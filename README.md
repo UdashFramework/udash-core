@@ -1,3 +1,3 @@
-# Udash RPC [<img align="right" height="50px" src="http://www.avsystem.com/avsystem_logo.png">](http://www.avsystem.com/)
+# Udash RPC [![Build Status](https://travis-ci.org/UdashFramework/udash-rpc.svg?branch=master)](https://travis-ci.org/UdashFramework/udash-rpc) [![Join the chat at https://gitter.im/UdashFramework/udash-rpc](https://badges.gitter.im/UdashFramework/udash-rpc.svg)](https://gitter.im/UdashFramework/udash-rpc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [<img align="right" height="50px" src="http://www.avsystem.com/avsystem_logo.png">](http://www.avsystem.com/)
 
 RPC system for the Udash framework.
