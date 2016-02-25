@@ -17,12 +17,49 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
+// Deployment configuration
+val deploymentConfiguration = Seq(
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false },
+
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  },
+
+  pomExtra := {
+    <url>https://github.com/UdashFramework/udash-core</url>
+      <licenses>
+        <license>
+          <name>Apache v.2 License</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:UdashFramework/udash-core.git</url>
+        <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>avsystem</id>
+          <name>AVSystem</name>
+          <url>http://www.avsystem.com/</url>
+        </developer>
+      </developers>
+  }
+)
+
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
   libraryDependencies ++= commonDeps.value,
   libraryDependencies ++= commonTestDeps.value
-)
+) ++ deploymentConfiguration
 
 val commonJSSettings = Seq(
   emitSourceMaps in Compile := true,
