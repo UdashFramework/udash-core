@@ -10,7 +10,7 @@ import scala.util.Try
   *
   * <p>Creates RPC endpoint per HTTP connection. Endpoint can be aware of [[io.udash.rpc.ClientId]]. </p>
   */
-final class DefaultAtmosphereServiceConfig[ServerRPCType <: RPC](localRpc: (ClientId) => ExposesServerRPC[ServerRPCType])
+final class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: (ClientId) => ExposesServerRPC[ServerRPCType])
   extends AtmosphereServiceConfig[ServerRPCType] with LazyLogging {
 
   private val RPCName = "RPC"

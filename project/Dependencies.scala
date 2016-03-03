@@ -5,7 +5,9 @@ object Dependencies extends Build {
 
   val versionOfScala = "2.11.7"
   val servletVersion = "3.1.0"
+
   val silencerVersion = "0.3"
+  val avsCommonsVersion = "1.13.1"
 
   val udashCoreVersion = "0.1.0"
 
@@ -15,6 +17,8 @@ object Dependencies extends Build {
   val scalaJsDomVersion = "0.9.0"
   val atmoshereVersion = "2.4.0.1"
   val scalaLoggingVersion = "3.1.0"
+
+  val jawnParserVersion = "0.8.4"
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
@@ -28,8 +32,8 @@ object Dependencies extends Build {
   ).map(compilerPlugin))
 
   val crossDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion,
-    "io.udash" % "udash-core-shared" % udashCoreVersion
+    "io.udash" % "udash-core-shared" % udashCoreVersion,
+    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
@@ -41,6 +45,10 @@ object Dependencies extends Build {
     "org.webjars" % "atmosphere-javascript" % atmoshereJSVersion / s"$atmoshereJSVersion/atmosphere.js"
   ))
 
+  val sharedJVMDeps = Def.setting(Seq(
+    "org.spire-math" %% "jawn-parser" % jawnParserVersion
+  ))
+
   val backendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
@@ -48,7 +56,8 @@ object Dependencies extends Build {
   ))
 
   val crossTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
+    "org.scalatest" %%% "scalatest" % scalatestVersion,
+    "com.lihaoyi" %%% "upickle" % upickleVersion
   ).map(_ % Test))
 
   val backendTestDeps = Def.setting(Seq(

@@ -1,26 +1,35 @@
 package io.udash.rpc
 
-import io.udash.rpc.internals._
-import upickle.Js
+import scala.concurrent.Future
 
-import scala.concurrent.{ExecutionContext, Future}
+abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends ExposesLocalRPC[ServerRPCType] {
+  import framework._
+  /**
+    * This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
+    * into calls on actual RPC implementation.
+    */
+  protected def localRpcAsRaw: AsRawRPC[ServerRPCType]
 
-final class ExposesServerRPC[ServerRPCType <: RPC](local: ServerRPCType)(implicit protected val localRpcAsRaw: AsRawRPC[ServerRPCType])
-  extends ExposesLocalRPC[ServerRPCType] {
+  protected lazy val rawLocalRpc = localRpcAsRaw.asRaw(localRpc)
 
   override protected def localRpc: ServerRPCType = local
 
-  implicit val executionContext: ExecutionContext = internalRPCExecutionContext
-
   /** Handles RPCCall and returns Future with call result. */
-  def handleRpcCall(call: RPCCall): Future[Js.Value] = {
-    val receiver = localRpcAsRaw.asRaw(localRpc).resolveGetterChain(call.gettersChain)
+  def handleRpcCall(call: RPCCall): Future[RawValue] = {
+    val receiver = rawLocalRpc.resolveGetterChain(call.gettersChain)
     receiver.call(call.invocation.rpcName, call.invocation.argLists)
   }
 
   /** Handles RPCFire */
   def handleRpcFire(fire: RPCFire): Unit = {
-    val receiver = localRpcAsRaw.asRaw(localRpc).resolveGetterChain(fire.gettersChain)
+    val receiver = rawLocalRpc.resolveGetterChain(fire.gettersChain)
     receiver.fire(fire.invocation.rpcName, fire.invocation.argLists)
   }
+}
+
+final class DefaultExposesServerRPC[ServerRPCType]
+  (local: ServerRPCType)(implicit protected val localRpcAsRaw: DefaultUdashRPCFramework.AsRawRPC[ServerRPCType])
+  extends ExposesServerRPC(local) {
+
+  override val framework = DefaultUdashRPCFramework
 }
