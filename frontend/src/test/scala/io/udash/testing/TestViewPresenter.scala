@@ -11,6 +11,7 @@ class TestViewPresenter[T <: TestState] extends ViewPresenter[T] {
 }
 
 class TestView extends View {
+  import scalatags.JsDom.all._
   var lastChild: View = _
   var renderingCounter = 0
 
@@ -21,7 +22,7 @@ class TestView extends View {
 
   override def getTemplate: Element = {
     renderingCounter += 1
-    null
+    div().render
   }
 }
 

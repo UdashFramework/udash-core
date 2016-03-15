@@ -2,14 +2,13 @@ package io.udash.bindings
 
 import io.udash.bindings.modifiers._
 import io.udash.properties._
-import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
+import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
-import scalatags.{JsDom, generic}
 
 trait Bindings {
   val Checkbox      = io.udash.bindings.Checkbox
@@ -77,7 +76,7 @@ trait Bindings {
     */
   def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
                                            initBuilder: Seq[E] => Element,
-                                           elementsUpdater: (Patch[E], JQuery) => Any) =
+                                           elementsUpdater: (Patch[E], Element) => Any) =
     new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**

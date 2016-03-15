@@ -2,7 +2,6 @@ package io.udash.bindings.modifiers
 
 import io.udash.bindings._
 import io.udash.properties._
-import io.udash.wrappers.jquery._
 import org.scalajs.dom
 import org.scalajs.dom._
 

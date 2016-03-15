@@ -3,9 +3,11 @@ package io.udash.view
 import io.udash.testing.{TestView, UdashFrontendTest}
 
 class ViewRendererTest extends UdashFrontendTest {
+  import scalatags.JsDom.all._
+
   "ViewRenderer" should {
     "render clear views hierarchy" in {
-      val renderer = new ViewRenderer(null)
+      val renderer = new ViewRenderer(emptyComponent())
 
       val rootView = new TestView
       val childViewA = new TestView
@@ -21,7 +23,7 @@ class ViewRendererTest extends UdashFrontendTest {
     }
 
     "render changed views without touching old ones" in {
-      val renderer = new ViewRenderer(null)
+      val renderer = new ViewRenderer(emptyComponent())
 
       val rootView = new TestView
       val childViewA = new TestView
@@ -57,7 +59,7 @@ class ViewRendererTest extends UdashFrontendTest {
     }
 
     "check old views hierarchy and use only valid prefix" in {
-      val renderer = new ViewRenderer(null)
+      val renderer = new ViewRenderer(emptyComponent())
 
       val rootView = new TestView
       val childViewA = new TestView
@@ -93,7 +95,7 @@ class ViewRendererTest extends UdashFrontendTest {
     }
 
     "remove old views from hierarchy" in {
-      val renderer = new ViewRenderer(null)
+      val renderer = new ViewRenderer(emptyComponent())
 
       val rootView = new TestView
       val childViewA = new TestView

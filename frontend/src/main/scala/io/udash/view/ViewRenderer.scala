@@ -2,7 +2,6 @@ package io.udash.view
 
 import io.udash.core.{View, Window}
 import io.udash.utils.FilteringUtils._
-import io.udash.wrappers.jquery.jQ
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
@@ -12,7 +11,7 @@ import scala.scalajs.js.timers.RawTimers
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
   */
 private[udash] class ViewRenderer(rootElement: Element) {
-  private val endpoint = jQ(rootElement)
+  private val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
 
   private def mergeViews(path: List[View]): View = {
@@ -34,7 +33,9 @@ private[udash] class ViewRenderer(rootElement: Element) {
     val rootView = mergeViews(path)
     views.clear()
     views.appendAll(path)
-    endpoint.html(rootView.getTemplate)
+    val child: Element = rootView.getTemplate
+    if (endpoint.hasChildNodes()) endpoint.replaceChild(child, endpoint.lastChild)
+    else endpoint.appendChild(child)
   }
 
   /**
@@ -67,7 +68,5 @@ private[udash] class ViewRenderer(rootElement: Element) {
 
       rootView.renderChild(rootViewToAttach)
     }
-
-    RawTimers.setTimeout(() => Window.resize, 25)
   }
 }

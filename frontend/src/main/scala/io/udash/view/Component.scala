@@ -1,6 +1,5 @@
 package io.udash.view
 
-import io.udash.wrappers.jquery.jQ
 import org.scalajs.dom
 import org.scalajs.dom._
 
@@ -12,5 +11,6 @@ trait Component extends Modifier[dom.Element] {
 
   def apply(): Element = getTemplate
 
-  override def applyTo(t: Element): Unit = jQ(t).append(getTemplate)
+  override def applyTo(t: Element): Unit =
+    t.appendChild(getTemplate)
 }

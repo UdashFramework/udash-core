@@ -5,8 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import io.udash._
 import io.udash.properties.SeqProperty
 import io.udash.testing.UdashFrontendTest
-import io.udash.wrappers.jquery
-import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
@@ -106,7 +104,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property[String]("A")
       val b = span(bind(p)).render
       val template = div(b).render
-      val template2 = div().render
+      val template2 = emptyComponent()
 
       template.textContent should be("A")
       template2.textContent should be("")
@@ -239,7 +237,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property[String]("A")
       val b = span(produce(p)(v => span(v).render)).render
       val template = div(b).render
-      val template2 = div().render
+      val template2 = emptyComponent()
 
       template.textContent should be("A")
       template2.textContent should be("")
@@ -395,7 +393,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = SeqProperty[String](Seq("A"))
       val b = span(produce(p)((v: Seq[String]) => span(v.mkString).render)).render
       val template = div(b).render
-      val template2 = div().render
+      val template2 = emptyComponent()
 
       template.textContent should be("A")
       template2.textContent should be("")
@@ -427,9 +425,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         span(),
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], el: JQuery) => {
+          (patch: Patch[Property[Int]], elem: Element) => {
+            val el = jQ(elem)
             val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jquery.jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
+            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
             patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
           }
@@ -473,9 +472,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val template = div(
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], el: JQuery) => {
+          (patch: Patch[Property[Int]], elem: Element) => {
+            val el = jQ(elem)
             val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jquery.jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
+            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
             patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
           }
@@ -522,9 +522,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       def prod(p: SeqProperty[Int, Property[Int]]) = {
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-          (patch: Patch[Property[Int]], el: JQuery) => {
+          (patch: Patch[Property[Int]], elem: Element) => {
+            val el = jQ(elem)
             val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jquery.jQ(span(p.get).render).insertBefore(insertBefore))
+            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(p.get).render))
             patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
           }
@@ -1073,7 +1074,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = SeqProperty[String](Seq("A"))
       val b = span(repeat(p)((v: Property[String]) => span(v.get).render)).render
       val template = div(b).render
-      val template2 = div().render
+      val template2 = emptyComponent()
 
       template.textContent should be("A")
       template2.textContent should be("")
