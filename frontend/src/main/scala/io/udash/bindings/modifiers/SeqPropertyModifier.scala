@@ -2,7 +2,6 @@ package io.udash.bindings.modifiers
 
 import io.udash.bindings._
 import io.udash.properties._
-import io.udash.wrappers.jquery._
 import org.scalajs.dom
 import org.scalajs.dom._
 
@@ -10,45 +9,52 @@ import scalatags.generic._
 
 private[bindings] class SeqPropertyModifier[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
                                                                          builder: E => Element) extends Modifier[dom.Element] with Bindings {
-  override def applyTo(t: Element): Unit = {
-    val root = jQ(t)
-    var firstElement: JQuery = null
+  private def indexOf(nodes: NodeList, node: Node): Int = {
+    var i = 0
+    while (i < nodes.length && nodes(i) != node) i += 1
+    i
+  }
+
+  override def applyTo(root: Element): Unit = {
+    var firstElement: Node = null
     var firstElementIsPlaceholder = false
 
     CallbackSequencer.finalCallback(() => {
       property.listenStructure((patch: Patch[E]) => if (patch.added.nonEmpty || patch.removed.nonEmpty) {
-        val firstIndex = root.contents().index(firstElement)
+        val firstIndex = indexOf(root.childNodes, firstElement)
 
         // Add new elements
         val newElements = patch.added.map(builder.apply)
-        val insertBefore = root.contents().at(patch.idx + firstIndex)
-        if (insertBefore.length == 0) newElements.foreach(el => root.append(el))
-        else newElements.foreach(el => jQ(el).insertBefore(insertBefore))
+        val insertBefore = root.childNodes(patch.idx + firstIndex)
+        if (insertBefore == null) newElements.foreach(el => root.appendChild(el))
+        else newElements.foreach(el => root.insertBefore(el, insertBefore))
 
         if (firstElementIsPlaceholder) {
           // Replace placeholder with first element of sequence
-          insertBefore.remove()
-          firstElement = jQ(newElements.head)
+          root.removeChild(insertBefore)
+          firstElement = newElements.head
           firstElementIsPlaceholder = false
         } else {
           // First element of sequence changed
-          if (patch.added.nonEmpty && patch.idx == 0) firstElement = jQ(newElements.head)
+          if (patch.added.nonEmpty && patch.idx == 0) firstElement = newElements.head
 
           val toRemove = for (i <- patch.removed.indices) yield i + patch.idx
           // Remove elements form second to the last
-          toRemove.slice(1, toRemove.size).map(idx => jQ(root.contents().at(idx + firstIndex + patch.added.size))).foreach(_.remove())
+          toRemove.slice(1, toRemove.size)
+            .map(idx => root.childNodes(idx + firstIndex + patch.added.size))
+            .foreach(root.removeChild)
           if (patch.clearsProperty) {
             // Replace old head of sequence with placeholder
-            val newFirstElement = jQ(emptyStringNode())
-            firstElement.replaceWith(newFirstElement)
+            val newFirstElement = emptyStringNode()
+            root.replaceChild(newFirstElement, firstElement)
             firstElement = newFirstElement
             firstElementIsPlaceholder = true
           } else {
             // Remove first element from patch.removed sequence
-            if (patch.removed.nonEmpty) root.contents().at(firstIndex + patch.added.size + patch.idx).remove()
+            if (patch.removed.nonEmpty) root.removeChild(root.childNodes(firstIndex + patch.added.size + patch.idx))
 
             // Update firstElement
-            if (patch.added.isEmpty && patch.idx == 0) firstElement = root.contents().at(firstIndex + patch.added.size)
+            if (patch.added.isEmpty && patch.idx == 0) firstElement = root.childNodes(firstIndex + patch.added.size)
           }
         }
       })
@@ -56,14 +62,14 @@ private[bindings] class SeqPropertyModifier[T, E <: ReadableProperty[T]](propert
 
     property.elemProperties.foreach(element => {
       val el = builder.apply(element)
-      if (firstElement == null) firstElement = jQ(el)
-      root.append(el)
+      if (firstElement == null) firstElement = el
+      root.appendChild(el)
     })
 
     if (firstElement == null) {
       val el = emptyStringNode()
-      firstElement = jQ(el)
-      root.append(el)
+      firstElement = el
+      root.appendChild(el)
       firstElementIsPlaceholder = true
     }
   }

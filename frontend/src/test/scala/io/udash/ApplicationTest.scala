@@ -3,6 +3,8 @@ package io.udash
 import io.udash.testing._
 
 class ApplicationTest extends UdashFrontendTest {
+  import scalatags.JsDom.all._
+
   "Application" should {
     val initUrl = Url("/")
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
@@ -11,7 +13,7 @@ class ApplicationTest extends UdashFrontendTest {
     val vpRegistry: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
     val app = new Application[TestState](routing, vpRegistry, RootState, urlProvider)
 
-    app.run(null)
+    app.run(emptyComponent())
 
     "register for url changes on start and handle initial state" in {
       urlProvider.changeListeners.size should be(1)

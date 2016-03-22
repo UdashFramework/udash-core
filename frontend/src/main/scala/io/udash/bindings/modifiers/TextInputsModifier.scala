@@ -1,7 +1,6 @@
 package io.udash.bindings.modifiers
 
 import io.udash.properties.Property
-import io.udash.wrappers.jquery._
 import org.scalajs.dom._
 
 import scalatags.JsDom

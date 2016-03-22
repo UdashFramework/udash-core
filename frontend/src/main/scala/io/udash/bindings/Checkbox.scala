@@ -1,7 +1,6 @@
 package io.udash.bindings
 
 import io.udash.properties.Property
-import io.udash.wrappers.jquery._
 import org.scalajs.dom.{html, _}
 
 import scala.concurrent.ExecutionContext
