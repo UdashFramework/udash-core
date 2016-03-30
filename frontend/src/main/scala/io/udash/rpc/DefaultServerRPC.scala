@@ -13,10 +13,10 @@ class DefaultServerRPC[ServerRPCType <: RPC](val remoteRpcAsReal: AsRealRPC[Serv
 object DefaultServerRPC {
   /** Creates [[io.udash.rpc.DefaultServerRPC]] for provided RPC interfaces. */
   def apply[ClientRPCType <: ClientRPC, ServerRPCType <: RPC]
-  (localRpc: ClientRPCType)(implicit localRpcAsRaw: AsRawRPC[ClientRPCType], serverRpcAsReal: AsRealRPC[ServerRPCType]): ServerRPCType = {
+  (localRpc: ClientRPCType, serverUrl: String = "/atm/")(implicit localRpcAsRaw: AsRawRPC[ClientRPCType], serverRpcAsReal: AsRealRPC[ServerRPCType]): ServerRPCType = {
 
     val clientRPC = new ExposesClientRPC[ClientRPCType](localRpc)
-    lazy val serverConnector = new AtmosphereServerConnector((resp) => serverRPC.handleResponse(resp), clientRPC)
+    lazy val serverConnector = new AtmosphereServerConnector((resp) => serverRPC.handleResponse(resp), clientRPC, serverUrl)
     lazy val serverRPC: DefaultServerRPC[ServerRPCType] = new DefaultServerRPC(serverRpcAsReal, serverConnector)
     serverRPC.remoteRpc
   }

@@ -14,7 +14,7 @@ trait ServerConnector {
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-class AtmosphereServerConnector(responseHandler: (RPCResponse) => Any, private val clientRpc: ExposesClientRPC[_], private val serverUrl: String = "/atm") extends ServerConnector {
+class AtmosphereServerConnector(responseHandler: (RPCResponse) => Any, private val clientRpc: ExposesClientRPC[_], private val serverUrl: String) extends ServerConnector {
 
   private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
   private var isReady = false
