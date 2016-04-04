@@ -20,11 +20,12 @@ private[udash] class ViewRenderer(rootElement: Element) {
       views.append(singleView)
       singleView
     } else {
-      path.reduceLeft[View]((parent, child) => {
+      val lastElement = path.reduceLeft[View]((parent, child) => {
         parent.renderChild(child)
         views.append(parent)
         child
       })
+      views.append(lastElement)
       path.head
     }
   }
