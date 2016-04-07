@@ -3,6 +3,7 @@ package io.udash.homepage.components
 import io.udash.core.{DomWindow, Window}
 import io.udash.homepage.IndexState
 import io.udash.homepage.Context._
+import io.udash.homepage.config.ExternalUrls
 import io.udash.homepage.styles.GlobalStyles
 import io.udash.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.homepage.views.{SVG, Size}
@@ -12,7 +13,8 @@ import org.scalajs.dom.raw.Element
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-class Header() {
+object Header {
+  val PinAttribute = "data-pin"
 
   Window.onScroll(onScroll)
 
@@ -31,11 +33,11 @@ class Header() {
   private lazy val template = header(HeaderStyles.header)(
     div(GlobalStyles.body, GlobalStyles.clearfix)(
       div(HeaderStyles.headerLeft)(
-        a(HeaderStyles.headerLogo, href := "/")()/*,
+        a(HeaderStyles.headerLogo, href := IndexState(None).url)()/*,
         nav(HeaderStyles.headerNav)(
           ul(
             li(HeaderStyles.headerLinkWrapper)(
-              a(href := "/", HeaderStyles.headerLink)("Documentation")
+              a(href := ExternalUrls.guide, HeaderStyles.headerLink)("Documentation")
             )
           )
         )*/
@@ -43,22 +45,22 @@ class Header() {
       div(HeaderStyles.headerRight)(
         ul(HeaderStyles.headerSocial)(
           li(HeaderStyles.headerSocialItem)(
-            a(href := "https://github.com/UdashFramework", HeaderStyles.headerSocialLink, target := "_blank")(
+            a(href := ExternalUrls.udashGithub, HeaderStyles.headerSocialLink, target := "_blank")(
               SVG("github.svg#github", Size(33, 32))
             )
           ),
           /*li(HeaderStyles.headerSocialItem)(
-            a(href := "#", HeaderStyles.headerSocialLink, target := "_blank")(
+            a(href := ExternalUrls.todoMvc, HeaderStyles.headerSocialLink, target := "_blank")(
               SVG("todomvc.svg#todomvc", Size(34, 31))
             )
           ),*/
           li(HeaderStyles.headerSocialItem)(
-            a(href := "http://stackoverflow.com/questions/tagged/udash", HeaderStyles.headerSocialLink, target := "_blank")(
+            a(href := ExternalUrls.stackoverflow, HeaderStyles.headerSocialLink, target := "_blank")(
               SVG("stack.svg#stack", Size(29, 33))
             )
           ),
           li(HeaderStyles.headerSocialItem)(
-            a(href := "http://www.avsystem.com/", HeaderStyles.headerSocialLinkYellow, target := "_blank")(
+            a(href := ExternalUrls.avsystem, HeaderStyles.headerSocialLinkYellow, target := "_blank")(
               SVG("avsystem.svg#avsystem", Size(33, 33))
             )
           )
@@ -69,12 +71,3 @@ class Header() {
 
   def getTemplate: Element = template
 }
-
-object Header {
-  val PinAttribute = "data-pin"
-
-  def apply(): Header = {
-    new Header()
-  }
-}
-

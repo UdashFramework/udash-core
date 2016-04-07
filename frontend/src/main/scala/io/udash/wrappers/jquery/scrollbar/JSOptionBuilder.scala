@@ -1,9 +1,7 @@
-package io.udash.homepage.wrappers.scrollbar
+package io.udash.wrappers.jquery.scrollbar
 
 import scala.scalajs.js
-
 import js.JSConverters._
-
 import scala.language.implicitConversions
 
 /**

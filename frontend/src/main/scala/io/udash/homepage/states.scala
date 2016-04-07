@@ -10,5 +10,5 @@ case object RootState extends RoutingState(null)
 
 case object ErrorState extends RoutingState(RootState)
 
-case class IndexState(additionalArgument: Option[String]) extends RoutingState(RootState)
+case class IndexState(selectedDemoTab: Option[String]) extends RoutingState(RootState)
 

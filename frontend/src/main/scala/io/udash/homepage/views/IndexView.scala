@@ -5,6 +5,7 @@ import io.udash.core.Presenter
 import io.udash.homepage._
 import io.udash.homepage.components.Buttons
 import io.udash.homepage.components.demo.DemoComponent
+import io.udash.homepage.config.ExternalUrls
 import io.udash.homepage.styles.GlobalStyles
 import io.udash.homepage.styles.partials.{ButtonsStyle, HomepageStyles}
 import io.udash.routing.WindowUrlChangeProvider
@@ -49,7 +50,7 @@ private[views] object IndexView {
   val sectionIntro = section(HomepageStyles.sectionIntro)(
     div(GlobalStyles.body)(
       div(HomepageStyles.introInner)(
-        a(href := "https://www.scala-js.org/", HomepageStyles.introScala, target := "_blank")(
+        a(href := ExternalUrls.scalajs, HomepageStyles.introScala, target := "_blank")(
           i(HomepageStyles.introScalaIcon)(
             SVG("based.svg#based", Size(10, 10))
           ),
@@ -60,7 +61,7 @@ private[views] object IndexView {
           span("framework for building", br(), "beautiful and maintainable", br()),
           span(GlobalStyles.grey)("Web Applications")
         ),
-        Buttons.whiteBorderButton("#", "Start your project")
+        Buttons.whiteBorderButton(ExternalUrls.guide, "Start your project")
       )
     )
   )
@@ -117,7 +118,7 @@ private[views] object IndexView {
       h1("Have a code preview"),
       new DemoComponent(url).getTemplate,
       p(HomepageStyles.demoDescription)("It’s free, try it now!"),
-      Buttons.blackBorderButton("http://guide.udash.io/", "Start your project")
+      Buttons.blackBorderButton(ExternalUrls.guide, "Start your project")
     )
   )
 }

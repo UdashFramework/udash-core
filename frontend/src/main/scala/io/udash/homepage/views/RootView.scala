@@ -28,11 +28,11 @@ class RootView extends View {
     ButtonsStyle.render[TypedTag[HTMLStyleElement]],
     DemoStyles.render[TypedTag[HTMLStyleElement]],
 
-    Header().getTemplate,
+    Header.getTemplate,
     main(GlobalStyles.main)(
       child
     ),
-    Footer().getTemplate
+    Footer.getTemplate
   ).render
 
   override def getTemplate: Element = content

@@ -1,43 +1,40 @@
 package io.udash.homepage.components
 
+import io.udash.homepage.IndexState
 import io.udash.homepage.styles.GlobalStyles
-import io.udash.homepage.styles.partials.{FooterStyles, HomepageStyles}
+import io.udash.homepage.styles.partials.FooterStyles
 import org.scalajs.dom.raw.Element
 
-import scalatags.JsDom.all._
 import scalacss.ScalatagsCss._
+import scalatags.JsDom.all._
+import io.udash.homepage.Context._
+import io.udash.homepage.config.ExternalUrls
+import io.udash.homepage.views.Image
 
-class Footer() {
+object Footer {
   def getTemplate: Element = {
     footer(FooterStyles.footer)(
       div(GlobalStyles.body, GlobalStyles.clearfix)(
-        a(FooterStyles.footerLogo, href := "/")(
-          img(GlobalStyles.block, src := "assets/images/udash_logo.png", alt := "Udash Guide")
+        a(FooterStyles.footerLogo, href := IndexState(None).url)(
+          Image("udash_logo.png", "Udash Framework", GlobalStyles.block)
         ),
         div(FooterStyles.footerLinks)(
           p(FooterStyles.footerMore)("See more"),
           ul(
             li(FooterStyles.footerLinkWrapper)(
-              a(href := "https://github.com/UdashFramework/udash-demos", target := "_blank", FooterStyles.footerLink)("Github demo")
+              a(href := ExternalUrls.udashGithub, target := "_blank", FooterStyles.footerLink)("Github demo")
             ),
             // TODO: unccoment
             /*li(UdashGuideStyles.linkWrapper)(
               a(target := "_blank", UdashGuideStyles.link)("Todomvc.com demo")
             ),*/
             li(FooterStyles.footerLinkWrapper)(
-              a(href := "http://stackoverflow.com/questions/tagged/udash", target := "_blank", FooterStyles.footerLink)("StackOverflow questions")
+              a(href := ExternalUrls.stackoverflow, target := "_blank", FooterStyles.footerLink)("StackOverflow questions")
             )
           ),
-          p(FooterStyles.footerCopyrights)("Udash was made with great support of ", a(FooterStyles.footerAvsystem, href := "http://www.avsystem.com/")("AVSystem"))
+          p(FooterStyles.footerCopyrights)("Proudly made by ", a(FooterStyles.footerAvsystem, href := ExternalUrls.avsystem)("AVSystem"))
         )
       )
     ).render
   }
 }
-
-object Footer {
-  def apply(): Footer = {
-    new Footer()
-  }
-}
-

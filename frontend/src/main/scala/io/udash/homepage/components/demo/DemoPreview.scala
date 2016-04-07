@@ -75,7 +75,7 @@ object DemoPreview {
     import scalacss.ScalatagsCss._
     import scalatags.JsDom.all._
 
-    val emailRegex = "([\\w.%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})".r
+    val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
 
     val email = Property("example@mail.com")
     email.addValidator(new Validator[String] {

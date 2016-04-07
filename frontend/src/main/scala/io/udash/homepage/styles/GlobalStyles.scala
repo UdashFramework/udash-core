@@ -131,11 +131,8 @@ object GlobalStyles extends StyleSheet.Inline {
     ),
 
     unsafeRoot("object[type='image/svg+xml']") (
+      display.block,
       pointerEvents := "none"
-    ),
-
-    unsafeRoot("object[type=\"image/svg+xml\"]") (
-      display.block
     ),
 
     unsafeRoot("input") (

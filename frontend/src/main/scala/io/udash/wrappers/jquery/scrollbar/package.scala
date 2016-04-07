@@ -1,6 +1,4 @@
-package io.udash.homepage.wrappers
-
-import io.udash.wrappers.jquery.JQuery
+package io.udash.wrappers.jquery
 
 /**
   * Created by malchik on 2016-04-05.
@@ -9,7 +7,6 @@ import io.udash.wrappers.jquery.JQuery
   * http://manos.malihu.gr/jquery-custom-content-scroller/
   */
 package object scrollbar {
-
   /**
     * A map of option values, which JSOptionBuilder builds up.
     */

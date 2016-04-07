@@ -1,6 +1,7 @@
-package io.udash.homepage.wrappers.scrollbar
+package io.udash.wrappers.jquery.scrollbar
 
 import io.udash.wrappers.jquery.JQuery
+
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName
 

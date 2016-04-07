@@ -7,7 +7,7 @@ import io.udash.homepage.components.CodeBlock
 import io.udash.homepage.styles.constant.StyleConstants
 import io.udash.homepage.styles.partials.DemoStyles
 import io.udash.homepage.views.Image
-import io.udash.homepage.wrappers.scrollbar._
+import io.udash.wrappers.jquery.scrollbar._
 import io.udash.properties.Property
 import io.udash.view.Component
 import io.udash.wrappers.jquery._
@@ -29,7 +29,7 @@ class DemoComponent(url: Property[String]) extends Component {
   private def onUrlChange(update: String) = {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
     val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
-    val urlString = "\"" + entry.url + "\""
+    val urlString = s""""${entry.url}""""
     val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.htmlClass}[href=$urlString]")
 
     jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.htmlClass}").attr(DemoComponent.ActiveAttribute, "false")
@@ -113,7 +113,7 @@ object DemoComponent {
       |  TextInput(name), br,
       |  produce(name)(name => h3(s"Hello, $name!").render)
       |).render""".stripMargin
-  )
+  )()
 
   def propertiesCode = CodeBlock(
     """import scalajs.concurrent.JSExecutionContext.Implicits
@@ -148,7 +148,7 @@ object DemoComponent {
       |  "Evens: ", repeat(evens)(renderer), br,
       |  "Odds: ", repeat(odds)(renderer)
       |).render""".stripMargin
-  )
+  )()
 
   def validationCode = CodeBlock(
     """import scalajs.concurrent.JSExecutionContext.Implicits
@@ -181,12 +181,12 @@ object DemoComponent {
       |    _ => span("ERROR").render
       |  )
       |).render""".stripMargin
-  )
+  )()
 
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello, World!", IndexState(Option("binding")).url, DemoPreview.helloWorldDemo, helloWorldCode),
-    DemoEntry("Properties", IndexState(Option("rpc")).url, DemoPreview.propertiesDemo, propertiesCode),
-    DemoEntry("Validation", IndexState(Option("server")).url, DemoPreview.validationDemo, validationCode)
+    DemoEntry("Hello, World!", IndexState(Option("hello")).url, DemoPreview.helloWorldDemo, helloWorldCode),
+    DemoEntry("Properties", IndexState(Option("properties")).url, DemoPreview.propertiesDemo, propertiesCode),
+    DemoEntry("Validation", IndexState(Option("validation")).url, DemoPreview.validationDemo, validationCode)
   )
 }
 
