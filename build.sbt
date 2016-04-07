@@ -1,7 +1,9 @@
+import sbtassembly.AssemblyPlugin.autoImport._
+
 name := "udash-homepage"
 
 version in ThisBuild := "0.1.0"
-scalaVersion in ThisBuild := "2.11.7"
+scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
 scalacOptions in ThisBuild ++= Seq(
@@ -53,7 +55,10 @@ lazy val backend = project.in(file("backend"))
       }
     },
 
-    watchSources ++= (sourceDirectory in frontend).value.***.get
+    watchSources ++= (sourceDirectory in frontend).value.***.get,
+
+    assemblyJarName in assembly := "udash-web.jar",
+    mainClass in assembly := Some("io.udash.homepage.Launcher")
   )
 
 lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
@@ -63,6 +68,12 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
     crossLibs(Compile),
     jsDependencies ++= frontendJSDeps.value,
     persistLauncher in Compile := true,
+
+    unmanagedJars in Compile ++= {
+      val base = baseDirectory.value / "libs"
+      val customJars = (base ** "*.jar")
+      customJars.classpath
+    },
 
     compile <<= (compile in Compile),
     compileStatics := {
