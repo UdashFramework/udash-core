@@ -75,17 +75,17 @@ private[views] object IndexView {
         li(HomepageStyles.featuresListItem)(
           i(HomepageStyles.featuresListIcon)(Image("features_shared.png", "Shared scala code", HomepageStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)("Shared scala code"),
-          p(HomepageStyles.moreListDescription)("Udash brings out of the box RPC system with shared data model and interfaces between frontend and backend which boosts development and keep code bases consistent.")
+          p(HomepageStyles.moreListDescription)("Udash brings out of the box the RPC system with a shared data model and interfaces between frontend and backend, which boosts development and keeps code bases consistent.")
         ),
         li(HomepageStyles.featuresListItem)(
           i()(HomepageStyles.featuresListIcon)(Image("features_typesafe.png", "Type safe", HomepageStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)(span("Type safe"), br(), span(HomepageStyles.featuresListHeadInner)("HTML CSS JS")),
-          p(HomepageStyles.moreListDescription)("In cooperation with Scalatags and ScalaCSS libraries, Udash provides type safe layer over HTML, CSS and JS with powerful data binding into DOM templates")
+          p(HomepageStyles.moreListDescription)("In cooperation with Scalatags and ScalaCSS libraries, Udash provides a type safe layer over HTML, CSS and JS with powerful data binding into DOM templates.")
         ),
         li(HomepageStyles.featuresListItem)(
           i(HomepageStyles.featuresListIcon)(Image("features_compiled.png", "Compiled to JS", HomepageStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)("Compiled to JS"),
-          p(HomepageStyles.moreListDescription)("Scala is compiled to highly efficient JavaScript with no need to maintain js. It is also easy to use with good, old JavaScript libraries like Twitter Bootstrap or jQuery.")
+          p(HomepageStyles.moreListDescription)("Scala is compiled to highly efficient JavaScript with no need to maintain js. It is also easy to use it with good, old JavaScript libraries like Twitter Bootstrap or jQuery.")
         )
       )
     )
@@ -99,15 +99,15 @@ private[views] object IndexView {
       ul(HomepageStyles.boxList)(
         li(HomepageStyles.moreListItem)(
           h2(HomepageStyles.moreListHead)("Routing"),
-          p(HomepageStyles.moreListDescription)("Udash serve frontend routing mechanism. Just define matching from URL to view.")
+          p(HomepageStyles.moreListDescription)("Udash serves a frontend routing mechanism. Just define matching from URL to view.")
         ),
         li(HomepageStyles.moreListItem)(
           h2(HomepageStyles.moreListHead)("Asynchronous"),
-          p(HomepageStyles.moreListDescription)("Udash serve frontend routing mechanism. Just define matching from URL to view.")
+          p(HomepageStyles.moreListDescription)("The whole framework is asynchronous by default – implementing reactive websites is much easier.")
         ),
         li(HomepageStyles.moreListItem)(
           h2(HomepageStyles.moreListHead)("IDE support"),
-          p(HomepageStyles.moreListDescription)("With any IDE supporting Scala language. No extra plugin needed.")
+          p(HomepageStyles.moreListDescription)("With any IDE supporting the Scala language. No extra plugin needed.")
         )
       )
     )
