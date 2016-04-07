@@ -1,5 +1,5 @@
 package io.udash.rpc
 
 trait RPCBackend {
-  type DefaultAtmosphereFramework                       = io.udash.rpc.utils.DefaultAtmosphereFramework
+  type DefaultAtmosphereFramework                    = io.udash.rpc.utils.DefaultAtmosphereFramework
 }

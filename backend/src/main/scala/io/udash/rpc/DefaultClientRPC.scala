@@ -1,7 +1,6 @@
 package io.udash.rpc
 
 import io.udash.rpc.internals.{BroadcastManager, UsesClientRPC}
-import upickle.default._
 
 import scala.concurrent.ExecutionContext
 
@@ -14,21 +13,25 @@ sealed trait ClientRPCTarget
 case object AllClients extends ClientRPCTarget
 case class ClientId(id: String) extends ClientRPCTarget
 
-/** Default implementation of UsesClientRPC for server to client communication. */
-class DefaultClientRPC[ClientRPCType <: ClientRPC](target: ClientRPCTarget, override protected val remoteRpcAsReal: AsRealRPC[ClientRPCType])
-                                                  (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
-
-  override protected def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit = {
-    val msg: String = write[RPCRequest](RPCFire(invocation, getterChain))
+abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
+                                       (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
+  override protected def fireRemote(getterChain: List[framework.RawInvocation], invocation: framework.RawInvocation): Unit = {
+    import framework._
+    val msg: RawValue = write[RPCRequest](RPCFire(invocation, getterChain))
     target match {
       case AllClients =>
-        BroadcastManager.broadcast(msg)
+        BroadcastManager.broadcast(rawToString(msg))
       case ClientId(clientId) =>
-        BroadcastManager.sendToClient(clientId, msg)
+        BroadcastManager.sendToClient(clientId, rawToString(msg))
     }
   }
 
   def get: ClientRPCType = remoteRpc
+}
 
-  override protected implicit def executionContext: ExecutionContext = ec
+/** Default implementation of [[io.udash.rpc.ClientRPC]] for server to client communication. */
+class DefaultClientRPC[ClientRPCType](target: ClientRPCTarget)
+                                     (implicit ec: ExecutionContext,
+                                      protected val remoteRpcAsReal: DefaultUdashRPCFramework.AsRealClientRPC[ClientRPCType]) extends ClientRPC[ClientRPCType](target) {
+  override val framework = DefaultUdashRPCFramework
 }

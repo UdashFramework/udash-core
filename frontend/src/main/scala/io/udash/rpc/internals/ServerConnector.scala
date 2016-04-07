@@ -1,20 +1,29 @@
 package io.udash.rpc.internals
 
+import io.udash.rpc.{DefaultUdashRPCFramework, UdashRPCFramework}
 import io.udash.utils.Logger
 import io.udash.wrappers.atmosphere._
-import upickle.Invalid
-import upickle.default._
 
 import scala.collection.mutable
 import scala.scalajs.js.timers
 
-trait ServerConnector {
+trait ServerConnector[RPCRequest] {
   /** Sends RPCRequest to server. */
   def sendRPCRequest(request: RPCRequest): Unit
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-class AtmosphereServerConnector(responseHandler: (RPCResponse) => Any, private val clientRpc: ExposesClientRPC[_], private val serverUrl: String) extends ServerConnector {
+abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String) extends ServerConnector[RPCRequest] {
+  protected val clientRpc: ExposesClientRPC[_]
+
+  val rpcFramework: UdashRPCFramework
+
+  import rpcFramework.{RPCResponse, RPCFire, read, stringToRaw, RPCResponseCodec, RPCRequestCodec}
+
+  def requestToString(request: RPCRequest): String
+
+  def handleResponse(response: RPCResponse): Any
+  def handleRpcFire(fire: RPCFire): Any
 
   private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
   private var isReady = false
@@ -52,26 +61,27 @@ class AtmosphereServerConnector(responseHandler: (RPCResponse) => Any, private v
   })
 
   override def sendRPCRequest(request: RPCRequest): Unit = {
-    val msg = write[RPCRequest](request)
+    val msg = requestToString(request)
     if (isReady) socket.push(msg)
     else waitingRequests += request
   }
 
   private def handleMessage(msg: String) = {
+    val rawMsg = stringToRaw(msg)
     try {
-      val response: RPCResponse = read[RPCResponse](msg)
-      responseHandler(response)
+      val response = read[RPCResponse](rawMsg)
+      handleResponse(response)
     } catch {
-      case _: Invalid.Json | _: Invalid.Data =>
+      case _: Exception =>
         try {
-          read[RPCRequest](msg) match {
+          read[rpcFramework.RPCRequest](rawMsg) match {
             case fire: RPCFire =>
-              clientRpc.handleRpcFire(fire)
+              handleRpcFire(fire)
             case unhandled =>
               Logger.error(s"Unhandled RPCRequest: $unhandled")
           }
         } catch {
-          case _: Invalid.Json | _: Invalid.Data =>
+          case _: Exception =>
             Logger.error(s"Unhandled message: $msg")
         }
     }
@@ -87,4 +97,22 @@ class AtmosphereServerConnector(responseHandler: (RPCResponse) => Any, private v
       queue foreach { req => sendRPCRequest(req) }
     }
   }
+}
+
+class DefaultAtmosphereServerConnector(override protected val clientRpc: DefaultExposesClientRPC[_],
+                                       responseHandler: (DefaultUdashRPCFramework.RPCResponse) => Any,
+                                       serverUrl: String) extends AtmosphereServerConnector[DefaultUdashRPCFramework.RPCRequest](serverUrl) {
+  override val rpcFramework = DefaultUdashRPCFramework
+
+  import rpcFramework._
+
+  override def requestToString(request: RPCRequest): String =
+    rawToString(write(request))
+
+  override def handleResponse(response: RPCResponse): Any =
+    responseHandler(response)
+
+  override def handleRpcFire(fire: RPCFire): Any =
+    clientRpc.handleRpcFire(fire)
+
 }

@@ -3,13 +3,10 @@ package io.udash.rpc.internals
 import java.io.PrintWriter
 import java.util.concurrent.TimeUnit
 
-import io.udash
 import io.udash.rpc._
 import io.udash.testing.UdashBackendTest
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
-import upickle.Js
-import upickle.default._
 
 import scala.util.{Failure, Success}
 
@@ -68,12 +65,22 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val config = mock[AtmosphereServiceConfig[TestRPC]]
       val atm = new AtmosphereService[TestRPC](config)
 
+      val calls = Seq.newBuilder[String]
+      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+        calls += method
+      })
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+
       val atmConfig = mock[MockableAtmosphereConfig]
       (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCFire(RawInvocation("doStuff", List(List(Js.True))), List())))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCFire(
+          DefaultUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultUdashRPCFramework.write[Boolean](true)))), List()
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
@@ -85,12 +92,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
       (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (config.resolveRpc _).expects(resource).once().returns(rpc)
       (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
-      (config.resolveRpc _).expects(resource).never()
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
+      calls.result().size should be(0)
     }
 
     "filter incoming calls" in {
@@ -100,12 +108,24 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val config = mock[AtmosphereServiceConfig[TestRPC]]
       val atm = new AtmosphereService[TestRPC](config)
 
+      val calls = Seq.newBuilder[String]
+      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+        calls += method
+      })
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+
       val atmConfig = mock[MockableAtmosphereConfig]
       (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuff", List(List(Js.True))), List(), "callId1")))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
@@ -118,12 +138,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (broadcaster.addAtmosphereResource _).expects(resource).once()
       (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
       (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseFailure"))).once()
+      (config.resolveRpc _).expects(resource).once().returns(rpc)
       (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
-      (config.resolveRpc _).expects(resource).never()
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
+      calls.result().size should be(0)
     }
 
     "handle incoming websocket fire" in {
@@ -131,7 +152,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -144,7 +165,12 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCFire(RawInvocation("handle", List()), List())))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCFire(
+          DefaultUdashRPCFramework.RawInvocation("handle", List()),
+          List()
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
@@ -161,7 +187,9 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      calls.result() should contain("handle")
+      eventually {
+        calls.result() should contain("handle")
+      }
     }
 
     "handle incoming websocket call" in {
@@ -169,7 +197,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -182,7 +210,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuff", List(List(Js.True))), List(), "callId1")))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
@@ -200,8 +234,10 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
-      calls.result() should contain("doStuff")
+      eventually {
+        calls.result() should contain("doStuff")
+      }
+      TimeUnit.SECONDS.sleep(1)
     }
 
     "handle incoming websocket failing call" in {
@@ -209,7 +245,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -222,7 +258,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuffWithFail", List(List(Js.True))), List(), "callId1")))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
@@ -240,8 +282,11 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
-      calls.result() should contain("doStuffWithFail")
+      eventually {
+        calls.result() should contain("doStuffWithFail")
+      }
+
+      Thread.sleep(10) //Wait for broadcaster.broadcast(_: Any)) call on broadcaster mock
     }
 
     "handle incoming polling fire" in {
@@ -249,7 +294,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -262,7 +307,12 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCFire(RawInvocation("handle", List()), List())))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCFire(
+          DefaultUdashRPCFramework.RawInvocation("handle", List()),
+          List()
+        )
+      ))
 
       val resource = mock[MockableAtmosphereResource]
       (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.POLLING)
@@ -279,8 +329,9 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
-      calls.result() should contain("handle")
+      eventually {
+        calls.result() should contain("handle")
+      }
     }
 
     "handle incoming polling call" in {
@@ -288,7 +339,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -301,7 +352,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuff", List(List(Js.True))), List(), "callId1")))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ))
 
       val response = new AtmosphereResponseMock(null)
 
@@ -320,10 +377,11 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
-      calls.result() should contain("doStuff")
-      response.write should be(true)
-      response.error should be(false)
+      eventually {
+        calls.result() should contain("doStuff")
+        response.write should be(true)
+        response.error should be(false)
+      }
     }
 
     "handle incoming polling failing call" in {
@@ -331,7 +389,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -344,7 +402,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuffWithFail", List(List(Js.True))), List(), "callId1")))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ))
 
       val response = new AtmosphereResponseMock(null)
 
@@ -375,7 +439,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
         calls += method
       })
-      val rpc = new udash.rpc.ExposesServerRPC[TestRPC](impl)
+      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
 
       val broadcasterFactory = mock[BroadcasterFactory]
       val metaBroadcaster = mock[MetaBroadcaster]
@@ -388,7 +452,13 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
 
       val request = AtmosphereRequestImpl.newInstance()
-      request.body(write[RPCRequest](RPCCall(RawInvocation("doStuffWithFail", List(List(Js.True))), List(), "callId1")).substring(5))
+      request.body(DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCRequest](
+        DefaultUdashRPCFramework.RPCCall(
+          DefaultUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultUdashRPCFramework.write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      ).substring(5))
 
       val response = new AtmosphereResponseMock(null)
 
@@ -399,16 +469,18 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (resource.getRequest _).expects().atLeastOnce().returns(request)
       (resource.getResponse _).expects().atLeastOnce().returns(response)
       (resource.resume _).expects().never()
+      (config.resolveRpc _).expects(resource).once().returns(rpc)
 
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).never()
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
-      calls.result() shouldNot contain("doStuffWithFail")
-      response.write should be(false)
-      response.error should be(true)
+      eventually {
+        calls.result() shouldNot contain("doStuffWithFail")
+        response.write should be(false)
+        response.error should be(true)
+      }
     }
 
     "suspend and register SSE request" in {
@@ -436,7 +508,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
 
       atm.init(atmConfig)
       atm.onRequest(resource)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
     }
 
     "call onClose when connection gets closed" in {
@@ -456,7 +528,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.onClose _).expects(resource).once()
 
       atm.onStateChange(event)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
     }
 
     "send broadcasts over websocket" in {
@@ -475,7 +547,11 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (resource.transport _).expects().once().returns(TRANSPORT.WEBSOCKET)
       (resource.getResponse _).expects().once().returns(response)
 
-      (event.getMessage _).expects().atLeastOnce().returns(write[RPCResponse](RPCResponseSuccess(Js.Str("response"), "call1")))
+      (event.getMessage _).expects().atLeastOnce().returns(
+        DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCResponse](
+          DefaultUdashRPCFramework.RPCResponseSuccess(DefaultUdashRPCFramework.write[String]("response"), "call1")
+        )
+      )
       (event.getResource _).expects().atLeastOnce().returns(resource)
       (event.isCancelled _).expects().once().returns(false)
       (event.isClosedByApplication _).expects().once().returns(false)
@@ -483,7 +559,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.onClose _).expects(resource).never()
 
       atm.onStateChange(event)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
     }
 
     "send broadcasts over SSE" in {
@@ -502,7 +578,11 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (resource.transport _).expects().once().returns(TRANSPORT.SSE)
       (resource.getResponse _).expects().once().returns(response)
 
-      (event.getMessage _).expects().atLeastOnce().returns(write[RPCResponse](RPCResponseSuccess(Js.Str("response"), "call1")))
+      (event.getMessage _).expects().atLeastOnce().returns(
+        DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCResponse](
+          DefaultUdashRPCFramework.RPCResponseSuccess(DefaultUdashRPCFramework.write[String]("response"), "call1")
+        )
+      )
       (event.getResource _).expects().atLeastOnce().returns(resource)
       (event.isCancelled _).expects().once().returns(false)
       (event.isClosedByApplication _).expects().once().returns(false)
@@ -510,7 +590,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.onClose _).expects(resource).never()
 
       atm.onStateChange(event)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
     }
 
     "send response over polling connection" in {
@@ -530,7 +610,11 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (resource.getResponse _).expects().once().returns(response)
       (resource.resume _).expects().once()
 
-      (event.getMessage _).expects().atLeastOnce().returns(write[RPCResponse](RPCResponseSuccess(Js.Str("response"), "call1")))
+      (event.getMessage _).expects().atLeastOnce().returns(
+        DefaultUdashRPCFramework.write[DefaultUdashRPCFramework.RPCResponse](
+          DefaultUdashRPCFramework.RPCResponseSuccess(DefaultUdashRPCFramework.write[String]("response"), "call1")
+        )
+      )
       (event.getResource _).expects().atLeastOnce().returns(resource)
       (event.isCancelled _).expects().once().returns(false)
       (event.isClosedByApplication _).expects().once().returns(false)
@@ -538,7 +622,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.onClose _).expects(resource).never()
 
       atm.onStateChange(event)
-      TimeUnit.MILLISECONDS.sleep(50)
+      TimeUnit.SECONDS.sleep(1)
     }
   }
 

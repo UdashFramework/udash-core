@@ -1,10 +1,10 @@
 package io.udash.rpc.utils
 
-import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig, RPC}
+import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig}
 import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
 
 /** AtmosphereFramework with default configuration for Udash. */
-class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_ <: RPC]) extends AtmosphereFramework {
+class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_]) extends AtmosphereFramework {
   addAtmosphereHandler("/*", new AtmosphereService(config))
   addInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")

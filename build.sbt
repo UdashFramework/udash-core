@@ -32,7 +32,8 @@ lazy val udash = project.in(file("."))
 lazy val macros = project.in(file("macros"))
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
     )
   )
 
@@ -45,21 +46,25 @@ def crossTestLibs() = {
 }
 
 /** Cross project containing code compiled to both JS and JVM. */
-lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
+lazy val shared = crossProject.crossType(CrossType.Full).in(file("shared"))
   .jsConfigure(_.dependsOn(macros))
   .jvmConfigure(_.dependsOn(macros))
   .settings(commonSettings: _*).settings(
     crossLibs(Provided),
     crossTestLibs()
   )
-
-lazy val sharedJVM = shared.jvm
-lazy val sharedJS = shared.js.enablePlugins(ScalaJSPlugin)
-  .settings(
+  .jsSettings(
     jsDependencies in Test += RuntimeDOM % Test,
     persistLauncher in Test := false,
-    scalaJSStage in Test := FastOptStage
+    scalaJSStage in Test := FastOptStage,
+    emitSourceMaps in Test := true
   )
+  .jvmSettings(
+    libraryDependencies ++= sharedJVMDeps.value
+  )
+
+lazy val sharedJVM = shared.jvm
+lazy val sharedJS = shared.js
 
 /** Project containing code compiled to JVM only. */
 lazy val backend = project.in(file("backend"))
@@ -83,5 +88,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
     crossTestLibs(),
     requiresDOM in Test := true,
     persistLauncher in Test := false,
-    scalaJSUseRhino in Test := false
+    scalaJSUseRhino in Test := false,
+    emitSourceMaps in Test := true
   )

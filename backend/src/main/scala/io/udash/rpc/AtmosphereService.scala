@@ -7,13 +7,11 @@ import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr.{AtmosphereConfig, AtmosphereResource, AtmosphereResourceEvent, AtmosphereServletProcessor}
-import upickle.Invalid
-import upickle.Js.Value
-import upickle.default._
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-trait AtmosphereServiceConfig[ServerRPCType <: RPC] {
+trait AtmosphereServiceConfig[ServerRPCType] {
   /**
     * Called after AtmosphereResource gets closed.
     *
@@ -35,16 +33,16 @@ trait AtmosphereServiceConfig[ServerRPCType <: RPC] {
 }
 
 /**
- * Integration between Atmosphere framework and Udash RPC system.
+  * Integration between Atmosphere framework and Udash RPC system.
   *
   * @param config Configuration of AtmosphereService.
- * @tparam ServerRPCType Main server side RPC interface
- */
-class AtmosphereService[ServerRPCType <: RPC](config: AtmosphereServiceConfig[ServerRPCType]) extends AtmosphereServletProcessor with LazyLogging {
+  * @tparam ServerRPCType Main server side RPC interface
+  */
+class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType])
+  extends AtmosphereServletProcessor with LazyLogging {
 
-  override def init(config: AtmosphereConfig): Unit = {
+  override def init(config: AtmosphereConfig): Unit =
     BroadcastManager.init(config.getBroadcasterFactory, config.metaBroadcaster())
-  }
 
   override def onRequest(resource: AtmosphereResource): Unit = {
     config.initRpc(resource)
@@ -65,20 +63,25 @@ class AtmosphereService[ServerRPCType <: RPC](config: AtmosphereServiceConfig[Se
     BroadcastManager.registerResource(resource, uuid)
 
     try {
-      val rpcRequest = read[RPCRequest](readInput(resource.getRequest.getInputStream))
-      handleRpcRequest(resource, rpcRequest, (call, responseValue) => responseValue match {
-        case Success(r) =>
-          BroadcastManager.sendToClient(uuid, write[RPCResponse](RPCResponseSuccess(r, call.callId)))
-        case Failure(ex) =>
-          logger.error("RPC request handling failed", ex)
-          val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
-          BroadcastManager.sendToClient(uuid, write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)))
-      })
+      val rpc = config.resolveRpc(resource)
+      import rpc.framework._
+      val input: String = readInput(resource.getRequest.getInputStream)
+      val rpcRequest = readRequest(input, rpc)
+      (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
+        case (call: RPCCall, Some(response)) =>
+          response onComplete {
+            case Success(r) =>
+              BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
+            case Failure(ex) =>
+              logger.error("RPC request handling failed", ex)
+              val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
+              BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
+          }
+        case (_, _) =>
+      }
     } catch {
-      case e: Invalid.Json => logger.debug("Invalid JSON.", e)
-      case e: Invalid.Data => logger.debug("Invalid data.", e)
       case e: Exception =>
-        logger.error("Error occurred while sending websocket data.", e)
+        logger.debug("Error occurred while handling websocket data.", e)
     }
   }
 
@@ -90,20 +93,28 @@ class AtmosphereService[ServerRPCType <: RPC](config: AtmosphereServiceConfig[Se
   private def onPollingRequest(resource: AtmosphereResource) = {
     try {
       resource.suspend()
-      val rpcRequest = read[RPCRequest](readInput(resource.getRequest.getInputStream))
-      handleRpcRequest(resource, rpcRequest, (call, responseValue) => responseValue match {
-        case Success(r) =>
-          resource.getResponse.write(write[RPCResponse](RPCResponseSuccess(r, call.callId)))
+      val rpc = config.resolveRpc(resource)
+      import rpc.framework._
+      val input: String = readInput(resource.getRequest.getInputStream)
+      val rpcRequest = readRequest(input, rpc)
+      (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
+        case (call: RPCCall, Some(response)) =>
+          response onComplete {
+            case Success(r) =>
+              resource.getResponse.write(rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
+              resource.resume()
+            case Failure(ex) =>
+              val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ""
+              resource.getResponse.write(rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
+              resource.resume()
+          }
+        case (_, _) =>
           resource.resume()
-        case Failure(ex) =>
-          val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ""
-          resource.getResponse.write(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)))
-          resource.resume()
-      }, _ => resource.resume())
+      }
     } catch {
       case e: Exception =>
         resource.getResponse.sendError(HttpServletResponse.SC_BAD_REQUEST)
-        logger.error("Error occurred while sending polling data.", e)
+        logger.debug("Error occurred while handling polling data.", e)
     }
   }
 
@@ -131,33 +142,38 @@ class AtmosphereService[ServerRPCType <: RPC](config: AtmosphereServiceConfig[Se
 
   override def destroy(): Unit = {}
 
-  private def handleRpcRequest(resource: AtmosphereResource, request: RPCRequest,
-    callResponder: (RPCCall, Try[Value]) => Any = (_, _) => {},
-    fireDispatchedCallback: (RPCFire) => Any = (_) => {}) = {
+  private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])
+                              (resource: AtmosphereResource,
+                               request: rpc.framework.RPCRequest): Option[Future[rpc.framework.RawValue]] = {
 
     val filterResult = config.filters.foldLeft[Try[Any]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
       case failure: Failure[_] => failure
     })
 
+    import rpc.framework._
     filterResult match {
       case Success(_) =>
-        val rpc = config.resolveRpc(resource)
         request match {
           case call: RPCCall =>
-            rpc.handleRpcCall(call) onComplete (responseValue => callResponder(call, responseValue))
+            Some(rpc.handleRpcCall(call))
           case fire: RPCFire =>
             rpc.handleRpcFire(fire)
-            fireDispatchedCallback(fire)
+            None
         }
       case Failure(ex) => request match {
         case call: RPCCall =>
-          callResponder(call, Failure(ex))
+          Some(Future.failed(ex))
         case fire: RPCFire =>
-          fireDispatchedCallback(fire)
+          None
       }
     }
+  }
 
+  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.framework.RPCRequest = {
+    import rpc.framework._
+    val raw: RawValue = stringToRaw(input)
+    read[RPCRequest](raw)
   }
 
   private def readInput(inputStream: ServletInputStream): String = {
