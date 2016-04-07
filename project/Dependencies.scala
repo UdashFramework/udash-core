@@ -4,8 +4,14 @@ import sbt._
 object Dependencies extends Build {
   val udashCoreVersion = "0.1.1"
 //  val scalaTagsVersion = "0.5.4"
-  val logbackVersion = "1.1.3"
+
   val jettyVersion = "9.3.7.v20160115"
+
+  val logbackVersion = "1.1.3"
+  val scalaLoggingVersion = "3.1.0"
+  val avsystemCommonsVersion = "1.13.1"
+  val typesafeConfigVersion = "1.3.0"
+  val springVersion = "4.2.2.RELEASE"
 
   val crossDeps = Def.setting(Seq[ModuleID](
     "io.udash" % "udash-core-shared" % udashCoreVersion
@@ -23,8 +29,14 @@ object Dependencies extends Build {
   ))
 
   val backendDeps = Def.setting(Seq[ModuleID](
-    "ch.qos.logback" % "logback-classic" % logbackVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+
+    "ch.qos.logback" % "logback-classic" % logbackVersion,
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+
+    "com.typesafe" % "config" % typesafeConfigVersion,
+    "org.springframework" % "spring-beans" % springVersion,
+    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion
   ))
 }

@@ -1,3 +1,5 @@
+import sbtassembly.AssemblyPlugin.autoImport._
+
 name := "udash-homepage"
 
 version in ThisBuild := "0.1.0"
@@ -53,7 +55,10 @@ lazy val backend = project.in(file("backend"))
       }
     },
 
-    watchSources ++= (sourceDirectory in frontend).value.***.get
+    watchSources ++= (sourceDirectory in frontend).value.***.get,
+
+    assemblyJarName in assembly := "udash-web.jar",
+    mainClass in assembly := Some("io.udash.homepage.Launcher")
   )
 
 lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
