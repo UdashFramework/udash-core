@@ -1,6 +1,6 @@
 name := "udash-i18n"
 
-version in ThisBuild := "0.1.0-SNAPSHOT"
+version in ThisBuild := "0.2.0-SNAPSHOT"
 scalaVersion in ThisBuild := "2.11.7"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
@@ -56,8 +56,7 @@ lazy val backend = project.in(file("backend"))
   .dependsOn(sharedJVM % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
     crossLibs(Compile),
-    crossTestLibs(),
-    libraryDependencies ++= backendDeps.value
+    crossTestLibs()
   )
 
 /** Project containing code compiled to JS only. */
@@ -66,7 +65,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
   .settings(commonSettings: _*).settings(
     crossLibs(Compile),
     libraryDependencies ++= frontendDeps.value,
-    jsDependencies ++= frontendJsDeps.value,
     jsDependencies += RuntimeDOM % Test,
 
     crossTestLibs(),

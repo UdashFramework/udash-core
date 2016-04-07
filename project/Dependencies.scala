@@ -27,12 +27,6 @@ object Dependencies extends Build {
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion
   ))
 
-  val frontendJsDeps = Def.setting(Seq(
-  ))
-
-  val backendDeps = Def.setting(Seq(
-  ))
-
   val crossTestDeps = Def.setting(Seq(
     "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
