@@ -32,7 +32,7 @@ class InputTest extends UdashFrontendTest {
       val input = TextInput(p).render
 
       input.value = "ABCD"
-      input.onchange(null)
+      input.onpaste(null)
       p.get should be("ABCD")
 
       input.value = "ABC"
@@ -40,11 +40,11 @@ class InputTest extends UdashFrontendTest {
       p.get should be("ABC")
 
       input.value = "AB"
-      input.onchange(null)
+      input.oninput(null)
       p.get should be("AB")
 
       input.value = "A"
-      input.onchange(null)
+      input.onkeyup(null)
       p.get should be("A")
 
       input.value = "123qweasd"

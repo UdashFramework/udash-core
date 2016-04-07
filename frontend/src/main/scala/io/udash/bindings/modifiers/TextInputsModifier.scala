@@ -11,6 +11,8 @@ private[bindings] abstract class TextInputsModifier(property: Property[String]) 
   def setElementValue(t: Element, v: String): Unit
   def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit
   def setElementOnChange(t: Element, callback: Event => Any): Unit
+  def setElementOnInput(t: Element, callback: (Event) => Any): Unit
+  def setElementOnPaste(t: Element, callback: (Event) => Any): Unit
 
   override def applyTo(t: Element): Unit = {
     if (property.get != null) setElementValue(t, property.get)
@@ -25,5 +27,7 @@ private[bindings] abstract class TextInputsModifier(property: Property[String]) 
     }
     setElementKeyUp(t, callback)
     setElementOnChange(t, callback)
+    setElementOnInput(t, callback)
+    setElementOnPaste(t, callback)
   }
 }
