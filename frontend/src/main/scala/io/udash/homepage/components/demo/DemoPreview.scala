@@ -31,16 +31,16 @@ object DemoPreview {
     import scalajs.concurrent.JSExecutionContext.Implicits.queue
     import scalatags.JsDom.all._
 
-    def isOdd(n: Int): Boolean =
-      n % 2 == 1
+    def isEven(n: Int): Boolean =
+      n % 2 == 0
 
     def renderer(n: ReadableProperty[Int]): Element =
       span(s"${n.get}, ").render
 
     val input = Property("")
     val numbers = SeqProperty[Int](Seq.empty)
-    val odds = numbers.filter(isOdd)
-    val evens = numbers.filter(n => !isOdd(n))
+    val odds = numbers.filter(n => !isEven(n))
+    val evens = numbers.filter(isEven)
 
     div(DemoStyles.demoIOWrapper)(
       TextInput(input, `type` := "number", placeholder := "Type some numbers and press Enter", maxlength := 32, DemoStyles.demoInput, GlobalStyles.width100)(
@@ -94,7 +94,7 @@ object DemoPreview {
           _ => span("Wait...").render,
           {
             case Valid => span("Yes").render
-            case _ => span("No").render
+            case Invalid(_) => span("No").render
           },
           _ => span("ERROR").render
         )
