@@ -22,7 +22,7 @@ object Footer {
           p(FooterStyles.footerMore)("See more"),
           ul(
             li(FooterStyles.footerLinkWrapper)(
-              a(href := ExternalUrls.udashGithub, target := "_blank", FooterStyles.footerLink)("Github demo")
+              a(href := ExternalUrls.udashDemos, target := "_blank", FooterStyles.footerLink)("Github demos")
             ),
             // TODO: unccoment
             /*li(UdashGuideStyles.linkWrapper)(
