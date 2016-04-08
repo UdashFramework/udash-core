@@ -61,7 +61,15 @@ object Header {
           ),
           li(HeaderStyles.headerSocialItem)(
             a(href := ExternalUrls.avsystem, HeaderStyles.headerSocialLinkYellow, target := "_blank")(
-              SVG("avsystem.svg#avsystem", Size(33, 33))
+              SVG("avsystem.svg#avsystem", Size(33, 33)),
+              div(HeaderStyles.tooltip)(
+                div(HeaderStyles.tooltipTop),
+                div(HeaderStyles.tooltipText)(
+                  div(HeaderStyles.tooltipTextInner)(
+                    "Proudly made by AVSystem"
+                  )
+                )
+              )
             )
           )
         )

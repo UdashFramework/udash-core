@@ -32,6 +32,8 @@ object StyleConstants extends StyleSheet.Inline{
   object Colors {
     val Red = c"#e30613"
 
+    val RedLight = c"#ff2727"
+
     val RedDark = c"#a6031b"
 
     val Grey = c"#898989"

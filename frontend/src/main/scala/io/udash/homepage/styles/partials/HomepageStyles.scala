@@ -93,8 +93,9 @@ object HomepageStyles extends StyleSheet.Inline {
   )
 
   lazy val introScalaIcon = style(
-    position.relative,
     StyleUtils.transition(),
+    position.relative,
+    width(10 px),
     display.inlineBlock,
     marginRight(1 rem),
 
@@ -357,4 +358,6 @@ object HomepageStyles extends StyleSheet.Inline {
       whiteSpace.pre
     )
   )
+
+
 }

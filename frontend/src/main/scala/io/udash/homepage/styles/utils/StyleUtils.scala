@@ -68,4 +68,17 @@ object StyleUtils extends StyleSheet.Inline {
     bStyle,
     borderColor(bColor)
   )
+
+  def bShadow(x: Int = 2, y: Int = 2, blur: Int = 5, spread: Int = 0, color: ValueT[ValueT.Color] = c"#000000", opacity: Double = .4, inset: Boolean = false): StyleA = style(
+    boxShadow := s"${if (inset) "inset " else ""}${x}px ${y}px ${blur}px ${spread}px ${hexToRGBA(color, opacity)}"
+  )
+
+  private def hexToRGBA(color: ValueT[ValueT.Color], opacity: Double = 1): String = {
+    val cNumber = Integer.parseInt(color.value.replace("#", ""), 16)
+    val r = (cNumber.toInt >> 16) & 0xFF
+    val g = (cNumber.toInt >>  8) & 0xFF
+    val b = (cNumber.toInt >>  0) & 0xFF
+
+    s"rgba($r, $g, $b, $opacity)"
+  }
 }
