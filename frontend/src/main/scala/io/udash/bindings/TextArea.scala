@@ -19,10 +19,23 @@ object TextArea {
     */
   def apply(property: Property[String], xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.TextArea] = {
     val bind = new TextInputsModifier(property) {
-      override def elementValue(t: Element): String = t.asInstanceOf[html.TextArea].value
-      override def setElementValue(t: Element, v: String): Unit = t.asInstanceOf[html.TextArea].value = v
-      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit = t.asInstanceOf[html.TextArea].onkeyup = callback
-      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit = t.asInstanceOf[html.TextArea].onchange = callback
+      override def elementValue(t: Element): String =
+        t.asInstanceOf[html.TextArea].value
+
+      override def setElementValue(t: Element, v: String): Unit =
+        t.asInstanceOf[html.TextArea].value = v
+
+      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit =
+        t.asInstanceOf[html.TextArea].onkeyup = callback
+
+      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.TextArea].onchange = callback
+
+      override def setElementOnInput(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.TextArea].oninput = callback
+
+      override def setElementOnPaste(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.TextArea].onpaste = callback
     }
 
     textarea(bind, xs)

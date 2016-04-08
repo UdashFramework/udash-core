@@ -18,10 +18,23 @@ private[bindings] abstract class Input(inputType: String) {
     */
   def apply(property: Property[String], xs: Modifier*): JsDom.TypedTag[html.Input] = {
     val bind = new TextInputsModifier(property) {
-      override def elementValue(t: Element): String = t.asInstanceOf[html.Input].value
-      override def setElementValue(t: Element, v: String): Unit = t.asInstanceOf[html.Input].value = if (v != null) v else ""
-      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit = t.asInstanceOf[html.Input].onkeyup = callback
-      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit = t.asInstanceOf[html.Input].onchange = callback
+      override def elementValue(t: Element): String =
+        t.asInstanceOf[html.Input].value
+
+      override def setElementValue(t: Element, v: String): Unit =
+        t.asInstanceOf[html.Input].value = if (v != null) v else ""
+
+      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit =
+        t.asInstanceOf[html.Input].onkeyup = callback
+
+      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.Input].onchange = callback
+
+      override def setElementOnInput(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.Input].oninput = callback
+
+      override def setElementOnPaste(t: Element, callback: (Event) => Any): Unit =
+        t.asInstanceOf[html.Input].onpaste = callback
     }
 
     input(tpe := inputType, bind, xs)
