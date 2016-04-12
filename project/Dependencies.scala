@@ -3,19 +3,17 @@ import sbt._
 
 object Dependencies extends Build {
 
-  val versionOfScala = "2.11.7"
   val servletVersion = "3.1.0"
 
   val silencerVersion = "0.3"
-  val avsCommonsVersion = "1.13.1"
+  val avsCommonsVersion = "1.14.0"
 
-  val udashCoreVersion = "0.1.0"
+  val udashCoreVersion = "0.2.0-rc.1"
 
-  val atmoshereJSVersion = "2.2.11"
+  val atmoshereJSVersion = "2.3.0"
 
-  val upickleVersion = "0.3.8"
-  val scalaJsDomVersion = "0.9.0"
-  val atmoshereVersion = "2.4.0.1"
+  val upickleVersion = "0.3.9"
+  val atmoshereVersion = "2.4.3"
   val scalaLoggingVersion = "3.1.0"
 
   val jawnParserVersion = "0.8.4"
@@ -37,8 +35,7 @@ object Dependencies extends Build {
   ))
 
   val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
-    "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion
+    "io.udash" %%% "udash-core-frontend" % udashCoreVersion
   ))
 
   val frontendJsDeps = Def.setting(Seq(
