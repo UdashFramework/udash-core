@@ -3,13 +3,13 @@ import sbt._
 
 object Dependencies extends Build {
 
-  val versionOfScala = "2.11.7"
+  val versionOfScala = "2.11.8"
   val silencerVersion = "0.3"
 
   val scalaJsDomVersion = "0.9.0"
   val scalaTagsVersion = "0.5.4"
 
-  val jqueryWrapperVersion = "0.2.0"
+  val jqueryWrapperVersion = "1.0.0-rc.2"
 
   val scalatestVersion = "3.0.0-M15"
 
