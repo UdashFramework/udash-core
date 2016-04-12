@@ -1,7 +1,7 @@
 name := "udash-rpc"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
-scalaVersion in ThisBuild := "2.11.7"
+version in ThisBuild := "0.2.0-rc.1"
+scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
 cancelable in Global := true
