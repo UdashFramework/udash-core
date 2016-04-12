@@ -99,12 +99,13 @@ class FrontendRoutingView(url: Property[String]) extends View {
       i("ViewPresenter"), ", then the previously created presenter will be informed about the state changed through calling the ", i("handleState"), " method."
     ),
     CodeBlock(
-      """class StatesToViewPresenterDef extends io.udash.core.ViewPresenterRegistry[RoutingState] {
-        |  def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] = state match {
-        |    case Dashboard => DashboardViewPresenter
-        |    case UsersListState(query) => UsersListViewPresenter
-        |    case UserDetailsState(username) => UserDetailsViewPresenter(username)
-        |  }
+      """class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
+        |  def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
+        |    state match {
+        |      case Dashboard => DashboardViewPresenter
+        |      case UsersListState(query) => UsersListViewPresenter
+        |      case UserDetailsState(username) => UserDetailsViewPresenter(username)
+        |    }
         |}""".stripMargin
     )(),
     p(

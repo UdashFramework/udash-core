@@ -93,7 +93,7 @@ class FrontendMVPView extends View {
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
     CodeBlock(
-      """class ExampleView(model: Property[Int], presenter: ExamplePresenter) extends io.udash.core.View {
+      """class ExampleView(model: Property[Int], presenter: ExamplePresenter) extends View {
         |  import io.udash.guide.Context._
         |  import io.udash.view.TagsBinding._
         |

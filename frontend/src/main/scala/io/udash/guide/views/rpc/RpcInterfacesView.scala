@@ -72,9 +72,11 @@ class RpcInterfacesView extends View {
         |    case Failure(ex) => println(ex)
         |  }
         |
-        |  rpc.innerRpc("some string argument").innerFire() // innerRpc gets argument which can be passed to the InnerRPC implementation
+        |  // innerRpc gets argument which can be passed to the InnerRPC implementation
+        |  rpc.innerRpc("some string argument").innerFire()
         |
-        |  val innerRpc = rpc.innerRpc("Udash") // this line does not send anything over network
+        |  // this line does not send anything over network
+        |  val innerRpc = rpc.innerRpc("Udash")
         |  innerRpc.innerCall(42) onComplete {
         |    case Success(response) => println(response)
         |    case Failure(ex) => println(ex)

@@ -36,7 +36,8 @@ class BootstrappingSBTView extends View {
       CodeBlock(
         s"""object Dependencies extends Build {
            |  val versionOfScala = "${Versions.scalaVersion}"
-           |  val jettyVersion = "${Versions.jettyVersion}" // We are going to use Jetty as webserver in this guide
+           |  // We are going to use Jetty as webserver in this guide
+           |  val jettyVersion = "${Versions.jettyVersion}"
            |
            |  val udashCoreVersion = "${Versions.udashCoreVersion}"
            |  val udashRpcVersion = "${Versions.udashRpcVersion}"
@@ -46,7 +47,8 @@ class BootstrappingSBTView extends View {
            |  val scalatestVersion = "3.0.0-M15"
            |  val scalamockVersion = "3.2.2"
            |
-           |  // Dependencies for both frontend and backend - those have to be cross-compilable
+           |  // Dependencies for both frontend and backend
+           |  // Those have to be cross-compilable
            |  val crossDeps = Def.setting(Seq(
            |    "io.udash" % "udash-core-shared" % udashCoreVersion,
            |    "io.udash" % "udash-rpc-shared" % udashRpcVersion
@@ -58,7 +60,8 @@ class BootstrappingSBTView extends View {
            |    "io.udash" %%% "udash-rpc-frontend" % udashRpcVersion
            |  ))
            |
-           |  // JavaScript libraries dependencies - those will be added into frontend-deps.js
+           |  // JavaScript libraries dependencies
+           |  // Those will be added into frontend-deps.js
            |  val frontendJSDeps = Def.setting(Seq(
            |    // it's optional of course
            |    "org.webjars" % "bootstrap-sass" % bootstrapVersion / "3.3.1/javascripts/bootstrap.js" dependsOn "jquery.js"
@@ -125,7 +128,8 @@ class BootstrappingSBTView extends View {
       )(),
       p("Next, you need to create the shared module. Cross libraries are provided by backend and frontend modules."),
       CodeBlock(
-        """lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
+        """lazy val shared = crossProject
+          |  .crossType(CrossType.Pure).in(file("shared"))
           |  .settings(commonSettings: _*).settings(
           |    crossLibs(Provided),
           |    libraryDependencies ++= crossTestDeps.value
@@ -139,7 +143,8 @@ class BootstrappingSBTView extends View {
         "indicates that you want to generate the JS application launcher."
       ),
       CodeBlock(
-        """lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
+        """lazy val frontend = project
+          |  .in(file("frontend")).enablePlugins(ScalaJSPlugin)
           |  .dependsOn(sharedJS)
           |  .settings(commonSettings: _*).settings(
           |    crossLibs(Compile),
@@ -148,23 +153,34 @@ class BootstrappingSBTView extends View {
           |    persistLauncher in Compile := true,
           |
           |    compileStatics := {
-          |      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / StaticFilesDir / "WebContent/assets/fonts")
-          |      IO.copyDirectory(sourceDirectory.value / "main/assets/images", crossTarget.value / StaticFilesDir / "WebContent/assets/images")
+          |      IO.copyDirectory(
+          |        sourceDirectory.value / "main/assets/fonts",
+          |        crossTarget.value / StaticFilesDir / "WebContent/assets/fonts"
+          |      )
+          |      IO.copyDirectory(
+          |        sourceDirectory.value / "main/assets/images",
+          |        crossTarget.value / StaticFilesDir / "WebContent/assets/images"
+          |      )
           |      compileStaticsForRelease.value
           |      (crossTarget.value / StaticFilesDir).***.get
           |    },
           |
           |    // Names of final JS files
           |    artifactPath in(Compile, fastOptJS) :=
-          |      (crossTarget in(Compile, fastOptJS)).value / StaticFilesDir / "WebContent/scripts/frontend-impl-fast.js",
+          |      (crossTarget in(Compile, fastOptJS)).value /
+          |        StaticFilesDir / "WebContent/scripts/frontend-impl-fast.js",
           |    artifactPath in(Compile, fullOptJS) :=
-          |      (crossTarget in(Compile, fullOptJS)).value / StaticFilesDir / "WebContent/scripts/frontend-impl.js",
+          |      (crossTarget in(Compile, fullOptJS)).value /
+          |        StaticFilesDir / "WebContent/scripts/frontend-impl.js",
           |    artifactPath in(Compile, packageJSDependencies) :=
-          |      (crossTarget in(Compile, packageJSDependencies)).value / StaticFilesDir / "WebContent/scripts/frontend-deps-fast.js",
+          |      (crossTarget in(Compile, packageJSDependencies)).value /
+          |        StaticFilesDir / "WebContent/scripts/frontend-deps-fast.js",
           |    artifactPath in(Compile, packageMinifiedJSDependencies) :=
-          |      (crossTarget in(Compile, packageMinifiedJSDependencies)).value / StaticFilesDir / "WebContent/scripts/frontend-deps.js",
+          |      (crossTarget in(Compile, packageMinifiedJSDependencies)).value /
+          |        StaticFilesDir / "WebContent/scripts/frontend-deps.js",
           |    artifactPath in(Compile, packageScalaJSLauncher) :=
-          |      (crossTarget in(Compile, packageScalaJSLauncher)).value / StaticFilesDir / "WebContent/scripts/frontend-init.js"
+          |      (crossTarget in(Compile, packageScalaJSLauncher)).value /
+          |        StaticFilesDir / "WebContent/scripts/frontend-init.js"
           |  )""".stripMargin
       )(),
       p(i("compileStatics"), " is our custom task which prepares the whole static files directory for deployment."),
@@ -225,13 +241,18 @@ class BootstrappingSBTView extends View {
           |    // mainClass in Compile := Some("..."),
           |
           |    compile <<= (compile in Compile).dependsOn(copyStatics),
-          |    copyStatics := IO.copyDirectory((crossTarget in frontend).value / StaticFilesDir, (target in Compile).value / StaticFilesDir),
+          |    copyStatics := IO.copyDirectory(
+          |      (crossTarget in frontend).value / StaticFilesDir,
+          |      (target in Compile).value / StaticFilesDir
+          |    ),
           |    copyStatics <<= copyStatics.dependsOn(compileStatics in frontend),
           |
           |    mappings in (Compile, packageBin) ++= {
           |      copyStatics.value
           |      ((target in Compile).value / StaticFilesDir).***.get map { file =>
-          |        file ➔ file.getAbsolutePath.stripPrefix((target in Compile).value.getAbsolutePath)
+          |        file -> file.getAbsolutePath.stripPrefix(
+          |          (target in Compile).value.getAbsolutePath
+          |        )
           |      }
           |    },
           |

@@ -44,7 +44,8 @@ class BootstrappingBackendView extends View {
     p("To make usage of client RPC more friendly, it is recommended to create a wrapper object like the one below:"),
     CodeBlock(
       """object ClientRPC {
-        |  def apply(target: ClientRPCTarget)(implicit ec: ExecutionContext): MainClientRPC =
+        |  def apply(target: ClientRPCTarget)
+        |           (implicit ec: ExecutionContext): MainClientRPC =
         |    new DefaultClientRPC(target, AsRealRPC[MainClientRPC]).get
         |}""".stripMargin)(),
     h3("Application server"),
@@ -70,7 +71,9 @@ class BootstrappingBackendView extends View {
         |  def stop() = server.stop()
         |
         |  private def createAtmosphereHolder() = {
-        |    val config = new DefaultAtmosphereServiceConfig((clientId) => new ExposedRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId)))
+        |    val config = new DefaultAtmosphereServiceConfig((clientId) =>
+        |      new ExposedRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId))
+        |    )
         |    val framework = new DefaultAtmosphereFramework(config)
         |
         |    framework.init()

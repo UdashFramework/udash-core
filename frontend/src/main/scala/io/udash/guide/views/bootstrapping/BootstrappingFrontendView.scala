@@ -62,7 +62,10 @@ class BootstrappingFrontendView extends View {
     CodeBlock(
       """class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
         |  def matchUrl(url: Url): RoutingState =
-        |    url2State.applyOrElse(url.value.stripSuffix("/"), (x: String) => LandingPageState)
+        |    url2State.applyOrElse(
+        |      url.value.stripSuffix("/"),
+        |      (x: String) => LandingPageState
+        |    )
         |
         |  def matchState(state: RoutingState): Url =
         |    Url(state2Url.apply(state))
@@ -86,14 +89,15 @@ class BootstrappingFrontendView extends View {
       i("ViewPresenterRegistry"), "."
     ),
     CodeBlock("""class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
-                |  def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] = state match {
-                |    case RootState => RootViewPresenter
-                |    case LandingPageState => LandingPageViewPresenter
-                |    case NewsletterState => NewsletterViewPresenter
-                |    case SubscribeState => NewsletterSubscribeViewPresenter
-                |    case UnsubscribeState => NewsletterUnsubscribeViewPresenter
-                |    case _ => ErrorViewPresenter
-                |  }
+                |  def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
+                |    state match {
+                |      case RootState => RootViewPresenter
+                |      case LandingPageState => LandingPageViewPresenter
+                |      case NewsletterState => NewsletterViewPresenter
+                |      case SubscribeState => NewsletterSubscribeViewPresenter
+                |      case UnsubscribeState => NewsletterUnsubscribeViewPresenter
+                |      case _ => ErrorViewPresenter
+                |    }
                 |}""".stripMargin
     )(),
     p("Each ViewPresenter is expected to initialize a View and a Presenter. At this point you can create the shared model for them."),
@@ -102,7 +106,9 @@ class BootstrappingFrontendView extends View {
         |  def email: String
         |}
         |
-        |case object NewsletterSubscribeViewPresenter extends ViewPresenter[SubscribeState.type] {
+        |case object NewsletterSubscribeViewPresenter
+        |  extends ViewPresenter[SubscribeState.type] {
+        |
         |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
         |
         |  override def create(): (View, Presenter[SubscribeState.type]) = {
@@ -114,7 +120,9 @@ class BootstrappingFrontendView extends View {
         |  }
         |}
         |
-        |class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel]) extends Presenter[SubscribeState.type] {
+        |class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel])
+        |  extends Presenter[SubscribeState.type] {
+        |
         |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
         |
         |  /** Called before view starts rendering. */
@@ -128,7 +136,10 @@ class BootstrappingFrontendView extends View {
         |  }
         |}
         |
-        |class NewsletterSubscribeView(model: ModelProperty[SubscribeModel], presenter: NewsletterSubscribePresenter) extends View {
+        |class NewsletterSubscribeView(model: ModelProperty[SubscribeModel],
+        |                              presenter: NewsletterSubscribePresenter)
+        |  extends View {
+        |
         |  import io.udash.forms._
         |  import io.udash.view.TagsBinding._
         |  import scalatags.JsDom.all._
@@ -144,7 +155,8 @@ class BootstrappingFrontendView extends View {
         |    }))("Subscribe")
         |  ).render
         |
-        |  /** Called if there is some child view. This method should place view template inside DOM. */
+        |  /** Called if there is some child view.
+        |    * This method should place view template inside DOM. */
         |  override def renderChild(view: View): Unit = ()
         |}""".stripMargin
     )(),
@@ -170,7 +182,8 @@ class BootstrappingFrontendView extends View {
     ),
     p("If the view does not need a presenter, you can use ", i("DefaultViewPresenterFactory"), "."),
     CodeBlock(
-      """case object NewsletterViewPresenter extends DefaultViewPresenterFactory[NewsletterState.type](() => new NewsletterView)
+      """case object NewsletterViewPresenter
+        |  extends DefaultViewPresenterFactory[NewsletterState.type](() => new NewsletterView)
         |
         |class NewsletterView extends View {
         |  import Context._
@@ -198,10 +211,15 @@ class BootstrappingFrontendView extends View {
     ),
     CodeBlock(
       """object Context {
-        |  private implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
+        |  import scalajs.concurrent.JSExecutionContext
+        |
+        |  private implicit val executionContext = JSExecutionContext.Implicits.queue
         |  private lazy val routingRegistry = new RoutingRegistryDef
         |  private lazy val viewPresenterRegistry = new StatesToViewPresenterDef
-        |  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState)
+        |
+        |  implicit val applicationInstance = new Application[RoutingState](
+        |    routingRegistry, viewPresenterRegistry, RootState
+        |  )
         |}""".stripMargin
     )(),
     p("ScalaJS needs the main function that will initialize the whole application. For example: "),

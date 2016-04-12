@@ -68,12 +68,12 @@ class IntroFormDemoComponent extends Component {
     import scalacss.Defaults._
     import scalacss.ScalatagsCss._
 
-    private def int2string: (Int) => String = _.toString
-    private def string2int: (String) => Int = (s) => Float.parseFloat(s).toInt
+    private def i2s(i: Int) = i.toString
+    private def s2i(s: String) = Float.parseFloat(s).toInt
 
-    private val minimum = model.subProp(_.minimum).transform(int2string, string2int)
-    private val between = model.subProp(_.between).transform(int2string, string2int)
-    private val maximum = model.subProp(_.maximum).transform(int2string, string2int)
+    private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
+    private val between = model.subProp(_.between).transform(i2s, s2i)
+    private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
 
     def render: Element = div(id := "frontend-intro-demo", GuideStyles.frame)(
       div(BootstrapStyles.inputGroup, GuideStyles.blockOnMobile)(

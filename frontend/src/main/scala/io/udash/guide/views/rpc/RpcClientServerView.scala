@@ -30,7 +30,10 @@ class RpcClientServerView extends View {
     ),
     h2("Server connection"),
     p("Let's start with creating a client-server connection in the client code:"),
-    CodeBlock("""val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new FrontendRPCService)""".stripMargin)(),
+    CodeBlock(
+      """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
+        |  new FrontendRPCService
+        |)""".stripMargin)(),
     p(
       i("MainClientRPC"), " and ", i("MainServerRPC"), " are root the RPC interfaces of the application. ",
       i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. Ignore it for now, this topic will be covered in the ",
@@ -73,8 +76,12 @@ class RpcClientServerView extends View {
     )(),
     p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), "."),
     CodeBlock(
-      """class BasicAtmosphereServiceConfig[ServerRPCType <: RPC](localRpc: ExposedRPC[ServerRPCType]) extends AtmosphereServiceConfig[ServerRPCType] {
-        |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] = localRpc
+      """class BasicAtmosphereServiceConfig[ServerRPCType <: RPC]
+        |  (localRpc: ExposedRPC[ServerRPCType])
+        |  extends AtmosphereServiceConfig[ServerRPCType] {
+        |
+        |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
+        |    localRpc
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = {}
         |
@@ -85,7 +92,9 @@ class RpcClientServerView extends View {
     )(),
     p("Now you can use it in the following way:"),
     CodeBlock(
-      """val config = new BasicAtmosphereServiceConfig(new ExposedRPC[MainServerRPC](MainRpcEndpoint))
+      """val config = new BasicAtmosphereServiceConfig(
+        |  new ExposedRPC[MainServerRPC](MainRpcEndpoint)
+        |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
     p("This is a very simple example of backend implementation. Unfortunately, it is only sufficient for very small and simple applications."),
@@ -95,7 +104,7 @@ class RpcClientServerView extends View {
       a(href := RpcServerClientState.url)("server ➔ client communication"), " for a specific client. "
     ),
     CodeBlock(
-      """class MainRpcEndpoint(implicit val clientId: io.udash.rpc.ClientId) extends MainServerRpc {
+      """class MainRpcEndpoint(implicit val clientId: ClientId) extends MainServerRpc {
         |  /** Methods implementation... */
         |}""".stripMargin
     )(),
@@ -105,12 +114,16 @@ class RpcClientServerView extends View {
       " implementation will be more complicated."
     ),
     CodeBlock(
-      """class DefaultAtmosphereServiceConfig[ServerRPCType <: RPC](localRpc: (ClientId) => ExposedRPC[ServerRPCType]) extends AtmosphereServiceConfig[ServerRPCType] {
+      """class DefaultAtmosphereServiceConfig[ServerRPCType <: RPC]
+        |  (localRpc: (ClientId) => ExposedRPC[ServerRPCType])
+        |  extends AtmosphereServiceConfig[ServerRPCType] {
+        |
         |  private val RPCName = "RPC"
         |  private val connections = new DefaultAtmosphereResourceSessionFactory
         |
         |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
-        |    connections.getSession(resource).getAttribute(RPCName).asInstanceOf[ExposedRPC[ServerRPCType]]
+        |    connections.getSession(resource).getAttribute(RPCName)
+        |      .asInstanceOf[ExposedRPC[ServerRPCType]]
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
         |    val session = connections.getSession(resource)
@@ -130,7 +143,9 @@ class RpcClientServerView extends View {
       "connection and stores it in the session attribute. Usage is as simple as earlier:"
     ),
     CodeBlock(
-      """val config = new DefaultAtmosphereServiceConfig(new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint()(clientId)))
+      """val config = new DefaultAtmosphereServiceConfig(
+        |  new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint()(clientId))
+        |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
     h4("Example"),
@@ -144,10 +159,14 @@ class RpcClientServerView extends View {
       "the service layer. "
     ),
     CodeBlock(
-      """class MainRpcEndpoint(primeService: PrimeService)(implicit val clientId: io.udash.rpc.ClientId) extends MainServerRpc {
+      """class MainRpcEndpoint
+        |  (primeService: PrimeService)(implicit val clientId: io.udash.rpc.ClientId)
+        |  extends MainServerRpc {
+        |
         |  def isPrime(n: BigInt): Future[Boolean] = {
-        |    /** Here you can handle for example server ➔ client calls with clientId or authorization.
-        |        You can also pass clientId to service method, if it needs it. */
+        |    /* Here you can handle for example server ➔ client
+        |       calls with clientId or authorization.
+        |       You can also pass clientId to service method, if it needs it. */
         |    primeService.isPrime(n)
         |  }
         |}
@@ -177,7 +196,9 @@ class RpcClientServerView extends View {
     p("In such implementation you can create a single service instance and a lightweight endpoint per client connection in the following way:"),
     CodeBlock(
       """val service = new PrimeService
-        |val config = new DefaultAtmosphereServiceConfig(new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint(service)(clientId)))
+        |val config = new DefaultAtmosphereServiceConfig(
+        |  new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint(service)(clientId))
+        |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
     h3("User-aware implementation"),
@@ -194,7 +215,11 @@ class RpcClientServerView extends View {
         |  def hasPermission(id: PermissionId): Boolean
         |}
         |
-        |class MainRpcEndpoint(primeService: PrimeService)(implicit val clientId: io.udash.rpc.ClientId, val user: UserContext) extends MainServerRpc {
+        |class MainRpcEndpoint
+        |  (primeService: PrimeService)
+        |  (implicit val clientId: io.udash.rpc.ClientId, val user: UserContext)
+        |  extends MainServerRpc {
+        |
         |  val isPrimePermission: PermissionId = ???
         |
         |  def isPrime(n: BigInt): Future[Boolean] = {
@@ -208,7 +233,7 @@ class RpcClientServerView extends View {
         |  private val responses = mutable.Map[BigInt, Boolean]()
         |
         |  def isPrime(n: BigInt)(implicit val user: UserContext): Future[Boolean] = {
-        |    if (quotaService.isExceeded(user.id)) Future.failure(/** A quota exception */)
+        |    if (quotaService.isExceeded(user.id)) Future.failure(/** Quota exception */)
         |    else if (responses.contains(n)) Future.successful(responses(n))
         |    else Future {
         |      val r = checkIfPrime(n)
@@ -229,16 +254,18 @@ class RpcClientServerView extends View {
     ),
     p("Now it is time to prepare ", i("AtmosphereServiceConfig"), ":"),
     CodeBlock(
-      """class AuthAtmosphereServiceConfig[ServerRPCType <: RPC]
-        |(localRpc: (ClientId, UserContext) => ExposedRPC[ServerRPCType], auth: AuthService)
-        |extends AtmosphereServiceConfig[ServerRPCType] {
+      """class AuthAtmosphereServiceConfig[ServerRPCType <: RPC](
+        |    localRpc: (ClientId, UserContext) => ExposedRPC[ServerRPCType],
+        |    auth: AuthService
+        |  ) extends AtmosphereServiceConfig[ServerRPCType] {
         |
         |  private val RPCName = "RPC"
         |  private val UserContextName = "UserContext"
         |  private val connections = new DefaultAtmosphereResourceSessionFactory
         |
         |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
-        |    connections.getSession(resource).getAttribute(RPCName).asInstanceOf[ExposedRPC[ServerRPCType]]
+        |    connections.getSession(resource).getAttribute(RPCName)
+        |      .asInstanceOf[ExposedRPC[ServerRPCType]]
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
         |    val session = connections.getSession(resource)
@@ -251,7 +278,8 @@ class RpcClientServerView extends View {
         |  }
         |
         |  /** Ignore all unauthenticated calls */
-        |  override def filters: Seq[(AtmosphereResource) => Try[Any]] = List(authenticationFilter)
+        |  override def filters: Seq[(AtmosphereResource) => Try[Any]] =
+        |    List(authenticationFilter)
         |
         |  override def onClose(resource: AtmosphereResource): Unit = {}
         |
@@ -286,7 +314,9 @@ class RpcClientServerView extends View {
       """val service = new PrimeService
         |val auth = new AuthService
         |val config = new DefaultAtmosphereServiceConfig(
-        |  new ExposedRPC[MainServerRPC]((clientId, user) => MainRpcEndpoint(service)(clientId, user)), auth
+        |  new ExposedRPC[MainServerRPC](
+        |    (clientId, user) => MainRpcEndpoint(service)(clientId, user)
+        |  ), auth
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
