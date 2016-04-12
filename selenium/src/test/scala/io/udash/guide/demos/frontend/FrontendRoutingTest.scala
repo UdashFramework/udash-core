@@ -80,8 +80,11 @@ class FrontendRoutingTest extends SeleniumTest {
         linkChanger.sendKeys(s)
         eventually {
           val escaped = s"/frontend/routing/${s.replaceAll(" ", "%20").replaceAll("#", "%23")}"
+          val unescaped = s"/frontend/routing/$s"
           init.getText should be("/frontend/routing")
-          link.getText should be(escaped)
+          link.getText should matchPattern {
+            case str: String if str == escaped || str == unescaped =>
+          }
         }
       }
 

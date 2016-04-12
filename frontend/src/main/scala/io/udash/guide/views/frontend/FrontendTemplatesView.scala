@@ -83,8 +83,11 @@ class FrontendTemplatesView extends View {
     )(),
     p("With Scalatags you can also bind callbacks, just like in HTML."),
     CodeBlock(
-      """a(cls := "btn btn-default", id := "example-button", onclick := { () => jQ("#example-button").toggleClass("btn-success") })
-        | ("Click me")""".stripMargin
+      """a(
+        |  cls := "btn btn-default",
+        |  id := "example-button",
+        |  onclick := { () => jQ("#example-button").toggleClass("btn-success") }
+        |)("Click me")""".stripMargin
     )(),
     h2("ScalaCSS"),
     p(
@@ -144,8 +147,11 @@ class FrontendTemplatesView extends View {
     CodeBlock(
       """div(
         |  ExampleStyles.render[TypedTag[HTMLStyleElement]],
-        |  a(ExampleStyles.btn  + ExampleStyles.btnDefault, id := "example-button",
-        |    onclick := { () => jQ("#example-button").toggleClass(ExampleStyles.btnSuccess.htmlClass) }
+        |  a(
+        |    ExampleStyles.btn  + ExampleStyles.btnDefault, id := "example-button",
+        |    onclick := { () =>
+        |      jQ("#example-button").toggleClass(ExampleStyles.btnSuccess.htmlClass)
+        |    }
         |  )("Click me")
         |)""".stripMargin
     )(),
@@ -211,10 +217,17 @@ class FrontendTemplatesView extends View {
         |}""".stripMargin
     )(),
     CodeBlock(
-      """a(ExampleStyles.swither, id := "example-switcher", data("state") := "off", onclick := { () =>
-        |  val jqSwitcher = jQ("#example-switcher")
-        |  if (jqSwitcher.attr("data-state").get == "on") jqSwitcher.attr("data-state", "off") else jqSwitcher.attr("data-state", "on")
-        |})(
+      """a(
+        |  ExampleStyles.swither, id := "example-switcher", data("state") := "off",
+        |  onclick := { () =>
+        |    val jqSwitcher = jQ("#example-switcher")
+        |
+        |    if (jqSwitcher.attr("data-state").get == "on")
+        |      jqSwitcher.attr("data-state", "off")
+        |    else
+        |      jqSwitcher.attr("data-state", "on")
+        |  }
+        |)(
         |  div(ExampleStyles.innerOff)("Off"),
         |  div(ExampleStyles.innerOn)("On")
         |)""".stripMargin
@@ -283,13 +296,18 @@ class FrontendTemplatesView extends View {
         |
         |  val btnAnimated = style(
         |    &.hover {
-        |      ExampleMixins.animation(ExampleKeyframes.colorPulse.name.value, FiniteDuration(750, TimeUnit.MILLISECONDS))
+        |      ExampleMixins.animation(
+        |        ExampleKeyframes.colorPulse.name.value,
+        |        FiniteDuration(750, TimeUnit.MILLISECONDS)
+        |      )
         |    }
         |  )
         |}""".stripMargin
     )(),
     CodeBlock(
-      """a(ExampleStyles.btn + ExampleStyles.btnDefault + ExampleStyles.btnAnimated)("Hover over me")""".stripMargin
+      """a(
+        |  ExampleStyles.btn + ExampleStyles.btnDefault + ExampleStyles.btnAnimated
+        |)("Hover over me")""".stripMargin
     )(),
     div(GuideStyles.frame)(
       a(ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated)( "Hover over me" )
@@ -327,8 +345,12 @@ class FrontendTemplatesView extends View {
         |}""".stripMargin
     )(),
     CodeBlock(
-      """div(ExampleStyles.mediaContainer + ExampleStyles.mediaDesktop)("Reduce the browser width"),
-        |div(ExampleStyles.mediaContainer + ExampleStyles.mediaTablet)("Increase the browser width")""".stripMargin
+      """div(
+        |  ExampleStyles.mediaContainer + ExampleStyles.mediaDesktop
+        |)("Reduce the browser width"),
+        |div(
+        |  ExampleStyles.mediaContainer + ExampleStyles.mediaTablet
+        |)("Increase the browser width")""".stripMargin
     )(),
     div(
       div(ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop)( "Reduce the browser width" ),

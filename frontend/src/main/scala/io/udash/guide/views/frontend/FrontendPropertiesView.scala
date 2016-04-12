@@ -35,9 +35,12 @@ class FrontendPropertiesView extends View {
         |
         |println(s"Starting validation of ${username.get}.")
         |username.isValid onComplete {
-        |  case Success(Valid) => println("It is valid, because there is no validator on this property...")
-        |  case Success(Invalid(errors)) => println("...but it might be invalid, if only we had added any.")
-        |  case Failure(ex) => println("Validation process went wrong...")
+        |  case Success(Valid) =>
+        |    println("It is valid, because there is no validator on this property...")
+        |  case Success(Invalid(errors)) =>
+        |    println("...but it might be invalid, if only we had added any.")
+        |  case Failure(ex) =>
+        |    println("Validation process went wrong...")
         |}""".stripMargin
     )(),
     p("That was the simple example. Now it is time for something more complex:"),
@@ -122,10 +125,12 @@ class FrontendPropertiesView extends View {
     p("Every validator must extend ", i("Validator[T]"), ", where T is a data model type. For example:"),
     CodeBlock(
       """object UserNameValidator extends Validator[String] {
-        |  override def apply(name: String)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-        |    if (name.length >= 3) Valid
-        |    else Invalid(Seq("User name must contain at least 3 characters!"))
-        |  }
+        |  def apply(name: String)
+        |           (implicit ec: ExecutionContext): Future[ValidationResult] =
+        |    Future {
+        |      if (name.length >= 3) Valid
+        |      else Invalid(Seq("User name must contain at least 3 characters!"))
+        |    }
         |}
         |
         |val comment = ModelProperty[Comment]
@@ -185,7 +190,8 @@ class FrontendPropertiesView extends View {
     )(),
     p("Now, if you want to obtain the user id property as Int, you can use the ", i("transform"), " method:"),
     CodeBlock(
-      """val userId: Property[Int] = user.subProp(_.id).transform(_.asInt, (i: Int) => UserId(i))
+      """val userId: Property[Int] = user.subProp(_.id)
+        |  .transform(_.asInt, (i: Int) => UserId(i))
         |val name: ReadableProperty[String] = user.transform(_.name)""".stripMargin
     )(),
     p(

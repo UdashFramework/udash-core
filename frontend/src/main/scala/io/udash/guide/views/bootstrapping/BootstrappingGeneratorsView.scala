@@ -17,12 +17,12 @@ class BootstrappingGeneratorsView extends View {
   import JsDom.all._
 
   override def getTemplate: dom.Element = div(
-    h2("Udash project generator"),
+    h1("Udash project generator"),
     p(
       "If you want to start developing with Udash as soon as possible, you may find the Udash project generator very helpful. ",
       "Basing on a few configuration settings, it will generate a complete, runnable Udash project ready to work with."
     ),
-    h3("Command line interface"),
+    h2("Command line interface"),
     p(
       "To use the project generator in the command line, download it from ",
       a(href := References.udashGeneratorDownload)("here"), ". Then use ", i("run.sh"), " or ", i("run.bat"), " script to start it."
@@ -54,7 +54,7 @@ class BootstrappingGeneratorsView extends View {
         li(b("Start generation"), " - decide if you want to start project generation based on the above configuration.")
       )
     ),
-    h3("Project structure"),
+    h2("Project structure"),
     p(
       "The basic Udash project contains three modules: ",
       strong("shared"), ", ", strong("backend"), " and ", strong("frontend"), "."
@@ -90,7 +90,7 @@ class BootstrappingGeneratorsView extends View {
         li(b("rpc/ClientRPC.scala"), " - helper object for communication with the client application.")
       )
     ),
-    h3("Project compilation and running"),
+    h2("Project compilation and running"),
     p(
       "In case of the frontend-only project, you can use the ", i("sbt compile"), " command to compile sources of your web application. ",
       "When compilation is finished, you can find generated files in the ", i("target/UdashStatic"), " directory."

@@ -32,7 +32,10 @@ class RpcServerClientView extends View {
     p(
       "As you might remember from the ", a(href := RpcClientServerState.url)("Client ➔ server communication"),
       " chapter, in frontend code we can create the server connection in the following way:"),
-    CodeBlock("""val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new FrontendRPCService)""".stripMargin)(),
+    CodeBlock(
+      """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
+        |  new FrontendRPCService
+        |)""".stripMargin)(),
     p("The ", i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. For example:"),
     CodeBlock(
       """class FrontendRPCService extends MainClientRPC {
@@ -47,9 +50,9 @@ class RpcServerClientView extends View {
     ),
     CodeBlock(
       """object ClientRPC {
-        |  def apply(target: io.udash.rpc.ClientRPCTarget)(implicit ec: ExecutionContext): MainClientRPC = {
-        |    new io.udash.rpc.DefaultClientRPC(target, io.udash.rpc.AsRealRPC[MainClientRPC]).get
-        |  }
+        |  def apply(target: io.udash.rpc.ClientRPCTarget)
+        |           (implicit ec: ExecutionContext): MainClientRPC =
+        |    new io.udash.rpc.DefaultClientRPC(target, AsRealRPC[MainClientRPC]).get
         |}""".stripMargin
     )(),
     p("Now you can call a client method in the following way:"),
@@ -85,13 +88,15 @@ class RpcServerClientView extends View {
         |
         |  def registerListener(listener: (String) => Any): Future[Unit] = {
         |    listeners += listener
-        |    if (listeners.size == 1) serverRpc.notificationsDemo().register() // register for server notifications
+        |    // register for server notifications
+        |    if (listeners.size == 1) serverRpc.notificationsDemo().register()
         |    else Future.successful(())
         |  }
         |
         |  def unregisterListener(listener: (String) => Any): Future[Unit] = {
         |    listeners -= listener
-        |    if (listeners.isEmpty) serverRpc.notificationsDemo().unregister() // unregister
+        |    // unregister
+        |    if (listeners.isEmpty) serverRpc.notificationsDemo().unregister()
         |    else Future.successful(())
         |  }
         |
@@ -102,12 +107,16 @@ class RpcServerClientView extends View {
     )(),
     CodeBlock(
       """/** Server implementation */
-        |class NotificationsServer(implicit clientId: ClientId) extends NotificationsServerRPC {
+        |class NotificationsServer(implicit clientId: ClientId)
+        |  extends NotificationsServerRPC {
+        |
         |  import io.udash.guide.Implicits.backendExecutionContext
         |
-        |  override def register(): Future[Unit] = Future { NotificationsService.register }
+        |  override def register(): Future[Unit] =
+        |    Future.successful(NotificationsService.register)
         |
-        |  override def unregister(): Future[Unit] = Future { NotificationsService.unregister }
+        |  override def unregister(): Future[Unit] =
+        |    Future.successful(NotificationsService.unregister)
         |}
         |
         |object NotificationsService {

@@ -128,3 +128,4 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+!frontend/libs/*.jar

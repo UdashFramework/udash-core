@@ -58,7 +58,9 @@ class FrontendFormsView extends View {
         |  ),
         |  div(
         |    "Age: ",
-        |    NumberInput(age.transform(_.toString, Integer.parseInt))(placeholder := "Input your age..."),
+        |    NumberInput(
+        |      age.transform(_.toString, Integer.parseInt)
+        |    )(placeholder := "Input your age..."),
         |    span(bind(age))
         |  )
         |)""".stripMargin
@@ -123,7 +125,9 @@ class FrontendFormsView extends View {
         |form(
         |  CheckButtons(
         |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-        |    (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(i, l) })
+        |    (els: Seq[(Input, String)]) => span(
+        |      els.map { case (i: Input, l: String) => label(i, l) }
+        |    )
         |  )
         |)""".stripMargin
     )(),
@@ -152,7 +156,9 @@ class FrontendFormsView extends View {
         |form(
         |  RadioButtons(
         |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-        |    (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(i, l) })
+        |    (els: Seq[(Input, String)]) => span(
+        |      els.map { case (i: Input, l: String) => label(i, l) }
+        |    )
         |  )
         |)""".stripMargin
     )(),

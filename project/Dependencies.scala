@@ -3,7 +3,7 @@ import sbt._
 
 object Dependencies extends Build {
 
-  val versionOfScala = "2.11.7"
+  val versionOfScala = "2.11.8"
   val jettyVersion = "9.3.7.v20160115"
 
   val udashCoreVersion = "0.1.1"
@@ -11,7 +11,7 @@ object Dependencies extends Build {
   val udashJQueryVersion = "0.2.0"
 
 //  val scalaTagsVersion = "0.5.4-avs.1"
-  val scalaCssVersion = "0.4.0"
+  val scalaCssVersion = "0.4.1"
 
   val scalaLoggingVersion = "3.1.0"
   val logbackVersion = "1.1.3"
@@ -22,8 +22,8 @@ object Dependencies extends Build {
 
   val bootstrapVersion = "3.3.1-1"
 
-  val seleniumVersion = "2.48.2"
-  val scalatestVersion = "2.2.5"
+  val seleniumVersion = "2.53.0"
+  val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
 
   val crossDeps = Def.setting(Seq(

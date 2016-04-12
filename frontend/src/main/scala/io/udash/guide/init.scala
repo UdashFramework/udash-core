@@ -21,9 +21,9 @@ object Context {
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
+    MenuLink("Udash generator", BootstrappingGeneratorsState),
     MenuContainer("Bootstrapping", Seq(
       MenuLink("Introduction", BootstrappingIntroState),
-      MenuLink("Generators", BootstrappingGeneratorsState),
       MenuLink("SBT configuration", BootstrappingSBTState),
       MenuLink("Shared RPC", BootstrappingRpcState),
       MenuLink("Backend", BootstrappingBackendState),

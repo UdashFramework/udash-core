@@ -71,15 +71,20 @@ class FrontendIntroView extends View {
         |
         |  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
         |  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
-        |    override def apply(element: IntroFormDemoModel)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-        |      val errors = mutable.ArrayBuffer[String]()
-        |      if (element.minimum > element.maximum) errors += "Minimum is bigger than maximum!"
-        |      if (element.minimum > element.between) errors += "Minimum is bigger than your value!"
-        |      if (element.between > element.maximum) errors += "Maximum is smaller than your value!"
+        |    override def apply(element: IntroFormDemoModel)
+        |                      (implicit ec: ExecutionContext): Future[ValidationResult] =
+        |      Future {
+        |        val errors = mutable.ArrayBuffer[String]()
+        |        if (element.minimum > element.maximum)
+        |          errors += "Minimum is bigger than maximum!"
+        |        if (element.minimum > element.between)
+        |          errors += "Minimum is bigger than your value!"
+        |        if (element.between > element.maximum)
+        |          errors += "Maximum is smaller than your value!"
         |
-        |      if (errors.isEmpty) Valid
-        |      else Invalid(errors.toSeq)
-        |    }
+        |        if (errors.isEmpty) Valid
+        |        else Invalid(errors.toSeq)
+        |      }
         |  }
         |
         |  /** Prepares model, view and presenter for demo component */
@@ -109,7 +114,8 @@ class FrontendIntroView extends View {
         |    }
         |  }
         |
-        |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) {
+        |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
+        |                          presenter: IntroFormDemoPresenter) {
         |    import Context._
         |    import io.udash.view.TagsBinding._
         |    import io.udash.forms._
@@ -118,12 +124,12 @@ class FrontendIntroView extends View {
         |    import scalacss.Defaults._
         |    import scalacss.ScalatagsCss._
         |
-        |    private def int2string: (Int) => String = _.toString
-        |    private def string2int: (String) => Int = _.toInt
+        |    private def i2s(i: Int) = i.toString
+        |    private def s2i(s: String) = Float.parseFloat(s).toInt
         |
-        |    private val minimum = model.subProp(_.minimum).transform(int2string, string2int)
-        |    private val between = model.subProp(_.between).transform(int2string, string2int)
-        |    private val maximum = model.subProp(_.maximum).transform(int2string, string2int)
+        |    private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
+        |    private val between = model.subProp(_.between).transform(i2s, s2i)
+        |    private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
         |
         |    def render: Element = div(id := "frontend-intro-demo")(
         |      div(BootstrapStyles.inputGroup)(
@@ -133,7 +139,10 @@ class FrontendIntroView extends View {
         |        span(BootstrapStyles.inputGroupAddon)(" <= "),
         |        NumberInput(maximum)(id := "maximum", BootstrapStyles.formControl),
         |        div(BootstrapStyles.inputGroupBtn)(
-        |          button(id := "randomize", BootstrapStyles.btn + BootstrapStyles.btnPrimary)(onclick :+= (ev => {
+        |          button(
+        |            id := "randomize",
+        |            BootstrapStyles.btn + BootstrapStyles.btnPrimary
+        |          )(onclick :+= (ev => {
         |            presenter.randomize()
         |            true
         |          }))("Randomize")

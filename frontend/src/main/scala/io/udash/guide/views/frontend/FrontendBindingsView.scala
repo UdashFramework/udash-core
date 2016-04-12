@@ -62,20 +62,29 @@ class FrontendBindingsView extends View {
         |  val idx = Random.nextInt(s)
         |  val amount = Random.nextInt(s - idx) + 1
         |  val count = Random.nextInt(5)
-        |  integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
+        |  integers.replace(
+        |    idx, amount,
+        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
+        |  )
         |}, 500)
         |
         |val template: Element = div(
         |  "Name: ",
         |  produce(name)(value => b(value).render), br,
         |  "Integers: ",
-        |  produce(integers)((seq: Seq[Int]) => span(seq.map(p => span(s"$p, ")):_*).render), br,
+        |  produce(integers)((seq: Seq[Int]) =>
+        |    span(seq.map(p => span(s"$p, ")):_*).render
+        |  ), br,
         |  "Integers (patching): ",
         |  produce(integers,
-        |    (seq: Seq[Property[Int]]) => span(seq.map(p => span(id := p.hashCode())(s"${p.get}, ")): _*).render,
+        |    (seq: Seq[Property[Int]]) =>
+        |      span(seq.map(p => span(id := p.hashCode())(s"${p.get}, ")):_*).render,
         |    (patch: Patch[Property[Int]], el: JQuery) => {
         |      val insertBefore = el.children().eq(patch.idx)
-        |      patch.added.foreach(p => jQ(span(id := p.hashCode())(s"${p.get}, ").render).insertBefore(insertBefore))
+        |      patch.added.foreach(p =>
+        |        jQ(span(id := p.hashCode())(s"${p.get}, ").render)
+        |          .insertBefore(insertBefore)
+        |      )
         |      patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
         |    }
         |  )
@@ -97,7 +106,10 @@ class FrontendBindingsView extends View {
         |  val idx = Random.nextInt(s)
         |  val amount = Random.nextInt(s - idx) + 1
         |  val count = Random.nextInt(5)
-        |  integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
+        |  integers.replace(
+        |    idx, amount,
+        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
+        |  )
         |}, 500)
         |
         |val template: Element = div(
@@ -111,11 +123,13 @@ class FrontendBindingsView extends View {
     CodeBlock(
       """val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
         |integers.addValidator(new Validator[Seq[Int]] {
-        |  override def apply(element: Seq[Int])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-        |    val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
-        |    if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-        |    else Invalid(Seq("Sequence is not sorted!"))
-        |  }
+        |  def apply(element: Seq[Int])
+        |           (implicit ec: ExecutionContext): Future[ValidationResult] =
+        |    Future {
+        |      val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
+        |      if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
+        |      else Invalid(Seq("Sequence is not sorted!"))
+        |    }
         |})
         |
         |dom.window.setInterval(() => {
@@ -123,12 +137,17 @@ class FrontendBindingsView extends View {
         |  val idx = Random.nextInt(s)
         |  val amount = Random.nextInt(s - idx) + 1
         |  val count = Random.nextInt(5)
-        |  integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
+        |  integers.replace(
+        |    idx, amount,
+        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
+        |  )
         |}, 1000)
         |
         |val template: Element = div(
         |  "Integers: ",
-        |  produce(integers)((seq: Seq[Int]) => span(seq.map(p => span(s"$p, ")): _*).render), br,
+        |  produce(integers)((seq: Seq[Int]) =>
+        |    span(seq.map(p => span(s"$p, ")): _*).render
+        |  ), br,
         |  "Is sorted: ",
         |  bindValidation(integers,
         |    _ => span("Validation in progress...").render,
