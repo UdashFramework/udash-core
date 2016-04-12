@@ -50,9 +50,9 @@ class RpcServerClientView extends View {
     ),
     CodeBlock(
       """object ClientRPC {
-        |  def apply(target: io.udash.rpc.ClientRPCTarget)
+        |  def apply(target: ClientRPCTarget)
         |           (implicit ec: ExecutionContext): MainClientRPC =
-        |    new io.udash.rpc.DefaultClientRPC(target, AsRealRPC[MainClientRPC]).get
+        |    new DefaultClientRPC[MainClientRPC](target).get
         |}""".stripMargin
     )(),
     p("Now you can call a client method in the following way:"),
@@ -62,10 +62,10 @@ class RpcServerClientView extends View {
     )(),
     h3("Broadcasting messages"),
     p("With the above ", i("ClientRPC"), " wrapper, it is easy to broadcast the method call to all active connections:"),
-    CodeBlock("""ClientRPC(io.udash.rpc.AllClients).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(AllClients).methodFromMainClientRPC()""")(),
     h3("Message to concrete client"),
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
-    CodeBlock("""ClientRPC(io.udash.rpc.ClientId(???)).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(),
     h2("Notifications example"),
     new NotificationsDemoComponent,
     p("The code of the example above:"),

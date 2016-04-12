@@ -92,7 +92,7 @@ class RpcInterfacesView extends View {
     CodeBlock(
       """case class Record(i: Int, fuu: String)
         |
-        |trait ClientRPC extends io.udash.rpc.ClientRPC {
+        |trait ClientRPC extends ClientRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
         |  @RPCName("fireWithManyArgsLists")
@@ -124,11 +124,11 @@ class RpcInterfacesView extends View {
         |  def newsletter(): NewsletterRPC
         |}
         |
-        |trait AuthenticationRPC extends io.udash.rpc.RPC {
+        |trait AuthenticationRPC extends RPC {
         |  def login(username: String, password: String): Future[AuthToken]
         |}
         |
-        |trait NewsletterRPC extends io.udash.rpc.RPC {
+        |trait NewsletterRPC extends RPC {
         |  def loadNews(limit: Int, skip: Int): Future[Seq[News]]
         |  def subscriptions(): NewsletterSubscriptionRPC
         |}

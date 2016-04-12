@@ -1,10 +1,11 @@
 package io.udash.guide.demos.rpc
 
-import io.udash.rpc.RPC
+import com.avsystem.commons.rpc.RPC
 
 import scala.concurrent.Future
 
-trait NotificationsServerRPC extends RPC {
+@RPC
+trait NotificationsServerRPC {
   def register(): Future[Unit]
   def unregister(): Future[Unit]
 }

@@ -160,7 +160,7 @@ class RpcClientServerView extends View {
     ),
     CodeBlock(
       """class MainRpcEndpoint
-        |  (primeService: PrimeService)(implicit val clientId: io.udash.rpc.ClientId)
+        |  (primeService: PrimeService)(implicit val clientId: ClientId)
         |  extends MainServerRpc {
         |
         |  def isPrime(n: BigInt): Future[Boolean] = {
@@ -217,7 +217,7 @@ class RpcClientServerView extends View {
         |
         |class MainRpcEndpoint
         |  (primeService: PrimeService)
-        |  (implicit val clientId: io.udash.rpc.ClientId, val user: UserContext)
+        |  (implicit val clientId: ClientId, val user: UserContext)
         |  extends MainServerRpc {
         |
         |  val isPrimePermission: PermissionId = ???

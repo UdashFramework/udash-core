@@ -95,7 +95,6 @@ class FrontendMVPView extends View {
     CodeBlock(
       """class ExampleView(model: Property[Int], presenter: ExamplePresenter) extends View {
         |  import io.udash.guide.Context._
-        |  import io.udash.view.TagsBinding._
         |
         |  import JsDom.all._
         |

@@ -39,8 +39,8 @@ class ProduceDemoComponent extends Component {
         "Integers (patching): ",
         produce(integers,
           (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
-          (patch: Patch[Property[Int]], el: JQuery) => {
-            val insertBefore = el.children().at(patch.idx)
+          (patch: Patch[Property[Int]], el: Element) => {
+            val insertBefore = jQ(el).children().at(patch.idx)
             patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
             patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
           }

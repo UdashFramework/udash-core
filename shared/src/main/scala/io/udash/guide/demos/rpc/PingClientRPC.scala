@@ -1,7 +1,8 @@
 package io.udash.guide.demos.rpc
 
-import io.udash.rpc.ClientRPC
+import com.avsystem.commons.rpc.RPC
 
-trait PingClientRPC extends ClientRPC {
+@RPC
+trait PingClientRPC {
   def pong(id: Int): Unit
 }
