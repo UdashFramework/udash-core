@@ -22,8 +22,8 @@ object Dependencies extends Build {
 
   val bootstrapVersion = "3.3.1-1"
 
-  val seleniumVersion = "2.48.2"
-  val scalatestVersion = "2.2.5"
+  val seleniumVersion = "2.53.0"
+  val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
 
   val crossDeps = Def.setting(Seq(
