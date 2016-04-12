@@ -27,7 +27,7 @@ case object BootstrappingBackendState extends RoutingState(BootstrappingState)
 
 case object BootstrappingFrontendState extends RoutingState(BootstrappingState)
 
-case object BootstrappingGeneratorsState extends RoutingState(BootstrappingState)
+case object BootstrappingGeneratorsState extends RoutingState(RootState)
 
 /** Frontend chapters */
 case object FrontendState extends RoutingState(RootState)
