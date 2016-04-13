@@ -10,6 +10,7 @@ import io.udash.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
+import scalacss.Compose
 import scalacss.Defaults._
 
 object GuideStyles extends StyleSheet.Inline {
@@ -17,7 +18,6 @@ object GuideStyles extends StyleSheet.Inline {
 
   val main = style(
     position.relative,
-    paddingBottom(5 rem),
     minHeight :=! s"calc(100vh - ${StyleConstants.Sizes.HeaderHeight}px - ${StyleConstants.Sizes.FooterHeight}px)"
   )
 
@@ -100,6 +100,7 @@ object GuideStyles extends StyleSheet.Inline {
     GlobalStyles.col,
     width :=! s"calc(100% - ${StyleConstants.Sizes.MenuWidth}px)",
     paddingLeft(4 rem),
+    paddingBottom(5 rem),
 
     unsafeChild("a")(
       color(StyleConstants.Colors.Red),
@@ -267,4 +268,139 @@ object GuideStyles extends StyleSheet.Inline {
       )
     )
   )
+
+  val section = style(
+    position.relative,
+    width(100 %%),
+    overflow.hidden
+  )
+
+  val sectionError = style(
+    section,
+    height :=! s"calc(100vh - 200px)",
+    color.white,
+    backgroundColor.black,
+    backgroundImage := "url(assets/images/intro_bg.jpg)",
+
+    media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
+      height.auto,
+      paddingTop(80 px),
+      paddingBottom(100 px)
+    ),
+
+    MediaQueries.tabletLandscape(
+      style(
+        height.auto,
+        paddingTop(80 px),
+        paddingBottom(100 px)
+      )
+    )
+  )(Compose.trust)
+
+  val errorInner = style(
+    StyleUtils.relativeMiddle,
+    top(50 %%),
+    transform := "translate3d(0, 0, 1)",
+
+    media.minHeight(1 px).maxHeight(650 px)(
+      top(60 %%)
+    ),
+
+    media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
+      top(auto),
+      transform := "translateY(0)"
+    ),
+
+    MediaQueries.tabletLandscape(
+      style(
+        top(auto),
+        transform := "translateY(0)"
+      )
+    )
+  )(Compose.trust)
+
+  val errorHead = style(
+    UdashFonts.acumin(FontWeight.SemiBold),
+    fontSize(8.8 rem),
+    lineHeight(1.1),
+    transform := "translate3d(0, 0, 1)",
+    textShadow := "0 0 15px black",
+
+    &.after(
+      content := "\" \"",
+      position.absolute,
+      bottom(-110 px),
+      right(-30 px),
+      width(400 px),
+      height(213 px),
+      backgroundImage := "url(assets/images/intro_bird.png)",
+      backgroundSize := "100%",
+
+      media.minHeight(1 px).maxHeight(850 px)(
+        width(400 * .7 px),
+        height(213 * .7 px),
+        bottom(-80 px)
+      ),
+
+      MediaQueries.tabletLandscape(
+        style(
+          width(400 * .7 px),
+          height(213 * .7 px),
+          bottom(-80 px)
+        )
+      ),
+
+      MediaQueries.tabletLandscape(
+        style(
+          display.none
+        )
+      )
+    ),
+
+    media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(850 px)(
+      marginTop(2 rem),
+      marginBottom(3 rem)
+    ),
+
+    media.minHeight(751 px).maxHeight(850 px)(
+      marginTop(2 rem),
+      marginBottom(3 rem),
+      fontSize(8 rem)
+    ),
+
+    media.minHeight(651 px).maxHeight(750 px)(
+      fontSize(6 rem)
+    ),
+
+    media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(650 px)(
+      fontSize(5 rem)
+    ),
+
+    media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
+      fontSize(6 rem),
+      marginTop(4 rem),
+      marginBottom(6 rem)
+    ),
+
+    MediaQueries.tabletLandscape(
+      style(
+        fontSize(8 rem).important
+      )
+    ),
+
+    MediaQueries.tabletLandscape(
+      style(
+        marginTop(3 rem).important,
+        marginBottom(6 rem).important,
+        fontSize(6 rem).important
+      )
+    ),
+
+    MediaQueries.phone(
+      style(
+        fontSize(4 rem).important,
+        lineHeight(1.2)
+      )
+    )
+  )(Compose.trust)
 }

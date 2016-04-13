@@ -86,6 +86,7 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
 
     compileStatics := {
       IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / StaticFilesDir / "WebContent/assets/fonts")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", crossTarget.value / StaticFilesDir / "WebContent/assets/pdf")
       IO.copyDirectory(sourceDirectory.value / "main/assets/images", crossTarget.value / StaticFilesDir / "WebContent/assets/images")
       IO.copyDirectory(sourceDirectory.value / "main/assets/svg", crossTarget.value / StaticFilesDir / "WebContent/assets/svg")
       IO.copyDirectory(sourceDirectory.value / "main/assets/prism", crossTarget.value / StaticFilesDir / "WebContent/assets/prism")

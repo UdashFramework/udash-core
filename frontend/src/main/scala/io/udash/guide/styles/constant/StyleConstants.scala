@@ -15,6 +15,8 @@ object StyleConstants extends StyleSheet.Inline{
   object Sizes {
     val BodyWidth = 1075
 
+    val MinSiteHeight = 550
+
     val HeaderHeight = 80
 
     val HeaderHeightMobile = 80
