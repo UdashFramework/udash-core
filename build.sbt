@@ -30,14 +30,11 @@ lazy val udashGuide = project.in(file("."))
     mainClass in Compile := Some("io.udash.guide.Launcher")
   )
 
-def crossLibs(configuration: Configuration) =
-  libraryDependencies ++= crossDeps.value.map(_ % configuration)
-
 /** Cross project containing code compiled to both JS and JVM.
   */
 lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
   .settings(commonSettings: _*).settings(
-    crossLibs(Provided)
+    libraryDependencies ++= crossDeps.value
   )
 
 lazy val sharedJVM = shared.jvm
@@ -49,7 +46,6 @@ lazy val backend = project.in(file("backend"))
   .dependsOn(sharedJVM)
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= backendDeps.value,
-    crossLibs(Compile),
 
     (compile in Compile) <<= (compile in Compile).dependsOn(copyStatics),
     copyStatics := IO.copyDirectory((crossTarget in frontend).value / StaticFilesDir, (target in Compile).value / StaticFilesDir),
@@ -74,7 +70,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJS)
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= frontendDeps.value,
-    crossLibs(Compile),
     jsDependencies ++= frontendJSDeps.value,
     persistLauncher in Compile := true,
 

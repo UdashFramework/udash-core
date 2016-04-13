@@ -3,6 +3,7 @@ package io.udash.guide.views
 object References {
   val udashGeneratorDownload = "https://github.com/UdashFramework/udash-generator/releases/download/v0.1.0/udash-generator-0.1.0.zip"
 
+  val avScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"
   val bootstrapHomepage = "http://getbootstrap.com/"
   val jettyHomepage = "http://www.eclipse.org/jetty/"
   val mvpPattern = "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter"
@@ -14,5 +15,4 @@ object References {
   val scalaHomepage = "http://www.scala-lang.org/"
   val scalatagsHomepage = "https://github.com/lihaoyi/scalatags"
   val upickleHomepage = "https://github.com/lihaoyi/upickle-pprint"
-  val upickleCustomPicklersHomepage = "http://lihaoyi.github.io/upickle-pprint/upickle/#CustomPicklers"
 }

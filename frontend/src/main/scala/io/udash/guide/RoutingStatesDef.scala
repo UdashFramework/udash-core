@@ -55,6 +55,8 @@ case object RpcIntroState extends RoutingState(RpcState)
 
 case object RpcInterfacesState extends RoutingState(RpcState)
 
+case object RpcSerializationState extends RoutingState(RpcState)
+
 case object RpcClientServerState extends RoutingState(RpcState)
 
 case object RpcServerClientState extends RoutingState(RpcState)

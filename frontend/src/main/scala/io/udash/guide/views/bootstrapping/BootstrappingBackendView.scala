@@ -72,7 +72,9 @@ class BootstrappingBackendView extends View {
         |
         |  private def createAtmosphereHolder() = {
         |    val config = new DefaultAtmosphereServiceConfig((clientId) =>
-        |      new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId))
+        |      new DefaultExposesServerRPC[MainServerRPC](
+        |        new ExposedRpcInterfaces()(clientId)
+        |      )
         |    )
         |    val framework = new DefaultAtmosphereFramework(config)
         |

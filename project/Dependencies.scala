@@ -6,8 +6,8 @@ object Dependencies extends Build {
   val versionOfScala = "2.11.8"
   val jettyVersion = "9.3.8.v20160314"
 
-  val udashCoreVersion = "0.2.0-rc.1"
-  val udashRpcVersion = "0.2.0-rc.1"
+  val udashCoreVersion = "0.2.0-rc.2"
+  val udashRpcVersion = "0.2.0-rc.2"
   val udashJQueryVersion = "1.0.0-rc.2"
 
 //  val scalaTagsVersion = "0.5.4-avs.1"
@@ -32,7 +32,7 @@ object Dependencies extends Build {
   ))
 
   val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashCoreVersion exclude("com.lihaoyi", "scalatags_sjs0.6_2.11"),
+    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
     "io.udash" %%% "udash-rpc-frontend" % udashRpcVersion,
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
 //    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion exclude("org.scala-js", "scalajs-dom_sjs0.6_2.11"),

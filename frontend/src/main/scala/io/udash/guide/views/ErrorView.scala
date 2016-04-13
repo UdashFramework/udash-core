@@ -1,6 +1,8 @@
 package io.udash.guide.views
 
 import io.udash._
+import io.udash.wrappers.jquery._
+import io.udash.core.DomWindow
 import io.udash.guide.{ErrorState, IntroState}
 import io.udash.guide.styles.GlobalStyles
 import io.udash.guide.styles.partials.{FooterStyles, GuideStyles, HeaderStyles}
@@ -31,12 +33,13 @@ class ErrorView extends View {
 
   private lazy val jqTemplate = jQ(content)
 
-  Window.onResize(onResize)
+  val window = jQ(DomWindow)
+  window.resize((element: Element, _: JQueryEvent) => onResize())
   onResize()
 
   private def onResize(): Unit = {
-    if (Window.width <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
-      val h = Window.height - jQ(s".${FooterStyles.footer.htmlClass}").outerHeight() - jQ(s".${HeaderStyles.header.htmlClass}").outerHeight()
+    if (window.width <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
+      val h = window.height - jQ(s".${FooterStyles.footer.htmlClass}").outerHeight() - jQ(s".${HeaderStyles.header.htmlClass}").outerHeight()
       jqTemplate.css("min-height", s"${h}px")
     }
   }

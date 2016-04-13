@@ -70,12 +70,16 @@ class RpcServerClientView extends View {
     new NotificationsDemoComponent,
     p("The code of the example above:"),
     CodeBlock(
-      """/** Interfaces from the shared module */
-        |trait NotificationsClientRPC extends ClientRPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |/** Interfaces from the shared module */
+        |@RPC
+        |trait NotificationsClientRPC {
         |  def notify(msg: String): Unit
         |}
         |
-        |trait NotificationsServerRPC extends RPC {
+        |@RPC
+        |trait NotificationsServerRPC {
         |  def register(): Future[Unit]
         |  def unregister(): Future[Unit]
         |}""".stripMargin
@@ -110,7 +114,7 @@ class RpcServerClientView extends View {
         |class NotificationsServer(implicit clientId: ClientId)
         |  extends NotificationsServerRPC {
         |
-        |  import io.udash.guide.Implicits.backendExecutionContext
+        |  import Implicits.backendExecutionContext
         |
         |  override def register(): Future[Unit] =
         |    Future.successful(NotificationsService.register)
@@ -120,7 +124,7 @@ class RpcServerClientView extends View {
         |}
         |
         |object NotificationsService {
-        |  import io.udash.guide.Implicits.backendExecutionContext
+        |  import Implicits.backendExecutionContext
         |
         |  private val clients = scala.collection.mutable.ArrayBuffer[ClientId]()
         |
@@ -151,7 +155,7 @@ class RpcServerClientView extends View {
     CodeBlock("NotificationsClient.registerListener((msg: String) => println(msg))")(),
     h2("What's next?"),
     p(
-      "You may find the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter interesting later on. "
+      "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "
     )
   ).render
 

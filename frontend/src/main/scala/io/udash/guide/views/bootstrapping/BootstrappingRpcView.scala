@@ -20,26 +20,26 @@ class BootstrappingRpcView extends View {
     h2("Bootstrapping RPC interfaces"),
     p(
       "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
-      " module, define two traits: "
+      " module, define two traits annotated with ", i("com.avsystem.commons.rpc.RPC"), ": "
     ),
     ul(GuideStyles.defaultList)(
-      li("MainClientRPC extending ", i("ClientRPC"), " - contains methods which can be called by a server on a client application"),
-      li("MainServerRPC extending ", i("RPC"), " - contains methods which can be called by a client on a server.")
+      li("MainClientRPC - contains methods which can be called by a server on a client application"),
+      li("MainServerRPC - contains methods which can be called by a client on a server.")
     ),
     p(
       "That is all you have to do in the ", i("shared"), " module. Implementation of those interfaces will be covered in ",
       a(href := BootstrappingBackendState.url)("backend"), " and ", a(href := BootstrappingFrontendState.url)("frontend"),
       " bootstrapping chapters."
     ),
-    h3("RPC vs ClientRPC"),
+    h3("RPC vs Client RPC"),
     p(
-      i("RPC"), " is a marker trait for all RPC interfaces. A RPC interface is a trait or class " +
+      "An ", i("com.avsystem.commons.rpc.RPC"), " is an annotation marking all RPC interfaces. A RPC interface is a trait or class " +
       "whose abstract methods will be interpreted as remote methods by the RPC framework. Remote methods must be defined " +
       "according to following rules:"
     ),
     ul(GuideStyles.defaultList)(
-      li("Types of arguments must be serializable by the uPickle library"),
-      li("Return type must be either Unit or Future[T] where T is a type serializable by the uPickle library or another RPC interface"),
+      li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable")),
+      li("Return type must be either Unit or Future[T] where T is a type serializable or another RPC interface"),
       li("Method must not have type parameters.")
     ),
     p(
@@ -47,19 +47,26 @@ class BootstrappingRpcView extends View {
       "remote members in their implementations."
     ),
     p(
-      i("ClientRPC"), " is a marker trait for all client-side RPC interfaces. It is basically the same as ",
-      i("RPC"), ", but it cannot contain abstract methods returning Future[T]. The reason for this is that ",
-      "those methods can be called on many clients and there is no standard way of collecting the results. Collecting the results ",
-      "can be implemented with one call from the server to the clients and another call from the clients to the server."
+      "Client RPC is basically the same as standard RPC interface, but it cannot contain abstract methods returning Future[T]. ",
+      "The reason for this is that those methods can be called on many clients and there is no standard way of collecting the results. ",
+      "Collecting the results can be implemented with one call from the server to the clients and another call from the clients to the server. ",
+      "Notice that both a standard RPC and a Client RPC are annotated with ", i("@RPC"), ". Client RPC can be used in every place where a RPC is expected, ",
+      "but you can not put a standard RPC where a Client RPC is expected."
     ),
     h4("Examples"),
     p("Example of RPC interfaces:"),
     CodeBlock(
-      """trait MainClientRPC extends ClientRPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait MainClientRPC {
         |  def pong(id: Int): Unit
         |}""".stripMargin)(),
     CodeBlock(
-      """trait MainServerRPC extends RPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait MainServerRPC {
         |  def ping(id: Int): Unit
         |  def hello(name: String): Future[String]
         |}""".stripMargin)(),
