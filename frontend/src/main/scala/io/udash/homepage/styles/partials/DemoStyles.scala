@@ -68,6 +68,14 @@ object DemoStyles extends StyleSheet.Inline {
       style(
         width(100 %%)
       )
+    ),
+
+    unsafeChild("::selection")(
+      backgroundColor(StyleConstants.Colors.GreyExtra)
+    ),
+
+    unsafeChild("::-moz-selection")(
+      backgroundColor(StyleConstants.Colors.GreyExtra)
     )
   )
 
@@ -101,7 +109,6 @@ object DemoStyles extends StyleSheet.Inline {
 
   val demoTabsItem = style(
     GlobalStyles.col,
-    marginBottom(-1 px),
 
     MediaQueries.phone(
       style(
@@ -120,10 +127,26 @@ object DemoStyles extends StyleSheet.Inline {
     color(StyleConstants.Colors.Grey),
     zIndex(2),
 
-
-    &.hover (
+    &.attr(DemoComponent.ActiveAttribute, "true") (
       color.white,
-      textDecoration := "none"
+
+      &.before(
+        opacity(1),
+        transform := "scaleY(1)"
+      ),
+
+      &.after(
+        opacity(1),
+        transform := "scaleY(1)"
+      )
+    ),
+    MediaQueries.desktop(
+      style(
+        &.hover(
+          color.white,
+          textDecoration := "none"
+        )
+      )
     ),
 
     &.before(
@@ -131,7 +154,20 @@ object DemoStyles extends StyleSheet.Inline {
       content := "\" \"",
       position.absolute,
       left(`0`),
-      bottom(`0`),
+      bottom(-2 px),
+      width(100 %%),
+      height :=! "calc(100% + 2px)",
+      backgroundColor(StyleConstants.Colors.GreySuperDark),
+      zIndex(-1),
+      opacity(0)
+    ),
+
+    &.after(
+      StyleUtils.transition(),
+      content := "\" \"",
+      position.absolute,
+      left(`0`),
+      bottom(-1 px),
       width(100 %%),
       height(100 %%),
       borderRadius(4 px, 4 px, `0`, `0`),
@@ -140,7 +176,6 @@ object DemoStyles extends StyleSheet.Inline {
       borderTopStyle.solid,
       borderLeftStyle.solid,
       borderRightStyle.solid,
-      backgroundColor(StyleConstants.Colors.GreySuperDark),
       zIndex(-1),
       opacity(0),
       transform := "scaleY(.7)",
@@ -152,15 +187,6 @@ object DemoStyles extends StyleSheet.Inline {
           borderRightStyle.none,
           borderBottomStyle.solid
         )
-      )
-    ),
-
-    &.attr(DemoComponent.ActiveAttribute, "true") (
-      color.white,
-
-      &.before(
-        opacity(1),
-        transform := "scaleY(1)"
       )
     )
   )
@@ -205,7 +231,7 @@ object DemoStyles extends StyleSheet.Inline {
 
   val demoInlineField = style(
     display.tableCell,
-    height(100 %%),
+    height(34 px),
     padding(`0`, 1.3 rem),
     border.none,
     verticalAlign.middle,

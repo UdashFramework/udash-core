@@ -73,22 +73,26 @@ object ButtonsStyle extends StyleSheet.Inline {
       transformOrigin := "100% 50%"
     ),
 
-    &.hover(
-      &.before (
-        transform := "scaleX(1)"
-      ),
+    MediaQueries.desktop(
+      style(
+        &.hover(
+          &.before (
+            transform := "scaleX(1)"
+          ),
 
-      &.after (
-        transform := "scaleX(1)"
-      ),
+          &.after (
+            transform := "scaleX(1)"
+          ),
 
-      unsafeChild(s".${btnDefaultInner.htmlClass}") (
-        &.before (
-          transform := "scaleY(1)"
-        ),
+          unsafeChild(s".${btnDefaultInner.htmlClass}") (
+            &.before (
+              transform := "scaleY(1)"
+            ),
 
-        &.after (
-          transform := "scaleY(1)"
+            &.after (
+              transform := "scaleY(1)"
+            )
+          )
         )
       )
     ),

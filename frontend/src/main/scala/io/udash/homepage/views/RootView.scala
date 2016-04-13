@@ -8,6 +8,7 @@ import io.udash.homepage.styles.partials._
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HTMLStyleElement
 
+import scala.scalajs.js
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.tags2._
 
@@ -42,5 +43,7 @@ class RootView extends View {
     val newChild = view.getTemplate
     jQ(child).replaceWith(newChild)
     child = newChild
+
+    js.Dynamic.global.svg4everybody()
   }
 }

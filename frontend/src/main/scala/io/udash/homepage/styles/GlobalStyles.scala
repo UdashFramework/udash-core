@@ -141,6 +141,10 @@ object GlobalStyles extends StyleSheet.Inline {
       )
     ),
 
+    unsafeRoot("input[type=number]") (
+      Attr.real("-moz-appearance") := "textfield"
+    ),
+
     unsafeRoot("input::-webkit-outer-spin-button")(
       Attr.real("-webkit-appearance") := "none",
       margin(`0`)
@@ -195,20 +199,7 @@ object GlobalStyles extends StyleSheet.Inline {
   )
 
   val main = style(
-    position.relative,
-    paddingBottom(15 rem),
-
-    MediaQueries.tabletLandscape(
-      style(
-        paddingBottom(10 rem)
-      )
-    ),
-
-    MediaQueries.phone(
-      style(
-        paddingBottom(5 rem)
-      )
-    )
+    position.relative
   )
 
   val body = style(

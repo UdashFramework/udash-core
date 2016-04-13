@@ -43,13 +43,14 @@ object CustomScrollbarAxis {
 
 
 class CustomScrollCommands(val scrollbar: CustomScrollbar) extends AnyVal {
-  def maskCmd(cmd: String, params: js.Any*) = scrollbar.customScrollbar(cmd, params: _*)
+  def scrollCmd(cmd: String, params: js.Any*) = scrollbar.customScrollbar(cmd, params: _*)
 
   /**
     * Calling destroy method will completely remove the custom scrollbar and return the element to its original state
+ *
     * @return
     */
-  def destroy() = maskCmd("destroy")
+  def destroy() = scrollCmd("destroy")
 }
 
 

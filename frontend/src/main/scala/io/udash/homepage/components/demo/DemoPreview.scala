@@ -43,7 +43,7 @@ object DemoPreview {
     val evens = numbers.filter(n => !isOdd(n))
 
     div(DemoStyles.demoIOWrapper)(
-      TextInput(input, `type` := "number", placeholder := "Type some numbers and press Enter", maxlength := 32, DemoStyles.demoInput, GlobalStyles.width100)(
+      TextInput(input, `type` := "number", placeholder := "Type a number and press enter...", maxlength := 32, DemoStyles.demoInput, GlobalStyles.width100)(
         onkeyup := ((ev: KeyboardEvent) => if (ev.keyCode == ext.KeyCode.Enter) {
           val n: Try[Int] = Try(input.get.toInt)
           if (n.isSuccess) {
