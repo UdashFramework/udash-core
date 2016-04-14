@@ -81,8 +81,12 @@ object FooterStyles extends StyleSheet.Inline {
     color.inherit,
     textDecoration := "underline",
 
-    &.hover (
-      color(StyleConstants.Colors.Yellow)
+    MediaQueries.desktop(
+      style(
+        &.hover (
+          color(StyleConstants.Colors.Yellow)
+        )
+      )
     ),
 
     &.visited (

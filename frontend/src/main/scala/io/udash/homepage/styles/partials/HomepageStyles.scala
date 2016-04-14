@@ -83,11 +83,18 @@ object HomepageStyles extends StyleSheet.Inline {
     backgroundColor(StyleConstants.Colors.RedDark),
 
     &.hover (
-      backgroundColor(StyleConstants.Colors.Red),
-      textDecoration := "none",
+      textDecoration := "none"
+    ),
 
-      unsafeChild(s".${introScalaIcon.htmlClass}")(
-        transform := "translateX(2px) translateY(-2px)"
+    MediaQueries.desktop(
+      style(
+        &.hover (
+          backgroundColor(StyleConstants.Colors.Red),
+
+          unsafeChild(s".${introScalaIcon.htmlClass}")(
+            transform := "translateX(2px) translateY(-2px)"
+          )
+        )
       )
     )
   )
@@ -111,6 +118,38 @@ object HomepageStyles extends StyleSheet.Inline {
     marginTop(5 rem),
     marginBottom(7.5 rem),
     transform := "translate3d(0, 0, 1)",
+    textShadow := "0 0 15px black",
+
+    &.after(
+      content := "\" \"",
+      position.absolute,
+      bottom(-40 px),
+      right(-30 px),
+      width(400 px),
+      height(213 px),
+      backgroundImage := "url(assets/images/intro_bird.png)",
+      backgroundSize := "100%",
+
+      media.minHeight(1 px).maxHeight(850 px)(
+        width(400 * .7 px),
+        height(213 * .7 px),
+        bottom(-20 px)
+      ),
+
+      MediaQueries.tabletLandscape(
+        style(
+          width(400 * .7 px),
+          height(213 * .7 px),
+          bottom(-20 px)
+        )
+      ),
+
+      MediaQueries.tabletLandscape(
+        style(
+          display.none
+        )
+      )
+    ),
 
     media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(850 px)(
       marginTop(2 rem),
@@ -327,7 +366,20 @@ object HomepageStyles extends StyleSheet.Inline {
 
   val sectionDemo = style(
     section,
-    textAlign.center
+    paddingBottom(15 rem),
+    textAlign.center,
+
+    MediaQueries.tabletLandscape(
+      style(
+        paddingBottom(10 rem)
+      )
+    ),
+
+    MediaQueries.phone(
+      style(
+        paddingBottom(5 rem)
+      )
+    )
   )
 
   val demoDescription = style(
@@ -359,5 +411,39 @@ object HomepageStyles extends StyleSheet.Inline {
     )
   )
 
+  val sectionError = style(
+    sectionIntro,
+    height :=! s"calc(100vh - 200px)",
 
+    MediaQueries.tabletPortrait(
+      style(
+        paddingTop(80 px).important
+      )
+    )
+  )(Compose.trust)
+
+  val errorInner = style(
+    introInner,
+    top(50 %%)
+  )(Compose.trust)
+
+  val errorHead = style(
+    introHead,
+    margin(`0`),
+
+    &.after(
+      bottom(-110 px),
+
+      media.minHeight(1 px).maxHeight(850 px)(
+        bottom(-80 px)
+      ),
+
+      MediaQueries.tabletLandscape(
+        style(
+          bottom(-80 px)
+        )
+      )
+    )
+
+  )(Compose.trust)
 }

@@ -11,6 +11,12 @@ import scala.language.postfixOps
 object MediaQueries extends StyleSheet.Inline {
   import dsl._
 
+  def desktop(properties: StyleA) = style(
+    media.screen.minWidth(StyleConstants.MediaQueriesBounds.TabletLandscapeMax + 1 px) (
+      properties
+    )
+  )
+
   def tabletLandscape(properties: StyleA) = style(
     media.screen.minWidth(1 px).maxWidth(StyleConstants.MediaQueriesBounds.TabletLandscapeMax px) (
       properties

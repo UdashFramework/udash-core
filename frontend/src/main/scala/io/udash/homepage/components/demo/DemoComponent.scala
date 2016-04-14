@@ -1,14 +1,15 @@
 package io.udash.homepage.components.demo
 
-import io.udash.core.Window
+import io.udash.core.{DomWindow, Window}
 import io.udash.homepage.Context._
-import io.udash.homepage.IndexState
+import io.udash.homepage.{Context, ErrorState, IndexState, RoutingState}
 import io.udash.homepage.components.CodeBlock
 import io.udash.homepage.styles.constant.StyleConstants
 import io.udash.homepage.styles.partials.DemoStyles
 import io.udash.homepage.views.Image
 import io.udash.wrappers.jquery.scrollbar._
 import io.udash.properties.Property
+import io.udash.routing.StateChangeEvent
 import io.udash.view.Component
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -53,7 +54,6 @@ class DemoComponent(url: Property[String]) extends Component {
 
           initCustomScroll()
           js.Dynamic.global.Prism.highlightAll()
-
         })
   }
 

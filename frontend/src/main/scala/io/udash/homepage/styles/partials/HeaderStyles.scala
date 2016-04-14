@@ -141,13 +141,20 @@ object HeaderStyles extends StyleSheet.Inline {
     ),
 
     &.hover(
-      color.white,
-      cursor.pointer,
-      textDecoration := "none",
+      textDecoration := "none"
+    ),
 
-      &.after (
-        transformOrigin := "0 50%",
-        transform := "scaleX(1)"
+    MediaQueries.desktop(
+      style(
+        &.hover(
+          color.white,
+          cursor.pointer,
+
+          &.after (
+            transformOrigin := "0 50%",
+            transform := "scaleX(1)"
+          )
+        )
       )
     )
   )
@@ -184,9 +191,13 @@ object HeaderStyles extends StyleSheet.Inline {
       svgFill := c"#fff"
     ),
 
-    &.hover (
-      unsafeChild("svg") (
-        svgFill := StyleConstants.Colors.Red
+    MediaQueries.desktop(
+      style(
+        &.hover (
+          unsafeChild("svg") (
+            svgFill := StyleConstants.Colors.Red
+          )
+        )
       )
     )
   )
@@ -198,20 +209,24 @@ object HeaderStyles extends StyleSheet.Inline {
       svgFill := StyleConstants.Colors.Yellow
     ),
 
-    &.hover (
-      unsafeChild(s".${tooltip.htmlClass}")(
-        visibility.visible,
-        opacity(1)
-      ),
+    MediaQueries.desktop(
+      style(
+        &.hover (
+          unsafeChild(s".${tooltip.htmlClass}")(
+            visibility.visible,
+            opacity(1)
+          ),
 
-      unsafeChild(s".${tooltipTop.htmlClass}")(
-        transitionDelay(new FiniteDuration(0, TimeUnit.MILLISECONDS)),
-        transform := "scaleX(1)"
-      ),
+          unsafeChild(s".${tooltipTop.htmlClass}")(
+            transitionDelay(new FiniteDuration(0, TimeUnit.MILLISECONDS)),
+            transform := "scaleX(1)"
+          ),
 
-      unsafeChild(s".${tooltipTextInner.htmlClass}")(
-        transitionDelay(new FiniteDuration(350, TimeUnit.MILLISECONDS)),
-        transform := "translateY(0)"
+          unsafeChild(s".${tooltipTextInner.htmlClass}")(
+            transitionDelay(new FiniteDuration(350, TimeUnit.MILLISECONDS)),
+            transform := "translateY(0)"
+          )
+        )
       )
     )
   )

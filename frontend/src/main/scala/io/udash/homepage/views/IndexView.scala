@@ -57,7 +57,7 @@ private[views] object IndexView {
           span("Based on Scala.js")
         ),
         p(HomepageStyles.introHead)(
-          span("Udash is "), span(GlobalStyles.red)("Scala", br()),
+          span("Udash is a "), span(GlobalStyles.red)("Scala", br()),
           span("framework for building", br(), "beautiful and maintainable", br()),
           span(GlobalStyles.grey)("Web Applications")
         ),
