@@ -18,7 +18,7 @@ class RootView extends ViewContainer {
   import scalacss.ScalatagsCss._
   import scalatags.JsDom.all._
 
-  protected val child = div(GuideStyles.contentWrapper).render
+  protected val child = div().render
 
   private val content = div(
     GlobalStyles.render[TypedTag[HTMLStyleElement]],
@@ -28,14 +28,7 @@ class RootView extends ViewContainer {
     FooterStyles.render[TypedTag[HTMLStyleElement]],
 
     Header.getTemplate,
-    main(GuideStyles.main)(
-      div(GlobalStyles.body)(
-        div(GuideStyles.menuWrapper)(
-          GuideMenu().getTemplate
-        ),
-        child
-      )
-    ),
+    child,
     Footer.getTemplate
   ).render
 

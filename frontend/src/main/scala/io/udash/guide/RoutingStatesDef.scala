@@ -8,14 +8,16 @@ sealed abstract class RoutingState(val parentState: RoutingState) extends State 
 
 case object RootState extends RoutingState(null)
 
+case object ContentState extends RoutingState(RootState)
+
 case object ErrorState extends RoutingState(RootState)
 
-case object IntroState extends RoutingState(RootState)
+case object IntroState extends RoutingState(ContentState)
 
-case object FAQState extends RoutingState(RootState)
+case object FAQState extends RoutingState(ContentState)
 
 /** Bootstrapping chapters */
-case object BootstrappingState extends RoutingState(RootState)
+case object BootstrappingState extends RoutingState(ContentState)
 
 case object BootstrappingIntroState extends RoutingState(BootstrappingState)
 
@@ -27,10 +29,10 @@ case object BootstrappingBackendState extends RoutingState(BootstrappingState)
 
 case object BootstrappingFrontendState extends RoutingState(BootstrappingState)
 
-case object BootstrappingGeneratorsState extends RoutingState(RootState)
+case object BootstrappingGeneratorsState extends RoutingState(ContentState)
 
 /** Frontend chapters */
-case object FrontendState extends RoutingState(RootState)
+case object FrontendState extends RoutingState(ContentState)
 
 case object FrontendIntroState extends RoutingState(FrontendState)
 
@@ -47,7 +49,7 @@ case object FrontendBindingsState extends RoutingState(FrontendState)
 case object FrontendFormsState extends RoutingState(FrontendState)
 
 /** RPC communication chapters */
-case object RpcState extends RoutingState(RootState)
+case object RpcState extends RoutingState(ContentState)
 
 case object RpcIntroState extends RoutingState(RpcState)
 

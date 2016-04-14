@@ -274,4 +274,12 @@ object GlobalStyles extends StyleSheet.Inline {
   val noMargin = style(
     margin(`0`).important
   )
+
+  val red = style(
+    color(StyleConstants.Colors.Red).important
+  )
+
+  val grey = style(
+    color(StyleConstants.Colors.Grey).important
+  )
 }

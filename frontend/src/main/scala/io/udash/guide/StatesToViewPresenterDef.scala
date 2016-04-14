@@ -4,12 +4,13 @@ import io.udash._
 import io.udash.guide.views.bootstrapping.{BootstrappingFrontendViewPresenter, _}
 import io.udash.guide.views.frontend.{FrontendFormsViewPresenter, FrontendPropertiesViewPresenter, FrontendRoutingViewPresenter, FrontendTemplatesViewPresenter, _}
 import io.udash.guide.views.rpc.{RpcIntroViewPresenter, RpcServerClientViewPresenter, _}
-import io.udash.guide.views.{FAQViewPresenter, IntroViewPresenter, ErrorViewPresenter, RootViewPresenter}
+import io.udash.guide.views._
 
 class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
   def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
     state match {
       case RootState => RootViewPresenter
+      case ContentState => ContentViewPresenter
 
       case IntroState => IntroViewPresenter
 
