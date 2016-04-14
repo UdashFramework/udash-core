@@ -8,7 +8,7 @@ object Dependencies extends Build {
   val silencerVersion = "0.3"
   val avsCommonsVersion = "1.14.0"
 
-  val udashCoreVersion = "0.2.0-rc.1"
+  val udashCoreVersion = "0.2.0-rc.2"
 
   val atmoshereJSVersion = "2.3.0"
 

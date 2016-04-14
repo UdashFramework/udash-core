@@ -1,6 +1,6 @@
 name := "udash-rpc"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
+version in ThisBuild := "0.2.0-rc.2"
 scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
@@ -37,21 +37,13 @@ lazy val macros = project.in(file("macros"))
     )
   )
 
-def crossLibs(configuration: Configuration) = {
-  libraryDependencies ++= crossDeps.value.map(_ % configuration)
-}
-
-def crossTestLibs() = {
-  libraryDependencies ++= crossTestDeps.value
-}
-
 /** Cross project containing code compiled to both JS and JVM. */
 lazy val shared = crossProject.crossType(CrossType.Full).in(file("shared"))
   .jsConfigure(_.dependsOn(macros))
   .jvmConfigure(_.dependsOn(macros))
   .settings(commonSettings: _*).settings(
-    crossLibs(Provided),
-    crossTestLibs()
+    libraryDependencies ++= crossDeps.value,
+    libraryDependencies ++= crossTestDeps.value
   )
   .jsSettings(
     jsDependencies in Test += RuntimeDOM % Test,
@@ -70,8 +62,6 @@ lazy val sharedJS = shared.js
 lazy val backend = project.in(file("backend"))
   .dependsOn(sharedJVM % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    crossLibs(Compile),
-    crossTestLibs(),
     libraryDependencies ++= backendDeps.value,
     libraryDependencies ++= backendTestDeps.value
   )
@@ -80,12 +70,10 @@ lazy val backend = project.in(file("backend"))
 lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJS % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    crossLibs(Compile),
     libraryDependencies ++= frontendDeps.value,
     jsDependencies ++= frontendJsDeps.value,
     jsDependencies += RuntimeDOM % Test,
 
-    crossTestLibs(),
     requiresDOM in Test := true,
     persistLauncher in Test := false,
     scalaJSUseRhino in Test := false,
