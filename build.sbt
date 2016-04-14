@@ -1,6 +1,6 @@
 name := "udash-core"
 
-version in ThisBuild := "0.2.0-rc.1"
+version in ThisBuild := "0.2.0-rc.2"
 scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
@@ -36,21 +36,13 @@ lazy val macros = project.in(file("macros"))
     )
   )
 
-def crossLibs(configuration: Configuration) = {
-  libraryDependencies ++= crossDeps.value.map(_ % configuration)
-}
-
-def crossTestLibs() = {
-  libraryDependencies ++= crossTestDeps.value
-}
-
 /** Cross project containing code compiled to both JS and JVM. */
 lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
   .jsConfigure(_.dependsOn(macros))
   .jvmConfigure(_.dependsOn(macros))
   .settings(commonSettings: _*).settings(
-    crossLibs(Provided),
-    crossTestLibs()
+    libraryDependencies ++= crossDeps.value,
+    libraryDependencies ++= crossTestDeps.value
   )
 
 lazy val sharedJVM = shared.jvm
@@ -66,7 +58,6 @@ lazy val sharedJS = shared.js.enablePlugins(ScalaJSPlugin)
 lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
   .dependsOn(macros, sharedJS % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    crossLibs(Compile),
     emitSourceMaps in Compile := true,
     libraryDependencies ++= frontendDeps.value,
     jsDependencies += RuntimeDOM % Test,
@@ -78,7 +69,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
       if (isSnapshot.value) Def.task((packageJSDependencies in Compile).value) else Def.task((packageMinifiedJSDependencies in Compile).value)
     },
 
-    crossTestLibs(),
     requiresDOM in Test := true,
     persistLauncher in Test := false,
     scalaJSUseRhino in Test := false
