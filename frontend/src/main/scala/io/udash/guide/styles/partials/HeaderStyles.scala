@@ -16,9 +16,11 @@ object HeaderStyles extends StyleSheet.Inline {
   import dsl._
 
   val header = style(
+    position.relative,
     backgroundColor.black,
     height(StyleConstants.Sizes.HeaderHeight px),
     fontSize(1.6 rem),
+    zIndex(99),
 
     MediaQueries.tabletPortrait(
       style(
