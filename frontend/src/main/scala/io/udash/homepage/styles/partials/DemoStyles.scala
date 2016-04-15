@@ -231,7 +231,8 @@ object DemoStyles extends StyleSheet.Inline {
 
   val demoInlineField = style(
     display.tableCell,
-    height(34 px),
+    minHeight(34 px),
+    height(100 %%),
     padding(`0`, 1.3 rem),
     border.none,
     verticalAlign.middle,

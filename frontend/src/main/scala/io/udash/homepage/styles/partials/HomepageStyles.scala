@@ -29,6 +29,7 @@ object HomepageStyles extends StyleSheet.Inline {
     color.white,
     backgroundColor.black,
     backgroundImage := "url(assets/images/intro_bg.jpg)",
+    backgroundSize := "cover",
 
     media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
       height.auto,
