@@ -30,8 +30,6 @@ class RpcIntroTest extends SeleniumTest {
   def buttonTest(callDemo: WebElement): Unit = {
     for (i <- 1 to 3) {
       callDemo.click()
-      callDemo.isEnabled should be(false)
-      for (_ <- 1 to 10) callDemo.click()
       eventually {
         callDemo.isEnabled should be(true)
         callDemo.getText should be(s"Ping($i)")

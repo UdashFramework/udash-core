@@ -4,10 +4,10 @@ import sbt._
 object Dependencies extends Build {
 
   val versionOfScala = "2.11.8"
-  val jettyVersion = "9.3.7.v20160115"
+  val jettyVersion = "9.3.8.v20160314"
 
   val udashCoreVersion = "0.1.1"
-  val udashRpcVersion = "0.1.0"
+  val udashRpcVersion = "0.1.1"
   val udashJQueryVersion = "0.2.0"
 
 //  val scalaTagsVersion = "0.5.4-avs.1"

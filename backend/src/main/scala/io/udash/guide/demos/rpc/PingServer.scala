@@ -11,12 +11,10 @@ class PingServer(implicit clientId: ClientId) extends PingServerRPC {
   import io.udash.guide.Implicits._
 
   override def ping(id: Int): Unit = {
-    TimeUnit.SECONDS.sleep(1)
     ClientRPC(clientId).demos().pingDemo().pong(id)
   }
 
   override def fPing(id: Int): Future[Int] = {
-    TimeUnit.SECONDS.sleep(1)
     Future.successful(id)
   }
 }

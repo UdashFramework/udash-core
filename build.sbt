@@ -1,6 +1,6 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.1.0-SNAPSHOT"
+version in ThisBuild := "0.1.0"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
