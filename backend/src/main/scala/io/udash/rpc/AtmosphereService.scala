@@ -8,7 +8,7 @@ import io.udash.rpc.internals._
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr.{AtmosphereConfig, AtmosphereResource, AtmosphereResourceEvent, AtmosphereServletProcessor}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait AtmosphereServiceConfig[ServerRPCType] {
@@ -39,6 +39,7 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @tparam ServerRPCType Main server side RPC interface
   */
 class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType])
+                                      (implicit val executionContext: ExecutionContext)
   extends AtmosphereServletProcessor with LazyLogging {
 
   override def init(config: AtmosphereConfig): Unit =

@@ -1,6 +1,6 @@
 name := "udash-rpc"
 
-version in ThisBuild := "0.2.0-rc.1"
+version in ThisBuild := "0.2.0-SNAPSHOT"
 scalaVersion in ThisBuild := "2.11.8"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
