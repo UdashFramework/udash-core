@@ -26,24 +26,27 @@ class RpcInterfacesView extends View {
     ),
     ul(GuideStyles.defaultList)(
       li(i("RPC"), " - the RPC interface exposed by the server-side"),
-      li(i("ClientRPC"), " - the RPC interface exposed by the client-side")
+      li(i("Client RPC"), " - the RPC interface exposed by the client-side")
     ),
     p("Methods exposed by the RPC interface can be divided into three groups:"),
     ul(GuideStyles.defaultList)(
-      li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose those methods)"),
-      li(i("Fires"), " - methods with a return type ", i("Unit"), " there is no guarantee that your request will be received by a recipient"),
+      li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)"),
+      li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient"),
       li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network")
     ),
     p(
       "Both call and fire methods are asynchronous. Call will complete a returned Future when response is received. Fire is a ",
-      "\"fire&forget\" method, there is no acknowledgement thatthea request reached its recipient."
+      "\"fire&forget\" method, there is no acknowledgement that the request reached its recipient."
     ),
-    h3("server-side RPC interface"),
+    h3("Server-side RPC interface"),
     p("Let's take a look at the following example of the server-side RPC interface:"),
     CodeBlock(
-      """case class Record(i: Int, fuu: String)
+      """import com.avsystem.commons.rpc.RPC
         |
-        |trait ServerRPC extends RPC {
+        |case class Record(i: Int, fuu: String)
+        |
+        |@RPC
+        |trait ServerRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
         |  @RPCName("fireWithManyArgsLists")
@@ -53,7 +56,8 @@ class RpcInterfacesView extends View {
         |  def innerRpc(name: String): InnerRPC
         |}
         |
-        |trait InnerRPC extends RPC {
+        |@RPC
+        |trait InnerRPC {
         |  def innerFire(): Unit
         |  def innerCall(arg: Int): Future[String]
         |}""".stripMargin
@@ -84,34 +88,38 @@ class RpcInterfacesView extends View {
         |}""".stripMargin
     )(),
     p("Important: method call returning another RPC interface does not send anything over the network."),
-    h3("client-side RPC interface"),
+    h3("Client-side RPC interface"),
     p(
       "Client RPC interfaces are similar to the server ones, with one important difference - they cannot contain any ",
       i("call"), " methods. For example: "
     ),
     CodeBlock(
-      """case class Record(i: Int, fuu: String)
+      """import com.avsystem.commons.rpc.RPC
         |
-        |trait ClientRPC extends io.udash.rpc.ClientRPC {
+        |case class Record(i: Int, fuu: String)
+        |
+        |@RPC
+        |trait ClientRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
         |  @RPCName("fireWithManyArgsLists")
         |  def fireWithArgs(i: Int, s: String)(o: Option[Boolean]): Unit
         |  def fireWithCaseClass(r: Record): Unit
-        |  def innerRpc(name: String): InnerRPC
+        |  def innerRpc(name: String): ClientInnerRPC
         |}
         |
-        |trait InnerRPC extends ClientRPC {
+        |@RPC
+        |trait ClientInnerRPC {
         |  def innerFire(): Unit
         |}""".stripMargin
     )(),
     p(
-      "Notice that ", i("InnerRPC"), " is also ", i("ClientRPC"), ". It is impossible to return a standard ", i("RPC"),
-      " interface inside ", i("ClientRPC"), "."
+      "Notice that ", i("ClientInnerRPC"), " is also a client RPC interface. It is impossible to return a standard RPC ",
+      "interface inside client RPC."
     ),
     p(
-      "The ", i("ClientRPC"), " cannot contain ", i("call"), " methods, because it can broadcast to many clients. It is hard to decide ",
-      "when a broadcast call can be assumed as finished without any use case context."
+      "The client RPC cannot contain ", i("call"), " methods, because it can broadcast to many clients. It is hard to decide ",
+      "when a broadcasted call can be assumed as finished without any use case context."
     ),
     h2("RPC interfaces hierarchy"),
     p(
@@ -119,21 +127,27 @@ class RpcInterfacesView extends View {
       i("MainServerRPC"), " and one ", i("MainClientRPC"), ", which will give access to other service RPC interfaces."
     ),
     CodeBlock(
-      """trait MainServerRPC extends RPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait MainServerRPC {
         |  def auth(): AuthenticationRPC
         |  def newsletter(): NewsletterRPC
         |}
         |
-        |trait AuthenticationRPC extends io.udash.rpc.RPC {
+        |@RPC
+        |trait AuthenticationRPC {
         |  def login(username: String, password: String): Future[AuthToken]
         |}
         |
-        |trait NewsletterRPC extends io.udash.rpc.RPC {
+        |@RPC
+        |trait NewsletterRPC {
         |  def loadNews(limit: Int, skip: Int): Future[Seq[News]]
         |  def subscriptions(): NewsletterSubscriptionRPC
         |}
         |
-        |trait NewsletterSubscriptionRPC extends RPC {
+        |@RPC
+        |trait NewsletterSubscriptionRPC {
         |  def subscribe(): Unit
         |  def unsubscribe(reason: String): Unit
         |}""".stripMargin
@@ -148,17 +162,11 @@ class RpcInterfacesView extends View {
         |  // operations using NewsletterSubscriptionRPC...
         |}""".stripMargin
     )(),
-    h2("Serialization"),
-    p(
-      "Everything you send via RPC has to be serializable. Udash internally uses ",
-      a(href := References.upickleHomepage)("uPickle"), " library which supports serialization of basic Scala types out of the box. ",
-      "If you want to pass any custom data structure, you might be interested in ",
-      a(href := References.upickleCustomPicklersHomepage)("uPickle custom picklers"), "."
-    ),
     h2("What's next?"),
     p(
       "Now you know more about Udash RPC interfaces. You might also want to take a look at ",
-      a(href := RpcClientServerState.url)("Client ➔ Server"), " or ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication."
+      a(href := RpcClientServerState.url)("Client ➔ Server"), " & ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication or ",
+      "the ", a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
     )
   ).render
 

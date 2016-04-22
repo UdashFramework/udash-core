@@ -1,9 +1,10 @@
 package io.udash.guide.demos.rpc
 
-import io.udash.rpc.RPC
+import com.avsystem.commons.rpc.RPC
 
 import scala.concurrent.Future
 
-trait ClientIdServerRPC extends RPC {
+@RPC
+trait ClientIdServerRPC {
   def clientId(): Future[String]
 }

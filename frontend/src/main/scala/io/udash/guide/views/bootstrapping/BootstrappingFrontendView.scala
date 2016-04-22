@@ -139,9 +139,6 @@ class BootstrappingFrontendView extends View {
         |class NewsletterSubscribeView(model: ModelProperty[SubscribeModel],
         |                              presenter: NewsletterSubscribePresenter)
         |  extends View {
-        |
-        |  import io.udash.forms._
-        |  import io.udash.view.TagsBinding._
         |  import scalatags.JsDom.all._
         |
         |  /** Renders view HTML code */

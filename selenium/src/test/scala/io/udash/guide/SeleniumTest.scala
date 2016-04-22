@@ -16,6 +16,7 @@ trait ServerConfig {
   def createUrl(part: String): String
   def destroy(): Unit
 }
+
 class ExternalServerConfig(urlPrefix: String) extends ServerConfig {
   require(!urlPrefix.endsWith("/"))
 
@@ -27,10 +28,12 @@ class ExternalServerConfig(urlPrefix: String) extends ServerConfig {
   override def init(): Unit = {}
   override def destroy(): Unit = {}
 }
+
 class InternalServerConfig extends ServerConfig {
   val guideCtx = Launcher.createApplicationContext()
 
-  override def init(): Unit = guideCtx.getBean(classOf[ApplicationServer]).start()
+  override def init(): Unit =
+    guideCtx.getBean(classOf[ApplicationServer]).start()
 
   override def destroy(): Unit = {
     guideCtx.getBean(classOf[ApplicationServer]).stop()

@@ -46,7 +46,7 @@ class BootstrappingBackendView extends View {
       """object ClientRPC {
         |  def apply(target: ClientRPCTarget)
         |           (implicit ec: ExecutionContext): MainClientRPC =
-        |    new DefaultClientRPC(target, AsRealRPC[MainClientRPC]).get
+        |    new DefaultClientRPC[MainClientRPC](target).get
         |}""".stripMargin)(),
     h3("Application server"),
     p(
@@ -72,7 +72,9 @@ class BootstrappingBackendView extends View {
         |
         |  private def createAtmosphereHolder() = {
         |    val config = new DefaultAtmosphereServiceConfig((clientId) =>
-        |      new ExposedRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId))
+        |      new DefaultExposesServerRPC[MainServerRPC](
+        |        new ExposedRpcInterfaces()(clientId)
+        |      )
         |    )
         |    val framework = new DefaultAtmosphereFramework(config)
         |

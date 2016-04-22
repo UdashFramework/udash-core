@@ -1,7 +1,8 @@
 package io.udash.guide.demos.rpc
 
-import io.udash.rpc.ClientRPC
+import com.avsystem.commons.rpc.RPC
 
-trait NotificationsClientRPC extends ClientRPC {
+@RPC
+trait NotificationsClientRPC {
   def notify(msg: String): Unit
 }

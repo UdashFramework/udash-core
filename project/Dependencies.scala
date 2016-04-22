@@ -6,9 +6,9 @@ object Dependencies extends Build {
   val versionOfScala = "2.11.8"
   val jettyVersion = "9.3.8.v20160314"
 
-  val udashCoreVersion = "0.1.1"
-  val udashRpcVersion = "0.1.1"
-  val udashJQueryVersion = "0.2.0"
+  val udashCoreVersion = "0.2.0-rc.2"
+  val udashRpcVersion = "0.2.0-rc.2"
+  val udashJQueryVersion = "1.0.0-rc.2"
 
 //  val scalaTagsVersion = "0.5.4-avs.1"
   val scalaCssVersion = "0.4.1"
@@ -16,9 +16,9 @@ object Dependencies extends Build {
   val scalaLoggingVersion = "3.1.0"
   val logbackVersion = "1.1.3"
 
-  val avsystemCommonsVersion = "1.13.1"
+  val avsystemCommonsVersion = "1.14.0"
   val typesafeConfigVersion = "1.3.0"
-  val springVersion = "4.2.2.RELEASE"
+  val springVersion = "4.2.5.RELEASE"
 
   val bootstrapVersion = "3.3.1-1"
 
@@ -32,8 +32,9 @@ object Dependencies extends Build {
   ))
 
   val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashCoreVersion exclude("com.lihaoyi", "scalatags_sjs0.6_2.11"),
+    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
     "io.udash" %%% "udash-rpc-frontend" % udashRpcVersion,
+    "io.udash" %%% "udash-jquery" % udashJQueryVersion,
 //    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion exclude("org.scala-js", "scalajs-dom_sjs0.6_2.11"),
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
     "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion

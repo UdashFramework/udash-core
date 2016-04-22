@@ -1,9 +1,10 @@
 package io.udash.guide.demos
 
+import com.avsystem.commons.rpc.RPC
 import io.udash.guide.demos.rpc.{NotificationsClientRPC, PingClientRPC}
-import io.udash.rpc.ClientRPC
 
-trait DemosClientRPC extends ClientRPC {
+@RPC
+trait DemosClientRPC {
   def pingDemo(): PingClientRPC
   def notificationsDemo(): NotificationsClientRPC
 }

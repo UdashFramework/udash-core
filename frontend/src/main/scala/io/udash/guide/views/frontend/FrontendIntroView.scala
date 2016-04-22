@@ -117,8 +117,6 @@ class FrontendIntroView extends View {
         |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
         |                          presenter: IntroFormDemoPresenter) {
         |    import Context._
-        |    import io.udash.view.TagsBinding._
-        |    import io.udash.forms._
         |
         |    import JsDom.all._
         |    import scalacss.Defaults._

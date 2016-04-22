@@ -28,6 +28,7 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/frontend/forms" => FrontendFormsState
     case "/rpc" => RpcIntroState
     case "/rpc/interfaces" => RpcInterfacesState
+    case "/rpc/serialization" => RpcSerializationState
     case "/rpc/client-server" => RpcClientServerState
     case "/rpc/server-client" => RpcServerClientState
     case "/faq" => FAQState

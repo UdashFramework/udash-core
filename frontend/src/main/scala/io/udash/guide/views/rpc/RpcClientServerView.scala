@@ -76,11 +76,11 @@ class RpcClientServerView extends View {
     )(),
     p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), "."),
     CodeBlock(
-      """class BasicAtmosphereServiceConfig[ServerRPCType <: RPC]
-        |  (localRpc: ExposedRPC[ServerRPCType])
+      """class BasicAtmosphereServiceConfig[ServerRPCType]
+        |  (localRpc: ExposesServerRPC[ServerRPCType])
         |  extends AtmosphereServiceConfig[ServerRPCType] {
         |
-        |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
+        |  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
         |    localRpc
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = {}
@@ -93,7 +93,7 @@ class RpcClientServerView extends View {
     p("Now you can use it in the following way:"),
     CodeBlock(
       """val config = new BasicAtmosphereServiceConfig(
-        |  new ExposedRPC[MainServerRPC](MainRpcEndpoint)
+        |  new DefaultExposesServerRPC[MainServerRPC](MainRpcEndpoint)
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
@@ -114,16 +114,16 @@ class RpcClientServerView extends View {
       " implementation will be more complicated."
     ),
     CodeBlock(
-      """class DefaultAtmosphereServiceConfig[ServerRPCType <: RPC]
-        |  (localRpc: (ClientId) => ExposedRPC[ServerRPCType])
+      """class DefaultAtmosphereServiceConfig[ServerRPCType]
+        |  (localRpc: (ClientId) => ExposesServerRPC[ServerRPCType])
         |  extends AtmosphereServiceConfig[ServerRPCType] {
         |
         |  private val RPCName = "RPC"
         |  private val connections = new DefaultAtmosphereResourceSessionFactory
         |
-        |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
+        |  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
         |    connections.getSession(resource).getAttribute(RPCName)
-        |      .asInstanceOf[ExposedRPC[ServerRPCType]]
+        |      .asInstanceOf[ExposesServerRPC[ServerRPCType]]
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
         |    val session = connections.getSession(resource)
@@ -144,7 +144,9 @@ class RpcClientServerView extends View {
     ),
     CodeBlock(
       """val config = new DefaultAtmosphereServiceConfig(
-        |  new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint()(clientId))
+        |  new DefaultExposesServerRPC[MainServerRPC](
+        |    clientId => MainRpcEndpoint()(clientId)
+        |  )
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
@@ -160,7 +162,7 @@ class RpcClientServerView extends View {
     ),
     CodeBlock(
       """class MainRpcEndpoint
-        |  (primeService: PrimeService)(implicit val clientId: io.udash.rpc.ClientId)
+        |  (primeService: PrimeService)(implicit val clientId: ClientId)
         |  extends MainServerRpc {
         |
         |  def isPrime(n: BigInt): Future[Boolean] = {
@@ -197,7 +199,9 @@ class RpcClientServerView extends View {
     CodeBlock(
       """val service = new PrimeService
         |val config = new DefaultAtmosphereServiceConfig(
-        |  new ExposedRPC[MainServerRPC](clientId => MainRpcEndpoint(service)(clientId))
+        |  new DefaultExposesServerRPC[MainServerRPC](
+        |    clientId => MainRpcEndpoint(service)(clientId)
+        |  )
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(),
@@ -217,13 +221,13 @@ class RpcClientServerView extends View {
         |
         |class MainRpcEndpoint
         |  (primeService: PrimeService)
-        |  (implicit val clientId: io.udash.rpc.ClientId, val user: UserContext)
+        |  (implicit val clientId: ClientId, val user: UserContext)
         |  extends MainServerRpc {
         |
-        |  val isPrimePermission: PermissionId = ???
+        |  val primeServicePermission: PermissionId = ???
         |
         |  def isPrime(n: BigInt): Future[Boolean] = {
-        |    if (!user.hasPermission(isPrimePermission)) Future.failure(/** An unauthorized exception */)
+        |    if (!user.hasPermission(primeServicePermission)) Future.failure(/** An unauthorized exception */)
         |    else primeService.isPrime(n)
         |  }
         |}
@@ -254,8 +258,8 @@ class RpcClientServerView extends View {
     ),
     p("Now it is time to prepare ", i("AtmosphereServiceConfig"), ":"),
     CodeBlock(
-      """class AuthAtmosphereServiceConfig[ServerRPCType <: RPC](
-        |    localRpc: (ClientId, UserContext) => ExposedRPC[ServerRPCType],
+      """class AuthAtmosphereServiceConfig[ServerRPCType](
+        |    localRpc: (ClientId, UserContext) => DefaultExposesServerRPC[ServerRPCType],
         |    auth: AuthService
         |  ) extends AtmosphereServiceConfig[ServerRPCType] {
         |
@@ -263,9 +267,9 @@ class RpcClientServerView extends View {
         |  private val UserContextName = "UserContext"
         |  private val connections = new DefaultAtmosphereResourceSessionFactory
         |
-        |  override def resolveRpc(resource: AtmosphereResource): ExposedRPC[ServerRPCType] =
+        |  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
         |    connections.getSession(resource).getAttribute(RPCName)
-        |      .asInstanceOf[ExposedRPC[ServerRPCType]]
+        |      .asInstanceOf[ExposesServerRPC[ServerRPCType]]
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
         |    val session = connections.getSession(resource)
@@ -314,7 +318,7 @@ class RpcClientServerView extends View {
       """val service = new PrimeService
         |val auth = new AuthService
         |val config = new DefaultAtmosphereServiceConfig(
-        |  new ExposedRPC[MainServerRPC](
+        |  new DefaultExposesServerRPC[MainServerRPC](
         |    (clientId, user) => MainRpcEndpoint(service)(clientId, user)
         |  ), auth
         |)

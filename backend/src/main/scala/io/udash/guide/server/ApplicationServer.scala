@@ -30,7 +30,9 @@ class ApplicationServer(val port: Int, resourceBase: String) {
   contextHandler.addServlet(appHolder, "/*")
 
   private val atmosphereHolder = {
-    val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) => new ExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId)))
+    val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) =>
+      new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId))
+    )
     val framework = new DefaultAtmosphereFramework(config)
 
     framework.init()

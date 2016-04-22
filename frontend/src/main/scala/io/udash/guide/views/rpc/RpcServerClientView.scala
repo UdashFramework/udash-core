@@ -50,9 +50,9 @@ class RpcServerClientView extends View {
     ),
     CodeBlock(
       """object ClientRPC {
-        |  def apply(target: io.udash.rpc.ClientRPCTarget)
+        |  def apply(target: ClientRPCTarget)
         |           (implicit ec: ExecutionContext): MainClientRPC =
-        |    new io.udash.rpc.DefaultClientRPC(target, AsRealRPC[MainClientRPC]).get
+        |    new DefaultClientRPC[MainClientRPC](target).get
         |}""".stripMargin
     )(),
     p("Now you can call a client method in the following way:"),
@@ -62,20 +62,24 @@ class RpcServerClientView extends View {
     )(),
     h3("Broadcasting messages"),
     p("With the above ", i("ClientRPC"), " wrapper, it is easy to broadcast the method call to all active connections:"),
-    CodeBlock("""ClientRPC(io.udash.rpc.AllClients).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(AllClients).methodFromMainClientRPC()""")(),
     h3("Message to concrete client"),
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
-    CodeBlock("""ClientRPC(io.udash.rpc.ClientId(???)).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(),
     h2("Notifications example"),
     new NotificationsDemoComponent,
     p("The code of the example above:"),
     CodeBlock(
-      """/** Interfaces from the shared module */
-        |trait NotificationsClientRPC extends ClientRPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |/** Interfaces from the shared module */
+        |@RPC
+        |trait NotificationsClientRPC {
         |  def notify(msg: String): Unit
         |}
         |
-        |trait NotificationsServerRPC extends RPC {
+        |@RPC
+        |trait NotificationsServerRPC {
         |  def register(): Future[Unit]
         |  def unregister(): Future[Unit]
         |}""".stripMargin
@@ -110,7 +114,7 @@ class RpcServerClientView extends View {
         |class NotificationsServer(implicit clientId: ClientId)
         |  extends NotificationsServerRPC {
         |
-        |  import io.udash.guide.Implicits.backendExecutionContext
+        |  import Implicits.backendExecutionContext
         |
         |  override def register(): Future[Unit] =
         |    Future.successful(NotificationsService.register)
@@ -120,7 +124,7 @@ class RpcServerClientView extends View {
         |}
         |
         |object NotificationsService {
-        |  import io.udash.guide.Implicits.backendExecutionContext
+        |  import Implicits.backendExecutionContext
         |
         |  private val clients = scala.collection.mutable.ArrayBuffer[ClientId]()
         |
@@ -151,7 +155,7 @@ class RpcServerClientView extends View {
     CodeBlock("NotificationsClient.registerListener((msg: String) => println(msg))")(),
     h2("What's next?"),
     p(
-      "You may find the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter interesting later on. "
+      "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "
     )
   ).render
 

@@ -44,7 +44,10 @@ class RpcIntroView extends View {
     new PingPongCallDemoComponent,
     p("The implementation is really simple. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """trait PingPongServerRPC extends RPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait PingPongServerRPC {
         |  def fPing(id: Int): Future[Int]
         |}""".stripMargin
     )(),
@@ -69,13 +72,19 @@ class RpcIntroView extends View {
     new PingPongPushDemoComponent,
     p("This implementation is only a little more complicated. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """trait PingPongServerRPC extends RPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait PingPongServerRPC {
         |  def ping(id: Int): Unit
         |}""".stripMargin
     )(),
     p("In the client RPC interface:"),
     CodeBlock(
-      """trait PingPongClientRPC extends ClientRPC {
+      """import com.avsystem.commons.rpc.RPC
+        |
+        |@RPC
+        |trait PingPongClientRPC {
         |  def pong(id: Int): Unit
         |}""".stripMargin
     )(),
@@ -92,9 +101,8 @@ class RpcIntroView extends View {
     p("There is only the client-side method implementation left:"),
     CodeBlock(
       """class PingPongPushEndpoint extends PingPongClientRPC {
-        |  override def pong(id: Int): Unit = {
+        |  override def pong(id: Int): Unit =
         |    println(s"Pong($id)")
-        |  }
         |}""".stripMargin
     )(),
     p("Now you can call it:"),

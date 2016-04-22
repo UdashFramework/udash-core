@@ -26,7 +26,7 @@ class FrontendBindingsView extends View {
     ),
     p("Udash provides many ways to bind properties to Scalatags templates. To use them you have to add this import in your code:"),
     CodeBlock(
-      """import io.udash.view.TagsBinding._""".stripMargin
+      """import io.udash._""".stripMargin
     )(),
     p("Let's briefly introduce all these methods:"),
     ul(GuideStyles.defaultList)(
@@ -79,8 +79,8 @@ class FrontendBindingsView extends View {
         |  produce(integers,
         |    (seq: Seq[Property[Int]]) =>
         |      span(seq.map(p => span(id := p.hashCode())(s"${p.get}, ")):_*).render,
-        |    (patch: Patch[Property[Int]], el: JQuery) => {
-        |      val insertBefore = el.children().eq(patch.idx)
+        |    (patch: Patch[Property[Int]], el: Element) => {
+        |      val insertBefore = jQ(el).children().eq(patch.idx)
         |      patch.added.foreach(p =>
         |        jQ(span(id := p.hashCode())(s"${p.get}, ").render)
         |          .insertBefore(insertBefore)

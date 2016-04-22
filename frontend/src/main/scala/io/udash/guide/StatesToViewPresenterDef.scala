@@ -34,6 +34,7 @@ class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
       case RpcState => RpcViewPresenter
       case RpcIntroState => RpcIntroViewPresenter
       case RpcInterfacesState => RpcInterfacesViewPresenter
+      case RpcSerializationState => RpcSerializationViewPresenter
       case RpcClientServerState => RpcClientServerViewPresenter
       case RpcServerClientState => RpcServerClientViewPresenter
 

@@ -71,7 +71,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
     )(),
     p(i("RoutingRegistry"), " is used to create a new application state on an URL change. For example:"),
     CodeBlock(
-      """class RoutingRegistryDef extends io.udash.core.RoutingRegistry[RoutingState] {
+      """class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
         |  def matchUrl(url: Url): RoutingState = {
         |    url2State.applyOrElse(url.value.stripSuffix("/"), (x: String) => ErrorState)
         |  }

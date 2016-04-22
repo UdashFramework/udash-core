@@ -42,7 +42,8 @@ object Context {
       MenuLink("Introduction", RpcIntroState),
       MenuLink("Interfaces", RpcInterfacesState),
       MenuLink("Client ➔ Server", RpcClientServerState),
-      MenuLink("Server ➔ Client", RpcServerClientState)
+      MenuLink("Server ➔ Client", RpcServerClientState),
+      MenuLink("Serialization", RpcSerializationState)
     ))/*,
     MenuLink("FAQ", FAQState)*/
   )
