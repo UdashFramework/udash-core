@@ -21,7 +21,6 @@ private[rpc] object BroadcastManager extends LazyLogging {
 
     val clientBroadcaster = factory.lookup[Broadcaster](clientPath(clientId), true)
     clientBroadcaster.addAtmosphereResource(resource)
-    clientBroadcaster.setBroadcasterLifeCyclePolicy(BroadcasterLifeCyclePolicy.EMPTY_DESTROY)
   }
 
   def sendToClient(clientId: String, msg: String): Unit = {

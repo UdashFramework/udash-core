@@ -10,6 +10,8 @@ import org.atmosphere.cpr._
 
 import scala.util.{Failure, Success}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class MockablePrintWriter extends PrintWriter(new java.io.CharArrayWriter())
 
 class MockableAtmosphereConfig extends AtmosphereConfig(null)
@@ -91,7 +93,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
       (config.resolveRpc _).expects(resource).once().returns(rpc)
       (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
 
@@ -136,7 +138,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
       (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseFailure"))).once()
       (config.resolveRpc _).expects(resource).once().returns(rpc)
       (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
@@ -181,7 +183,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
       (config.filters _).expects().returns(Seq())
       (config.resolveRpc _).expects(resource).returns(rpc)
 
@@ -227,7 +229,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
       (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseSuccess"))).once()
       (config.filters _).expects().returns(Seq())
       (config.resolveRpc _).expects(resource).returns(rpc)
@@ -275,7 +277,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
       (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseFailure"))).once()
       (config.filters _).expects().returns(Seq())
       (config.resolveRpc _).expects(resource).returns(rpc)
@@ -504,7 +506,7 @@ class AtmosphereServiceTest extends UdashBackendTest {
       (config.initRpc _).expects(resource).once()
       (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/sseUuid123", *).atLeastOnce().returns(broadcaster)
       (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).once()
+      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
 
       atm.init(atmConfig)
       atm.onRequest(resource)
