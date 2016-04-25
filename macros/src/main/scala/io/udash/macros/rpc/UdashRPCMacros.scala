@@ -16,7 +16,7 @@ class UdashRPCMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     val (_, functions, _) = proxyableMethods(rpcTpe)
 
     if (functions.nonEmpty)
-      abort(s"Client RPC interface can not contain functions, $rpcTpe is.")
+      abort(s"Client RPC interfaces cannot contain functions, $rpcTpe does.")
 
     q"""new $AsRawClientRPCCls"""
   }
@@ -26,7 +26,7 @@ class UdashRPCMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     val (_, functions, _) = proxyableMethods(rpcTpe)
 
     if (functions.nonEmpty)
-      abort(s"Client RPC interface can not contain functions, $rpcTpe is.")
+      abort(s"Client RPC interfaces cannot contain functions, $rpcTpe does.")
 
     q"""new $AsRealClientRPCCls"""
   }
