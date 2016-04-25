@@ -2,6 +2,7 @@ package io.udash.guide.views
 
 object References {
   val udashGeneratorDownload = "https://github.com/UdashFramework/udash-generator/releases/download/v0.1.0/udash-generator-0.1.0.zip"
+  val udashjQueryWrapperRepo = "https://github.com/UdashFramework/scala-js-jquery"
 
   val avScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"
   val bootstrapHomepage = "http://getbootstrap.com/"

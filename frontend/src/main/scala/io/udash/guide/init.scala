@@ -44,6 +44,10 @@ object Context {
       MenuLink("Client ➔ Server", RpcClientServerState),
       MenuLink("Server ➔ Client", RpcServerClientState),
       MenuLink("Serialization", RpcSerializationState)
+    )),
+    MenuContainer("Extensions", Seq(
+//      MenuLink("Internationalization", RpcInterfacesState),
+      MenuLink("jQuery wrapper", JQueryExtState)
     ))/*,
     MenuLink("FAQ", FAQState)*/
   )
