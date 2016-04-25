@@ -161,7 +161,7 @@ class BootstrappingFrontendView extends View {
       "The above example shows simple View, Presenter and ViewPresenter implementations. ",
       ul(GuideStyles.defaultList)(
         li(
-          i("SubscribeModel"), " is a model trait, which is used to create shared ", i("ModelProperty"), ". ",
+          i("SubscribeModel"), " is a model trait witch is used to create shared ", i("ModelProperty"), ". ",
           a(href := FrontendPropertiesState.url)("Properties in Udash"), " are described in other part of this guide. "
         ),
         li(

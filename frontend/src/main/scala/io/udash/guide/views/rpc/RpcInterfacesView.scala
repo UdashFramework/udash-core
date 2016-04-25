@@ -124,7 +124,7 @@ class RpcInterfacesView extends View {
     h2("RPC interfaces hierarchy"),
     p(
       "The Udash RPC system makes creating RPC interfaces hierarchy easy. Inside the application you can create one ",
-      i("MainServerRPC"), " and one ", i("MainClientRPC"), ", which will give access to other service RPC interfaces."
+      i("MainServerRPC"), " and one ", i("MainClientRPC"), " witch will give access to other service RPC interfaces."
     ),
     CodeBlock(
       """import com.avsystem.commons.rpc.RPC

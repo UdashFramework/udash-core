@@ -19,12 +19,6 @@ object GenCodecServerRPC {
 
 
   import com.avsystem.commons.serialization.GenCodec
-  object Fruit {
-    implicit val fruitGenCodec = GenCodec.auto[Fruit]
-  }
-  object DemoCaseClass {
-    implicit val DemoCaseClassCodec = GenCodec.auto[DemoCaseClass]
-  }
   object DemoClass {
     implicit val DemoClassCodec = new GenCodec[DemoClass] {
       override def read(input: Input): DemoClass = {

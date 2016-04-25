@@ -39,8 +39,7 @@ class BootstrappingSBTView extends View {
            |  // We are going to use Jetty as webserver in this guide
            |  val jettyVersion = "${Versions.jettyVersion}"
            |
-           |  val udashCoreVersion = "${Versions.udashCoreVersion}"
-           |  val udashRpcVersion = "${Versions.udashRpcVersion}"
+           |  val udashVersion = "${Versions.udashVersion}"
            |
            |  val bootstrapVersion = "3.3.1-1"
            |
@@ -50,14 +49,14 @@ class BootstrappingSBTView extends View {
            |  // Dependencies for both frontend and backend
            |  // Those have to be cross-compilable
            |  val crossDeps = Def.setting(Seq(
-           |    "io.udash" % "udash-core-shared" % udashCoreVersion,
-           |    "io.udash" % "udash-rpc-shared" % udashRpcVersion
+           |    "io.udash" %%% "udash-core-shared" % udashVersion,
+           |    "io.udash" %%% "udash-rpc-shared" % udashVersion
            |  ))
            |
            |  // Dependencies compiled to JavaScript code
            |  val frontendDeps = Def.setting(Seq(
-           |    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
-           |    "io.udash" %%% "udash-rpc-frontend" % udashRpcVersion
+           |    "io.udash" %%% "udash-core-frontend" % udashVersion,
+           |    "io.udash" %%% "udash-rpc-frontend" % udashVersion
            |  ))
            |
            |  // JavaScript libraries dependencies
@@ -69,7 +68,7 @@ class BootstrappingSBTView extends View {
            |
            |  // Dependencies for JVM part of code
            |  val backendDeps = Def.setting(Seq(
-           |    "io.udash" % "udash-rpc-backend" % udashRpcVersion,
+           |    "io.udash" %% "udash-rpc-backend" % udashVersion,
            |
            |    "org.eclipse.jetty" % "jetty-server" % jettyVersion,
            |    "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion

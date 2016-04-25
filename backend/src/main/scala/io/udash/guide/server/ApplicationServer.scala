@@ -9,6 +9,7 @@ import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
 class ApplicationServer(val port: Int, resourceBase: String) {
+  import io.udash.guide.Implicits._
   private val server = new Server(port)
   private val contextHandler = new ServletContextHandler
 

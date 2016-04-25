@@ -46,7 +46,7 @@ object Context {
       MenuLink("Serialization", RpcSerializationState)
     )),
     MenuContainer("Extensions", Seq(
-//      MenuLink("Internationalization", RpcInterfacesState),
+      MenuLink("Internationalization", I18NExtState),
       MenuLink("jQuery wrapper", JQueryExtState)
     ))/*,
     MenuLink("FAQ", FAQState)*/

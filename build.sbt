@@ -3,7 +3,6 @@ name := "udash-guide"
 version in ThisBuild := "0.2.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
-crossPaths in ThisBuild := false
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
   "-deprecation",
@@ -72,12 +71,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
     libraryDependencies ++= frontendDeps.value,
     jsDependencies ++= frontendJSDeps.value,
     persistLauncher in Compile := true,
-
-    unmanagedJars in Compile ++= {
-      val base = baseDirectory.value / "libs"
-      val customJars = (base ** "*.jar")
-      customJars.classpath
-    },
 
     compileStatics := {
       IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / StaticFilesDir / "WebContent/assets/fonts")

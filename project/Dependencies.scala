@@ -6,11 +6,10 @@ object Dependencies extends Build {
   val versionOfScala = "2.11.8"
   val jettyVersion = "9.3.8.v20160314"
 
-  val udashCoreVersion = "0.2.0-rc.2"
-  val udashRpcVersion = "0.2.0-rc.2"
+  val udashVersion = "0.2.0"
   val udashJQueryVersion = "1.0.0-rc.2"
 
-//  val scalaTagsVersion = "0.5.4-avs.1"
+  val scalaTagsVersion = "0.5.5"
   val scalaCssVersion = "0.4.1"
 
   val scalaLoggingVersion = "3.1.0"
@@ -27,15 +26,17 @@ object Dependencies extends Build {
   val scalamockVersion = "3.2.2"
 
   val crossDeps = Def.setting(Seq(
-    "io.udash" % "udash-core-shared" % udashCoreVersion,
-    "io.udash" % "udash-rpc-shared" % udashRpcVersion
+    "io.udash" %%% "udash-core-shared" % udashVersion exclude("com.lihaoyi", "scalatags_2.11"),
+    "io.udash" %%% "udash-rpc-shared" % udashVersion,
+    "io.udash" %%% "udash-i18n-shared" % udashVersion,
+    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
-    "io.udash" %%% "udash-rpc-frontend" % udashRpcVersion,
+    "io.udash" %%% "udash-core-frontend" % udashVersion,
+    "io.udash" %%% "udash-rpc-frontend" % udashVersion,
+    "io.udash" %%% "udash-i18n-frontend" % udashVersion,
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
-//    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion exclude("org.scala-js", "scalajs-dom_sjs0.6_2.11"),
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
     "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion
   ))
@@ -45,7 +46,8 @@ object Dependencies extends Build {
   ))
 
   val backendDeps = Def.setting(Seq(
-    "io.udash" % "udash-rpc-backend" % udashRpcVersion,
+    "io.udash" %% "udash-rpc-backend" % udashVersion,
+    "io.udash" %% "udash-i18n-backend" % udashVersion,
 
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,

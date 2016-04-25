@@ -42,7 +42,7 @@ class FrontendMVPView extends View {
     h3("ViewPresenter"),
     p(
       "The ViewPresenter responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",
-      "If you want to create a static view, then you can use ", i("DefaultViewPresenterFactory"), ", which ",
+      "If you want to create a static view, then you can use ", i("DefaultViewPresenterFactory"), " witch ",
       "will create ", i("EmptyPresenter"), " for your view."
     ),
     h3("Model"),

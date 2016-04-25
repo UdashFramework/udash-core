@@ -75,7 +75,7 @@ class JQueryExtView extends View {
       "they create new object every time."
     ),
     h2("jQuery callbacks"),
-    p("The wrapper provides alse typed API for the jQuery callbacks mechanism: "),
+    p("The wrapper provides also typed API for the jQuery callbacks mechanism: "),
     CodeBlock(
       s"""val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
          |callbacks.add((t: (Int, Int)) => {
@@ -105,7 +105,7 @@ class JQueryExtView extends View {
     h2("What's next?"),
     p(
       "You can find more information on the wrapper ", a(href := References.udashjQueryWrapperRepo)("GitHub repository"), ". ",
-      "It also contains an example application, which presents more ways of working with this wrapper."
+      "It also contains an example application witch presents more ways of working with this wrapper."
     )
   ).render
 
