@@ -13,7 +13,7 @@ import scala.util.Try
 /**
   * TranslationProvider dedicated to applications using RPC system.
   * @param translationsEndpoint RPC endpoint serving translations.
-  * @param cache Optional [[org.scalajs.dom.ext.Storage]], it will be used as translations cache.
+  * @param cache Optional `org.scalajs.dom.ext.Storage`, it will be used as translations cache.
   * @param ttl Time period between translations refresh, if using `cache`.
   * @param missingTranslationError This text will be used in place of missing translations.
   */

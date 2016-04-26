@@ -1,7 +1,7 @@
 package io.udash.i18n
 import scala.concurrent.{ExecutionContext, Future}
 
-/** Default implementation of [[io.udash.i18n.RemoteTranslationRPC]]. */
+/** Default implementation of `io.udash.i18n.RemoteTranslationRPC`. */
 class TranslationRPCEndpoint(provider: TranslationTemplatesProvider)(implicit ec: ExecutionContext) extends RemoteTranslationRPC {
   override def loadTemplateForLang(lang: Lang, key: String): Future[String] = Future {
     provider.template(key)(lang)

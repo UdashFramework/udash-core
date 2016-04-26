@@ -4,7 +4,7 @@ import java.{util => ju}
 
 import scala.collection.mutable
 
-/** Loads translations from provided [[java.util.ResourceBundle]]s. */
+/** Loads translations from provided `java.util.ResourceBundles`. */
 class ResourceBundlesTranslationTemplatesProvider(bundles: Map[Lang, Seq[ju.ResourceBundle]]) extends TranslationTemplatesProvider {
   private val cache: mutable.Map[Lang, Bundle] = mutable.Map.empty
 

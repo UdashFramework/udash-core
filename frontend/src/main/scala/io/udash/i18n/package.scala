@@ -38,7 +38,7 @@ package object i18n {
     new AttrTranslationBinding(translation, attr)
 
   /**
-    * Binds translated string in DOM element attribute  and updates it when application language changes.
+    * Binds translated string in DOM element attribute and updates it when application language changes.
     * @param key TranslationKey which will be used in order to get text.
     * @param translator Should apply any needed arguments to TranslationKey and create `Future[Translated]`.
     * @param attr Attribute name which gonna be updated when `translation` text become ready.

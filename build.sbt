@@ -1,6 +1,6 @@
 name := "udash-i18n"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
+version in ThisBuild := "0.2.0-rc.1"
 scalaVersion in ThisBuild := "2.11.7"
 organization in ThisBuild := "io.udash"
 crossPaths in ThisBuild := false
