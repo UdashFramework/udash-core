@@ -2,12 +2,12 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.EscapeUtils
-import io.udash.testing.UdashRPCSharedTest
+import io.udash.testing.UdashSharedTest
 
 import scala.language.higherKinds
 import scala.util.Random
 
-trait RpcMessagesTestScenarios extends UdashRPCSharedTest {
+trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   def tests(RPC: UdashRPCFramework) = {
     import RPC._
 

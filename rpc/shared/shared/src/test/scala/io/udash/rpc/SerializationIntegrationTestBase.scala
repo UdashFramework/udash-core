@@ -1,11 +1,11 @@
 package io.udash.rpc
 
-import io.udash.testing.UdashRPCSharedTest
+import io.udash.testing.UdashSharedTest
 
 import scala.language.higherKinds
 import scala.util.Random
 
-class SerializationIntegrationTestBase extends UdashRPCSharedTest {
+class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
   val repeats = 1000
 
   def tests(writer: UdashRPCFramework, reader: UdashRPCFramework) = {

@@ -7,6 +7,8 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 class TranslationKeyTest extends UdashSharedTest {
+  import Utils._
+
   implicit val lang = Lang("en")
 
   implicit val provider = new TranslationProvider {

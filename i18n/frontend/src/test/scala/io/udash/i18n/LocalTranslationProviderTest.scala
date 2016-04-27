@@ -6,6 +6,8 @@ import io.udash.testing.UdashFrontendTest
 import scala.language.postfixOps
 
 class LocalTranslationProviderTest extends UdashFrontendTest {
+  import Utils._
+
   @silent
   implicit val ec = scalajs.concurrent.JSExecutionContext.Implicits.runNow
   implicit val lang = Lang("en")

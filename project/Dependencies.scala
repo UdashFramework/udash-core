@@ -2,37 +2,27 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 object Dependencies extends Build {
-
   val versionOfScala = "2.11.8"
   val silencerVersion = "0.3"
+
+  val jqueryWrapperVersion = "1.0.0-rc.2"
 
   val scalaJsDomVersion = "0.9.0"
   val scalaTagsVersion = "0.5.4"
 
-  val jqueryWrapperVersion = "1.0.0-rc.2"
-
   val servletVersion = "3.1.0"
-
   val avsCommonsVersion = "1.14.0"
 
-  val udashCoreVersion = "0.2.0"
-
   val atmoshereJSVersion = "2.3.0"
+  val atmoshereVersion = "2.4.3"
 
   val upickleVersion = "0.3.9"
-  val atmoshereVersion = "2.4.3"
-  val scalaLoggingVersion = "3.1.0"
-
   val jawnParserVersion = "0.8.4"
+
+  val scalaLoggingVersion = "3.1.0"
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
-  val udashCoreVersion = "0.2.0"
-  val udashRpcVersion = "0.2.0"
-
-  val scalaJsDomVersion = "0.9.0"
-
-  val scalatestVersion = "3.0.0-M15"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -79,17 +69,5 @@ object Dependencies extends Build {
 
   val rpcBackendTestDeps = Def.setting(Seq(
     "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
-  val crossDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-shared" % udashCoreVersion,
-    "io.udash" %%% "udash-rpc-shared" % udashRpcVersion
-  ))
-
-  val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
-    "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion
-  ))
-
-  val crossTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
 }

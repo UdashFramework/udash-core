@@ -3,12 +3,15 @@ package io.udash.i18n
 import com.github.ghik.silencer.silent
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.ext.LocalStorage
+import org.scalatest.BeforeAndAfter
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
-class RemoteTranslationProviderTest extends UdashFrontendTest {
+class RemoteTranslationProviderTest extends UdashFrontendTest with BeforeAndAfter {
+  import Utils._
+
   @silent
   implicit val ec = scalajs.concurrent.JSExecutionContext.Implicits.runNow
   implicit val lang = Lang("en")

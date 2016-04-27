@@ -5,7 +5,7 @@ import io.udash.testing.UdashFrontendTest
 
 import scala.collection.mutable
 
-class ExposesClientRPCTest extends UdashFrontendTest {
+class ExposesClientRPCTest extends UdashFrontendTest with Utils {
   def tests(createExposesClientRPC: mutable.Builder[String, Seq[String]] => ExposesClientRPC[TestClientRPC]) = {
     "handle RPC fires" in {
       val calls = Seq.newBuilder[String]
