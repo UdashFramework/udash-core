@@ -1,9 +1,8 @@
 name := "udash-rpc"
 
-version in ThisBuild := "0.2.0-rc.2"
-scalaVersion in ThisBuild := "2.11.8"
+version in ThisBuild := "0.2.0"
+scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
-crossPaths in ThisBuild := false
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
@@ -19,17 +18,18 @@ scalacOptions in ThisBuild ++= Seq(
 )
 
 val commonSettings = Seq(
-  moduleName := "udash-rpc-" + moduleName.value,
+  moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
-  libraryDependencies ++= commonDeps.value
+  libraryDependencies ++= commonDeps.value,
+  libraryDependencies ++= commonTestDeps.value
 )
 
 lazy val udash = project.in(file("."))
-  .aggregate(macros, sharedJS, sharedJVM, frontend, backend)
+  .aggregate(`rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`)
   .settings(publishArtifact := false)
 
 /** Project containing implementations of macros. Macros can be used in both JS and JVM code. */
-lazy val macros = project.in(file("macros"))
+lazy val `rpc-macros` = project.in(file("rpc/macros"))
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
@@ -38,40 +38,38 @@ lazy val macros = project.in(file("macros"))
   )
 
 /** Cross project containing code compiled to both JS and JVM. */
-lazy val shared = crossProject.crossType(CrossType.Full).in(file("shared"))
-  .jsConfigure(_.dependsOn(macros))
-  .jvmConfigure(_.dependsOn(macros))
+lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
+  .jsConfigure(_.dependsOn(`rpc-macros`))
+  .jvmConfigure(_.dependsOn(`rpc-macros`))
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= crossDeps.value,
-    libraryDependencies ++= crossTestDeps.value
+    libraryDependencies ++= rpcCrossDeps.value,
+    libraryDependencies ++= rpcCrossTestDeps.value
   )
   .jsSettings(
-    jsDependencies in Test += RuntimeDOM % Test,
     persistLauncher in Test := false,
+    emitSourceMaps in Test := true,
     scalaJSStage in Test := FastOptStage,
-    emitSourceMaps in Test := true
+    jsDependencies in Test += RuntimeDOM % Test
   )
   .jvmSettings(
-    libraryDependencies ++= sharedJVMDeps.value
+    libraryDependencies ++= rpcSharedJVMDeps.value
   )
 
-lazy val sharedJVM = shared.jvm
-lazy val sharedJS = shared.js
+lazy val `rpc-shared-JVM` = `rpc-shared`.jvm
+lazy val `rpc-shared-JS` = `rpc-shared`.js
 
-/** Project containing code compiled to JVM only. */
-lazy val backend = project.in(file("backend"))
-  .dependsOn(sharedJVM % "test->test;compile->compile")
+lazy val `rpc-backend` = project.in(file("rpc/backend"))
+  .dependsOn(`rpc-shared-JVM` % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= backendDeps.value,
-    libraryDependencies ++= backendTestDeps.value
+    libraryDependencies ++= rpcBackendDeps.value,
+    libraryDependencies ++= rpcBackendTestDeps.value
   )
 
-/** Project containing code compiled to JS only. */
-lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(sharedJS % "test->test;compile->compile")
+lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`rpc-shared-JS` % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= frontendDeps.value,
-    jsDependencies ++= frontendJsDeps.value,
+    libraryDependencies ++= rpcFrontendDeps.value,
+    jsDependencies ++= rpcFrontendJsDeps.value,
     jsDependencies += RuntimeDOM % Test,
 
     requiresDOM in Test := true,
