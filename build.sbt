@@ -1,9 +1,8 @@
-name := "udash-core"
+name := "udash"
 
-version in ThisBuild := "0.2.0-rc.2"
-scalaVersion in ThisBuild := "2.11.8"
+version in ThisBuild := "0.2.0"
+scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
-crossPaths in ThisBuild := false
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
@@ -19,47 +18,44 @@ scalacOptions in ThisBuild ++= Seq(
 )
 
 val commonSettings = Seq(
-  moduleName := "udash-core-" + moduleName.value,
+  moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
   libraryDependencies ++= commonDeps.value
 )
 
 lazy val udash = project.in(file("."))
-  .aggregate(macros, sharedJS, sharedJVM, frontend)
+  .aggregate(`core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`)
   .settings(publishArtifact := false)
 
 /** Project containing implementations of macros. Macros can be used in both JS and JVM code. */
-lazy val macros = project.in(file("macros"))
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
-    )
-  )
-
-/** Cross project containing code compiled to both JS and JVM. */
-lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
-  .jsConfigure(_.dependsOn(macros))
-  .jvmConfigure(_.dependsOn(macros))
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= crossDeps.value,
-    libraryDependencies ++= crossTestDeps.value
-  )
-
-lazy val sharedJVM = shared.jvm
-lazy val sharedJS = shared.js.enablePlugins(ScalaJSPlugin)
+lazy val `core-macros` = project.in(file("core/macros"))
+  .settings(commonSettings: _*)
   .settings(
-    emitSourceMaps in Compile := true,
-    jsDependencies in Test += RuntimeDOM % Test,
-    persistLauncher in Test := false,
-    scalaJSStage in Test := FastOptStage
+    libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
   )
 
-/** Project containing code compiled to JS only. */
-lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(macros, sharedJS % "test->test;compile->compile")
+lazy val `core-shared` = crossProject.crossType(CrossType.Pure).in(file("core/shared"))
+  .jsConfigure(_.dependsOn(`core-macros`))
+  .jvmConfigure(_.dependsOn(`core-macros`))
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= coreCrossDeps.value,
+    libraryDependencies ++= commonTestDeps.value
+  )
+  .jsSettings(
+    emitSourceMaps in Compile := true,
+    persistLauncher in Test := false,
+    scalaJSStage in Test := FastOptStage,
+    jsDependencies in Test += RuntimeDOM % Test
+  )
+
+lazy val `core-shared-JVM` = `core-shared`.jvm
+lazy val `core-shared-JS` = `core-shared`.js
+
+lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-shared-JS` % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
     emitSourceMaps in Compile := true,
-    libraryDependencies ++= frontendDeps.value,
+    libraryDependencies ++= coreFrontendDeps.value,
     jsDependencies += RuntimeDOM % Test,
     persistLauncher in Compile := true,
     publishedJS <<= Def.taskDyn {

@@ -13,24 +13,24 @@ object Dependencies extends Build {
 
   val scalatestVersion = "3.0.0-M15"
 
-  val commonDeps = Def.setting(Seq(
-    "com.github.ghik" % "silencer-lib" % silencerVersion
-  ))
-
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
   ).map(compilerPlugin))
 
-  val crossDeps = Def.setting(Seq(
+  val commonDeps = Def.setting(Seq(
+    "com.github.ghik" % "silencer-lib" % silencerVersion
+  ))
+
+  val commonTestDeps = Def.setting(Seq(
+    "org.scalatest" %%% "scalatest" % scalatestVersion
+  ).map(_ % Test))
+
+  val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
-  val frontendDeps = Def.setting(Seq(
+  val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
-
-  val crossTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
-  ).map(_ % Test))
 }
