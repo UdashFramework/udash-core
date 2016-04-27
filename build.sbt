@@ -20,11 +20,15 @@ scalacOptions in ThisBuild ++= Seq(
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
-  libraryDependencies ++= commonDeps.value
+  libraryDependencies ++= commonDeps.value,
+  libraryDependencies ++= commonTestDeps.value
 )
 
 lazy val udash = project.in(file("."))
-  .aggregate(`core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`)
+  .aggregate(
+    `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
+    `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`
+  )
   .settings(publishArtifact := false)
 
 /** Project containing implementations of macros. Macros can be used in both JS and JVM code. */
@@ -38,8 +42,7 @@ lazy val `core-shared` = crossProject.crossType(CrossType.Pure).in(file("core/sh
   .jsConfigure(_.dependsOn(`core-macros`))
   .jvmConfigure(_.dependsOn(`core-macros`))
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= coreCrossDeps.value,
-    libraryDependencies ++= commonTestDeps.value
+    libraryDependencies ++= coreCrossDeps.value
   )
   .jsSettings(
     emitSourceMaps in Compile := true,
@@ -68,4 +71,54 @@ lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(Scala
     requiresDOM in Test := true,
     persistLauncher in Test := false,
     scalaJSUseRhino in Test := false
+  )
+
+/** Project containing implementations of macros. Macros can be used in both JS and JVM code. */
+lazy val `rpc-macros` = project.in(file("rpc/macros"))
+  .dependsOn(`core-macros`)
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
+    )
+  )
+
+/** Cross project containing code compiled to both JS and JVM. */
+lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
+  .jsConfigure(_.dependsOn(`rpc-macros`))
+  .jvmConfigure(_.dependsOn(`rpc-macros`))
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= rpcCrossDeps.value,
+    libraryDependencies ++= rpcCrossTestDeps.value
+  )
+  .jsSettings(
+    persistLauncher in Test := false,
+    emitSourceMaps in Test := true,
+    scalaJSStage in Test := FastOptStage,
+    jsDependencies in Test += RuntimeDOM % Test
+  )
+  .jvmSettings(
+    libraryDependencies ++= rpcSharedJVMDeps.value
+  )
+
+lazy val `rpc-shared-JVM` = `rpc-shared`.jvm
+lazy val `rpc-shared-JS` = `rpc-shared`.js
+
+lazy val `rpc-backend` = project.in(file("rpc/backend"))
+  .dependsOn(`rpc-shared-JVM` % "test->test;compile->compile")
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= rpcBackendDeps.value,
+    libraryDependencies ++= rpcBackendTestDeps.value
+  )
+
+lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`rpc-shared-JS` % "test->test;compile->compile", `core-frontend`)
+  .settings(commonSettings: _*).settings(
+    jsDependencies ++= rpcFrontendJsDeps.value,
+    jsDependencies += RuntimeDOM % Test,
+
+    requiresDOM in Test := true,
+    persistLauncher in Test := false,
+    scalaJSUseRhino in Test := false,
+    emitSourceMaps in Test := true
   )
