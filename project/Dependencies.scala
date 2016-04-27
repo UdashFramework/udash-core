@@ -27,6 +27,12 @@ object Dependencies extends Build {
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
+  val udashCoreVersion = "0.2.0"
+  val udashRpcVersion = "0.2.0"
+
+  val scalaJsDomVersion = "0.9.0"
+
+  val scalatestVersion = "3.0.0-M15"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -73,5 +79,17 @@ object Dependencies extends Build {
 
   val rpcBackendTestDeps = Def.setting(Seq(
     "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
+  val crossDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-core-shared" % udashCoreVersion,
+    "io.udash" %%% "udash-rpc-shared" % udashRpcVersion
+  ))
+
+  val frontendDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-core-frontend" % udashCoreVersion,
+    "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion
+  ))
+
+  val crossTestDeps = Def.setting(Seq(
+    "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
 }
