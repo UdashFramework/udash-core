@@ -6,8 +6,8 @@ object Dependencies extends Build {
   val versionOfScala = "2.11.8"
   val silencerVersion = "0.3"
 
-  val udashCoreVersion = "0.2.0-rc.2"
-  val udashRpcVersion = "0.2.0-rc.3"
+  val udashCoreVersion = "0.2.0"
+  val udashRpcVersion = "0.2.0"
 
   val scalaJsDomVersion = "0.9.0"
 
@@ -18,8 +18,8 @@ object Dependencies extends Build {
   ).map(compilerPlugin))
 
   val crossDeps = Def.setting(Seq(
-    "io.udash" % "udash-core-shared" % udashCoreVersion,
-    "io.udash" % "udash-rpc-shared" % udashRpcVersion
+    "io.udash" %%% "udash-core-shared" % udashCoreVersion,
+    "io.udash" %%% "udash-rpc-shared" % udashRpcVersion
   ))
 
   val frontendDeps = Def.setting(Seq(

@@ -3,7 +3,6 @@ name := "udash-i18n"
 version in ThisBuild := "0.2.0-rc.1"
 scalaVersion in ThisBuild := "2.11.7"
 organization in ThisBuild := "io.udash"
-crossPaths in ThisBuild := false
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
@@ -18,28 +17,23 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
+externalResolvers in ThisBuild := Seq(
+  Resolver.file("local", file(System.getProperty("user.home") + "/.ivy2/local"))(Resolver.ivyStylePatterns)
+)
+
 val commonSettings = Seq(
   moduleName := "udash-i18n-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value
 )
 
 lazy val udash = project.in(file("."))
-  .aggregate(sharedJS, sharedJVM, frontend, backend)
+  .aggregate(`i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`)
   .settings(publishArtifact := false)
 
-def crossLibs(configuration: Configuration) = {
-  libraryDependencies ++= crossDeps.value.map(_ % configuration)
-}
-
-def crossTestLibs() = {
-  libraryDependencies ++= crossTestDeps.value
-}
-
-/** Cross project containing code compiled to both JS and JVM. */
-lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
+lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
   .settings(commonSettings: _*).settings(
-    crossLibs(Provided),
-    crossTestLibs()
+    libraryDependencies ++= crossDeps.value,
+    libraryDependencies ++= crossTestDeps.value
   )
   .jsSettings(
     jsDependencies in Test += RuntimeDOM % Test,
@@ -48,26 +42,19 @@ lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
     emitSourceMaps in Test := true
   )
 
-lazy val sharedJVM = shared.jvm
-lazy val sharedJS = shared.js
+lazy val `i18n-shared-JVM` = `i18n-shared`.jvm
+lazy val `i18n-shared-JS` = `i18n-shared`.js
 
-/** Project containing code compiled to JVM only. */
-lazy val backend = project.in(file("backend"))
-  .dependsOn(sharedJVM % "test->test;compile->compile")
-  .settings(commonSettings: _*).settings(
-    crossLibs(Compile),
-    crossTestLibs()
-  )
+lazy val `i18n-backend` = project.in(file("i18n/backend"))
+  .dependsOn(`i18n-shared-JVM` % "test->test;compile->compile")
+  .settings(commonSettings: _*)
 
-/** Project containing code compiled to JS only. */
-lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(sharedJS % "test->test;compile->compile")
+lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`i18n-shared-JS` % "test->test;compile->compile")
   .settings(commonSettings: _*).settings(
-    crossLibs(Compile),
     libraryDependencies ++= frontendDeps.value,
     jsDependencies += RuntimeDOM % Test,
 
-    crossTestLibs(),
     requiresDOM in Test := true,
     persistLauncher in Test := false,
     scalaJSUseRhino in Test := false,
