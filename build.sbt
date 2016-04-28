@@ -59,7 +59,7 @@ lazy val `core-shared-JVM` = `core-shared`.jvm
 lazy val `core-shared-JS` = `core-shared`.js
 
 lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-shared-JS` % "test->test;compile->compile")
+  .dependsOn(`core-shared-JS` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(
@@ -84,7 +84,7 @@ lazy val `rpc-macros` = project.in(file("rpc/macros"))
   )
 
 lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
-  .configure(_.dependsOn(`core-shared` % "test->test;compile->compile"))
+  .configure(_.dependsOn(`core-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rpc-macros`))
   .jvmConfigure(_.dependsOn(`rpc-macros`))
   .settings(commonSettings: _*).settings(
@@ -100,14 +100,14 @@ lazy val `rpc-shared-JVM` = `rpc-shared`.jvm
 lazy val `rpc-shared-JS` = `rpc-shared`.js
 
 lazy val `rpc-backend` = project.in(file("rpc/backend"))
-  .dependsOn(`rpc-shared-JVM` % "test->test;compile->compile")
+  .dependsOn(`rpc-shared-JVM` % CompileAndTest)
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= rpcBackendDeps.value,
     libraryDependencies ++= rpcBackendTestDeps.value
   )
 
 lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`rpc-shared-JS` % "test->test;compile->compile", `core-frontend` % "test->test;compile->compile")
+  .dependsOn(`rpc-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(
@@ -115,7 +115,7 @@ lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJS
   )
 
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
-  .configure(_.dependsOn(`core-shared`, `rpc-shared` % "test->test;compile->compile"))
+  .configure(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
   .jsSettings(commonJSSettings:_*)
 
@@ -123,11 +123,11 @@ lazy val `i18n-shared-JVM` = `i18n-shared`.jvm
 lazy val `i18n-shared-JS` = `i18n-shared`.js
 
 lazy val `i18n-backend` = project.in(file("i18n/backend"))
-  .dependsOn(`i18n-shared-JVM` % "test->test;compile->compile", `rpc-backend` % "test->test;compile->compile")
+  .dependsOn(`i18n-shared-JVM` % CompileAndTest, `rpc-backend` % CompileAndTest)
   .settings(commonSettings: _*)
 
 lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`i18n-shared-JS` % "test->test;compile->compile", `core-frontend` % "test->test;compile->compile")
+  .dependsOn(`i18n-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(
