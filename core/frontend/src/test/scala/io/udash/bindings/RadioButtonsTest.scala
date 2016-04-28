@@ -32,13 +32,19 @@ class RadioButtonsTest extends UdashFrontendTest {
 
     "synchronise property with state changes" in {
       val options = Seq("A", "B", "C", "D", "E")
-      val p = Property[String]("B")
+      val p = Property[String]("X")
 
       val buttons = RadioButtons(p, options, s => div(s.map(t => t._1))).render
 
       buttons.childElementCount should be(5)
 
       for (i <- options.indices) {
+        buttons.childNodes(i).asInstanceOf[org.scalajs.dom.html.Input].click()
+        buttons.childNodes(i).asInstanceOf[org.scalajs.dom.html.Input].onchange(null)
+        p.get should be(options(i))
+      }
+
+      for (i <- options.indices.reverse) {
         buttons.childNodes(i).asInstanceOf[org.scalajs.dom.html.Input].click()
         buttons.childNodes(i).asInstanceOf[org.scalajs.dom.html.Input].onchange(null)
         p.get should be(options(i))

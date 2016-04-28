@@ -47,7 +47,7 @@ object RadioButtons {
         updateInput(element)
         property.listen(_ => updateInput(element))
         element.onchange = (event: Event) => {
-          if (element.checked) property.set(element.value)
+          property.set(element.value)
         }
       }
     }

@@ -1,21 +1,13 @@
 package io.udash.testing
 
-import scala.concurrent.ExecutionContextExecutor
+import com.github.ghik.silencer.silent
+
+import scala.scalajs.concurrent.JSExecutionContext
 
 trait UdashFrontendTest extends UdashSharedTest {
   import scalatags.JsDom.all.div
   def emptyComponent() = div().render
 
-  implicit val testExecutionContext = new ExecutionContextExecutor {
-    def execute(runnable: Runnable): Unit = {
-      try {
-        runnable.run()
-      } catch {
-        case t: Throwable => reportFailure(t)
-      }
-    }
-
-    def reportFailure(t: Throwable): Unit =
-      t.printStackTrace()
-  }
+  @silent
+  implicit val testExecutionContext = JSExecutionContext.runNow
 }
