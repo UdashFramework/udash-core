@@ -29,7 +29,8 @@ val commonJSSettings = Seq(
   persistLauncher in Test := false,
   scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
-  jsDependencies in Test += RuntimeDOM % Test
+  jsDependencies in Test += RuntimeDOM % Test,
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox).withKeepAlive()
 )
 
 lazy val udash = project.in(file("."))
