@@ -917,6 +917,41 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       dom.textContent should be("1357")
     }
 
+    "work with filtered transformed SeqProperty" in {
+      val doubles = SeqProperty[Double](Seq(1.5, 2.3, 3.7))
+      val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val evens = ints.filter(_ % 2 == 0)
+
+      val dom = div(
+        "Doubles: ", repeat(doubles)(p => span(p.get, ", ").render), ";",
+        "Ints: ", repeat(ints)(p => span(p.get, ", ").render), ";",
+        "Evens: ", repeat(evens)(p => span(p.get, ", ").render)
+      ).render
+
+      dom.textContent should be("Doubles: 1.5, 2.3, 3.7, ;Ints: 1, 2, 3, ;Evens: 2, ")
+
+      doubles.prepend(8.5)
+      dom.textContent should be("Doubles: 8.5, 1.5, 2.3, 3.7, ;Ints: 8, 1, 2, 3, ;Evens: 8, 2, ")
+
+      ints.append(12)
+      dom.textContent should be("Doubles: 8.5, 1.5, 2.3, 3.7, 12, ;Ints: 8, 1, 2, 3, 12, ;Evens: 8, 2, 12, ")
+
+      doubles.replace(1, 3, 4.5)
+      dom.textContent should be("Doubles: 8.5, 4.5, 12, ;Ints: 8, 4, 12, ;Evens: 8, 4, 12, ")
+
+      doubles.remove(8.5)
+      dom.textContent should be("Doubles: 4.5, 12, ;Ints: 4, 12, ;Evens: 4, 12, ")
+
+      ints.remove(12)
+      dom.textContent should be("Doubles: 4.5, ;Ints: 4, ;Evens: 4, ")
+
+      doubles.remove(4.5)
+      dom.textContent should be("Doubles: ;Ints: ;Evens: ")
+
+      ints.append(6)
+      dom.textContent should be("Doubles: 6, ;Ints: 6, ;Evens: 6, ")
+    }
+
     "work with filtered SeqProperty and CallbackSequencer" in {
       sealed abstract class NumbersFilter(val matcher: (Int) => Boolean)
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)

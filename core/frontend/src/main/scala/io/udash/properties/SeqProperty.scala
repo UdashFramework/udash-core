@@ -141,17 +141,17 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
   origin.elemProperties.foreach(p => registrations(p) = p.listen(elementChanged(p)))
   origin.listenStructure(patch => {
-    patch.removed.foreach(p => {
+    patch.removed.foreach(p => if (registrations.contains(p)) {
       registrations(p).cancel()
       registrations.remove(p)
     })
     patch.added.foreach(p => registrations(p) = p.listen(elementChanged(p)))
 
     val added = patch.added.filter(p => matcher(p.get))
-    val removed = patch.removed.filter(p => filteredProps.contains(p) && matcher(filteredValues(filteredProps.indexOf(p))))
+    val removed = patch.removed.filter(p => matcher(p.get))
     if (added.nonEmpty || removed.nonEmpty) {
       val props = loadPropsFromOrigin()
-      val idx = if (added.nonEmpty) props.indexOf(added.head) else filteredProps.indexOf(removed.head)
+      val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
       val callbackProps = props.map(_.get)
 
       filteredProps = filteredProps.slice(0, idx) ++ added ++ filteredProps.slice(idx + removed.size, filteredProps.size)

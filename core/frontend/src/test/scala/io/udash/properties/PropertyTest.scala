@@ -757,5 +757,57 @@ class PropertyTest extends UdashFrontendTest {
       strings.remove("6")
       numbers.get should be(Seq(1, 2, 3, 5))
     }
+
+    "filter transformed property" in {
+      val doubles = SeqProperty[Double](Seq(1.5, 2.3, 3.7))
+      val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val evens = ints.filter(_ % 2 == 0)
+
+      doubles.get should be(Seq(1.5, 2.3, 3.7))
+      ints.get should be(Seq(1, 2, 3))
+      evens.get should be(Seq(2))
+
+      doubles.prepend(8.5)
+
+      doubles.get should be(Seq(8.5, 1.5, 2.3, 3.7))
+      ints.get should be(Seq(8, 1, 2, 3))
+      evens.get should be(Seq(8, 2))
+
+      ints.append(12)
+
+      doubles.get should be(Seq(8.5, 1.5, 2.3, 3.7, 12.0))
+      ints.get should be(Seq(8, 1, 2, 3, 12))
+      evens.get should be(Seq(8, 2, 12))
+
+      doubles.replace(1, 3, 4.5, 5.5, 6.6)
+
+      doubles.get should be(Seq(8.5, 4.5, 5.5, 6.6, 12.0))
+      ints.get should be(Seq(8, 4, 5, 6, 12))
+      evens.get should be(Seq(8, 4, 6, 12))
+
+      ints.remove(4)
+
+      doubles.get should be(Seq(8.5, 5.5, 6.6, 12.0))
+      ints.get should be(Seq(8, 5, 6, 12))
+      evens.get should be(Seq(8, 6, 12))
+
+      doubles.remove(6.6)
+
+      doubles.get should be(Seq(8.5, 5.5, 12.0))
+      ints.get should be(Seq(8, 5, 12))
+      evens.get should be(Seq(8, 12))
+
+      doubles.append(8.2, 10.3)
+
+      doubles.get should be(Seq(8.5, 5.5, 12.0, 8.2, 10.3))
+      ints.get should be(Seq(8, 5, 12, 8, 10))
+      evens.get should be(Seq(8, 12, 8, 10))
+
+      ints.remove(5)
+
+      doubles.get should be(Seq(8.5, 12.0, 8.2, 10.3))
+      ints.get should be(Seq(8, 12, 8, 10))
+      evens.get should be(Seq(8, 12, 8, 10))
+    }
   }
 }
