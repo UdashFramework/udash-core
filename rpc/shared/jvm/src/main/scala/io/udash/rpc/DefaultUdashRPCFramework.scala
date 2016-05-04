@@ -7,18 +7,10 @@ import jawn.Parser
 
 import scala.language.postfixOps
 
-object DefaultUdashRPCFramework extends UdashRPCFramework {
-  type RawValue = String
-
+object DefaultUdashRPCFramework extends AutoUdashRPCFramework {
   def inputSerialization(value: String): Input =
     new JsonInput(Parser.parseFromString(value)(JawnFacade).get)
 
   def outputSerialization(valueConsumer: String => Unit): Output =
     new JsonOutput(valueConsumer)
-
-  implicit val RawValueCodec: GenCodec[RawValue] =
-    GenCodec.StringCodec
-
-  def stringToRaw(string: String) = string
-  def rawToString(raw: RawValue) = raw
 }

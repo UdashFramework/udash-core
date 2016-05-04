@@ -11,7 +11,7 @@ object Dependencies extends Build {
   val scalaTagsVersion = "0.5.4"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.14.0"
+  val avsCommonsVersion = "1.15.0"
 
   val atmoshereJSVersion = "2.3.0"
   val atmoshereVersion = "2.4.3"

@@ -24,8 +24,8 @@ trait Utils {
     map = Map(Seq.fill(Random.nextInt(20))(Random.nextString(20) -> Random.nextInt()):_*)
   )
 
-  implicit val codec = GenCodec.auto[TestCC]
-  implicit val codecN = GenCodec.auto[NestedTestCC]
+  implicit val codec = GenCodec.materialize[TestCC]
+  implicit val codecN = GenCodec.materialize[NestedTestCC]
   implicit val codecDN = new GenCodec[DeepNestedTestCC] {
     override def read(input: Input): DeepNestedTestCC = {
       def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC = {
@@ -57,6 +57,5 @@ trait Utils {
       obj.finish()
     }
   }
-  implicit val codecCI = GenCodec.auto[CompleteItem]
-  implicit val codecR = GenCodec.auto[Record]
+  implicit val codecCI = GenCodec.materialize[CompleteItem]
 }

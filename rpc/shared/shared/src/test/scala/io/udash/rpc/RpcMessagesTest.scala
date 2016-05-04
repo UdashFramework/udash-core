@@ -121,15 +121,15 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
         override def read(input: Input): TwoItems = {
           val obj = input.readObject().get
           obj.nextField()._2.skip()
-          val i2 = codecCI.read(obj.nextField()._2)
+          val i2 = GenCodec.read[CompleteItem](obj.nextField()._2)
           TwoItems(null, i2)
         }
 
 
         override def write(output: Output, value: TwoItems): Unit = {
           val obj = output.writeObject()
-          codecCI.write(obj.writeField("i1"), value.i1)
-          codecCI.write(obj.writeField("i2"), value.i2)
+          GenCodec.write[CompleteItem](obj.writeField("i1"), value.i1)
+          GenCodec.write[CompleteItem](obj.writeField("i2"), value.i2)
           obj.finish()
         }
       }
