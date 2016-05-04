@@ -1,6 +1,6 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
+version in ThisBuild := "0.2.0"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
@@ -60,7 +60,13 @@ lazy val backend = project.in(file("backend"))
     watchSources ++= (sourceDirectory in frontend).value.***.get,
 
     assemblyJarName in assembly := "udash-guide.jar",
-    mainClass in assembly := Some("io.udash.guide.Launcher")
+    mainClass in assembly := Some("io.udash.guide.Launcher"),
+    assemblyMergeStrategy in assembly := {
+      case "JS_DEPENDENCIES" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
   )
 
 /** Project containing code compiled to JS only.

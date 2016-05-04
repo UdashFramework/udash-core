@@ -7,7 +7,7 @@ object Dependencies extends Build {
   val jettyVersion = "9.3.8.v20160314"
 
   val udashVersion = "0.2.0"
-  val udashJQueryVersion = "1.0.0-rc.2"
+  val udashJQueryVersion = "1.0.0"
 
   val scalaTagsVersion = "0.5.5"
   val scalaCssVersion = "0.4.1"
