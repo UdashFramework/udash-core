@@ -135,7 +135,7 @@ object UPickleUdashRPCFramework extends UdashRPCFramework {
     }
   }
 
-  implicit val RawValueCodec: GenCodec[RawValue] = new GenCodec[Js.Value] {
+  val RawValueCodec: GenCodec[RawValue] = new GenCodec[Js.Value] {
     override def read(input: Input): Js.Value = {
       val obj = input.readObject().get
       val fields = obj.iterator(i => i).toMap

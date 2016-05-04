@@ -7,10 +7,13 @@ import io.udash.macros
 import scala.language.postfixOps
 
 trait UdashRPCFramework extends RPCFramework {
-  type Writer[T] = GenCodec[T]
-  type Reader[T] = GenCodec[T]
+  type Writer[T] = GenCodec.Auto[T]
+  type Reader[T] = GenCodec.Auto[T]
 
-  implicit val RawValueCodec: GenCodec[RawValue]
+  val RawValueCodec: GenCodec[RawValue]
+
+  private implicit def rawCodec: GenCodec[RawValue] =
+    RawValueCodec
 
   /** Converts `String` into `RawValue`. It is used to read data from network. */
   def stringToRaw(string: String): RawValue
@@ -25,13 +28,13 @@ trait UdashRPCFramework extends RPCFramework {
   /** Converts value of type `T` into `RawValue`. */
   def write[T: Writer](value: T): RawValue = {
     var result: RawValue = null.asInstanceOf[RawValue]
-    GenCodec.write[T](outputSerialization(result = _), value)
+    GenCodec.autoWrite[T](outputSerialization(result = _), value)
     result
   }
 
   /** Converts `RawValue` into value of type `T`. */
   def read[T: Reader](raw: RawValue): T =
-    GenCodec.read[T](inputSerialization(raw))
+    GenCodec.autoRead[T](inputSerialization(raw))
 
   class AsRawClientRPC[T](implicit asRawRpc: AsRawRPC[T]) {
     def asRaw(rpcImpl: T): RawRPC =
