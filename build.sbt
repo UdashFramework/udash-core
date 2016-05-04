@@ -30,7 +30,12 @@ val commonJSSettings = Seq(
   scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox).withKeepAlive()
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox).withKeepAlive(),
+  scalacOptions += {
+    val localDir = (baseDirectory in ThisBuild).value.toURI.toString
+    val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
+    s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
+  }
 )
 
 lazy val udash = project.in(file("."))
