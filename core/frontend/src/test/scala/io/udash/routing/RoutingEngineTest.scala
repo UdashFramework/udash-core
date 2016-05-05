@@ -3,7 +3,10 @@ package io.udash.routing
 import io.udash._
 import io.udash.testing._
 
-class RoutingEngineTest extends UdashFrontendTest {
+import scala.collection.mutable.ListBuffer
+
+class RoutingEngineTest extends UdashFrontendTest with TestRouting {
+
   "RoutingEngine" should {
     "render valid views on url change" in {
       val rootView = new TestView
@@ -21,11 +24,7 @@ class RoutingEngineTest extends UdashFrontendTest {
         ErrorState -> new DefaultViewPresenterFactory[ErrorState.type](() => errorView) {}
       )
 
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(state2VP, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine(state2vp = state2VP)
 
       routingEngine.handleUrl(Url("/"))
 
@@ -79,11 +78,7 @@ class RoutingEngineTest extends UdashFrontendTest {
     }
 
     "fire state change callbacks" in {
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine()
 
       var lastCallbackEvent: StateChangeEvent[TestState] = null
       routingEngine.onStateChange(lastCallbackEvent = _)
@@ -120,11 +115,7 @@ class RoutingEngineTest extends UdashFrontendTest {
     }
 
     "return valid current app state" in {
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine()
 
       routingEngine.handleUrl(Url("/"))
       routingEngine.currentState should be(ObjectState)
@@ -143,6 +134,22 @@ class RoutingEngineTest extends UdashFrontendTest {
 
       routingEngine.handleUrl(Url("/next"))
       routingEngine.currentState should be(NextObjectState)
+    }
+
+    "pass previous app state to routing registry" in {
+      val prevStates = ListBuffer.empty[TestState]
+      initTestRoutingEngine(new TestRoutingRegistry {
+        override def matchUrl(url: Url, previous: TestState): TestState = {
+          prevStates += previous
+          super.matchUrl(url, previous)
+        }
+      })
+
+      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl(Url("/next"))
+      prevStates.toList shouldBe null :: ObjectState :: NextObjectState :: ClassState("abc", 1) :: Nil
     }
   }
 }

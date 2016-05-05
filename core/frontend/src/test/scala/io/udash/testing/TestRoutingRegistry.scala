@@ -10,7 +10,7 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
   var urlsHistory: mutable.ArrayBuffer[Url] = mutable.ArrayBuffer.empty
   var statesHistory: mutable.ArrayBuffer[TestState] = mutable.ArrayBuffer.empty
 
-  override def matchUrl(url: Url): TestState = {
+  override def matchUrl(url: Url, previous: TestState): TestState = {
     urlsHistory.append(url)
     url.value match {
       case "/" => ObjectState

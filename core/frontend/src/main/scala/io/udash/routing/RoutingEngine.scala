@@ -24,7 +24,7 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
     * @param url URL to be resolved
     */
   def handleUrl(url: Url): Unit = {
-    val newState = routingRegistry.matchUrl(url)
+    val newState = routingRegistry.matchUrl(url, current)
 
     val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(newState)

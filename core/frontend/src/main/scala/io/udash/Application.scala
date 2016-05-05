@@ -18,11 +18,12 @@ class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
                                          rootState: S,
                                          urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
   private var rootElement: Element = _
-  private lazy val viewRendered = new ViewRenderer(rootElement)
-  private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewPresenterRegistry, viewRendered, rootState)
+  private lazy val viewRenderer = new ViewRenderer(rootElement)
+  private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewPresenterRegistry, viewRenderer, rootState)
 
   /**
     * Starts the application using selected element as root.
+    *
     * @param attachElement Root element of application.
     */
   def run(attachElement: Element): Unit = {
@@ -34,6 +35,7 @@ class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
 
   /**
     * Changes application routing state to the provided one.
+    *
     * @param state New application routing state,
     */
   def goTo(state: S): Unit = {
@@ -50,6 +52,7 @@ class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
 
   /**
     * Register callback for routing state change.
+    *
     * @param callback Callback getting newState and oldState as arguments.
     */
   def onStateChange(callback: StateChangeEvent[S] => Unit) = {
