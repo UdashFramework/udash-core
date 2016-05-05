@@ -1,9 +1,12 @@
 package io.udash.rpc.internals
 
+import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc._
+import io.udash.rpc.utils.CallLogging
 import io.udash.testing.UdashBackendTest
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 class ExposesServerRPCTest extends UdashBackendTest {
 
@@ -83,8 +86,7 @@ class ExposesServerRPCTest extends UdashBackendTest {
     val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
       calls += method
     })
-    val rpc = new DefaultExposesServerRPC[TestRPC](impl)
-    rpc
+    new DefaultExposesServerRPC[TestRPC](impl)
   }
 
   final class UPickleExposesServerRPC[ServerRPCType]
@@ -98,10 +100,35 @@ class ExposesServerRPCTest extends UdashBackendTest {
     val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
       calls += method
     })
-    val rpc = new UPickleExposesServerRPC[TestRPC](impl)
-    rpc
+    new UPickleExposesServerRPC[TestRPC](impl)
+  }
+
+  val loggedCalls = ListBuffer.empty[String]
+
+  def createLoggingRpc(calls: mutable.Builder[String, Seq[String]]): ExposesServerRPC[TestRPC] = {
+    val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+      calls += method
+    })
+    new ExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
+      override protected val metadata: RPCMetadata[TestRPC] = RPCMetadata[TestRPC]
+
+      override val framework = DefaultUdashRPCFramework
+
+      import framework._
+
+      override protected def localRpcAsRaw: framework.AsRawRPC[TestRPC] = framework.AsRawRPC[TestRPC]
+
+      override def log(rpcName: String, methodName: String, args: Seq[String]): Unit = loggedCalls += s"$rpcName $methodName $args"
+    }
   }
 
   "DefaultExposesServerRPC" should tests(createDefaultRpc)
   "CustomExposesServerRPC" should tests(createCustomRpc)
+  "LoggingExposesServerRPC" should {
+    tests(createLoggingRpc)
+    import io.udash.rpc.InnerRPC
+    "log calls of annotated RPC methods" in {
+      loggedCalls.toList shouldBe List(s"${classOf[InnerRPC].getSimpleName} func List(5)")
+    }
+  }
 }
