@@ -11,7 +11,6 @@ import org.scalajs.dom
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
 
-
 case object RpcSerializationViewPresenter extends DefaultViewPresenterFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
 class RpcSerializationView extends View {
@@ -84,30 +83,12 @@ class RpcSerializationView extends View {
         |demoRpc.sendClass(new DemoClass(Random.nextInt(), Random.nextString(5)))
         |demoRpc.sendSealedTrait(Seq(Apple, Orange, Banana)(Random.nextInt(3)))""".stripMargin
     )(),
-    p("Compilation of this code rises three errors:"),
-    ul(GuideStyles.defaultList)(
-      li("No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.Fruit")),
-      li("No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoCaseClass")),
-      li("No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoClass"))
-    ),
-    p(
-      "For custom data types it is required to create implicit value (in companion objects of these types) containing ", i("GenCodec"), ". ",
-      "For sealed trait hierarchy or case calsses it is simple, add following lines in ", i("GenCodecServerRPC"), " object:"
-    ),
-    CodeBlock(
-      """import com.avsystem.commons.serialization.GenCodec
-        |object Fruit {
-        |  implicit val fruitGenCodec = GenCodec.auto[Fruit]
-        |}
-        |object DemoCaseClass {
-        |  implicit val DemoCaseClassCodec = GenCodec.auto[DemoCaseClass]
-        |}""".stripMargin
-    )(),
-    p(
-      "There is ", i("DemoClass"), " left. For the classic classes you have to implement ", i("GenCodec"), " manually. ",
+    p("Compilation of this code rises an error: No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoClass")),
+    p("For custom data types it is required to create implicit value (in companion objects of these types) containing ",
+      i("GenCodec"), ". The classic classes requires you to implement ", i("GenCodec"), " manually. ",
       "Method ", i("write"), " gets two arguments. ", i("Output"), " allows you to write the basic Scala types and data structures, ",
       "you should use it to create representation of object provided as second argument. Method ", i("read"), " should convert ",
-      "provided ", i("Input"), ", which allows you to read the basic Scala types and data structures, to object. Take a look at the example below. "
+      "provided ", i("Input"), " witch allows you to read the basic Scala types and data structures to object. Take a look at the example below. "
     ),
     CodeBlock(
       """object DemoClass {
@@ -137,7 +118,7 @@ class RpcSerializationView extends View {
     new GenCodecsDemoComponent,
     h3("Default JSON serialization"),
     p(
-      "The ", i("GenCodec"), "s mechanism provides abstraction layer over the serialization to the raw string, which is sent via websocket. ",
+      "The ", i("GenCodec"), "s mechanism provides abstraction layer over the serialization to the raw string witch is sent via websocket. ",
       "By default the Udash framework uses the ", i("GenCodec"), "s representation of data to serialize it to the JSON."
     ),
     p("Usually you do not need to worry about serialization from ",  i("GenCodec"), " to the raw string, unless you want to change serialization mechanism."),
@@ -160,7 +141,7 @@ class RpcSerializationView extends View {
       ul(GuideStyles.defaultList)(
         li(b("RawValue"), " - ", i("GenCodec"), " needs to be converted to this type and then this type needs to be converted into the string. Usually it is some kind of AST."),
         li(b("inputSerialization"), " - method which converts ", i("RawValue"), " into the ", i("Input"), " object."),
-        li(b("outputSerialization"), " - method which returns the ", i("Output"), " object, which creates a ", i("RawValue"), " as the result."),
+        li(b("outputSerialization"), " - method which returns the ", i("Output"), " object witch creates a ", i("RawValue"), " as the result."),
         li(b("stringToRaw"), " - converts a string into the ", i("RawValue"), "."),
         li(b("rawToString"), " - converts a ", i("RawValue"), " into the string.")
       )

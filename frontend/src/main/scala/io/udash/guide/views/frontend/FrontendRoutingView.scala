@@ -132,7 +132,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       )
     ),
     p(
-      "Below you can find input, which changes the URL on every update. This change is handled like ",
+      "Below you can find input witch changes the URL on every update. This change is handled like ",
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
     div(GuideStyles.frame)(

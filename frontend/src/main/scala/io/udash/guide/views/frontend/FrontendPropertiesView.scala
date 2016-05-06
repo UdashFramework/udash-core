@@ -88,7 +88,7 @@ class FrontendPropertiesView extends View {
     ),
     p(
       i("SeqProperty"), " always contains ", i("Property"), " elements, but when you call the ",
-      i("filter"), " method, it returns ", i("ReadableSeqProperty"), ", which contains ", i("ReadableProperty"), " elements."
+      i("filter"), " method, it returns ", i("ReadableSeqProperty"), " witch contains ", i("ReadableProperty"), " elements."
     ),
     h3("Properties hierarchy"),
     p("In more complex models we can look at properties as a hierarchy. For example:"),
@@ -165,7 +165,7 @@ class FrontendPropertiesView extends View {
     )(),
     p("As you may notice, when you change a nested property, all its ancestors will be treated as changed."),
     p(
-      "SeqProperty has the ", i("listenStructure"), " method, which allows you to listen on adding or removing elements ",
+      "SeqProperty has the ", i("listenStructure"), " method witch allows you to listen on adding or removing elements ",
       "in this property, yet it will not fire on change inside children of a property. For example:"
     ),
     CodeBlock(

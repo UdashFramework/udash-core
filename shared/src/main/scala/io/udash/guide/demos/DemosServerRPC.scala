@@ -5,8 +5,11 @@ import io.udash.guide.demos.rpc.{ClientIdServerRPC, GenCodecServerRPC, Notificat
 
 @RPC
 trait DemosServerRPC {
+  import io.udash.i18n._
+
   def pingDemo(): PingServerRPC
   def clientIdDemo(): ClientIdServerRPC
   def notificationsDemo(): NotificationsServerRPC
   def gencodecsDemo(): GenCodecServerRPC
+  def translations(): RemoteTranslationRPC
 }

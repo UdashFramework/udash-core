@@ -1,9 +1,8 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
+version in ThisBuild := "0.2.0"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
-crossPaths in ThisBuild := false
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
   "-deprecation",
@@ -61,7 +60,13 @@ lazy val backend = project.in(file("backend"))
     watchSources ++= (sourceDirectory in frontend).value.***.get,
 
     assemblyJarName in assembly := "udash-guide.jar",
-    mainClass in assembly := Some("io.udash.guide.Launcher")
+    mainClass in assembly := Some("io.udash.guide.Launcher"),
+    assemblyMergeStrategy in assembly := {
+      case "JS_DEPENDENCIES" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
   )
 
 /** Project containing code compiled to JS only.
@@ -72,12 +77,6 @@ lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
     libraryDependencies ++= frontendDeps.value,
     jsDependencies ++= frontendJSDeps.value,
     persistLauncher in Compile := true,
-
-    unmanagedJars in Compile ++= {
-      val base = baseDirectory.value / "libs"
-      val customJars = (base ** "*.jar")
-      customJars.classpath
-    },
 
     compileStatics := {
       IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / StaticFilesDir / "WebContent/assets/fonts")
