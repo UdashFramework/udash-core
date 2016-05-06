@@ -25,7 +25,9 @@ import scalatags.JsDom.all._
 class DemoComponent(url: Property[String]) extends Component {
 
   url.listen(onUrlChange)
-  Window.onResize(onResize)
+
+  val window = jQ(DomWindow)
+  window.resize((element: Element, _: JQueryEvent) => onResize())
 
   private def onUrlChange(update: String) = {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
@@ -58,7 +60,7 @@ class DemoComponent(url: Property[String]) extends Component {
   }
 
   private def initCustomScroll(): Unit = {
-    val scrollAxis = if (Window.width > StyleConstants.Sizes.BodyWidth) CustomScrollbarAxis.XY else CustomScrollbarAxis.X
+    val scrollAxis = if (window.width > StyleConstants.Sizes.BodyWidth) CustomScrollbarAxis.XY else CustomScrollbarAxis.X
     jq2CustomScrollbar(jqCodeContainer).customScrollbar(CustomScrollbarOptions
       .axis(scrollAxis)
       .autoHideScrollbar(true)

@@ -14,7 +14,7 @@ object Launcher extends LazyLogging {
     ctx.getBean(classOf[ApplicationServer]).start()
     
     val duration: Long = (System.nanoTime - startTime) / 1000000000
-    logger.info(s"Udash Guide started in ${duration}s.")
+    logger.info(s"Udash Homepage & Dev's Guide started in ${duration}s.")
   }
 
   def createApplicationContext(): GenericApplicationContext = {

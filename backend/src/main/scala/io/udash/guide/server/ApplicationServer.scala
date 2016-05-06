@@ -4,31 +4,24 @@ import io.udash.guide.MainServerRPC
 import io.udash.guide.rpc.ExposedRpcInterfaces
 import io.udash.rpc._
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
-class ApplicationServer(val port: Int, resourceBase: String) {
+class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String) {
   import io.udash.guide.Implicits._
   private val server = new Server(port)
-  private val contextHandler = new ServletContextHandler
-
-  contextHandler.setSessionHandler(new SessionHandler)
-
-  contextHandler.setGzipHandler(new GzipHandler)
-  server.setHandler(contextHandler)
 
   def start() = server.start()
 
   def stop() = server.stop()
 
-  private val appHolder = {
-    val appHolder = new ServletHolder(new DefaultServlet)
-    appHolder.setAsyncSupported(true)
-    appHolder.setInitParameter("resourceBase", resourceBase)
-    appHolder
-  }
-  contextHandler.addServlet(appHolder, "/*")
+  private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
+  private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2"))
+
+  homepage.addServlet(createStaticHandler(homepageResourceBase), "/*")
+  guide.addServlet(createStaticHandler(guideResourceBase), "/*")
 
   private val atmosphereHolder = {
     val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) =>
@@ -42,5 +35,24 @@ class ApplicationServer(val port: Int, resourceBase: String) {
     atmosphereHolder.setAsyncSupported(true)
     atmosphereHolder
   }
-  contextHandler.addServlet(atmosphereHolder, "/atm/*")
+  guide.addServlet(atmosphereHolder, "/atm/*")
+
+  val contexts = new ContextHandlerCollection
+  contexts.setHandlers(Array(homepage, guide))
+  server.setHandler(contexts)
+
+  private def createContextHandler(hosts: Array[String]): ServletContextHandler = {
+    val context = new ServletContextHandler
+    context.setSessionHandler(new SessionHandler)
+    context.setGzipHandler(new GzipHandler)
+    context.setVirtualHosts(hosts)
+    context
+  }
+
+  private def createStaticHandler(resourceBase: String): ServletHolder = {
+    val appHolder = new ServletHolder(new DefaultServlet)
+    appHolder.setAsyncSupported(true)
+    appHolder.setInitParameter("resourceBase", resourceBase)
+    appHolder
+  }
 }

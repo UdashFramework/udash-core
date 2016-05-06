@@ -2,23 +2,21 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt.Keys._
 import sbt._
 
-object UdashGuideBuild extends Build {
-  val GuideStaticFilesDir = "UdashStatic/guide"
+object UdashHomepageBuild extends Build {
+  val HomepageStaticFilesDir = "UdashStatic/homepage"
 
   def copyIndex(file: File, to: File) = {
     val newFile = Path(to.toPath.toString + "/index.html")
     IO.copyFile(file, newFile.asFile)
   }
 
-  val compileStaticsGuide = taskKey[Seq[File]]("Guide static files manager.")
-  val copyStaticsGuide = taskKey[Unit]("Copy guide static files into backend target.")
+  val compileStaticsHomepage = taskKey[Seq[File]]("Homepage static files manager.")
 
-  // Compile proper version of JS depending on build version.
-  val compileStaticsGuideForRelease = Def.taskDyn {
-    val outDir = crossTarget.value / GuideStaticFilesDir / "WebContent"
+  val compileStaticsHomepageForRelease = Def.taskDyn {
+    val outDir = crossTarget.value / HomepageStaticFilesDir / "WebContent"
     if (!isSnapshot.value) {
       Def.task {
-        val indexFile = sourceDirectory.value / s"main/assets/index.prod.html"
+        val indexFile = sourceDirectory.value / "main/assets/index.prod.html"
         copyIndex(indexFile, outDir)
         (fullOptJS in Compile).value
         (packageMinifiedJSDependencies in Compile).value
@@ -26,7 +24,7 @@ object UdashGuideBuild extends Build {
       }
     } else {
       Def.task {
-        val indexFile = sourceDirectory.value / s"main/assets/index.dev.html"
+        val indexFile = sourceDirectory.value / "main/assets/index.dev.html"
         copyIndex(indexFile, outDir)
         (fastOptJS in Compile).value
         (packageJSDependencies in Compile).value
@@ -34,4 +32,5 @@ object UdashGuideBuild extends Build {
       }
     }
   }
-}
+
+  val copyStaticsHomepage = taskKey[Unit]("Copy homepage static files into backend target.")}

@@ -1,30 +1,31 @@
-package io.udash.homepage.views
+package io.udash.guide.views
 
 import io.udash._
+import io.udash.wrappers.jquery._
 import io.udash.core.DomWindow
-import io.udash.homepage.IndexState
-import io.udash.homepage.styles.GlobalStyles
-import io.udash.homepage.styles.partials.{FooterStyles, HeaderStyles, HomepageStyles}
+import io.udash.guide.{ErrorState, IntroState}
+import io.udash.guide.styles.GlobalStyles
+import io.udash.guide.styles.partials.{FooterStyles, GuideStyles, HeaderStyles}
 import org.scalajs.dom.Element
 
 import scalatags.JsDom.tags2._
 import scalacss.ScalatagsCss._
-import io.udash.homepage.Context._
-import io.udash.homepage.styles.constant.StyleConstants
+import io.udash.guide.Context._
+import io.udash.guide.styles.constant.StyleConstants
 import io.udash.wrappers.jquery._
 
-object ErrorViewPresenter extends DefaultViewPresenterFactory[IndexState](() => new ErrorView)
+object ErrorViewPresenter extends DefaultViewPresenterFactory[ErrorState.type](() => new ErrorView)
 
 class ErrorView extends View {
   import scalatags.JsDom.all._
 
-  private val content = section(HomepageStyles.sectionError)(
+  private val content = section(GuideStyles.sectionError)(
     div(GlobalStyles.body)(
-      div(HomepageStyles.errorInner)(
-        p(HomepageStyles.errorHead)(
+      div(GuideStyles.errorInner)(
+        p(GuideStyles.errorHead)(
           span(GlobalStyles.red)("Oops! 404"), br(),
           span("The link doesn’t work. Or maybe it never has? You can still ", a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")), br(),
-          span("... or go "), a(GlobalStyles.red, href := IndexState(None).url)("home"), span(".")
+          span("... or go "), a(GlobalStyles.red, href := IntroState.url)("home"), span("")
         )
       )
     )
@@ -38,7 +39,7 @@ class ErrorView extends View {
 
   private def onResize(): Unit = {
     if (window.width <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
-      val h = window.height - jQ(s".${FooterStyles.footer.htmlClass}").outerHeight()
+      val h = window.height - jQ(s".${FooterStyles.footer.htmlClass}").outerHeight() - jQ(s".${HeaderStyles.header.htmlClass}").outerHeight()
       jqTemplate.css("min-height", s"${h}px")
     }
   }

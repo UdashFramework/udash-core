@@ -7,7 +7,8 @@ import io.udash.homepage.config.ExternalUrls
 import io.udash.homepage.styles.GlobalStyles
 import io.udash.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.homepage.views.{SVG, Size}
-import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.{JQueryEvent, _}
+import org.scalajs.dom._
 import org.scalajs.dom.raw.Element
 
 import scalacss.ScalatagsCss._
@@ -16,9 +17,10 @@ import scalatags.JsDom.all._
 object Header {
   val PinAttribute = "data-pin"
 
-  Window.onScroll(onScroll)
+  val window = jQ(DomWindow)
+  window.on("scroll", onScroll)
 
-  private def onScroll(): Unit = {
+  private def onScroll(el: Element, ev: JQueryEvent): Unit = {
     val pin = jQ(template).attr(Header.PinAttribute).getOrElse("false").toBoolean
     val scrollTop = jQ(DomWindow).scrollTop()
     val introHeight = jQ(s".${HomepageStyles.sectionIntro.htmlClass}").height()

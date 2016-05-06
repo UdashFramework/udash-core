@@ -45,6 +45,10 @@ object Dependencies extends Build {
     "org.webjars" % "bootstrap-sass" % bootstrapVersion / "3.3.1/javascripts/bootstrap.js" dependsOn "jquery.js"
   ))
 
+  val homepageJSDeps = Def.setting(Seq(
+    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js"
+  ))
+
   val backendDeps = Def.setting(Seq(
     "io.udash" %% "udash-rpc-backend" % udashVersion,
     "io.udash" %% "udash-i18n-backend" % udashVersion,
