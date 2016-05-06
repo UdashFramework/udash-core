@@ -22,8 +22,8 @@ val commonSettings = Seq(
 )
 
 lazy val udashGuide = project.in(file("."))
-  .aggregate(sharedJS, sharedJVM, guide, backend)
-    .dependsOn(backend)
+  .aggregate(sharedJS, sharedJVM, guide, homepage, backend, `frontend-commons`)
+  .dependsOn(backend)
   .settings(
     publishArtifact := false,
     mainClass in Compile := Some("io.udash.guide.Launcher")
@@ -42,26 +42,15 @@ lazy val backend = project.in(file("backend"))
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= backendDeps.value,
 
-    (compile in Compile) <<= (compile in Compile).dependsOn(copyStaticsGuide),
-    copyStaticsGuide := IO.copyDirectory((crossTarget in guide).value / GuideStaticFilesDir, (target in Compile).value / GuideStaticFilesDir),
-    copyStaticsGuide <<= copyStaticsGuide.dependsOn(compileStaticsGuide in guide),
-
-    (compile in Compile) <<= (compile in Compile).dependsOn(copyStaticsHomepage),
-    copyStaticsHomepage := IO.copyDirectory((crossTarget in homepage).value / HomepageStaticFilesDir, (target in Compile).value / HomepageStaticFilesDir),
-    copyStaticsHomepage <<= copyStaticsHomepage.dependsOn(compileStaticsHomepage in homepage),
-
-    mappings in (Compile, packageBin) ++= {
-      copyStaticsGuide.value
-      ((target in Compile).value / GuideStaticFilesDir).***.get map { file =>
-        file -> file.getAbsolutePath.stripPrefix((target in Compile).value.getAbsolutePath)
-      }
+    (compile in Compile) <<= (compile in Compile).dependsOn(copyStatics),
+    copyStatics := {
+      copyStaticsToBackend(homepage).value
+      copyStaticsToBackend(guide).value
     },
+    copyStatics <<= copyStatics.dependsOn(compileStatics in guide, compileStatics in homepage),
 
     mappings in (Compile, packageBin) ++= {
-      copyStaticsHomepage.value
-      ((target in Compile).value / HomepageStaticFilesDir).***.get map { file =>
-        file -> file.getAbsolutePath.stripPrefix((target in Compile).value.getAbsolutePath)
-      }
+      prepareMappings(homepage).value ++ prepareMappings(guide).value
     },
 
     watchSources ++= (sourceDirectory in guide).value.***.get,
@@ -76,71 +65,77 @@ lazy val backend = project.in(file("backend"))
     }
   )
 
-lazy val guide = project.in(file("guide")).enablePlugins(ScalaJSPlugin)
+lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJS)
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= frontendDeps.value,
-    jsDependencies ++= frontendJSDeps.value,
-    persistLauncher in Compile := true,
+  .settings(commonSettings: _*)
+  .settings(
+    staticFilesDir := "UdashStatic/commons",
+    compileStatics := {
+      IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", target.value / staticFilesDir.value / "WebContent/assets/pdf")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/svg", target.value / staticFilesDir.value / "WebContent/assets/svg")
+      target.value / staticFilesDir.value
+    }
+  )
 
-    compileStaticsGuide := {
-      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / GuideStaticFilesDir / "WebContent/assets/fonts")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", crossTarget.value / GuideStaticFilesDir / "WebContent/assets/pdf")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/images", crossTarget.value / GuideStaticFilesDir / "WebContent/assets/images")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/svg", crossTarget.value / GuideStaticFilesDir / "WebContent/assets/svg")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/prism", crossTarget.value / GuideStaticFilesDir / "WebContent/assets/prism")
-      compileStaticsGuideForRelease.value
-      (crossTarget.value / GuideStaticFilesDir).***.get
+val commonFrontendSettings = Seq(
+  libraryDependencies ++= frontendDeps.value,
+  jsDependencies ++= frontendJSDeps.value,
+  persistLauncher in Compile := true,
+
+  compile <<= (compile in Compile),
+
+  artifactPath in(Compile, fastOptJS) :=
+    (target in(Compile, fastOptJS)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-impl-fast.js",
+  artifactPath in(Compile, fullOptJS) :=
+    (target in(Compile, fullOptJS)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-impl.js",
+  artifactPath in(Compile, packageJSDependencies) :=
+    (target in(Compile, packageJSDependencies)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-deps-fast.js",
+  artifactPath in(Compile, packageMinifiedJSDependencies) :=
+    (target in(Compile, packageMinifiedJSDependencies)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-deps.js",
+  artifactPath in(Compile, packageScalaJSLauncher) :=
+    (target in(Compile, packageScalaJSLauncher)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-init.js",
+
+  requiresDOM in Test := true,
+  persistLauncher in Test := false,
+  scalaJSUseRhino in Test := false
+)
+
+lazy val guide = project.in(file("guide")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`frontend-commons`)
+  .settings(commonSettings: _*)
+  .settings(commonFrontendSettings: _*)
+  .settings(
+    staticFilesDir := "UdashStatic/guide",
+    compileStatics := {
+      IO.copyDirectory((compileStatics in `frontend-commons`).value, target.value / staticFilesDir.value)
+      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", target.value / staticFilesDir.value / "WebContent/assets/fonts")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/images", target.value / staticFilesDir.value / "WebContent/assets/images")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/prism", target.value / staticFilesDir.value / "WebContent/assets/prism")
+      compileStaticsForRelease.value
+      target.value / staticFilesDir.value
     },
-
-    artifactPath in(Compile, fastOptJS) :=
-      (crossTarget in(Compile, fastOptJS)).value / GuideStaticFilesDir / "WebContent" / "scripts" / "frontend-impl-fast.js",
-    artifactPath in(Compile, fullOptJS) :=
-      (crossTarget in(Compile, fullOptJS)).value / GuideStaticFilesDir / "WebContent" / "scripts" / "frontend-impl.js",
-    artifactPath in(Compile, packageJSDependencies) :=
-      (crossTarget in(Compile, packageJSDependencies)).value / GuideStaticFilesDir / "WebContent" / "scripts" / "frontend-deps-fast.js",
-    artifactPath in(Compile, packageMinifiedJSDependencies) :=
-      (crossTarget in(Compile, packageMinifiedJSDependencies)).value / GuideStaticFilesDir / "WebContent" / "scripts" / "frontend-deps.js",
-    artifactPath in(Compile, packageScalaJSLauncher) :=
-      (crossTarget in(Compile, packageScalaJSLauncher)).value / GuideStaticFilesDir / "WebContent" / "scripts" / "frontend-init.js",
-
-    requiresDOM in Test := true,
-    persistLauncher in Test := false,
-    scalaJSUseRhino in Test := false
+    compileStatics <<= compileStatics.dependsOn(compile in Compile)
   )
 
 lazy val homepage = project.in(file("homepage")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(sharedJS)
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= frontendDeps.value,
-    jsDependencies ++= frontendJSDeps.value,
+  .dependsOn(`frontend-commons`)
+  .settings(commonSettings: _*)
+  .settings(commonFrontendSettings: _*)
+  .settings(
     jsDependencies ++= homepageJSDeps.value,
-    persistLauncher in Compile := true,
 
-    compile <<= (compile in Compile),
-    compileStaticsHomepage := {
-      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/fonts")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/pdf")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/images", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/images")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/svg", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/svg")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/prism", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/prism")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/scrollbar", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/scrollbar")
-      IO.copyDirectory(sourceDirectory.value / "main/assets/svg4everybody", crossTarget.value / HomepageStaticFilesDir / "WebContent/assets/svg4everybody")
-      compileStaticsHomepageForRelease.value
-      (crossTarget.value / HomepageStaticFilesDir).***.get
+    staticFilesDir := "UdashStatic/homepage",
+    compileStatics := {
+      IO.copyDirectory((compileStatics in `frontend-commons`).value, target.value / staticFilesDir.value)
+      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", target.value / staticFilesDir.value / "WebContent/assets/fonts")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/images", target.value / staticFilesDir.value / "WebContent/assets/images")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/prism", target.value / staticFilesDir.value / "WebContent/assets/prism")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/scrollbar", target.value / staticFilesDir.value / "WebContent/assets/scrollbar")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/svg4everybody", target.value / staticFilesDir.value / "WebContent/assets/svg4everybody")
+      compileStaticsForRelease.value
+      target.value / staticFilesDir.value
     },
-    compileStaticsHomepage <<= compileStaticsHomepage.dependsOn(compile in Compile),
-
-    artifactPath in(Compile, fastOptJS) :=
-      (crossTarget in(Compile, fastOptJS)).value / HomepageStaticFilesDir / "WebContent" / "scripts" / "frontend-impl-fast.js",
-    artifactPath in(Compile, fullOptJS) :=
-      (crossTarget in(Compile, fullOptJS)).value / HomepageStaticFilesDir / "WebContent" / "scripts" / "frontend-impl.js",
-    artifactPath in(Compile, packageJSDependencies) :=
-      (crossTarget in(Compile, packageJSDependencies)).value / HomepageStaticFilesDir / "WebContent" / "scripts" / "frontend-deps-fast.js",
-    artifactPath in(Compile, packageMinifiedJSDependencies) :=
-      (crossTarget in(Compile, packageMinifiedJSDependencies)).value / HomepageStaticFilesDir / "WebContent" / "scripts" / "frontend-deps.js",
-    artifactPath in(Compile, packageScalaJSLauncher) :=
-      (crossTarget in(Compile, packageScalaJSLauncher)).value / HomepageStaticFilesDir / "WebContent" / "scripts" / "frontend-init.js"
+    compileStatics <<= compileStatics.dependsOn(compile in Compile)
   )
 
 lazy val selenium = project.in(file("selenium"))

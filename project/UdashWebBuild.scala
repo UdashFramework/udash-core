@@ -2,20 +2,19 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt.Keys._
 import sbt._
 
-object UdashGuideBuild extends Build {
-  val GuideStaticFilesDir = "UdashStatic/guide"
-
+object UdashWebBuild extends Build {
   def copyIndex(file: File, to: File) = {
     val newFile = Path(to.toPath.toString + "/index.html")
     IO.copyFile(file, newFile.asFile)
   }
 
-  val compileStaticsGuide = taskKey[Seq[File]]("Guide static files manager.")
-  val copyStaticsGuide = taskKey[Unit]("Copy guide static files into backend target.")
+  val staticFilesDir = settingKey[String]("Frontend application static files manager.")
+  val compileStatics = taskKey[File]("Frontend application static files manager.")
+  val copyStatics = taskKey[Unit]("Copy static files into backend target.")
 
   // Compile proper version of JS depending on build version.
-  val compileStaticsGuideForRelease = Def.taskDyn {
-    val outDir = crossTarget.value / GuideStaticFilesDir / "WebContent"
+  val compileStaticsForRelease = Def.taskDyn {
+    val outDir = target.value / staticFilesDir.value / "WebContent"
     if (!isSnapshot.value) {
       Def.task {
         val indexFile = sourceDirectory.value / s"main/assets/index.prod.html"
@@ -32,6 +31,17 @@ object UdashGuideBuild extends Build {
         (packageJSDependencies in Compile).value
         (packageScalaJSLauncher in Compile).value
       }
+    }
+  }
+
+  def copyStaticsToBackend(p: Project) = Def.task {
+    IO.copyDirectory((target in p).value / (staticFilesDir in p).value, (target in Compile).value / (staticFilesDir in p).value)
+  }
+
+  def prepareMappings(p: Project) = Def.task {
+    copyStatics.value
+    ((target in Compile).value / (staticFilesDir in p).value).***.get map { file =>
+      file -> file.getAbsolutePath.stripPrefix((target in Compile).value.getAbsolutePath)
     }
   }
 }

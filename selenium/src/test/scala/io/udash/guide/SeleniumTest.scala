@@ -42,7 +42,7 @@ class InternalServerConfig extends ServerConfig {
 
   override def createUrl(part: String): String = {
     require(part.startsWith("/"))
-    s"http://localhost:${guideCtx.getBean(classOf[ApplicationServer]).port}$part"
+    s"http://127.0.0.2:${guideCtx.getBean(classOf[ApplicationServer]).port}$part"
   }
 }
 
