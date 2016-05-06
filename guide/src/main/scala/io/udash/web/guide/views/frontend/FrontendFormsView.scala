@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import org.scalajs.dom
@@ -64,7 +64,7 @@ class FrontendFormsView extends View {
         |    span(bind(age))
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new TextInputDemoComponent,
     h3("TextArea"),
     p("Below you can find a similar example, this time with text areas."),
@@ -76,7 +76,7 @@ class FrontendFormsView extends View {
         |  TextArea(text),
         |  TextArea(text)
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new TextAreaDemoComponent,
     h3("Checkbox"),
     p(
@@ -97,7 +97,7 @@ class FrontendFormsView extends View {
         |  Checkbox(propB), " B -> ", bind(propB),
         |  Checkbox(propCAsBoolean), " C -> ", bind(propC)
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new CheckboxDemoComponent,
     h3("CheckButtons"),
     p(
@@ -130,7 +130,7 @@ class FrontendFormsView extends View {
         |    )
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new CheckButtonsDemoComponent,
     h3("RadioButtons"),
     p(
@@ -161,7 +161,7 @@ class FrontendFormsView extends View {
         |    )
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new RadioButtonsDemoComponent,
     h3("Select"),
     p("The HTML select element might be used in two ways: with or without multi selection. Below you can find examples of both usages."),
@@ -186,7 +186,7 @@ class FrontendFormsView extends View {
         |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString)
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new SelectDemoComponent,
     h4("Select with multiple selected values"),
     p("Notice that the only difference is the type of the used property."),
@@ -211,7 +211,7 @@ class FrontendFormsView extends View {
         |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString))
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     new MultiSelectDemoComponent,
     h2("What's next?"),
     p(

@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
-import io.udash.web.guide.components.CodeBlock
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos.ClientIdDemoComponent
 import io.udash.web.guide.{Context, _}
@@ -33,14 +33,15 @@ class RpcClientServerView extends View {
     CodeBlock(
       """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
-        |)""".stripMargin)(),
+        |)""".stripMargin
+    )(GuideStyles),
     p(
       i("MainClientRPC"), " and ", i("MainServerRPC"), " are root the RPC interfaces of the application. ",
       i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. Ignore it for now, this topic will be covered in the ",
       a(href := RpcServerClientState.url)("Server ➔ Client communication"), " chapter."
     )(),
     p("Now you can use ", i("serverRpc"), " to make RPC calls from the client to the server application."),
-    CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(),
+    CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
     h2("Backend endpoints implementation"),
     p("There are many ways of implementing the backend RPC interface. Below you can find description of three possible solutions:"),
     ul(GuideStyles.defaultList)(
@@ -73,7 +74,7 @@ class RpcClientServerView extends View {
       """object MainRpcEndpoint extends MainServerRpc {
         |  /** Methods implementation... */
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), ""),
     CodeBlock(
       """class BasicAtmosphereServiceConfig[ServerRPCType]
@@ -89,14 +90,14 @@ class RpcClientServerView extends View {
         |
         |  override def onClose(resource: AtmosphereResource): Unit = {}
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can use it in the following way:"),
     CodeBlock(
       """val config = new BasicAtmosphereServiceConfig(
         |  new DefaultExposesServerRPC[MainServerRPC](MainRpcEndpoint)
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
-    )(),
+    )(GuideStyles),
     p("This is a very simple example of backend implementation. Unfortunately, it is only sufficient for very small and simple applications."),
     h3("Client-aware implementation"),
     p(
@@ -107,7 +108,7 @@ class RpcClientServerView extends View {
       """class MainRpcEndpoint(implicit val clientId: ClientId) extends MainServerRpc {
         |  /** Methods implementation... */
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Now the RPC interface is implemented as a class, with the constructor taking a ", i("ClientId"), ". This is an implicit argument ",
       " in order to make passing the client id to nested interfaces implementations easier. Now the ", i("AtmosphereServiceConfig"),
@@ -137,7 +138,7 @@ class RpcClientServerView extends View {
         |
         |  override def onClose(resource: AtmosphereResource): Unit = {}
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "This is the default ", i("AtmosphereServiceConfig"), " implementation from Udash. It creates a new RPC endpoint for each ",
       "connection and stores it in the session attribute. Usage is as simple as earlier:"
@@ -149,7 +150,7 @@ class RpcClientServerView extends View {
         |  )
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
-    )(),
+    )(GuideStyles),
     h4("Example"),
     p("Click the below button to get your ", i("ClientId"), ":"),
     new ClientIdDemoComponent,
@@ -194,7 +195,7 @@ class RpcClientServerView extends View {
         |
         |  private def checkIfPrime(n: BigInt): Boolean = ???
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("In such implementation you can create a single service instance and a lightweight endpoint per client connection in the following way:"),
     CodeBlock(
       """val service = new PrimeService
@@ -204,7 +205,7 @@ class RpcClientServerView extends View {
         |  )
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("User-aware implementation"),
     p("More complex services might need the ", i("UserContext"), " of the method call. Look at one of possible ways to provide it:"),
     ul(GuideStyles.defaultList)(
@@ -248,7 +249,7 @@ class RpcClientServerView extends View {
         |
         |  private def checkIfPrime(n: BigInt): Boolean = ???
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "The above example is similar to the previous one. Now ", i("MainRpcEndpoint"), " receives ", i("UserContext"),
       " and checks if the user has permission required to call the service method. The ", i("isPrime"), " method from the ",
@@ -306,7 +307,7 @@ class RpcClientServerView extends View {
         |    }
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "This time the ", i("AtmosphereServiceConfig"), " is expected to authenticate calls before passing them to the RPC endpoints. ",
       "The ", i("UserContext"), " is cached per connection, just like the RPC endpoints in the previous examples. The ", i("resolveUserContext"), " method ",
@@ -323,7 +324,7 @@ class RpcClientServerView extends View {
         |  ), auth
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"), " chapter interesting later on. "

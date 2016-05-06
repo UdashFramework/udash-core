@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 
@@ -42,7 +42,7 @@ class FrontendPropertiesView extends View {
         |  case Failure(ex) =>
         |    println("Validation process went wrong...")
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("That was the simple example. Now it is time for something more complex:"),
     CodeBlock(
       """trait NumbersInRange {
@@ -59,7 +59,7 @@ class FrontendPropertiesView extends View {
         |s.set(Seq(3,7,20,32))
         |s.replace(idx = 1, amount = 2, values = Seq(8,9,10))
         |""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "As you can see, you can create a Property based on trait or Seq. This will be discussed later. "
     ),
@@ -109,7 +109,7 @@ class FrontendPropertiesView extends View {
         |// print responses
         |val responses: DirectSeqProperty[Comment] = comment.subSeq(_.responses)
         |responses.elemProperties.foreach(r => println(r.asModel.subProp(_.content)))""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The ", i("comment"), " property might be illustrated like:"),
     FrontendImage("propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.imgBig, GuideStyles.frame),
     p(
@@ -144,7 +144,7 @@ class FrontendPropertiesView extends View {
         |name.isValid                   // returns Future(Valid)
         |comment.subProp(_.author).isValid    // returns Future(Valid)
         |comment.isValid                      // returns Future(Valid)""".stripMargin
-    )(),
+    )(GuideStyles),
     p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
     ul(GuideStyles.defaultList)(
       li(i("Property"), " - every added validator accepts a value"),
@@ -162,7 +162,7 @@ class FrontendPropertiesView extends View {
         |comment.subProp(_.content).listen(_ => println("D"))
         |comment.subProp(_.author.name).set("Name")    // prints A, B and C
         |comment.subProp(_.content).set("Content")     // prints C and D""".stripMargin
-    )(),
+    )(GuideStyles),
     p("As you may notice, when you change a nested property, all its ancestors will be treated as changed."),
     p(
       "SeqProperty has the ", i("listenStructure"), " method witch allows you to listen on adding or removing elements ",
@@ -175,7 +175,7 @@ class FrontendPropertiesView extends View {
         |
         |ints.insert(0, Seq(1, 2, 3))           // fires both listeners
         |ints.elemProperties.head.set(5)        // prints only "listen"""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("Properties transformation"),
     p("You can also change the type of a property. Let's assume the User model looks like below:"),
     CodeBlock(
@@ -187,13 +187,13 @@ class FrontendPropertiesView extends View {
         |}
         |
         |val user = ModelProperty[User]""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now, if you want to obtain the user id property as Int, you can use the ", i("transform"), " method:"),
     CodeBlock(
       """val userId: Property[Int] = user.subProp(_.id)
         |  .transform(_.asInt, (i: Int) => UserId(i))
         |val name: ReadableProperty[String] = user.transform(_.name)""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Remember that ", i("userId"), " is not a new property. All operations will be synchronized between the both ",
       "original and new property. "
@@ -208,7 +208,7 @@ class FrontendPropertiesView extends View {
         |val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
         |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
         |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at ", a(href := FrontendBindingsState.url)("Template Data Binding"),

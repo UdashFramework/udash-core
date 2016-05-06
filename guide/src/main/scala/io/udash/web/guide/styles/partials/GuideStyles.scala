@@ -2,9 +2,10 @@ package io.udash.web.guide.styles.partials
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.components.CodeBlockStyles
+import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.components.GuideMenu
 import io.udash.web.guide.styles.GlobalStyles
-import io.udash.web.guide.styles.constant.StyleConstants
 import io.udash.web.guide.styles.fonts.{FontWeight, UdashFonts}
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
@@ -13,7 +14,7 @@ import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object GuideStyles extends StyleSheet.Inline {
+object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
   import dsl._
 
   val main = style(

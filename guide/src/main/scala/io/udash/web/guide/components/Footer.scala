@@ -1,10 +1,10 @@
 package io.udash.web.guide.components
 
-import io.udash.web.guide.config.ExternalUrls
+import io.udash.web.commons.views.Image
+import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.FooterStyles
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.Image
 import org.scalajs.dom.raw.Element
 
 import scalatags.JsDom.all._

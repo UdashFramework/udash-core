@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos.IntroFormDemoComponent
@@ -166,7 +166,7 @@ class FrontendIntroView extends View {
         |  }
         |}
       """.stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendRoutingState(None).url)("Routing in Udash"),

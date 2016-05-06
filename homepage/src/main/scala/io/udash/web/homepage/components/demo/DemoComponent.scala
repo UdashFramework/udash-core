@@ -1,17 +1,16 @@
 package io.udash.web.homepage.components.demo
 
-import io.udash.core.{DomWindow, Window}
-import io.udash.web.homepage.Context._
-import io.udash.web.homepage.{Context, ErrorState, IndexState, RoutingState}
-import io.udash.web.homepage.components.CodeBlock
-import io.udash.web.homepage.styles.constant.StyleConstants
-import io.udash.web.homepage.styles.partials.DemoStyles
-import io.udash.web.homepage.views.Image
-import io.udash.wrappers.jquery.scrollbar._
+import io.udash.core.DomWindow
 import io.udash.properties.Property
-import io.udash.routing.StateChangeEvent
 import io.udash.view.Component
+import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.styles.utils.StyleConstants
+import io.udash.web.homepage.Context._
+import io.udash.web.homepage.IndexState
+import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
+import io.udash.web.commons.views.Image
 import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.scrollbar._
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
@@ -115,7 +114,7 @@ object DemoComponent {
       |  TextInput(name), br,
       |  produce(name)(name => h3(s"Hello, $name!").render)
       |).render""".stripMargin
-  )()
+  )(HomepageStyles)
 
   def propertiesCode = CodeBlock(
     """import scalajs.concurrent.JSExecutionContext.Implicits
@@ -150,7 +149,7 @@ object DemoComponent {
       |  "Evens: ", repeat(evens)(renderer), br,
       |  "Odds: ", repeat(odds)(renderer)
       |).render""".stripMargin
-  )()
+  )(HomepageStyles)
 
   def validationCode = CodeBlock(
     """import scalajs.concurrent.JSExecutionContext.Implicits
@@ -183,7 +182,7 @@ object DemoComponent {
       |    _ => span("ERROR").render
       |  )
       |).render""".stripMargin
-  )()
+  )(HomepageStyles)
 
   def demoEntries: Seq[DemoEntry] = Seq(
     DemoEntry("Hello, World!", IndexState(Option("hello")).url, DemoPreview.helloWorldDemo, helloWorldCode),

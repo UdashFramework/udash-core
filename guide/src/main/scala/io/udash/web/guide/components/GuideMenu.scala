@@ -1,9 +1,9 @@
 package io.udash.web.guide.components
 
 import io.udash.web.guide.styles.partials.{GuideStyles, MenuStyles}
-import io.udash.web.guide.views.{SVG, Size}
 import io.udash.web.guide.{Context, _}
 import io.udash.properties.Property
+import io.udash.web.commons.views.{SVG, Size}
 import io.udash.wrappers.jquery._
 
 import scalacss.ScalatagsCss._

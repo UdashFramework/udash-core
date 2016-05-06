@@ -2,10 +2,10 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.routing.WindowUrlChangeProvider
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.{BootstrapStyles, GlobalStyles}
 import org.scalajs.dom
 
@@ -45,7 +45,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
     ),
     h3("URL"),
     p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),
-    CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(),
+    CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(GuideStyles),
     div(GuideStyles.frame)(
       p(
         span("The URL of this page is: "),
@@ -68,7 +68,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       """case class UsersListState(searchQuery: Option[String]) extends RoutingState(RootState)
         |case class UserDetailsState(username: String) extends RoutingState(RootState)
         |case object Dashboard extends RoutingState(RootState)""".stripMargin
-    )(),
+    )(GuideStyles),
     p(i("RoutingRegistry"), " is used to create a new application state on an URL change. For example:"),
     CodeBlock(
       """class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
@@ -85,7 +85,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
         |    case "/users/details" /:/ username => UserDetailsState(username)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "You can pass URL parts into the application state, just use the ", i("/:/"), " operator like in the example above. ",
       "For ", i("UsersListState"), " it is possible to keep some ",
@@ -107,7 +107,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
         |      case UserDetailsState(username) => UserDetailsViewPresenter(username)
         |    }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Notice that matching for ", i("UsersListState"), " always returns the same ", i("UsersListViewPresenter"), " and ",
       "for ", i("UserDetailsState"), " always returns new ", i("UserDetailsViewPresenter"), ""

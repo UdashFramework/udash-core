@@ -3,8 +3,8 @@ package io.udash.web.guide.views.frontend
 import java.util.concurrent.TimeUnit
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.wrappers.jquery._
@@ -61,7 +61,7 @@ class FrontendTemplatesView extends View {
         |    )
         |  )
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Will be compiled to this HTML:"),
     CodeBlock(
       """<html>
@@ -80,7 +80,7 @@ class FrontendTemplatesView extends View {
         |    </main>
         |  </body>
         |</html>""".stripMargin
-    )(),
+    )(GuideStyles),
     p("With Scalatags you can also bind callbacks, just like in HTML."),
     CodeBlock(
       """a(
@@ -88,7 +88,7 @@ class FrontendTemplatesView extends View {
         |  id := "example-button",
         |  onclick := { () => jQ("#example-button").toggleClass("btn-success") }
         |)("Click me")""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("ScalaCSS"),
     p(
       "ScalaCSS is a library for creating CSS stylesheets with the Scala language. Using inline stylesheets is type safe ",
@@ -142,7 +142,7 @@ class FrontendTemplatesView extends View {
         |    )
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Using Scalatags:"),
     CodeBlock(
       """div(
@@ -154,7 +154,7 @@ class FrontendTemplatesView extends View {
         |    }
         |  )("Click me")
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     div(GuideStyles.frame)(
       a(
         ExampleStyles.btn, ExampleStyles.btnDefault, id := "example-button",
@@ -215,7 +215,7 @@ class FrontendTemplatesView extends View {
         |    )
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     CodeBlock(
       """a(
         |  ExampleStyles.swither, id := "example-switcher", data("state") := "off",
@@ -231,7 +231,7 @@ class FrontendTemplatesView extends View {
         |  div(ExampleStyles.innerOff)("Off"),
         |  div(ExampleStyles.innerOn)("On")
         |)""".stripMargin
-    )(),
+    )(GuideStyles),
     div(GuideStyles.frame)(
       a(ExampleStyles.swither, id := "example-switcher", data("state") := "off", onclick := { () =>
         val jqSwitcher = jQ("#example-switcher")
@@ -271,7 +271,7 @@ class FrontendTemplatesView extends View {
         |    animationDuration(2 seconds)
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("Mixins"),
     p("If you need some mixins, you can define methods which return a StyleA typed object:"),
     CodeBlock(
@@ -287,7 +287,7 @@ class FrontendTemplatesView extends View {
         |    easing
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Using keyframes and animation mixins, you can create a button with a simple animation when you hover over it, for example:"),
     CodeBlock(
       """object ExampleStyles extends StyleSheet.Inline {
@@ -303,12 +303,12 @@ class FrontendTemplatesView extends View {
         |    }
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     CodeBlock(
       """a(
         |  ExampleStyles.btn + ExampleStyles.btnDefault + ExampleStyles.btnAnimated
         |)("Hover over me")""".stripMargin
-    )(),
+    )(GuideStyles),
     div(GuideStyles.frame)(
       a(ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated)( "Hover over me" )
     ),
@@ -343,7 +343,7 @@ class FrontendTemplatesView extends View {
         |    )
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     CodeBlock(
       """div(
         |  ExampleStyles.mediaContainer + ExampleStyles.mediaDesktop
@@ -351,7 +351,7 @@ class FrontendTemplatesView extends View {
         |div(
         |  ExampleStyles.mediaContainer + ExampleStyles.mediaTablet
         |)("Increase the browser width")""".stripMargin
-    )(),
+    )(GuideStyles),
     div(
       div(ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop)( "Reduce the browser width" ),
       div(ExampleStyles.mediaContainer, ExampleStyles.mediaTablet)( "Increase the browser width" )

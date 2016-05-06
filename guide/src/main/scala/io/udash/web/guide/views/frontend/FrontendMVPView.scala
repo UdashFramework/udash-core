@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import org.scalajs.dom
@@ -65,7 +65,7 @@ class FrontendMVPView extends View {
         |s.set(Seq(3,7,20,32))
         |s.replace(idx = 1, amount = 2, values = Seq(8,9,10))
         |""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The Properties system is described in the ", a(href := FrontendPropertiesState.url)("Properties"), " chapter."),
     h3("Presenter"),
     p(
@@ -85,7 +85,7 @@ class FrontendMVPView extends View {
         |  def decButtonClick(): Unit =
         |    model.set(model.get - 1)
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("View"),
     p(
       "The View implementation usually gets the Model and the Presenter as constructor arguments. They can be used ",
@@ -124,7 +124,7 @@ class FrontendMVPView extends View {
         |    jQ(child).html(childView.getTemplate)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendTemplatesState.url)("Scalatags & ScalaCSS"), " chapter to ",

@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
@@ -51,7 +51,7 @@ class BootstrappingFrontendView extends View {
         |case object SubscribeState extends RoutingState(NewsletterState)
         |
         |case object UnsubscribeState extends RoutingState(NewsletterState)""".stripMargin
-    )(),
+    )(GuideStyles),
     BootstrappingImage("states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
     h3("Routing system"),
     p(
@@ -76,7 +76,7 @@ class BootstrappingFrontendView extends View {
         |    case "/newsletter/unsubscribe" => UnsubscribeState
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       i("Bidirectional"), " returns tuple ",
       i("(PartialFunction[String, RoutingState], PartialFunction[RoutingState, String])"),
@@ -99,7 +99,7 @@ class BootstrappingFrontendView extends View {
                 |      case _ => ErrorViewPresenter
                 |    }
                 |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Each ViewPresenter is expected to initialize a View and a Presenter. At this point you can create the shared model for them."),
     CodeBlock(
       """trait SubscribeModel {
@@ -156,7 +156,7 @@ class BootstrappingFrontendView extends View {
         |    * This method should place view template inside DOM. */
         |  override def renderChild(view: View): Unit = ()
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "The above example shows simple View, Presenter and ViewPresenter implementations. ",
       ul(GuideStyles.defaultList)(
@@ -200,7 +200,7 @@ class BootstrappingFrontendView extends View {
         |    jQ(child).html(view.getTemplate)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("Udash Application"),
     p(
       "Everything is ready to create ", i("Application"), ". It can be done in some object, " +
@@ -218,7 +218,7 @@ class BootstrappingFrontendView extends View {
         |    routingRegistry, viewPresenterRegistry, RootState
         |  )
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("ScalaJS needs the main function that will initialize the whole application. For example: "),
     CodeBlock(
       """object Init extends JSApp {
@@ -231,7 +231,7 @@ class BootstrappingFrontendView extends View {
         |    })
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The application should compile and it is ready to start."),
     h3("Frontend RPC"),
     p("The last thing that should be bootstrapped is the client RPC implementation."),
@@ -241,15 +241,15 @@ class BootstrappingFrontendView extends View {
         |  override def pong(id: Int): Unit =
         |    println(s"pong $id")
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now, in the Context object, create ", i("DefaultServerRPC"), ":"),
-    CodeBlock("""val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)""".stripMargin)(),
+    CodeBlock("""val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)""".stripMargin)(GuideStyles),
     p("You can use serverRpc like that:"),
     CodeBlock("""serverRpc.hello("World") onComplete {
                 |  case Success(r) => println(r)
                 |  case Failure(ex) => println(ex)
                 |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Now all parts of the Udash application are ready. You can find a complete demo application in ",

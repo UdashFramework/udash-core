@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos.NotificationsDemoComponent
 import org.scalajs.dom
@@ -35,13 +35,14 @@ class RpcServerClientView extends View {
     CodeBlock(
       """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
-        |)""".stripMargin)(),
+        |)""".stripMargin
+    )(GuideStyles),
     p("The ", i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. For example:"),
     CodeBlock(
       """class FrontendRPCService extends MainClientRPC {
         |  /** Methods implementation... */
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("That is all you have to do in the frontend code."),
     h2("Push notifications"),
     p(
@@ -54,18 +55,18 @@ class RpcServerClientView extends View {
         |           (implicit ec: ExecutionContext): MainClientRPC =
         |    new DefaultClientRPC[MainClientRPC](target).get
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can call a client method in the following way:"),
     CodeBlock(
       """val clientRpc = ClientRPC(clientId) // RPC for this client can be reused
         |clientRpc.methodFromMainClientRPC()""".stripMargin
-    )(),
+    )(GuideStyles),
     h3("Broadcasting messages"),
     p("With the above ", i("ClientRPC"), " wrapper, it is easy to broadcast the method call to all active connections:"),
-    CodeBlock("""ClientRPC(AllClients).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(AllClients).methodFromMainClientRPC()""")(GuideStyles),
     h3("Message to concrete client"),
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
-    CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(),
+    CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(GuideStyles),
     h2("Notifications example"),
     new NotificationsDemoComponent,
     p("The code of the example above:"),
@@ -83,7 +84,7 @@ class RpcServerClientView extends View {
         |  def register(): Future[Unit]
         |  def unregister(): Future[Unit]
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     CodeBlock (
       """/** Client implementation */
         |object NotificationsClient extends NotificationsClientRPC {
@@ -108,7 +109,7 @@ class RpcServerClientView extends View {
         |    listeners.foreach(_(msg))
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     CodeBlock(
       """/** Server implementation */
         |class NotificationsServer(implicit clientId: ClientId)
@@ -150,9 +151,9 @@ class RpcServerClientView extends View {
         |    }
         |  })
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("To start receiving messages from the server just call:"),
-    CodeBlock("NotificationsClient.registerListener((msg: String) => println(msg))")(),
+    CodeBlock("NotificationsClient.registerListener((msg: String) => println(msg))")(GuideStyles),
     h2("What's next?"),
     p(
       "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "

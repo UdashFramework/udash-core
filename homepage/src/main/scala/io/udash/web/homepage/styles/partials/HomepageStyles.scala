@@ -1,14 +1,14 @@
 package io.udash.web.homepage.styles.partials
 
-import io.udash.web.homepage.styles.constant.StyleConstants
+import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.homepage.styles.fonts.{FontStyle, FontWeight, UdashFonts}
-import io.udash.web.homepage.styles.utils.{MediaQueries, StyleUtils}
+import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 
 import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object HomepageStyles extends StyleSheet.Inline {
+object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
   import dsl._
 
   val section = style(

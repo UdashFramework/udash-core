@@ -1,9 +1,7 @@
-package io.udash.web.homepage.styles.utils
+package io.udash.web.commons.styles.utils
 
-import io.udash.web.homepage.styles.constant.StyleConstants
-
-import scalacss.Defaults._
 import scala.language.postfixOps
+import scalacss.Defaults._
 
 /**
   * Created by malchik on 2016-03-30.

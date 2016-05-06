@@ -1,14 +1,13 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import org.scalajs.dom
 
 import scalatags.JsDom
-
 import scalacss.ScalatagsCss._
 
 case object FrontendBindingsViewPresenter extends DefaultViewPresenterFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
@@ -27,7 +26,7 @@ class FrontendBindingsView extends View {
     p("Udash provides many ways to bind properties to Scalatags templates. To use them you have to add this import in your code:"),
     CodeBlock(
       """import io.udash._""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Let's briefly introduce all these methods:"),
     ul(GuideStyles.defaultList)(
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
@@ -46,7 +45,7 @@ class FrontendBindingsView extends View {
         |val template: Element = div(
         |  "Name: ", bind(name)
         |).render""".stripMargin
-    )(),
+    )(GuideStyles),
     new BindDemoComponent,
     p("As you can see the ", i("bind"), " method automatically updates displayed name on every change of the property value."),
     h3("produce"),
@@ -89,7 +88,7 @@ class FrontendBindingsView extends View {
         |    }
         |  )
         |).render""".stripMargin
-    )(),
+    )(GuideStyles),
     new ProduceDemoComponent,
     p(
       "The above example presents three variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
@@ -116,7 +115,7 @@ class FrontendBindingsView extends View {
         |  "Integers: ",
         |  repeat(integers)(p => span(s"${p.get}, ").render)
         |).render""".stripMargin
-    )(),
+    )(GuideStyles),
     new RepeatDemoComponent,
     p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
     h3("bindValidation"),
@@ -158,7 +157,7 @@ class FrontendBindingsView extends View {
         |    _ => span("Validation error...").render
         |  )
         |).render""".stripMargin
-    )(),
+    )(GuideStyles),
     new BindValidationDemoComponent,
     p(
       "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
@@ -175,7 +174,8 @@ class FrontendBindingsView extends View {
                 |    if (show) el.setAttribute("style", "display: inline;")
                 |    else el.setAttribute("style", "display: none;")
                 |  }))("Show/hide")
-                |).render""".stripMargin)(),
+                |).render""".stripMargin
+    )(GuideStyles),
     new BindAttributeDemoComponent,
     p("On every change of the property value, passed callback is called and it can change the element attributes."),
     h2("What's next?"),

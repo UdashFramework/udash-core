@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import org.scalajs.dom
@@ -61,7 +61,7 @@ class RpcInterfacesView extends View {
         |  def innerFire(): Unit
         |  def innerCall(arg: Int): Future[String]
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Inside ", i("ServerRPC"), " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
       i("@RPCName"), " allows you to change a method name for serialization purposes, it is useful for overloaded methods in the RPC interface. ",
@@ -86,7 +86,7 @@ class RpcInterfacesView extends View {
         |    case Failure(ex) => println(ex)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Important: method call returning another RPC interface does not send anything over the network."),
     h3("Client-side RPC interface"),
     p(
@@ -112,7 +112,7 @@ class RpcInterfacesView extends View {
         |trait ClientInnerRPC {
         |  def innerFire(): Unit
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Notice that ", i("ClientInnerRPC"), " is also a client RPC interface. It is impossible to return a standard RPC ",
       "interface inside client RPC."
@@ -151,7 +151,7 @@ class RpcInterfacesView extends View {
         |  def subscribe(): Unit
         |  def unsubscribe(reason: String): Unit
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Thanks to such interface arrangement, you have only one entry point to RPC communication. Do not worry that your hierarchy " +
       "may be too deep - you can obtain a nested interface, without any performance impact in the following way: "
@@ -161,7 +161,7 @@ class RpcInterfacesView extends View {
         |  val subscriptions: NewsletterSubscriptionRPC = rpc.newsletter().subscriptions()
         |  // operations using NewsletterSubscriptionRPC...
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Now you know more about Udash RPC interfaces. You might also want to take a look at ",

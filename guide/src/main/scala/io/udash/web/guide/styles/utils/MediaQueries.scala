@@ -1,6 +1,6 @@
 package io.udash.web.guide.styles.utils
 
-import io.udash.web.guide.styles.constant.StyleConstants
+import io.udash.web.commons.styles.utils.StyleConstants
 
 import scalacss.Defaults._
 import scala.language.postfixOps

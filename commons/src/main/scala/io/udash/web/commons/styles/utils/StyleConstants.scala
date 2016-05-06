@@ -1,4 +1,4 @@
-package io.udash.web.homepage.styles.constant
+package io.udash.web.commons.styles.utils
 
 /**
   * Created by malchik on 2016-03-22.
@@ -17,9 +17,15 @@ object StyleConstants extends StyleSheet.Inline{
 
     val MinSiteHeight = 550
 
-    val HeaderHeight = 150
+    val LandingPageHeaderHeight = 150
+
+    val HeaderHeight = 80
+
+    val HeaderHeightMobile = 80
 
     val HeaderHeightPin = 80
+
+    val FooterHeight = 120
 
     val MenuWidth = 320
 

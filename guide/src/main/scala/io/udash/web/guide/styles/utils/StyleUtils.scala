@@ -2,7 +2,7 @@ package io.udash.web.guide.styles.utils
 
 import java.util.concurrent.TimeUnit
 
-import io.udash.web.guide.styles.constant.StyleConstants
+import io.udash.web.commons.styles.utils.StyleConstants
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps

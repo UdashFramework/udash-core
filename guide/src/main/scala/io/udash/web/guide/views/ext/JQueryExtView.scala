@@ -1,8 +1,9 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.views.{References, Versions}
 import org.scalajs.dom
 
@@ -24,7 +25,7 @@ class JQueryExtView extends View {
     p("To start development with the jQuery wrapper add the following line in you frontend module dependencies: "),
     CodeBlock(
       s""""io.udash" %%% "udash-jquery" % "${Versions.udashJQueryVersion}"""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The wrapper provides a typed equivalent of the jQuery ", i("$()"), " operator: "),
     CodeBlock(
       s"""import io.udash.wrappers.jquery._
@@ -34,7 +35,7 @@ class JQueryExtView extends View {
          |
          |val paragraphs = jQ("p")
          |val hello = jQ(component)""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can use any jQuery method on these values: "),
     CodeBlock(
       s"""paragraphs.show(1500, EasingFunction.swing)
@@ -42,7 +43,7 @@ class JQueryExtView extends View {
          |  duration = Some(3000),
          |  easing = Some(EasingFunction.linear)
          |))""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("jQuery event handlers"),
     p("The below example presents events handling with jQuery wrapper: "),
     CodeBlock(
@@ -68,7 +69,7 @@ class JQueryExtView extends View {
          |jQ(".demo #click")
          |  .on("click", onCallback)
          |  .one("click", oneCallback)""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Notice that if you want to use the ", i("off()"), " method, then you have to pass exectly the same object ",
       "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
@@ -101,7 +102,7 @@ class JQueryExtView extends View {
          |
          |callbacks.disable()
          |callbacks.fire(1, 2)""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "You can find more information on the wrapper ", a(href := References.udashjQueryWrapperRepo)("GitHub repository"), " ",

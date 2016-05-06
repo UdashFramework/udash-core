@@ -69,6 +69,7 @@ lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSP
   .dependsOn(sharedJS)
   .settings(commonSettings: _*)
   .settings(
+    libraryDependencies ++= frontendDeps.value,
     staticFilesDir := "UdashStatic/commons",
     compileStatics := {
       IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", target.value / staticFilesDir.value / "WebContent/assets/pdf")
@@ -78,7 +79,6 @@ lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSP
   )
 
 val commonFrontendSettings = Seq(
-  libraryDependencies ++= frontendDeps.value,
   jsDependencies ++= frontendJSDeps.value,
   persistLauncher in Compile := true,
 

@@ -2,9 +2,8 @@ package io.udash.web.homepage.styles.partials
 
 import java.util.concurrent.TimeUnit
 
-import io.udash.web.homepage.styles.constant.StyleConstants
+import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 import io.udash.web.homepage.styles.fonts.{FontWeight, UdashFonts}
-import io.udash.web.homepage.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps

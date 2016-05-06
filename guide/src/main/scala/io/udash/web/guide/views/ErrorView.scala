@@ -3,6 +3,7 @@ package io.udash.web.guide.views
 import io.udash._
 import io.udash.wrappers.jquery._
 import io.udash.core.DomWindow
+import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.{ErrorState, IntroState}
 import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.{FooterStyles, GuideStyles, HeaderStyles}
@@ -11,7 +12,6 @@ import org.scalajs.dom.Element
 import scalatags.JsDom.tags2._
 import scalacss.ScalatagsCss._
 import io.udash.web.guide.Context._
-import io.udash.web.guide.styles.constant.StyleConstants
 import io.udash.wrappers.jquery._
 
 object ErrorViewPresenter extends DefaultViewPresenterFactory[ErrorState.type](() => new ErrorView)

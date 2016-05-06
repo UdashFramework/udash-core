@@ -2,8 +2,8 @@ package io.udash.web.guide.styles.partials
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.components.GuideMenu
-import io.udash.web.guide.styles.constant.StyleConstants
 import io.udash.web.guide.styles.fonts.{FontWeight, UdashFonts}
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 

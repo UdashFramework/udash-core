@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 
@@ -61,7 +61,7 @@ class BootstrappingRpcView extends View {
         |@RPC
         |trait MainClientRPC {
         |  def pong(id: Int): Unit
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     CodeBlock(
       """import com.avsystem.commons.rpc.RPC
         |
@@ -69,7 +69,7 @@ class BootstrappingRpcView extends View {
         |trait MainServerRPC {
         |  def ping(id: Int): Unit
         |  def hello(name: String): Future[String]
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),

@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.GenCodecsDemoComponent
@@ -71,7 +71,7 @@ class RpcSerializationView extends View {
         |  def sendClass(el: DemoClass): Future[DemoClass]
         |  def sendSealedTrait(el: Fruit): Future[Fruit]
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("The backend implementation is not important here. Let's assume that we use these methods as follows:"),
     CodeBlock(
       """val demoRpc: GenCodecServerRPC = ???
@@ -82,7 +82,7 @@ class RpcSerializationView extends View {
         |demoRpc.sendCaseClass(DemoCaseClass(Random.nextInt(), Random.nextString(5)))
         |demoRpc.sendClass(new DemoClass(Random.nextInt(), Random.nextString(5)))
         |demoRpc.sendSealedTrait(Seq(Apple, Orange, Banana)(Random.nextInt(3)))""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Compilation of this code rises an error: No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoClass")),
     p("For custom data types it is required to create implicit value (in companion objects of these types) containing ",
       i("GenCodec"), ". The classic classes requires you to implement ", i("GenCodec"), " manually. ",
@@ -113,7 +113,7 @@ class RpcSerializationView extends View {
         |    }
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now this code should compile fine. Below you can test this exemple. "),
     new GenCodecsDemoComponent,
     h3("Default JSON serialization"),
@@ -135,7 +135,7 @@ class RpcSerializationView extends View {
         |  def stringToRaw(string: String): RawValue = ???
         |  def rawToString(raw: RawValue): String = ???
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "You have to implement five elements:",
       ul(GuideStyles.defaultList)(

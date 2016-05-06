@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 
@@ -40,14 +40,14 @@ class BootstrappingBackendView extends View {
         |
         |  override def hello(name: String): Future[String] =
         |    Future.successful("Hello, ${name}!")
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     p("To make usage of client RPC more friendly, it is recommended to create a wrapper object like the one below:"),
     CodeBlock(
       """object ClientRPC {
         |  def apply(target: ClientRPCTarget)
         |           (implicit ec: ExecutionContext): MainClientRPC =
         |    new DefaultClientRPC[MainClientRPC](target).get
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     h3("Application server"),
     p(
       "Application server creates Jetty server and configures content holders. ", i("resourceBase"), " is the directory contaning ",
@@ -91,7 +91,7 @@ class BootstrappingBackendView extends View {
         |    appHolder.setInitParameter("resourceBase", resourceBase)
         |    appHolder
         |  }
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     p(
       i("AtmosphereServiceConfig"), " is used to manage ", i("ExposedRpcInterfaces"), " instances and link them to ",
         "server connections. At this point you can inject something like a user context into a service layer. In this example ",
@@ -115,7 +115,7 @@ class BootstrappingBackendView extends View {
         |    val duration: Long = (System.nanoTime - startTime).nanos.toUnit(SECONDS)
         |    logger.info(s"Application started in ${duration}s.")
         |  }
-        |}""".stripMargin)(),
+        |}""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
       "Now that the server-side of the application is ready, it is time to implement the ",

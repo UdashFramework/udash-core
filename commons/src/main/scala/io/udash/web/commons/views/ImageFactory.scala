@@ -1,4 +1,4 @@
-package io.udash.web.guide.views
+package io.udash.web.commons.views
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.Element
@@ -17,8 +17,7 @@ class ImageFactory(prefix: String) {
 object Image extends ImageFactory("assets/images")
 
 object SVG {
-  import scalatags.JsDom.svgTags
-  import scalatags.JsDom.svgAttrs
+  import scalatags.JsDom.{svgAttrs, svgTags}
   def apply(name: String, size: Size, xs: Modifier*): JsDom.TypedTag[Element] = {
     div(style := s"position: relative; width: 100%; padding-top: ${100 * size.height / size.width}%")(
       svgTags.svg(xmlns := Namespace.svgNamespaceConfig.uri, svgAttrs.viewBox := s"0 0 ${size.width} ${size.height}", style := "position: absolute; top: 0; left: 0; width: 100%; height: 100%;")(
@@ -27,6 +26,5 @@ object SVG {
     )
   }
 }
-
 
 case class Size(width: Int, height: Int)

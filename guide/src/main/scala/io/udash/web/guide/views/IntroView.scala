@@ -1,10 +1,10 @@
 package io.udash.web.guide.views
 
 import io.udash._
+import io.udash.web.commons.views.ImageFactory
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.Context._
-
 import org.scalajs.dom.Element
 
 import scalacss.ScalatagsCss._

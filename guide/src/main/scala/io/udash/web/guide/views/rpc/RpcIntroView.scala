@@ -1,15 +1,14 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.{PingPongCallDemoComponent, PingPongPushDemoComponent}
 import org.scalajs.dom
 
 import scalacss.ScalatagsCss._
-
 import scalatags.JsDom
 
 case object RpcIntroViewPresenter extends DefaultViewPresenterFactory[RpcIntroState.type](() => new RpcIntroView)
@@ -50,7 +49,7 @@ class RpcIntroView extends View {
         |trait PingPongServerRPC {
         |  def fPing(id: Int): Future[Int]
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("and implement this method in your server code:"),
     CodeBlock(
       """class PingPongEndpoint extends PingPongServerRPC {
@@ -59,14 +58,14 @@ class RpcIntroView extends View {
         |    Future.successful(id)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can call it from the client code:"),
     CodeBlock(
       """serverRpc.fPing(fPingId) onComplete {
         |  case Success(response) => println(s"Pong($response)")
         |  case Failure(ex) => println(s"PongError($ex)")
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     h2("Server push ping-pong example"),
     p("It is also possible to implement the above example using the server push mechanism."),
     new PingPongPushDemoComponent,
@@ -78,7 +77,7 @@ class RpcIntroView extends View {
         |trait PingPongServerRPC {
         |  def ping(id: Int): Unit
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("In the client RPC interface:"),
     CodeBlock(
       """import com.avsystem.commons.rpc.RPC
@@ -87,7 +86,7 @@ class RpcIntroView extends View {
         |trait PingPongClientRPC {
         |  def pong(id: Int): Unit
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("As you can see, now the server-side method does not return any value. We want it to call the client-side method."),
     CodeBlock(
       """class PingPongEndpoint extends PingPongServerRPC {
@@ -96,7 +95,7 @@ class RpcIntroView extends View {
         |    ClientRPC(clientId).pong(id)
         |  }
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(i("clientId"), " is an identity of the client connection passed to the server RPC endpoint."),
     p("There is only the client-side method implementation left:"),
     CodeBlock(
@@ -104,9 +103,9 @@ class RpcIntroView extends View {
         |  override def pong(id: Int): Unit =
         |    println(s"Pong($id)")
         |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can call it:"),
-    CodeBlock("""serverRpc.ping(pingId)""".stripMargin)(),
+    CodeBlock("""serverRpc.ping(pingId)""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
       "Now you know the basics of the Udash RPC system. You should alse take a closer look at ",

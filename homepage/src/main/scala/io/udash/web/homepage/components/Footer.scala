@@ -8,8 +8,8 @@ import org.scalajs.dom.raw.Element
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 import io.udash.web.homepage.Context._
-import io.udash.web.homepage.config.ExternalUrls
-import io.udash.web.homepage.views.Image
+import io.udash.web.commons.config.ExternalUrls
+import io.udash.web.commons.views.Image
 
 object Footer {
   def getTemplate: Element = {

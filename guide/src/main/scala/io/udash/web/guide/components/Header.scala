@@ -1,15 +1,17 @@
 package io.udash.web.guide.components
 
-import io.udash.web.guide.config.ExternalUrls
+import io.udash.web.commons.components.HeaderButtons
+import io.udash.web.commons.views.{Image, SVG, Size}
+import io.udash.web.commons.config.ExternalUrls
+import io.udash.web.commons.styles.components.HeaderButtonsStyles
 import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.HeaderStyles
-import io.udash.web.guide.views.{Image, SVG, Size}
 import org.scalajs.dom.raw.Element
 
 import scalatags.JsDom.all._
 import scalacss.ScalatagsCss._
 
-object Header {
+object Header extends HeaderButtons {
   private lazy val template = header(HeaderStyles.header)(
     div(GlobalStyles.body, GlobalStyles.clearfix)(
       div(HeaderStyles.headerLeft)(
@@ -24,40 +26,11 @@ object Header {
           )
         )*/
       ),
-      div(HeaderStyles.headerRight)(
-        ul(HeaderStyles.headerSocial)(
-          li(HeaderStyles.headerSocialItem)(
-            a(href := ExternalUrls.udashGithub, HeaderStyles.headerSocialLink, target := "_blank")(
-              SVG("github.svg#github", Size(33, 32))
-            )
-          ),
-          /*li(HeaderStyles.headerSocialItem)(
-            a(href := ExternalUrls.todoMvc, HeaderStyles.headerSocialLink, target := "_blank")(
-              SVG("todomvc.svg#todomvc", Size(34, 31))
-            )
-          ),*/
-          li(HeaderStyles.headerSocialItem)(
-            a(href := ExternalUrls.stackoverflow, HeaderStyles.headerSocialLink, target := "_blank")(
-              SVG("stack.svg#stack", Size(29, 33))
-            )
-          ),
-          li(HeaderStyles.headerSocialItem)(
-            a(href := ExternalUrls.avsystem, HeaderStyles.headerSocialLinkYellow, target := "_blank")(
-              SVG("avsystem.svg#avsystem", Size(33, 33)),
-              div(HeaderStyles.tooltip)(
-                div(HeaderStyles.tooltipTop),
-                div(HeaderStyles.tooltipText)(
-                  div(HeaderStyles.tooltipTextInner)(
-                    "Proudly made by AVSystem"
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
+      buttons
     )
   ).render
 
   def getTemplate: Element = template
+
+  override val styles: HeaderButtonsStyles = HeaderStyles
 }

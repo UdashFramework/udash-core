@@ -1,13 +1,11 @@
-package io.udash.web.homepage.styles.utils
+package io.udash.web.commons.styles.utils
 
 import java.util.concurrent.TimeUnit
 
-import io.udash.web.homepage.styles.constant.StyleConstants
-
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scalacss.{AV, Attr, Length, ValueT}
 import scalacss.Defaults._
+import scalacss.{AV, Attr, Length, ValueT}
 
 object StyleUtils extends StyleSheet.Inline {
   import dsl._

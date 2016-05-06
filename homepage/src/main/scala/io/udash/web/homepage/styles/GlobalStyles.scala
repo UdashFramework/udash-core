@@ -1,8 +1,7 @@
 package io.udash.web.homepage.styles
 
-import io.udash.web.homepage.styles.constant.StyleConstants
+import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 import io.udash.web.homepage.styles.fonts.{FontStyle, FontWeight, UdashFonts}
-import io.udash.web.homepage.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.language.postfixOps
 import scalacss.Attr

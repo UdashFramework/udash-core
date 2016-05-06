@@ -1,8 +1,7 @@
 package io.udash.web.guide.styles
 
-import io.udash.web.guide.styles.constant.StyleConstants
+import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.styles.fonts.{FontStyle, FontWeight, UdashFonts}
-import io.udash.web.guide.styles.partials.GuideStyles._
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.language.postfixOps

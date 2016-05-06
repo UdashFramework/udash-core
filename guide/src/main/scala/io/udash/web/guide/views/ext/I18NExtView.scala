@@ -1,8 +1,9 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
-import io.udash.web.guide.components.CodeBlock
+import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, FrontendTranslationsDemo, RemoteTranslationsDemo}
 import org.scalajs.dom
@@ -45,7 +46,7 @@ class I18NExtView extends View {
          |    }
          |  }
          |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       i("TranslationKey"), " knows the count and types of the arguments. In the above example, ",
       i("retriesLeft"), " key expects one integer as the argument."
@@ -57,7 +58,7 @@ class I18NExtView extends View {
          |translated onSuccess {
          |  case Translated(text) => println(text)
          |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "This code requires a ", i("TranslationProvider"), " instance to compile. The Udash i18n plugin provides two ",
       i("TranslationProviders"), ": ", i("LocalTranslationProvider"), " and ", i("RemoteTranslationProvider"), ""
@@ -126,7 +127,7 @@ class I18NExtView extends View {
          |    ).render
          |  }
          |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "Take a look at the example below. As you can see in the code sample, it uses ",
       i("translated"), " method to bind translation into DOM hierarchy. "
@@ -147,7 +148,7 @@ class I18NExtView extends View {
           |trait DemosServerRPC {
           |  def translations(): RemoteTranslationRPC
           |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       "The Udash i18n plugin makes ", i("RemoteTranslationRPC"), " easier, because it provides ",
       i("TranslationRPCEndpoint"), " and ", i("ResourceBundlesTranslationTemplatesProvider"), " classes."
@@ -171,7 +172,7 @@ class I18NExtView extends View {
           |  val langs = Seq("en", "pl")
           |  val bundlesNames = Seq("demo_translations")
           |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p(
       i("ResourceBundlesTranslationTemplatesProvider"), " expects ", i("Map[Lang, Seq[ju.ResourceBundle]]"), " as a constructor argument, whereas ",
       i("TranslationRPCEndpoint"), " takes ", i("ResourceBundlesTranslationTemplatesProvider"), " instance. ",
@@ -227,7 +228,7 @@ class I18NExtView extends View {
          |    ).render
          |  }
          |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Take a look at the example below."),
     RemoteTranslationsDemo(),
     h2("Translations binding"),
@@ -300,7 +301,7 @@ class I18NExtView extends View {
          |    ).render
          |  }
          |}""".stripMargin
-    )(),
+    )(GuideStyles),
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
     DynamicRemoteTranslationsDemo()
   ).render

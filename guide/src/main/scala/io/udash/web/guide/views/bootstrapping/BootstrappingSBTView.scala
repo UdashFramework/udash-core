@@ -1,8 +1,9 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.components.CodeBlock
 import io.udash.web.guide.views.Versions
 import org.scalajs.dom
 
@@ -26,7 +27,7 @@ class BootstrappingSBTView extends View {
         " provides tools for configuring cross-compiled modules and JS dependencies management. If you want to use it, " +
           "add the following line into the ", i("project/plugins.sbt"), " file: "
       ),
-      CodeBlock(s"""addSbtPlugin("org.scala-js" % "sbt-scalajs" % "${Versions.scalaJSPluginVersion}")""")(),
+      CodeBlock(s"""addSbtPlugin("org.scala-js" % "sbt-scalajs" % "${Versions.scalaJSPluginVersion}")""")(GuideStyles),
       h3("SBT dependencies"),
       p(
         "To keep the configuration clean, keep dependencies in a separate file such as ",
@@ -84,7 +85,7 @@ class BootstrappingSBTView extends View {
            |    "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
            |  ).map(_ % Test))
            |}""".stripMargin
-      )(),
+      )(GuideStyles),
       p(
         "You are not obligated to use ", a(href := jettyHomepage)("Jetty"), " as webserver nor to use ",
         a(href := bootstrapHomepage)("Twitter bootstrap"), " in frontend. Anyway it is recommended to use ",
@@ -118,13 +119,13 @@ class BootstrappingSBTView extends View {
           |// Adds cross-compiled dependencies with specified Configuration
           |def crossLibs(configuration: Configuration) =
           |  libraryDependencies ++= crossDeps.value.map(_ % configuration)""".stripMargin
-      )(),
+      )(GuideStyles),
       p("The root project will aggregate all needed modules and will not publish an artifact."),
       CodeBlock(
         """lazy val udashGuide = project.in(file("."))
           |  .aggregate(sharedJS, sharedJVM, frontend, backend)
           |  .settings(publishArtifact := false)""".stripMargin
-      )(),
+      )(GuideStyles),
       p("Next, you need to create the shared module. Cross libraries are provided by backend and frontend modules."),
       CodeBlock(
         """lazy val shared = crossProject
@@ -136,7 +137,7 @@ class BootstrappingSBTView extends View {
           |
           |lazy val sharedJVM = shared.jvm
           |lazy val sharedJS = shared.js""".stripMargin
-      )(),
+      )(GuideStyles),
       p(
         "The frontend module uses ScalaJSPlugin and depends on sharedJS. It also provides cross-compiled libraries. persistLauncher ",
         "indicates that you want to generate the JS application launcher."
@@ -181,7 +182,7 @@ class BootstrappingSBTView extends View {
           |      (crossTarget in(Compile, packageScalaJSLauncher)).value /
           |        StaticFilesDir / "WebContent/scripts/frontend-init.js"
           |  )""".stripMargin
-      )(),
+      )(GuideStyles),
       p(i("compileStatics"), " is our custom task which prepares the whole static files directory for deployment."),
       p("To make it work, add the following lines into the ", i("project/AppBuild.scala"), " file:"),
       CodeBlock(
@@ -222,7 +223,7 @@ class BootstrappingSBTView extends View {
           |    }
           |  }
           |}""".stripMargin
-      )(),
+      )(GuideStyles),
       p(
         "It defines required custom SBT tasks. ", i("compileStaticsForRelease"), " compiles JS using fast or full optimization " +
           "depending on a build version. It also copies the ", i("index.html"), " file with proper links in the assets directory."
@@ -258,7 +259,7 @@ class BootstrappingSBTView extends View {
           |    // Recompile when frontend files get changed, hint: ~compile in SBT
           |    watchSources ++= (sourceDirectory in frontend).value.***.get
           |  )""".stripMargin
-      )(),
+      )(GuideStyles),
       p(
         "Notice that backend depends on ", i("sharedJVM"), " not ", i("sharedJs"), ". It also provides cross-compiled libraries " +
           "in JVM versions. Compilation of this module copies static files from the frontend module into the backend module target. " +
@@ -284,7 +285,7 @@ class BootstrappingSBTView extends View {
             |<div id="application"></div>
             |</body>
             |</html>""".stripMargin
-        )(),
+        )(GuideStyles),
         p("It is recommended to use fully optimized ", i("frontend-deps.js"), " and ", i("frontend-impl.js"), " in the production version."),
         p("Remember to check if file names correspond to those in SBT configurations.")
       ),
