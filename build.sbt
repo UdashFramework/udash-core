@@ -22,7 +22,7 @@ def crossLibs(configuration: Configuration) =
   libraryDependencies ++= crossDeps.value.map(_ % configuration)
 
 lazy val `udash-homepage` = project.in(file("."))
-  .aggregate(sharedJS, sharedJVM, frontend, backend)
+  .aggregate(sharedJS, sharedJVM, homepage, backend)
   .dependsOn(backend)
   .settings(
     publishArtifact := false,
@@ -45,8 +45,8 @@ lazy val backend = project.in(file("backend"))
 
     compile <<= (compile in Compile),
     (compile in Compile) <<= (compile in Compile).dependsOn(copyStatics),
-    copyStatics := IO.copyDirectory((crossTarget in frontend).value / StaticFilesDir, (target in Compile).value / StaticFilesDir),
-    copyStatics <<= copyStatics.dependsOn(compileStatics in frontend),
+    copyStatics := IO.copyDirectory((crossTarget in homepage).value / StaticFilesDir, (target in Compile).value / StaticFilesDir),
+    copyStatics <<= copyStatics.dependsOn(compileStatics in homepage),
 
     mappings in (Compile, packageBin) ++= {
       copyStatics.value
@@ -55,25 +55,19 @@ lazy val backend = project.in(file("backend"))
       }
     },
 
-    watchSources ++= (sourceDirectory in frontend).value.***.get,
+    watchSources ++= (sourceDirectory in homepage).value.***.get,
 
     assemblyJarName in assembly := "udash-web.jar",
     mainClass in assembly := Some("io.udash.homepage.Launcher")
   )
 
-lazy val frontend = project.in(file("frontend")).enablePlugins(ScalaJSPlugin)
+lazy val homepage = project.in(file("homepage")).enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJS)
   .settings(
     libraryDependencies ++= frontendDeps.value,
     crossLibs(Compile),
     jsDependencies ++= frontendJSDeps.value,
     persistLauncher in Compile := true,
-
-    unmanagedJars in Compile ++= {
-      val base = baseDirectory.value / "libs"
-      val customJars = (base ** "*.jar")
-      customJars.classpath
-    },
 
     compile <<= (compile in Compile),
     compileStatics := {
