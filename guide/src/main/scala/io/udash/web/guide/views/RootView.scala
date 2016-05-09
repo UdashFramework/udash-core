@@ -1,14 +1,15 @@
 package io.udash.web.guide.views
 
 import io.udash._
+import io.udash.web.commons.components.Footer
+import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.guide.RootState
-import io.udash.web.guide.components.{Footer, GuideMenu, Header}
-import io.udash.web.guide.styles.partials.{FooterStyles, GuideStyles, HeaderStyles, MenuStyles}
+import io.udash.web.guide.components.Header
 import io.udash.web.guide.styles.GlobalStyles
+import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles, MenuStyles}
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HTMLStyleElement
 
-import scalatags.JsDom.tags2._
 import scalatags.JsDom.TypedTag
 
 object RootViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new RootView)

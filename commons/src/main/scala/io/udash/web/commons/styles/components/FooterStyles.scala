@@ -1,8 +1,7 @@
-package io.udash.web.guide.styles.partials
+package io.udash.web.commons.styles.components
 
-import io.udash.web.commons.styles.utils.StyleConstants
-import io.udash.web.guide.styles.fonts.{FontWeight, UdashFonts}
-import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
+import io.udash.web.commons.styles.CommonGlobalStyles
+import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
 import scalacss.Defaults._
@@ -10,7 +9,7 @@ import scalacss.Defaults._
 /**
   * Created by malchik on 2016-04-04.
   */
-object FooterStyles extends StyleSheet.Inline {
+object FooterStyles extends StyleSheet.Inline with CommonGlobalStyles {
   import dsl._
 
   val footer = style(
@@ -84,6 +83,32 @@ object FooterStyles extends StyleSheet.Inline {
 
       &.hover (
         color(StyleConstants.Colors.Yellow)
+      )
+    )
+  )
+
+  val navItem = style(
+    position.relative,
+    display.inlineBlock,
+    verticalAlign.middle,
+    paddingLeft(1.8 rem),
+    paddingRight(1.8 rem),
+
+    &.firstChild (
+      paddingLeft(0 px)
+    ),
+
+    &.lastChild (
+      paddingRight(0 px)
+    ),
+
+    &.before.not(_.firstChild)(
+      StyleUtils.absoluteMiddle,
+      content := "\"|\"",
+      left(`0`),
+
+      &.hover(
+        textDecoration := "none"
       )
     )
   )

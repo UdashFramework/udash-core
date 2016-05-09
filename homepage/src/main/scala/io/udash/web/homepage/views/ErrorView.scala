@@ -2,16 +2,17 @@ package io.udash.web.homepage.views
 
 import io.udash._
 import io.udash.core.DomWindow
+import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.styles.utils.StyleConstants
+import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.GlobalStyles
-import io.udash.web.homepage.styles.partials.{FooterStyles, HeaderStyles, HomepageStyles}
+import io.udash.web.homepage.styles.partials.HomepageStyles
+import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 
-import scalatags.JsDom.tags2._
 import scalacss.ScalatagsCss._
-import io.udash.web.homepage.Context._
-import io.udash.wrappers.jquery._
+import scalatags.JsDom.tags2._
 
 object ErrorViewPresenter extends DefaultViewPresenterFactory[IndexState](() => new ErrorView)
 

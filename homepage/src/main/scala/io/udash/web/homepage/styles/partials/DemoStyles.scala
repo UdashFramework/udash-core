@@ -1,9 +1,8 @@
 package io.udash.web.homepage.styles.partials
 
+import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils, UdashFonts}
 import io.udash.web.homepage.components.demo.DemoComponent
 import io.udash.web.homepage.styles.GlobalStyles
-import io.udash.web.homepage.styles.fonts.UdashFonts
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 
 import scala.language.postfixOps
 import scalacss.Defaults._

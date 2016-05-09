@@ -1,8 +1,10 @@
 package io.udash.web.homepage.views
 
 import io.udash._
+import io.udash.web.commons.components.Footer
+import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.homepage.RootState
-import io.udash.web.homepage.components.{Footer, Header}
+import io.udash.web.homepage.components.Header
 import io.udash.web.homepage.styles.GlobalStyles
 import io.udash.web.homepage.styles.partials._
 import org.scalajs.dom.Element

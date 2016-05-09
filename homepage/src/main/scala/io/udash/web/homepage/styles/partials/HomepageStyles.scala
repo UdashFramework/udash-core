@@ -1,8 +1,7 @@
 package io.udash.web.homepage.styles.partials
 
 import io.udash.web.commons.styles.components.CodeBlockStyles
-import io.udash.web.homepage.styles.fonts.{FontStyle, FontWeight, UdashFonts}
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
+import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
 import scalacss.Compose

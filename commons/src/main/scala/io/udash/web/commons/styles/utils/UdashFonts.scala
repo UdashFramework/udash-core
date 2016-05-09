@@ -1,4 +1,4 @@
-package io.udash.web.homepage.styles.fonts
+package io.udash.web.commons.styles.utils
 
 import scala.language.postfixOps
 import scalacss.AV

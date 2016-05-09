@@ -1,15 +1,12 @@
 package io.udash.web.guide.styles.partials
 
-import java.util.concurrent.TimeUnit
-
 import io.udash.web.commons.styles.components.CodeBlockStyles
-import io.udash.web.commons.styles.utils.StyleConstants
+import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.components.GuideMenu
 import io.udash.web.guide.styles.GlobalStyles
-import io.udash.web.guide.styles.fonts.{FontWeight, UdashFonts}
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
@@ -119,63 +116,6 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
       style(
         width(100 %%),
         paddingLeft(`0`)
-      )
-    )
-  )
-
-  val navItem = style(
-    position.relative,
-    display.inlineBlock,
-    verticalAlign.middle,
-    paddingLeft(1.8 rem),
-    paddingRight(1.8 rem),
-
-    &.firstChild (
-      paddingLeft(0 px)
-    ),
-
-    &.lastChild (
-      paddingRight(0 px)
-    ),
-
-    &.before.not(_.firstChild)(
-      StyleUtils.absoluteMiddle,
-      content := "\"|\"",
-      left(`0`),
-
-      &.hover(
-        textDecoration := "none"
-      )
-    )
-  )
-
-  val underlineLink = style(
-    position.relative,
-    display.block,
-    color.white,
-
-    &.after(
-      StyleUtils.transition(transform, new FiniteDuration(250, TimeUnit.MILLISECONDS)),
-      position.absolute,
-      top(100 %%),
-      left(`0`),
-      content := "\" \"",
-      width(100 %%),
-      borderBottomColor.white,
-      borderBottomWidth(1 px),
-      borderBottomStyle.solid,
-      transform := "scaleX(0)",
-      transformOrigin := "100% 50%"
-    ),
-
-    &.hover(
-      color.white,
-      cursor.pointer,
-      textDecoration := "none",
-
-      &.after (
-        transformOrigin := "0 50%",
-        transform := "scaleX(1)"
       )
     )
   )

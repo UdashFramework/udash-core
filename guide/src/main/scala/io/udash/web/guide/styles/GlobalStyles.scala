@@ -1,14 +1,14 @@
 package io.udash.web.guide.styles
 
-import io.udash.web.commons.styles.utils.StyleConstants
-import io.udash.web.guide.styles.fonts.{FontStyle, FontWeight, UdashFonts}
+import io.udash.web.commons.styles.CommonGlobalStyles
+import io.udash.web.commons.styles.utils.{FontStyle, FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.language.postfixOps
 import scalacss.Attr
 import scalacss.Defaults._
 
-object GlobalStyles extends StyleSheet.Inline {
+object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
   import dsl._
 
   val reset = style(scalacss.ext.CssReset.meyer)
@@ -215,70 +215,5 @@ object GlobalStyles extends StyleSheet.Inline {
         boxSizing.borderBox
       )
     )
-  )
-
-  val clearfix = style(
-    &.before (
-      content := "\" \"",
-      display.table
-    ),
-
-    &.after (
-      content := "\" \"",
-      display.table,
-      clear.both
-    )
-  )
-
-  val col = style(
-    position.relative,
-    display.inlineBlock,
-    verticalAlign.top
-  )
-
-  val body = style(
-    position.relative,
-    width(StyleConstants.Sizes.BodyWidth px),
-    height(100 %%),
-    margin(0 px, auto),
-
-    MediaQueries.tabletLandscape(
-      style(
-        width(100 %%),
-        paddingLeft(2 rem),
-        paddingRight(2 rem)
-      )
-    ),
-
-    MediaQueries.phone(
-      style(
-        paddingLeft(3 %%),
-        paddingRight(3 %%)
-      )
-    )
-  )
-
-  val block = style(
-    display.block
-  )
-
-  val inline = style(
-    display.inline
-  )
-
-  val hidden = style(
-    visibility.hidden
-  )
-
-  val noMargin = style(
-    margin(`0`).important
-  )
-
-  val red = style(
-    color(StyleConstants.Colors.Red).important
-  )
-
-  val grey = style(
-    color(StyleConstants.Colors.Grey).important
   )
 }
