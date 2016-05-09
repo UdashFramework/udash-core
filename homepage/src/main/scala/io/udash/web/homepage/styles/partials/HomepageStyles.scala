@@ -413,7 +413,7 @@ object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
 
   val sectionError = style(
     sectionIntro,
-    height :=! s"calc(100vh - 136px)",
+    height :=! s"calc(100vh - 120px)",
 
     MediaQueries.tabletPortrait(
       style(
