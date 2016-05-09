@@ -125,10 +125,46 @@ class ExposesServerRPCTest extends UdashBackendTest {
   "DefaultExposesServerRPC" should tests(createDefaultRpc)
   "CustomExposesServerRPC" should tests(createCustomRpc)
   "LoggingExposesServerRPC" should {
-    tests(createLoggingRpc)
     import io.udash.rpc.InnerRPC
+    val calls = Seq.newBuilder[String]
+    val rpc: ExposesServerRPC[TestRPC] = createLoggingRpc(calls)
+    import rpc.framework._
+    "not log calls of regular RPC methods" in {
+      rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("doStuff", List(List(write[Boolean](true)))),
+          List(),
+          "callId1"
+        )
+      )
+      rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("doStuff", List(List(write[Boolean](false)))),
+          List(),
+          "callId1"
+        )
+      )
+      loggedCalls shouldBe empty
+    }
     "log calls of annotated RPC methods" in {
-      loggedCalls.toList shouldBe List(s"${classOf[InnerRPC].getSimpleName} func List(5)")
+      rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("func", List(List(write[Int](5)))),
+          List(RawInvocation("innerRpc", List(List(write[String]("arg0"))))),
+          "callId2"
+        )
+      )
+      rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("func", List(List(write[Int](10)))),
+          List(RawInvocation("innerRpc", List(List(write[String]("arg0"))))),
+          "callId2"
+        )
+      )
+      loggedCalls.toList shouldBe List(
+        s"${classOf[InnerRPC].getSimpleName} func List(5)",
+        s"${classOf[InnerRPC].getSimpleName} func List(10)"
+      )
     }
   }
 }

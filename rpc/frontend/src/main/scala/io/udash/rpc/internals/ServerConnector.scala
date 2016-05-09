@@ -1,7 +1,7 @@
 package io.udash.rpc.internals
 
+import io.udash.StrictLogging
 import io.udash.rpc.{DefaultUdashRPCFramework, UdashRPCFramework}
-import io.udash.utils.Logger
 import io.udash.wrappers.atmosphere._
 
 import scala.collection.mutable
@@ -13,12 +13,13 @@ trait ServerConnector[RPCRequest] {
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String) extends ServerConnector[RPCRequest] {
+abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String)
+  extends ServerConnector[RPCRequest] with StrictLogging {
   protected val clientRpc: ExposesClientRPC[_]
 
   val rpcFramework: UdashRPCFramework
 
-  import rpcFramework.{RPCResponse, RPCFire, read, stringToRaw, RPCResponseCodec, RPCRequestCodec}
+  import rpcFramework.{RPCFire, RPCResponse, read, stringToRaw}
 
   def requestToString(request: RPCRequest): String
 
@@ -78,11 +79,11 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
             case fire: RPCFire =>
               handleRpcFire(fire)
             case unhandled =>
-              Logger.error(s"Unhandled RPCRequest: $unhandled")
+              logger.error(s"Unhandled RPCRequest: $unhandled")
           }
         } catch {
           case _: Exception =>
-            Logger.error(s"Unhandled message: $msg")
+            logger.error(s"Unhandled message: $msg")
         }
     }
   }
