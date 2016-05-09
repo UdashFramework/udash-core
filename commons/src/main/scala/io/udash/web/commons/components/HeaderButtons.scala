@@ -8,13 +8,13 @@ import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 trait HeaderButtons {
-  val styles: HeaderButtonsStyles
+  val buttonStyles: HeaderButtonsStyles
 
   def buttons = {
-    div(styles.headerRight)(
-      ul(styles.headerSocial)(
-        li(styles.headerSocialItem)(
-          a(href := ExternalUrls.udashGithub, styles.headerSocialLink, target := "_blank")(
+    div(buttonStyles.headerRight)(
+      ul(buttonStyles.headerSocial)(
+        li(buttonStyles.headerSocialItem)(
+          a(href := ExternalUrls.udashGithub, buttonStyles.headerSocialLink, target := "_blank")(
             SVG("github.svg#github", Size(33, 32))
           )
         ),
@@ -23,18 +23,18 @@ trait HeaderButtons {
             SVG("todomvc.svg#todomvc", Size(34, 31))
           )
         ),*/
-        li(styles.headerSocialItem)(
-          a(href := ExternalUrls.stackoverflow, styles.headerSocialLink, target := "_blank")(
+        li(buttonStyles.headerSocialItem)(
+          a(href := ExternalUrls.stackoverflow, buttonStyles.headerSocialLink, target := "_blank")(
             SVG("stack.svg#stack", Size(29, 33))
           )
         ),
-        li(styles.headerSocialItem)(
-          a(href := ExternalUrls.avsystem, styles.headerSocialLinkYellow, target := "_blank")(
+        li(buttonStyles.headerSocialItem)(
+          a(href := ExternalUrls.avsystem, buttonStyles.headerSocialLinkYellow, target := "_blank")(
             SVG("avsystem.svg#avsystem", Size(33, 33)),
-            div(styles.tooltip)(
-              div(styles.tooltipTop),
-              div(styles.tooltipText)(
-                div(styles.tooltipTextInner)(
+            div(buttonStyles.tooltip)(
+              div(buttonStyles.tooltipTop),
+              div(buttonStyles.tooltipText)(
+                div(buttonStyles.tooltipTextInner)(
                   "Proudly made by AVSystem"
                 )
               )

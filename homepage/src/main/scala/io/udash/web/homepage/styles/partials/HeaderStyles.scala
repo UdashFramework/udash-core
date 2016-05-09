@@ -2,7 +2,7 @@ package io.udash.web.homepage.styles.partials
 
 import java.util.concurrent.TimeUnit
 
-import io.udash.web.commons.styles.components.HeaderButtonsStyles
+import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.homepage.components.Header
 import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 
@@ -10,7 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scalacss.Defaults._
 
-object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
+object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
   val header = style(
@@ -37,9 +37,9 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
       ),
 
       unsafeChild(s".${headerLogo.htmlClass}")(
-        width(130 px),
+        width(48 px),
         height(56 px),
-        backgroundImage := "url(assets/images/udash_logo_m.png)",
+        backgroundImage := "url(assets/images/udash_logo.png)",
 
         MediaQueries.tabletPortrait(
           style(
@@ -73,13 +73,6 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
     height(100 %%)
   )
 
-  val headerNav = style(
-    StyleUtils.relativeMiddle,
-    display.inlineBlock,
-    verticalAlign.top,
-    color.white
-  )
-
   lazy val headerLogo = style(
     StyleUtils.relativeMiddle,
     display.inlineBlock,
@@ -95,70 +88,6 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
       style(
         width(65 * .7 px),
         height(96 * .7 px)
-      )
-    )
-  )
-
-  val headerLinkWrapper = style(
-    position.relative,
-    display.inlineBlock,
-    verticalAlign.middle,
-    paddingLeft(1.8 rem),
-    paddingRight(1.8 rem),
-
-    &.firstChild (
-      paddingLeft(0 px)
-    ),
-
-    &.lastChild (
-      paddingRight(0 px)
-    ),
-
-    &.before.not(_.firstChild)(
-      StyleUtils.absoluteMiddle,
-      content := "\"|\"",
-      left(`0`),
-
-      &.hover(
-        textDecoration := "none"
-      )
-    )
-  )
-
-  val headerLink = style(
-    position.relative,
-    display.block,
-    color.white,
-
-    &.after(
-      StyleUtils.transition(transform, new FiniteDuration(250, TimeUnit.MILLISECONDS)),
-      position.absolute,
-      top(100 %%),
-      left(`0`),
-      content := "\" \"",
-      width(100 %%),
-      borderBottomColor.white,
-      borderBottomWidth(1 px),
-      borderBottomStyle.solid,
-      transform := "scaleX(0)",
-      transformOrigin := "100% 50%"
-    ),
-
-    &.hover(
-      textDecoration := "none"
-    ),
-
-    MediaQueries.desktop(
-      style(
-        &.hover(
-          color.white,
-          cursor.pointer,
-
-          &.after (
-            transformOrigin := "0 50%",
-            transform := "scaleX(1)"
-          )
-        )
       )
     )
   )

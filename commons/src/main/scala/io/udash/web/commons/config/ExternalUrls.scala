@@ -11,4 +11,6 @@ object ExternalUrls {
   val homepage = "http://udash.io/"
   val guide = "http://guide.udash.io/"
   val scalajs = "https://www.scala-js.org/"
+
+  val releases = "https://github.com/UdashFramework/udash-core/releases"
 }

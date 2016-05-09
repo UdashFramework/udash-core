@@ -1,19 +1,16 @@
 package io.udash.web.guide.styles.partials
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.web.commons.styles.components.HeaderButtonsStyles
+import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
-import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scalacss.Defaults._
 
 /**
   * Created by malchik on 2016-04-04.
   */
-object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
+object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
   val header = style(
@@ -54,12 +51,5 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles {
         width(130 * .8 px)
       )
     )
-  )
-
-  val headerNav = style(
-    StyleUtils.relativeMiddle,
-    display.inlineBlock,
-    verticalAlign.top,
-    color.white
   )
 }
