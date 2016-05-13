@@ -1,15 +1,19 @@
 package io.udash.rpc
 
+import java.util.UUID
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletResponse
 
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
-import org.atmosphere.cpr.{AtmosphereConfig, AtmosphereResource, AtmosphereResourceEvent, AtmosphereServletProcessor}
+import org.atmosphere.cpr._
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
+import scala.languageFeature.postfixOps
 
 trait AtmosphereServiceConfig[ServerRPCType] {
   /**
@@ -38,20 +42,27 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @param config Configuration of AtmosphereService.
   * @tparam ServerRPCType Main server side RPC interface
   */
-class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType])
+class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType], sseSuspendTime: FiniteDuration = 1 minute)
                                       (implicit val executionContext: ExecutionContext)
   extends AtmosphereServletProcessor with LazyLogging {
 
-  override def init(config: AtmosphereConfig): Unit =
-    BroadcastManager.init(config.getBroadcasterFactory, config.metaBroadcaster())
+  private var brodcasterFactory: BroadcasterFactory = _
+
+  override def init(config: AtmosphereConfig): Unit = {
+    brodcasterFactory = config.getBroadcasterFactory
+    BroadcastManager.init(brodcasterFactory, config.metaBroadcaster())
+  }
 
   override def onRequest(resource: AtmosphereResource): Unit = {
-    config.initRpc(resource)
-
     resource.transport match {
-      case TRANSPORT.WEBSOCKET => onWebsocketRequest(resource)
-      case TRANSPORT.SSE => onSSERequest(resource)
-      case TRANSPORT.POLLING => onPollingRequest(resource)
+      case TRANSPORT.WEBSOCKET =>
+        config.initRpc(resource)
+        onWebsocketRequest(resource)
+      case TRANSPORT.SSE =>
+        config.initRpc(resource)
+        onSSERequest(resource)
+      case TRANSPORT.POLLING =>
+        onPollingRequest(resource)
       case _ =>
         logger.error(s"Transport ${resource.transport} is not supported!")
         resource.getResponse.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)
@@ -87,12 +98,13 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
   }
 
   private def onSSERequest(resource: AtmosphereResource) = {
-    resource.suspend()
+    resource.suspend(sseSuspendTime.toMillis)
     BroadcastManager.registerResource(resource, resource.uuid())
   }
 
   private def onPollingRequest(resource: AtmosphereResource) = {
     try {
+      resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
       val rpc = config.resolveRpc(resource)
       import rpc.framework._
