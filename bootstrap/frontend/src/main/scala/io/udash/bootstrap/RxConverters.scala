@@ -4,6 +4,7 @@ import io.udash._
 import io.udash.properties.{ModelValue, PropertyCreator}
 import rx.{Ctx, Rx, Var}
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 
 /**
@@ -11,9 +12,14 @@ import scala.concurrent.ExecutionContext
   */
 trait RxConverters {
 
+  private val varCache: mutable.Map[Property[_], Var[_]] = mutable.Map.empty
+
   implicit protected val context: Ctx.Owner = Ctx.Owner.Unsafe.Unsafe
 
-  implicit class PropertyVar[T](property: Property[T]) extends Var[T](property.get) {
+  implicit def property2Var[T](property: Property[T]): Var[T] =
+    varCache.getOrElseUpdate(property, new PropertyVar(property)).asInstanceOf[Var[T]]
+
+  private class PropertyVar[T](property: Property[T]) extends Var[T](property.get) {
     private val registration = property.listen(update)
 
     override def update(newValue: T): Unit = {
@@ -26,6 +32,7 @@ trait RxConverters {
       super.kill()
     }
   }
+
 
   implicit def var2Property[T: ModelValue : PropertyCreator](variable: Var[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
     val res = rx2readableProp(variable)
