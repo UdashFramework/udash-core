@@ -138,3 +138,13 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(Scala
   .settings(
     jsDependencies += RuntimeDOM % Test
   )
+
+lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    libraryDependencies ++= bootstrapDeps.value,
+    jsDependencies ++= bootstrapFrontendJsDeps.value
+  )
+
