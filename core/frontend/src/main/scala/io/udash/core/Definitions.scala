@@ -77,7 +77,7 @@ trait State {
   * @tparam S
   */
 trait RoutingRegistry[S <: State] {
-  def matchUrl(url: Url, previous: S): S
+  def matchUrl(url: Url): S
 
   def matchState(state: S): Url
 }

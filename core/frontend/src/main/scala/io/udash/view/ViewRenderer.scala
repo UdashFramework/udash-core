@@ -10,8 +10,8 @@ import scala.scalajs.js.timers.RawTimers
 /**
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
   */
-private[udash] class ViewRenderer(rootElement: Element) {
-  private val endpoint = rootElement
+private[udash] class ViewRenderer(rootElement: => Element) {
+  private lazy val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
 
   private def mergeViews(path: List[View]): View = {
