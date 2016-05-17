@@ -2,10 +2,11 @@ package io.udash.web.guide.views
 
 import io.udash._
 import io.udash.web.commons.components.Footer
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.guide.RootState
 import io.udash.web.guide.components.Header
-import io.udash.web.guide.styles.GlobalStyles
+import io.udash.web.guide.styles.GuideDefaultStyles
 import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles, MenuStyles}
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HTMLStyleElement
@@ -22,6 +23,7 @@ class RootView extends ViewContainer {
   protected val child = div().render
 
   private val content = div(
+    GuideDefaultStyles.render[TypedTag[HTMLStyleElement]],
     GlobalStyles.render[TypedTag[HTMLStyleElement]],
     GuideStyles.render[TypedTag[HTMLStyleElement]],
     MenuStyles.render[TypedTag[HTMLStyleElement]],

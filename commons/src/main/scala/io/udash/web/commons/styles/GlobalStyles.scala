@@ -1,13 +1,13 @@
 package io.udash.web.commons.styles
 
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
+import io.udash.web.commons.styles.utils._
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scalacss.Attr
 import scalacss.Defaults._
 
-trait CommonGlobalStyles extends StyleSheet.Inline {
+object GlobalStyles extends StyleSheet.Inline {
   import dsl._
 
   val clearfix = style(
@@ -139,3 +139,4 @@ trait CommonGlobalStyles extends StyleSheet.Inline {
     )
   )
 }
+

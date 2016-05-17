@@ -6,9 +6,9 @@ import io.udash.web.homepage._
 import io.udash.web.homepage.components.Buttons
 import io.udash.web.homepage.components.demo.DemoComponent
 import io.udash.web.commons.config.ExternalUrls
-import io.udash.web.homepage.styles.GlobalStyles
 import io.udash.web.homepage.styles.partials.{ButtonsStyle, HomepageStyles}
 import io.udash.routing.WindowUrlChangeProvider
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.views.{Image, SVG, Size}
 import org.scalajs.dom.Element
 

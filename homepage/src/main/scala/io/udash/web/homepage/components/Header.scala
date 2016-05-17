@@ -1,16 +1,14 @@
 package io.udash.web.homepage.components
 
-import io.udash.core.{DomWindow, Window}
+import io.udash.core.DomWindow
 import io.udash.web.commons.components.{HeaderButtons, HeaderNav}
-import io.udash.web.homepage.IndexState
-import io.udash.web.homepage.Context._
 import io.udash.web.commons.config.ExternalUrls
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
-import io.udash.web.homepage.styles.GlobalStyles
+import io.udash.web.homepage.Context._
+import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
-import io.udash.web.commons.views.{SVG, Size}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
-import org.scalajs.dom._
 import org.scalajs.dom.raw.Element
 
 import scalacss.ScalatagsCss._

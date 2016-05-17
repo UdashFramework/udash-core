@@ -1,6 +1,6 @@
 package io.udash.web.homepage.components.demo
 
-import io.udash.web.homepage.styles.GlobalStyles
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.homepage.styles.partials.DemoStyles
 import org.scalajs.dom.raw.Element
 

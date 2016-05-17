@@ -2,9 +2,9 @@ package io.udash.web.guide.components
 
 import io.udash.web.commons.components.{HeaderButtons, HeaderNav}
 import io.udash.web.commons.config.ExternalUrls
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.views.Image
-import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.HeaderStyles
 import org.scalajs.dom.raw.Element
 

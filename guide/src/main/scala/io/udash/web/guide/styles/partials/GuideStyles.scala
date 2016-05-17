@@ -1,9 +1,9 @@
 package io.udash.web.guide.styles.partials
 
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.components.GuideMenu
-import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.DurationInt
@@ -41,7 +41,16 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
   )
 
   val imgLeft = style(float.left)
-  val imgRight = style(float.right)
+  val imgRight = style(
+    float.right,
+    MediaQueries.phone(style(
+      float.none,
+      width(100 %%),
+      maxWidth.none,
+      maxHeight.none,
+      margin(2 rem, `0`)
+    ))
+  )
 
   val highlightRedKeyframes = keyframes(
     (0 %%) -> keyframe(

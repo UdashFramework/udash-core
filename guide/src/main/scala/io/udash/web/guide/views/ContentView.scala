@@ -1,9 +1,9 @@
 package io.udash.web.guide.views
 
 import io.udash._
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.ContentState
 import io.udash.web.guide.components.GuideMenu
-import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 

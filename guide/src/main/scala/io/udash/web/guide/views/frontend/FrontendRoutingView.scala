@@ -1,12 +1,13 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
-import io.udash.web.guide.{Context, _}
-import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
 import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.styles.{BootstrapStyles, GlobalStyles}
+import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.web.guide.styles.partials.GuideStyles
+import io.udash.web.guide.views.References
+import io.udash.web.guide.{Context, _}
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -30,7 +31,6 @@ class FrontendRoutingView(url: Property[String]) extends View {
   import Context._
 
   import JsDom.all._
-  import scalacss.Defaults._
   import scalacss.ScalatagsCss._
 
   override def getTemplate: dom.Element = div(

@@ -2,10 +2,11 @@ package io.udash.web.homepage.views
 
 import io.udash._
 import io.udash.web.commons.components.Footer
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.homepage.RootState
 import io.udash.web.homepage.components.Header
-import io.udash.web.homepage.styles.GlobalStyles
+import io.udash.web.homepage.styles.HomepageDefaultStyles
 import io.udash.web.homepage.styles.partials._
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HTMLStyleElement
@@ -24,6 +25,7 @@ class RootView extends View {
   private var child: Element = div().render
 
   private val content = div(
+    HomepageDefaultStyles.render[TypedTag[HTMLStyleElement]],
     GlobalStyles.render[TypedTag[HTMLStyleElement]],
     HomepageStyles.render[TypedTag[HTMLStyleElement]],
     FooterStyles.render[TypedTag[HTMLStyleElement]],

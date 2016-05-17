@@ -2,10 +2,10 @@ package io.udash.web.guide.views
 
 import io.udash._
 import io.udash.core.DomWindow
+import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.Context._
-import io.udash.web.guide.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles}
 import io.udash.web.guide.{ErrorState, IntroState}
 import io.udash.wrappers.jquery._

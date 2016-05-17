@@ -1,18 +1,17 @@
-package io.udash.web.homepage.styles
+package io.udash.web.commons.styles
 
-import io.udash.web.commons.styles.CommonGlobalStyles
 import io.udash.web.commons.styles.utils._
 
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scalacss.Attr
 import scalacss.Defaults._
 
-object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
+trait DefaultStyles extends StyleSheet.Inline {
   import dsl._
 
-  val reset = style(scalacss.ext.CssReset.meyer)
-
-  val global = style(
+  style(scalacss.ext.CssReset.meyer) +
+  style(
     unsafeRoot("#application") (
       height(100 %%)
     ),
@@ -27,12 +26,7 @@ object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
 
     unsafeRoot("body") (
       position.relative,
-      height(100 %%),
-      fontSize(1.7 rem)
-    ),
-
-    unsafeRoot("p")(
-      fontSize(1.6 rem)
+      height(100 %%)
     ),
 
     unsafeRoot("li")(
@@ -45,7 +39,6 @@ object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
       UdashFonts.acumin(FontWeight.SemiBold),
       paddingTop(7 rem),
       paddingBottom(4.5 rem),
-      marginBottom(5 rem),
       lineHeight(1.2),
       fontSize(4.8 rem),
       textAlign.left,
@@ -60,15 +53,15 @@ object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
 
       MediaQueries.phone(
         style(
-          fontSize(3.2 rem),
-          paddingTop(5 rem),
-          marginBottom(3 rem)
+          fontSize(3.2 rem)
         )
       )
     ),
 
     unsafeRoot("h2") (
       UdashFonts.acumin(FontWeight.SemiBold),
+      marginTop(5.5 rem),
+      marginBottom(2 rem),
       lineHeight(1.2),
       fontSize(3.2 rem),
 
@@ -184,3 +177,4 @@ object GlobalStyles extends StyleSheet.Inline with CommonGlobalStyles {
     )
   )
 }
+
