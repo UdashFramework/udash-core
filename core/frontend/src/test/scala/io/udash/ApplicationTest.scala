@@ -2,15 +2,12 @@ package io.udash
 
 import io.udash.testing._
 
-class ApplicationTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
+class ApplicationTest extends UdashFrontendTest with TestRouting {
 
   "Application" should {
+    initTestRouting()
     val initUrl = Url("/")
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
-    val routing: TestRoutingRegistry = new TestRoutingRegistry
-    val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-    val vpRegistry: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
     val app = new Application[TestState](routing, vpRegistry, RootState, urlProvider)
 
     app.run(emptyComponent())

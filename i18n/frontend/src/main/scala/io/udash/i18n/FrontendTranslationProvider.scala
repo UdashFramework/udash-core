@@ -1,8 +1,8 @@
 package io.udash.i18n
 
-import io.udash.utils.Logger
+import io.udash.StrictLogging
 
-trait FrontendTranslationProvider extends TranslationProvider {
+trait FrontendTranslationProvider extends TranslationProvider with StrictLogging {
   protected def handleMixedPlaceholders(template: String): Unit =
-    Logger.warn(s"""Indexed and unindexed placeholders in "$template"!""")
+    logger.warn(s"""Indexed and unindexed placeholders in "$template"!""")
 }
