@@ -4,7 +4,7 @@ import io.udash._
 
 /**
   * [[Property]] adapters for scalajs-bootstrap.
-  * Use with [[com.karasiq.bootstrap.BootstrapImplicits]] import.
+  * Use with com.karasiq.bootstrap.BootstrapImplicits import.
   */
 trait UdashBootstrapImplicits extends RxConverters {
 

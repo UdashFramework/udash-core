@@ -42,7 +42,7 @@ lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
-    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`
+    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`, `bootstrap`
   )
   .settings(publishArtifact := false)
 

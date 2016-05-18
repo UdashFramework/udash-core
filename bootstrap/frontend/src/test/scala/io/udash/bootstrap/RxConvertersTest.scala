@@ -7,7 +7,7 @@ import rx.{Ctx, Rx, Var}
 import scala.collection.mutable
 import scala.util.Success
 
-class RxConvertersTest extends UdashFrontendTest with UdashBootstrapImplicits {
+class RxConvertersTest extends UdashFrontendTest with RxConverters {
 
   sealed trait T
 
@@ -110,6 +110,7 @@ class RxConvertersTest extends UdashFrontendTest with UdashBootstrapImplicits {
   }
 
 
+  //https://github.com/lihaoyi/scala.rx/blob/9253578bf7b88575faa52a70340013fb57c90ad4/scalarx/shared/src/test/scala/rx/BasicTests.scala
   "Property used as a Var" should {
     "update dependent values" in {
       val a = Property(1)

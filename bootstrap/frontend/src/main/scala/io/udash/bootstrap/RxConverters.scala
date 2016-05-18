@@ -8,7 +8,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 
 /**
-  * Provides implicit conversion between [[rx.Rx]] and [[Property]].
+  * Provides implicit conversion between rx.Rx and [[Property]].
   */
 trait RxConverters {
 
