@@ -1,7 +1,7 @@
 package io.udash.rpc
 
 import com.typesafe.scalalogging.LazyLogging
-import org.atmosphere.cpr.{AtmosphereResource, DefaultAtmosphereResourceSessionFactory}
+import org.atmosphere.cpr._
 
 import scala.util.Try
 
@@ -16,10 +16,12 @@ final class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: (ClientId) =
   private val RPCName = "RPC"
   private val connections = new DefaultAtmosphereResourceSessionFactory
 
-  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
+  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] = connections.synchronized {
+    if (connections.getSession(resource).getAttribute(RPCName) == null) initRpc(resource)
     connections.getSession(resource).getAttribute(RPCName).asInstanceOf[ExposesServerRPC[ServerRPCType]]
+  }
 
-  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
+  override def initRpc(resource: AtmosphereResource): Unit = connections.synchronized {
     val session = connections.getSession(resource)
 
     if (session.getAttribute(RPCName) == null) {

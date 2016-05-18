@@ -30,7 +30,7 @@ private object ConsoleLogger extends Logger {
 }
 
 /**
-  * Provides `logger` reference to [[io.udash.utils.ConsoleLogger]].
+  * Provides `logger` reference to io.udash.utils.ConsoleLogger.
   */
 trait StrictLogging {
   val logger: Logger = ConsoleLogger
