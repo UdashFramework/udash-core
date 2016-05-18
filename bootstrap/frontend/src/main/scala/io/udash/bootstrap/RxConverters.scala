@@ -12,9 +12,12 @@ import scala.concurrent.ExecutionContext
   */
 trait RxConverters {
 
-  private val varCache: mutable.Map[Property[_], Var[_]] = mutable.Map.empty
-
   implicit protected val context: Ctx.Owner = Ctx.Owner.Unsafe.Unsafe
+
+  //cache views to avoid redundant updates
+  private val varCache = mutable.Map.empty[Property[_], Var[_]]
+  private val readablePropertyCache = mutable.Map.empty[Rx[_], CastableReadableProperty[_]]
+  private val propertyCache = mutable.Map.empty[Var[_], CastableProperty[_]]
 
   implicit def property2Var[T](property: Property[T]): Var[T] =
     varCache.getOrElseUpdate(property, new PropertyVar(property)).asInstanceOf[Var[T]]
@@ -33,20 +36,24 @@ trait RxConverters {
     }
   }
 
+  implicit def var2Property[T: ModelValue : PropertyCreator](variable: Var[T])(implicit ec: ExecutionContext): CastableProperty[T] =
+    propertyCache.getOrElseUpdate(variable, {
+      val res = createReadableProp(variable)
+      res.listen(variable.update)
+      res
+    }).asInstanceOf[CastableProperty[T]]
 
-  implicit def var2Property[T: ModelValue : PropertyCreator](variable: Var[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
-    val res = rx2readableProp(variable)
-    res.listen(variable.update)
-    res
-  }
 
-  private def rx2readableProp[T: ModelValue : PropertyCreator](variable: Rx[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
+  private def createReadableProp[T: ModelValue : PropertyCreator](variable: Rx[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
     val res = Property[T]
     variable.trigger(res.set(variable.now))
     res
   }
 
-  implicit def rx2Property[T: ModelValue : PropertyCreator](variable: Rx[T])(implicit ec: ExecutionContext): CastableReadableProperty[T] =
-    rx2readableProp(variable)
+  implicit def rx2Property[T: ModelValue : PropertyCreator](rx: Rx[T])(implicit ec: ExecutionContext): CastableReadableProperty[T] =
+    rx match {
+      case variable: Var[T] => var2Property(variable)
+      case _ => readablePropertyCache.getOrElseUpdate(rx, createReadableProp(rx)).asInstanceOf[CastableReadableProperty[T]]
+    }
 
 }
