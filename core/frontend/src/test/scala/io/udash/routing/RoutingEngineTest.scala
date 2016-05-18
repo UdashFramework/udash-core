@@ -80,36 +80,64 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
     "fire state change callbacks" in {
       initTestRoutingEngine()
 
+      var calls = 0
       var lastCallbackEvent: StateChangeEvent[TestState] = null
-      routingEngine.onStateChange(lastCallbackEvent = _)
+      routingEngine.onStateChange(ev => {
+        lastCallbackEvent = ev
+        calls += 1
+      })
 
       routingEngine.handleUrl(Url("/"))
 
+      calls should be(1)
       lastCallbackEvent.oldState should be(null)
       lastCallbackEvent.currentState should be(ObjectState)
 
       routingEngine.handleUrl(Url("/next"))
 
+      calls should be(2)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(NextObjectState)
 
       routingEngine.handleUrl(Url("/"))
 
+      calls should be(3)
+      lastCallbackEvent.oldState should be(NextObjectState)
+      lastCallbackEvent.currentState should be(ObjectState)
+
+      routingEngine.handleUrl(Url("/"))
+
+      calls should be(3)
       lastCallbackEvent.oldState should be(NextObjectState)
       lastCallbackEvent.currentState should be(ObjectState)
 
       routingEngine.handleUrl(Url("/abc/1"))
 
+      calls should be(4)
+      lastCallbackEvent.oldState should be(ObjectState)
+      lastCallbackEvent.currentState should be(ClassState("abc", 1))
+
+      routingEngine.handleUrl(Url("/abc/1"))
+
+      calls should be(4)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(ClassState("abc", 1))
 
       routingEngine.handleUrl(Url("/abcd/234"))
 
+      calls should be(5)
       lastCallbackEvent.oldState should be(ClassState("abc", 1))
       lastCallbackEvent.currentState should be(ClassState("abcd", 234))
 
       routingEngine.handleUrl(Url("/next"))
 
+      calls should be(6)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 234))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/next"))
+
+      calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
     }
@@ -134,22 +162,6 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       routingEngine.handleUrl(Url("/next"))
       routingEngine.currentState should be(NextObjectState)
-    }
-
-    "pass previous app state to routing registry" in {
-      val prevStates = ListBuffer.empty[TestState]
-      initTestRoutingEngine(new TestRoutingRegistry {
-        override def matchUrl(url: Url, previous: TestState): TestState = {
-          prevStates += previous
-          super.matchUrl(url, previous)
-        }
-      })
-
-      routingEngine.handleUrl(Url("/"))
-      routingEngine.handleUrl(Url("/next"))
-      routingEngine.handleUrl(Url("/abc/1"))
-      routingEngine.handleUrl(Url("/next"))
-      prevStates.toList shouldBe null :: ObjectState :: NextObjectState :: ClassState("abc", 1) :: Nil
     }
   }
 }

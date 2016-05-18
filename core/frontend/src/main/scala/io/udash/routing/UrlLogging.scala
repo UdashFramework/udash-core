@@ -9,15 +9,13 @@ import scala.util.Try
 /**
   * RoutingRegistry mixin simplifying logging app navigation.
   */
-trait UrlLogging[S <: State] extends RoutingRegistry[S] with StrictLogging {
+trait UrlLogging[S <: State] extends StrictLogging { app: Application[S] =>
 
   implicit protected val loggingEC: ExecutionContext = JSExecutionContext.queue
   protected def log(url: String, referrer: Option[String]): Unit
 
-  abstract override def matchUrl(url: Url, previous: S): S = {
-    Future(log(url.value, Try(matchState(previous).value).toOption))
+  app.onStateChange((event: StateChangeEvent[S]) => {
+    Future(log(matchState(event.currentState).value, Try(matchState(event.oldState).value).toOption))
       .onFailure { case t => logger.warn("Logging url change failed: {}", t.getMessage) }
-    super.matchUrl(url, previous)
-  }
-
+  })
 }
