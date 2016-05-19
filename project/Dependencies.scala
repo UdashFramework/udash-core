@@ -74,10 +74,11 @@ object Dependencies extends Build {
   ).map(_ % Test))
 
   val bootstrapDeps = Def.setting(Seq(
-    "com.github.karasiq" %%% "scalajs-bootstrap" % "1.0.5"
+    "com.github.karasiq" %%% "scalajs-bootstrap" % scalajsBootstrapVersion,
+    "org.webjars" % "bootstrap" % bootstrapVersion
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "bootstrap" % "3.3.6" / "bootstrap.js" dependsOn "jquery.js"
+    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js"
   ))
 }
