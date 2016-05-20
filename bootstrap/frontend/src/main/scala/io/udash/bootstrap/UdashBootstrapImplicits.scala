@@ -1,6 +1,9 @@
 package io.udash.bootstrap
 
+import com.karasiq.bootstrap.form.{FormRadio, FormRadioGroup}
 import io.udash._
+
+import scala.concurrent.ExecutionContext
 
 /**
   * [[Property]] adapters for scalajs-bootstrap.
@@ -19,5 +22,11 @@ trait UdashBootstrapImplicits extends RxConverters {
   implicit def udashBooleanInputOps[T](value: Property[Boolean]): RxBooleanInputOps[T] = RxBooleanInputOps(value)
 
   implicit def udashStateOps(state: Property[Boolean]): RxStateOps = RxStateOps(state)
+
+  implicit class FormRadioGroupOps(rg: FormRadioGroup)(implicit ec: ExecutionContext) {
+    def radioListProperty: ReadableSeqProperty[FormRadio] = rg.radioList
+
+    def valueProperty: Property[String] = rg.value
+  }
 
 }
