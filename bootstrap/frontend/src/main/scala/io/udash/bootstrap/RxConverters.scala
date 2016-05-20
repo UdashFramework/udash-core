@@ -16,11 +16,49 @@ trait RxConverters {
 
   //cache views to avoid redundant updates
   private val varCache = mutable.Map.empty[Property[_], Var[_]]
-  private val readablePropertyCache = mutable.Map.empty[Rx[_], CastableReadableProperty[_]]
-  private val propertyCache = mutable.Map.empty[Var[_], CastableProperty[_]]
+  private val readablePropertyCache = mutable.Map.empty[Rx[_], ReadableProperty[_]]
+  private val propertyCache = mutable.Map.empty[Var[_], Property[_]]
 
   implicit def property2Var[T](property: Property[T]): Var[T] =
     varCache.getOrElseUpdate(property, new PropertyVar(property)).asInstanceOf[Var[T]]
+
+  implicit def rx2Property[T: ModelValue : PropertyCreator](rx: Rx[T])(implicit ec: ExecutionContext): CastableReadableProperty[T] =
+    rx match {
+      case variable: Var[T] => var2Property(variable)
+      case _ => readablePropertyCache.getOrElseUpdate(rx, createReadableProp(rx)).asInstanceOf[CastableReadableProperty[T]]
+    }
+
+  implicit def var2Property[T: ModelValue : PropertyCreator](variable: Var[T])(implicit ec: ExecutionContext): CastableProperty[T] =
+    propertyCache.getOrElseUpdate(variable, {
+      val res = createReadableProp(variable)
+      res.listen(variable.update)
+      res
+    }).asInstanceOf[CastableProperty[T]]
+
+  private def createReadableProp[T: ModelValue : PropertyCreator](rx: Rx[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
+    val res = Property[T]
+    rx.trigger(res.set(rx.now))
+    res
+  }
+
+  implicit def rxSeq2Property[T: ModelValue](rx: Rx[Seq[T]])(implicit ec: ExecutionContext): ReadableSeqProperty[T] =
+    rx match {
+      case variable: Var[Seq[T]] => varSeq2Property(variable)
+      case _ => readablePropertyCache.getOrElseUpdate(rx, createReadableSeqProp(rx)).asInstanceOf[ReadableSeqProperty[T]]
+    }
+
+  implicit def varSeq2Property[T: ModelValue](variable: Var[Seq[T]])(implicit ec: ExecutionContext): SeqProperty[T] =
+    propertyCache.getOrElseUpdate(variable, {
+      val res = createReadableSeqProp(variable)
+      res.listen(t => variable.update(t))
+      res
+    }).asInstanceOf[SeqProperty[T]]
+
+  private def createReadableSeqProp[T: ModelValue](rx: Rx[Seq[T]])(implicit ec: ExecutionContext): SeqProperty[T] = {
+    val res = SeqProperty[T]
+    rx.trigger(res.set(rx.now))
+    res
+  }
 
   private class PropertyVar[T](property: Property[T]) extends Var[T](property.get) {
     private val registration = property.listen(update)
@@ -35,25 +73,4 @@ trait RxConverters {
       super.kill()
     }
   }
-
-  implicit def var2Property[T: ModelValue : PropertyCreator](variable: Var[T])(implicit ec: ExecutionContext): CastableProperty[T] =
-    propertyCache.getOrElseUpdate(variable, {
-      val res = createReadableProp(variable)
-      res.listen(variable.update)
-      res
-    }).asInstanceOf[CastableProperty[T]]
-
-
-  private def createReadableProp[T: ModelValue : PropertyCreator](variable: Rx[T])(implicit ec: ExecutionContext): CastableProperty[T] = {
-    val res = Property[T]
-    variable.trigger(res.set(variable.now))
-    res
-  }
-
-  implicit def rx2Property[T: ModelValue : PropertyCreator](rx: Rx[T])(implicit ec: ExecutionContext): CastableReadableProperty[T] =
-    rx match {
-      case variable: Var[T] => var2Property(variable)
-      case _ => readablePropertyCache.getOrElseUpdate(rx, createReadableProp(rx)).asInstanceOf[CastableReadableProperty[T]]
-    }
-
 }
