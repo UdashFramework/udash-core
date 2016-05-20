@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 
 import com.karasiq.bootstrap.form.{FormRadio, FormRadioGroup}
+import com.karasiq.bootstrap.navbar.{Navigation, NavigationBar, NavigationTab}
 import io.udash._
 
 import scala.concurrent.ExecutionContext
@@ -28,5 +29,14 @@ trait UdashBootstrapImplicits extends RxConverters {
 
     def valueProperty: Property[String] = rg.value
   }
+
+  implicit class NavigationOps(nav: Navigation) {
+    def contentProperty(implicit ec: ExecutionContext): ReadableSeqProperty[NavigationTab] = nav.content
+  }
+
+  implicit class NavigationBarOps(nb: NavigationBar) {
+    def navigationTabsProperty(implicit ec: ExecutionContext): SeqProperty[NavigationTab] = nb.navigationTabs
+  }
+
 
 }
