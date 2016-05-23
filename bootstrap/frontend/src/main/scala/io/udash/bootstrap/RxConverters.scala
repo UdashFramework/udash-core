@@ -15,6 +15,7 @@ trait RxConverters {
   implicit protected val context: Ctx.Owner = Ctx.Owner.Unsafe.Unsafe
 
   //cache views to avoid redundant updates
+  private val rxCache = mutable.Map.empty[ReadableProperty[_], Rx[_]]
   private val varCache = mutable.Map.empty[Property[_], Var[_]]
   private val readablePropertyCache = mutable.Map.empty[Rx[_], ReadableProperty[_]]
   private val propertyCache = mutable.Map.empty[Var[_], Property[_]]
@@ -60,17 +61,26 @@ trait RxConverters {
     res
   }
 
-  private class PropertyVar[T](property: Property[T]) extends Var[T](property.get) {
-    private val registration = property.listen(update)
-
-    override def update(newValue: T): Unit = {
-      property.set(newValue)
-      super.update(newValue)
+  implicit def readableProp2Rx[T](property: ReadableProperty[T]): Rx[T] = {
+    property match {
+      case prop: Property[T] => property2Var(prop)
+      case _ => rxCache.getOrElseUpdate(property, new ReadablePropertyRx[T](property).r).asInstanceOf[Rx[T]]
     }
+  }
+
+  private class ReadablePropertyRx[T](property: ReadableProperty[T]) extends Var[T](property.get) {
+    private val registration = property.listen(update)
 
     override def kill(): Unit = {
       registration.cancel()
       super.kill()
+    }
+  }
+
+  private class PropertyVar[T](property: Property[T]) extends ReadablePropertyRx[T](property) {
+    override def update(newValue: T): Unit = {
+      property.set(newValue)
+      super.update(newValue)
     }
   }
 }

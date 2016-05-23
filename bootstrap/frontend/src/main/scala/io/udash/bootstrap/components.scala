@@ -1,25 +1,20 @@
-import com.karasiq.bootstrap._
-import com.karasiq.bootstrap.alert.AlertStyle
-import com.karasiq.bootstrap.buttons.{ButtonBuilder, ButtonSize, ButtonStyle}
-import com.karasiq.bootstrap.grid.GridSystem.col.GridColSize
-import com.karasiq.bootstrap.icons.IconModifier
-import com.karasiq.bootstrap.modal.ModalBuilder
-import com.karasiq.bootstrap.panel.PanelBuilder
-import com.karasiq.bootstrap.table.TableRowStyle
+package io.udash.bootstrap
+
+
+import com.karasiq.bootstrap
 import io.udash._
-import io.udash.bootstrap.UdashBootstrapImplicits
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
 object Alert {
-  def apply(style: AlertStyle, md: Modifier*): ConcreteHtmlTag[dom.html.Div] = alert.Alert(style, md: _*)
+  def apply(style: bootstrap.alert.AlertStyle, md: Modifier*): ConcreteHtmlTag[dom.html.Div] = bootstrap.alert.Alert(style, md: _*)
 }
 
 object Button {
   // Shortcut to ButtonBuilder()
-  def apply(style: ButtonStyle = ButtonStyle.default, size: ButtonSize = ButtonSize.default, block: Boolean = false, active: Boolean = false, disabled: Boolean = false): ButtonBuilder =
-    buttons.Button(style, size, block, active, disabled)
+  def apply(style: bootstrap.buttons.ButtonStyle = bootstrap.buttons.ButtonStyle.default, size: bootstrap.buttons.ButtonSize = bootstrap.buttons.ButtonSize.default, block: Boolean = false, active: Boolean = false, disabled: Boolean = false): bootstrap.buttons.ButtonBuilder =
+    bootstrap.buttons.Button(style, size, block, active, disabled)
 }
 
 object Carousel extends UdashBootstrapImplicits {
@@ -28,23 +23,23 @@ object Carousel extends UdashBootstrapImplicits {
       BoostrapCarousel.reactive(data, id)
   */
 
-  def apply(content: Modifier*): carousel.Carousel =
-    carousel.Carousel(content: _*)
+  def apply(content: Modifier*): bootstrap.carousel.Carousel =
+    bootstrap.carousel.Carousel(content: _*)
 
 }
 
 object Collapse {
-  def apply(btnTitle: String)(content: Modifier*): Modifier = collapse.Collapse(btnTitle)(content: _*)
+  def apply(btnTitle: String)(content: Modifier*): Modifier = bootstrap.collapse.Collapse(btnTitle)(content: _*)
 }
 
 object Dropdown {
-  def item(md: Modifier*): Tag = dropdown.Dropdown.item(md: _*)
+  def item(md: Modifier*): Tag = bootstrap.dropdown.Dropdown.item(md: _*)
 
-  def link(target: String, md: Modifier*): Tag = dropdown.Dropdown.link(target, md: _*)
+  def link(target: String, md: Modifier*): Tag = bootstrap.dropdown.Dropdown.link(target, md: _*)
 
-  def apply(title: Modifier, items: Modifier*): Tag = dropdown.Dropdown(title, items: _*)
+  def apply(title: Modifier, items: Modifier*): Tag = bootstrap.dropdown.Dropdown(title, items: _*)
 
-  def dropup(title: Modifier, items: Modifier*): Tag = dropdown.Dropdown.dropup(title, items: _*)
+  def dropup(title: Modifier, items: Modifier*): Tag = bootstrap.dropdown.Dropdown.dropup(title, items: _*)
 }
 
 object Form {
@@ -76,20 +71,20 @@ object FormInput extends UdashBootstrapImplicits {
 
   def checkbox(label: Modifier, md: Modifier*): Tag = com.karasiq.bootstrap.form.FormInput.checkbox(label, md: _*)
 
-  def radio(title: String, radioName: String, radioValue: String, radioId: String = Bootstrap.newId): FormRadio =
+  def radio(title: String, radioName: String, radioValue: String, radioId: String = bootstrap.Bootstrap.newId): FormRadio =
     com.karasiq.bootstrap.form.FormInput.radio(title, radioName, radioValue, radioId)
 
   def radioGroup(radios: FormRadio*): FormRadioGroup = com.karasiq.bootstrap.form.FormInput.radioGroup(radios: _*)
 
-  def radioGroup(radios: SeqProperty[FormRadio]): FormRadioGroup = com.karasiq.bootstrap.form.FormInput.radioGroup(radios)
+  def radioGroup(radios: ReadableSeqProperty[FormRadio]): FormRadioGroup = com.karasiq.bootstrap.form.FormInput.radioGroup(radios)
 
   def select(title: Modifier, options: String*): FormSelect = com.karasiq.bootstrap.form.FormInput.select(title, options: _*)
 
-  def select(title: Modifier, options: SeqProperty[String]): FormSelect = com.karasiq.bootstrap.form.FormInput.select(title, options)
+  def select(title: Modifier, options: ReadableSeqProperty[String]): FormSelect = com.karasiq.bootstrap.form.FormInput.select(title, options)
 
   def multipleSelect(title: Modifier, options: String*): FormSelect = com.karasiq.bootstrap.form.FormInput.multipleSelect(title, options: _*)
 
-  def multipleSelect(title: Modifier, options: SeqProperty[String]): FormSelect = com.karasiq.bootstrap.form.FormInput.multipleSelect(title, options)
+  def multipleSelect(title: Modifier, options: ReadableSeqProperty[String]): FormSelect = com.karasiq.bootstrap.form.FormInput.multipleSelect(title, options)
 
   def apply(label: Modifier, md: Modifier*): Tag = com.karasiq.bootstrap.form.FormInput(label, md: _*)
 }
@@ -115,141 +110,141 @@ object FormInputGroup {
 
 object GridSystem {
 
-  def container: Tag = grid.GridSystem.container
+  def container: Tag = bootstrap.grid.GridSystem.container
 
-  def containerFluid: Tag = grid.GridSystem.containerFluid
+  def containerFluid: Tag = bootstrap.grid.GridSystem.containerFluid
 
-  def row: Tag = grid.GridSystem.row
+  def row: Tag = bootstrap.grid.GridSystem.row
 
-  def mkRow(md: Modifier*): Tag = grid.GridSystem.mkRow(md: _*)
+  def mkRow(md: Modifier*): Tag = bootstrap.grid.GridSystem.mkRow(md: _*)
 
   object col {
-    def xs(size: Int): GridColSize = grid.GridSystem.col.xs(size)
+    def xs(size: Int): bootstrap.grid.GridSystem.col.GridColSize = bootstrap.grid.GridSystem.col.xs(size)
 
-    def sm(size: Int): GridColSize = grid.GridSystem.col.sm(size)
+    def sm(size: Int): bootstrap.grid.GridSystem.col.GridColSize = bootstrap.grid.GridSystem.col.sm(size)
 
-    def md(size: Int): GridColSize = grid.GridSystem.col.md(size)
+    def md(size: Int): bootstrap.grid.GridSystem.col.GridColSize = bootstrap.grid.GridSystem.col.md(size)
 
-    def lg(size: Int): GridColSize = grid.GridSystem.col.lg(size)
+    def lg(size: Int): bootstrap.grid.GridSystem.col.GridColSize = bootstrap.grid.GridSystem.col.lg(size)
 
-    def responsive(xsSize: Int, smSize: Int, mdSize: Int, lgSize: Int): GridColSize =
-      grid.GridSystem.col.responsive(xsSize, smSize, mdSize, lgSize)
+    def responsive(xsSize: Int, smSize: Int, mdSize: Int, lgSize: Int): bootstrap.grid.GridSystem.col.GridColSize =
+      bootstrap.grid.GridSystem.col.responsive(xsSize, smSize, mdSize, lgSize)
 
-    def apply(size: Int): GridColSize = grid.GridSystem.col(size)
+    def apply(size: Int): bootstrap.grid.GridSystem.col.GridColSize = bootstrap.grid.GridSystem.col(size)
   }
 
 }
 
 object BootstrapGlyphicon {
-  def apply(name: String): icons.BootstrapGlyphicon = icons.BootstrapGlyphicon(name)
+  def apply(name: String): bootstrap.icons.BootstrapGlyphicon = bootstrap.icons.BootstrapGlyphicon(name)
 }
 
 object FontAwesome {
-  val Inverse = icons.FontAwesome.inverse
+  val Inverse = bootstrap.icons.FontAwesome.inverse
   // Size modifiers
-  val Large = icons.FontAwesome.large
-  val X2 = icons.FontAwesome.x2
-  val X3 = icons.FontAwesome.x3
-  val X4 = icons.FontAwesome.x4
-  val X5 = icons.FontAwesome.x5
+  val Large = bootstrap.icons.FontAwesome.large
+  val X2 = bootstrap.icons.FontAwesome.x2
+  val X3 = bootstrap.icons.FontAwesome.x3
+  val X4 = bootstrap.icons.FontAwesome.x4
+  val X5 = bootstrap.icons.FontAwesome.x5
   // Fixed width
-  val FixedWidth = icons.FontAwesome.fixedWidth
+  val FixedWidth = bootstrap.icons.FontAwesome.fixedWidth
   // List icons
-  val List = icons.FontAwesome.list
-  val Line = icons.FontAwesome.line
+  val List = bootstrap.icons.FontAwesome.list
+  val Line = bootstrap.icons.FontAwesome.line
   // Bordered & Pulled icons
-  val Border = icons.FontAwesome.border
-  val PullRight = icons.FontAwesome.pullRight
-  val PullLeft = icons.FontAwesome.pullLeft
+  val Border = bootstrap.icons.FontAwesome.border
+  val PullRight = bootstrap.icons.FontAwesome.pullRight
+  val PullLeft = bootstrap.icons.FontAwesome.pullLeft
   // Animated icons
-  val Spin = icons.FontAwesome.spin
-  val Pulse = icons.FontAwesome.pulse
+  val Spin = bootstrap.icons.FontAwesome.spin
+  val Pulse = bootstrap.icons.FontAwesome.pulse
   // Rotated & Flipped
-  val Rotate90 = icons.FontAwesome.rotate90
-  val Rotate180 = icons.FontAwesome.rotate180
-  val Rotate270 = icons.FontAwesome.rotate270
-  val FlipHorizontal = icons.FontAwesome.flipHorizontal
-  val FlipVertical = icons.FontAwesome.flipVertical
-  val Stacked1x = icons.FontAwesome.stacked1x
-  val Stacked2x = icons.FontAwesome.stacked2x
+  val Rotate90 = bootstrap.icons.FontAwesome.rotate90
+  val Rotate180 = bootstrap.icons.FontAwesome.rotate180
+  val Rotate270 = bootstrap.icons.FontAwesome.rotate270
+  val FlipHorizontal = bootstrap.icons.FontAwesome.flipHorizontal
+  val FlipVertical = bootstrap.icons.FontAwesome.flipVertical
+  val Stacked1x = bootstrap.icons.FontAwesome.stacked1x
+  val Stacked2x = bootstrap.icons.FontAwesome.stacked2x
 
-  def apply(name: String, styles: Modifier*): icons.FontAwesomeIcon = icons.FontAwesome(name, styles: _*)
+  def apply(name: String, styles: Modifier*): bootstrap.icons.FontAwesomeIcon = bootstrap.icons.FontAwesome(name, styles: _*)
 
   // Stacked icons
-  def stacked(iconss: Tag*): Tag = icons.FontAwesome.stacked(iconss: _*)
+  def stacked(iconss: Tag*): Tag = bootstrap.icons.FontAwesome.stacked(iconss: _*)
 }
 
 object Modal {
 
-  val Dismiss: Modifier = modal.Modal.dismiss
+  val Dismiss: Modifier = bootstrap.modal.Modal.dismiss
 
-  def closeButton(title: String = "Close"): ConcreteHtmlTag[dom.html.Button] = modal.Modal.closeButton(title)
+  def closeButton(title: String = "Close"): ConcreteHtmlTag[dom.html.Button] = bootstrap.modal.Modal.closeButton(title)
 
-  def button(md: Modifier*): ConcreteHtmlTag[dom.html.Button] = modal.Modal.button(md: _*)
+  def button(md: Modifier*): ConcreteHtmlTag[dom.html.Button] = bootstrap.modal.Modal.button(md: _*)
 
-  def apply(title: Modifier = "Modal dialog", body: Modifier = "", buttons: Modifier = Modal.closeButton()): ModalBuilder =
-    modal.Modal(title, body, buttons)
+  def apply(title: Modifier = "Modal dialog", body: Modifier = "", buttons: Modifier = Modal.closeButton()): bootstrap.modal.ModalBuilder =
+    bootstrap.modal.Modal(title, body, buttons)
 }
 
 object Navigation extends UdashBootstrapImplicits {
-  def tabs(tabs: navbar.NavigationTab*): navbar.Navigation = navbar.Navigation.tabs(tabs: _*)
+  def tabs(tabs: bootstrap.navbar.NavigationTab*): bootstrap.navbar.Navigation = bootstrap.navbar.Navigation.tabs(tabs: _*)
 
-  def pills(tabs: navbar.NavigationTab*): navbar.Navigation = navbar.Navigation.pills(tabs: _*)
+  def pills(tabs: bootstrap.navbar.NavigationTab*): bootstrap.navbar.Navigation = bootstrap.navbar.Navigation.pills(tabs: _*)
 }
 
 
 object NavigationBar extends UdashBootstrapImplicits {
-  def apply(tabs: Seq[navbar.NavigationTab] = Nil, barId: String = Bootstrap.newId, brand: Modifier = "Navigation",
-            styles: Seq[navbar.NavigationBarStyle] = Seq(navbar.NavigationBarStyle.default, navbar.NavigationBarStyle.fixedTop),
+  def apply(tabs: Seq[bootstrap.navbar.NavigationTab] = Nil, barId: String = bootstrap.Bootstrap.newId, brand: Modifier = "Navigation",
+            styles: Seq[bootstrap.navbar.NavigationBarStyle] = Seq(bootstrap.navbar.NavigationBarStyle.default, bootstrap.navbar.NavigationBarStyle.fixedTop),
             container: Modifier ⇒ Modifier = md ⇒ GridSystem.container(md),
             contentContainer: Modifier ⇒ Modifier = md ⇒ GridSystem.container(GridSystem.mkRow(md))) =
-    navbar.NavigationBar(tabs, barId, brand, styles, container, contentContainer)
+    bootstrap.navbar.NavigationBar(tabs, barId, brand, styles, container, contentContainer)
 }
 
 object NavigationBarStyle {
 
-  val Default = navbar.NavigationBarStyle.default
-  val Inverse = navbar.NavigationBarStyle.inverse
+  val Default = bootstrap.navbar.NavigationBarStyle.default
+  val Inverse = bootstrap.navbar.NavigationBarStyle.inverse
 
-  val FixedTop = navbar.NavigationBarStyle.fixedTop
-  val FixedBottom = navbar.NavigationBarStyle.fixedBottom
-  val StaticTop = navbar.NavigationBarStyle.staticTop
+  val FixedTop = bootstrap.navbar.NavigationBarStyle.fixedTop
+  val FixedBottom = bootstrap.navbar.NavigationBarStyle.fixedBottom
+  val StaticTop = bootstrap.navbar.NavigationBarStyle.staticTop
 
 }
 
 object Panel {
 
-  def collapse(panelId: String, modifiers: Modifier*): Tag = panel.Panel.collapse(panelId, modifiers: _*)
+  def collapse(panelId: String, modifiers: Modifier*): Tag = bootstrap.panel.Panel.collapse(panelId, modifiers: _*)
 
-  def title(icon: IconModifier, title: Modifier, modifiers: Modifier*): Tag = panel.Panel.title(icon, title, modifiers: _*)
+  def title(icon: bootstrap.icons.IconModifier, title: Modifier, modifiers: Modifier*): Tag = bootstrap.panel.Panel.title(icon, title, modifiers: _*)
 
-  def button(icon: IconModifier, modifiers: Modifier*): ConcreteHtmlTag[dom.html.Anchor] = panel.Panel.button(icon, modifiers: _*)
+  def button(icon: bootstrap.icons.IconModifier, modifiers: Modifier*): ConcreteHtmlTag[dom.html.Anchor] = bootstrap.panel.Panel.button(icon, modifiers: _*)
 
-  def buttons(buttons: Modifier*): Tag = panel.Panel.buttons(buttons: _*)
+  def buttons(buttons: Modifier*): Tag = bootstrap.panel.Panel.buttons(buttons: _*)
 
-  def apply(panelId: String = Bootstrap.newId, style: panel.PanelStyle = PanelStyle.Default, header: Option[Modifier] = None, footer: Option[Modifier] = None): PanelBuilder =
-    panel.Panel(panelId, style, header, footer)
+  def apply(panelId: String = bootstrap.Bootstrap.newId, style: bootstrap.panel.PanelStyle = PanelStyle.Default, header: Option[Modifier] = None, footer: Option[Modifier] = None): bootstrap.panel.PanelBuilder =
+    bootstrap.panel.Panel(panelId, style, header, footer)
 }
 
 object PanelStyle {
-  val Default: panel.PanelStyle = panel.PanelStyle.default
+  val Default: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.default
 
-  val Primary: panel.PanelStyle = panel.PanelStyle.primary
-  val Success: panel.PanelStyle = panel.PanelStyle.success
-  val Info: panel.PanelStyle = panel.PanelStyle.info
-  val Warning: panel.PanelStyle = panel.PanelStyle.warning
-  val Danger: panel.PanelStyle = panel.PanelStyle.danger
+  val Primary: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.primary
+  val Success: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.success
+  val Info: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.info
+  val Warning: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.warning
+  val Danger: bootstrap.panel.PanelStyle = bootstrap.panel.PanelStyle.danger
 }
 
 object Popover {
-  def apply(title: String, content: Modifier, placement: tooltip.TooltipPlacement = tooltip.TooltipPlacement.auto): popover.Popover =
-    popover.Popover(title, content, placement)
+  def apply(title: String, content: Modifier, placement: bootstrap.tooltip.TooltipPlacement = bootstrap.tooltip.TooltipPlacement.auto): bootstrap.popover.Popover =
+    bootstrap.popover.Popover(title, content, placement)
 }
 
 object ProgressBar extends UdashBootstrapImplicits {
-  def basic(value: Property[Int]): progressbar.ProgressBar = progressbar.ProgressBar.basic(value)
+  def basic(value: ReadableProperty[Int]): bootstrap.progressbar.ProgressBar = bootstrap.progressbar.ProgressBar.basic(value)
 
-  def withLabel(value: Property[Int]): progressbar.ProgressBar = progressbar.ProgressBar.withLabel(value)
+  def withLabel(value: ReadableProperty[Int]): bootstrap.progressbar.ProgressBar = bootstrap.progressbar.ProgressBar.withLabel(value)
 }
 
 object PagedTable extends UdashBootstrapImplicits {
@@ -268,12 +263,12 @@ object TableRow {
   def apply(data: Seq[Modifier], ms: Modifier*): com.karasiq.bootstrap.table.TableRow =
     com.karasiq.bootstrap.table.TableRow(data, ms: _*)
 
-  val Default: TableRowStyle = com.karasiq.bootstrap.table.TableRow.default
-  val Active: TableRowStyle = com.karasiq.bootstrap.table.TableRow.active
-  val Success: TableRowStyle = com.karasiq.bootstrap.table.TableRow.success
-  val Warning: TableRowStyle = com.karasiq.bootstrap.table.TableRow.warning
-  val Danger: TableRowStyle = com.karasiq.bootstrap.table.TableRow.danger
-  val Info: TableRowStyle = com.karasiq.bootstrap.table.TableRow.info
+  val Default: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.default
+  val Active: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.active
+  val Success: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.success
+  val Warning: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.warning
+  val Danger: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.danger
+  val Info: bootstrap.table.TableRowStyle = com.karasiq.bootstrap.table.TableRow.info
 }
 
 object TableStyle {
@@ -285,8 +280,8 @@ object TableStyle {
 }
 
 object Tooltip {
-  def apply(content: String, placement: tooltip.TooltipPlacement = tooltip.TooltipPlacement.auto): tooltip.Tooltip =
-    tooltip.Tooltip(content, placement)
+  def apply(content: String, placement: bootstrap.tooltip.TooltipPlacement = bootstrap.tooltip.TooltipPlacement.auto): bootstrap.tooltip.Tooltip =
+    bootstrap.tooltip.Tooltip(content, placement)
 }
 
 object TooltipPlacement {

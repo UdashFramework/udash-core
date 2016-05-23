@@ -1,11 +1,6 @@
 package io.udash.bootstrap
 
-import com.karasiq.bootstrap.buttons.{DisabledButton, ToggleButton}
-import com.karasiq.bootstrap.form.{FormRadio, FormRadioGroup}
-import com.karasiq.bootstrap.navbar.{Navigation, NavigationBar, NavigationTab}
-import com.karasiq.bootstrap.progressbar.ProgressBar
-import com.karasiq.bootstrap.table.{PagedTable, Table, TableRow}
-import com.karasiq.bootstrap.{BootstrapComponent, BootstrapHtmlComponent}
+import com.karasiq.bootstrap
 import io.udash._
 import org.scalajs.dom
 import org.scalajs.dom.DOMList
@@ -39,47 +34,47 @@ trait UdashBootstrapImplicits extends RxConverters {
 
   implicit def propertyFragNode[T](prop: Property[T])(implicit ev: T => Frag): RxFragNode[T] = RxFragNode(prop)
 
-  implicit class FormRadioGroupOps(rg: FormRadioGroup)(implicit ec: ExecutionContext) {
-    def radioListProperty: ReadableSeqProperty[FormRadio] = rg.radioList
+  implicit class FormRadioGroupOps(rg: bootstrap.form.FormRadioGroup)(implicit ec: ExecutionContext) {
+    def radioListProperty: ReadableSeqProperty[bootstrap.form.FormRadio] = rg.radioList
 
     def valueProperty: Property[String] = rg.value
   }
 
-  implicit class NavigationOps(nav: Navigation) {
-    def contentProperty(implicit ec: ExecutionContext): ReadableSeqProperty[NavigationTab] = nav.content
+  implicit class NavigationOps(nav: bootstrap.navbar.Navigation) {
+    def contentProperty(implicit ec: ExecutionContext): ReadableSeqProperty[bootstrap.navbar.NavigationTab] = nav.content
   }
 
-  implicit class NavigationBarOps(nb: NavigationBar) {
-    def navigationTabsProperty(implicit ec: ExecutionContext): SeqProperty[NavigationTab] = nb.navigationTabs
+  implicit class NavigationBarOps(nb: bootstrap.navbar.NavigationBar) {
+    def navigationTabsProperty(implicit ec: ExecutionContext): SeqProperty[bootstrap.navbar.NavigationTab] = nb.navigationTabs
   }
 
-  implicit class ProgressBarOps(bar: ProgressBar) {
+  implicit class ProgressBarOps(bar: bootstrap.progressbar.ProgressBar) {
     def progressProperty(implicit ec: ExecutionContext): CastableReadableProperty[Int] = bar.progress
   }
 
-  implicit class TableOps(table: Table)(implicit ec: ExecutionContext) {
+  implicit class TableOps(table: bootstrap.table.Table)(implicit ec: ExecutionContext) {
     def headingProperty: ReadableSeqProperty[Modifier] = table.heading
 
-    def contentProperty: ReadableSeqProperty[TableRow] = table.content
+    def contentProperty: ReadableSeqProperty[bootstrap.table.TableRow] = table.content
   }
 
-  implicit class PagedTableOps(table: PagedTable)(implicit ec: ExecutionContext) {
+  implicit class PagedTableOps(table: bootstrap.table.PagedTable)(implicit ec: ExecutionContext) {
     def currentPageProperty: Property[Int] = table.currentPage
 
     def pages: CastableReadableProperty[Int] = table.pages
   }
 
   implicit class ButtonOps(val button: ConcreteHtmlTag[dom.html.Button]) {
-    def toggleButton: ToggleButton = new ToggleButton(button)
+    def toggleButton: bootstrap.buttons.ToggleButton = new bootstrap.buttons.ToggleButton(button)
 
-    def disabledButton: DisabledButton = new DisabledButton(button)
+    def disabledButton: bootstrap.buttons.DisabledButton = new bootstrap.buttons.DisabledButton(button)
   }
 
-  implicit def bootstrapHtmlComponentToTag[T <: dom.Element](bc: BootstrapHtmlComponent[T]): ConcreteHtmlTag[T] =
+  implicit def bootstrapHtmlComponentToTag[T <: dom.Element](bc: bootstrap.BootstrapHtmlComponent[T]): ConcreteHtmlTag[T] =
     BI.bootstrapHtmlComponentToTag(bc)
 
 
-  implicit def renderBootstrapComponent(bc: BootstrapComponent): Modifier =
+  implicit def renderBootstrapComponent(bc: bootstrap.BootstrapComponent): Modifier =
     BI.renderBootstrapComponent(bc)
 
   implicit def domListIndexedSeq[T](dl: DOMList[T]): DOMListIndexedSeq[T] = DOMListIndexedSeq(dl)
