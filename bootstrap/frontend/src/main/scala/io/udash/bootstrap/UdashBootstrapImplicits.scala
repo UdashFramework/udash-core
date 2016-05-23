@@ -2,9 +2,12 @@ package io.udash.bootstrap
 
 import com.karasiq.bootstrap.form.{FormRadio, FormRadioGroup}
 import com.karasiq.bootstrap.navbar.{Navigation, NavigationBar, NavigationTab}
+import com.karasiq.bootstrap.progressbar.ProgressBar
+import com.karasiq.bootstrap.table.{PagedTable, Table, TableRow}
 import io.udash._
 
 import scala.concurrent.ExecutionContext
+import scalatags.JsDom.all._
 
 /**
   * [[Property]] adapters for scalajs-bootstrap.
@@ -38,5 +41,20 @@ trait UdashBootstrapImplicits extends RxConverters {
     def navigationTabsProperty(implicit ec: ExecutionContext): SeqProperty[NavigationTab] = nb.navigationTabs
   }
 
+  implicit class ProgressBarOps(bar: ProgressBar) {
+    def progressProperty(implicit ec: ExecutionContext): CastableReadableProperty[Int] = bar.progress
+  }
+
+  implicit class TableOps(table: Table)(implicit ec: ExecutionContext) {
+    def headingProperty: ReadableSeqProperty[Modifier] = table.heading
+
+    def contentProperty: ReadableSeqProperty[TableRow] = table.content
+  }
+
+  implicit class PagedTableOps(table: PagedTable)(implicit ec: ExecutionContext) {
+    def currentPageProperty: Property[Int] = table.currentPage
+
+    def pages: CastableReadableProperty[Int] = table.pages
+  }
 
 }

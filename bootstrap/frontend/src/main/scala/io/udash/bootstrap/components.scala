@@ -2,7 +2,10 @@ import com.karasiq.bootstrap._
 import com.karasiq.bootstrap.alert.AlertStyle
 import com.karasiq.bootstrap.buttons.{ButtonBuilder, ButtonSize, ButtonStyle}
 import com.karasiq.bootstrap.grid.GridSystem.col.GridColSize
+import com.karasiq.bootstrap.icons.IconModifier
 import com.karasiq.bootstrap.modal.ModalBuilder
+import com.karasiq.bootstrap.panel.PanelBuilder
+import com.karasiq.bootstrap.table.TableRowStyle
 import io.udash._
 import io.udash.bootstrap.UdashBootstrapImplicits
 import org.scalajs.dom
@@ -142,45 +145,38 @@ object BootstrapGlyphicon {
 }
 
 object FontAwesome {
-  def apply(name: String, styles: Modifier*): icons.FontAwesomeIcon = icons.FontAwesome(name, styles: _*)
-
   val Inverse = icons.FontAwesome.inverse
-
   // Size modifiers
   val Large = icons.FontAwesome.large
   val X2 = icons.FontAwesome.x2
   val X3 = icons.FontAwesome.x3
   val X4 = icons.FontAwesome.x4
   val X5 = icons.FontAwesome.x5
-
   // Fixed width
   val FixedWidth = icons.FontAwesome.fixedWidth
-
   // List icons
   val List = icons.FontAwesome.list
   val Line = icons.FontAwesome.line
-
   // Bordered & Pulled icons
   val Border = icons.FontAwesome.border
   val PullRight = icons.FontAwesome.pullRight
   val PullLeft = icons.FontAwesome.pullLeft
-
   // Animated icons
   val Spin = icons.FontAwesome.spin
   val Pulse = icons.FontAwesome.pulse
-
   // Rotated & Flipped
   val Rotate90 = icons.FontAwesome.rotate90
   val Rotate180 = icons.FontAwesome.rotate180
   val Rotate270 = icons.FontAwesome.rotate270
   val FlipHorizontal = icons.FontAwesome.flipHorizontal
   val FlipVertical = icons.FontAwesome.flipVertical
+  val Stacked1x = icons.FontAwesome.stacked1x
+  val Stacked2x = icons.FontAwesome.stacked2x
+
+  def apply(name: String, styles: Modifier*): icons.FontAwesomeIcon = icons.FontAwesome(name, styles: _*)
 
   // Stacked icons
   def stacked(iconss: Tag*): Tag = icons.FontAwesome.stacked(iconss: _*)
-
-  val Stacked1x = icons.FontAwesome.stacked1x
-  val Stacked2x = icons.FontAwesome.stacked2x
 }
 
 object Modal {
@@ -220,5 +216,87 @@ object NavigationBarStyle {
   val StaticTop = navbar.NavigationBarStyle.staticTop
 
 }
+
+object Panel {
+
+  def collapse(panelId: String, modifiers: Modifier*): Tag = panel.Panel.collapse(panelId, modifiers: _*)
+
+  def title(icon: IconModifier, title: Modifier, modifiers: Modifier*): Tag = panel.Panel.title(icon, title, modifiers: _*)
+
+  def button(icon: IconModifier, modifiers: Modifier*): ConcreteHtmlTag[dom.html.Anchor] = panel.Panel.button(icon, modifiers: _*)
+
+  def buttons(buttons: Modifier*): Tag = panel.Panel.buttons(buttons: _*)
+
+  def apply(panelId: String = Bootstrap.newId, style: panel.PanelStyle = PanelStyle.Default, header: Option[Modifier] = None, footer: Option[Modifier] = None): PanelBuilder =
+    panel.Panel(panelId, style, header, footer)
+}
+
+object PanelStyle {
+  val Default: panel.PanelStyle = panel.PanelStyle.default
+
+  val Primary: panel.PanelStyle = panel.PanelStyle.primary
+  val Success: panel.PanelStyle = panel.PanelStyle.success
+  val Info: panel.PanelStyle = panel.PanelStyle.info
+  val Warning: panel.PanelStyle = panel.PanelStyle.warning
+  val Danger: panel.PanelStyle = panel.PanelStyle.danger
+}
+
+object Popover {
+  def apply(title: String, content: Modifier, placement: tooltip.TooltipPlacement = tooltip.TooltipPlacement.auto): popover.Popover =
+    popover.Popover(title, content, placement)
+}
+
+object ProgressBar extends UdashBootstrapImplicits {
+  def basic(value: Property[Int]): progressbar.ProgressBar = progressbar.ProgressBar.basic(value)
+
+  def withLabel(value: Property[Int]): progressbar.ProgressBar = progressbar.ProgressBar.withLabel(value)
+}
+
+object PagedTable extends UdashBootstrapImplicits {
+
+  /*  def apply(heading: Rx[Seq[Modifier]], content: Rx[Seq[TableRow]], perPage: Int = 20)(implicit ctx: Ctx.Owner): StaticPagedTable = {
+      new StaticPagedTable(heading, content, perPage)
+    }
+
+    def static(heading: Seq[Modifier], content: Seq[TableRow], perPage: Int = 20)(implicit ctx: Ctx.Owner): StaticPagedTable = {
+      this.apply(Rx(heading), Rx(content), perPage)
+    }*/
+
+}
+
+object TableRow {
+  def apply(data: Seq[Modifier], ms: Modifier*): com.karasiq.bootstrap.table.TableRow =
+    com.karasiq.bootstrap.table.TableRow(data, ms: _*)
+
+  val Default: TableRowStyle = com.karasiq.bootstrap.table.TableRow.default
+  val Active: TableRowStyle = com.karasiq.bootstrap.table.TableRow.active
+  val Success: TableRowStyle = com.karasiq.bootstrap.table.TableRow.success
+  val Warning: TableRowStyle = com.karasiq.bootstrap.table.TableRow.warning
+  val Danger: TableRowStyle = com.karasiq.bootstrap.table.TableRow.danger
+  val Info: TableRowStyle = com.karasiq.bootstrap.table.TableRow.info
+}
+
+object TableStyle {
+
+  val Striped: com.karasiq.bootstrap.table.TableStyle = com.karasiq.bootstrap.table.TableStyle.striped
+  val Hover: com.karasiq.bootstrap.table.TableStyle = com.karasiq.bootstrap.table.TableStyle.hover
+  val Bordered: com.karasiq.bootstrap.table.TableStyle = com.karasiq.bootstrap.table.TableStyle.bordered
+  val Condensed: com.karasiq.bootstrap.table.TableStyle = com.karasiq.bootstrap.table.TableStyle.condensed
+}
+
+object Tooltip {
+  def apply(content: String, placement: tooltip.TooltipPlacement = tooltip.TooltipPlacement.auto): tooltip.Tooltip =
+    tooltip.Tooltip(content, placement)
+}
+
+object TooltipPlacement {
+  val Auto = com.karasiq.bootstrap.tooltip.TooltipPlacement.auto
+  val Left = com.karasiq.bootstrap.tooltip.TooltipPlacement.left
+  val Right = com.karasiq.bootstrap.tooltip.TooltipPlacement.right
+  val Top = com.karasiq.bootstrap.tooltip.TooltipPlacement.top
+  val Bottom = com.karasiq.bootstrap.tooltip.TooltipPlacement.bottom
+}
+
+
 
 
