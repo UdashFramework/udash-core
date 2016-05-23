@@ -42,7 +42,7 @@ lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
-    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`
+    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`, `bootstrap`
   )
   .settings(publishArtifact := false)
 
@@ -138,3 +138,13 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(Scala
   .settings(
     jsDependencies += RuntimeDOM % Test
   )
+
+lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    libraryDependencies ++= bootstrapDeps.value,
+    jsDependencies ++= bootstrapFrontendJsDeps.value
+  )
+
