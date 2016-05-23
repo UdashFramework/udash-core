@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.testing.UdashSharedTest
 
 import scala.language.higherKinds

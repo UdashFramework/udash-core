@@ -19,6 +19,8 @@ object Dependencies extends Build {
   val upickleVersion = "0.4.1"
   val jawnParserVersion = "0.8.4"
 
+  val scalaHttpClientVersion = "1.0.0"
+
   val scalaLoggingVersion = "3.4.0"
 
   val scalatestVersion = "3.0.0-M15"
@@ -70,4 +72,9 @@ object Dependencies extends Build {
   val rpcBackendTestDeps = Def.setting(Seq(
     "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
   ).map(_ % Test))
+
+  val restCrossDeps = Def.setting(Seq(
+    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
+    "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
+  ))
 }

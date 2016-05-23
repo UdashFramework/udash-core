@@ -1,18 +1,39 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.FunctionRPCFramework
+import com.avsystem.commons.rpc.{FunctionRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
 
 import scala.language.postfixOps
 
+trait GenCodecSerializationFramework { this: RPCFramework =>
+  type Writer[T] = GenCodec.Auto[T]
+  type Reader[T] = GenCodec.Auto[T]
+
+  /** Converts value of type `T` into `RawValue`. */
+  def write[T: Writer](value: T): RawValue = {
+    var result: RawValue = null.asInstanceOf[RawValue]
+    GenCodec.autoWrite[T](outputSerialization(result = _), value)
+    result
+  }
+
+  /** Converts `RawValue` into value of type `T`. */
+  def read[T: Reader](raw: RawValue): T =
+    GenCodec.autoRead[T](inputSerialization(raw))
+
+  /** Returns `Input` for data marshalling. */
+  def inputSerialization(value: RawValue): Input
+  /** Returns `Output` for data unmarshalling. */
+  def outputSerialization(valueConsumer: RawValue => Unit): Output
+}
+
 /** Mixin for RPC framework with automatic `GenCodec` to `String` serialization. */
-trait AutoUdashRPCFramework { this: UdashRPCFramework =>
+trait AutoUdashRPCFramework extends GenCodecSerializationFramework { this: RPCFramework =>
   type RawValue = String
 
-  override val RawValueCodec = implicitly[GenCodec[String]]
+  val RawValueCodec = implicitly[GenCodec[String]]
 
-  override def stringToRaw(string: String): RawValue = string
-  override def rawToString(raw: RawValue): String = raw
+  def stringToRaw(string: String): RawValue = string
+  def rawToString(raw: RawValue): String = raw
 }
 
 /** Base RPC framework for client RPC interface. This one does not allow RPC interfaces to contain methods with return type `Future[T]`. */
