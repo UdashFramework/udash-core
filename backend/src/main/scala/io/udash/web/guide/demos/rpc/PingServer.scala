@@ -1,9 +1,7 @@
 package io.udash.web.guide.demos.rpc
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.web.guide.rpc.ClientRPC
 import io.udash.rpc._
+import io.udash.web.guide.rpc.ClientRPC
 
 import scala.concurrent.Future
 

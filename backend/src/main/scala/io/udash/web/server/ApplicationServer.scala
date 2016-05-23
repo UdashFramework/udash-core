@@ -1,8 +1,11 @@
 package io.udash.web.server
 
+import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.web.guide.MainServerRPC
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.rpc._
+import io.udash.rpc.utils.CallLogging
+import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -24,9 +27,15 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   guide.addServlet(createStaticHandler(guideResourceBase), "/*")
 
   private val atmosphereHolder = {
-    val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) =>
-      new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces()(clientId))
-    )
+    val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) => {
+      val callLogger = new CallLogger
+      new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
+        override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
+
+        override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
+          callLogger.append(Call(rpcName, methodName, args))
+      }
+    })
     val framework = new DefaultAtmosphereFramework(config)
 
     framework.init()

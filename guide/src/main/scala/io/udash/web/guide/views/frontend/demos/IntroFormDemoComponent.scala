@@ -11,7 +11,6 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 trait IntroFormDemoModel {
   def minimum: Int
@@ -64,8 +63,8 @@ class IntroFormDemoComponent extends Component {
 
   class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) {
     import io.udash.web.guide.Context._
+
     import JsDom.all._
-    import scalacss.Defaults._
     import scalacss.ScalatagsCss._
 
     private def i2s(i: Int) = i.toString
