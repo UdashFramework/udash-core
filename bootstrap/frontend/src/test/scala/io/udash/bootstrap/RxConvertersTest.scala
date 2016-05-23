@@ -1,6 +1,6 @@
 package io.udash.bootstrap
 
-import io.udash.properties.Property
+import io.udash._
 import io.udash.testing.UdashFrontendTest
 import rx.{Ctx, Rx, Var}
 
@@ -106,6 +106,12 @@ class RxConvertersTest extends UdashFrontendTest with RxConverters {
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
       values should contain(C(-5, "tp"))
+    }
+    "cache adapters" in {
+      testSameInstance[Var[Int], Property[Int]](Var(1))
+      testSameInstance[Rx[Int], ReadableProperty[Int]](Var(1).r)
+      testSameInstance[Var[Seq[Int]], SeqProperty[Int]](Var(Seq(1, 2, 3)))
+      testSameInstance[Rx[Seq[Int]], ReadableSeqProperty[Int]](Var(Seq(1, 2, 3)).r)
     }
   }
 
@@ -389,6 +395,18 @@ class RxConvertersTest extends UdashFrontendTest with RxConverters {
       r.startsWith("Rx@") shouldBe true
       r.endsWith("(1)") shouldBe true
     }
+    "cache adapters" in {
+      testSameInstance[Property[Int], Var[Int]](Property(1))
+      testSameInstance[ReadableProperty[Int], Rx[Int]](Property(1).transform(identity))
+      testSameInstance[SeqProperty[Int], Var[Seq[Int]]](SeqProperty(Seq(1, 2, 3)))
+      testSameInstance[ReadableSeqProperty[Int], Rx[Seq[Int]]](SeqProperty(Seq(1, 2, 3)).transform(identity))
+    }
+  }
+
+  private def testSameInstance[T1 <: AnyRef, T2 <: AnyRef](obj: T1)(implicit ev: T1 => T2): Unit = {
+    val obj1: T2 = obj
+    val obj2: T2 = obj
+    obj1 should be theSameInstanceAs obj2
   }
 
 }

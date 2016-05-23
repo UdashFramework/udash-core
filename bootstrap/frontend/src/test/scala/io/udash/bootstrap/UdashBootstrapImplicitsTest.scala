@@ -3,9 +3,6 @@ package io.udash.bootstrap
 import io.udash.properties.SeqProperty
 import io.udash.testing.UdashFrontendTest
 
-/**
-  * @author nuk
-  */
 class UdashBootstrapImplicitsTest extends UdashFrontendTest with UdashBootstrapImplicits {
   "UdashBootstrapImplicits" should {
     "let this compile" in {
