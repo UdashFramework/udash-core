@@ -114,7 +114,7 @@ class RpcSerializationView extends View {
         |  }
         |}""".stripMargin
     )(GuideStyles),
-    p("Now this code should compile fine. Below you can test this exemple. "),
+    p("Now this code should compile fine. Below you can test this example. "),
     new GenCodecsDemoComponent,
     h3("Default JSON serialization"),
     p(

@@ -84,7 +84,7 @@ class BootstrappingFrontendView extends View {
     ),
     h3("View, Presenter & ViewPresenter"),
     p(
-      "ViewPersenter is a pair of View and Presenter. ", i("ViewPresenterRegistry"), " is responsible " +
+      "ViewPresenter is a pair of View and Presenter. ", i("ViewPresenterRegistry"), " is responsible " +
       "for matching a current application state to ViewPresenter. Below you can find an example implementation of ",
       i("ViewPresenterRegistry"), ""
     ),

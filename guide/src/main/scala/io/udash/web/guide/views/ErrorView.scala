@@ -24,7 +24,7 @@ class ErrorView extends View {
       div(GuideStyles.errorInner)(
         p(GuideStyles.errorHead)(
           span(GlobalStyles.red)("Oops! 404"), br(),
-          span("The link doesn’t work. Or maybe it never has? You can still ", a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")), br(),
+          span("The link doesn't work. Or maybe it never has? You can still ", a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")), br(),
           span("... or go "), a(GlobalStyles.red, href := IntroState.url)("home"), span("")
         )
       )

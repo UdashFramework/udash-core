@@ -118,7 +118,7 @@ private[views] object IndexView {
     div(GlobalStyles.body)(
       h1("Have a code preview"),
       new DemoComponent(url).getTemplate,
-      p(HomepageStyles.demoDescription)("It’s free, try it now!"),
+      p(HomepageStyles.demoDescription)("It's free, try it now!"),
       Buttons.blackBorderButton(ExternalUrls.guide, "Start your project")
     )
   )

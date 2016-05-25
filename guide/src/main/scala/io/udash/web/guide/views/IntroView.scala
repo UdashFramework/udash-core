@@ -82,7 +82,7 @@ class IntroView extends View {
     h2("What's next?"),
     p(
       "Now you know the basics of the Udash framework. You can learn more about the Udash project configuration in the ",
-      a(href := BootstrappingIntroState.url)("Udash bootstraping"), " chapter. ",
+      a(href := BootstrappingIntroState.url)("Udash bootstrapping"), " chapter. ",
       "Check also: ",
       a(href := FrontendIntroState.url)("Frontend application development"),
       " and ",
