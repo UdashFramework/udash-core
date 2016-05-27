@@ -204,7 +204,7 @@ class FrontendPropertiesView extends View {
       "A filtered property is synchronised with the original one."
     ),
     CodeBlock(
-      """val numbers = SeqProperty[Int](Seq(1, 2, 3))
+      """val numbers = SeqProperty[Int](1, 2, 3)
         |val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
         |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
         |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin

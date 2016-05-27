@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rpc.demos
 
-import io.udash.web.guide.Context
 import io.udash._
+import io.udash.bootstrap.BootstrapStyles
+import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.PingClient
-import io.udash.web.guide.styles.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -51,11 +51,10 @@ class PingPongPushDemoComponent extends Component {
 
   class PingPongPushDemoView(model: ModelProperty[PingPongPushDemoModel], presenter: PingPongPushDemoPresenter) {
     import JsDom.all._
-    import scalacss.Defaults._
     import scalacss.ScalatagsCss._
 
     def render: Element = span(GuideStyles.frame)(
-      button(id := "ping-pong-push-demo", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
+      button(id := "ping-pong-push-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true
       }))(produce(model.subProp(_.pingId))(p => JsDom.StringFrag(s"Ping($p)").render.asInstanceOf[dom.Element]))

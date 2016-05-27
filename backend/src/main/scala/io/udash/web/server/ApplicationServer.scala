@@ -21,7 +21,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   def stop() = server.stop()
 
   private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
-  private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2"))
+  private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
 
   homepage.addServlet(createStaticHandler(homepageResourceBase), "/*")
   guide.addServlet(createStaticHandler(guideResourceBase), "/*")

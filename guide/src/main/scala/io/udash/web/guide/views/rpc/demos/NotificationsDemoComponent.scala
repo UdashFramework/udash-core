@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.demos.rpc.NotificationsClient
-import io.udash.web.guide.styles.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom._
@@ -61,11 +61,10 @@ class NotificationsDemoComponent extends Component {
 
   class NotificationsDemoView(model: ModelProperty[NotificationsDemoModel], presenter: NotificationsDemoPresenter) {
     import JsDom.all._
-    import scalacss.Defaults._
     import scalacss.ScalatagsCss._
 
     def render: Element = span(GuideStyles.frame)(
-      button(id := "notifications-demo", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
+      button(id := "notifications-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true
       }))(produce(model.subProp(_.registered))(p => JsDom.StringFrag(if (!p) "Register for notifications" else "Unregister").render.asInstanceOf[Element])),

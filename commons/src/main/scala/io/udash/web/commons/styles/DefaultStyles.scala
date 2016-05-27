@@ -20,8 +20,7 @@ trait DefaultStyles extends StyleSheet.Inline {
       UdashFonts.acumin(),
       position.relative,
       height(100 %%),
-      fontSize(62.5 %%),
-      overflowY.scroll
+      fontSize(62.5 %%)
     ),
 
     unsafeRoot("body") (

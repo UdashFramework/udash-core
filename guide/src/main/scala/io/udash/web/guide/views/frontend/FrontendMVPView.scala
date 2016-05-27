@@ -26,7 +26,7 @@ class FrontendMVPView extends View {
         "it provides one and two-ways bindings to DOM elements."
       ),
       li(
-        "View - extends ", i("View"), " and creates a ", a(href := References.scalatagsHomepage)("Scalatags"), " template ",
+        "View - extends ", i("View"), " and creates a ", a(href := References.ScalatagsHomepage)("Scalatags"), " template ",
         "with a method getting a child view to render."
       ),
       li(
@@ -89,7 +89,7 @@ class FrontendMVPView extends View {
     h3("View"),
     p(
       "The View implementation usually gets the Model and the Presenter as constructor arguments. They can be used ",
-      "in the ", a(href := References.scalatagsHomepage)("Scalatags"), " template of a view as user interaction callbacks. ",
+      "in the ", a(href := References.ScalatagsHomepage)("Scalatags"), " template of a view as user interaction callbacks. ",
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
     CodeBlock(

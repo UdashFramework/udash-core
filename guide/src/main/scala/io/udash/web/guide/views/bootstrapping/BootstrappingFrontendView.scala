@@ -172,7 +172,7 @@ class BootstrappingFrontendView extends View {
         ),
         li(
           i("NewsletterSubscribeView"), " creates an input and button template using the ",
-          a(href := References.scalatagsHomepage)("Scalatags"), " project with some Udash extensions."
+          a(href := References.ScalatagsHomepage)("Scalatags"), " project with some Udash extensions."
         ),
         li("View ignores child views, because it is the final view.")
       )

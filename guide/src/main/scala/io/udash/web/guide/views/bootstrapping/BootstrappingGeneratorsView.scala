@@ -25,7 +25,7 @@ class BootstrappingGeneratorsView extends View {
     h2("Command line interface"),
     p(
       "To use the project generator in the command line, download it from ",
-      a(href := References.udashGeneratorDownload)("here"), ". Then use ", i("run.sh"), " or ", i("run.bat"), " script to start it."
+      a(href := References.UdashGeneratorDownload)("here"), ". Then use ", i("run.sh"), " or ", i("run.bat"), " script to start it."
     ),
     p(
       "Now you will have to configure a few settings: ",

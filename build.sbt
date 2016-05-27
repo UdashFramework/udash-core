@@ -72,6 +72,8 @@ lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSP
     libraryDependencies ++= frontendDeps.value,
     staticFilesDir := "UdashStatic/commons",
     compileStatics := {
+      IO.copyDirectory(sourceDirectory.value / "main/assets/bootstrap", target.value / staticFilesDir.value / "WebContent/assets/bootstrap")
+      IO.copyDirectory(sourceDirectory.value / "main/assets/fonts", target.value / staticFilesDir.value / "WebContent/assets/fonts")
       IO.copyDirectory(sourceDirectory.value / "main/assets/pdf", target.value / staticFilesDir.value / "WebContent/assets/pdf")
       IO.copyDirectory(sourceDirectory.value / "main/assets/svg", target.value / staticFilesDir.value / "WebContent/assets/svg")
       target.value / staticFilesDir.value

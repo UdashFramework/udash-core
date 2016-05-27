@@ -14,7 +14,7 @@ class RepeatDemoComponent extends Component {
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
-  val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
+  val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
 
   dom.window.setInterval(() => {
     val s: Int = integers.get.size

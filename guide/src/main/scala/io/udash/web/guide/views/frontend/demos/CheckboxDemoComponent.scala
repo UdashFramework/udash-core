@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
@@ -17,7 +17,7 @@ class CheckboxDemoComponent extends Component {
   val propB: Property[Boolean] = Property(false)
   val propC: Property[String] = Property("Yes")
   val propCAsBoolean = propC.transform(
-    (s: String) => if (s.equalsIgnoreCase("yes")) true else false,
+    (s: String) => s.equalsIgnoreCase("yes"),
     (b: Boolean) => if (b) "Yes" else "No"
   )
 
@@ -28,25 +28,25 @@ class CheckboxDemoComponent extends Component {
   ).render
 
   private val inputs = div(BootstrapStyles.row)(
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Property A:"),
-        div(BootstrapStyles.inputGroupAddon)(Checkbox(propA, cls := "checkbox-demo-a")),
-        div(BootstrapStyles.inputGroupAddon, "data-bind".attr := "a")(bind(propA))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Property A:"),
+        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propA, cls := "checkbox-demo-a")),
+        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "a")(bind(propA))
       )
     ),
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Property B:"),
-        div(BootstrapStyles.inputGroupAddon)(Checkbox(propB, cls := "checkbox-demo-b")),
-        div(BootstrapStyles.inputGroupAddon, "data-bind".attr := "b")(bind(propB))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Property B:"),
+        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propB, cls := "checkbox-demo-b")),
+        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "b")(bind(propB))
       )
     ),
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Property C:"),
-        div(BootstrapStyles.inputGroupAddon)(Checkbox(propCAsBoolean, cls := "checkbox-demo-c")),
-        div(BootstrapStyles.inputGroupAddon, "data-bind".attr := "c")(bind(propC))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Property C:"),
+        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propCAsBoolean, cls := "checkbox-demo-c")),
+        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "c")(bind(propC))
       )
     )
   )

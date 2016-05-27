@@ -197,6 +197,7 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
     fontSize(1.6 rem),
     color(StyleConstants.Colors.GreySemi),
     paddingLeft(6 rem),
+    marginBottom(`0`),
 
     unsafeChild(":not(pre) > code[class*=\"language-\"]") (
       whiteSpace.pre

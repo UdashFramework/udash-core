@@ -23,7 +23,7 @@ class IntroView extends View {
     (new ImageFactory("assets/images/quick"))("generator.png", "Generator example", GuideStyles.imgRight, GuideStyles.imgMedium),
     p(
       "A good starting point is a generation of a project base with the Udash project generator. You can download it from ",
-      a(href := References.udashGeneratorDownload)("here"), " ",
+      a(href := References.UdashGeneratorDownload)("here"), " ",
       "The generator provides a command line interface which will collect some information about the project and ",
       "prepare the project base for you. "
     ),

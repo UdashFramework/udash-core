@@ -3,7 +3,7 @@ package io.udash.web.guide.views.rest.demos
 import io.udash.web.guide.Context
 import io.udash._
 import io.udash.web.guide.demos.rest.RestExampleClass
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -71,19 +71,19 @@ class SimpleRestDemoComponent extends Component {
 
     // TODO migrate to bootstrap components
     def render: Element = span(GuideStyles.frame, id := "simple-rest-demo")(
-      button(id := "simple-rest-demo-string-btn", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(
+      button(id := "simple-rest-demo-string-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
         onclick :+= ((ev: MouseEvent) => {
           presenter.sendStringRequest(jQ(ev.target))
           true
         })
       )("Get string"),
-      button(id := "simple-rest-demo-int-btn", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(
+      button(id := "simple-rest-demo-int-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
         onclick :+= ((ev: MouseEvent) => {
           presenter.sendIntRequest(jQ(ev.target))
           true
         })
       )("Get integer"),
-      button(id := "simple-rest-demo-class-btn", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(
+      button(id := "simple-rest-demo-class-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
         onclick :+= ((ev: MouseEvent) => {
           presenter.sendClassRequest(jQ(ev.target))
           true

@@ -16,12 +16,6 @@ object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
     overflow.hidden
   )
 
-  val centerBlock = style(
-    display.block,
-    textAlign.center,
-    margin(`0`, auto)
-  )
-
   val sectionIntro = style(
     section,
     height(100 vh),

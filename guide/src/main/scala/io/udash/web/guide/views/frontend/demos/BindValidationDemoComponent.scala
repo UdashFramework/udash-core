@@ -15,7 +15,7 @@ class BindValidationDemoComponent extends Component {
 
   import JsDom.all._
 
-  val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
+  val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
   integers.addValidator(new Validator[Seq[Int]] {
     override def apply(element: Seq[Int])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
       val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))

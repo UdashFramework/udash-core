@@ -228,6 +228,10 @@ object DemoStyles extends StyleSheet.Inline {
     )
   )
 
+  val demoBootstrap = style(
+    height(300 px)
+  )
+
   val demoInlineField = style(
     display.tableCell,
     minHeight(34 px),
