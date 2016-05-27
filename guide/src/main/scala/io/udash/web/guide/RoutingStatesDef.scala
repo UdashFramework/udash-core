@@ -16,6 +16,8 @@ case object IntroState extends RoutingState(ContentState)
 
 case object FAQState extends RoutingState(ContentState)
 
+case object LicenseState extends RoutingState(ContentState)
+
 /** Bootstrapping chapters */
 case object BootstrappingState extends RoutingState(ContentState)
 

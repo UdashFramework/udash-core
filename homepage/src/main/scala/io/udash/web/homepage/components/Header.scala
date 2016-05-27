@@ -38,7 +38,8 @@ object Header extends HeaderButtons with HeaderNav {
         a(HeaderStyles.headerLogo, href := IndexState(None).url)(),
         navigation(Seq(
           NavItem(ExternalUrls.guide, "Documentation"),
-          NavItem(ExternalUrls.releases, "Changelog")
+          NavItem(ExternalUrls.releases, "Changelog"),
+          NavItem(ExternalUrls.license, "License")
         ))
       ),
       buttons
