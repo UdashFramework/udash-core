@@ -18,7 +18,7 @@ class JQueryExtView extends View {
   override def getTemplate: dom.Element = div(
     h1("Udash jQuery wrapper"),
     p(
-      "The jQuery libarary is a very popular tool in the web development. We have created a strongly typed wrapper for jQuery, ",
+      "The jQuery library is a very popular tool in the web development. We have created a strongly typed wrapper for jQuery, ",
       "which allows you to use jQuery in the typed environment of Scala.js."
     ),
     h2("The first steps"),
@@ -71,7 +71,7 @@ class JQueryExtView extends View {
          |  .one("click", oneCallback)""".stripMargin
     )(GuideStyles),
     p(
-      "Notice that if you want to use the ", i("off()"), " method, then you have to pass exectly the same object ",
+      "Notice that if you want to use the ", i("off()"), " method, then you have to pass exactly the same object ",
       "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
       "they create new object every time."
     ),

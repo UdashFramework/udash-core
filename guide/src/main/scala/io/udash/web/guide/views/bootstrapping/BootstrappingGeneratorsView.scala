@@ -75,7 +75,7 @@ class BootstrappingGeneratorsView extends View {
       )
     ),
     p(
-      "The ", i("shared"), " module contains files releated to the RPC system:",
+      "The ", i("shared"), " module contains files related to the RPC system:",
       ul(GuideStyles.defaultList)(
         li(b("MainServerRPC.scala"), " - contains the main server RPC interface implemented in the ", i("backend"), " module."),
         li(b("MainClientRPC.scala"), " - contains the main client RPC interface implemented in the ", i("frontend"), " module.")

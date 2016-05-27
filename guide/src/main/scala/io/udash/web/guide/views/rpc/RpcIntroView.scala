@@ -108,7 +108,7 @@ class RpcIntroView extends View {
     CodeBlock("""serverRpc.ping(pingId)""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
-      "Now you know the basics of the Udash RPC system. You should alse take a closer look at ",
+      "Now you know the basics of the Udash RPC system. You should also take a closer look at ",
       a(href := RpcInterfacesState.url)("RPC interfaces"), ""
     )
   ).render

@@ -50,7 +50,7 @@ class BootstrappingBackendView extends View {
         |}""".stripMargin)(GuideStyles),
     h3("Application server"),
     p(
-      "Application server creates Jetty server and configures content holders. ", i("resourceBase"), " is the directory contaning ",
+      "Application server creates Jetty server and configures content holders. ", i("resourceBase"), " is the directory containing ",
       i("index.html"), " and ", i("port"), " is the port for Jetty server to bind to."
     ),
     CodeBlock(
