@@ -75,7 +75,7 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "serialize and deserialize simple case classes" in {
-      val test: TestCC = TestCC(5, 123L, true, "bla", 'a' :: 'b' :: Nil)
+      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
       val serialized = RPC.write[TestCC](test)
       val deserialized = RPC.read[TestCC](serialized)
 
@@ -83,8 +83,8 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "serialize and deserialize nested case classes" in {
-      val test: TestCC = TestCC(5, 123L, true, "bla", 'a' :: 'b' :: Nil)
-      val test2: TestCC = TestCC(-35, 1L, true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
+      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
+      val test2: TestCC = TestCC(-35, 1L, 432, true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
       val nested: NestedTestCC = NestedTestCC(-123, test, test2)
       val serialized = RPC.write(nested)
       val deserialized = RPC.read[NestedTestCC](serialized)
@@ -159,7 +159,7 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
   def hugeTests(RPC: UdashRPCFramework) = {
     "serialize and deserialize huge case classes" in {
-      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
+      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
       def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
       def dncc(counter: Int = 0): DeepNestedTestCC =
         if (counter < 500) DeepNestedTestCC(ncc(), dncc(counter + 1))
