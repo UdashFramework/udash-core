@@ -1,6 +1,6 @@
 package io.udash.rpc
 
-case class TestCC(i: Int, l: Long, b: Boolean, s: String, list: List[Char])
+case class TestCC(i: Int, l: Long, intAsDouble: Double, b: Boolean, s: String, list: List[Char])
 case class NestedTestCC(i: Int, t: TestCC, t2: TestCC)
 case class DeepNestedTestCC(n: NestedTestCC, l: DeepNestedTestCC)
 
