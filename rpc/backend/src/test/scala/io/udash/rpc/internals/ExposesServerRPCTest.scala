@@ -109,14 +109,9 @@ class ExposesServerRPCTest extends UdashBackendTest {
     val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
       calls += method
     })
-    new ExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
+    new DefaultExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
+
       override protected val metadata: RPCMetadata[TestRPC] = RPCMetadata[TestRPC]
-
-      override val framework = DefaultUdashRPCFramework
-
-      import framework._
-
-      override protected def localRpcAsRaw: framework.AsRawRPC[TestRPC] = framework.AsRawRPC[TestRPC]
 
       override def log(rpcName: String, methodName: String, args: Seq[String]): Unit = loggedCalls += s"$rpcName $methodName $args"
     }

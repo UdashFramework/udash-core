@@ -27,7 +27,7 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
   }
 }
 
-final class DefaultExposesServerRPC[ServerRPCType]
+class DefaultExposesServerRPC[ServerRPCType]
   (local: ServerRPCType)(implicit protected val localRpcAsRaw: DefaultUdashRPCFramework.AsRawRPC[ServerRPCType])
   extends ExposesServerRPC(local) {
 

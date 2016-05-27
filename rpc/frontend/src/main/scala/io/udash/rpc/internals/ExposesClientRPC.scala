@@ -26,7 +26,7 @@ abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPC
     JSExecutionContext.queue
 }
 
-final class DefaultExposesClientRPC[ClientRPCType]
+class DefaultExposesClientRPC[ClientRPCType]
   (local: ClientRPCType)(implicit protected val localRpcAsRaw: DefaultUdashRPCFramework.AsRawClientRPC[ClientRPCType])
   extends ExposesClientRPC(local) {
 
