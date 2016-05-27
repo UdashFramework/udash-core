@@ -6,7 +6,7 @@ import com.avsystem.commons.serialization.{Input, Output}
 import scala.concurrent.Future
 
 object GenCodecServerRPC {
-  case class DemoCaseClass(i: Int, s: String)
+  case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
 
   class DemoClass(val i: Int, val s: String) {
     var _v: Int = 5
@@ -47,6 +47,7 @@ trait GenCodecServerRPC {
   import GenCodecServerRPC._
 
   def sendInt(el: Int): Future[Int]
+  def sendDouble(el: Double): Future[Double]
   def sendString(el: String): Future[String]
   def sendSeq(el: Seq[String]): Future[Seq[String]]
   def sendMap(el: Map[String, Int]): Future[Map[String, Int]]

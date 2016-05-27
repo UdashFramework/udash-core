@@ -12,6 +12,11 @@ class GenCodecServer extends GenCodecServerRPC with LazyLogging {
     el
   }
 
+  override def sendDouble(el: Double): Future[Double] = Future {
+    logger.debug(el.toString)
+    el
+  }
+
   override def sendSealedTrait(el: Fruit): Future[Fruit] = Future {
     logger.debug(el.toString)
     el

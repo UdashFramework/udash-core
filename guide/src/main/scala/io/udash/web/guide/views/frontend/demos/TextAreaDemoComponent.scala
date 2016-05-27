@@ -18,13 +18,13 @@ class TextAreaDemoComponent extends Component {
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(BootstrapStyles.colMd4)(
-          TextArea(text, BootstrapStyles.formControl)
+          TextArea.debounced(text, BootstrapStyles.formControl)
         ),
         div(BootstrapStyles.colMd4)(
-          TextArea(text, BootstrapStyles.formControl)
+          TextArea.debounced(text, BootstrapStyles.formControl)
         ),
         div(BootstrapStyles.colMd4)(
-          TextArea(text, BootstrapStyles.formControl)
+          TextArea.debounced(text, BootstrapStyles.formControl)
         )
       )
     )
