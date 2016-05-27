@@ -184,10 +184,80 @@ object DemoComponent {
       |).render""".stripMargin
   )(HomepageStyles)
 
+  def i18n = CodeBlock(
+    """import scalajs.concurrent.JSExecutionContext.Implicits
+      |import Implicits.queue
+      |import scalacss.ScalatagsCss._
+      |import scalatags.JsDom.all._
+      |
+      |import io.udash._
+      |import io.udash.i18n._
+      |
+      |val name = Property("World")
+      |
+      |object Translations {
+      |  import TranslationKey._
+      |  object udash {
+      |    val hello = key("udash.hello")
+      |    val withArg = key1[String]("udash.withArg")
+      |  }
+      |}
+      |
+      |object FrontendTranslationProvider {
+      |  private val translations = Map(
+      |    Lang("en") -> Bundle(BundleHash("enHash"), Map(
+      |      "udash.hello" -> "Hello, Udash!",
+      |      "udash.withArg" -> "Hello, {}!"
+      |    )),
+      |    Lang("pl") -> Bundle(BundleHash("plHash"), Map(
+      |      "udash.hello" -> "Witaj, Udash!",
+      |      "udash.withArg" -> "Witaj, {}!"
+      |    )),
+      |    Lang("de") -> Bundle(BundleHash("deHash"), Map(
+      |      "udash.hello" -> "Hallo, Udash!",
+      |      "udash.withArg" -> "Hallo, {}!"
+      |    )),
+      |    Lang("sp") -> Bundle(BundleHash("spHash"), Map(
+      |      "udash.hello" -> "Hola, Udash!",
+      |      "udash.withArg" -> "Hola, {}!"
+      |    ))
+      |  )
+      |
+      |  def apply(): LocalTranslationProvider =
+      |    new LocalTranslationProvider(translations)
+      |}
+      |
+      |implicit val translationProvider: TranslationProvider =
+      |  FrontendTranslationProvider()
+      |
+      |implicit val lang: Property[Lang] =
+      |  Property(Lang("en"))
+      |
+      |def changeLang(l: Lang) = lang.set(l)
+      |
+      |div(
+      |  TextInput(name, `type` := "text",
+      |            placeholder := "Type your name..."),
+      |  div(
+      |    translatedDynamic(Translations.udash.hello)(_.apply())
+      |  ),
+      |  div(produce(name)(n => span(
+      |    translatedDynamic(Translations.udash.withArg)(_.apply(n))
+      |  ).render),
+      |  ul(
+      |    li(a(onclick := (() => changeLang(Lang("en"))))("EN")),
+      |    li(a(onclick := (() => changeLang(Lang("pl"))))("PL")),
+      |    li(a(onclick := (() => changeLang(Lang("de"))))("DE")),
+      |    li(a(onclick := (() => changeLang(Lang("sp"))))("SP"))
+      |  )
+      |).render""".stripMargin
+  )(HomepageStyles)
+
   def demoEntries: Seq[DemoEntry] = Seq(
     DemoEntry("Hello, World!", IndexState(Option("hello")).url, DemoPreview.helloWorldDemo, helloWorldCode),
     DemoEntry("Properties", IndexState(Option("properties")).url, DemoPreview.propertiesDemo, propertiesCode),
-    DemoEntry("Validation", IndexState(Option("validation")).url, DemoPreview.validationDemo, validationCode)
+    DemoEntry("Validation", IndexState(Option("validation")).url, DemoPreview.validationDemo, validationCode),
+    DemoEntry("Internationalization", IndexState(Option("i18n")).url, DemoPreview.i18n, i18n)
   )
 }
 

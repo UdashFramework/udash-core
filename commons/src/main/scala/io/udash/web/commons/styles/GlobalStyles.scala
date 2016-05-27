@@ -128,7 +128,6 @@ object GlobalStyles extends StyleSheet.Inline {
     ),
 
     &.hover(
-      color.white,
       cursor.pointer,
       textDecoration := "none",
 

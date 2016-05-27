@@ -5,6 +5,7 @@ import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUti
 import io.udash.web.homepage.components.demo.DemoComponent
 
 import scala.language.postfixOps
+import scalacss.Compose
 import scalacss.Defaults._
 
 object DemoStyles extends StyleSheet.Inline {
@@ -262,4 +263,36 @@ object DemoStyles extends StyleSheet.Inline {
     paddingRight(15 px),
     textAlign.right
   )
+
+  val navItem = style(
+    color.black,
+    position.relative,
+    display.inlineBlock,
+    verticalAlign.middle,
+    paddingLeft(1.8 rem),
+    paddingRight(1.8 rem),
+
+    &.firstChild (
+      paddingLeft(0 px)
+    ),
+
+    &.lastChild (
+      paddingRight(0 px)
+    ),
+
+    &.before.not(_.firstChild)(
+      StyleUtils.absoluteMiddle,
+      content := "\"|\"",
+      left(`0`),
+
+      &.hover(
+        textDecoration := "none"
+      )
+    )
+  )
+
+  val underlineLink = style(
+    GlobalStyles.underlineLink,
+    color.black
+  )(Compose.trust)
 }
