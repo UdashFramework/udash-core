@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
+import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.views.{References, Versions}
 import org.scalajs.dom
@@ -53,8 +54,8 @@ class JQueryExtView extends View {
          |  jQ(".demo ul").append(li("This will be added only once").render)
          |
          |val content = div(cls := "demo")(
-         |  button(id := "click")("Click me"),
          |  ul(),
+         |  button(id := "click")("Click me"),
          |  button(
          |    id := "off",
          |    onclick :+= ((_: Event) => {
@@ -75,6 +76,7 @@ class JQueryExtView extends View {
       "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
       "they create new object every time."
     ),
+    JQueryEventsDemo(),
     h2("jQuery callbacks"),
     p("The wrapper provides also typed API for the jQuery callbacks mechanism: "),
     CodeBlock(
@@ -103,6 +105,7 @@ class JQueryExtView extends View {
          |callbacks.disable()
          |callbacks.fire(1, 2)""".stripMargin
     )(GuideStyles),
+    JQueryCallbacksDemo(),
     h2("What's next?"),
     p(
       "You can find more information on the wrapper ", a(href := References.udashjQueryWrapperRepo)("GitHub repository"), " ",
