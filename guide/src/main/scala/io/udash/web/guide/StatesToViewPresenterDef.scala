@@ -43,6 +43,7 @@ class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
       case JQueryExtState => JQueryExtViewPresenter
 
       case FAQState => FAQViewPresenter
+      case LicenseState => LicenseViewPresenter
 
       case _ => ErrorViewPresenter
     }

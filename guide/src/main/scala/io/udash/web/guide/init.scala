@@ -48,7 +48,8 @@ object Context {
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
       MenuLink("jQuery wrapper", JQueryExtState)
-    ))/*,
+    )),
+    MenuLink("License", LicenseState)/*,
     MenuLink("FAQ", FAQState)*/
   )
 }
