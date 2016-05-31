@@ -1,6 +1,7 @@
 package io.udash.web.homepage.components.demo
 
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.homepage.styles.partials.DemoStyles
 import org.scalajs.dom.raw.Element
 
@@ -97,6 +98,73 @@ object DemoPreview {
             case Invalid(_) => span("No").render
           },
           _ => span("ERROR").render
+        )
+      )
+    ).render
+  }
+
+  def i18n: Element = {
+    import io.udash._
+    import io.udash.i18n._
+
+    import scalajs.concurrent.JSExecutionContext.Implicits
+    import Implicits.queue
+    import scalacss.ScalatagsCss._
+    import scalatags.JsDom.all._
+
+    val name = Property("World")
+
+    object Translations {
+      import TranslationKey._
+      object udash {
+        val hello = key("udash.hello")
+        val withArg = key1[String]("udash.withArg")
+      }
+    }
+
+    object FrontendTranslationProvider {
+      private val translations = Map(
+        Lang("en") -> Bundle(BundleHash("enHash"), Map(
+          "udash.hello" -> "Hello, Udash!",
+          "udash.withArg" -> "Hello, {}!"
+        )),
+        Lang("pl") -> Bundle(BundleHash("plHash"), Map(
+          "udash.hello" -> "Witaj, Udash!",
+          "udash.withArg" -> "Witaj, {}!"
+        )),
+        Lang("de") -> Bundle(BundleHash("deHash"), Map(
+          "udash.hello" -> "Hallo, Udash!",
+          "udash.withArg" -> "Hallo, {}!"
+        )),
+        Lang("sp") -> Bundle(BundleHash("spHash"), Map(
+          "udash.hello" -> "Hola, Udash!",
+          "udash.withArg" -> "Hola, {}!"
+        ))
+      )
+      def apply(): LocalTranslationProvider =
+        new LocalTranslationProvider(translations)
+    }
+
+    implicit val translationProvider: TranslationProvider = FrontendTranslationProvider()
+    implicit val lang: Property[Lang] = Property(Lang("en"))
+
+    def changeLang(l: Lang): Unit =
+      lang.set(l)
+
+    div(DemoStyles.demoIOWrapper)(
+      TextInput(name, `type` := "text", placeholder := "Type your name...", DemoStyles.demoInput, GlobalStyles.width100),
+      div(DemoStyles.demoOutput)(
+        span(translatedDynamic(Translations.udash.hello)(_.apply()))
+      ),
+      div(DemoStyles.demoOutput)(
+        produce(name)(n => span(translatedDynamic(Translations.udash.withArg)(_.apply(n))).render)
+      ),
+      div(DemoStyles.demoOutput)(
+        ul(
+          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("en"))))("EN")),
+          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("pl"))))("PL")),
+          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("de"))))("DE")),
+          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("sp"))))("SP"))
         )
       )
     ).render
