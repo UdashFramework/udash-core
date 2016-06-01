@@ -72,9 +72,10 @@ class ClientRPCTest extends UdashBackendTest {
 
   class UPickleClientRPC[ClientRPCType](target: ClientRPCTarget)
                                        (implicit ec: ExecutionContext,
-                                        protected val remoteRpcAsReal: UPickleUdashRPCFramework.AsRealClientRPC[ClientRPCType])
+                                        protected val remoteRpcAsReal: ClientUPickleUdashRPCFramework.AsRealRPC[ClientRPCType])
     extends ClientRPC[ClientRPCType](target) {
-    override val framework = UPickleUdashRPCFramework
+    override val localFramework = ServerUPickleUdashRPCFramework
+    override val remoteFramework = ClientUPickleUdashRPCFramework
   }
 
   def createCustomClientRPC(target: ClientRPCTarget): UPickleClientRPC[TestClientRPC] = {

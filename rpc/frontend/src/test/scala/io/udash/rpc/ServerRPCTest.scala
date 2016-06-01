@@ -14,7 +14,7 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
       requests += request
   }
 
-  def tests[F <: UdashRPCFramework](createServerRpc: () => (MockServerConnector[F#RPCRequest], ServerRPC[TestRPC])) = {
+  def tests[LocalFramework <: UdashRPCFramework, ServerFramework <: UdashRPCFramework](createServerRpc: () => (MockServerConnector[ServerFramework#RPCRequest], ServerRPC[TestRPC])) = {
     "gain access to RPC methods of server" in {
       val (connectorMock, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc
@@ -41,7 +41,7 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
       val f3 = rpc.doStuffInt(true)
       val f4 = rpc.doStuff(true)
 
-      import serverRPC.framework._
+      import serverRPC.remoteFramework._
       serverRPC.handleResponse(RPCResponseSuccess(write("response1"), "1"))
       serverRPC.handleResponse(RPCResponseSuccess(write("response2"), "2"))
       serverRPC.handleResponse(RPCResponseSuccess(write[Int](5), "3"))
@@ -64,7 +64,7 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
       val f2 = rpc.innerRpc("bla").func(123)
       val f3 = rpc.doStuffInt(true)
 
-      import serverRPC.framework._
+      import serverRPC.remoteFramework._
       serverRPC.handleResponse(RPCResponseFailure("cause1", "msg1", "1"))
       serverRPC.handleResponse(RPCResponseFailure("cause2", "msg2", "2"))
 
@@ -77,26 +77,42 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
     }
   }
 
-  def createDefaultServerRpc(): (MockServerConnector[DefaultUdashRPCFramework.RPCRequest], DefaultServerRPC[TestRPC]) = {
-    val connectorMock = new MockServerConnector[DefaultUdashRPCFramework.RPCRequest]
+  def createDefaultServerRpc(): (MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest], DefaultServerRPC[TestRPC]) = {
+    val connectorMock = new MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest]
     @silent
     val serverRPC = new DefaultServerRPC[TestRPC](connectorMock)
     (connectorMock, serverRPC)
   }
 
-  class UPickleServerRPC[ServerRPCType](override protected val connector: ServerConnector[UPickleUdashRPCFramework.RPCRequest])
-                                       (implicit override val remoteRpcAsReal: UPickleUdashRPCFramework.AsRealRPC[ServerRPCType])
+  class UPickleServerRPC[ServerRPCType](override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest])
+                                       (implicit override val remoteRpcAsReal: ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType])
     extends ServerRPC[ServerRPCType] {
-    override val framework = UPickleUdashRPCFramework
+    override val remoteFramework = ServerUPickleUdashRPCFramework
+    override val localFramework = ClientUPickleUdashRPCFramework
   }
 
-  def createCustomServerRpc(): (MockServerConnector[UPickleUdashRPCFramework.RPCRequest], UPickleServerRPC[TestRPC]) = {
-    val connectorMock = new MockServerConnector[UPickleUdashRPCFramework.RPCRequest]
+  def createCustomServerRpc(): (MockServerConnector[ServerUPickleUdashRPCFramework.RPCRequest], UPickleServerRPC[TestRPC]) = {
+    val connectorMock = new MockServerConnector[ServerUPickleUdashRPCFramework.RPCRequest]
     @silent
     val serverRPC = new UPickleServerRPC[TestRPC](connectorMock)
     (connectorMock, serverRPC)
   }
 
-  "DefaultServerRPC" should tests[DefaultUdashRPCFramework.type](createDefaultServerRpc)
-  "CustomServerRPC" should tests[UPickleUdashRPCFramework.type](createCustomServerRpc)
+  class MixedServerRPC[ServerRPCType](override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
+                                       (implicit override val remoteRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType])
+    extends ServerRPC[ServerRPCType] {
+    override val remoteFramework = DefaultServerUdashRPCFramework
+    override val localFramework = ClientUPickleUdashRPCFramework
+  }
+
+  def createMixedServerRpc(): (MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest], MixedServerRPC[TestRPC]) = {
+    val connectorMock = new MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest]
+    @silent
+    val serverRPC = new MixedServerRPC[TestRPC](connectorMock)
+    (connectorMock, serverRPC)
+  }
+
+  "DefaultServerRPC" should tests[DefaultClientUdashRPCFramework.type, DefaultServerUdashRPCFramework.type](createDefaultServerRpc)
+  "CustomServerRPC" should tests[ClientUPickleUdashRPCFramework.type, ServerUPickleUdashRPCFramework.type](createCustomServerRpc)
+  "MixedServerRPC" should tests[ClientUPickleUdashRPCFramework.type, DefaultServerUdashRPCFramework.type](createMixedServerRpc)
 }

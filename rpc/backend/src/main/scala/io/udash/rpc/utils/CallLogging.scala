@@ -14,17 +14,17 @@ trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
 
   def log(rpcName: String, methodName: String, args: Seq[String]): Unit
 
-  override def handleRpcCall(call: framework.RPCCall): Future[framework.RawValue] = {
+  override def handleRpcCall(call: localFramework.RPCCall): Future[localFramework.RawValue] = {
     val classMetadata = call
       .gettersChain.reverse
-      .foldLeft[RPCMetadata[_]](metadata)((metadata, invocation) => metadata.getterResultMetadata(invocation.rpcName))
+      .foldLeft[RPCMetadata[_]](metadata)((metadata, invocation) => metadata.getterResults(invocation.rpcName))
 
     classMetadata
-      .methodsByRpcName
+      .signatures
       .get(call.invocation.rpcName)
-      .filter(_.signature.annotations.exists(_.isInstanceOf[Logged]))
+      .filter(_.annotations.exists(_.isInstanceOf[Logged]))
       .foreach(methodMetadata =>
-        log(classMetadata.name, methodMetadata.signature.methodName, call.invocation.argLists.flatMap(_.map(framework.rawToString)))
+        log(classMetadata.name, methodMetadata.methodName, call.invocation.argLists.flatMap(_.map(localFramework.rawToString)))
       )
     super.handleRpcCall(call)
   }

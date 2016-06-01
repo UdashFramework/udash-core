@@ -3,7 +3,7 @@ package io.udash.rpc
 import scala.language.higherKinds
 
 class JVMSerializationIntegrationTest extends SerializationIntegrationTestBase {
-  "DefaultUdashRPCFramework -> DefaultUdashRPCFramework default serialization" should tests(DefaultUdashRPCFramework, DefaultUdashRPCFramework)
-  "DefaultUdashRPCFramework -> UPickleUdashRPCFramework default serialization" should tests(DefaultUdashRPCFramework, UPickleUdashRPCFramework)
-  "UPickleUdashRPCFramework -> DefaultUdashRPCFramework default serialization" should tests(UPickleUdashRPCFramework, DefaultUdashRPCFramework)
+  "DefaultUdashRPCFramework -> DefaultUdashRPCFramework default serialization" should tests(DefaultServerUdashRPCFramework, DefaultServerUdashRPCFramework)
+  "DefaultUdashRPCFramework -> UPickleUdashRPCFramework default serialization" should tests(DefaultServerUdashRPCFramework, ServerUPickleUdashRPCFramework)
+  "UPickleUdashRPCFramework -> DefaultUdashRPCFramework default serialization" should tests(ServerUPickleUdashRPCFramework, DefaultServerUdashRPCFramework)
 }

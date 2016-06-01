@@ -76,7 +76,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
     try {
       val rpc = config.resolveRpc(resource)
-      import rpc.framework._
+      import rpc.localFramework._
       val input: String = readInput(resource.getRequest.getInputStream)
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
@@ -107,7 +107,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
       resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
       val rpc = config.resolveRpc(resource)
-      import rpc.framework._
+      import rpc.localFramework._
       val input: String = readInput(resource.getRequest.getInputStream)
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
@@ -157,14 +157,14 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
   private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])
                               (resource: AtmosphereResource,
-                               request: rpc.framework.RPCRequest): Option[Future[rpc.framework.RawValue]] = {
+                               request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
 
     val filterResult = config.filters.foldLeft[Try[Any]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
       case failure: Failure[_] => failure
     })
 
-    import rpc.framework._
+    import rpc.localFramework._
     filterResult match {
       case Success(_) =>
         request match {
@@ -183,8 +183,8 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.framework.RPCRequest = {
-    import rpc.framework._
+  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
+    import rpc.localFramework._
     val raw: RawValue = stringToRaw(input)
     read[RPCRequest](raw)
   }

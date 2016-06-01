@@ -5,7 +5,7 @@ import upickle.Js
 
 import scala.collection.mutable.ListBuffer
 
-object UPickleUdashRPCFramework extends UdashRPCFramework {
+trait UPickleUdashRPCFramework extends UdashRPCFramework {
   override type RawValue = Js.Value
 
   def inputSerialization(value: Js.Value): Input =
@@ -210,3 +210,6 @@ object UPickleUdashRPCFramework extends UdashRPCFramework {
     }
   }
 }
+
+object ServerUPickleUdashRPCFramework extends UPickleUdashRPCFramework with ServerUdashRPCFramework
+object ClientUPickleUdashRPCFramework extends UPickleUdashRPCFramework with ClientUdashRPCFramework

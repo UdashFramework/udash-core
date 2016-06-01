@@ -15,7 +15,7 @@ class ExposesServerRPCTest extends UdashBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.framework._
+      import rpc.localFramework._
       rpc.handleRpcFire(
         RPCFire(
           RawInvocation("handle", List()),
@@ -38,7 +38,7 @@ class ExposesServerRPCTest extends UdashBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.framework._
+      import rpc.localFramework._
       rpc.handleRpcCall(
         RPCCall(
           RawInvocation("doStuff", List(List(write[Boolean](true)))),
@@ -62,7 +62,7 @@ class ExposesServerRPCTest extends UdashBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.framework._
+      import rpc.localFramework._
       rpc.handleRpcFire(
         RPCFire(
           RawInvocation("handle", List()),
@@ -90,10 +90,10 @@ class ExposesServerRPCTest extends UdashBackendTest {
   }
 
   final class UPickleExposesServerRPC[ServerRPCType]
-    (local: ServerRPCType)(implicit protected val localRpcAsRaw: UPickleUdashRPCFramework.AsRawRPC[ServerRPCType])
+    (local: ServerRPCType)(implicit protected val localRpcAsRaw: ServerUPickleUdashRPCFramework.AsRawRPC[ServerRPCType])
     extends ExposesServerRPC(local) {
 
-    override val framework = UPickleUdashRPCFramework
+    override val localFramework = ServerUPickleUdashRPCFramework
   }
 
   def createCustomRpc(calls: mutable.Builder[String, Seq[String]]): UPickleExposesServerRPC[TestRPC] = {
@@ -123,7 +123,7 @@ class ExposesServerRPCTest extends UdashBackendTest {
     import io.udash.rpc.InnerRPC
     val calls = Seq.newBuilder[String]
     val rpc: ExposesServerRPC[TestRPC] = createLoggingRpc(calls)
-    import rpc.framework._
+    import rpc.localFramework._
     "not log calls of regular RPC methods" in {
       rpc.handleRpcCall(
         RPCCall(
