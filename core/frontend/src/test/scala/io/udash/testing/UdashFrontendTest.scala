@@ -20,6 +20,8 @@ trait FrontendTestUtils {
 
 trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils with PatienceConfiguration {
+  case object EventuallyTimeout extends Exception
+
   def eventually(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
     val start = Date.now()
     val p = Promise[Assertion]
@@ -33,7 +35,7 @@ trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils
             case _: Exception => startTest()
           }
         } else {
-          p.complete(Failure(new NullPointerException))
+          p.complete(Failure(EventuallyTimeout))
         }
       }, patienceConfig.interval.toMillis)
     }

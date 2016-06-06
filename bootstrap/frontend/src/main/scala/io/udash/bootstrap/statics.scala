@@ -12,6 +12,9 @@ object BootstrapTags {
   val dataRide = "data-ride".attr
   val dataSlide = "data-slide".attr
   val dataDismiss = "data-dismiss".attr
+  val dataBind = "data-bind".attr
+  val dataLabel = "data-label".attr
+
 }
 
 object BootstrapStyles extends StyleSheet.Inline {
@@ -54,9 +57,6 @@ object BootstrapStyles extends StyleSheet.Inline {
   val right = style(addClassName("right"))
   val show = style(addClassName("show"))
   val top = style(addClassName("top"))
-  val lg = style(addClassName("lg"))
-  val sm = style(addClassName("sm"))
-  val xs = style(addClassName("xs"))
 
   object Grid {
     val colLg1 = style(addClassName("col-lg-1"))

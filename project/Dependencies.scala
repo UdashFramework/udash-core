@@ -46,7 +46,7 @@ object Dependencies extends Build {
 
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
   ))
 
   val rpcCrossDeps = Def.setting(Seq(

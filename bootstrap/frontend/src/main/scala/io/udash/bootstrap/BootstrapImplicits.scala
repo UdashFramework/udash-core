@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 
-import org.scalajs.dom
 import io.udash._
+import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
@@ -11,16 +11,51 @@ import scalatags.JsDom.all._
 
 trait BootstrapImplicits {
 
-  implicit class StyleOps(style: StyleA) {
-    def applyTo(element: dom.Element): Unit = {
-      element.classList.add(style.htmlClass)
-    }
+  implicit class StyleOps(style: StyleA) { outer =>
+    def applyTo(element: dom.Element): Unit =
+      for (cl <- style.classNameIterator) element.classList.add(cl.value)
+
+    def removeFrom(element: dom.Element): Unit =
+      for (cl <- style.classNameIterator) element.classList.remove(cl.value)
 
     def styleIf(property: Property[Boolean]): Modifier = property.reactiveApply(
       (elem, value) =>
         if (value) applyTo(elem)
-        else elem.classList.remove(style.htmlClass)
+        else removeFrom(elem)
     )
+
+    def styleIf(condition: Boolean): Modifier = new Modifier {
+      override def applyTo(t: Element): Unit =
+        if (condition) outer.applyTo(t)
+    }
+  }
+
+  implicit class AttrOps(attr: Attr) { outer =>
+    def applyTo(element: dom.Element, value: String = ""): Unit =
+      element.setAttribute(attr.name, value)
+
+    def bind(property: Property[String]): Modifier = property.reactiveApply(
+      (elem, value) => applyTo(elem)
+    )
+  }
+
+  implicit class AttrPairOps(attr: scalatags.generic.AttrPair[_, _]) { outer =>
+    def applyTo(element: dom.Element, value: String = ""): Unit =
+      element.setAttribute(attr.a.name, value)
+
+    def removeFrom(element: dom.Element): Unit =
+      element.removeAttribute(attr.a.name)
+
+    def attrIf(property: Property[Boolean]): Modifier = property.reactiveApply(
+      (elem, value) =>
+        if (value) applyTo(elem)
+        else removeFrom(elem)
+    )
+
+    def attrIf(condition: Boolean): Modifier = new Modifier {
+      override def applyTo(t: Element): Unit =
+        if (condition) outer.applyTo(t)
+    }
   }
 
   implicit class ElementOps(element: dom.Element) {
@@ -35,7 +70,7 @@ trait BootstrapImplicits {
       override def applyTo(t: Element): Unit = {
         var registration: Registration = null
         registration = property.listen(value => if (available(t)) f(t, value) else registration.cancel())
-        property.set(property.get)
+        if (available(t)) f(t, property.get)
       }
     }
   }

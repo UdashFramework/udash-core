@@ -9,16 +9,16 @@ sealed abstract class ButtonSize(sizeStyle: StyleA) extends ClassModifier(sizeSt
 
 object ButtonSize {
 
-  import BootstrapStyles._
+  import BootstrapStyles.Button._
 
   case object Default extends ButtonSize(null) {
     override def applyTo(t: Element): Unit = {}
   }
 
-  case object Large extends ButtonSize(lg)
+  case object Large extends ButtonSize(btnLg)
 
-  case object Small extends ButtonSize(sm)
+  case object Small extends ButtonSize(btnSm)
 
-  case object ExtraSmall extends ButtonSize(xs)
+  case object ExtraSmall extends ButtonSize(btnXs)
 
 }
