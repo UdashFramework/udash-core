@@ -15,8 +15,8 @@ case class ClientId(id: String) extends ClientRPCTarget
 
 abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
                                        (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
-  override protected def fireRemote(getterChain: List[framework.RawInvocation], invocation: framework.RawInvocation): Unit = {
-    import framework._
+  override protected def fireRemote(getterChain: List[remoteFramework.RawInvocation], invocation: remoteFramework.RawInvocation): Unit = {
+    import remoteFramework._
     val msg: RawValue = write[RPCRequest](RPCFire(invocation, getterChain))
     target match {
       case AllClients =>
@@ -32,6 +32,7 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
 /** Default implementation of [[io.udash.rpc.ClientRPC]] for server to client communication. */
 class DefaultClientRPC[ClientRPCType](target: ClientRPCTarget)
                                      (implicit ec: ExecutionContext,
-                                      protected val remoteRpcAsReal: DefaultUdashRPCFramework.AsRealClientRPC[ClientRPCType]) extends ClientRPC[ClientRPCType](target) {
-  override val framework = DefaultUdashRPCFramework
+                                      protected val remoteRpcAsReal: DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType]) extends ClientRPC[ClientRPCType](target) {
+  override val localFramework = DefaultServerUdashRPCFramework
+  override val remoteFramework = DefaultClientUdashRPCFramework
 }

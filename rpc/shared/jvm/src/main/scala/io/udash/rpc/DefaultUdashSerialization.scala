@@ -1,13 +1,12 @@
 package io.udash.rpc
 
-import com.avsystem.commons.serialization.{GenCodec, Input, Output}
+import com.avsystem.commons.serialization.{Input, Output}
 import io.udash.rpc.serialization.{JsonInput, JsonOutput}
 import io.udash.rpc.serialization.jawn.JawnFacade
 import jawn.Parser
 
-import scala.language.postfixOps
-
-object DefaultUdashRPCFramework extends AutoUdashRPCFramework {
+/** Provides JAWN based serialization to JSON `String`. */
+trait DefaultUdashSerialization {
   def inputSerialization(value: String): Input =
     new JsonInput(Parser.parseFromString(value)(JawnFacade).get)
 

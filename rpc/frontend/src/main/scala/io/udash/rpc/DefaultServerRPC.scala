@@ -11,17 +11,18 @@ abstract class ServerRPC[ServerRPCType] extends UsesServerRPC[ServerRPCType] {
 }
 
 /** Default implementation of [[io.udash.rpc.ServerRPC]]. */
-class DefaultServerRPC[ServerRPCType](override protected val connector: ServerConnector[DefaultUdashRPCFramework.RPCRequest])
-                                     (implicit override val remoteRpcAsReal: DefaultUdashRPCFramework.AsRealRPC[ServerRPCType])
+class DefaultServerRPC[ServerRPCType](override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
+                                     (implicit override val remoteRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType])
   extends ServerRPC[ServerRPCType] {
-  override val framework = DefaultUdashRPCFramework
+  override val remoteFramework = DefaultServerUdashRPCFramework
+  override val localFramework = DefaultClientUdashRPCFramework
 }
 
 object DefaultServerRPC {
   /** Creates [[io.udash.rpc.DefaultServerRPC]] for provided RPC interfaces. */
   def apply[ClientRPCType, ServerRPCType](localRpc: ClientRPCType, serverUrl: String = "/atm/")
-                                         (implicit localRpcAsRaw: DefaultUdashRPCFramework.AsRawClientRPC[ClientRPCType],
-                                          serverRpcAsReal: DefaultUdashRPCFramework.AsRealRPC[ServerRPCType]): ServerRPCType = {
+                                         (implicit localRpcAsRaw: DefaultClientUdashRPCFramework.AsRawRPC[ClientRPCType],
+                                          serverRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType]): ServerRPCType = {
 
     val clientRPC = new DefaultExposesClientRPC[ClientRPCType](localRpc)
     lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl)

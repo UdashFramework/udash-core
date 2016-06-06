@@ -2,7 +2,7 @@ package io.udash.rpc.internals
 
 import com.avsystem.commons.serialization.Input
 import io.udash.utils.StrictLogging
-import io.udash.rpc.{DefaultUdashRPCFramework, UdashRPCFramework}
+import io.udash.rpc._
 import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
 import org.scalajs.dom
@@ -20,14 +20,13 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
   extends ServerConnector[RPCRequest] with StrictLogging {
   protected val clientRpc: ExposesClientRPC[_]
 
-  val rpcFramework: UdashRPCFramework
-
-  import rpcFramework.{RPCFire, RPCResponse, read, stringToRaw}
+  val remoteFramework: ServerUdashRPCFramework
+  val localFramework: ClientUdashRPCFramework
 
   def requestToString(request: RPCRequest): String
 
-  def handleResponse(response: RPCResponse): Any
-  def handleRpcFire(fire: RPCFire): Any
+  def handleResponse(response: remoteFramework.RPCResponse): Any
+  def handleRpcFire(fire: localFramework.RPCFire): Any
 
   private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
   private var isReady = false
@@ -70,17 +69,20 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
   }
 
   private def handleMessage(msg: String) = {
-    import rpcFramework.{RPCResponseCodec, RPCRequestCodec}
-    val rawMsg = stringToRaw(msg)
-    val rawMsgInput: Input = rpcFramework.inputSerialization(rawMsg)
     try {
+      import remoteFramework.RPCResponseCodec
+      val rawMsg = remoteFramework.stringToRaw(msg)
+      val rawMsgInput: Input = remoteFramework.inputSerialization(rawMsg)
       val response = RPCResponseCodec.read(rawMsgInput)
       handleResponse(response)
     } catch {
       case _: Exception =>
         try {
+          import localFramework.RPCRequestCodec
+          val rawMsg = localFramework.stringToRaw(msg)
+          val rawMsgInput: Input = localFramework.inputSerialization(rawMsg)
           RPCRequestCodec.read(rawMsgInput) match {
-            case fire: RPCFire =>
+            case fire: localFramework.RPCFire =>
               handleRpcFire(fire)
             case unhandled =>
               logger.error(s"Unhandled RPCRequest: $unhandled")
@@ -134,19 +136,18 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
 }
 
 class DefaultAtmosphereServerConnector(override protected val clientRpc: DefaultExposesClientRPC[_],
-                                       responseHandler: (DefaultUdashRPCFramework.RPCResponse) => Any,
-                                       serverUrl: String) extends AtmosphereServerConnector[DefaultUdashRPCFramework.RPCRequest](serverUrl) {
-  override val rpcFramework = DefaultUdashRPCFramework
+                                       responseHandler: (DefaultServerUdashRPCFramework.RPCResponse) => Any,
+                                       serverUrl: String) extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl) {
+  override val remoteFramework = DefaultServerUdashRPCFramework
+  override val localFramework = DefaultClientUdashRPCFramework
 
-  import rpcFramework._
+  override def requestToString(request: remoteFramework.RPCRequest): String =
+    remoteFramework.rawToString(remoteFramework.write(request))
 
-  override def requestToString(request: RPCRequest): String =
-    rawToString(write(request))
-
-  override def handleResponse(response: RPCResponse): Any =
+  override def handleResponse(response: remoteFramework.RPCResponse): Any =
     responseHandler(response)
 
-  override def handleRpcFire(fire: RPCFire): Any =
+  override def handleRpcFire(fire: localFramework.RPCFire): Any =
     clientRpc.handleRpcFire(fire)
 
 }
