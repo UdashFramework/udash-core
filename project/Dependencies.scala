@@ -84,7 +84,6 @@ object Dependencies extends Build {
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
     "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion,
     "com.github.karasiq" %%% "scalajs-bootstrap" % "1.0.5" //todo remove once not needed
-    //"org.webjars" % "bootstrap" % bootstrapVersion
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](

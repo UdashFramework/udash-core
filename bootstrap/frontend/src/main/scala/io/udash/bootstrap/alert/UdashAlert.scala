@@ -5,6 +5,7 @@ import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
 
+import scala.concurrent.ExecutionContext
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
@@ -16,7 +17,7 @@ sealed class UdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*) e
 
 }
 
-class DismissibleUdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*) extends UdashAlert(alertStyle)() {
+class DismissibleUdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*)(implicit ec: ExecutionContext) extends UdashAlert(alertStyle)() {
 
   def dismiss(): Unit = buttonRendered.click()
 
@@ -42,15 +43,15 @@ object UdashAlert {
 
   import AlertStyle._
 
-  private def create(alertStyle: AlertStyle, mds: Modifier*): UdashAlert = new UdashAlert(alertStyle)(mds: _*)
+  private def create(alertStyle: AlertStyle, mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = new UdashAlert(alertStyle)(mds: _*)
 
-  def success(mds: Modifier*): UdashAlert = create(Success, mds: _*)
+  def success(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Success, mds: _*)
 
-  def info(mds: Modifier*): UdashAlert = create(Info, mds: _*)
+  def info(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Info, mds: _*)
 
-  def warning(mds: Modifier*): UdashAlert = create(Warning, mds: _*)
+  def warning(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Warning, mds: _*)
 
-  def danger(mds: Modifier*): UdashAlert = create(Danger, mds: _*)
+  def danger(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Danger, mds: _*)
 
-  def dismissible(alertStyle: AlertStyle)(mds: Modifier*): DismissibleUdashAlert = new DismissibleUdashAlert(alertStyle)(mds: _*)
+  def dismissible(alertStyle: AlertStyle)(mds: Modifier*)(implicit ec: ExecutionContext): DismissibleUdashAlert = new DismissibleUdashAlert(alertStyle)(mds: _*)
 }

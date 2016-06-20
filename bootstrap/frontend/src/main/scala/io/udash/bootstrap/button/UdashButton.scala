@@ -18,10 +18,23 @@ class UdashButton private(style: ButtonStyle, size: ButtonSize, block: Boolean,
     BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
 
   lazy val render: dom.html.Button =
-    JsDom.all.button(classes: _*)(onclick :+= ((_: MouseEvent) => {
+    button(classes: _*)(onclick :+= ((_: MouseEvent) => {
       fire(ButtonClickEvent(this))
       false
     }))(mds: _*).render
+
+  private[bootstrap] def radio(radioId: String, selected: Property[String]): dom.Element = {
+    val inputId: String = UdashBootstrap.newId()
+    val in = input(tpe := "radio", name := radioId, id := inputId)
+    selected.listen(v => active.set(v == inputId))
+    active.listen(v => if (v) selected.set(inputId))
+    if (active.get) selected.set(inputId)
+    label(classes: _*)(onclick :+= ((_: MouseEvent) => {
+      selected.set(inputId)
+      fire(ButtonClickEvent(this))
+      false
+    }))(in)(mds: _*).render
+  }
 }
 
 object UdashButton {

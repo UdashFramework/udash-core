@@ -235,6 +235,7 @@ object BootstrapStyles extends StyleSheet.Inline {
     val btnLink = style(addClassName("btn-link"))
     val btnPrimary = style(addClassName("btn-primary"))
     val btnSuccess = style(addClassName("btn-success"))
+    val btnToolbar = style(addClassName("btn-toolbar"))
     val btnWarning = style(addClassName("btn-warning"))
     val btnXs = style(addClassName("btn-xs"))
     val btnSm = style(addClassName("btn-sm"))
