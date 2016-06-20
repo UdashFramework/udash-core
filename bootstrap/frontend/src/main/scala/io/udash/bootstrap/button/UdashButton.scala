@@ -6,16 +6,14 @@ import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
 import org.scalajs.dom
 import org.scalajs.dom._
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
 class UdashButton private(style: ButtonStyle, size: ButtonSize, block: Boolean,
                           val active: Property[Boolean], val disabled: Property[Boolean])
                          (mds: Modifier*) extends UdashBootstrapComponent with Listenable[ButtonClickEvent] {
-  import BootstrapStyles.Button._
 
-  private lazy val classes: List[Modifier] = btn :: style :: size ::
+  private lazy val classes: List[Modifier] = style :: size ::
     BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::
     BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
 

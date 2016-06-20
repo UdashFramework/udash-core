@@ -3,7 +3,7 @@ package button
 
 import scalacss.StyleA
 
-sealed abstract class ButtonStyle(style: StyleA) extends ClassModifier(style)
+sealed abstract class ButtonStyle(style: StyleA) extends ClassModifier(BootstrapStyles.Button.btn, style)
 
 object ButtonStyle {
 

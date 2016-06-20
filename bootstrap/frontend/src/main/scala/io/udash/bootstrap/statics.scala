@@ -257,7 +257,7 @@ object BootstrapStyles extends StyleSheet.Inline {
   object Alert {
     val alert = style(addClassName("alert"))
     val alertDanger = style(addClassName("alert-danger"))
-    val alertDismissable = style(addClassName("alert-dismissable"))
+    val alertDismissible = style(addClassName("alert-dismissible"))
     val alertInfo = style(addClassName("alert-info"))
     val alertLink = style(addClassName("alert-link"))
     val alertSuccess = style(addClassName("alert-success"))

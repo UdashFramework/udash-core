@@ -4,7 +4,6 @@ package dropdown
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom
-import org.scalajs.dom.{raw => _, _}
 
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
@@ -47,7 +46,7 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
   }
 
   private def jQFireEvent(ev: DropdownEvent[T]): JQueryCallback =
-    (_: Element, _: JQueryEvent) => fire(ev)
+    (_: dom.Element, _: JQueryEvent) => fire(ev)
 }
 
 object UdashDropdown {
