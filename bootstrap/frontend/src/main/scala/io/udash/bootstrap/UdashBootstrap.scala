@@ -1,12 +1,13 @@
 package io.udash.bootstrap
 
-import scala.util.Random
-
 object UdashBootstrap {
+  private var cid = -1
 
   /**
     * Generates unique element ID
     */
-  def newId(): String = s"bs-auto-${BigInt.probablePrime(100, Random).toString(36)}"
-
+  def newId(): String = {
+    cid += 1
+    s"bs-auto-$cid"
+  }
 }
