@@ -374,14 +374,16 @@ object BootstrapStyles extends StyleSheet.Inline {
     val imgThumbnail = style(addClassName("img-thumbnail"))
     val caption = style(addClassName("caption"))
     val thumbnail = style(addClassName("thumbnail"))
-    val glyphicon = style(addClassName("glyphicon"))
     val media = style(addClassName("media"))
     val mediaBody = style(addClassName("media-body"))
     val mediaHeading = style(addClassName("media-heading"))
     val mediaList = style(addClassName("media-list"))
     val mediaObject = style(addClassName("media-object"))
 
-    def glyphicon(name: String) = style(addClassName(s"glyphicon-$name"))
+    val _fa = style(addClassName("fa"))
+    val _glyphicon = style(addClassName("glyphicon"))
+    def fa(name: String) = Seq(_fa, style(addClassName(s"fa-$name")))
+    def glyphicon(name: String) = Seq(_glyphicon, style(addClassName(s"glyphicon-$name")))
   }
 
   object Navigation {

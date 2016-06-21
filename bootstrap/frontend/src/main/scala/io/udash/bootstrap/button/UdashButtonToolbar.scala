@@ -1,7 +1,7 @@
-package io.udash.bootstrap.button
+package io.udash.bootstrap
+package button
 
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext

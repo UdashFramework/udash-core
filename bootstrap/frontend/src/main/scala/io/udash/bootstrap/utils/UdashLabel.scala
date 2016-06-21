@@ -1,9 +1,8 @@
-package io.udash.bootstrap.utils
+package io.udash.bootstrap
+package utils
 
 import io.udash._
 import org.scalajs.dom
-
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashLabel(style: LabelStyle)(mds: Modifier*) {

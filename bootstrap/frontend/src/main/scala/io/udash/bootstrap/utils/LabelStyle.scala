@@ -1,6 +1,5 @@
-package io.udash.bootstrap.utils
-
-import io.udash.bootstrap.{BootstrapStyles, ClassModifier}
+package io.udash.bootstrap
+package utils
 
 import scalacss.StyleA
 

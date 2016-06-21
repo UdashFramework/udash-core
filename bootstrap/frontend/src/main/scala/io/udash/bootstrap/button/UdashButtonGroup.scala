@@ -1,7 +1,7 @@
-package io.udash.bootstrap.button
+package io.udash.bootstrap
+package button
 
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.properties.ModelPart
 import org.scalajs.dom
 
@@ -14,7 +14,6 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
                        size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean)
                       (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
 
-  import io.udash.bootstrap.BootstrapImplicits._
   import io.udash.bootstrap.BootstrapTags._
 
   private lazy val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
