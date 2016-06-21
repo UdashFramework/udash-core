@@ -27,10 +27,10 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
       _id += 1
       _id
     }
-    val el = div(BootstrapStyles.Dropdown.dropdown, BootstrapStyles.Dropdown.dropup.styleIf(dropup))(
+    val el = div(BootstrapStyles.Button.btnGroup, BootstrapStyles.Dropdown.dropup.styleIf(dropup))(
       UdashButton()(
         BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
-        mds, raw("&nbsp"), span(BootstrapStyles.Dropdown.caret)
+        mds, span(BootstrapStyles.Dropdown.caret)
       ).render,
       ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId)(
         repeat(items)((p) => withSelectionListener(itemFactory(p.get), next()))
