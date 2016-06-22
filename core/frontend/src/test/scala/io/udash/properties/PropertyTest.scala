@@ -535,15 +535,24 @@ class PropertyTest extends UdashFrontendTest {
       val f = p.filter(_ % 2 == 0)
 
       f.get should be(Seq(2))
+      f.size should be(1)
+      f.isEmpty should be(false)
+      f.nonEmpty should be(true)
 
       p.append(4, 5, 6)
       p.prepend(-2, -4, -6)
 
       f.get should be(Seq(-2, -4, -6, 2, 4, 6))
+      f.size should be(6)
+      f.isEmpty should be(false)
+      f.nonEmpty should be(true)
 
       p.elemProperties.foreach(el => if (el.get % 2 == 0) el.set(el.get + 1))
 
       f.get should be(Seq())
+      f.size should be(0)
+      f.isEmpty should be(true)
+      f.nonEmpty should be(false)
     }
 
     "return filtered version of sequence with ModelProperty" in {

@@ -54,6 +54,21 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType] =
     new FilteredSeqProperty[A, ElemType](this, matcher, PropertyCreator.newID())
+
+  /** The size of this sequence, equivalent to length. */
+  def size: Int =
+    elemProperties.size
+
+  /** The size of this sequence. */
+  def length: Int = size
+
+  /** Tests whether this traversable collection is empty. */
+  def isEmpty: Boolean =
+    elemProperties.isEmpty
+
+  /** Tests whether this traversable collection is not empty. */
+  def nonEmpty: Boolean =
+    elemProperties.nonEmpty
 }
 
 class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
