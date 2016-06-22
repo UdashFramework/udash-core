@@ -209,8 +209,8 @@ class PropertyTest extends UdashFrontendTest {
   "SeqProperty" should {
     "handle sequence of properties" in {
       val p = SeqProperty[Int](Seq(1,2,3))
-      val pt = SeqProperty[T](Seq(TO1, TC1(5), TO2))
-      val ptt = SeqProperty[TT](Seq(randTT(), randTT(), randTT()))
+      val pt = SeqProperty[T](TO1, TC1(5), TO2)
+      val ptt = SeqProperty[TT](randTT(), randTT(), randTT())
 
       def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt)) = {
         props.foreach(p => {
@@ -336,7 +336,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "handle null value as empty Seq" in {
-      val p = SeqProperty[Int](Seq(1,2,3))
+      val p = SeqProperty[Int](1,2,3)
       p.set(null)
       p.get.size should be(0)
     }
@@ -473,7 +473,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "transform into Property" in {
-      val p = SeqProperty[Int](Seq(1, 2, 3))
+      val p = SeqProperty[Int](1, 2, 3)
       val t = p.transform[Int](
         (s: Seq[Int]) => s.sum,
         (i: Int) => (1 to i).toSeq
@@ -495,7 +495,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "transform into another SeqProperty" in {
-      val p = SeqProperty[Int](Seq(1, 2, 3))
+      val p = SeqProperty[Int](1, 2, 3)
       val t = p.transform[T](
         (i: Int) => TC1(i),
         (t: T) => t match {
@@ -525,13 +525,13 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "return immutable sequence from get" in {
-      val p = SeqProperty[Int](Seq(1, 2, 3))
+      val p = SeqProperty[Int](1, 2, 3)
       p.replace(0, 3, p.get.map(_ + 1):_*)
       p.get should be(Seq(2, 3, 4))
     }
 
     "return filtered version of sequence" in {
-      val p = SeqProperty[Int](Seq(1, 2, 3))
+      val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
       f.get should be(Seq(2))
@@ -562,7 +562,7 @@ class PropertyTest extends UdashFrontendTest {
 
       case class MI(override val x: Int) extends M
 
-      val p = SeqProperty[M](Seq(MI(1), MI(2), MI(3)))
+      val p = SeqProperty[M](MI(1), MI(2), MI(3))
       val f = p.filter(_.x % 2 == 0)
 
       f.get.map(_.x) should be(Seq(2))
@@ -578,7 +578,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "provide filtered version of sequence which should fire valid listeners" in {
-      val p = SeqProperty[Int](Seq(1, 2, 3))
+      val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
       var states = mutable.ArrayBuffer.empty[Seq[Int]]
@@ -756,7 +756,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "be able to modify after transformation" in {
-      val numbers = SeqProperty[Int](Seq(1, 2, 3))
+      val numbers = SeqProperty[Int](1, 2, 3)
       val strings = numbers.transform((i: Int) => i.toString, (s: String) => Integer.parseInt(s))
 
       strings.append("4", "5", "6")
@@ -768,7 +768,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "filter transformed property" in {
-      val doubles = SeqProperty[Double](Seq(1.5, 2.3, 3.7))
+      val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
       val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 

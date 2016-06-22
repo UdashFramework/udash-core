@@ -23,6 +23,10 @@ object SeqProperty {
     Property[Seq[T]].asSeq[T]
 
   /** Creates DirectSeqProperty[T] with initial value. */
+  def apply[T](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+    Property[Seq[T]](item +: more).asSeq[T]
+
+  /** Creates DirectSeqProperty[T] with initial value. */
   def apply[T](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
     Property[Seq[T]](init).asSeq[T]
 }
