@@ -81,6 +81,18 @@ trait ReadableProperty[A] {
   def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer, PropertyCreator.newID())
 
+  // TODO: make it public
+  private[udash] def combine[B, O : ModelValue](property: Property[B])(combiner: (A, B) => O): Property[O] = {
+    val output = Property[O]
+    def update(x: A, y: B): Unit =
+      output.set(combiner(x, y))
+
+    listen(x => update(x, property.get))
+    property.listen(y => update(get, y))
+    update(get, property.get)
+    output
+  }
+
   protected[properties] def parent: Property[_]
 
   protected[properties] def fireValueListeners(): Unit = {
