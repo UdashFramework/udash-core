@@ -48,11 +48,10 @@ object BootstrapStyles extends StyleSheet.Inline {
   val jumbotron = style(addClassName("jumbotron"))
   val left = style(addClassName("left"))
   val next = style(addClassName("next"))
-  val pager = style(addClassName("pager"))
-  val pagination = style(addClassName("pagination"))
   val pillPane = style(addClassName("pill-pane"))
   val preScrollable = style(addClassName("pre-scrollable"))
   val prettyprint = style(addClassName("prettyprint"))
+  val previous = style(addClassName("previous"))
   val prev = style(addClassName("prev"))
   val right = style(addClassName("right"))
   val show = style(addClassName("show"))
@@ -434,6 +433,13 @@ object BootstrapStyles extends StyleSheet.Inline {
     val modalHeader = style(addClassName("modal-header"))
     val modalOpen = style(addClassName("modal-open"))
     val modalTitle = style(addClassName("modal-title"))
+  }
+
+  object Pagination {
+    val pagination = style(addClassName("pagination"))
+    val paginationLg = style(addClassName("pagination-lg"))
+    val paginationSm = style(addClassName("pagination-sm"))
+    val pager = style(addClassName("pager"))
   }
 
   object Panel {

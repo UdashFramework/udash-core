@@ -8,13 +8,13 @@ trait Listenable[EventType <: ListenableEvent] {
 
   private val onClickActions = mutable.LinkedHashSet.empty[EventHandler]
 
-  def listen(onClick: EventHandler): Registration = {
-    onClickActions += onClick
-    new Registration(onClick)
+  def listen(onEvent: EventHandler): Registration = {
+    onClickActions += onEvent
+    new Registration(onEvent)
   }
 
-  class Registration private[Listenable](onClick: EventHandler) {
-    def cancel(): Unit = onClickActions -= onClick
+  class Registration private[Listenable](onEvent: EventHandler) {
+    def cancel(): Unit = onClickActions -= onEvent
   }
 
   protected def fire(event: EventType): Unit =

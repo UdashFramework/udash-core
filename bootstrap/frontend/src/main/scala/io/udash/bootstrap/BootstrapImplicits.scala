@@ -18,7 +18,7 @@ trait BootstrapImplicits {
     def removeFrom(element: dom.Element): Unit =
       for (cl <- style.classNameIterator) element.classList.remove(cl.value)
 
-    def styleIf(property: Property[Boolean]): Modifier = property.reactiveApply(
+    def styleIf(property: ReadableProperty[Boolean]): Modifier = property.reactiveApply(
       (elem, value) =>
         if (value) applyTo(elem)
         else removeFrom(elem)
@@ -34,7 +34,7 @@ trait BootstrapImplicits {
     def applyTo(element: dom.Element, value: String = ""): Unit =
       element.setAttribute(attr.name, value)
 
-    def bind(property: Property[String]): Modifier = property.reactiveApply(
+    def bind(property: ReadableProperty[String]): Modifier = property.reactiveApply(
       (elem, value) => applyTo(elem)
     )
   }
@@ -46,7 +46,7 @@ trait BootstrapImplicits {
     def removeFrom(element: dom.Element): Unit =
       element.removeAttribute(attr.a.name)
 
-    def attrIf(property: Property[Boolean]): Modifier = property.reactiveApply(
+    def attrIf(property: ReadableProperty[Boolean]): Modifier = property.reactiveApply(
       (elem, value) =>
         if (value) applyTo(elem)
         else removeFrom(elem)
@@ -65,7 +65,7 @@ trait BootstrapImplicits {
     }
   }
 
-  implicit class PropertyOps[T](property: Property[T]) {
+  implicit class PropertyOps[T](property: ReadableProperty[T]) {
     def reactiveApply(f: (Element, T) => Unit): Modifier = new Modifier {
       override def applyTo(t: Element): Unit = {
         var registration: Registration = null
