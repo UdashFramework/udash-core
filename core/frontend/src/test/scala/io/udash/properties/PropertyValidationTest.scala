@@ -157,7 +157,7 @@ class PropertyValidationTest extends UdashFrontendTest {
     }
 
     "work with SeqProperty" in {
-      val p = SeqProperty[T](Seq(TO1, TO2))
+      val p = SeqProperty[T](TO1, TO2)
       p.addValidator(new Validator[Seq[T]] {
         override def apply(element: Seq[T])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
           if (element.contains(TO1)) Valid

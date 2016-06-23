@@ -40,7 +40,7 @@ class SelectTest extends UdashFrontendTest {
   "Select with multiple on" should {
     "synchronise state with property changes" in {
       val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String](Seq("B"))
+      val p = SeqProperty[String]("B")
 
       val select = Select(p, options).render
 
@@ -77,7 +77,7 @@ class SelectTest extends UdashFrontendTest {
 
     "synchronise property with state changes" in {
       val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String](Seq("B"))
+      val p = SeqProperty[String]("B")
 
       val select = Select(p, options).render
 
