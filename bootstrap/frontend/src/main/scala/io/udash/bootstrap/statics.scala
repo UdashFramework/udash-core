@@ -377,11 +377,6 @@ object BootstrapStyles extends StyleSheet.Inline {
     val imgThumbnail = style(addClassName("img-thumbnail"))
     val caption = style(addClassName("caption"))
     val thumbnail = style(addClassName("thumbnail"))
-    val media = style(addClassName("media"))
-    val mediaBody = style(addClassName("media-body"))
-    val mediaHeading = style(addClassName("media-heading"))
-    val mediaList = style(addClassName("media-list"))
-    val mediaObject = style(addClassName("media-object"))
 
     val _fa = style(addClassName("fa"))
     val _glyphicon = style(addClassName("glyphicon"))
@@ -428,6 +423,16 @@ object BootstrapStyles extends StyleSheet.Inline {
     val labelWarning = style(addClassName("label-warning"))
   }
 
+  object Media {
+    val media = style(addClassName("media"))
+    val mediaBody = style(addClassName("media-body"))
+    val mediaHeading = style(addClassName("media-heading"))
+    val mediaList = style(addClassName("media-list"))
+    val mediaObject = style(addClassName("media-object"))
+    val mediaLeft = style(addClassName("media-left"))
+    val mediaMiddle = style(addClassName("media-middle"))
+    val mediaRight = style(addClassName("media-right"))
+  }
 
   object Modal {
     val modal = style(addClassName("modal"))
