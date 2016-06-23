@@ -1,5 +1,8 @@
 package io.udash.bootstrap
 
+import io.udash.wrappers.jquery.{JQueryEvent, _}
+import org.scalajs.dom
+
 import scala.collection.mutable
 
 trait Listenable[EventType <: ListenableEvent] {
@@ -19,6 +22,9 @@ trait Listenable[EventType <: ListenableEvent] {
 
   protected def fire(event: EventType): Unit =
     onClickActions.iterator.foreach(handler => if (handler.isDefinedAt(event)) handler(event))
+
+  protected def jQFire(ev: EventType): JQueryCallback =
+    (_: dom.Element, _: JQueryEvent) => fire(ev)
 }
 
 trait ListenableEvent

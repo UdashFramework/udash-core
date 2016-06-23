@@ -14,6 +14,10 @@ object BootstrapTags {
   val dataDismiss = "data-dismiss".attr
   val dataBind = "data-bind".attr
   val dataLabel = "data-label".attr
+  val dataParent = "data-parent".attr
+  val dataKeyboard = "data-keyboard".attr
+  val dataBackdrop = "data-backdrop".attr
+  val dataShow = "data-show".attr
 
 }
 
@@ -381,6 +385,8 @@ object BootstrapStyles extends StyleSheet.Inline {
 
     val _fa = style(addClassName("fa"))
     val _glyphicon = style(addClassName("glyphicon"))
+
+    //todo private or use dynamic scalacss
     def fa(name: String) = Seq(_fa, style(addClassName(s"fa-$name")))
     def glyphicon(name: String) = Seq(_glyphicon, style(addClassName(s"glyphicon-$name")))
   }
@@ -431,7 +437,9 @@ object BootstrapStyles extends StyleSheet.Inline {
     val modalDialog = style(addClassName("modal-dialog"))
     val modalFooter = style(addClassName("modal-footer"))
     val modalHeader = style(addClassName("modal-header"))
+    val modalLarge = style(addClassName("modal-lg"))
     val modalOpen = style(addClassName("modal-open"))
+    val modalSmall = style(addClassName("modal-sm"))
     val modalTitle = style(addClassName("modal-title"))
   }
 

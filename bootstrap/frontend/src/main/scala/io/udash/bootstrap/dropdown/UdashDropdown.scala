@@ -16,7 +16,7 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
   import io.udash.wrappers.jquery._
 
   private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
-    jQ(elem).click(jQFireEvent(SelectionEvent(this, items.get(id))))
+    jQ(elem).click(jQFire(SelectionEvent(this, items.get(id))))
     elem
   }
 
@@ -38,15 +38,12 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.dropdown", jQFireEvent(DropdownShowEvent(this)))
-    jQEl.on("shown.bs.dropdown", jQFireEvent(DropdownShownEvent(this)))
-    jQEl.on("hide.bs.dropdown", jQFireEvent(DropdownHideEvent(this)))
-    jQEl.on("hidden.bs.dropdown", jQFireEvent(DropdownHiddenEvent(this)))
+    jQEl.on("show.bs.dropdown", jQFire(DropdownShowEvent(this)))
+    jQEl.on("shown.bs.dropdown", jQFire(DropdownShownEvent(this)))
+    jQEl.on("hide.bs.dropdown", jQFire(DropdownHideEvent(this)))
+    jQEl.on("hidden.bs.dropdown", jQFire(DropdownHiddenEvent(this)))
     el
   }
-
-  private def jQFireEvent(ev: DropdownEvent[T]): JQueryCallback =
-    (_: dom.Element, _: JQueryEvent) => fire(ev)
 }
 
 object UdashDropdown {

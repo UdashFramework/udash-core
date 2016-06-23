@@ -5,9 +5,11 @@ import io.udash.{properties, _}
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
+import scala.concurrent.ExecutionContext
+
 class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
                       (val pages: properties.SeqProperty[ItemType, ElemType], val selectedPage: ReadableProperty[Int])
-                      (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+                      (itemFactory: (ElemType) => dom.Element)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
   lazy val render: Element = {
     import scalacss.ScalatagsCss._
     import scalatags.JsDom.all._
@@ -41,6 +43,6 @@ object UdashBreadcrumbs {
 
   def apply[ItemType, ElemType <: Property[ItemType]]
            (pages: properties.SeqProperty[ItemType, ElemType], selectedPage: ReadableProperty[Int])
-           (itemFactory: (ElemType) => dom.Element): UdashBreadcrumbs[ItemType, ElemType] =
+           (itemFactory: (ElemType) => dom.Element)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, selectedPage)(itemFactory)
 }
