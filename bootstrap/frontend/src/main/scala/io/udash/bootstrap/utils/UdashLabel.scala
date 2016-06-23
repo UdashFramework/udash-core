@@ -5,8 +5,8 @@ import io.udash._
 import org.scalajs.dom
 import scalatags.JsDom.all._
 
-class UdashLabel(style: LabelStyle)(mds: Modifier*) {
-  lazy val render: dom.Element =
+class UdashLabel(style: LabelStyle)(mds: Modifier*) extends UdashBootstrapComponent {
+  override lazy val render: dom.Element =
     span(style)(mds:_*).render
 }
 

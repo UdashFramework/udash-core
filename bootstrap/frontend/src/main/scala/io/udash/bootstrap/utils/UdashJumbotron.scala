@@ -7,8 +7,8 @@ import org.scalajs.dom
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-class UdashJumbotron(mds: Modifier*) {
-  lazy val render: dom.Element =
+class UdashJumbotron(mds: Modifier*) extends UdashBootstrapComponent {
+  override lazy val render: dom.Element =
     div(BootstrapStyles.jumbotron)(mds).render
 }
 

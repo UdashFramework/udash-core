@@ -1,19 +1,17 @@
 package io.udash.bootstrap
 package button
 
-import org.scalajs.dom.Element
-
 import scalacss.StyleA
 
-sealed abstract class ButtonSize(sizeStyle: StyleA) extends ClassModifier(sizeStyle)
+sealed abstract class ButtonSize(sizeStyle: Option[StyleA]) extends ClassModifier(sizeStyle.toSeq: _*) {
+  def this(sizeStyle: StyleA) = this(Some(sizeStyle))
+}
 
 object ButtonSize {
 
   import BootstrapStyles.Button._
 
-  case object Default extends ButtonSize(null) {
-    override def applyTo(t: Element): Unit = {}
-  }
+  case object Default extends ButtonSize(None)
 
   case object Large extends ButtonSize(btnLg)
 

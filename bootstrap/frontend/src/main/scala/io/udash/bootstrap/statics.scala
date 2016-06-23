@@ -1,5 +1,6 @@
 package io.udash.bootstrap
 
+import scala.language.postfixOps
 import scalacss.Defaults._
 
 object BootstrapTags {
@@ -482,6 +483,7 @@ object BootstrapStyles extends StyleSheet.Inline {
     val progressBarInfo = style(addClassName("progress-bar-info"))
     val progressBarSuccess = style(addClassName("progress-bar-success"))
     val progressBarWarning = style(addClassName("progress-bar-warning"))
+    val progressBarStriped = style(addClassName("progress-bar-striped"))
   }
 
   object Tooltip {

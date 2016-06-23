@@ -7,8 +7,8 @@ import org.scalajs.dom
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-class UdashPageHeader(mds: Modifier*) {
-  lazy val render: dom.Element =
+class UdashPageHeader(mds: Modifier*) extends UdashBootstrapComponent {
+  override lazy val render: dom.Element =
     span(BootstrapStyles.Typography.pageHeader)(mds).render
 }
 

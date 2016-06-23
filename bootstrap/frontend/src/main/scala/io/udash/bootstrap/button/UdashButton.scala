@@ -9,11 +9,11 @@ import org.scalajs.dom._
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-class UdashButton private(style: ButtonStyle, size: ButtonSize, block: Boolean,
+class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean,
                           val active: Property[Boolean], val disabled: Property[Boolean])
                          (mds: Modifier*) extends UdashBootstrapComponent with Listenable[ButtonClickEvent] {
 
-  private lazy val classes: List[Modifier] = style :: size ::
+  private lazy val classes: List[Modifier] = buttonStyle :: size ::
     BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::
     BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
 
@@ -42,13 +42,13 @@ object UdashButton {
 
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-  def apply(style: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
+  def apply(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
             active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false))(mds: Modifier*): UdashButton =
-    new UdashButton(style, size, block, active, disabled)(mds: _*)
+    new UdashButton(buttonStyle, size, block, active, disabled)(mds: _*)
 
-  def toggle(style: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
+  def toggle(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
              active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false))(mds: Modifier*): UdashButton = {
-    val button = new UdashButton(style, size, block, active, disabled)(mds: _*)
+    val button = new UdashButton(buttonStyle, size, block, active, disabled)(mds: _*)
     button.listen { case _ => active.set(!active.get) }
     button
   }

@@ -7,8 +7,8 @@ import org.scalajs.dom
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-class UdashBadge(mds: Modifier*) {
-  lazy val render: dom.Element =
+class UdashBadge(mds: Modifier*) extends UdashBootstrapComponent {
+  override lazy val render: dom.Element =
     span(BootstrapStyles.Label.badge)(mds).render
 }
 
