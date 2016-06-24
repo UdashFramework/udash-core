@@ -7,18 +7,18 @@ object BootstrapTags {
 
   import scalatags.JsDom.all._
 
-  val dataTarget = "data-target".attr
-  val dataToggle = "data-toggle".attr
-  val dataSlideTo = "data-slide-to".attr
-  val dataRide = "data-ride".attr
-  val dataSlide = "data-slide".attr
-  val dataDismiss = "data-dismiss".attr
+  val dataBackdrop = "data-backdrop".attr
   val dataBind = "data-bind".attr
+  val dataDismiss = "data-dismiss".attr
+  val dataKeyboard = "data-keyboard".attr
   val dataLabel = "data-label".attr
   val dataParent = "data-parent".attr
-  val dataKeyboard = "data-keyboard".attr
-  val dataBackdrop = "data-backdrop".attr
+  val dataRide = "data-ride".attr
   val dataShow = "data-show".attr
+  val dataSlide = "data-slide".attr
+  val dataSlideTo = "data-slide-to".attr
+  val dataTarget = "data-target".attr
+  val dataToggle = "data-toggle".attr
 
 }
 
@@ -38,9 +38,7 @@ object BootstrapStyles extends StyleSheet.Inline {
   val bottom = style(addClassName("bottom"))
   val close = style(addClassName("close"))
   val col = style(addClassName("col"))
-  val collapse = style(addClassName("collapse"))
   val collapsed = style(addClassName("collapsed"))
-  val collapsing = style(addClassName("collapsing"))
   val body = container
   val divider = style(addClassName("divider"))
   val disabled = style(addClassName("disabled"))
@@ -61,6 +59,12 @@ object BootstrapStyles extends StyleSheet.Inline {
   val right = style(addClassName("right"))
   val show = style(addClassName("show"))
   val top = style(addClassName("top"))
+
+  object Collapse {
+    val collapse = style(addClassName("collapse"))
+    val collapsing = style(addClassName("collapsing"))
+    val collapseIn = in
+  }
 
   object Grid {
     val colLg1 = style(addClassName("col-lg-1"))
@@ -459,9 +463,11 @@ object BootstrapStyles extends StyleSheet.Inline {
   object Panel {
     val panel = style(addClassName("panel"))
     val panelBody = style(addClassName("panel-body"))
+    val panelCollapse = style(addClassName("panel-collapse"))
     val panelDanger = style(addClassName("panel-danger"))
     val panelDefault = style(addClassName("panel-default"))
     val panelFooter = style(addClassName("panel-footer"))
+    val panelGroup = style(addClassName("panel-group"))
     val panelHeading = style(addClassName("panel-heading"))
     val panelInfo = style(addClassName("panel-info"))
     val panelPrimary = style(addClassName("panel-primary"))

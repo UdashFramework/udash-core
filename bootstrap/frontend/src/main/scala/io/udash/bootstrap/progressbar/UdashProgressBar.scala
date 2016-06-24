@@ -27,7 +27,10 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
   override lazy val render: Element = div(BootstrapStyles.ProgressBar.progress)(
     div(modifiers)(
       produce(showPercentage)(shouldShow =>
-        (if (shouldShow) div(bind(stringifiedValue)) else span(BootstrapStyles.Visibility.srOnly)(bind(stringifiedValue))).render
+        (
+          if (shouldShow) div(bind(stringifiedValue))
+          else span(BootstrapStyles.Visibility.srOnly)(bind(stringifiedValue))
+        ).render
       )
     )
   ).render
@@ -36,7 +39,8 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
 
 class AnimatedUdashProgressBar private[progressbar](progress: Property[Int], showPercentage: Property[Boolean], val animate: Property[Boolean],
                                                     barStyle: ProgressBarStyle, minValue: Int, maxValue: Int, minWidthEm: Int, valueStringifier: ValueStringifier)
-                                                   (implicit ec: ExecutionContext) extends UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier) {
+                                                   (implicit ec: ExecutionContext)
+  extends UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier) {
   override protected lazy val modifiers: Seq[Modifier] = super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), ProgressBarStyle.Striped)
 }
 

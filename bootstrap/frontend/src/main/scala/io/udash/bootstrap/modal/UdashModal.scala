@@ -15,6 +15,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
   extends UdashBootstrapComponent with Listenable[UdashModal.ModalEvent]{
 
   import io.udash.wrappers.jquery._
+  import BootstrapTags._
   import UdashModal._
 
   val dialogId = UdashBootstrap.newId()
@@ -31,8 +32,8 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
 
   def openButtonAttrs(): Seq[scalatags.generic.AttrPair[Element, String]] =
     Seq(
-      "data-toggle".attr := "modal",
-      "data-target".attr := s"#$dialogId"
+      dataToggle := "modal",
+      dataTarget := s"#$dialogId"
     )
 
   lazy val render: Element = {

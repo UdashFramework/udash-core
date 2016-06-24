@@ -4,6 +4,7 @@ import com.github.ghik.silencer.silent
 import org.scalajs.dom
 import org.scalatest.{Assertion, Succeeded}
 import org.scalatest.concurrent.PatienceConfiguration
+import org.scalatest.time.{Millis, Span}
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext
@@ -21,6 +22,8 @@ trait FrontendTestUtils {
 trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils with PatienceConfiguration {
   case object EventuallyTimeout extends Exception
+
+  override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   def eventually(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
     val start = Date.now()

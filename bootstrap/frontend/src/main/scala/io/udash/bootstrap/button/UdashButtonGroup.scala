@@ -23,7 +23,13 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
 
   lazy val render: dom.Element = {
     div(role := "group", classes, if (toggle) dataToggle := "buttons" else ())(
-      repeat(items)(itemFactory)
+      repeat(items)(
+        // "To use justified button groups with <button> elements, you must wrap each button in a button group.
+        // Most browsers don't properly apply our CSS for justification to <button> elements,
+        // but since we support button dropdowns, we can work around that." ~ http://getbootstrap.com/components/#btn-groups
+        if (justified) (item) => div(BootstrapStyles.Button.btnGroup)(itemFactory(item)).render
+        else itemFactory
+      )
     ).render
   }
 }
