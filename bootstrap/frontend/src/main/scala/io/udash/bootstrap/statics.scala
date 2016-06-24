@@ -334,6 +334,10 @@ object BootstrapStyles extends StyleSheet.Inline {
     val listGroupItemText = style(addClassName("list-group-item-text"))
     val listInline = style(addClassName("list-inline"))
     val listUnstyled = style(addClassName("list-unstyled"))
+    val listItemSuccess = style(addClassName("list-group-item-success"))
+    val listItemInfo = style(addClassName("list-group-item-info"))
+    val listItemWarning = style(addClassName("list-group-item-warning"))
+    val listItemDanger = style(addClassName("list-group-item-danger"))
     val dlHorizontal = style(addClassName("dl-horizontal"))
   }
 
@@ -496,7 +500,12 @@ object BootstrapStyles extends StyleSheet.Inline {
     val tooltip = style(addClassName("tooltip"))
     val tooltipArrow = style(addClassName("tooltip-arrow"))
     val tooltipInner = style(addClassName("tooltip-inner"))
-
   }
 
+  object EmbedResponsive {
+    val embed = style(addClassName("embed-responsive"))
+    val item = style(addClassName("embed-responsive-item"))
+    val embed16by9 = style(addClassName("embed-responsive-16by9"))
+    val embed4by3 = style(addClassName("embed-responsive-4by3"))
+  }
 }
