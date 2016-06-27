@@ -365,6 +365,8 @@ object BootstrapStyles extends StyleSheet.Inline {
     val inputGroup = style(addClassName("input-group"))
     val inputGroupAddon = style(addClassName("input-group-addon"))
     val inputGroupBtn = style(addClassName("input-group-btn"))
+    val inputGroupLg = style(addClassName("input-group-lg"))
+    val inputGroupSm = style(addClassName("input-group-sm"))
     val inputLg = style(addClassName("input-lg"))
     val inputSm = style(addClassName("input-sm"))
     val checkbox = style(addClassName("checkbox"))
