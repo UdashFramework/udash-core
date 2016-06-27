@@ -7,10 +7,14 @@ import scalatags.JsDom.all._
 object UdashBootstrap {
   private var cid = -1
 
+  case class ComponentId(id: String) extends AnyVal {
+    override def toString: String = id
+  }
+
   /** Generates unique element ID */
-  def newId(): String = {
+  def newId(): ComponentId = {
     cid += 1
-    s"bs-auto-$cid"
+    ComponentId(s"bs-auto-$cid")
   }
 
   /** Loads FontAwesome styles. */

@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import io.udash._
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.SeqProperty
 import org.scalajs.dom
 import org.scalajs.dom._
@@ -14,9 +15,10 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
                      heading: (ElemType) => dom.Element,
                      body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
   import BootstrapTags._
+
   import scalatags.JsDom.all._
 
-  val accordionId = UdashBootstrap.newId()
+  val accordionId: ComponentId = UdashBootstrap.newId()
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
   def collapseOf(panel: ElemType): Option[UdashCollapse] =
     collapses.get(panel)
@@ -24,11 +26,11 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
   lazy val render: Element = {
     import scalacss.ScalatagsCss._
 
-    div(BootstrapStyles.Panel.panelGroup, id := accordionId, role := "tablist", aria.multiselectable := true)(
+    div(BootstrapStyles.Panel.panelGroup, id := accordionId.id, role := "tablist", aria.multiselectable := true)(
       repeat(panels)(panel => {
         val headingId = UdashBootstrap.newId()
         val collapse = UdashCollapse()(
-          BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId,
+          BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId.id,
           body(panel)
         )
         val collapseId = collapse.collapseId
@@ -37,7 +39,7 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
           BootstrapStyles.Panel.panel,
           panelTypeSelector(panel.get)
         )(
-          div(BootstrapStyles.Panel.panelHeading, role := "tab", id := headingId)(
+          div(BootstrapStyles.Panel.panelHeading, role := "tab", id := headingId.id)(
             h4(BootstrapStyles.Panel.panelTitle)(
               a(role := "button", dataToggle := "collapse", dataParent := s"#$accordionId", href := s"#$collapseId")(
                 heading(panel)

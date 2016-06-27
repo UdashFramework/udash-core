@@ -261,6 +261,7 @@ object BootstrapStyles extends StyleSheet.Inline {
     val carouselControl = style(addClassName("carousel-control"))
     val carouselIndicators = style(addClassName("carousel-indicators"))
     val carouselInner = style(addClassName("carousel-inner"))
+    val slide = style(addClassName("slide"))
   }
 
   object Alert {

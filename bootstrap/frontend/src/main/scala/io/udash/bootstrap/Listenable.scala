@@ -5,7 +5,7 @@ import org.scalajs.dom
 
 import scala.collection.mutable
 
-trait Listenable[EventType <: ListenableEvent] {
+trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] {
 
   type EventHandler = PartialFunction[EventType, Unit]
 
@@ -27,4 +27,6 @@ trait Listenable[EventType <: ListenableEvent] {
     (_: dom.Element, _: JQueryEvent) => fire(ev)
 }
 
-trait ListenableEvent
+trait ListenableEvent[ComponentType <: Listenable[ComponentType, _]] {
+  def source: ComponentType
+}

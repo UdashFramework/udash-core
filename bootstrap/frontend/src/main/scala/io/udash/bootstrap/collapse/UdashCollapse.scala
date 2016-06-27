@@ -9,7 +9,7 @@ import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
 
 class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean)(mds: Modifier*)
-  extends UdashBootstrapComponent with Listenable[UdashCollapse.CollapseEvent]{
+  extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import BootstrapTags._
   import UdashCollapse._
@@ -37,7 +37,7 @@ class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolea
 
     val el = div(
       dataParent := parentSelector.getOrElse("false"), dataToggle := toggleOnInit,
-      BootstrapStyles.Collapse.collapse, id := collapseId
+      BootstrapStyles.Collapse.collapse, id := collapseId.id
     )(mds).render
 
     val jQEl = jQ(el)
@@ -50,11 +50,16 @@ class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolea
 }
 
 object UdashCollapse {
-  sealed abstract class CollapseEvent(collapse: UdashCollapse) extends ListenableEvent
-  case class CollapseShowEvent(collapse: UdashCollapse) extends CollapseEvent(collapse)
-  case class CollapseShownEvent(collapse: UdashCollapse) extends CollapseEvent(collapse)
-  case class CollapseHideEvent(collapse: UdashCollapse) extends CollapseEvent(collapse)
-  case class CollapseHiddenEvent(collapse: UdashCollapse) extends CollapseEvent(collapse)
+
+  sealed trait CollapseEvent extends ListenableEvent[UdashCollapse]
+
+  case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
+
+  case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
+
+  case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
+
+  case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
 
   def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true)(mds: Modifier*): UdashCollapse =
     new UdashCollapse(parentSelector, toggleOnInit)(mds)

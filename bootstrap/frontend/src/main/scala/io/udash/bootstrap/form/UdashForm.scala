@@ -10,7 +10,7 @@ import scalacss.StyleA
 import scalatags.JsDom.all._
 
 class UdashForm(formStyle: Option[StyleA])(mds: Modifier*) extends UdashBootstrapComponent {
-  lazy val render =
+  override lazy val render =
     form(if (formStyle.isDefined) formStyle.get else ())(mds).render
 }
 
@@ -23,11 +23,11 @@ object UdashForm {
       Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
       property.isValid onComplete {
         case Success(Valid) =>
-          StyleOps(hasSuccess).applyTo(el)
+          hasSuccess.addTo(el)
         case Success(Invalid(_)) =>
-          StyleOps(hasError).applyTo(el)
+          hasError.addTo(el)
         case Failure(ex) =>
-          StyleOps(hasWarning).applyTo(el)
+          hasWarning.addTo(el)
       }
     })
 
@@ -44,8 +44,7 @@ object UdashForm {
     div(BootstrapStyles.Form.formGroup)(mds)
 
   def input(el: dom.Element): dom.Element = {
-    BootstrapStyles.Form.formControl.classNameIterator
-      .foreach(cls => el.classList.add(cls.value))
+    BootstrapStyles.Form.formControl.addTo(el)
     el
   }
 
@@ -57,19 +56,19 @@ object UdashForm {
       validation
     )
 
-  def textInput(inputId: String = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
+  def textInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
                (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextInput.debounced(property, id := inputId, input).render)
 
-  def passwordInput(inputId: String = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
+  def passwordInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
                    (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(PasswordInput.debounced(property, id := inputId, input).render)
 
-  def numberInput(inputId: String = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
+  def numberInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
                  (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, input).render)
 
-  def textArea(inputId: String = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
+  def textArea(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
               (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, input).render)
 

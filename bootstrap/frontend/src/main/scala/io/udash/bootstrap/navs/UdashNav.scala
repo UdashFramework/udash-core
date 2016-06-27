@@ -4,22 +4,19 @@ package navs
 import io.udash.properties.SeqProperty
 import io.udash.{properties, _}
 import org.scalajs.dom
-import org.scalajs.dom.Element
 
-import scalacss.ScalatagsCss._
-import scalacss._
 import scalatags.JsDom.all._
 
 class UdashNav[ItemType, ElemType <: Property[ItemType]] private
-              (navStyle: StyleA, stacked: Boolean, justified: Boolean)
-              (panels: properties.SeqProperty[ItemType, ElemType])
-              (elemFactory: (ElemType) => dom.Element,
+              (navStyle: BootstrapStyles.BootstrapClass, stacked: Boolean, justified: Boolean)
+              (val panels: properties.SeqProperty[ItemType, ElemType])
+              (elemFactory: (ElemType) => dom.Node,
                isActive: (ElemType) => ReadableProperty[Boolean],
                isDisabled: (ElemType) => ReadableProperty[Boolean],
                isDropdown: (ElemType) => ReadableProperty[Boolean])
   extends UdashBootstrapComponent {
 
-  lazy val render: Element =
+  override lazy val render: dom.Element =
     ul(
       BootstrapStyles.Navigation.nav, navStyle,
       BootstrapStyles.Navigation.navJustified.styleIf(justified),
@@ -41,7 +38,7 @@ object UdashNav {
   def apply[ItemType, ElemType <: Property[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false)
            (panels: SeqProperty[ItemType, ElemType])
-           (elemFactory: (ElemType) => Element,
+           (elemFactory: (ElemType) => dom.Node,
             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
@@ -50,7 +47,7 @@ object UdashNav {
   def pills[ItemType, ElemType <: Property[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false)
            (panels: SeqProperty[ItemType, ElemType])
-           (elemFactory: (ElemType) => Element,
+           (elemFactory: (ElemType) => dom.Node,
             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
@@ -59,9 +56,17 @@ object UdashNav {
   def tabs[ItemType, ElemType <: Property[ItemType]]
           (stacked: Boolean = false, justified: Boolean = false)
           (panels: SeqProperty[ItemType, ElemType])
-          (elemFactory: (ElemType) => Element,
+          (elemFactory: (ElemType) => dom.Node,
            isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
            isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
            isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
     new UdashNav(BootstrapStyles.Navigation.navTabs, stacked, justified)(panels)(elemFactory, isActive, isDisabled, isDropdown)
+
+  def navbar[ItemType, ElemType <: Property[ItemType]]
+            (panels: SeqProperty[ItemType, ElemType])
+            (elemFactory: (ElemType) => dom.Node,
+             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
+             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
+             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
+    new UdashNav(BootstrapStyles.Navigation.navbarNav, false, false)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 }
