@@ -1,9 +1,7 @@
 package io.udash.bootstrap
 package button
 
-import scalacss.StyleA
-
-sealed abstract class ButtonStyle(style: StyleA) extends ClassModifier(BootstrapStyles.Button.btn, style)
+sealed abstract class ButtonStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Button.btn, style)
 
 object ButtonStyle {
 

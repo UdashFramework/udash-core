@@ -1,9 +1,7 @@
 package io.udash.bootstrap
 package collapse
 
-import scalacss.StyleA
-
-sealed abstract class PanelType(style: StyleA) extends ClassModifier(style)
+sealed abstract class PanelType(style: BootstrapStyles.BootstrapClass) extends ClassModifier(style)
 
 object PanelType {
 

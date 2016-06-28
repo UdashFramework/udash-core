@@ -5,11 +5,9 @@ import io.udash._
 import org.scalajs.dom
 
 import scala.util.{Failure, Success}
-import scalacss.ScalatagsCss._
-import scalacss.StyleA
 import scalatags.JsDom.all._
 
-class UdashForm(formStyle: Option[StyleA])(mds: Modifier*) extends UdashBootstrapComponent {
+class UdashForm(formStyle: Option[BootstrapStyles.BootstrapClass])(mds: Modifier*) extends UdashBootstrapComponent {
   override lazy val render =
     form(if (formStyle.isDefined) formStyle.get else ())(mds).render
 }
@@ -80,7 +78,8 @@ object UdashForm {
       validation
     )
 
-  def checkboxes(validation: Option[Modifier] = None)(selected: SeqProperty[String], options: Seq[String], checkboxStyle: StyleA = BootstrapStyles.Form.checkbox): Modifier =
+  def checkboxes(validation: Option[Modifier] = None)(selected: SeqProperty[String], options: Seq[String],
+                                                      checkboxStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.checkbox): Modifier =
     CheckButtons(
       selected, options,
       items => div(BootstrapStyles.Form.formGroup)(
@@ -91,7 +90,8 @@ object UdashForm {
       )
     )
 
-  def radio(selected: Property[String], options: Seq[String], radioStyle: StyleA = BootstrapStyles.Form.radio): Modifier =
+  def radio(selected: Property[String], options: Seq[String],
+            radioStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.radio): Modifier =
     RadioButtons(
       selected, options,
       items => div(BootstrapStyles.Form.formGroup)(

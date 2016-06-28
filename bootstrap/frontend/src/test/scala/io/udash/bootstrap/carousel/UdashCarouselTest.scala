@@ -21,8 +21,8 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
     "show indicators conditionally" in {
       val carousel1 = UdashCarousel(slides(), showIndicators = false)
       val carousel2 = UdashCarousel(slides(), showIndicators = true)
-      jQ(carousel1.render).has(s".${BootstrapStyles.Carousel.carouselIndicators.htmlClass}").length shouldBe 0
-      jQ(carousel2.render).has(s".${BootstrapStyles.Carousel.carouselIndicators.htmlClass}").length shouldBe 1
+      jQ(carousel1.render).has(s".${BootstrapStyles.Carousel.carouselIndicators.cls}").length shouldBe 0
+      jQ(carousel2.render).has(s".${BootstrapStyles.Carousel.carouselIndicators.cls}").length shouldBe 1
     }
 
     "select sensible first slide" in {
@@ -113,14 +113,14 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
 
   private def activeIdx(sls: Seq[UdashCarouselSlide]): Int =
     sls.zipWithIndex.collectFirst {
-      case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.htmlClass) => idx
+      case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.cls) => idx
     }.get
 
   private def activeIndicatorIdx(carousel: UdashCarousel): Int = {
-    val indicators = jQ(carousel.render).find(s".${BootstrapStyles.Carousel.carouselIndicators.htmlClass}").children()
+    val indicators = jQ(carousel.render).find(s".${BootstrapStyles.Carousel.carouselIndicators.cls}").children()
     (0 until indicators.length)
       .map(indicators.at)
-      .find(_.hasClass(BootstrapStyles.active.htmlClass)).get
+      .find(_.hasClass(BootstrapStyles.active.cls)).get
       .attr(BootstrapTags.dataSlideTo.name).get
       .toInt
   }

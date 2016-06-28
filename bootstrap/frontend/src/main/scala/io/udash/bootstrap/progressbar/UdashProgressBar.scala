@@ -14,8 +14,6 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
                                             minValue: Int, maxValue: Int, minWidthEm: Int, valueStringifier: ValueStringifier)
                                            (implicit ec: ExecutionContext) extends UdashBootstrapComponent {
 
-  import scalacss.ScalatagsCss._
-
   protected def modifiers = Seq(
     barStyle, role := "progressbar", aria.valuenow.bind(progress.transform(_.toString)),
     progress.reactiveApply((el, pct) => jQ(el).width(s"$pct%")),

@@ -6,7 +6,6 @@ import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
 
 import scala.concurrent.ExecutionContext
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 sealed class UdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*) extends UdashBootstrapComponent {

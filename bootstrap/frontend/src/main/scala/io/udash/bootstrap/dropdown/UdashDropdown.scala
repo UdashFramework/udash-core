@@ -6,7 +6,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private

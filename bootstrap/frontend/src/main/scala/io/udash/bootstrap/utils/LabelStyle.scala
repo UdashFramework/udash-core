@@ -1,9 +1,7 @@
 package io.udash.bootstrap
 package utils
 
-import scalacss.StyleA
-
-sealed abstract class LabelStyle(style: StyleA) extends ClassModifier(BootstrapStyles.Label.label, style)
+sealed abstract class LabelStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Label.label, style)
 
 object LabelStyle {
   import BootstrapStyles.Label._

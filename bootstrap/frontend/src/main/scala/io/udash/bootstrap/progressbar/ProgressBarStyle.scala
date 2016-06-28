@@ -3,10 +3,9 @@ package progressbar
 
 import io.udash.bootstrap.BootstrapStyles.ProgressBar._
 
-import scalacss.StyleA
-
-sealed abstract class ProgressBarStyle(style: Option[StyleA]) extends ClassModifier(Seq(Some(progressBar), style).flatten: _*) {
-  def this(style: StyleA) = this(Some(style))
+sealed abstract class ProgressBarStyle(style: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(Seq(Some(progressBar), style).flatten: _*) {
+  def this(style: BootstrapStyles.BootstrapClass) =
+    this(Some(style))
 }
 
 object ProgressBarStyle {

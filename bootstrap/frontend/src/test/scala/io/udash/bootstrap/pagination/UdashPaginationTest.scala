@@ -11,7 +11,6 @@ class UdashPaginationTest extends UdashFrontendTest {
   import org.scalajs.dom._
 
   import scalatags.JsDom.all._
-  import scalacss.ScalatagsCss._
 
   "UdashPagination component" should {
     import UdashPagination._

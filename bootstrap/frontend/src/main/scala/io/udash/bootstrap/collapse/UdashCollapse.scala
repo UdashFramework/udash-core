@@ -33,7 +33,6 @@ class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolea
   }
 
   lazy val render: Element = {
-    import scalacss.ScalatagsCss._
 
     val el = div(
       dataParent := parentSelector.getOrElse("false"), dataToggle := toggleOnInit,

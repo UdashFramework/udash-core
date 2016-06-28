@@ -54,17 +54,17 @@ class UdashButtonTest extends UdashFrontendTest {
       for (i <- 1 to 10) {
         el.click()
         activeProperty.get should be(true)
-        el.hasClass(BootstrapStyles.active.className.value) should be(true)
+        el.hasClass(BootstrapStyles.active.cls) should be(true)
         el.click()
         activeProperty.get should be(false)
-        el.hasClass(BootstrapStyles.active.className.value) should be(false)
+        el.hasClass(BootstrapStyles.active.cls) should be(false)
       }
 
       for (i <- 1 to 10) {
         activeProperty.set(true)
-        el.hasClass(BootstrapStyles.active.className.value) should be(true)
+        el.hasClass(BootstrapStyles.active.cls) should be(true)
         activeProperty.set(false)
-        el.hasClass(BootstrapStyles.active.className.value) should be(false)
+        el.hasClass(BootstrapStyles.active.cls) should be(false)
       }
     }
   }

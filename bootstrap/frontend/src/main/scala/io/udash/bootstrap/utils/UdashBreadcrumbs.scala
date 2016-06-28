@@ -11,7 +11,6 @@ class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
                       (val pages: properties.SeqProperty[ItemType, ElemType], val selectedPage: ReadableProperty[Int])
                       (itemFactory: (ElemType) => dom.Element)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
   lazy val render: Element = {
-    import scalacss.ScalatagsCss._
     import scalatags.JsDom.all._
 
     ol(BootstrapStyles.Navigation.breadcrumb)(

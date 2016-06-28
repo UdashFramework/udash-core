@@ -1,9 +1,7 @@
 package io.udash.bootstrap
 package alert
 
-import scalacss.StyleA
-
-sealed abstract class AlertStyle(style: StyleA) extends ClassModifier(BootstrapStyles.Alert.alert, style)
+sealed abstract class AlertStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Alert.alert, style)
 
 object AlertStyle {
 

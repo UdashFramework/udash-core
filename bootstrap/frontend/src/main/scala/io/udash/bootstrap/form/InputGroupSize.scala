@@ -2,10 +2,9 @@ package io.udash.bootstrap.form
 
 import io.udash.bootstrap.{BootstrapStyles, ClassModifier}
 
-import scalacss.StyleA
-
-sealed abstract class InputGroupSize(sizeStyle: Option[StyleA]) extends ClassModifier(sizeStyle.toSeq: _*) {
-  def this(sizeStyle: StyleA) = this(Some(sizeStyle))
+sealed abstract class InputGroupSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq: _*) {
+  def this(sizeStyle: BootstrapStyles.BootstrapClass) =
+    this(Some(sizeStyle))
 }
 
 object InputGroupSize {

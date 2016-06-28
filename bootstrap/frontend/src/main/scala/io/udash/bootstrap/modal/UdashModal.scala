@@ -38,7 +38,6 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
     )
 
   lazy val render: Element = {
-    import scalacss.ScalatagsCss._
 
     val content = Seq(
       (headerFactory, BootstrapStyles.Modal.modalHeader),
@@ -46,7 +45,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
       (footerFactory, BootstrapStyles.Modal.modalFooter)
     ).filter(_._1.nonEmpty).map { case (factory, styleName) =>
       val el = factory.get.apply()
-      styleName.classNameIterator.foreach(c => el.classList.add(c.value))
+      el.classList.add(styleName.cls)
       el
     }
 

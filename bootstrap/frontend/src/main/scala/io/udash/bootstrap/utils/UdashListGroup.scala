@@ -10,7 +10,6 @@ class UdashListGroup[ItemType, ElemType <: Property[ItemType]] private
                     (items: properties.SeqProperty[ItemType, ElemType])
                     (body: (ElemType) => dom.Element)
   extends UdashBootstrapComponent {
-  import scalacss.ScalatagsCss._
   import scalatags.JsDom.all._
 
   override def render: Element =

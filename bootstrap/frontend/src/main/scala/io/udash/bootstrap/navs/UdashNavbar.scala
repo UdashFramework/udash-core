@@ -2,16 +2,13 @@ package io.udash.bootstrap
 package navs
 
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
-import scalacss.ScalatagsCss._
-import scalacss.StyleA
 
 class UdashNavbar[ItemType, ElemType <: Property[ItemType]] private
-                 (navbarStyle: StyleA)(brand: dom.Element, nav: UdashNav[ItemType, ElemType])
+                 (navbarStyle: BootstrapStyles.BootstrapClass)(brand: dom.Element, nav: UdashNav[ItemType, ElemType])
   extends UdashBootstrapComponent {
 
   import BootstrapTags._

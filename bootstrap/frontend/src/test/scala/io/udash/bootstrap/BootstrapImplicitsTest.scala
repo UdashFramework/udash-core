@@ -5,7 +5,6 @@ import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom
 
 import scala.language.postfixOps
-import scalacss.StyleA
 
 class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
   "PropertyOps" should {
@@ -48,10 +47,9 @@ class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
   }
 
   implicit class ElemOps(elem: dom.Element) {
-    def hasStyles(styles: StyleA*): Boolean =
+    def hasStyles(styles: BootstrapStyles.BootstrapClass*): Boolean =
       styles
-        .flatMap(_.classNameIterator)
-        .map(_.value)
+        .map(_.cls)
         .forall(elem.classList.contains)
   }
 }

@@ -167,6 +167,5 @@ lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(Scal
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(
-    libraryDependencies ++= bootstrapDeps.value,
     jsDependencies ++= bootstrapFrontendJsDeps.value
   )

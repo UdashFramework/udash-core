@@ -3,6 +3,7 @@ package utils
 
 import io.udash._
 import org.scalajs.dom
+
 import scalatags.JsDom.all._
 
 class UdashLabel(style: LabelStyle)(mds: Modifier*) extends UdashBootstrapComponent {

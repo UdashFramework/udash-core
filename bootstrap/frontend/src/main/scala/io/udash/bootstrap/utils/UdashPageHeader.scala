@@ -4,7 +4,6 @@ package utils
 import io.udash._
 import org.scalajs.dom
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashPageHeader(mds: Modifier*) extends UdashBootstrapComponent {

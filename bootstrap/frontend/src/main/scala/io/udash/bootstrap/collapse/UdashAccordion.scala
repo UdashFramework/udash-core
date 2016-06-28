@@ -24,7 +24,6 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
     collapses.get(panel)
 
   lazy val render: Element = {
-    import scalacss.ScalatagsCss._
 
     div(BootstrapStyles.Panel.panelGroup, id := accordionId.id, role := "tablist", aria.multiselectable := true)(
       repeat(panels)(panel => {

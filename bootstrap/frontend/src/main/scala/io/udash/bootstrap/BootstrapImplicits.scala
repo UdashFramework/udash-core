@@ -5,18 +5,24 @@ import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
-import scalacss.Defaults._
 import scalatags.JsDom.all._
 
 
 trait BootstrapImplicits {
+  class StyleModifier(s: BootstrapStyles.BootstrapClass) extends Modifier {
+    def applyTo(t: dom.Element) =
+      t.classList.add(s.cls)
+  }
 
-  implicit class StyleOps(style: StyleA) { outer =>
+  implicit final def styleToJsDomTag(s: BootstrapStyles.BootstrapClass): Modifier =
+    new StyleModifier(s)
+
+  implicit class StyleOps(style: BootstrapStyles.BootstrapClass) { outer =>
     def addTo(element: dom.Element): Unit =
-      for (cl <- style.classNameIterator) element.classList.add(cl.value)
+      element.classList.add(style.cls)
 
     def removeFrom(element: dom.Element): Unit =
-      for (cl <- style.classNameIterator) element.classList.remove(cl.value)
+      element.classList.remove(style.cls)
 
     def styleIf(property: ReadableProperty[Boolean]): Modifier = property.reactiveApply(
       (elem, value) =>
@@ -59,7 +65,7 @@ trait BootstrapImplicits {
   }
 
   implicit class ElementOps(element: dom.Element) {
-    def styles(styles: StyleA*): dom.Element = {
+    def styles(styles: BootstrapStyles.BootstrapClass*): dom.Element = {
       styles.foreach(_.addTo(element))
       element
     }

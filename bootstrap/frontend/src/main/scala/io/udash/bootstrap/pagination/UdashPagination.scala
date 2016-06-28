@@ -29,7 +29,6 @@ class UdashPagination[PageType, ElemType <: Property[PageType]] private
 
 
   lazy val render: dom.Element = {
-    import scalacss.ScalatagsCss._
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -69,7 +68,6 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
                 (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
 
   lazy val render: dom.Element = {
-    import scalacss.ScalatagsCss._
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -81,7 +79,7 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
     ).render
   }
 
-  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType, alignStyle: scalacss.StyleA) = {
+  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType, alignStyle: BootstrapStyles.BootstrapClass) = {
     import scalatags.JsDom.all._
 
     produce(pages)(_ => {

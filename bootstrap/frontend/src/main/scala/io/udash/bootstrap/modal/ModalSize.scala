@@ -3,13 +3,11 @@ package io.udash.bootstrap.modal
 import io.udash.bootstrap.{BootstrapStyles, ClassModifier}
 import org.scalajs.dom.Element
 
-import scalacss.StyleA
-
-sealed abstract class ModalSize(sizeStyle: StyleA) extends ClassModifier(sizeStyle)
+sealed abstract class ModalSize(sizeStyle: BootstrapStyles.BootstrapClass) extends ClassModifier(sizeStyle)
 
 object ModalSize {
 
-  case object Default extends ModalSize(null) {
+  case object Default extends ModalSize(BootstrapStyles.BootstrapClass("")) {
     override def applyTo(t: Element): Unit = {}
   }
 

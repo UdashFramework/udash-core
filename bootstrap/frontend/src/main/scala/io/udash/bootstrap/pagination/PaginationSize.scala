@@ -1,11 +1,9 @@
 package io.udash.bootstrap
 package pagination
 
-
-import scalacss.StyleA
-
-sealed abstract class PaginationSize(sizeStyle: Option[StyleA]) extends ClassModifier(sizeStyle.toSeq: _*) {
-  def this(sizeStyle: StyleA) = this(Some(sizeStyle))
+sealed abstract class PaginationSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq: _*) {
+  def this(sizeStyle: BootstrapStyles.BootstrapClass) =
+    this(Some(sizeStyle))
 }
 
 object PaginationSize {

@@ -3,7 +3,6 @@ package form
 
 import org.scalajs.dom
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashInputGroup(groupSize: InputGroupSize)(mds: Modifier*) extends UdashBootstrapComponent {
@@ -22,8 +21,7 @@ object UdashInputGroup {
     div(BootstrapStyles.Form.inputGroupBtn)(mds)
 
   def input(el: dom.Element): dom.Element = {
-    BootstrapStyles.Form.formControl.classNameIterator
-      .foreach(cls => el.classList.add(cls.value))
+    el.classList.add(BootstrapStyles.Form.formControl.cls)
     el
   }
 }

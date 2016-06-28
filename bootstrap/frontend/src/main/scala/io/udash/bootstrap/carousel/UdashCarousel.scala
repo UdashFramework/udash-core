@@ -16,7 +16,6 @@ import scala.language.postfixOps
 import scala.scalajs.js
 import scala.scalajs.js.Dictionary
 import scala.util.Try
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: ComponentId,
@@ -33,7 +32,7 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
   private lazy val _activeIndex: Property[Int] = Property[Int](firstActive)
 
   content.listen(p => _activeIndex.set(p.zipWithIndex.collectFirst {
-    case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.htmlClass) => idx
+    case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.cls) => idx
   }.get))
 
   override lazy val render: Element = {

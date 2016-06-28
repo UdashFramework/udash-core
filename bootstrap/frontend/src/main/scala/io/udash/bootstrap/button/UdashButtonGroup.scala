@@ -6,7 +6,6 @@ import io.udash.properties.ModelPart
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private

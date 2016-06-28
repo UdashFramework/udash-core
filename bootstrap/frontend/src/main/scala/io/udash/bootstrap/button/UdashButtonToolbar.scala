@@ -5,7 +5,6 @@ import io.udash._
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashButtonToolbar[ItemType, ElemType <: Property[ItemType]] private
