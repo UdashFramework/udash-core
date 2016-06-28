@@ -418,6 +418,8 @@ object BootstrapStyles extends StyleSheet.Inline {
     val navbarToggle = style(addClassName("navbar-toggle"))
     val navDivider = style(addClassName("nav-divider"))
     val navJustified = style(addClassName("nav-justified"))
+    val navStacked = style(addClassName("nav-stacked"))
+    val navPills = style(addClassName("nav-pills"))
     val navTabs = style(addClassName("nav-tabs"))
     val navTabsJustified = style(addClassName("nav-tabs-justified"))
     val breadcrumb = style(addClassName("breadcrumb"))

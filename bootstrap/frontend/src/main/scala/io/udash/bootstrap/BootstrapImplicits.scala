@@ -12,7 +12,7 @@ import scalatags.JsDom.all._
 trait BootstrapImplicits {
 
   implicit class StyleOps(style: StyleA) { outer =>
-    def applyTo(element: dom.Element): Unit =
+    def addTo(element: dom.Element): Unit =
       for (cl <- style.classNameIterator) element.classList.add(cl.value)
 
     def removeFrom(element: dom.Element): Unit =
@@ -20,13 +20,13 @@ trait BootstrapImplicits {
 
     def styleIf(property: ReadableProperty[Boolean]): Modifier = property.reactiveApply(
       (elem, value) =>
-        if (value) applyTo(elem)
+        if (value) addTo(elem)
         else removeFrom(elem)
     )
 
     def styleIf(condition: Boolean): Modifier = new Modifier {
       override def applyTo(t: Element): Unit =
-        if (condition) outer.applyTo(t)
+        if (condition) outer.addTo(t)
     }
   }
 
@@ -60,7 +60,7 @@ trait BootstrapImplicits {
 
   implicit class ElementOps(element: dom.Element) {
     def styles(styles: StyleA*): dom.Element = {
-      styles.foreach(_.applyTo(element))
+      styles.foreach(_.addTo(element))
       element
     }
   }
