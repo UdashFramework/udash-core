@@ -10,9 +10,9 @@ import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
-                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean = false, dropdownId: String = UdashBootstrap.newId())
+                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean = false, dropdownId: ComponentId = UdashBootstrap.newId())
                    (itemFactory: (ElemType) => dom.Element)(mds: Modifier*)
-  extends Listenable[UdashDropdown.DropdownEvent[ItemType, ElemType]] {
+  extends Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
   import io.udash.wrappers.jquery._
@@ -34,7 +34,7 @@ class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
         BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId.id, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
         mds, span(BootstrapStyles.Dropdown.caret)
       ).render,
-      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId)(
+      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId.id)(
         repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
       )
     ).render
@@ -56,11 +56,11 @@ class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
     }
     Seq(
       a(
-        BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId, dataToggle := "dropdown",  href := "#",
+        BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId.id, dataToggle := "dropdown",  href := "#",
         aria.haspopup := true, aria.expanded := false,
         mds, span(BootstrapStyles.Dropdown.caret)
       ),
-      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId)(
+      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId.id)(
         repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
       )
     ).render
@@ -69,7 +69,7 @@ class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
 
 object UdashDropdown {
 
-  sealed abstract class DropdownEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends ListenableEvent
+  sealed abstract class DropdownEvent[ItemType, ElemType <: Property[ItemType]](override val source: UdashDropdown[ItemType, ElemType]) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
   case class DropdownShowEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownShownEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownHideEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
