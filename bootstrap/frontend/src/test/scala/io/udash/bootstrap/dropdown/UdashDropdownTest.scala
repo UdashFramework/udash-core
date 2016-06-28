@@ -18,7 +18,7 @@ class UdashDropdownTest extends UdashFrontendTest {
       DropdownDivider,
       DropdownDisabled(DropdownLink("Link 3", Url("#")))
     ))
-    val dropdown = UdashDropdown(elements)("Test")
+    val dropdown = UdashDropdown(elements)(UdashDropdown.defaultItemFactory, "Test")
     val el = dropdown.render
     jQ("body").append(el)
 

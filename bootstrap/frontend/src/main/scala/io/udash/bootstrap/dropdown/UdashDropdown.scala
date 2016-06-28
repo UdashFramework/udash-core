@@ -9,9 +9,10 @@ import org.scalajs.dom
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = false, dropdownId: ComponentId = UdashBootstrap.newId())
-                              (itemFactory: (T) => dom.Element)(mds: Modifier*)
-  extends Listenable[UdashDropdown[T], UdashDropdown.DropdownEvent[T]] {
+class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
+                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean = false, dropdownId: String = UdashBootstrap.newId())
+                   (itemFactory: (ElemType) => dom.Element)(mds: Modifier*)
+  extends Listenable[UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
   import io.udash.wrappers.jquery._
@@ -33,8 +34,8 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
         BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId.id, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
         mds, span(BootstrapStyles.Dropdown.caret)
       ).render,
-      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId.id)(
-        repeat(items)((p) => withSelectionListener(itemFactory(p.get), next()))
+      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId)(
+        repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
       )
     ).render
 
@@ -45,21 +46,35 @@ class UdashDropdown[T] private(val items: SeqProperty[T], dropup: Boolean = fals
     jQEl.on("hidden.bs.dropdown", jQFire(DropdownHiddenEvent(this)))
     el
   }
+
+  lazy val linkRender: dom.Node = {
+    import BootstrapTags._
+    var _id = -1
+    def next(): Int = {
+      _id += 1
+      _id
+    }
+    Seq(
+      a(
+        BootstrapStyles.Dropdown.dropdownToggle, id := dropdownId, dataToggle := "dropdown",  href := "#",
+        aria.haspopup := true, aria.expanded := false,
+        mds, span(BootstrapStyles.Dropdown.caret)
+      ),
+      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := dropdownId)(
+        repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
+      )
+    ).render
+  }
 }
 
 object UdashDropdown {
 
-  sealed trait DropdownEvent[T] extends ListenableEvent[UdashDropdown[T]]
-
-  case class DropdownShowEvent[T](source: UdashDropdown[T]) extends DropdownEvent[T]
-
-  case class DropdownShownEvent[T](source: UdashDropdown[T]) extends DropdownEvent[T]
-
-  case class DropdownHideEvent[T](source: UdashDropdown[T]) extends DropdownEvent[T]
-
-  case class DropdownHiddenEvent[T](source: UdashDropdown[T]) extends DropdownEvent[T]
-
-  case class SelectionEvent[T](source: UdashDropdown[T], item: T) extends DropdownEvent[T]
+  sealed abstract class DropdownEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends ListenableEvent
+  case class DropdownShowEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownShownEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownHideEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownHiddenEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class SelectionEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType], item: ItemType) extends DropdownEvent(dropdown)
 
   sealed trait DefaultDropdownItem
   case class DropdownLink(title: String, url: Url) extends DefaultDropdownItem
@@ -67,22 +82,25 @@ object UdashDropdown {
   case object DropdownDivider extends DefaultDropdownItem
   case class DropdownDisabled(link: DropdownLink) extends DefaultDropdownItem
 
-  val defaultItemFactory: (DefaultDropdownItem) => dom.Element = {
-    case DropdownLink(title, url) => li(a(href := url.value)(title)).render
-    case DropdownHeader(title) => li(BootstrapStyles.Dropdown.dropdownHeader)(title).render
-    case DropdownDivider => li(BootstrapStyles.divider, role := "separator").render
-    case DropdownDisabled(item) => defaultItemFactory(item).styles(BootstrapStyles.disabled)
+  def defaultItemFactory(p: Property[DefaultDropdownItem]): dom.Element = {
+    import io.udash._
+    def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
+      case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
+      case DropdownHeader(title) => li(BootstrapStyles.Dropdown.dropdownHeader)(produce(p)(_ => span(title).render)).render
+      case DropdownDivider => li(BootstrapStyles.divider, role := "separator").render
+      case DropdownDisabled(item) => itemFactory(item).styles(BootstrapStyles.disabled)
+    }
+
+    itemFactory(p.get)
   }
 
-  def apply[T](items: SeqProperty[T], itemFactory: (T) => dom.Element)(mds: Modifier*): UdashDropdown[T] =
+  def apply[ItemType, ElemType <: Property[ItemType]]
+           (items: properties.SeqProperty[ItemType, ElemType])
+           (itemFactory: (ElemType) => dom.Element, mds: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items)(itemFactory)(mds)
 
-  def apply(items: SeqProperty[DefaultDropdownItem])(mds: Modifier*): UdashDropdown[DefaultDropdownItem] =
-    new UdashDropdown(items)(defaultItemFactory)(mds)
-
-  def dropup[T](items: SeqProperty[T], itemFactory: (T) => dom.Element)(mds: Modifier*): UdashDropdown[T] =
+  def dropup[ItemType, ElemType <: Property[ItemType]]
+            (items: properties.SeqProperty[ItemType, ElemType])
+            (itemFactory: (ElemType) => dom.Element, mds: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true)(itemFactory)(mds)
-
-  def dropup(items: SeqProperty[DefaultDropdownItem])(mds: Modifier*): UdashDropdown[DefaultDropdownItem] =
-    new UdashDropdown(items, true)(defaultItemFactory)(mds)
 }
