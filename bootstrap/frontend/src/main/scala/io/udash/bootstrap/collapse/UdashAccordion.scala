@@ -3,6 +3,7 @@ package collapse
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.panel.{PanelStyle, PanelStyle$, UdashPanel}
 import io.udash.properties.SeqProperty
 import org.scalajs.dom
 import org.scalajs.dom._
@@ -11,7 +12,7 @@ import scala.collection.mutable
 
 class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
                     (panels: properties.SeqProperty[ItemType, ElemType])
-                    (panelTypeSelector: ItemType => PanelType,
+                    (panelStyleSelector: ItemType => PanelStyle,
                      heading: (ElemType) => dom.Element,
                      body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
   import BootstrapTags._
@@ -26,27 +27,25 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
   lazy val render: Element = {
 
     div(BootstrapStyles.Panel.panelGroup, id := accordionId.id, role := "tablist", aria.multiselectable := true)(
-      repeat(panels)(panel => {
+      repeat(panels)(item => {
         val headingId = UdashBootstrap.newId()
         val collapse = UdashCollapse()(
           BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId.id,
-          body(panel)
+          body(item)
         )
         val collapseId = collapse.collapseId
-        collapses(panel) = collapse
-        div(
-          BootstrapStyles.Panel.panel,
-          panelTypeSelector(panel.get)
-        )(
+        collapses(item) = collapse
+        val panel = UdashPanel(panelStyleSelector(item.get))(
           div(BootstrapStyles.Panel.panelHeading, role := "tab", id := headingId.id)(
             h4(BootstrapStyles.Panel.panelTitle)(
               a(role := "button", dataToggle := "collapse", dataParent := s"#$accordionId", href := s"#$collapseId")(
-                heading(panel)
+                heading(item)
               )
             )
           ),
           collapse.render
-        ).render
+        )
+        panel.render
       })
     ).render
   }
@@ -56,6 +55,6 @@ object UdashAccordion {
 
   def apply[ItemType, ElemType <: Property[ItemType]](panels: SeqProperty[ItemType, ElemType])
            (heading: (ElemType) => Element, body: (ElemType) => Element,
-            panelTypeSelector: ItemType => PanelType = (_: ItemType) => PanelType.Default): UdashAccordion[ItemType, ElemType] =
+            panelTypeSelector: ItemType => PanelStyle = (_: ItemType) => PanelStyle.Default): UdashAccordion[ItemType, ElemType] =
     new UdashAccordion(panels)(panelTypeSelector, heading, body)
 }
