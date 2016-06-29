@@ -78,13 +78,9 @@ object UdashModal {
   case object NoneBackdrop extends BackdropType("false")
 
   sealed trait ModalEvent extends ListenableEvent[UdashModal]
-
   case class ModalShowEvent(source: UdashModal) extends ModalEvent
-
   case class ModalShownEvent(source: UdashModal) extends ModalEvent
-
   case class ModalHideEvent(source: UdashModal) extends ModalEvent
-
   case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
 
   def apply(modalSize: ModalSize = ModalSize.Default, fade: Boolean = true, labelId: String = "",
