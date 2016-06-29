@@ -41,7 +41,7 @@ class UdashButtonGroupTest extends UdashFrontendTest {
         DefaultCheckboxModel("Button 2", true),
         DefaultCheckboxModel("Button 3", false)
       ))
-      val group = UdashButtonGroup.checkboxes(buttons)(defaultCheckboxFactory)
+      val group = UdashButtonGroup.checkboxes(buttons)
 
       val el = group.render
       val children: JQuery = jQ(el).children()

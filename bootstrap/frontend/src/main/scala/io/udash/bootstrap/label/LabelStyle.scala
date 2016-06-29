@@ -1,5 +1,5 @@
 package io.udash.bootstrap
-package utils
+package label
 
 sealed abstract class LabelStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Label.label, style)
 

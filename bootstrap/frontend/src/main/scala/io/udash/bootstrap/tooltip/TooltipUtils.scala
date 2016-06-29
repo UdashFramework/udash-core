@@ -1,8 +1,7 @@
-package io.udash.bootstrap.tooltip
+package io.udash.bootstrap
+package tooltip
 
-import io.udash.bootstrap.{Listenable, ListenableEvent}
 import org.scalajs.dom
-
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.language.postfixOps
 import scala.scalajs.js
@@ -31,13 +30,29 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
   case class TooltipHiddenEvent(source: TooltipType) extends TooltipEvent
   case class TooltipInsertedEvent(source: TooltipType) extends TooltipEvent
 
+  /**
+    * Add tooltip/popover to provided element.
+    * More: <a href="http://getbootstrap.com/javascript/#tooltips">Bootstrap Docs (Tooltip)</a>.
+    * More: <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap Docs (Popover)</a>.
+    *
+    * @param animation Apply a CSS fade transition to the popover.
+    * @param container Appends the popover to a specific element.
+    * @param content   Popover content.
+    * @param delay     Show/hide delay.
+    * @param html      Treat content and title as HTML.
+    * @param placement Tooltip/popover placement.
+    * @param template  Tooltip/popover template.
+    * @param title     Component title.
+    * @param trigger   Triggers to show/hide tooltip.
+    * @param viewport  Keeps the popover within the bounds of this element.
+    * @param el        Node which will own the created tooltip/popover.
+    */
   def apply(animation: Boolean = true,
             container: Option[String] = None,
             content: (dom.Element) => String = (_) => "",
             delay: Delay = Delay(0 millis, 0 millis),
             html: Boolean = false,
             placement: (dom.Element, dom.Element) => Seq[Placement] = defaultPlacement,
-            selector: Option[String] = None,
             template: Option[String] = None,
             title: (dom.Element) => String = (_) => "",
             trigger: Seq[Trigger] = defaultTrigger,
@@ -50,7 +65,6 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
         "delay" -> js.Dictionary("show" -> delay.show.toMillis, "hide" -> delay.hide.toMillis),
         "html" -> html,
         "placement" -> scalajs.js.Any.fromFunction2((popover: dom.Element, trigger: dom.Element) => placement(popover, trigger).map(_.name).mkString(" ")),
-        "selector" -> selector.getOrElse(false),
         "template" -> template.getOrElse(defaultTemplate),
         "title" -> js.ThisFunction.fromFunction1(title),
         "trigger" -> trigger.map(_.name).mkString(" "),

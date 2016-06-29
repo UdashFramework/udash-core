@@ -8,49 +8,67 @@ import org.scalajs.dom.Element
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-sealed class UdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*) extends UdashBootstrapComponent {
+sealed class UdashAlert private[alert](alertStyle: AlertStyle)(content: Modifier*) extends UdashBootstrapComponent {
+  override val componentId = UdashBootstrap.newId()
 
-  protected def partial() = div(alertStyle, role := "alert")(mds: _*)
+  override lazy val render: Element = template().render
 
-  override lazy val render: Element = partial().render
-
+  protected def template() =
+    div(id := componentId, alertStyle, role := "alert")(content: _*)
 }
 
-class DismissibleUdashAlert private[alert](alertStyle: AlertStyle)(mds: Modifier*)(implicit ec: ExecutionContext) extends UdashAlert(alertStyle)() {
-
-  def dismiss(): Unit = buttonRendered.click()
-
+class DismissibleUdashAlert private[alert](alertStyle: AlertStyle)(content: Modifier*)(implicit ec: ExecutionContext) extends UdashAlert(alertStyle)() {
   private val _dismissed = Property[Boolean](false)
-
   val dismissed: ReadableProperty[Boolean] = _dismissed.transform(identity)
 
   private val button = UdashButton()(
-    `type` := "button", BootstrapStyles.close, BootstrapTags.dataDismiss := "alert", aria.label := "close",
+    `type` := "button", BootstrapStyles.close,
+    BootstrapTags.dataDismiss := "alert", aria.label := "close",
     span(aria.hidden := "true")("×")
   )
-
   button.listen { case ev => _dismissed.set(true) }
 
   private lazy val buttonRendered = button.render
 
-  override lazy val render: Element = partial()(BootstrapStyles.Alert.alertDismissible)(buttonRendered, mds).render
+  override lazy val render: Element = template()(
+    BootstrapStyles.Alert.alertDismissible,
+    buttonRendered, content
+  ).render
 
+  def dismiss(): Unit =
+    buttonRendered.click()
 }
 
-
-object UdashAlert {
-
+trait AlertCompanion[T <: UdashAlert] {
   import AlertStyle._
 
-  private def create(alertStyle: AlertStyle, mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = new UdashAlert(alertStyle)(mds: _*)
+  protected def create(alertStyle: AlertStyle)(content: Modifier*)(implicit ec: ExecutionContext): T
 
-  def success(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Success, mds: _*)
+  /** Creates an alert with `Success` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
+  def success(content: Modifier*)(implicit ec: ExecutionContext): T =
+    create(Success)(content: _*)
 
-  def info(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Info, mds: _*)
+  /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  def info(content: Modifier*)(implicit ec: ExecutionContext): T =
+    create(Info)(content: _*)
 
-  def warning(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Warning, mds: _*)
+  /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  def warning(content: Modifier*)(implicit ec: ExecutionContext): T =
+    create(Warning)(content: _*)
 
-  def danger(mds: Modifier*)(implicit ec: ExecutionContext): UdashAlert = create(Danger, mds: _*)
+  /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  def danger(content: Modifier*)(implicit ec: ExecutionContext): T =
+    create(Danger)(content: _*)
+}
 
-  def dismissible(alertStyle: AlertStyle)(mds: Modifier*)(implicit ec: ExecutionContext): DismissibleUdashAlert = new DismissibleUdashAlert(alertStyle)(mds: _*)
+/** Standard alert component. */
+object UdashAlert extends AlertCompanion[UdashAlert] {
+  protected def create(alertStyle: AlertStyle)(content: Modifier*)(implicit ec: ExecutionContext): UdashAlert =
+    new UdashAlert(alertStyle)(content: _*)
+}
+
+/** Dismissible alert component. */
+object DismissibleUdashAlert extends AlertCompanion[DismissibleUdashAlert] {
+  protected def create(alertStyle: AlertStyle)(content: Modifier*)(implicit ec: ExecutionContext): DismissibleUdashAlert =
+    new DismissibleUdashAlert(alertStyle)(content: _*)
 }

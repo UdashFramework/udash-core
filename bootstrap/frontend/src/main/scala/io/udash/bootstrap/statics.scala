@@ -391,7 +391,6 @@ object BootstrapStyles {
     val _fa = BootstrapClass("fa")
     val _glyphicon = BootstrapClass("glyphicon")
 
-    //todo private or use dynamic scalacss
     def fa(name: String) = Seq(_fa, BootstrapClass(s"fa-$name"))
     def glyphicon(name: String) = Seq(_glyphicon, BootstrapClass(s"glyphicon-$name"))
   }

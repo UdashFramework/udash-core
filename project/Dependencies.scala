@@ -45,7 +45,7 @@ object Dependencies extends Build {
 
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
 
   val rpcCrossDeps = Def.setting(Seq(
@@ -79,10 +79,8 @@ object Dependencies extends Build {
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
   ))
 
-  val bootstrapDeps = Def.setting(Seq(
-    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
-    "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion,
-    "com.github.karasiq" %%% "scalajs-bootstrap" % "1.0.5" //todo remove once not needed
+  val bootstrapFrontendDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](

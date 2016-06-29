@@ -3,7 +3,7 @@ package carousel
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.{Hover, PauseOption}
+import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.Icons
@@ -18,9 +18,9 @@ import scala.scalajs.js.Dictionary
 import scala.util.Try
 import scalatags.JsDom.all._
 
-class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: ComponentId,
-                    showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
-                   (implicit ec: ExecutionContext) extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
+class UdashCarousel private(val content: SeqProperty[UdashCarouselSlide], val componentId: ComponentId,
+                            showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
+                           (implicit ec: ExecutionContext) extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
   require(activeSlide >= 0, "Active slide index cannot be negative.")
 
   import BootstrapStyles.Carousel._
@@ -31,14 +31,14 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
   private lazy val indices = content.transform((slides: Seq[UdashCarouselSlide]) => slides.length)
   private lazy val _activeIndex: Property[Int] = Property[Int](firstActive)
 
-  content.listen(p => _activeIndex.set(p.zipWithIndex.collectFirst {
+  content.listen(slides => _activeIndex.set(slides.zipWithIndex.collectFirst {
     case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.cls) => idx
   }.get))
 
   override lazy val render: Element = {
     def indicators() = {
       def indicator(index: Int) =
-        li(dataTarget := s"#$carouselId", dataSlideTo := index, BootstrapStyles.active.styleIf(activeIndex.transform(idx => idx == index)))
+        li(dataTarget := s"#$componentId", dataSlideTo := index, BootstrapStyles.active.styleIf(activeIndex.transform(idx => idx == index)))
 
       produce(indices)(length =>
         ol(carouselIndicators)(
@@ -53,14 +53,14 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
       }.get
       val direction = Try {
         val directionString = ev.asInstanceOf[Dictionary[String]].apply("direction")
-        if (directionString == "left") CarouselEvent.Left else if (directionString == "right") CarouselEvent.Right else CarouselEvent.Unknown
+        if (directionString == "left") CarouselEvent.Direction.Left else if (directionString == "right") CarouselEvent.Direction.Right else CarouselEvent.Direction.Unknown
       }
-      (idx, direction.getOrElse(CarouselEvent.Unknown))
+      (idx, direction.getOrElse(CarouselEvent.Direction.Unknown))
     }
 
 
     val counter = new Countdown(firstActive)
-    val res = div(id := carouselId, carousel, slide)(
+    val res = div(id := componentId, carousel, slide)(
       if (showIndicators) indicators() else {},
       div(carouselInner, role := "listbox")(
         repeat(content) { slide =>
@@ -69,11 +69,11 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
           res
         }
       ),
-      a(BootstrapStyles.left, carouselControl, href := s"#$carouselId", role := "button", dataSlide := "prev")(
+      a(BootstrapStyles.left, carouselControl, href := s"#$componentId", role := "button", dataSlide := "prev")(
         span(Icons.Glyphicon.chevronLeft),
         span(`class` := "sr-only", "Previous")
       ),
-      a(BootstrapStyles.right, carouselControl, href := s"#$carouselId", role := "button", dataSlide := "next")(
+      a(BootstrapStyles.right, carouselControl, href := s"#$componentId", role := "button", dataSlide := "next")(
         span(Icons.Glyphicon.chevronRight),
         span(`class` := "sr-only", "Next")
       )
@@ -94,21 +94,39 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
     res
   }
 
+  /**
+    * @return Property containing active slide index
+    */
   def activeIndex: ReadableProperty[Int] = _activeIndex.transform(identity)
 
+  /**
+    * Turn on slide transition.
+    */
   def cycle(): Unit = jQSelector().cycle()
 
+  /**
+    * Pause slide transition.
+    */
   def pause(): Unit = jQSelector().pause()
 
+  /**
+    * Change active slide.
+    *
+    * @param slideNumber new active slide index
+    */
   def goTo(slideNumber: Int): Unit = jQSelector().goTo(slideNumber)
 
+  /**
+    * Change active slide to the next one (index order).
+    */
   def nextSlide(): Unit = jQSelector().nextSlide()
 
+  /**
+    * Change active slide to the previous one (index order).
+    */
   def previousSlide(): Unit = jQSelector().previousSlide()
 
   private def jQSelector(): UdashCarouselJQuery = jQ(render).asCarousel()
-
-  def carouselId: String = s"$componentId-carousel"
 
   private def firstActive: Int = math.min(activeSlide, content.length - 1)
 
@@ -126,30 +144,74 @@ class UdashCarousel(val content: SeqProperty[UdashCarouselSlide], componentId: C
 
 object UdashCarousel {
 
+  /**
+    * Creates the UdashCarousel component.
+    * More: <a href="http://getbootstrap.com/javascript/#carousel">Bootstrap Docs</a>.
+    *
+    * @param content          SeqProperty of carousel slides.
+    * @param componentId      Carousel div ID.
+    * @param showIndicators   Show carousel slide indicators.
+    * @param activeSlide      Initially active carousel slide.
+    * @param animationOptions Carousel animation options.
+    * @param ec               ExecutionContext for carousel internal properties
+    * @return `UdashCarousel` component
+    */
   def apply(content: SeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
             showIndicators: Boolean = true, activeSlide: Int = 0, animationOptions: AnimationOptions = AnimationOptions())
            (implicit ec: ExecutionContext): UdashCarousel =
     new UdashCarousel(content, componentId, showIndicators, activeSlide, animationOptions)
 
+  /**
+    * Event hierarchy for [[UdashCarousel]]-emitted events.
+    */
   sealed trait CarouselEvent extends ListenableEvent[UdashCarousel] {
+    /**
+      * @return The index of the slide source transitioned to. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
+      */
     def targetIndex: Int
 
+    /**
+      * @return The animation direction
+      */
     def direction: Direction
   }
 
+  /**
+    * Event emitted by [[UdashCarousel]] on slide change transition start
+    *
+    * @param source      The [[UdashCarousel]] emitting the event.
+    * @param targetIndex The index of the slide source transitioned to.
+    * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
+    */
   case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
+  /**
+    * Event emitted by [[UdashCarousel]] on slide change transition finish.
+    *
+    * @param source      The [[UdashCarousel]] emitting the event.
+    * @param targetIndex The index of the slide source transitioned to.
+    * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
+    */
   case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
   object CarouselEvent {
 
+    /**
+      * Carousel animation direction.
+      */
     sealed trait Direction
 
-    case object Left extends Direction
+    object Direction {
 
-    case object Right extends Direction
+      case object Left extends Direction
 
-    case object Unknown extends Direction
+      case object Right extends Direction
+
+      /**
+        * Animation direction from carousel.js that neither left nor right.
+        */
+      case object Unknown extends Direction
+    }
 
   }
 
@@ -172,7 +234,16 @@ object UdashCarousel {
     var keyboard: Boolean = js.native
   }
 
-  case class AnimationOptions(interval: Duration = 5 seconds, pause: PauseOption = Hover, wrap: Boolean = true,
+  /**
+    * [[UdashCarousel]] animation options.
+    *
+    * @param interval The amount of time to delay between automatically cycling an item.
+    * @param pause    Indicated whether the carousel should pass on some specific event. See [[UdashCarousel.AnimationOptions.PauseOption]].
+    * @param wrap     Should the carousel cycle continuously or have hard stops.
+    * @param keyboard Should the carousel react to keyboard events.
+    * @param active   Should the animation be active.
+    */
+  case class AnimationOptions(interval: Duration = 5 seconds, pause: PauseOption = PauseOption.Hover, wrap: Boolean = true,
                               keyboard: Boolean = true, active: Boolean = true) {
     private[UdashCarousel] def native: CarouselOptionsJS = {
       val options = js.Object().asInstanceOf[CarouselOptionsJS]
@@ -208,19 +279,35 @@ object UdashCarousel {
 
     sealed abstract class PauseOption(val raw: String)
 
-    case object Hover extends PauseOption("hover")
+    object PauseOption {
 
-    case object False extends PauseOption("false")
+      /**
+        * Pauses the cycling of the carousel on mouseenter and resumes the cycling of the carousel on mouseleave.
+        */
+      case object Hover extends PauseOption("hover")
+
+      case object False extends PauseOption("false")
+
+    }
 
   }
+
 }
 
+/**
+  * [[UdashCarousel]] slide.
+  *
+  * @param imgSrc  Slide image source url.
+  * @param content Slide content.
+  */
 case class UdashCarouselSlide(imgSrc: Url)(content: Modifier*) extends UdashBootstrapComponent {
-  override lazy val render: Element = div(BootstrapStyles.item)(
+  override lazy val render: Element =
+    div(id := componentId, BootstrapStyles.item)(
     img(src := imgSrc.value),
     div(BootstrapStyles.Carousel.carouselCaption)(
       content
     )
   ).render
 
+  override val componentId: ComponentId = UdashBootstrap.newId()
 }

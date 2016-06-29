@@ -18,7 +18,7 @@ class UdashDropdownTest extends UdashFrontendTest {
       DropdownDivider,
       DropdownDisabled(DropdownLink("Link 3", Url("#")))
     ))
-    val dropdown = UdashDropdown(elements)(UdashDropdown.defaultItemFactory, "Test")
+    val dropdown = UdashDropdown(elements)(UdashDropdown.defaultItemFactory)("Test")
     val el = dropdown.render
     jQ("body").append(el)
 
@@ -41,6 +41,32 @@ class UdashDropdownTest extends UdashFrontendTest {
         hideCounter should be(i-1)
         hiddenCounter should be(i-1)
         el.childNodes(0).asInstanceOf[Button].click()
+        showCounter should be(i)
+        shownCounter should be(i)
+        hideCounter should be(i)
+        hiddenCounter should be(i)
+      }
+    }
+
+    "call listeners on toggle call" in {
+      var showCounter = 0
+      var shownCounter = 0
+      var hideCounter = 0
+      var hiddenCounter = 0
+      dropdown.listen {
+        case DropdownShowEvent(_) => showCounter += 1
+        case DropdownShownEvent(_) => shownCounter += 1
+        case DropdownHideEvent(_) => hideCounter += 1
+        case DropdownHiddenEvent(_) => hiddenCounter += 1
+      }
+
+      for (i <- 1 to 10) {
+        dropdown.toggle()
+        showCounter should be(i)
+        shownCounter should be(i)
+        hideCounter should be(i-1)
+        hiddenCounter should be(i-1)
+        dropdown.toggle()
         showCounter should be(i)
         shownCounter should be(i)
         hideCounter should be(i)

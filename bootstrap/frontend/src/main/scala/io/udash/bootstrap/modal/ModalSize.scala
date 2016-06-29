@@ -1,17 +1,14 @@
-package io.udash.bootstrap.modal
+package io.udash.bootstrap
+package modal
 
-import io.udash.bootstrap.{BootstrapStyles, ClassModifier}
-import org.scalajs.dom.Element
-
-sealed abstract class ModalSize(sizeStyle: BootstrapStyles.BootstrapClass) extends ClassModifier(sizeStyle)
+sealed abstract class ModalSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq:_*) {
+  def this(sizeStyle: BootstrapStyles.BootstrapClass) = this(Some(sizeStyle))
+}
 
 object ModalSize {
+  import BootstrapStyles.Modal._
 
-  case object Default extends ModalSize(BootstrapStyles.BootstrapClass("")) {
-    override def applyTo(t: Element): Unit = {}
-  }
-
-  case object Large extends ModalSize(BootstrapStyles.Modal.modalLarge)
-
-  case object Small extends ModalSize(BootstrapStyles.Modal.modalSmall)
+  case object Default extends ModalSize(None)
+  case object Large extends ModalSize(modalLarge)
+  case object Small extends ModalSize(modalSmall)
 }

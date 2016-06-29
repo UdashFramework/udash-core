@@ -3,7 +3,7 @@ package collapse
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.panel.{PanelStyle, PanelStyle$, UdashPanel}
+import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
 import io.udash.properties.SeqProperty
 import org.scalajs.dom
 import org.scalajs.dom._
@@ -19,26 +19,27 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
 
   import scalatags.JsDom.all._
 
-  val accordionId: ComponentId = UdashBootstrap.newId()
+  override val componentId: ComponentId = UdashBootstrap.newId()
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
+
+  /** Returns [[io.udash.bootstrap.collapse.UdashCollapse]] component created for selected item. */
   def collapseOf(panel: ElemType): Option[UdashCollapse] =
     collapses.get(panel)
 
-  lazy val render: Element = {
-
-    div(BootstrapStyles.Panel.panelGroup, id := accordionId.id, role := "tablist", aria.multiselectable := true)(
+  override lazy val render: Element =
+    div(BootstrapStyles.Panel.panelGroup, id := componentId, role := "tablist", aria.multiselectable := true)(
       repeat(panels)(item => {
         val headingId = UdashBootstrap.newId()
         val collapse = UdashCollapse()(
-          BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId.id,
+          BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId,
           body(item)
         )
-        val collapseId = collapse.collapseId
+        val collapseId = collapse.componentId
         collapses(item) = collapse
         val panel = UdashPanel(panelStyleSelector(item.get))(
-          div(BootstrapStyles.Panel.panelHeading, role := "tab", id := headingId.id)(
+          div(BootstrapStyles.Panel.panelHeading, role := "tab", id := headingId)(
             h4(BootstrapStyles.Panel.panelTitle)(
-              a(role := "button", dataToggle := "collapse", dataParent := s"#$accordionId", href := s"#$collapseId")(
+              a(role := "button", dataToggle := "collapse", dataParent := s"#$componentId", href := s"#$collapseId")(
                 heading(item)
               )
             )
@@ -48,12 +49,23 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
         panel.render
       })
     ).render
-  }
 }
 
 object UdashAccordion {
-
-  def apply[ItemType, ElemType <: Property[ItemType]](panels: SeqProperty[ItemType, ElemType])
+  /**
+    * Creates dynamic accordion component. `items` sequence changes will be synchronised with rendered button group.
+    * More: <a href="http://getbootstrap.com/javascript/#collapse-example-accordion">Bootstrap Docs</a>.
+    *
+    * @param panels            Data items which will be represented as panels in accordion.
+    * @param heading           Creates panel header.
+    * @param body              Creates panel body.
+    * @param panelTypeSelector Panel style.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashAccordion` component, call render to create DOM element.
+    */
+  def apply[ItemType, ElemType <: Property[ItemType]]
+           (panels: SeqProperty[ItemType, ElemType])
            (heading: (ElemType) => Element, body: (ElemType) => Element,
             panelTypeSelector: ItemType => PanelStyle = (_: ItemType) => PanelStyle.Default): UdashAccordion[ItemType, ElemType] =
     new UdashAccordion(panels)(panelTypeSelector, heading, body)

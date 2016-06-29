@@ -20,10 +20,12 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
     aria.valuemin := minValue, aria.valuemax := maxValue, minWidth := s"${minWidthEm}em"
   )
 
+  override val componentId = UdashBootstrap.newId()
   lazy val stringifiedValue: ReadableProperty[String] = progress.transform(valueStringifier)
 
-  override lazy val render: Element = div(BootstrapStyles.ProgressBar.progress)(
-    div(modifiers)(
+  override lazy val render: Element =
+    div(BootstrapStyles.ProgressBar.progress)(
+      div(id := componentId, modifiers)(
       produce(showPercentage)(shouldShow =>
         (
           if (shouldShow) div(bind(stringifiedValue))
@@ -43,22 +45,50 @@ class AnimatedUdashProgressBar private[progressbar](progress: Property[Int], sho
 }
 
 object UdashProgressBar {
-
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   type ValueStringifier = Int => String
   val ToStringValueStringifier: ValueStringifier = _.toString
 
-  def percentValueStringifier(min: Int, max: Int): ValueStringifier = value => ((value - min) * 100 / (max - min)) + "%"
+  /** Default method of converting progress to string. */
+  def percentValueStringifier(min: Int, max: Int): ValueStringifier =
+    value => ((value - min) * 100 / (max - min)) + "%"
 
+  /**
+    * Creates progress bar component.
+    * More: <a href="http://getbootstrap.com/components/#progress">Bootstrap Docs</a>.
+    *
+    * @param progress         Property containing Integer in range `minValue` to `maxValue`.
+    * @param showPercentage   If true, display progress string.
+    * @param barStyle         Component style.
+    * @param minValue         Minimum progress value.
+    * @param maxValue         Maximum progress value.
+    * @param minWidth         Minimal width of the progress indicator.
+    * @param valueStringifier Converts progress to string displayed inside component.
+    * @return `UdashProgressBar` component, call render to create DOM element.
+    */
   def apply(progress: Property[Int] = Property(0), showPercentage: Property[Boolean] = Property(true),
-            barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2
-           )(valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): UdashProgressBar =
+            barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2)
+           (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): UdashProgressBar =
     new UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidth, valueStringifier)
 
-  def animated(progress: Property[Int] = Property(0), showPercentage: Property[Boolean] = Property(true), animate: Property[Boolean],
-               barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2
-              )(valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): AnimatedUdashProgressBar =
+  /**
+    * Creates animated bar component.
+    * More: <a href="http://getbootstrap.com/components/#progress">Bootstrap Docs</a>.
+    *
+    * @param progress         Property containing Integer in range `minValue` to `maxValue`.
+    * @param showPercentage   If true, display progress string.
+    * @param animate          If true, turns on progress bar animation
+    * @param barStyle         Component style.
+    * @param minValue         Minimum progress value.
+    * @param maxValue         Maximum progress value.
+    * @param minWidth         Minimal width of the progress indicator.
+    * @param valueStringifier Converts progress to string displayed inside component.
+    * @return `UdashProgressBar` component, call render to create DOM element.
+    */
+  def animated(progress: Property[Int] = Property(0), showPercentage: Property[Boolean] = Property(true), animate: Property[Boolean] = Property(true),
+               barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2)
+              (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): AnimatedUdashProgressBar =
     new AnimatedUdashProgressBar(progress, showPercentage, animate, barStyle, minValue, maxValue, minWidth, valueStringifier)
 
 }

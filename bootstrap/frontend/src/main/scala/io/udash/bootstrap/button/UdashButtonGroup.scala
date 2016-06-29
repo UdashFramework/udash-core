@@ -12,16 +12,17 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
                       (val items: io.udash.properties.SeqProperty[ItemType, ElemType],
                        size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean)
                       (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
-
   import io.udash.bootstrap.BootstrapTags._
+
+  override val componentId = UdashBootstrap.newId()
 
   private lazy val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
     BootstrapStyles.Button.btnGroupVertical.styleIf(vertical) ::
     BootstrapStyles.Button.btnGroupJustified.styleIf(justified) ::
     size :: Nil
 
-  lazy val render: dom.Element = {
-    div(role := "group", classes, if (toggle) dataToggle := "buttons" else ())(
+  override lazy val render: dom.Element = {
+    div(id := componentId, role := "group", classes, if (toggle) dataToggle := "buttons" else ())(
       repeat(items)(
         // "To use justified button groups with <button> elements, you must wrap each button in a button group.
         // Most browsers don't properly apply our CSS for justification to <button> elements,
@@ -34,34 +35,82 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
 }
 
 object UdashButtonGroup {
+  /** Default checkbox element model. */
   trait CheckboxModel {
     def text: String
     def checked: Boolean
   }
-  case class DefaultCheckboxModel(override val text: String, override val checked: Boolean) extends CheckboxModel
+  /** Default implementation of [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. */
+  case class DefaultCheckboxModel(text: String, checked: Boolean) extends CheckboxModel
+
+  /** Button factory for [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. It creates group of toggle buttons. */
   val defaultCheckboxFactory = (el: CastableProperty[CheckboxModel]) => {
     val model = el.asModel
     UdashButton.toggle(active = model.subProp(_.checked))(model.subProp(_.text).get).render
   }
 
+  /**
+    * Creates a static button group.
+    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    *
+    * @param size      button group size
+    * @param vertical  If true, buttons will be rendered vertically
+    * @param justified If true, buttons will be justified
+    * @param buttons   Rendered buttons belonging to the group
+    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    */
   def apply(size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false)
-           (buttons: dom.Element*)(implicit ec: ExecutionContext): UdashButtonGroup[Int, Property[Int]] = {
-    val idxs = SeqProperty[Int](0 until buttons.size)
-    reactive[Int, Property[Int]](idxs, size, vertical, justified)(idx => buttons(idx.get))
-  }
+           (buttons: dom.Element*)(implicit ec: ExecutionContext): UdashButtonGroup[dom.Element, Property[dom.Element]] =
+    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](buttons), size, vertical, justified)(_.get)
 
+
+  /**
+    * Creates dynamic button group. `items` sequence changes will be synchronized with rendered button group.
+    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    *
+    * @param items       Data items which will be represented as buttons in this group.
+    * @param size        button group size
+    * @param vertical    If true, buttons will be rendered vertically
+    * @param justified   If true, buttons will be justified
+    * @param itemFactory Creates a button based on an item from the `items` sequence.
+    * @tparam ItemType Single element type in the `items` sequence.
+    * @tparam ElemType Type of the property containing every element in the `items` sequence.
+    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    */
   def reactive[ItemType, ElemType <: Property[ItemType]]
-           (items: io.udash.properties.SeqProperty[ItemType, ElemType],
-            size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false)
-           (itemFactory: (ElemType) => dom.Element): UdashButtonGroup[ItemType, ElemType] =
+              (items: io.udash.properties.SeqProperty[ItemType, ElemType],
+               size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false)
+              (itemFactory: (ElemType) => dom.Element): UdashButtonGroup[ItemType, ElemType] =
     new UdashButtonGroup[ItemType, ElemType](items, size, vertical, justified, false)(itemFactory)
 
-  def checkboxes[ItemType <: CheckboxModel : ModelPart, ElemType <: CastableProperty[ItemType]]
-                (items: io.udash.properties.SeqProperty[ItemType, ElemType],
-                 size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false)
-                (itemFactory: (ElemType) => dom.Element): UdashButtonGroup[ItemType, ElemType] =
-    new UdashButtonGroup[ItemType, ElemType](items, size, vertical, justified, false)(itemFactory)
+  /**
+    * Creates dynamic toggle buttons group. Add/remove element from `items` sequence
+    * and it will be synchronised with presented button group.
+    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    *
+    * @param items     Data items which will be represented as buttons in this group.
+    * @param size      button group size
+    * @param vertical  If true, buttons will be rendered vertically
+    * @param justified If true, buttons will be justified
+    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    */
+  def checkboxes(items: io.udash.properties.SeqProperty[CheckboxModel, CastableProperty[CheckboxModel]],
+                 size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false): UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]] =
+    new UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]](items, size, vertical, justified, false)(defaultCheckboxFactory)
 
+  /**
+    * Creates dynamic radio buttons group. Add/remove element from `items` sequence
+    * and it will be synchronised with presented button group.
+    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    *
+    * @param items     Data items which will be represented as buttons in this group.
+    * @param size      button group size
+    * @param vertical  If true, buttons will be rendered vertically
+    * @param justified If true, buttons will be justified
+    * @tparam ItemType Single element type in the `items` sequence.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    */
   def radio[ItemType <: CheckboxModel : ModelPart, ElemType <: CastableProperty[ItemType]]
            (items: io.udash.properties.SeqProperty[ItemType, ElemType],
             size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false)

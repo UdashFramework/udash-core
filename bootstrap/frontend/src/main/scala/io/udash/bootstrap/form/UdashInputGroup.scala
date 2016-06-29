@@ -5,23 +5,36 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashInputGroup(groupSize: InputGroupSize)(mds: Modifier*) extends UdashBootstrapComponent {
-  lazy val render =
-    div(BootstrapStyles.Form.inputGroup, groupSize)(mds).render
+class UdashInputGroup private(groupSize: InputGroupSize)(content: Modifier*) extends UdashBootstrapComponent {
+  override val componentId = UdashBootstrap.newId()
+  override lazy val render =
+    div(BootstrapStyles.Form.inputGroup, groupSize)(
+      content
+    ).render
 }
 
 object UdashInputGroup {
-  def apply(groupSize: InputGroupSize = InputGroupSize.Default)(mds: Modifier*): UdashInputGroup =
-    new UdashInputGroup(groupSize)(mds)
+  /**
+    * Creates input group. More: <a href="http://getbootstrap.com/components/#input-groups">Bootstrap Docs</a>.
+    *
+    * @param groupSize Size of the inputs in group.
+    * @param content   Group content.
+    * @return `UdashInputGroup` component, call render to create DOM element.
+    */
+  def apply(groupSize: InputGroupSize = InputGroupSize.Default)(content: Modifier*): UdashInputGroup =
+    new UdashInputGroup(groupSize)(content)
 
-  def addon(mds: Modifier*): Modifier =
-    span(BootstrapStyles.Form.inputGroupAddon)(mds)
+  /** Creates addon element for input group. */
+  def addon(content: Modifier*): Modifier =
+    span(BootstrapStyles.Form.inputGroupAddon)(content)
 
-  def buttons(mds: Modifier*): Modifier =
-    div(BootstrapStyles.Form.inputGroupBtn)(mds)
+  /** Wraps buttons for input group. */
+  def buttons(content: Modifier*): Modifier =
+    div(BootstrapStyles.Form.inputGroupBtn)(content)
 
+  /** Wraps input for input group. */
   def input(el: dom.Element): dom.Element = {
-    el.classList.add(BootstrapStyles.Form.formControl.cls)
+    BootstrapStyles.Form.formControl.addTo(el)
     el
   }
 }

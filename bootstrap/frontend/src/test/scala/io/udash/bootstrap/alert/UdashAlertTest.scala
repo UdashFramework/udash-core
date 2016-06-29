@@ -10,14 +10,14 @@ class UdashAlertTest extends UdashFrontendTest {
 
   "UdashAlert component" should {
     "maintain dismissed property on click" in {
-      val alert = UdashAlert.dismissible(AlertStyle.Info)()
+      val alert = DismissibleUdashAlert.info()
       alert.dismissed.get shouldBe false
       alert.render.children.apply(0).asInstanceOf[Button].click()
       alert.dismissed.get shouldBe true
     }
 
     "hide on dismiss" in {
-      val alert = UdashAlert.dismissible(AlertStyle.Info)("lol")
+      val alert = DismissibleUdashAlert.info("lol")
       alert.dismissed.get shouldBe false
       val division = div(alert.render).render
       jQ("body").append(division)

@@ -2,19 +2,24 @@ package io.udash.bootstrap
 package form
 
 import io.udash._
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-class UdashForm(formStyle: Option[BootstrapStyles.BootstrapClass])(mds: Modifier*) extends UdashBootstrapComponent {
+class UdashForm private(formStyle: Option[BootstrapStyles.BootstrapClass])(content: Modifier*) extends UdashBootstrapComponent {
+  override val componentId = UdashBootstrap.newId()
   override lazy val render =
-    form(if (formStyle.isDefined) formStyle.get else ())(mds).render
+    form(if (formStyle.isDefined) formStyle.get else ())(
+      content
+    ).render
 }
 
 object UdashForm {
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+  /** Binds provided `property` validation result to element Bootstrap validation style. */
   def validation(property: Property[_]): Modifier =
     bindAttribute(property)((_, el) => {
       import BootstrapStyles.Form._
@@ -29,24 +34,51 @@ object UdashForm {
       }
     })
 
-  def apply(mds: Modifier*): UdashForm =
-    new UdashForm(None)(mds)
+  /**
+    * Creates standard form with provided content. <br/>
+    * Example: `UdashForm(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms">Bootstrap Docs</a>.
+    *
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def apply(content: Modifier*): UdashForm =
+    new UdashForm(None)(content)
 
-  def inline(mds: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formInline))(mds)
+  /**
+    * Creates inline form with provided content. <br/>
+    * Example: `UdashForm.inline(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms-inline">Bootstrap Docs</a>.
+    *
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def inline(content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formInline))(content)
 
-  def horizontal(mds: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formHorizontal))(mds)
+  /**
+    * Creates horizontal form with provided content. <br/>
+    * Example: `UdashForm.horizontal(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms-horizontal">Bootstrap Docs</a>.
+    *
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def horizontal(content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formHorizontal))(content)
 
-  def group(mds: Modifier*): Modifier =
-    div(BootstrapStyles.Form.formGroup)(mds)
+  /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
+    * Example: `UdashForm(UdashForm.group(...)).render` */
+  def group(content: Modifier*): Modifier =
+    div(BootstrapStyles.Form.formGroup)(content)
 
+  /** Wrapper for inputs in form. */
   def input(el: dom.Element): dom.Element = {
     BootstrapStyles.Form.formControl.addTo(el)
     el
   }
 
-  private def inputGroup(inputId: String, validation: Option[Modifier])
+  private def inputGroup(inputId: ComponentId, validation: Option[Modifier])
                         (labelContent: Modifier*)(input: dom.Element): Modifier =
     group(
       label(`for` := inputId)(labelContent),
@@ -54,22 +86,27 @@ object UdashForm {
       validation
     )
 
-  def textInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
+  /** Creates text input group. */
+  def textInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
                (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextInput.debounced(property, id := inputId, input).render)
 
-  def passwordInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
+  /** Creates password input group. */
+  def passwordInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
                    (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(PasswordInput.debounced(property, id := inputId, input).render)
 
-  def numberInput(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
+  /** Creates number input group. */
+  def numberInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
                  (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, input).render)
 
-  def textArea(inputId: String = UdashBootstrap.newId().id, validation: Option[Modifier] = None)(labelContent: Modifier*)
+  /** Creates textarea input group. */
+  def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
               (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, input).render)
 
+  /** Creates checkbox. */
   def checkbox(validation: Option[Modifier] = None)(labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =
     div(BootstrapStyles.Form.checkbox)(
       label(
@@ -78,42 +115,54 @@ object UdashForm {
       validation
     )
 
-  def checkboxes(validation: Option[Modifier] = None)(selected: SeqProperty[String], options: Seq[String],
-                                                      checkboxStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.checkbox): Modifier =
+  private def defaultDecorator(checkboxStyle: BootstrapStyles.BootstrapClass) =
+    (input: dom.html.Input, id: String) => label(checkboxStyle)(input, id).render
+
+  /** Creates checkboxes for provided elements. `selected` property contains values from selected checkboxes. */
+  def checkboxes(checkboxStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.checkbox)
+                (selected: SeqProperty[String], options: Seq[String],
+                 decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(
       selected, options,
       items => div(BootstrapStyles.Form.formGroup)(
-        items.map(item => {
-          val (input, desc) = item
-          label(checkboxStyle)(input, desc)
-        }):_*
+        items.map {
+          case (input, id) => decorator(input, id)
+        }
       )
     )
 
-  def radio(selected: Property[String], options: Seq[String],
-            radioStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.radio): Modifier =
+  /** Creates checkboxes for provided `options`. `selected` property has the value of selected radio button. */
+  def radio(radioStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.radio)
+           (selected: Property[String], options: Seq[String],
+            decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(
       selected, options,
       items => div(BootstrapStyles.Form.formGroup)(
-        items.map(item => {
-          val (input, desc) = item
-          label(radioStyle)(input, desc)
-        }):_*
+        items.map {
+          case (input, id) => decorator(input, id)
+        }
       )
     )
 
+  /** Creates selection input for provided `options`. `selected` property has the value of selected item. */
   def select(selected: Property[String], options: Seq[String]): Modifier =
     Select(selected, options, BootstrapStyles.Form.formControl)
 
+  /** Creates multiple selection input for provided `options`. `selected` property contains values of selected items. */
   def multiselect(selected: SeqProperty[String], options: Seq[String]): Modifier =
     Select(selected, options, BootstrapStyles.Form.formControl)
 
-  def staticControl(mds: Modifier*): Modifier =
-    p(BootstrapStyles.Form.formControlStatic)(mds)
+  /** Creates static control element. */
+  def staticControl(content: Modifier*): Modifier =
+    p(BootstrapStyles.Form.formControlStatic)(content)
 
-  def disabled(disabled: Property[Boolean] = Property(true))(mds: Modifier*): Modifier =
+  /** Wrapper for disabled elements.
+    *
+    * @param disabled Property indicating if elements are disabled. You can change it anytime.
+    */
+  def disabled(disabled: Property[Boolean] = Property(true))(content: Modifier*): Modifier =
     fieldset(bindAttribute(disabled)((v, el) => {
       if (v) el.setAttribute("disabled", "disabled")
       else el.removeAttribute("disabled")
-    }))(mds)
+    }))(content)
 }

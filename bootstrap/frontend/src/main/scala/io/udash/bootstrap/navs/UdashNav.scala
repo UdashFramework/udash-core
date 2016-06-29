@@ -16,8 +16,10 @@ class UdashNav[ItemType, ElemType <: Property[ItemType]] private
                isDropdown: (ElemType) => ReadableProperty[Boolean])
   extends UdashBootstrapComponent {
 
+  override val componentId = UdashBootstrap.newId()
   override lazy val render: dom.Element =
     ul(
+      id := componentId,
       BootstrapStyles.Navigation.nav, navStyle,
       BootstrapStyles.Navigation.navJustified.styleIf(justified),
       BootstrapStyles.Navigation.navStacked.styleIf(stacked)
@@ -35,6 +37,20 @@ class UdashNav[ItemType, ElemType <: Property[ItemType]] private
 object UdashNav {
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+  /**
+    * Creates default navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    *
+    * @param stacked     If true, navigation elements will be rendered vertically.
+    * @param justified   If true, navigation elements will be justified.
+    * @param panels      Sequence of elements to be converted into navigation.
+    * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    * @param isActive    Creates property indicating if an element is active.
+    * @param isDisabled  Creates property indicating if an element is disabled.
+    * @param isDropdown  Creates property indicating if an element has a dropdown menu.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashNav` component, call render to create DOM element.
+    */
   def apply[ItemType, ElemType <: Property[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false)
            (panels: SeqProperty[ItemType, ElemType])
@@ -44,6 +60,20 @@ object UdashNav {
             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
     pills(stacked, justified)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 
+  /**
+    * Creates pills navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    *
+    * @param stacked     If true, navigation elements will be rendered vertically.
+    * @param justified   If true, navigation elements will be justified.
+    * @param panels      Sequence of elements to be converted into navigation.
+    * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    * @param isActive    Creates property indicating if an element is active.
+    * @param isDisabled  Creates property indicating if an element is disabled.
+    * @param isDropdown  Creates property indicating if an element has a dropdown menu.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashNav` component, call render to create DOM element.
+    */
   def pills[ItemType, ElemType <: Property[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false)
            (panels: SeqProperty[ItemType, ElemType])
@@ -53,6 +83,20 @@ object UdashNav {
             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
     new UdashNav(BootstrapStyles.Navigation.navPills, stacked, justified)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 
+  /**
+    * Creates tabs navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    *
+    * @param stacked     If true, navigation elements will be rendered vertically.
+    * @param justified   If true, navigation elements will be justified.
+    * @param panels      Sequence of elements to be converted into navigation.
+    * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    * @param isActive    Creates property indicating if an element is active.
+    * @param isDisabled  Creates property indicating if an element is disabled.
+    * @param isDropdown  Creates property indicating if an element has a dropdown menu.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashNav` component, call render to create DOM element.
+    */
   def tabs[ItemType, ElemType <: Property[ItemType]]
           (stacked: Boolean = false, justified: Boolean = false)
           (panels: SeqProperty[ItemType, ElemType])
@@ -62,6 +106,19 @@ object UdashNav {
            isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
     new UdashNav(BootstrapStyles.Navigation.navTabs, stacked, justified)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 
+  /**
+    * Creates navbar navigation. It's prepared to put into navbar element. <br/>
+    * More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    *
+    * @param panels      Sequence of elements to be converted into navigation.
+    * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    * @param isActive    Creates property indicating if element is active.
+    * @param isDisabled  Creates property indicating if element is disabled.
+    * @param isDropdown  Creates property indicating if element has a dropdown menu.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashNav` component, call render to create DOM element.
+    */
   def navbar[ItemType, ElemType <: Property[ItemType]]
             (panels: SeqProperty[ItemType, ElemType])
             (elemFactory: (ElemType) => dom.Node,

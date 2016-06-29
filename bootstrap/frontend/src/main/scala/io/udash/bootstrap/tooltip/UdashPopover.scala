@@ -8,15 +8,19 @@ import scala.language.postfixOps
 import scala.scalajs.js
 
 class UdashPopover(selector: UdashPopover.UdashPopoverJQuery) extends Listenable[UdashPopover, UdashPopover.TooltipEvent] {
+  /** Shows popover. */
   def show(): Unit =
     selector.popover("show")
 
+  /** Hides popover. */
   def hide(): Unit =
     selector.popover("hide")
 
+  /** Toggles popover visibility. */
   def toggle(): Unit =
     selector.popover("toggle")
 
+  /** Destroys popover. */
   def destroy(): Unit =
     selector.popover("destroy")
 
@@ -29,22 +33,29 @@ class UdashPopover(selector: UdashPopover.UdashPopoverJQuery) extends Listenable
 }
 
 object UdashPopover extends TooltipUtils[UdashPopover] {
-  protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): UdashPopover = {
+  override protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): UdashPopover = {
     val tp: UdashPopoverJQuery = jQ(el).asPopover()
     tp.popover(options)
     new UdashPopover(tp)
   }
 
-  protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(RightPlacement)
-  protected val defaultTemplate: String = "<div class=\"popover\" role=\"tooltip\"><div class=\"arrow\"></div><h3 class=\"popover-title\"></h3><div class=\"popover-content\"></div></div>"
-  protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)
+  override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(RightPlacement)
+  override protected val defaultTemplate: String = {
+    import scalatags.Text.all._
+    div(cls := BootstrapStyles.Popover.popover.cls, role := "tooltip")(
+      div(cls := BootstrapStyles.arrow.cls),
+      h3(cls := BootstrapStyles.Popover.popoverTitle.cls),
+      div(cls := BootstrapStyles.Popover.popoverContent.cls)
+    ).render
+  }
+  override protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)
 
   @js.native
-  trait UdashPopoverJQuery extends JQuery {
+  private trait UdashPopoverJQuery extends JQuery {
     def popover(arg: js.Any): UdashPopoverJQuery = js.native
   }
 
-  implicit class JQueryPopoverExt(jQ: JQuery) {
+  private implicit class JQueryPopoverExt(jQ: JQuery) {
     def asPopover(): UdashPopoverJQuery =
       jQ.asInstanceOf[UdashPopoverJQuery]
   }

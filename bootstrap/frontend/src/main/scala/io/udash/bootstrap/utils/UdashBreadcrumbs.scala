@@ -1,24 +1,25 @@
 package io.udash.bootstrap
 package utils
 
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.{properties, _}
 import org.scalajs.dom
 import org.scalajs.dom.Element
+import org.scalajs.dom.html.Anchor
 
 import scala.concurrent.ExecutionContext
 
 class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
-                      (val pages: properties.SeqProperty[ItemType, ElemType], val selectedPage: ReadableProperty[Int])
-                      (itemFactory: (ElemType) => dom.Element)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
-  lazy val render: Element = {
-    import scalatags.JsDom.all._
+                      (val pages: properties.SeqProperty[ItemType, ElemType])
+                      (itemFactory: (ElemType) => dom.Element,
+                       isSelected: (ItemType) => Boolean)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
+  override val componentId: ComponentId = UdashBootstrap.newId()
 
-    ol(BootstrapStyles.Navigation.breadcrumb)(
+  override lazy val render: Element = {
+    import scalatags.JsDom.all._
+    ol(id := componentId, BootstrapStyles.Navigation.breadcrumb)(
       repeat(pages)(page => {
-        def currentIdx: Int = pages.elemProperties.indexOf(page)
-        val pageIdx = Property[Int](currentIdx)
-        pages.listen(_ => pageIdx.set(currentIdx))
-        li(BootstrapStyles.active.styleIf(selectedPage.combine(pageIdx)(_ == _)))(
+        li(BootstrapStyles.active.styleIf(page.transform(isSelected)))(
           itemFactory(page)
         ).render
       })
@@ -29,6 +30,7 @@ class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
 object UdashBreadcrumbs {
   import scalatags.JsDom.all._
 
+  /** Default breadcrumb model. */
   trait Breadcrumb {
     def name: String
     def url: Url
@@ -37,11 +39,25 @@ object UdashBreadcrumbs {
 
   private def bindHref(page: CastableProperty[Breadcrumb]) =
     bindAttribute(page.asModel.subProp(_.url))((url, el) => el.setAttribute("href", url.value))
-  val defaultPageFactory = (page: CastableProperty[Breadcrumb]) =>
-    a(bindHref(page))(bind(page.asModel.subProp(_.name))).render
 
+  /** Default breadcrumb model factory. */
+  val defaultPageFactory: CastableProperty[Breadcrumb] => Anchor =
+    page => a(bindHref(page))(bind(page.asModel.subProp(_.name))).render
+
+  /**
+    * Creates breadcrumbs component, synchronised with provided SeqProperty.
+    * More: <a href="http://getbootstrap.com/javascript/#breadcrumbs">Bootstrap Docs</a>.
+    *
+    * @param pages       SeqProperty containing breadcrumbs data.
+    * @param itemFactory Creates DOM representation for provided item.
+    * @param isSelected  Decides whether an element is selected.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashBreadcrumbs` component, call render to create DOM element.
+    */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (pages: properties.SeqProperty[ItemType, ElemType], selectedPage: ReadableProperty[Int])
-           (itemFactory: (ElemType) => dom.Element)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
-    new UdashBreadcrumbs(pages, selectedPage)(itemFactory)
+           (pages: properties.SeqProperty[ItemType, ElemType])
+           (itemFactory: (ElemType) => dom.Element,
+            isSelected: (ItemType) => Boolean = (_: ItemType) => false)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
+    new UdashBreadcrumbs(pages)(itemFactory, isSelected)
 }

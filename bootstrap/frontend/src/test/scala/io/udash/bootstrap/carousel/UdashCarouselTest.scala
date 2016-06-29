@@ -95,8 +95,8 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
         case ev: SlideChangedEvent => changedEvent = ev
       }
       carousel.goTo(5)
-      eventually(changeEvent shouldBe SlideChangeEvent(carousel, 5, CarouselEvent.Left))
-      eventually(changedEvent shouldBe SlideChangedEvent(carousel, 5, CarouselEvent.Left))
+      eventually(changeEvent shouldBe SlideChangeEvent(carousel, 5, CarouselEvent.Direction.Left))
+      eventually(changedEvent shouldBe SlideChangedEvent(carousel, 5, CarouselEvent.Direction.Left))
       eventually(carousel.activeIndex.get shouldBe 5)
     }
 
