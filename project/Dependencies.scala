@@ -3,23 +3,23 @@ import sbt._
 
 object Dependencies extends Build {
   val versionOfScala = "2.11.8"
-  val silencerVersion = "0.3"
+  val silencerVersion = "0.4"
 
-  val jqueryWrapperVersion = "1.0.0-rc.2"
+  val jqueryWrapperVersion = "1.0.0"
 
-  val scalaJsDomVersion = "0.9.0"
-  val scalaTagsVersion = "0.5.4"
+  val scalaJsDomVersion = "0.9.1"
+  val scalaTagsVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.16.0"
+  val avsCommonsVersion = "1.16.1"
 
   val atmoshereJSVersion = "2.3.0"
-  val atmoshereVersion = "2.4.3"
+  val atmoshereVersion = "2.4.4"
 
-  val upickleVersion = "0.3.9"
+  val upickleVersion = "0.4.1"
   val jawnParserVersion = "0.8.4"
 
-  val scalaLoggingVersion = "3.1.0"
+  val scalaLoggingVersion = "3.4.0"
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
