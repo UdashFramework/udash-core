@@ -30,9 +30,9 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
 }
 
 /** Default implementation of [[io.udash.rpc.ClientRPC]] for server to client communication. */
-class DefaultClientRPC[ClientRPCType](target: ClientRPCTarget)
-                                     (implicit ec: ExecutionContext,
-                                      protected val remoteRpcAsReal: DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType]) extends ClientRPC[ClientRPCType](target) {
+class DefaultClientRPC[ClientRPCType : DefaultClientUdashRPCFramework.AsRealRPC]
+                      (target: ClientRPCTarget)(implicit ec: ExecutionContext) extends ClientRPC[ClientRPCType](target) {
   override val localFramework = DefaultServerUdashRPCFramework
   override val remoteFramework = DefaultClientUdashRPCFramework
+  protected val remoteRpcAsReal: DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType] = implicitly[DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType]]
 }

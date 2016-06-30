@@ -84,11 +84,12 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
     (connectorMock, serverRPC)
   }
 
-  class UPickleServerRPC[ServerRPCType](override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest])
-                                       (implicit override val remoteRpcAsReal: ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType])
+  class UPickleServerRPC[ServerRPCType : ServerUPickleUdashRPCFramework.AsRealRPC]
+                        (override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest])
     extends ServerRPC[ServerRPCType] {
     override val remoteFramework = ServerUPickleUdashRPCFramework
     override val localFramework = ClientUPickleUdashRPCFramework
+    override val remoteRpcAsReal: ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType] = implicitly[ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType]]
   }
 
   def createCustomServerRpc(): (MockServerConnector[ServerUPickleUdashRPCFramework.RPCRequest], UPickleServerRPC[TestRPC]) = {
@@ -98,11 +99,12 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
     (connectorMock, serverRPC)
   }
 
-  class MixedServerRPC[ServerRPCType](override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
-                                       (implicit override val remoteRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType])
+  class MixedServerRPC[ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
+                      (override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
     extends ServerRPC[ServerRPCType] {
     override val remoteFramework = DefaultServerUdashRPCFramework
     override val localFramework = ClientUPickleUdashRPCFramework
+    override val remoteRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType] = implicitly[DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType]]
   }
 
   def createMixedServerRpc(): (MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest], MixedServerRPC[TestRPC]) = {

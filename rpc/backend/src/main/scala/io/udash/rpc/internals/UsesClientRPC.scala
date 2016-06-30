@@ -13,7 +13,7 @@ private[rpc] abstract class UsesClientRPC[ClientRPCType] extends UsesRemoteRPC[C
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
     */
-  val remoteRpc = remoteRpcAsReal.asReal(new RawRemoteRPC(Nil))
+  lazy val remoteRpc = remoteRpcAsReal.asReal(new RawRemoteRPC(Nil))
 
   /**
     * This allows for generation of proxy which translates RPC calls into raw calls that

@@ -1,15 +1,13 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework}
+import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
 
 import scala.language.postfixOps
 
 /** Base for all RPC frameworks in Udash. */
-trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework {
+trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
   type RawRPC <: GetterRawRPC with ProcedureRawRPC
-  type Writer[T] = GenCodec.Auto[T]
-  type Reader[T] = GenCodec.Auto[T]
 
   val RawValueCodec: GenCodec[RawValue]
 
@@ -20,22 +18,6 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework {
   def stringToRaw(string: String): RawValue
   /** Converts `RawValue` into `String`. It is used to write data to network. */
   def rawToString(raw: RawValue): String
-
-  /** Returns `Input` for data marshalling. */
-  def inputSerialization(value: RawValue): Input
-  /** Returns `Output` for data unmarshalling. */
-  def outputSerialization(valueConsumer: RawValue => Unit): Output
-
-  /** Converts value of type `T` into `RawValue`. */
-  def write[T: Writer](value: T): RawValue = {
-    var result: RawValue = null.asInstanceOf[RawValue]
-    GenCodec.autoWrite[T](outputSerialization(result = _), value)
-    result
-  }
-
-  /** Converts `RawValue` into value of type `T`. */
-  def read[T: Reader](raw: RawValue): T =
-    GenCodec.autoRead[T](inputSerialization(raw))
 
   sealed trait RPCRequest {
     def invocation: RawInvocation
