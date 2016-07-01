@@ -3,6 +3,7 @@ package io.udash.web.guide.views.bootstrapping
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
@@ -22,11 +23,11 @@ class BootstrappingFrontendView extends View {
   override def getTemplate: dom.Element = div(
     h2("Frontend application structure"),
     p("The frontend application consists of:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Routing system - bidirectional mapping between URLs and states"),
       li(
         span("ViewPresenters - a logical pairing between a view and a presenter"),
-        ul(GuideStyles.innerList)(
+        ul(GuideStyles.get.innerList)(
           li("Mapping from states to ViewPresenters"),
           li("Views & Presenters")
       )),
@@ -52,7 +53,7 @@ class BootstrappingFrontendView extends View {
         |
         |case object UnsubscribeState extends RoutingState(NewsletterState)""".stripMargin
     )(GuideStyles),
-    BootstrappingImage("states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
+    ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.get.imgMedium, GlobalStyles.get.noMargin),
     h3("Routing system"),
     p(
       "The routing system reacts on URL changes and updates the application state. It requires only mappings from the URL to the state " +
@@ -159,7 +160,7 @@ class BootstrappingFrontendView extends View {
     )(GuideStyles),
     p(
       "The above example shows simple View, Presenter and ViewPresenter implementations. ",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(
           i("SubscribeModel"), " is a model trait witch is used to create shared ", i("ModelProperty"), " ",
           a(href := FrontendPropertiesState.url)("Properties in Udash"), " are described in other part of this guide. "

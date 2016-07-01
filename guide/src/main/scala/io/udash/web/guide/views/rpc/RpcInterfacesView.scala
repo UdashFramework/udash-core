@@ -24,12 +24,12 @@ class RpcInterfacesView extends View {
       "Interfaces are the most important part of the Udash RPC system. Thanks to the cross compilation, they make client-server " +
       "communication easy to develop and maintain. You can find two types of RPC interfaces in Udash: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("RPC"), " - the RPC interface exposed by the server-side"),
       li(i("Client RPC"), " - the RPC interface exposed by the client-side")
     ),
     p("Methods exposed by the RPC interface can be divided into three groups:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)"),
       li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient"),
       li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network")

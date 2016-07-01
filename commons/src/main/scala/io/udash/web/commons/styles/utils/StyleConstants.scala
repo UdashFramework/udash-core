@@ -23,13 +23,13 @@ object StyleConstants extends StyleSheet.Inline{
 
     val HeaderHeightMobile = 80
 
+    val GuideHeaderHeightMobile = HeaderHeight * .7
+
     val HeaderHeightPin = 80
 
     val FooterHeight = 120
 
     val MenuWidth = 320
-
-    val MobileMenuButton = 50
   }
 
   /**

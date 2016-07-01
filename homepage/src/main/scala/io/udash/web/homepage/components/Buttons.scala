@@ -10,12 +10,12 @@ import scalacss.ScalatagsCss._
   */
 object Buttons {
   def whiteBorderButton(link: String, label: String, xs: Modifier*) =
-    a(href := link, target := "_blank", ButtonsStyle.btnDefault, xs: Modifier)(
-      div(ButtonsStyle.btnDefaultInner)(label)
+    a(href := link, target := "_blank", ButtonsStyle.get.btnDefault, xs: Modifier)(
+      div(ButtonsStyle.get.btnDefaultInner)(label)
     )
 
   def blackBorderButton(link: String, label: String, xs: Modifier*) =
-    a(href := link, target := "_blank", ButtonsStyle.btnDefault, ButtonsStyle.btnDefaultBlack, xs: Modifier)(
-      div(ButtonsStyle.btnDefaultInner, ButtonsStyle.btnDefaultInnerBlack)(label)
+    a(href := link, target := "_blank", ButtonsStyle.get.btnDefault, ButtonsStyle.get.btnDefaultBlack, xs: Modifier)(
+      div(ButtonsStyle.get.btnDefaultInner, ButtonsStyle.get.btnDefaultInnerBlack)(label)
     )
 }

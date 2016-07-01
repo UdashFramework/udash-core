@@ -20,7 +20,7 @@ class BootstrappingBackendView extends View {
   override def getTemplate: dom.Element = div(
     h2("Bootstrapping application backend"),
     p("This chapter covers:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Implementation of the server-side RPC endpoint"),
       li("Configuration of the ", a(href := JettyHomepage)("Jetty"), " webserver to handle RPC and static files requests"),
       li("Implementation of a simple system launcher")

@@ -19,7 +19,7 @@ object DynamicRemoteTranslationsDemo {
     import io.udash.web.guide.Context._
     implicit val translationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = LangProperty(Lang("en"))
-    div(id := "dynamic-rpc-translations-demo", GuideStyles.frame)(
+    div(id := "dynamic-rpc-translations-demo", GuideStyles.get.frame)(
       button(BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
       button(BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
       ul(

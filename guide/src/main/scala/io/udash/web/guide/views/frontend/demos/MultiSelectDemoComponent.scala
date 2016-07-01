@@ -28,7 +28,7 @@ class MultiSelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "multi-select-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "multi-select-demo", GuideStyles.get.frame)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -42,14 +42,14 @@ class MultiSelectDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.get.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)("Fruits:"),
     div(BootstrapStyles.Form.inputGroupAddon)(
       Select(
         favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
         BootstrapStyles.Form.formControl
       )
     ),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
   )
 }

@@ -28,7 +28,7 @@ class SelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "select-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "select-demo", GuideStyles.get.frame)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -42,8 +42,8 @@ class SelectDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.get.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)("Fruits:"),
     div(BootstrapStyles.Form.inputGroupAddon)(
       Select(
         favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),

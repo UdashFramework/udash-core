@@ -4,7 +4,8 @@ import io.udash.core.DomWindow
 import io.udash.web.commons.components.{HeaderButtons, HeaderNav}
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
+import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles, MobileMenuStyles}
 import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
@@ -15,39 +16,65 @@ import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
-  val PinAttribute = "data-pin"
+  override val buttonStyles: HeaderButtonsStyles = HeaderStyles
+  override val navStyles: HeaderNavStyles = HeaderStyles
 
-  val window = jQ(DomWindow)
+  private val window = jQ(DomWindow)
   window.on("scroll", onScroll)
 
-  private def onScroll(el: Element, ev: JQueryEvent): Unit = {
-    val pin = jQ(template).attr(Header.PinAttribute).getOrElse("false").toBoolean
-    val scrollTop = jQ(DomWindow).scrollTop()
-    val introHeight = jQ(s".${HomepageStyles.sectionIntro.htmlClass}").height()
+  private lazy val btnMobileMenu = a(href := "#", MobileMenuStyles.get.btnMobile, HeaderStyles.get.btnMobile)(
+    div(MobileMenuStyles.get.btnMobileLines)(
+      span(MobileMenuStyles.get.btnMobileLineTop),
+      span(MobileMenuStyles.get.btnMobileLineMiddle),
+      span(MobileMenuStyles.get.btnMobileLineBottom)
+    )
+  ).render
 
-    if (scrollTop >= introHeight && !pin) {
-      jQ(template).attr(Header.PinAttribute, "true")
-    } else if (scrollTop < introHeight && pin) {
-      jQ(template).attr(Header.PinAttribute, "false")
-    }
-  }
+  private lazy val navElement =  navigation(Seq(
+    NavItem(ExternalUrls.guide, "Documentation"),
+    NavItem(ExternalUrls.releases, "Changelog"),
+    NavItem(ExternalUrls.license, "License")
+  ))
 
-  private lazy val template = header(HeaderStyles.header)(
-    div(GlobalStyles.body, GlobalStyles.clearfix)(
-      div(HeaderStyles.headerLeft)(
-        a(HeaderStyles.headerLogo, href := IndexState(None).url)(),
-        navigation(Seq(
-          NavItem(ExternalUrls.guide, "Documentation"),
-          NavItem(ExternalUrls.releases, "Changelog"),
-          NavItem(ExternalUrls.license, "License")
-        ))
+  private lazy val template = header(HeaderStyles.get.header)(
+    div(GlobalStyles.get.body, GlobalStyles.get.clearfix)(
+      div(HeaderStyles.get.headerLeft)(
+        btnMobileMenu,
+        a(HeaderStyles.get.headerLogo, href := IndexState(None).url)(),
+        navElement
       ),
       buttons
     )
   ).render
 
+
+  private lazy val jqNav = jQ(navElement)
+  private lazy val jqMobileButton = jQ(btnMobileMenu)
+
+  jqMobileButton.on("click", (jqThis: Element, jqEvent: JQueryEvent) => {
+    jqEvent.preventDefault()
+    toggleBooleanAttribute(jqNav, Attributes.data(Attributes.Active))
+    toggleBooleanAttribute(jqMobileButton, Attributes.data(Attributes.Active))
+  })
+
+  private def onScroll(el: Element, ev: JQueryEvent): Unit = {
+    val pin = jQ(template).attr(Attributes.data(Attributes.Pinned)).getOrElse("false").toBoolean
+    val scrollTop = jQ(DomWindow).scrollTop()
+    val introHeight = jQ(s".${HomepageStyles.get.sectionIntro.htmlClass}").height()
+
+    if (scrollTop >= introHeight && !pin) {
+      jQ(template).attr(Attributes.data(Attributes.Pinned), "true")
+    } else if (scrollTop < introHeight && pin) {
+      jQ(template).attr(Attributes.data(Attributes.Pinned), "false")
+    }
+  }
+
   def getTemplate: Element = template
 
-  override val buttonStyles: HeaderButtonsStyles = HeaderStyles
-  override val navStyles: HeaderNavStyles = HeaderStyles
+  private def toggleBooleanAttribute(jqElement: JQuery, attribute: String): Unit = {
+    val activeOption = jqElement.attr(attribute)
+    val newValue = if (activeOption.isEmpty || !activeOption.get.toBoolean) true else false
+
+    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString)
+  }
 }

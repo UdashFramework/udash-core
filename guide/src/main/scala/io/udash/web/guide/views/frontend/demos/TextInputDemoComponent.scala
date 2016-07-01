@@ -17,7 +17,7 @@ class TextInputDemoComponent extends Component {
   val password: Property[String] = Property("")
   val age: Property[Int] = Property(1)
 
-  override def getTemplate: Element = div(id := "inputs-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "inputs-demo", GuideStyles.get.frame)(
     form(BootstrapStyles.containerFluid)(
       inputs, br, inputs
     )

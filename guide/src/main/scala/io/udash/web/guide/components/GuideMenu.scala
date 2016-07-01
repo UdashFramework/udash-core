@@ -3,6 +3,8 @@ package io.udash.web.guide.components
 import io.udash.web.guide.styles.partials.{GuideStyles, MenuStyles}
 import io.udash.web.guide.{Context, _}
 import io.udash.properties.Property
+import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.styles.components.MobileMenuStyles
 import io.udash.web.commons.views.{SVG, Size}
 import io.udash.wrappers.jquery._
 
@@ -24,39 +26,39 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
   import scalatags.JsDom.all._
 
   private val ClickEvent = "click"
-  private val ActiveItemSelector = s".${MenuStyles.subToggle.htmlClass}[${GuideMenu.DataActiveAttribute} = 'true']"
-  private val InactiveItemSelector = s".${MenuStyles.subToggle.htmlClass}[${GuideMenu.DataActiveAttribute} = 'false']"
+  private val ActiveItemSelector = s".${MenuStyles.get.subToggle.htmlClass}[${Attributes.data(Attributes.Active)} = 'true']"
+  private val InactiveItemSelector = s".${MenuStyles.get.subToggle.htmlClass}[${Attributes.data(Attributes.Active)} = 'false']"
 
   private def getMenuElementTag(entry: MenuEntry): TypedTag[Element] = {
     entry match {
       case MenuLink(name, state) =>
-        li(MenuStyles.item)(
-          a(href := state.url(Context.applicationInstance), MenuStyles.link, data("id") := entry.name)(
-            span(MenuStyles.linkText)(entry.name)
+        li(MenuStyles.get.item)(
+          a(href := state.url(Context.applicationInstance), MenuStyles.get.link, data("id") := entry.name)(
+            span(MenuStyles.get.linkText)(entry.name)
           )
         )
       case MenuContainer(name, children) =>
-        li(MenuStyles.subItem)(
-          a(href := "#", MenuStyles.subToggle, data("id") := entry.name)(
-            span(MenuStyles.linkText)(entry.name),
-            i(MenuStyles.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11)))
+        li(MenuStyles.get.subItem)(
+          a(href := "#", MenuStyles.get.subToggle, data("id") := entry.name)(
+            span(MenuStyles.get.linkText)(entry.name),
+            i(MenuStyles.get.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11)))
           ),
-          ul(MenuStyles.subList)(
+          ul(MenuStyles.get.subList)(
             children.map(subEntry => getMenuElementTag(subEntry))
           )
         )
     }
   }
 
-  private lazy val btnMenu = a(href := "#", MenuStyles.btnMobile)(
-    div(MenuStyles.btnMobileLines)(
-      span(MenuStyles.btnMobileLineTop),
-      span(MenuStyles.btnMobileLineMiddle),
-      span(MenuStyles.btnMobileLineBottom)
+  private lazy val btnMenu = a(href := "#", MobileMenuStyles.get.btnMobile, MenuStyles.get.btnMobile)(
+    div(MobileMenuStyles.get.btnMobileLines)(
+      span(MobileMenuStyles.get.btnMobileLineTop),
+      span(MobileMenuStyles.get.btnMobileLineMiddle),
+      span(MobileMenuStyles.get.btnMobileLineBottom)
     )
   ).render
 
-  private lazy val template = div(MenuStyles.guideMenu)(
+  private lazy val template = div(MenuStyles.get.guideMenu)(
     nav(
       ul(
         entries.map(entry => getMenuElementTag(entry))
@@ -65,8 +67,10 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
     btnMenu
   ).render
 
-  private lazy val menuSubs = jQ(template).find(s".${MenuStyles.subToggle.htmlClass}")
-  private lazy val menuItems = jQ(template).find(s".${MenuStyles.link.htmlClass}")
+  private lazy val menuSubs = jQ(template).find(s".${MenuStyles.get.subToggle.htmlClass}")
+  private lazy val menuItems = jQ(template).find(s".${MenuStyles.get.link.htmlClass}")
+
+  private lazy val jqMobileButton = jQ(template).find(s".${MenuStyles.get.btnMobile.htmlClass}")
 
   def getTemplate: Element = {
     initListeners()
@@ -82,54 +86,53 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
     menuSubs.on(ClickEvent, onSubClick)
 
-    jQ(template).find(s".${MenuStyles.btnMobile.htmlClass}").on(ClickEvent, onMobileMenuClick)
+    jqMobileButton.on(ClickEvent, onMobileMenuClick)
   }
 
   private def onCurrentItemUpdate(update: String) = {
     val jqElement = menuItemByUrl(update)
-    menuItems.not(jqElement).attr(GuideMenu.DataActiveAttribute, "false")
-    jqElement.attr(GuideMenu.DataActiveAttribute, "true")
+    menuItems.not(jqElement).attr(Attributes.data(Attributes.Active), "false")
+    jqElement.attr(Attributes.data(Attributes.Active), "true")
 
-    val parentSub = jqElement.closest(s".${MenuStyles.subList.htmlClass}")
+    val parentSub = jqElement.closest(s".${MenuStyles.get.subList.htmlClass}")
     parentSub.stop().slideDown()
-    parentSub.parent().find(s".${MenuStyles.subToggle.htmlClass}").attr(GuideMenu.DataActiveAttribute, "true")
+    parentSub.parent().find(s".${MenuStyles.get.subToggle.htmlClass}").attr(Attributes.data(Attributes.Active), "true")
 
-    jQ(s".${GuideStyles.menuWrapper.htmlClass}").attr(GuideMenu.DataActiveAttribute, "false")
+    jQ(s".${GuideStyles.get.menuWrapper.htmlClass}").attr(Attributes.data(Attributes.Active), "false")
   }
 
   @tailrec
   private def menuItemByUrl(url: String): JQuery = {
-    val item = jQ(template).find(s".${MenuStyles.link.htmlClass}[href = '$url']")
+    val item = jQ(template).find(s".${MenuStyles.get.link.htmlClass}[href = '$url']")
     if (item.length > 0) item else menuItemByUrl(url.substring(0, url.lastIndexOf("/")))
   }
 
   private lazy val onSubClick: JQueryCallback = (jqThis: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
 
-    toggleBooleanAttribute(jQ(jqThis), GuideMenu.DataActiveAttribute)
+    toggleBooleanAttribute(jQ(jqThis), Attributes.data(Attributes.Active))
 
-    jQ(template).find(ActiveItemSelector).parent().find(s".${MenuStyles.subList.htmlClass}").stop().slideDown()
-    jQ(template).find(InactiveItemSelector).parent().find(s".${MenuStyles.subList.htmlClass}").stop().slideUp()
+    jQ(template).find(ActiveItemSelector).parent().find(s".${MenuStyles.get.subList.htmlClass}").stop().slideDown()
+    jQ(template).find(InactiveItemSelector).parent().find(s".${MenuStyles.get.subList.htmlClass}").stop().slideUp()
   }
 
   private lazy val onMobileMenuClick: JQueryCallback = (jqThis: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
 
-    toggleBooleanAttribute(jQ(s".${GuideStyles.menuWrapper.htmlClass}"), GuideMenu.DataActiveAttribute)
+    toggleBooleanAttribute(jQ(s".${GuideStyles.get.menuWrapper.htmlClass}"), Attributes.data(Attributes.Active))
+    toggleBooleanAttribute(jqMobileButton, Attributes.data(Attributes.Active))
   }
 
   private def toggleBooleanAttribute(jqElement: JQuery, attribute: String): Unit = {
     val activeOption = jqElement.attr(attribute)
     val newValue = if (activeOption.isEmpty || !activeOption.get.toBoolean) true else false
 
-    jqElement.attr(GuideMenu.DataActiveAttribute, newValue.toString)
+    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString)
   }
 }
 
 object GuideMenu {
   import Context._
-
-  val DataActiveAttribute = "data-active"
 
   private val property = Property[String]
 

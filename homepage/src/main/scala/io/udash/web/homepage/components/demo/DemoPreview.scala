@@ -19,9 +19,9 @@ object DemoPreview {
 
     val name = Property("World")
 
-    div(DemoStyles.demoIOWrapper, GlobalStyles.table)(
-      TextInput.debounced(name, maxlength := 16, DemoStyles.demoInlineField, GlobalStyles.width100),
-      produce(name)(name => h3(DemoStyles.demoInlineField, DemoStyles.demoOutput, GlobalStyles.width50)(s"Hello, $name!").render)
+    div(DemoStyles.get.demoIOWrapper, GlobalStyles.get.table)(
+      TextInput.debounced(name, maxlength := 16, DemoStyles.get.demoInlineField, GlobalStyles.get.width100),
+      produce(name)(name => h3(DemoStyles.get.demoInlineField, DemoStyles.get.demoOutput, GlobalStyles.get.width50)(s"Hello, $name!").render)
     ).render
   }
 
@@ -44,8 +44,8 @@ object DemoPreview {
     val odds = numbers.filter(n => !isEven(n))
     val evens = numbers.filter(isEven)
 
-    div(DemoStyles.demoIOWrapper)(
-      TextInput.debounced(input, `type` := "text", placeholder := "Type a number and press enter...", maxlength := 6, pattern := "\\d*", DemoStyles.demoInput, GlobalStyles.width100)(
+    div(DemoStyles.get.demoIOWrapper)(
+      TextInput.debounced(input, `type` := "text", placeholder := "Type a number and press enter...", maxlength := 6, pattern := "\\d*", DemoStyles.get.demoInput, GlobalStyles.get.width100)(
         onkeyup := ((ev: KeyboardEvent) => if (ev.keyCode == ext.KeyCode.Enter) {
           val n: Try[Int] = Try(input.get.toInt)
           if (n.isSuccess) {
@@ -54,17 +54,17 @@ object DemoPreview {
           }
         })
       ), br,
-      div(DemoStyles.demoOutput)(
-        span(DemoStyles.demoOutpuLabel)("Numbers: "),
-        span(GlobalStyles.col, GlobalStyles.width66, GlobalStyles.textLeft)(repeat(numbers)(renderer))
+      div(DemoStyles.get.demoOutput)(
+        span(DemoStyles.get.demoOutpuLabel)("Numbers: "),
+        span(GlobalStyles.get.col, GlobalStyles.get.width66, GlobalStyles.get.textLeft)(repeat(numbers)(renderer))
       ),
-      div(DemoStyles.demoOutput)(
-        span(DemoStyles.demoOutpuLabel)("Evens: "),
-        span(GlobalStyles.col, GlobalStyles.width66, GlobalStyles.textLeft)(repeat(evens)(renderer))
+      div(DemoStyles.get.demoOutput)(
+        span(DemoStyles.get.demoOutpuLabel)("Evens: "),
+        span(GlobalStyles.get.col, GlobalStyles.get.width66, GlobalStyles.get.textLeft)(repeat(evens)(renderer))
       ),
-      div(DemoStyles.demoOutput)(
-        span(DemoStyles.demoOutpuLabel)("Odds: "),
-        span(GlobalStyles.col, GlobalStyles.width66, GlobalStyles.textLeft)(repeat(odds)(renderer))
+      div(DemoStyles.get.demoOutput)(
+        span(DemoStyles.get.demoOutpuLabel)("Odds: "),
+        span(GlobalStyles.get.col, GlobalStyles.get.width66, GlobalStyles.get.textLeft)(repeat(odds)(renderer))
       )
     ).render
   }
@@ -89,9 +89,9 @@ object DemoPreview {
       }
     })
 
-    div(DemoStyles.demoIOWrapper, GlobalStyles.table)(
-      TextInput.debounced(email, maxlength := 32, DemoStyles.demoInlineField, GlobalStyles.width100),
-      span(DemoStyles.demoInlineField, DemoStyles.demoOutput, GlobalStyles.width50)(
+    div(DemoStyles.get.demoIOWrapper, GlobalStyles.get.table)(
+      TextInput.debounced(email, maxlength := 32, DemoStyles.get.demoInlineField, GlobalStyles.get.width100),
+      span(DemoStyles.get.demoInlineField, DemoStyles.get.demoOutput, GlobalStyles.get.width50)(
         "Valid: ", bindValidation(email,
           _ => span("Wait...").render,
           {
@@ -152,20 +152,20 @@ object DemoPreview {
     def changeLang(l: Lang): Unit =
       lang.set(l)
 
-    div(DemoStyles.demoIOWrapper)(
-      TextInput.debounced(name, `type` := "text", placeholder := "Type your name...", DemoStyles.demoInput, GlobalStyles.width100),
-      div(DemoStyles.demoOutput)(
+    div(DemoStyles.get.demoIOWrapper)(
+      TextInput.debounced(name, `type` := "text", placeholder := "Type your name...", DemoStyles.get.demoInput, GlobalStyles.get.width100),
+      div(DemoStyles.get.demoOutput)(
         span(translatedDynamic(Translations.udash.hello)(_.apply()))
       ),
-      div(DemoStyles.demoOutput)(
+      div(DemoStyles.get.demoOutput)(
         produce(name)(n => span(translatedDynamic(Translations.udash.withArg)(_.apply(n))).render)
       ),
-      div(DemoStyles.demoOutput)(
+      div(DemoStyles.get.demoOutput)(
         ul(
-          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("en"))))("EN")),
-          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("pl"))))("PL")),
-          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("de"))))("DE")),
-          li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("sp"))))("SP"))
+          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("en"))))("EN")),
+          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("pl"))))("PL")),
+          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("de"))))("DE")),
+          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("sp"))))("SP"))
         )
       )
     ).render
@@ -217,9 +217,9 @@ object DemoPreview {
       case UdashModal.ModalShownEvent(_) => makeProgress()
     }
 
-    div(DemoStyles.demoIOWrapper)(
+    div(DemoStyles.get.demoIOWrapper)(
       // apply Bootstrap styles
-      div(cls := "bootstrap", DemoStyles.demoBootstrap)(
+      div(cls := "bootstrap", DemoStyles.get.demoBootstrap)(
         UdashInputGroup()(
           UdashInputGroup.addon("Modal title: "),
           UdashInputGroup.input(

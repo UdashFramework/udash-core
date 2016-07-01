@@ -39,14 +39,14 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "Modern web applications create user friendly URLs and use them to handle the frontend routing. Udash framework ",
       "provides a convenient routing engine. To use it, create:"
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("RoutingRegistry"), " - mapping from a URL to ", i("RoutingState")),
       li(i("ViewPresenterRegistry"), " - mapping from ", i("RoutingState"), " to ", i("ViewPresenter"))
     ),
     h3("URL"),
     p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),
     CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(GuideStyles),
-    div(GuideStyles.frame)(
+    div(GuideStyles.get.frame)(
       p(
         span("The URL of this page is: "),
         span(id := "url-demo-link")(bind(url)), br(), br(),
@@ -112,10 +112,10 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "Notice that matching for ", i("UsersListState"), " always returns the same ", i("UsersListViewPresenter"), " and ",
       "for ", i("UserDetailsState"), " always returns new ", i("UserDetailsViewPresenter"), ""
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(
         span("The URL change: /users/details/john ➔ /users/details/david"),
-        ul(GuideStyles.innerList)(
+        ul(GuideStyles.get.innerList)(
           li("The application state changes: UserDetailsState(\"john\") ➔ UserDetailsState(\"david\")."),
           li("The ViewPresenter changes: UserDetailsViewPresenter(\"john\") ➔ UserDetailsViewPresenter(\"david\")."),
           li("The application creates new view and presenter.")
@@ -123,7 +123,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       ),
       li(
         span("The URL change: /users/search/john ➔ /users/search/david"),
-        ul(GuideStyles.innerList)(
+        ul(GuideStyles.get.innerList)(
           li("The application state changes: UsersListState(Some(\"john\")) ➔ UsersListState(Some(\"david\"))."),
           li("The ViewPresenter stays: UsersListViewPresenter ➔ UsersListViewPresenter."),
           li("Presenter's ", i("handleState"), " method is called with the new state as an argument."),
@@ -135,7 +135,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "Below you can find input witch changes the URL on every update. This change is handled like ",
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
-    div(GuideStyles.frame)(
+    div(GuideStyles.get.frame)(
       input(BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "", placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
         applicationInstance.goTo(FrontendRoutingState(
           Some(js.Dynamic.global

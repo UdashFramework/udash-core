@@ -42,7 +42,7 @@ class FrontendIntroView extends View {
       a(href := References.ScalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about the Udash ",
       a(href := RpcIntroState.url)("RPC"), " system. In this part of the guide you will read about: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Routing in Udash based applications."),
       li("The powerful Properties system for an application model."),
       li(

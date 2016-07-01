@@ -31,7 +31,7 @@ object FrontendTranslationsDemo {
     import io.udash.web.guide.Context._
     implicit val translationProvider = FrontendTranslationsProvider()
     implicit val lang = Lang("en")
-    div(id := "frontend-translations-demo", GuideStyles.frame)(
+    div(id := "frontend-translations-demo", GuideStyles.get.frame)(
       ul(
         li("auth.loginLabel: ", translated(Translations.auth.loginLabel())),
         li("auth.passwordLabel: ", translated(Translations.auth.passwordLabel())),

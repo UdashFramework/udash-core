@@ -2,7 +2,7 @@ package io.udash.web.homepage.views
 
 import io.udash._
 import io.udash.web.commons.components.Footer
-import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.{GlobalStyles, StyleRegistry}
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.homepage.RootState
 import io.udash.web.homepage.components.Header
@@ -23,18 +23,12 @@ class RootView extends View {
   import scalatags.JsDom.all._
 
   private var child: Element = div().render
+  private val defaultStyles = HomepageDefaultStyles.get
 
   private val content = div(
-    HomepageDefaultStyles.render[TypedTag[HTMLStyleElement]],
-    GlobalStyles.render[TypedTag[HTMLStyleElement]],
-    HomepageStyles.render[TypedTag[HTMLStyleElement]],
-    FooterStyles.render[TypedTag[HTMLStyleElement]],
-    HeaderStyles.render[TypedTag[HTMLStyleElement]],
-    ButtonsStyle.render[TypedTag[HTMLStyleElement]],
-    DemoStyles.render[TypedTag[HTMLStyleElement]],
-
+    StyleRegistry.styleSheet,
     Header.getTemplate,
-    main(GlobalStyles.main)(
+    main(GlobalStyles.get.main)(
       child
     ),
     Footer.getTemplate

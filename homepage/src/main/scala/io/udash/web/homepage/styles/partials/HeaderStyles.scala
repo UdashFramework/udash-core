@@ -2,6 +2,8 @@ package io.udash.web.homepage.styles.partials
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.UdashStylesheet
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.homepage.components.Header
 import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
@@ -10,7 +12,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scalacss.Defaults._
 
-object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with HeaderNavStyles {
+object HeaderStyles extends UdashStylesheet with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
   val header = style(
@@ -22,7 +24,7 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
     fontSize(1.6 rem),
     zIndex(999),
 
-    &.attr(Header.PinAttribute, "true")(
+    &.attr(Attributes.data(Attributes.Pinned), "true")(
       position.fixed,
       height(StyleConstants.Sizes.HeaderHeightPin px),
       backgroundColor.black,
@@ -30,7 +32,7 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
       animationIterationCount.count(1),
       animationDuration(new FiniteDuration(300, TimeUnit.MILLISECONDS)),
 
-      MediaQueries.phone(
+      MediaQueries.tabletLandscape(
         style(
           height(StyleConstants.Sizes.HeaderHeightPin * .85 px)
         )
@@ -43,16 +45,19 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
 
         MediaQueries.tabletPortrait(
           style(
-            width(130 * .8 px),
-            height(56 * .8 px)
+            display.none
           )
         )
+      ),
+
+      unsafeChild(s".${btnMobile.htmlClass}")(
+        StyleUtils.middle
       )
     ),
 
     MediaQueries.tabletPortrait(
       style(
-        height(StyleConstants.Sizes.HeaderHeight * .7 px)
+        height(StyleConstants.Sizes.HeaderHeight * .9 px)
       )
     )
   )
@@ -76,7 +81,7 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
   lazy val headerLogo = style(
     StyleUtils.relativeMiddle,
     display.inlineBlock,
-    verticalAlign.top,
+    verticalAlign.middle,
     width(65 px),
     height(96 px),
     marginRight(25 px),
@@ -86,9 +91,17 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
 
     MediaQueries.tabletPortrait(
       style(
-        width(65 * .7 px),
-        height(96 * .7 px)
+        display.block,
+        width(StyleConstants.Sizes.GuideHeaderHeightMobile px),
+        height(14 px),
+        backgroundPosition := "bottom",
+        transform := "none",
+        top.auto
       )
     )
+  )
+
+  lazy val btnMobile = style(
+    position.relative
   )
 }

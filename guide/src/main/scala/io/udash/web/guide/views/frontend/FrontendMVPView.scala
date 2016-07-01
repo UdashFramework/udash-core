@@ -2,6 +2,7 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
@@ -20,7 +21,7 @@ class FrontendMVPView extends View {
   override def getTemplate: dom.Element = div(
     h2("Model, View, Presenter & ViewPresenter"),
     p("A single page in Udash app is based on four elements:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(
         "Model - based on the ", a(href := FrontendPropertiesState.url)("Properties"), " mechanism, ",
         "it provides one and two-ways bindings to DOM elements."
@@ -38,7 +39,7 @@ class FrontendMVPView extends View {
         a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewPresenter is responsible for creating a View and a Presenter. "
       )
     ),
-    FrontendImage("mvp.png", "MVP in the Udash", GuideStyles.imgBig, GuideStyles.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.get.imgBig, GuideStyles.get.frame),
     h3("ViewPresenter"),
     p(
       "The ViewPresenter responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",

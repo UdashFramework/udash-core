@@ -2,6 +2,7 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
@@ -30,7 +31,7 @@ class ClientIdDemoComponent extends Component {
 
   class ClientIdDemoPresenter(model: ModelProperty[ClientIdDemoModel]) {
     def onButtonClick(target: JQuery) = {
-      target.attr("disabled", "true")
+      target.attr(Attributes.data(Attributes.Disabled), "true")
       Context.serverRpc.demos().clientIdDemo().clientId() onComplete {
         case Success(cid) => println(cid); model.subProp(_.clientId).set(cid)
         case Failure(ex) => println(ex); model.subProp(_.clientId).set(ex.toString)
@@ -42,7 +43,7 @@ class ClientIdDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.frame)(
+    def render: Element = span(GuideStyles.get.frame)(
       button(id := "client-id-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true

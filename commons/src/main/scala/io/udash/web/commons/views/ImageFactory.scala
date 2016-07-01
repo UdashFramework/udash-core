@@ -7,6 +7,20 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 import scalatags.generic.Namespace
 
+class ImageFactoryPrefix(val value: String)
+object ImageFactoryPrefixSet {
+  case object Intro extends ImageFactoryPrefix(value = "assets/images/quick")
+  case object Boostrapping extends ImageFactoryPrefix(value = "assets/images/views/bootstrapping")
+  case object Frontend extends ImageFactoryPrefix(value = "assets/images/views/frontend")
+}
+
+object ClickableImageFactory {
+  def apply(prefix: ImageFactoryPrefix, name: String, altText: String, xs: Modifier*): JsDom.TypedTag[dom.html.Anchor] =
+    a(href := "/" + prefix.value + "/" + name, target := "_blank", xs)(
+      (new ImageFactory(prefix.value))(name, altText)
+    )
+}
+
 class ImageFactory(prefix: String) {
   import scalatags.JsDom.all._
   def apply(name: String, altText: String, xs: Modifier*): JsDom.TypedTag[dom.html.Image] = {

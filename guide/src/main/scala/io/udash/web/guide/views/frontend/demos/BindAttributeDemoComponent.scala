@@ -18,7 +18,7 @@ class BindAttributeDemoComponent extends Component {
 
   dom.window.setInterval(() => visible.set(!visible.get), 1000)
 
-  override def getTemplate: Element = div(id := "bind-attr-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "bind-attr-demo", GuideStyles.get.frame)(
     span("Visible: ", bind(visible), " -> "),
     span(bindAttribute(visible)((show, el) => {
       if (show) el.setAttribute("style", "display: inline;")

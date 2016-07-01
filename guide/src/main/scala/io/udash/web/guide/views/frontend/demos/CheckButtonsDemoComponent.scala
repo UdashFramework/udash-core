@@ -29,7 +29,7 @@ class CheckButtonsDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "check-buttons-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "check-buttons-demo", GuideStyles.get.frame)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -43,14 +43,14 @@ class CheckButtonsDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.get.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)("Fruits:"),
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)(
       CheckButtons(
         favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
         (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, "data-label".attr := l)(i, l) })
       )
     ),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.get.blockOnMobile)(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
   )
 }

@@ -1,12 +1,12 @@
 package io.udash.web.homepage.styles
 
-import io.udash.web.commons.styles.DefaultStyles
+import io.udash.web.commons.styles.{DefaultStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
 import scalacss.Defaults._
 
-object HomepageDefaultStyles extends StyleSheet.Inline with DefaultStyles {
+object HomepageDefaultStyles extends UdashStylesheet with DefaultStyles {
   import dsl._
 
   style(

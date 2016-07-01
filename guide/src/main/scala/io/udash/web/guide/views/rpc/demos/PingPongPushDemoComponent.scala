@@ -2,6 +2,7 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.PingClient
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -34,7 +35,7 @@ class PingPongPushDemoComponent extends Component {
     private var registered = false
 
     def onButtonClick(target: JQuery) = {
-      target.attr("disabled", "true")
+      target.attr(Attributes.data(Attributes.Disabled), "true")
       registerCallback(target)
       Context.serverRpc.demos().pingDemo().ping(model.subProp(_.pingId).get)
     }
@@ -53,7 +54,7 @@ class PingPongPushDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.frame)(
+    def render: Element = span(GuideStyles.get.frame)(
       button(id := "ping-pong-push-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true

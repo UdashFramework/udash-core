@@ -1,6 +1,6 @@
 package io.udash.web.commons.styles.components
 
-import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.{GlobalStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
@@ -9,7 +9,7 @@ import scalacss.Defaults._
 /**
   * Created by malchik on 2016-04-04.
   */
-object FooterStyles extends StyleSheet.Inline {
+object FooterStyles extends UdashStylesheet {
   import dsl._
 
   val footer = style(

@@ -24,12 +24,12 @@ class RepeatDemoComponent extends Component {
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
   }, 2000)
 
-  override def getTemplate: Element = div(id := "repeat-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "repeat-demo", GuideStyles.get.frame)(
     p(
       "Integers: ",
-      span(id := "repeat-demo-integers")(repeat(integers)(p => span(GuideStyles.highlightRed)(s"${p.get}, ").render)), br,
+      span(id := "repeat-demo-integers")(repeat(integers)(p => span(GuideStyles.get.highlightRed)(s"${p.get}, ").render)), br,
       "Integers (produce): ",
-      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(seq.map(p => span(GuideStyles.highlightRed)(s"$p, ")): _*).render)
+      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, ")): _*).render)
     )
   ).render
 }

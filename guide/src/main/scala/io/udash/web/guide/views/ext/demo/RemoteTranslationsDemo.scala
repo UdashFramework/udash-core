@@ -18,7 +18,7 @@ object RemoteTranslationsDemo {
     import io.udash.web.guide.Context._
     implicit val translationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = Lang("pl")
-    div(id := "rpc-translations-demo", GuideStyles.frame)(
+    div(id := "rpc-translations-demo", GuideStyles.get.frame)(
       ul(
         li("auth.loginLabel: ", translated(Translations.auth.loginLabel())),
         li("auth.passwordLabel: ", translated(Translations.auth.passwordLabel())),

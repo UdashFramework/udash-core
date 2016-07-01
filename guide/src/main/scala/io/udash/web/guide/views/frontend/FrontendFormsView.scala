@@ -24,7 +24,7 @@ class FrontendFormsView extends View {
       "In this part of the guide you will learn means of binding properties to form elements."
     ),
     p("Let's briefly introduce all bindable form elements:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), ""),
       li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), ""),
       li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), ""),

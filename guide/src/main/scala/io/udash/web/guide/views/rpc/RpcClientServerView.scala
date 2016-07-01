@@ -23,7 +23,7 @@ class RpcClientServerView extends View {
       "Every dynamic web application needs to communicate with a server, every modern application should do it asynchronously. " +
       "In Udash all you have to do to make asynchronous server calls is:"
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement prepared interface in your backend code."),
       li("Use ", i("DefaultServerRPC"), " in the frontend code to make a server connection.")
@@ -44,7 +44,7 @@ class RpcClientServerView extends View {
     CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
     h2("Backend endpoints implementation"),
     p("There are many ways of implementing the backend RPC interface. Below you can find description of three possible solutions:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(
         "Basic implementation - the easiest way witch is useful when your service layer does not need to know anything ",
         "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), ") "
@@ -59,7 +59,7 @@ class RpcClientServerView extends View {
       )
     ),
     p("Things to consider when implementing the backend RPC interface:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("How to create and cache the RPC endpoints?"),
       li("How to handle authentication and authorization in an endpoint?"),
       li("How to pass a required data (like ", i("ClientId"), " and ", i("UserContext"), ") to the RPC endpoints?")
@@ -208,7 +208,7 @@ class RpcClientServerView extends View {
     )(GuideStyles),
     h3("User-aware implementation"),
     p("More complex services might need the ", i("UserContext"), " of the method call. Look at one of possible ways to provide it:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("AtmosphereServiceConfig"), " will resolve the ", i("UserContext"), " based on a HttpServlet request and create the RPC endpoint with it"),
       li("The RPC endpoint will authorize method access"),
       li("The service will do the job")

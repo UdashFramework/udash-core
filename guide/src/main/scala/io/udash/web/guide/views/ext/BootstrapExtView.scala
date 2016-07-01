@@ -369,11 +369,10 @@ class BootstrapExtView extends View {
           |    )("Age")(user.subProp(_.age).transform(_.toString, _.toInt)),
           |    UdashForm.group(
           |      label("Shirt size"),
-          |      UdashForm.radio(
+          |      UdashForm.radio(radioStyle = BootstrapStyles.Form.radioInline)(
           |        user.subProp(_.shirtSize)
           |          .transform(shirtSizeToLabel, labelToShirtSize),
-          |        Seq(Small, Medium, Large).map(shirtSizeToLabel),
-          |        radioStyle = BootstrapStyles.Form.radioInline
+          |        Seq(Small, Medium, Large).map(shirtSizeToLabel)
           |      )
           |    ),
           |    UdashForm.disabled()(UdashButton()("Send").render)

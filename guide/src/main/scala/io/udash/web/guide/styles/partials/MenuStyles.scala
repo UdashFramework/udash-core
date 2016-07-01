@@ -2,6 +2,9 @@ package io.udash.web.guide.styles.partials
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.UdashStylesheet
+import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.styles.components.MobileMenuStyles
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.components.GuideMenu
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
@@ -11,7 +14,7 @@ import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object MenuStyles extends StyleSheet.Inline {
+object MenuStyles extends UdashStylesheet {
   import dsl._
 
   val guideMenu = style(
@@ -21,7 +24,7 @@ object MenuStyles extends StyleSheet.Inline {
 
     MediaQueries.phone(
       style(
-        width(320 - StyleConstants.Sizes.MobileMenuButton px),
+        width(320 - StyleConstants.Sizes.GuideHeaderHeightMobile px),
         height(100 %%),
         overflowY.auto
       )
@@ -57,7 +60,7 @@ object MenuStyles extends StyleSheet.Inline {
   val link = style(
     menuLink,
 
-    &.attr(GuideMenu.DataActiveAttribute, "true") (
+    &.attr(Attributes.data(Attributes.Active), "true") (
       color(StyleConstants.Colors.Red),
 
       unsafeChild(s".${linkText.htmlClass}") (
@@ -72,7 +75,7 @@ object MenuStyles extends StyleSheet.Inline {
   val subToggle = style(
     menuLink,
 
-    &.attr(GuideMenu.DataActiveAttribute, "true") (
+    &.attr(Attributes.data(Attributes.Active), "true") (
       unsafeChild(s".${icon.htmlClass}") (
         transform := "rotate(90deg)"
       )
@@ -167,68 +170,13 @@ object MenuStyles extends StyleSheet.Inline {
     )
   )
 
-  private val lineHeight = 4
-
-  val btnMobileLines = style(
-    StyleUtils.absoluteCenter,
-    width(60 %%)
-  )
-
-  val btnMobileLine = style(
-    StyleUtils.transition(),
-    position.relative,
-    display.block,
-    height(lineHeight px),
-    width(100 %%),
-    marginTop(lineHeight px),
-    marginBottom(lineHeight px),
-    backgroundColor(StyleConstants.Colors.Red)
-  )
-
-  val btnMobileLineTop = style(
-    btnMobileLine,
-    transformOrigin := s"50% calc(50% + ${lineHeight * 2}px)"
-  )
-
-  val btnMobileLineMiddle = style(
-    btnMobileLine
-  )
-
-  val btnMobileLineBottom = style(
-    btnMobileLine,
-    transformOrigin := s"50% calc(50% - ${lineHeight * 2}px)"
-  )
-
-  private val btnMobileActive = style(
-    unsafeChild(s".${btnMobileLineTop.htmlClass}") (
-      transform := s"rotate(45deg) translateY(${lineHeight * 2}px)"
-    ),
-
-    unsafeChild(s".${btnMobileLineBottom.htmlClass}") (
-      transform := s"rotate(-45deg) translateY(-${lineHeight * 2}px)"
-    ),
-
-    unsafeChild(s".${btnMobileLineMiddle.htmlClass}") (
-      opacity(0)
-    )
-  )
-
   val btnMobile = style(
     StyleUtils.border(),
-    display.none,
     borderLeft.none,
     position.absolute,
     top(`0`),
     left :=! "calc(100% - 1px)",
-    width(StyleConstants.Sizes.MobileMenuButton + 1 px),
-    height(StyleConstants.Sizes.MobileMenuButton px),
     backgroundColor.white,
-
-    unsafeRoot(s".${GuideStyles.menuWrapper.htmlClass}")(
-      &.attr(GuideMenu.DataActiveAttribute, "true") (
-        btnMobileActive
-      )
-    ),
 
     MediaQueries.tabletLandscape(
       style(

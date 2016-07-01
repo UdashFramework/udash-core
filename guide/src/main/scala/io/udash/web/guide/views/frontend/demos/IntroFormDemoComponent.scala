@@ -74,8 +74,8 @@ class IntroFormDemoComponent extends Component {
     private val between = model.subProp(_.between).transform(i2s, s2i)
     private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
 
-    def render: Element = div(id := "frontend-intro-demo", GuideStyles.frame)(
-      div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
+    def render: Element = div(id := "frontend-intro-demo", GuideStyles.get.frame)(
+      div(BootstrapStyles.Form.inputGroup, GuideStyles.get.blockOnMobile)(
         NumberInput.debounced(minimum)(id := "minimum", BootstrapStyles.Form.formControl),
         span(BootstrapStyles.Form.inputGroupAddon)(" <= "),
         NumberInput.debounced(between)(id := "between", BootstrapStyles.Form.formControl),

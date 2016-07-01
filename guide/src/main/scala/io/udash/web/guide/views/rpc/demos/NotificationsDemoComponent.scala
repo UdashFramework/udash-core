@@ -2,6 +2,7 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.demos.rpc.NotificationsClient
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
@@ -35,7 +36,7 @@ class NotificationsDemoComponent extends Component {
     private val demoListener = (msg: String) => model.subProp(_.lastMessage).set(msg)
 
     def onButtonClick(target: JQuery) = {
-      target.attr("disabled", "true")
+      target.attr(Attributes.data(Attributes.Disabled), "true")
       model.subProp(_.registered).get match {
         case false =>
           NotificationsClient.registerListener(demoListener) onComplete {
@@ -63,7 +64,7 @@ class NotificationsDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.frame)(
+    def render: Element = span(GuideStyles.get.frame)(
       button(id := "notifications-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true

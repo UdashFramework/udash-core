@@ -29,7 +29,7 @@ class RpcIntroView extends View {
       a(href := References.ScalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("RPC interfaces with typed arguments and returned value"),
       li("Data models which can be used in RPC communication"),
       li("Model validators witch can be used both in frontend and backend")

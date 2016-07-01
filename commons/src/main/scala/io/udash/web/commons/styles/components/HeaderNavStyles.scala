@@ -2,6 +2,7 @@ package io.udash.web.commons.styles.components
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.FiniteDuration
@@ -15,7 +16,29 @@ trait HeaderNavStyles extends StyleSheet.Inline {
     StyleUtils.relativeMiddle,
     display.inlineBlock,
     verticalAlign.top,
-    color.white
+    color.white,
+
+    MediaQueries.tabletPortrait(style(
+      StyleUtils.transition(),
+      position.fixed,
+      left(`0`),
+      top(`0`),
+      width(100 %%),
+      height(100 %%),
+      backgroundColor(c"rgba(0,0,0,.9)"),
+      transform := "translateX(-100%)",
+
+      &.attr(Attributes.data(Attributes.Active), "true") (
+        transform := "translateX(0)"
+      )
+    ))
+  )
+
+  val headerLinkList = style(
+    MediaQueries.tabletPortrait(style(
+      StyleUtils.center,
+      position.absolute
+    ))
   )
 
   val headerLinkWrapper: StyleA = style(
@@ -40,8 +63,18 @@ trait HeaderNavStyles extends StyleSheet.Inline {
 
       &.hover(
         textDecoration := "none"
-      )
-    )
+      ),
+
+      MediaQueries.tabletPortrait(style(
+        content := "\"\""
+      ))
+    ),
+
+    MediaQueries.tabletPortrait(style(
+      display.block,
+      padding(1 rem, `0`),
+      textAlign.center
+    ))
   )
 
   val headerLink: StyleA = style(

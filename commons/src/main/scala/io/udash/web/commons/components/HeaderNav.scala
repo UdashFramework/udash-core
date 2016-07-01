@@ -16,7 +16,7 @@ trait HeaderNav {
 
   def navigation(items: Seq[NavItem]): Element =
     nav(navStyles.headerNav)(
-      ul(
+      ul(navStyles.headerLinkList)(
         items.map(item =>
           li(navStyles.headerLinkWrapper)(
             a(href := item.url, navStyles.headerLink)(item.title)

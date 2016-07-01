@@ -21,7 +21,7 @@ class CheckboxDemoComponent extends Component {
     (b: Boolean) => if (b) "Yes" else "No"
   )
 
-  override def getTemplate: Element = div(id := "checkbox-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "checkbox-demo", GuideStyles.get.frame)(
     form(BootstrapStyles.containerFluid)(
       inputs, br, inputs
     )
