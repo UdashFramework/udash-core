@@ -31,7 +31,7 @@ class RpcIntroView extends View {
     ),
     ul(GuideStyles.defaultList)(
       li("RPC interfaces with typed arguments and returned value"),
-      li("Data models witch can be used in RPC communication"),
+      li("Data models which can be used in RPC communication"),
       li("Model validators witch can be used both in frontend and backend")
     ),
     p(
@@ -109,7 +109,7 @@ class RpcIntroView extends View {
     h2("What's next?"),
     p(
       "Now you know the basics of the Udash RPC system. You should also take a closer look at ",
-      a(href := RpcInterfacesState.url)("RPC interfaces"), ""
+      a(href := RpcInterfacesState.url)("RPC interfaces"), "."
     )
   ).render
 

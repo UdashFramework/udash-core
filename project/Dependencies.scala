@@ -18,6 +18,8 @@ object Dependencies extends Build {
   val avsystemCommonsVersion = "1.14.0"
   val typesafeConfigVersion = "1.3.0"
   val springVersion = "4.2.5.RELEASE"
+  val akkaVersion = "2.4.7"
+  val sprayVersion = "1.3.1"
 
   val bootstrapVersion = "3.3.1-1"
 
@@ -27,6 +29,7 @@ object Dependencies extends Build {
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core-shared" % udashVersion exclude("com.lihaoyi", "scalatags_2.11"),
+    "io.udash" %%% "udash-rest-shared" % udashVersion,
     "io.udash" %%% "udash-rpc-shared" % udashVersion,
     "io.udash" %%% "udash-i18n-shared" % udashVersion,
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
@@ -61,7 +64,12 @@ object Dependencies extends Build {
 
     "com.typesafe" % "config" % typesafeConfigVersion,
     "org.springframework" % "spring-beans" % springVersion,
-    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion
+    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
+
+    "io.spray" %% "spray-can" % sprayVersion,
+    "io.spray" %% "spray-routing" % sprayVersion,
+    "io.spray" %% "spray-servlet" % sprayVersion,
+    "com.typesafe.akka" %% "akka-actor" % akkaVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(

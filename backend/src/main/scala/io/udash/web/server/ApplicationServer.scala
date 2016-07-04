@@ -37,6 +37,16 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   }
   guide.addServlet(atmosphereHolder, "/atm/*")
 
+  private val restApiHolder = {
+    import spray.servlet.Servlet30ConnectorServlet
+    import spray.servlet.Initializer
+
+    guide.addEventListener(new Initializer())
+    val apiHolder = new ServletHolder(new Servlet30ConnectorServlet)
+    apiHolder
+  }
+  guide.addServlet(restApiHolder, s"/${ApplicationServer.restPrefix}/*")
+
   val contexts = new ContextHandlerCollection
   contexts.setHandlers(Array(homepage, guide))
   server.setHandler(contexts)
@@ -55,4 +65,8 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     appHolder.setInitParameter("resourceBase", resourceBase)
     appHolder
   }
+}
+
+object ApplicationServer {
+  val restPrefix = "rest"
 }

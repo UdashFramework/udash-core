@@ -1,0 +1,46 @@
+package io.udash.web.guide.demos.rest
+
+import io.udash.web.SeleniumTest
+import org.openqa.selenium.By.{ById, ByTagName}
+import org.openqa.selenium.WebElement
+
+class RestIntroTest extends SeleniumTest {
+  val rpcIntroUrl = "/#/rest"
+
+  "RestIntro view" should {
+    driver.get(server.createUrl(rpcIntroUrl))
+
+    "contain REST simple demo" in {
+      eventually {
+        driver.findElementById("simple-rest-demo")
+      }
+    }
+
+    "receive response in demo" in {
+      val callDemo = driver.findElementById("simple-rest-demo")
+      val stringButton = callDemo.findElement(new ById("simple-rest-demo-string-btn"))
+      val intButton = callDemo.findElement(new ById("simple-rest-demo-int-btn"))
+      val classButton = callDemo.findElement(new ById("simple-rest-demo-class-btn"))
+
+      eventually {
+        val responses = callDemo.findElements(new ByTagName("div"))
+        responses.size should be(3)
+        responses.get(0).getText should be("String:")
+        responses.get(1).getText should be("Int:")
+        responses.get(2).getText should be("Class:")
+      }
+
+      stringButton.click()
+      intButton.click()
+      classButton.click()
+
+      eventually {
+        val responses = callDemo.findElements(new ByTagName("div"))
+        responses.size should be(3)
+        responses.get(0).getText should be("String: OK")
+        responses.get(1).getText should be("Int: 123")
+        responses.get(2).getText should be("Class: RestExampleClass(42,Udash,(321.123,REST Support))")
+      }
+    }
+  }
+}
