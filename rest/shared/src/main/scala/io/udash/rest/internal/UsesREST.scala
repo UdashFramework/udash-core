@@ -2,7 +2,7 @@ package io.udash.rest.internal
 
 import com.avsystem.commons.rpc.{MetadataAnnotation, RPCMetadata}
 import io.udash.rest._
-import io.udash.rest.internal.RESTConnector.HTTPMethod
+import io.udash.rpc.serialization.URLEncoder
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -106,7 +106,7 @@ abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMeta
     parseInvocation(invocation, metadata)
 
     connector.send(
-      url = s"/${urlBuilder.result().mkString("/")}",
+      url = s"/${urlBuilder.result().map(URLEncoder.encode).mkString("/")}",
       method = findRestMethod(invocation, metadata),
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),

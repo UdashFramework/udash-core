@@ -20,7 +20,7 @@ class DefaultRESTConnector(val host: String, val port: Int, val pathPrefix: Stri
     val request: HttpRequest = HttpRequest()
       .withHost(host)
       .withPort(port)
-      .withURL(pathPrefix.stripSuffix("/") + url)
+      .withPath(pathPrefix.stripSuffix("/") + url)
       .withMethod(method)
       .withQueryParameters(queryArguments.toSeq:_*)
       .withHeaders(headers.toSeq:_*)
