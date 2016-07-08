@@ -26,21 +26,21 @@ class TextInputDemoComponent extends Component {
     div(BootstrapStyles.colMd4)(
       div(BootstrapStyles.inputGroup)(
         div(BootstrapStyles.inputGroupAddon)("Name:"),
-        TextInput(name)(BootstrapStyles.formControl, placeholder := "Input your name...", maxlength := "6"),
+        TextInput.debounced(name)(BootstrapStyles.formControl, placeholder := "Input your name...", maxlength := "6"),
         div(BootstrapStyles.inputGroupAddon)(bind(name))
       )
     ),
     div(BootstrapStyles.colMd4)(
       div(BootstrapStyles.inputGroup)(
         div(BootstrapStyles.inputGroupAddon)("Password:"),
-        PasswordInput(password)(BootstrapStyles.formControl, placeholder := "Input your password...", maxlength := "6"),
+        PasswordInput.debounced(password)(BootstrapStyles.formControl, placeholder := "Input your password...", maxlength := "6"),
         div(BootstrapStyles.inputGroupAddon)(bind(password))
       )
     ),
     div(BootstrapStyles.colMd4)(
       div(BootstrapStyles.inputGroup)(
         div(BootstrapStyles.inputGroupAddon)("Age:"),
-        NumberInput(age.transform(_.toString, Integer.parseInt), maxlength := "6")(BootstrapStyles.formControl),
+        NumberInput.debounced(age.transform(_.toString, Integer.parseInt), maxlength := "6")(BootstrapStyles.formControl),
         div(BootstrapStyles.inputGroupAddon)(bind(age))
       )
     )

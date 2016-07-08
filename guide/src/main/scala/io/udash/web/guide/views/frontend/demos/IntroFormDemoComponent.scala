@@ -77,11 +77,11 @@ class IntroFormDemoComponent extends Component {
 
     def render: Element = div(id := "frontend-intro-demo", GuideStyles.frame)(
       div(BootstrapStyles.inputGroup, GuideStyles.blockOnMobile)(
-        NumberInput(minimum)(id := "minimum", BootstrapStyles.formControl),
+        NumberInput.debounced(minimum)(id := "minimum", BootstrapStyles.formControl),
         span(BootstrapStyles.inputGroupAddon)(" <= "),
-        NumberInput(between)(id := "between", BootstrapStyles.formControl),
+        NumberInput.debounced(between)(id := "between", BootstrapStyles.formControl),
         span(BootstrapStyles.inputGroupAddon)(" <= "),
-        NumberInput(maximum)(id := "maximum", BootstrapStyles.formControl),
+        NumberInput.debounced(maximum)(id := "maximum", BootstrapStyles.formControl),
         div(BootstrapStyles.inputGroupBtn)(
           button(id := "randomize", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
             presenter.randomize()

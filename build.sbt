@@ -1,6 +1,6 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.2.0-SNAPSHOT"
+version in ThisBuild := "0.3.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
