@@ -11,7 +11,7 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
       val calls = Seq.newBuilder[String]
       val rpc: ExposesClientRPC[TestClientRPC] = createExposesClientRPC(calls)
 
-      import rpc.framework._
+      import rpc.localFramework._
       rpc.handleRpcFire(RPCFire(RawInvocation("handle", List()), List()))
       calls.result() should contain("handle")
 
@@ -35,10 +35,10 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
   }
 
   final class UPickleExposesClientRPC[ClientRPCType]
-    (local: ClientRPCType)(implicit protected val localRpcAsRaw: UPickleUdashRPCFramework.AsRawClientRPC[ClientRPCType])
+    (local: ClientRPCType)(implicit protected val localRpcAsRaw: ClientUPickleUdashRPCFramework.AsRawRPC[ClientRPCType])
     extends ExposesClientRPC(local) {
 
-    override val framework = UPickleUdashRPCFramework
+    override val localFramework = ClientUPickleUdashRPCFramework
   }
 
   def createCustomExposesClientRPC(calls: mutable.Builder[String, Seq[String]]): UPickleExposesClientRPC[TestClientRPC] = {

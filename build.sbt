@@ -1,6 +1,6 @@
 name := "udash"
 
-version in ThisBuild := "0.2.0"
+version in ThisBuild := "0.3.0-rc.1"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
@@ -67,7 +67,7 @@ val commonJSSettings = Seq(
   scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox).withKeepAlive(),
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -79,7 +79,9 @@ lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
-    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`
+    `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`,
+    `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
+    `bootstrap`
   )
   .settings(publishArtifact := false)
 
@@ -156,6 +158,27 @@ lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJS
     jsDependencies ++= rpcFrontendJsDeps.value
   )
 
+lazy val `rest-macros` = project.in(file("rest/macros"))
+  .dependsOn(`rpc-macros`)
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
+    )
+  )
+
+lazy val `rest-shared` = crossProject.crossType(CrossType.Pure).in(file("rest/shared"))
+  .configure(_.dependsOn(`rpc-shared` % CompileAndTest))
+  .jsConfigure(_.dependsOn(`rest-macros`))
+  .jvmConfigure(_.dependsOn(`rest-macros`))
+  .settings(commonSettings: _*).settings(
+    libraryDependencies ++= restCrossDeps.value
+  )
+  .jsSettings(commonJSSettings:_*)
+
+lazy val `rest-shared-JVM` = `rest-shared`.jvm
+lazy val `rest-shared-JS` = `rest-shared`.js
+
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
   .configure(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
@@ -174,4 +197,13 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(Scala
   .settings(commonJSSettings: _*)
   .settings(
     jsDependencies += RuntimeDOM % Test
+  )
+
+lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    libraryDependencies ++= bootstrapFrontendDeps.value,
+    jsDependencies ++= bootstrapFrontendJsDeps.value
   )

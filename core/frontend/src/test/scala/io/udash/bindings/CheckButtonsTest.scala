@@ -9,7 +9,7 @@ class CheckButtonsTest extends UdashFrontendTest {
   "CheckButtons" should {
     "synchronise state with property changes" in {
       val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String](Seq("A", "C"))
+      val p = SeqProperty[String]("A", "C")
 
       val buttons = CheckButtons(p, options, s => div(s.map(t => t._1))).render
 
@@ -44,7 +44,7 @@ class CheckButtonsTest extends UdashFrontendTest {
 
     "synchronise property with state changes" in {
       val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String](Seq("A", "C"))
+      val p = SeqProperty[String]("A", "C")
 
       val buttons = CheckButtons(p, options, s => div(s.map(t => t._1))).render
 

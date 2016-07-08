@@ -27,6 +27,7 @@ class JsonInput(value: JValue) extends Input {
 
   def readDouble() = _read("Double") {
     case JDouble(v) => ReadSuccessful(v)
+    case JInt(v) => ReadSuccessful(v.toDouble)
   }
 
   def readBoolean() = _read("Boolean") {

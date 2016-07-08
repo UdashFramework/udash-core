@@ -1,14 +1,13 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.RPCFramework
+import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
-import io.udash.macros
 
 import scala.language.postfixOps
 
-trait UdashRPCFramework extends RPCFramework {
-  type Writer[T] = GenCodec.Auto[T]
-  type Reader[T] = GenCodec.Auto[T]
+/** Base for all RPC frameworks in Udash. */
+trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
+  type RawRPC <: GetterRawRPC with ProcedureRawRPC
 
   val RawValueCodec: GenCodec[RawValue]
 
@@ -19,48 +18,6 @@ trait UdashRPCFramework extends RPCFramework {
   def stringToRaw(string: String): RawValue
   /** Converts `RawValue` into `String`. It is used to write data to network. */
   def rawToString(raw: RawValue): String
-
-  /** Returns `Input` for data marshalling. */
-  def inputSerialization(value: RawValue): Input
-  /** Returns `Output` for data unmarshalling. */
-  def outputSerialization(valueConsumer: RawValue => Unit): Output
-
-  /** Converts value of type `T` into `RawValue`. */
-  def write[T: Writer](value: T): RawValue = {
-    var result: RawValue = null.asInstanceOf[RawValue]
-    GenCodec.autoWrite[T](outputSerialization(result = _), value)
-    result
-  }
-
-  /** Converts `RawValue` into value of type `T`. */
-  def read[T: Reader](raw: RawValue): T =
-    GenCodec.autoRead[T](inputSerialization(raw))
-
-  class AsRawClientRPC[T](implicit asRawRpc: AsRawRPC[T]) {
-    def asRaw(rpcImpl: T): RawRPC =
-      asRawRpc.asRaw(rpcImpl)
-  }
-
-  object AsRawClientRPC {
-    def apply[T](implicit asRawClientRPC: AsRawClientRPC[T]): AsRawClientRPC[T] =
-      asRawClientRPC
-  }
-
-  implicit def materializeAsRawClient[T]: AsRawClientRPC[T] =
-    macro macros.rpc.UdashRPCMacros.asRawClientImpl[T]
-
-  class AsRealClientRPC[T](implicit asRealRpc: AsRealRPC[T]) {
-    def asReal(rawRpc: RawRPC): T =
-      asRealRpc.asReal(rawRpc)
-  }
-
-  object AsRealClientRPC {
-    def apply[T](implicit asRealClientRPC: AsRealClientRPC[T]): AsRealClientRPC[T] =
-      asRealClientRPC
-  }
-
-  implicit def materializeAsRealClient[T]: AsRealClientRPC[T] =
-    macro macros.rpc.UdashRPCMacros.asRealClientImpl[T]
 
   sealed trait RPCRequest {
     def invocation: RawInvocation

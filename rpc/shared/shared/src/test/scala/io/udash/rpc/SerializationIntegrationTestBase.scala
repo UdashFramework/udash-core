@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.testing.UdashSharedTest
 
 import scala.language.higherKinds
@@ -11,7 +12,7 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
   def tests(writer: UdashRPCFramework, reader: UdashRPCFramework) = {
     "serialize and deserialize all types" in {
       for (i <- 1 to repeats) {
-        def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextBoolean(), Random.nextString(200), List.fill(Random.nextInt(200))('a'))
+        def cc() = TestCC(Random.nextInt(), Random.nextLong(), 123, Random.nextBoolean(), Random.nextString(200), List.fill(Random.nextInt(200))('a'))
         def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
         def dncc(counter: Int = 0): DeepNestedTestCC =
           if (counter < 200) DeepNestedTestCC(ncc(), dncc(counter + 1))

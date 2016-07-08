@@ -2,16 +2,16 @@ package io.udash.i18n
 
 import java.{util => ju}
 
-import io.udash.utils.Logger
 import org.scalajs.dom.ext.Storage
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.util.Try
 
 /**
   * TranslationProvider dedicated to applications using RPC system.
+  *
   * @param translationsEndpoint RPC endpoint serving translations.
   * @param cache Optional `org.scalajs.dom.ext.Storage`, it will be used as translations cache.
   * @param ttl Time period between translations refresh, if using `cache`.
@@ -27,7 +27,7 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
 
   private var reloading: Future[Option[Bundle]] = null
 
-  if (cache.isEmpty) Logger.warn("RemoteTranslationProvider has no cache, so it will request server for every translation.")
+  if (cache.isEmpty) logger.warn("RemoteTranslationProvider has no cache, so it will request server for every translation.")
 
   def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] =
     fromCache(key)
@@ -44,7 +44,7 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
             case Some(translationString) =>
               Future.successful(translationString)
             case None =>
-              Logger.warn(s"Key $key not found in cache!")
+              logger.warn(s"Key $key not found in cache!")
               Future.failed(new IllegalArgumentException(s"Key $key not found in cache!"))
           }
       case None =>

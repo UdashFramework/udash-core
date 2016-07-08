@@ -1,6 +1,6 @@
 package io.udash.i18n
 
-import com.avsystem.commons.rpc.RPC
+import io.udash.rpc.RPC
 
 import scala.concurrent.Future
 

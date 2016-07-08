@@ -3,7 +3,9 @@ package io.udash.rpc
 import scala.concurrent.Future
 
 abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends ExposesLocalRPC[ServerRPCType] {
-  import framework._
+  override val localFramework: ServerUdashRPCFramework
+
+  import localFramework._
   /**
     * This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
     * into calls on actual RPC implementation.
@@ -27,9 +29,9 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
   }
 }
 
-final class DefaultExposesServerRPC[ServerRPCType]
-  (local: ServerRPCType)(implicit protected val localRpcAsRaw: DefaultUdashRPCFramework.AsRawRPC[ServerRPCType])
+class DefaultExposesServerRPC[ServerRPCType](local: ServerRPCType)
+                                            (implicit protected val localRpcAsRaw: DefaultServerUdashRPCFramework.AsRawRPC[ServerRPCType])
   extends ExposesServerRPC(local) {
 
-  override val framework = DefaultUdashRPCFramework
+  override val localFramework = DefaultServerUdashRPCFramework
 }

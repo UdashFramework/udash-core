@@ -61,7 +61,7 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
 
     val oldState = current
     current = newState
-    callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
+    if (newState != oldState) callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
   }
 
   /**

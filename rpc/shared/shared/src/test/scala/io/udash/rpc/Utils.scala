@@ -20,7 +20,7 @@ trait Utils {
     binary = Array.fill(Random.nextInt(20))(Random.nextInt().toByte),
     list = List.fill(Random.nextInt(20))(Random.nextString(Random.nextInt(20))),
     set = List.fill(Random.nextInt(20))(Random.nextString(Random.nextInt(20))).toSet,
-    obj = TestCC(Random.nextInt(), Random.nextLong(), Random.nextBoolean(), Random.nextString(Random.nextInt(20)), Nil),
+    obj = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(20)), Nil),
     map = Map(Seq.fill(Random.nextInt(20))(Random.nextString(20) -> Random.nextInt()):_*)
   )
 

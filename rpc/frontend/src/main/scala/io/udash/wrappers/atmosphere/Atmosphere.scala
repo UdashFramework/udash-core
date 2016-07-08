@@ -135,7 +135,7 @@ trait AtmosphereResponse extends js.Object {
 }
 
 object AtmosphereRequest {
-  def apply(url: String, connectTimeout: Int = -1, reconnectInterval: Int = 0, timeout: Int = 300000,
+  def apply(url: String, connectTimeout: Int = -1, reconnectInterval: Int = 1000, timeout: Int = 300000,
     method: Method.Method = Method.GET, fallbackMethod: Method.Method = Method.GET, headers: js.Array[js.Any] = js.Array(),
     contentType: String = "", data: String = "", suspend: Boolean = true, maxRequest: Int = -1, maxStreamingLength: Int = 10000000,
     logLevel: String = "info", transport: Transport.Transport = Transport.LONG_POLLING,

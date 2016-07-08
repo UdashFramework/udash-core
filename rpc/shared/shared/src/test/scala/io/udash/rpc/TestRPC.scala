@@ -1,7 +1,7 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.{RPC, RPCName}
 import com.github.ghik.silencer.silent
+import io.udash.rpc.utils.Logged
 
 import scala.concurrent.Future
 
@@ -29,6 +29,7 @@ trait RPCMethods {
 trait InnerRPC {
   def proc(): Unit
 
+  @Logged
   def func(arg: Int): Future[String]
 }
 

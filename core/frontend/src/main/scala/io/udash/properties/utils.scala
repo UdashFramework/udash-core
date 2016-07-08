@@ -18,6 +18,7 @@ object ImmutableValue {
   implicit val allowStringTpe: ImmutableValue[String] = null
   implicit val allowCharTpe: ImmutableValue[Char] = null
   implicit val allowBooleanTpe: ImmutableValue[Boolean] = null
+  implicit val allowDomElementTpe: ImmutableValue[org.scalajs.dom.Element] = null
   implicit def isImmutable[T]: ImmutableValue[T] = macro io.udash.macros.PropertyMacros.reifyImmutableValue[T]
 }
 

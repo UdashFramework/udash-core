@@ -4,20 +4,34 @@ import org.scalajs.dom.Console
 
 import scala.scalajs.js.Dynamic.global
 
-/** Global JS logger. */
-object Logger {
-  private val console: Console = global.console.asInstanceOf[Console]
+trait Logger {
+  def info(message: String, params: String*): Unit
 
-  def info(message: String): Unit = console.info(message)
+  def warn(message: String, params: String*): Unit
 
-  def warn(message: String): Unit = console.warn(message)
+  def error(message: String, params: String*): Unit
 
-  def error(message: String): Unit = console.error(message)
-
-  def log(message: String): Unit = console.log(message)
+  def log(message: String, params: String*): Unit
 }
 
-/** Provides `logger` reference to [[io.udash.utils.Logger]]. */
+/**
+  * Global JS logger.
+  */
+private object ConsoleLogger extends Logger {
+  private val console: Console = global.console.asInstanceOf[Console]
+
+  def info(message: String, params: String*): Unit = console.info(message, params)
+
+  def warn(message: String, params: String*): Unit = console.warn(message, params)
+
+  def error(message: String, params: String*): Unit = console.error(message, params)
+
+  def log(message: String, params: String*): Unit = console.log(message, params)
+}
+
+/**
+  * Provides `logger` reference to io.udash.utils.ConsoleLogger.
+  */
 trait StrictLogging {
-  val logger = Logger
+  val logger: Logger = ConsoleLogger
 }

@@ -3,7 +3,10 @@ package io.udash.routing
 import io.udash._
 import io.udash.testing._
 
-class RoutingEngineTest extends UdashFrontendTest {
+import scala.collection.mutable.ListBuffer
+
+class RoutingEngineTest extends UdashFrontendTest with TestRouting {
+
   "RoutingEngine" should {
     "render valid views on url change" in {
       val rootView = new TestView
@@ -21,11 +24,7 @@ class RoutingEngineTest extends UdashFrontendTest {
         ErrorState -> new DefaultViewPresenterFactory[ErrorState.type](() => errorView) {}
       )
 
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(state2VP, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine(state2vp = state2VP)
 
       routingEngine.handleUrl(Url("/"))
 
@@ -79,52 +78,72 @@ class RoutingEngineTest extends UdashFrontendTest {
     }
 
     "fire state change callbacks" in {
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine()
 
+      var calls = 0
       var lastCallbackEvent: StateChangeEvent[TestState] = null
-      routingEngine.onStateChange(lastCallbackEvent = _)
+      routingEngine.onStateChange(ev => {
+        lastCallbackEvent = ev
+        calls += 1
+      })
 
       routingEngine.handleUrl(Url("/"))
 
+      calls should be(1)
       lastCallbackEvent.oldState should be(null)
       lastCallbackEvent.currentState should be(ObjectState)
 
       routingEngine.handleUrl(Url("/next"))
 
+      calls should be(2)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(NextObjectState)
 
       routingEngine.handleUrl(Url("/"))
 
+      calls should be(3)
+      lastCallbackEvent.oldState should be(NextObjectState)
+      lastCallbackEvent.currentState should be(ObjectState)
+
+      routingEngine.handleUrl(Url("/"))
+
+      calls should be(3)
       lastCallbackEvent.oldState should be(NextObjectState)
       lastCallbackEvent.currentState should be(ObjectState)
 
       routingEngine.handleUrl(Url("/abc/1"))
 
+      calls should be(4)
+      lastCallbackEvent.oldState should be(ObjectState)
+      lastCallbackEvent.currentState should be(ClassState("abc", 1))
+
+      routingEngine.handleUrl(Url("/abc/1"))
+
+      calls should be(4)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(ClassState("abc", 1))
 
       routingEngine.handleUrl(Url("/abcd/234"))
 
+      calls should be(5)
       lastCallbackEvent.oldState should be(ClassState("abc", 1))
       lastCallbackEvent.currentState should be(ClassState("abcd", 234))
 
       routingEngine.handleUrl(Url("/next"))
 
+      calls should be(6)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 234))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/next"))
+
+      calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
     }
 
     "return valid current app state" in {
-      val routing: TestRoutingRegistry = new TestRoutingRegistry
-      val viewPresenter: TestViewPresenter[ErrorState.type] = new TestViewPresenter[ErrorState.type]
-      val vp: TestViewPresenterRegistry = new TestViewPresenterRegistry(Map.empty, viewPresenter)
-      val renderer = new TestViewRenderer
-      val routingEngine = new RoutingEngine[TestState](routing, vp, renderer, RootState)
+      initTestRoutingEngine()
 
       routingEngine.handleUrl(Url("/"))
       routingEngine.currentState should be(ObjectState)

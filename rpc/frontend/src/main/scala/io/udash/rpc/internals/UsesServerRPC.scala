@@ -2,16 +2,17 @@ package io.udash.rpc.internals
 
 import io.udash.rpc._
 
-import scala.collection.mutable
-import scala.concurrent.Promise
+import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 
 /**
  * Base trait for client-side components which use some RPC exposed by server-side.
  */
 private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCType] {
-  import framework._
+  override val localFramework: ClientUdashRPCFramework
+  override val remoteFramework: ServerUdashRPCFramework
 
+  import remoteFramework._
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
     */
@@ -25,32 +26,45 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val connector: ServerConnector[RPCRequest]
 
-  private[rpc] def returnServerResult(callId: String, value: RawValue) =
-    returnRemoteResult(callId, value)
+  private val pendingCalls = new js.Object().asInstanceOf[js.Dictionary[Promise[RawValue]]]
+  private var cid: Int = 0
 
-  private[rpc] def reportServerFailure(callId: String, cause: String, message: String) =
-    reportRemoteFailure(callId, cause, message)
-
-  // overridden to use JS object instead of mutable.HashMap
-  override protected[rpc] final def createPendingCallsRegistry: mutable.Map[String, Promise[RawValue]] =
-    new js.Object().asInstanceOf[js.Dictionary[Promise[RawValue]]]
-
-  protected[rpc] def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
-    sendRPCRequest(RPCFire(invocation, getterChain))
-
-  protected[rpc] def callRemote(callId: String, getterChain: List[RawInvocation], invocation: RawInvocation): Unit = {
-    sendRPCRequest(RPCCall(invocation, getterChain, callId))
+  private def newCallId() = {
+    cid += 1
+    cid.toString
   }
-
-  private def sendRPCRequest(request: RPCRequest) =
-    connector.sendRPCRequest(request)
 
   def handleResponse(response: RPCResponse) = {
     response match {
       case RPCResponseSuccess(r, callId) =>
-        returnServerResult(callId, r)
+        pendingCalls.remove(callId).foreach(_.success(r))
       case RPCResponseFailure(cause, error, callId) =>
-        reportServerFailure(callId, cause, error)
+        pendingCalls.remove(callId).foreach(_.failure(RPCFailure(cause, error)))
     }
+  }
+
+  override protected[rpc] def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
+    sendRPCRequest(RPCFire(invocation, getterChain))
+
+  protected[rpc] def callRemote(callId: String, getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
+    sendRPCRequest(RPCCall(invocation, getterChain, callId))
+
+  private def sendRPCRequest(request: RPCRequest) =
+    connector.sendRPCRequest(request)
+
+  protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
+    def fire(rpcName: String, argLists: List[List[RawValue]]): Unit =
+      fireRemote(getterChain, RawInvocation(rpcName, argLists))
+
+    def call(rpcName: String, argLists: List[List[RawValue]]): Future[RawValue] = {
+      val callId = newCallId()
+      val promise = Promise[RawValue]()
+      pendingCalls.put(callId, promise)
+      callRemote(callId, getterChain, RawInvocation(rpcName, argLists))
+      promise.future
+    }
+
+    def get(rpcName: String, argLists: List[List[RawValue]]): RawRPC =
+      new RawRemoteRPC(RawInvocation(rpcName, argLists) :: getterChain)
   }
 }

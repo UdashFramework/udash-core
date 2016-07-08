@@ -1,15 +1,19 @@
 package io.udash.rpc
 
+import java.util.UUID
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletResponse
 
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
-import org.atmosphere.cpr.{AtmosphereConfig, AtmosphereResource, AtmosphereResourceEvent, AtmosphereServletProcessor}
+import org.atmosphere.cpr._
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
+import scala.languageFeature.postfixOps
 
 trait AtmosphereServiceConfig[ServerRPCType] {
   /**
@@ -38,20 +42,27 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @param config Configuration of AtmosphereService.
   * @tparam ServerRPCType Main server side RPC interface
   */
-class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType])
+class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType], sseSuspendTime: FiniteDuration = 1 minute)
                                       (implicit val executionContext: ExecutionContext)
   extends AtmosphereServletProcessor with LazyLogging {
 
-  override def init(config: AtmosphereConfig): Unit =
-    BroadcastManager.init(config.getBroadcasterFactory, config.metaBroadcaster())
+  private var brodcasterFactory: BroadcasterFactory = _
+
+  override def init(config: AtmosphereConfig): Unit = {
+    brodcasterFactory = config.getBroadcasterFactory
+    BroadcastManager.init(brodcasterFactory, config.metaBroadcaster())
+  }
 
   override def onRequest(resource: AtmosphereResource): Unit = {
-    config.initRpc(resource)
-
     resource.transport match {
-      case TRANSPORT.WEBSOCKET => onWebsocketRequest(resource)
-      case TRANSPORT.SSE => onSSERequest(resource)
-      case TRANSPORT.POLLING => onPollingRequest(resource)
+      case TRANSPORT.WEBSOCKET =>
+        config.initRpc(resource)
+        onWebsocketRequest(resource)
+      case TRANSPORT.SSE =>
+        config.initRpc(resource)
+        onSSERequest(resource)
+      case TRANSPORT.POLLING =>
+        onPollingRequest(resource)
       case _ =>
         logger.error(s"Transport ${resource.transport} is not supported!")
         resource.getResponse.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)
@@ -65,7 +76,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
     try {
       val rpc = config.resolveRpc(resource)
-      import rpc.framework._
+      import rpc.localFramework._
       val input: String = readInput(resource.getRequest.getInputStream)
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
@@ -87,15 +98,16 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
   }
 
   private def onSSERequest(resource: AtmosphereResource) = {
-    resource.suspend()
+    resource.suspend(sseSuspendTime.toMillis)
     BroadcastManager.registerResource(resource, resource.uuid())
   }
 
   private def onPollingRequest(resource: AtmosphereResource) = {
     try {
+      resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
       val rpc = config.resolveRpc(resource)
-      import rpc.framework._
+      import rpc.localFramework._
       val input: String = readInput(resource.getRequest.getInputStream)
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
@@ -145,14 +157,14 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
   private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])
                               (resource: AtmosphereResource,
-                               request: rpc.framework.RPCRequest): Option[Future[rpc.framework.RawValue]] = {
+                               request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
 
     val filterResult = config.filters.foldLeft[Try[Any]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
       case failure: Failure[_] => failure
     })
 
-    import rpc.framework._
+    import rpc.localFramework._
     filterResult match {
       case Success(_) =>
         request match {
@@ -171,8 +183,8 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.framework.RPCRequest = {
-    import rpc.framework._
+  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
+    import rpc.localFramework._
     val raw: RawValue = stringToRaw(input)
     read[RPCRequest](raw)
   }

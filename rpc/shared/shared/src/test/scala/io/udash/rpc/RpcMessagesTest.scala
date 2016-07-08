@@ -11,91 +11,91 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   def tests(RPC: UdashRPCFramework) = {
     import RPC._
 
-    val inv = RPC.RawInvocation("r{p[c\"]}Name", List(List(RPC.stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""))))
-    val getter1 = RPC.RawInvocation("g{}[]\",\"etter1", List(List(RPC.stringToRaw("\",a\""), RPC.stringToRaw("\"B,,\""), RPC.stringToRaw("\"v\"")), List(RPC.stringToRaw("\"xy,z\""))))
-    val getter2 = RPC.RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
-    val req = RPC.RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
-    val success = RPC.RPCResponseSuccess(RPC.stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
-    val failure = RPC.RPCResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
-    val rpcFail = RPC.RPCFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
+    val inv = RawInvocation("r{p[c\"]}Name", List(List(stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""))))
+    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List(stringToRaw("\",a\""), stringToRaw("\"B,,\""), stringToRaw("\"v\"")), List(stringToRaw("\"xy,z\""))))
+    val getter2 = RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
+    val req = RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
+    val success = RPCResponseSuccess(stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
+    val failure = RPCResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
+    val rpcFail = RPCFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
 
     "serialize and deserialize call request" in {
-      val serialized = RPC.write[RPC.RPCRequest](req)
-      val deserialized = RPC.read[RPC.RPCRequest](serialized)
+      val serialized = write[RPCRequest](req)
+      val deserialized = read[RPCRequest](serialized)
       deserialized should be(req)
     }
 
     "serialize and deserialize fire request" in {
-      val serialized = RPC.write[RPC.RPCRequest](req)
-      val deserialized = RPC.read[RPC.RPCRequest](serialized)
+      val serialized = write[RPCRequest](req)
+      val deserialized = read[RPCRequest](serialized)
       deserialized should be(req)
     }
 
     "serialize and deserialize success response" in {
-      val serialized = RPC.write[RPC.RPCResponse](success)
-      val deserialized = RPC.read[RPC.RPCResponse](serialized)
+      val serialized = write[RPCResponse](success)
+      val deserialized = read[RPCResponse](serialized)
       deserialized should be(success)
     }
 
     "serialize and deserialize failure response" in {
-      val serialized = RPC.write[RPC.RPCResponse](failure)
-      val deserialized = RPC.read[RPC.RPCResponse](serialized)
+      val serialized = write[RPCResponse](failure)
+      val deserialized = read[RPCResponse](serialized)
       deserialized should be(failure)
     }
 
     "serialize and deserialize rpc failure msg" in {
-      val serialized = RPC.write[RPC.RPCFailure](rpcFail)
-      val deserialized = RPC.read[RPC.RPCFailure](serialized)
+      val serialized = write[RPCFailure](rpcFail)
+      val deserialized = read[RPCFailure](serialized)
 
       deserialized should be(rpcFail)
     }
 
     "serialize and deserialize integers" in {
       val test = 5
-      val serialized = RPC.write(test)
-      val deserialized = RPC.read[Int](serialized)
+      val serialized = write(test)
+      val deserialized = read[Int](serialized)
 
       deserialized should be(test)
     }
 
     "serialize and deserialize booleans" in {
       val test = true
-      val serialized = RPC.write(test)
-      val deserialized = RPC.read[Boolean](serialized)
+      val serialized = write(test)
+      val deserialized = read[Boolean](serialized)
 
       deserialized should be(test)
     }
 
     "serialize and deserialize strings" in {
       val test = "a።bc\u0676ąቢść➔Ĳ"
-      val serialized = RPC.write(test)
-      val deserialized = RPC.read[String](serialized)
+      val serialized = write(test)
+      val deserialized = read[String](serialized)
 
       deserialized should be(test)
     }
 
     "serialize and deserialize simple case classes" in {
-      val test: TestCC = TestCC(5, 123L, true, "bla", 'a' :: 'b' :: Nil)
-      val serialized = RPC.write[TestCC](test)
-      val deserialized = RPC.read[TestCC](serialized)
+      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
+      val serialized = write[TestCC](test)
+      val deserialized = read[TestCC](serialized)
 
       deserialized should be(test)
     }
 
     "serialize and deserialize nested case classes" in {
-      val test: TestCC = TestCC(5, 123L, true, "bla", 'a' :: 'b' :: Nil)
-      val test2: TestCC = TestCC(-35, 1L, true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
+      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
+      val test2: TestCC = TestCC(-35, 1L, 432, true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
       val nested: NestedTestCC = NestedTestCC(-123, test, test2)
-      val serialized = RPC.write(nested)
-      val deserialized = RPC.read[NestedTestCC](serialized)
+      val serialized = write(nested)
+      val deserialized = read[NestedTestCC](serialized)
 
       deserialized should be(nested)
     }
 
     "serialize all types" in {
       val item = completeItem()
-      val serialized = RPC.write(item)
-      val deserialized = RPC.read[CompleteItem](serialized)
+      val serialized = write(item)
+      val deserialized = read[CompleteItem](serialized)
 
       deserialized.unit should be(item.unit)
       deserialized.string should be(item.string)
@@ -135,8 +135,8 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       }
 
       val item = TwoItems(completeItem(), completeItem())
-      val serialized = RPC.write(item)
-      val deserialized = RPC.read[TwoItems](serialized)
+      val serialized = write(item)
+      val deserialized = read[TwoItems](serialized)
 
       deserialized.i1 should be(null)
       deserialized.i2.unit should be(item.i2.unit)
@@ -158,16 +158,17 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   }
 
   def hugeTests(RPC: UdashRPCFramework) = {
+    import RPC._
     "serialize and deserialize huge case classes" in {
-      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
+      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
       def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
       def dncc(counter: Int = 0): DeepNestedTestCC =
         if (counter < 500) DeepNestedTestCC(ncc(), dncc(counter + 1))
         else DeepNestedTestCC(ncc(), null)
 
       val test: DeepNestedTestCC = dncc()
-      val serialized = RPC.write(test)
-      val deserialized = RPC.read[DeepNestedTestCC](serialized)
+      val serialized = write(test)
+      val deserialized = read[DeepNestedTestCC](serialized)
 
       deserialized should be(test)
     }
@@ -175,5 +176,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 }
 
 class UPickleRpcMessagesTest extends RpcMessagesTestScenarios {
-  "RPCMessages uPickle serializers" should tests(UPickleUdashRPCFramework)
+  "RPCMessages client uPickle serializers" should tests(ClientUPickleUdashRPCFramework)
+  "RPCMessages server uPickle serializers" should tests(ServerUPickleUdashRPCFramework)
 }

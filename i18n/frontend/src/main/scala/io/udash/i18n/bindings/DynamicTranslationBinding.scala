@@ -2,7 +2,6 @@ package io.udash.i18n.bindings
 
 import io.udash._
 import io.udash.i18n._
-import io.udash.utils.Logger
 import org.scalajs.dom
 import org.scalajs.dom._
 
@@ -12,7 +11,8 @@ import scalatags.JsDom
 import scalatags.generic.Modifier
 
 private[i18n] class DynamicTranslationBinding[Key <: TranslationKey](key: Key, translator: (Key) => Future[Translated], placeholder: Option[dom.Element])
-                                                                    (implicit ec: ExecutionContext, lang: ReadableProperty[Lang]) extends Modifier[dom.Element] {
+                                                                    (implicit ec: ExecutionContext, lang: ReadableProperty[Lang])
+  extends Modifier[dom.Element] with StrictLogging {
   override def applyTo(t: dom.Element): Unit = {
     var holder: Element = placeholder.getOrElse(emptyStringNode())
     t.appendChild(holder)
@@ -27,7 +27,7 @@ private[i18n] class DynamicTranslationBinding[Key <: TranslationKey](key: Key, t
           )
           holder = newHolder
         case Failure(ex) =>
-          Logger.error(ex.getMessage)
+          logger.error(ex.getMessage)
       }
     }
 
