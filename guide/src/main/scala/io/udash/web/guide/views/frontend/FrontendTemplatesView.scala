@@ -360,7 +360,8 @@ class FrontendTemplatesView extends View {
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendPropertiesState.url)("Properties"),
-      " chapter to read about a data model in the Udash applications."
+      " chapter to read about a data model in the Udash applications. ",
+      "You might find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   ).render
 

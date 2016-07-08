@@ -46,7 +46,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
     h3("URL"),
     p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),
     CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(GuideStyles),
-    div(GuideStyles.get.frame)(
+    div(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       p(
         span("The URL of this page is: "),
         span(id := "url-demo-link")(bind(url)), br(), br(),
@@ -135,7 +135,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "Below you can find input witch changes the URL on every update. This change is handled like ",
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
-    div(GuideStyles.get.frame)(
+    div(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       input(BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "", placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
         applicationInstance.goTo(FrontendRoutingState(
           Some(js.Dynamic.global

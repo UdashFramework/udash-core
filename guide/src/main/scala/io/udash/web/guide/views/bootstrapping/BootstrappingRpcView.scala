@@ -56,14 +56,14 @@ class BootstrappingRpcView extends View {
     h4("Examples"),
     p("Example of RPC interfaces:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait MainClientRPC {
         |  def pong(id: Int): Unit
         |}""".stripMargin)(GuideStyles),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait MainServerRPC {

@@ -21,7 +21,7 @@ object JQueryEventsDemo {
     jQ("#jquery-events-demo ul").append(li("This will be added only once").render)
 
   def apply(): dom.Element = {
-    val content = div(id := "jquery-events-demo", GuideStyles.get.frame)(
+    val content = div(id := "jquery-events-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       ul(),
       br,
       UdashButtonGroup()(

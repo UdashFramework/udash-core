@@ -1,6 +1,6 @@
 package io.udash.web.guide.demos.rpc
 
-import com.avsystem.commons.rpc.RPC
+import io.udash.rpc._
 import com.avsystem.commons.serialization.{Input, Output}
 
 import scala.concurrent.Future

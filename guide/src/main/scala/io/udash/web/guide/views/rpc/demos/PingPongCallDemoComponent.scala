@@ -48,7 +48,7 @@ class PingPongCallDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.get.frame)(
+    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       button(id := "ping-pong-call-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true

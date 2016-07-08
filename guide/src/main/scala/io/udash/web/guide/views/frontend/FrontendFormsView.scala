@@ -217,7 +217,8 @@ class FrontendFormsView extends View {
     p(
       "Now you know everything you need to start frontend development using Udash. ",
       "If you want to learn more about client-server communication, check the ",
-      a(href := RpcIntroState.url)("RPC"), " chapter."
+      a(href := RpcIntroState.url)("RPC"), " chapter. ",
+      "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   ).render
 

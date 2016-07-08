@@ -215,6 +215,10 @@ object GuideStyles extends UdashStylesheet with CodeBlockStyles {
     margin(2 rem, `0`)
   )
 
+  val useBootstrap = style(
+    addClassName("bootstrap")
+  )
+
   val blockOnMobile = style(
     MediaQueries.phone(
       style(

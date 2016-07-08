@@ -43,7 +43,7 @@ class RpcIntroView extends View {
     new PingPongCallDemoComponent,
     p("The implementation is really simple. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongServerRPC {
@@ -71,7 +71,7 @@ class RpcIntroView extends View {
     new PingPongPushDemoComponent,
     p("This implementation is only a little more complicated. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongServerRPC {
@@ -80,7 +80,7 @@ class RpcIntroView extends View {
     )(GuideStyles),
     p("In the client RPC interface:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongClientRPC {

@@ -41,7 +41,7 @@ class RpcInterfacesView extends View {
     h3("Server-side RPC interface"),
     p("Let's take a look at the following example of the server-side RPC interface:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |case class Record(i: Int, fuu: String)
         |
@@ -94,7 +94,7 @@ class RpcInterfacesView extends View {
       i("call"), " methods. For example: "
     ),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |case class Record(i: Int, fuu: String)
         |
@@ -127,7 +127,7 @@ class RpcInterfacesView extends View {
       i("MainServerRPC"), " and one ", i("MainClientRPC"), " witch will give access to other service RPC interfaces."
     ),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait MainServerRPC {

@@ -65,7 +65,7 @@ class EchoRestDemoComponent extends Component {
     val content = Property("a b !@#$%^&*()_+")
 
     // TODO migrate to bootstrap components
-    def render: Element = span(GuideStyles.frame, id := "echo-rest-demo")(
+    def render: Element = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "echo-rest-demo")(
       TextInput.debounced(content, id := "echo-rest-demo-input"),
       button(id := "echo-rest-demo-query-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
         onclick :+= ((ev: MouseEvent) => {

@@ -324,8 +324,7 @@ object HomepageStyles extends UdashStylesheet with CodeBlockStyles {
         width(50 %%),
 
         &.nthChild("odd").lastChild(
-          width(100 %%),
-          borderTopStyle.none
+          width(100 %%)
         )
       )
     ),
@@ -347,6 +346,11 @@ object HomepageStyles extends UdashStylesheet with CodeBlockStyles {
         )
       )
     )
+  )
+
+
+  val moreListItemTwoLineTitle = style(
+    paddingTop(57 px)
   )
 
   val moreListHead = style(

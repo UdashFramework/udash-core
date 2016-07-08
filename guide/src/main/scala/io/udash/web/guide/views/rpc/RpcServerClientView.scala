@@ -71,7 +71,7 @@ class RpcServerClientView extends View {
     new NotificationsDemoComponent,
     p("The code of the example above:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |/** Interfaces from the shared module */
         |@RPC

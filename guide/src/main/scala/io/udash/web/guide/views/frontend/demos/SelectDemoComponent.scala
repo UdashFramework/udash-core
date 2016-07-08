@@ -28,7 +28,7 @@ class SelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "select-demo", GuideStyles.get.frame)(
+  override def getTemplate: Element = div(id := "select-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(

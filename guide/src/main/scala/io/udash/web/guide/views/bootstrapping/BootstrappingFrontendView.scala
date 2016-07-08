@@ -42,15 +42,10 @@ class BootstrappingFrontendView extends View {
     ),
     CodeBlock(
       """sealed abstract class RoutingState(val parentState: RoutingState) extends State
-        |
         |case object RootState extends RoutingState(null)
-        |
         |case object LandingPageState extends RoutingState(RootState)
-        |
         |case object NewsletterState extends RoutingState(RootState)
-        |
         |case object SubscribeState extends RoutingState(NewsletterState)
-        |
         |case object UnsubscribeState extends RoutingState(NewsletterState)""".stripMargin
     )(GuideStyles),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.get.imgMedium, GlobalStyles.get.noMargin),

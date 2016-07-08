@@ -70,7 +70,7 @@ class SimpleRestDemoComponent extends Component {
     import scalacss.ScalatagsCss._
 
     // TODO migrate to bootstrap components
-    def render: Element = span(GuideStyles.frame, id := "simple-rest-demo")(
+    def render: Element = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(
       button(id := "simple-rest-demo-string-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
         onclick :+= ((ev: MouseEvent) => {
           presenter.sendStringRequest(jQ(ev.target))

@@ -96,18 +96,18 @@ private[views] object IndexView {
   val sectionMore = section(HomepageStyles.get.section)(
     div(GlobalStyles.get.body)(
       h1(
-        "What's more?"
+        "Why Udash?"
       ),
       ul(HomepageStyles.get.moreList)(
-        li(HomepageStyles.get.moreListItem)(
-          h2(HomepageStyles.get.moreListHead)("Reactive Bindings"),
+        li(HomepageStyles.get.moreListItem, HomepageStyles.get.moreListItemTwoLineTitle)(
+          h2(HomepageStyles.get.moreListHead)("Reactive", br(), "Data Bindings"),
           p(HomepageStyles.get.moreListDescription)("Automatically synchronise user interface with your data model.")
         ),
-        li(HomepageStyles.get.moreListItem)(
+        li(HomepageStyles.get.moreListItem, HomepageStyles.get.moreListItemTwoLineTitle)(
           h2(HomepageStyles.get.moreListHead)("Type-safe ", br(), "RPC & REST"),
-          p(HomepageStyles.get.moreListDescription)("A client↔server communication based on typed interfaces.")
+          p(HomepageStyles.get.moreListDescription)("A client↔server communication based on typed interfaces. Bidirectional RPC via WebSockets out of the box.")
         ),
-        li(HomepageStyles.get.moreListItem)(
+        li(HomepageStyles.get.moreListItem, HomepageStyles.get.moreListItemTwoLineTitle)(
           h2(HomepageStyles.get.moreListHead)("User Interface Components"),
           p(HomepageStyles.get.moreListDescription)("Twitter Bootstrap components enriched by Udash features.")
         ),
@@ -119,6 +119,19 @@ private[views] object IndexView {
         li(HomepageStyles.get.moreListItem)(
           h2(HomepageStyles.get.moreListHead)("i18n"),
           p(HomepageStyles.get.moreListDescription)("Translations served by the backend or compiled into JavaScript.")
+        ),
+        li(HomepageStyles.get.moreListItem)(
+          h2(HomepageStyles.get.moreListHead)("Generator"),
+          p(HomepageStyles.get.moreListDescription)("Generate a customized application, compile and\u00A0try it out in a 5 minutes.")
+        ),
+
+        li(HomepageStyles.get.moreListItem)(
+          h2(HomepageStyles.get.moreListHead)("Open Source"),
+          p(HomepageStyles.get.moreListDescription)("The whole framework code is available on GitHub under ", i("Apache v2"), " license.")
+        ),
+        li(HomepageStyles.get.moreListItem, HomepageStyles.get.moreListItemTwoLineTitle)(
+          h2(HomepageStyles.get.moreListHead)("Backend independent"),
+          p(HomepageStyles.get.moreListDescription)("Udash provides a complete support for your web application and the communication with the server, but makes no influence on your backend implementation.")
         ),
         li(HomepageStyles.get.moreListItem)(
           h2(HomepageStyles.get.moreListHead)("IDE support"),

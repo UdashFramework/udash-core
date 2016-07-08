@@ -87,7 +87,7 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.get.frame)(
+    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       button(id := "gencodec-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true
