@@ -3,7 +3,7 @@ package io.udash.core
 import org.scalajs.dom._
 
 /**
-  * Url wrapper - just for omitting strings.
+  * Url wrapper - just for avoiding strings.
   */
 case class Url(value: String) extends AnyVal
 

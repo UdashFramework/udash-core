@@ -25,6 +25,7 @@ object Dependencies extends Build {
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
+  val bootstrapVersion = "3.3.6"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -76,5 +77,13 @@ object Dependencies extends Build {
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
+  ))
+
+  val bootstrapFrontendDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
+  ))
+
+  val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js"
   ))
 }
