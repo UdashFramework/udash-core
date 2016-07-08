@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash._
+import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
@@ -10,6 +10,7 @@ import scalatags.JsDom
 
 class RepeatDemoComponent extends Component {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
@@ -20,7 +21,7 @@ class RepeatDemoComponent extends Component {
     val idx = Random.nextInt(s)
     val amount = Random.nextInt(s - idx) + 1
     val count = Random.nextInt(5)
-    integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
+    integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
   }, 2000)
 
   override def getTemplate: Element = div(id := "repeat-demo", GuideStyles.frame)(

@@ -9,6 +9,7 @@ import scalatags.JsDom
 
 class TextInputDemoComponent extends Component {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
