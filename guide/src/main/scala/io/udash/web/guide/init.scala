@@ -4,7 +4,9 @@ import io.udash._
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.rpc.RPCService
 import io.udash.rpc._
+import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.wrappers.jquery._
+import org.scalajs.dom
 import org.scalajs.dom.{Element, document}
 
 import scala.scalajs.js
@@ -18,6 +20,9 @@ object Context {
 
   implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState)
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)
+
+  import io.udash.rest._
+  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, dom.window.location.port.toInt, "/rest/")
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
@@ -44,6 +49,11 @@ object Context {
       MenuLink("Client ➔ Server", RpcClientServerState),
       MenuLink("Server ➔ Client", RpcServerClientState),
       MenuLink("Serialization", RpcSerializationState)
+    )),
+    MenuContainer("REST", Seq(
+      MenuLink("Introduction", RestIntroState),
+      MenuLink("Interfaces", RestInterfacesState),
+      MenuLink("Client ➔ Server", RestClientServerState)
     )),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),

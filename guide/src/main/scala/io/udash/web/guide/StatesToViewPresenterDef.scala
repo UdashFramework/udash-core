@@ -1,11 +1,12 @@
 package io.udash.web.guide
 
 import io.udash._
-import io.udash.web.guide.views.bootstrapping.{BootstrappingFrontendViewPresenter, _}
-import io.udash.web.guide.views.frontend.{FrontendFormsViewPresenter, FrontendPropertiesViewPresenter, FrontendRoutingViewPresenter, FrontendTemplatesViewPresenter, _}
-import io.udash.web.guide.views.rpc.{RpcIntroViewPresenter, RpcServerClientViewPresenter, _}
 import io.udash.web.guide.views._
+import io.udash.web.guide.views.bootstrapping.{BootstrappingFrontendViewPresenter, _}
 import io.udash.web.guide.views.ext.{I18NExtViewPresenter, JQueryExtViewPresenter}
+import io.udash.web.guide.views.frontend.{FrontendFormsViewPresenter, FrontendPropertiesViewPresenter, FrontendRoutingViewPresenter, FrontendTemplatesViewPresenter, _}
+import io.udash.web.guide.views.rest._
+import io.udash.web.guide.views.rpc.{RpcIntroViewPresenter, RpcServerClientViewPresenter, _}
 
 class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
   def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
@@ -38,6 +39,11 @@ class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
       case RpcSerializationState => RpcSerializationViewPresenter
       case RpcClientServerState => RpcClientServerViewPresenter
       case RpcServerClientState => RpcServerClientViewPresenter
+
+      case RestState => RestViewPresenter
+      case RestIntroState => RestIntroViewPresenter
+      case RestInterfacesState => RestInterfacesViewPresenter
+      case RestClientServerState => RestClientServerViewPresenter
 
       case I18NExtState => I18NExtViewPresenter
       case JQueryExtState => JQueryExtViewPresenter

@@ -63,6 +63,15 @@ case object RpcClientServerState extends RoutingState(RpcState)
 
 case object RpcServerClientState extends RoutingState(RpcState)
 
+/** REST communication chapters */
+case object RestState extends RoutingState(ContentState)
+
+case object RestIntroState extends RoutingState(RestState)
+
+case object RestInterfacesState extends RoutingState(RestState)
+
+case object RestClientServerState extends RoutingState(RestState)
+
 /** Extensions **/
 case object JQueryExtState extends RoutingState(ContentState)
 

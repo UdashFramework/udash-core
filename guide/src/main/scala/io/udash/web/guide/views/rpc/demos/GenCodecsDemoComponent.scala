@@ -27,7 +27,7 @@ trait GenCodecsDemoModel {
   def sealedTrait: Fruit
 }
 
-class GenCodecsDemoComponent extends Component {
+class GenCodecsDemoComponent extends Component with StrictLogging {
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
   import Context._
   
@@ -41,7 +41,7 @@ class GenCodecsDemoComponent extends Component {
     }
   }
 
-  class GenCodecsDemoPresenter(model: ModelProperty[GenCodecsDemoModel]) extends StrictLogging {
+  class GenCodecsDemoPresenter(model: ModelProperty[GenCodecsDemoModel]) {
     def onButtonClick(target: JQuery) = {
       target.attr("disabled", "true")
       val demoRpc: GenCodecServerRPC = Context.serverRpc.demos().gencodecsDemo()
