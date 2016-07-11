@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.ext.demo
 
-import io.udash.web.guide.styles.BootstrapStyles
-import io.udash.wrappers.jquery._
+import io.udash.bootstrap.button.UdashButton
 import io.udash.web.guide.styles.partials.GuideStyles
+import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
 import scala.language.postfixOps
@@ -41,13 +41,13 @@ object JQueryCallbacksDemo {
       "Divide:",
       ul(id := "div"),
       br,
-      button(BootstrapStyles.btn, BootstrapStyles.btnPrimary, id := "fire")(onclick := (() => {
+      UdashButton()(id := "fire", onclick := (() => {
         callbacks.fire(1, 1)
         callbacks.fire(3, 3)
         callbacks.fire(7, 4)
         callbacks.disable()
         callbacks.fire(1, 2)
-      }))("Fire")
+      }), "Fire").render
     ).render
   }
 }

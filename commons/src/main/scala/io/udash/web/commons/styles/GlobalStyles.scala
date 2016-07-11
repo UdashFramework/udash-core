@@ -108,6 +108,10 @@ object GlobalStyles extends StyleSheet.Inline {
     margin(`0`).important
   )
 
+  val smallMargin = style(
+    margin(5 px).important
+  )
+
   val underlineLink = style(
     position.relative,
     display.block,
@@ -136,6 +140,12 @@ object GlobalStyles extends StyleSheet.Inline {
         transform := "scaleX(1)"
       )
     )
+  )
+
+  val centerBlock = style(
+    display.block,
+    textAlign.center,
+    margin(`0`, auto)
   )
 }
 

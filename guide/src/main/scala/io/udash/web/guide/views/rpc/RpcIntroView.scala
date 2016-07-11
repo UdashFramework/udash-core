@@ -26,7 +26,7 @@ class RpcIntroView extends View {
     ),
     p(
       "The Udash project tries to make frontend applications as type safe as possible. Thanks to the ",
-      a(href := References.scalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
+      a(href := References.ScalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
     ul(GuideStyles.defaultList)(

@@ -30,7 +30,7 @@ class FrontendTemplatesView extends View {
     ExampleKeyframes.render[TypedTag[HTMLStyleElement]],
     h2("Scalatags & ScalaCSS"),
     p(
-      "Using ", a(href := References.scalatagsHomepage)("Scalatags"), " and ", a(href := References.scalaCssHomepage)("ScalaCSS"), " ",
+      "Using ", a(href := References.ScalatagsHomepage)("Scalatags"), " and ", a(href := References.ScalaCssHomepage)("ScalaCSS"), " ",
       "is the recommended way of creating and styling view templates. This part of the guide presents the most interesting parts ",
       "of these libraries. For more details refer to projects documentation."
     ),

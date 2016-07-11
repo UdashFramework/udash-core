@@ -33,23 +33,23 @@ class FrontendIntroView extends View {
       "JS leads to frustration, frustration leads to anger, anger leads to Scala.js."
     ),
     p(
-      "The ", a(href := References.scalaJsHomepage)("Scala.js"), " project tries to make developers lives easier. It brings us ",
-      "power of the ", a(href := References.scalaHomepage)("Scala language"), " and compiles it to JavaScript. Thanks to this, ",
+      "The ", a(href := References.ScalaJsHomepage)("Scala.js"), " project tries to make developers lives easier. It brings us ",
+      "power of the ", a(href := References.ScalaHomepage)("Scala language"), " and compiles it to JavaScript. Thanks to this, ",
       "we can develop in a type safe, modern, developer friendly language and publish a project as a website like with JavaScript. "
     ),
     p(
       "The Udash framework provides tools to make web applications development with ",
-      a(href := References.scalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about the Udash ",
+      a(href := References.ScalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about the Udash ",
       a(href := RpcIntroState.url)("RPC"), " system. In this part of the guide you will read about: "
     ),
     ul(GuideStyles.defaultList)(
       li("Routing in Udash based applications."),
       li("The powerful Properties system for an application model."),
       li(
-        a(href := References.scalatagsHomepage)("Scalatags"), " and ", a(href := References.scalaCssHomepage)("ScalaCSS"),
+        a(href := References.ScalatagsHomepage)("Scalatags"), " and ", a(href := References.ScalaCssHomepage)("ScalaCSS"),
         " usage as HTML and CSS replacement."
       ),
-      li("The properties bindings for ", a(href := References.scalatagsHomepage)("Scalatags"), "")
+      li("The properties bindings for ", a(href := References.ScalatagsHomepage)("Scalatags"), "")
     ),
     p("All these features will make your life as a frontend developer pleasant."),
     h4("Example"),
@@ -139,7 +139,7 @@ class FrontendIntroView extends View {
         |        div(BootstrapStyles.inputGroupBtn)(
         |          button(
         |            id := "randomize",
-        |            BootstrapStyles.btn + BootstrapStyles.btnPrimary
+        |            BootstrapStyles.Button.btn + BootstrapStyles.Button.btnPrimary
         |          )(onclick :+= (ev => {
         |            presenter.randomize()
         |            true

@@ -14,6 +14,11 @@ object GuideDefaultStyles extends StyleSheet.Inline with DefaultStyles {
       fontSize(1.6 rem)
     ),
 
+    unsafeRoot("pre") (
+      backgroundColor(Color("#f5f5f5")),
+      overflow.auto
+    ),
+
     unsafeRoot("p")(
       marginTop(2.5 rem),
       fontSize(1.6 rem),

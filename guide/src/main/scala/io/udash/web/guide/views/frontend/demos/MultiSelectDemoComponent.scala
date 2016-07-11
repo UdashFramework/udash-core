@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
@@ -18,7 +18,7 @@ class MultiSelectDemoComponent extends Component {
   case object Orange extends Fruit
   case object Banana extends Fruit
 
-  val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Seq(Apple, Banana))
+  val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
   val favoriteFruitsStrings = favoriteFruits.transform(
     (f: Fruit) => f.toString,
     (s: String) => s match {
@@ -42,14 +42,14 @@ class MultiSelectDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.inputGroupAddon)(
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
+    div(BootstrapStyles.Form.inputGroupAddon)(
       Select(
         favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-        BootstrapStyles.formControl
+        BootstrapStyles.Form.formControl
       )
     ),
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
   )
 }

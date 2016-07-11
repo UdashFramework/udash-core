@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc.demos
 
-import io.udash.web.guide.Context
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.BootstrapStyles
+import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom._
@@ -40,11 +40,10 @@ class ClientIdDemoComponent extends Component {
 
   class ClientIdDemoView(model: ModelProperty[ClientIdDemoModel], presenter: ClientIdDemoPresenter) {
     import JsDom.all._
-    import scalacss.Defaults._
     import scalacss.ScalatagsCss._
 
     def render: Element = span(GuideStyles.frame)(
-      button(id := "client-id-demo", BootstrapStyles.btn, BootstrapStyles.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
+      button(id := "client-id-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
         presenter.onButtonClick(jQ(ev.target))
         true
       }))("Load client id"),

@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
@@ -9,6 +9,7 @@ import scalatags.JsDom
 
 class SelectDemoComponent extends Component {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
@@ -41,14 +42,14 @@ class SelectDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.inputGroupAddon)(
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
+    div(BootstrapStyles.Form.inputGroupAddon)(
       Select(
         favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-        BootstrapStyles.formControl
+        BootstrapStyles.Form.formControl
       )
     ),
-    div(BootstrapStyles.inputGroupAddon)(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
+    div(BootstrapStyles.Form.inputGroupAddon)(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
   )
 }

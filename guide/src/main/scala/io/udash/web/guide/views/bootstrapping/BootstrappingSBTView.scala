@@ -21,9 +21,9 @@ class BootstrappingSBTView extends View {
     div(
       h2("SBT configuration"),
       p(
-        a(href := sbtHomepage)("SBT"),
+        a(href := SbtHomepage)("SBT"),
         " is the recommended build tool for ScalaJS. The excellent ",
-        a(href:= sbtScalaJsPluginHomepage)("ScalaJS SBT plugin"),
+        a(href := SbtScalaJsPluginHomepage)("ScalaJS SBT plugin"),
         " provides tools for configuring cross-compiled modules and JS dependencies management. If you want to use it, " +
           "add the following line into the ", i("project/plugins.sbt"), " file: "
       ),
@@ -87,9 +87,9 @@ class BootstrappingSBTView extends View {
            |}""".stripMargin
       )(GuideStyles),
       p(
-        "You are not obligated to use ", a(href := jettyHomepage)("Jetty"), " as webserver nor to use ",
-        a(href := bootstrapHomepage)("Twitter bootstrap"), " in frontend. Anyway it is recommended to use ",
-        a(href := jettyHomepage)("Jetty"), " for an easy start, because you can embed it inside your code and launch easily anywhere."
+        "You are not obligated to use ", a(href := JettyHomepage)("Jetty"), " as webserver nor to use ",
+        a(href := BootstrapHomepage)("Twitter bootstrap"), " in frontend. Anyway it is recommended to use ",
+        a(href := JettyHomepage)("Jetty"), " for an easy start, because you can embed it inside your code and launch easily anywhere."
       ),
       h3("SBT build configuration"),
       p("Let's start with some basic options inside the ", i("build.sbt"), " file (you can change these if you need):"),

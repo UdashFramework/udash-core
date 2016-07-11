@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
@@ -24,25 +24,25 @@ class TextInputDemoComponent extends Component {
   ).render
 
   private val inputs = div(BootstrapStyles.row)(
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Name:"),
-        TextInput.debounced(name)(BootstrapStyles.formControl, placeholder := "Input your name...", maxlength := "6"),
-        div(BootstrapStyles.inputGroupAddon)(bind(name))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Name:"),
+        TextInput.debounced(name)(BootstrapStyles.Form.formControl, placeholder := "Input your name...", maxlength := "6"),
+        div(BootstrapStyles.Form.inputGroupAddon)(bind(name))
       )
     ),
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Password:"),
-        PasswordInput.debounced(password)(BootstrapStyles.formControl, placeholder := "Input your password...", maxlength := "6"),
-        div(BootstrapStyles.inputGroupAddon)(bind(password))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Password:"),
+        PasswordInput.debounced(password)(BootstrapStyles.Form.formControl, placeholder := "Input your password...", maxlength := "6"),
+        div(BootstrapStyles.Form.inputGroupAddon)(bind(password))
       )
     ),
-    div(BootstrapStyles.colMd4)(
-      div(BootstrapStyles.inputGroup)(
-        div(BootstrapStyles.inputGroupAddon)("Age:"),
-        NumberInput.debounced(age.transform(_.toString, Integer.parseInt), maxlength := "6")(BootstrapStyles.formControl),
-        div(BootstrapStyles.inputGroupAddon)(bind(age))
+    div(BootstrapStyles.Grid.colMd4)(
+      div(BootstrapStyles.Form.inputGroup)(
+        div(BootstrapStyles.Form.inputGroupAddon)("Age:"),
+        NumberInput.debounced(age.transform(_.toString, Integer.parseInt), maxlength := "6")(BootstrapStyles.Form.formControl),
+        div(BootstrapStyles.Form.inputGroupAddon)(bind(age))
       )
     )
   )

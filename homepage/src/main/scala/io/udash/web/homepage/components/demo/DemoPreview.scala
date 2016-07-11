@@ -1,7 +1,8 @@
 package io.udash.web.homepage.components.demo
 
+import io.udash.bootstrap.UdashBootstrap
+import io.udash.bootstrap.modal.ModalSize
 import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.homepage.styles.partials.DemoStyles
 import org.scalajs.dom.raw.Element
 
@@ -166,6 +167,71 @@ object DemoPreview {
           li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("de"))))("DE")),
           li(DemoStyles.navItem)(a(DemoStyles.underlineLink, onclick := (() => changeLang(Lang("sp"))))("SP"))
         )
+      )
+    ).render
+  }
+
+  def components: Element = {
+    import io.udash._
+
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+    import io.udash.bootstrap.modal.UdashModal
+    import io.udash.bootstrap.progressbar.UdashProgressBar
+
+    import org.scalajs.dom
+    import scalajs.concurrent.JSExecutionContext.Implicits
+    import Implicits.queue
+    import scalacss.ScalatagsCss._
+    import scalatags.JsDom.all._
+
+    val text = Property[String]("")
+    val progress = Property[Int](0)
+    val disableButton = Property(text.get.isEmpty)
+    text.listen(s => disableButton.set(s.isEmpty))
+
+    lazy val modal: UdashModal = UdashModal(
+      backdrop = UdashModal.NoneBackdrop,
+      modalSize = ModalSize.Small
+    )(
+      headerFactory = Some(() => h4(bind(text)).render),
+      bodyFactory = Some(() => {
+        div(
+          h4("Closing..."),
+          UdashProgressBar.animated(progress)().render
+        ).render
+      })
+    )
+
+    def makeProgress(): Unit = progress.get match {
+      case v if v >= 100 =>
+        text.set("")
+        progress.set(0)
+        modal.hide()
+      case v =>
+        progress.set(v + 25)
+        dom.window.setTimeout(() => makeProgress(), 750)
+    }
+
+    modal.listen {
+      case UdashModal.ModalShownEvent(_) => makeProgress()
+    }
+
+    div(DemoStyles.demoIOWrapper)(
+      // apply Bootstrap styles
+      div(cls := "bootstrap", DemoStyles.demoBootstrap)(
+        UdashInputGroup()(
+          UdashInputGroup.addon("Modal title: "),
+          UdashInputGroup.input(
+            TextInput.debounced(text).render
+          ),
+          UdashInputGroup.buttons(
+            UdashButton(
+              disabled = disableButton
+            )("Go!", modal.openButtonAttrs()).render
+          )
+        ).render,
+        modal.render
       )
     ).render
   }

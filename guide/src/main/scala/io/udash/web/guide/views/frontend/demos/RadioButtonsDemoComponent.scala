@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.web.guide.styles.BootstrapStyles
+import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Input
@@ -10,6 +10,7 @@ import scalatags.JsDom
 
 class RadioButtonsDemoComponent extends Component {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
@@ -42,14 +43,14 @@ class RadioButtonsDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)(
+  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(
       RadioButtons(
         favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-        (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.radioInline, "data-label".attr := l)(i, l) })
+        (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l) })
       )
     ),
-    div(BootstrapStyles.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
+    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
   )
 }

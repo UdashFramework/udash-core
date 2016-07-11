@@ -112,7 +112,7 @@ class FrontendFormsView extends View {
         |case object Orange extends Fruit
         |case object Banana extends Fruit
         |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Seq(Apple, Banana))
+        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
         |val favoriteFruitsStrings = favoriteFruits.transform(
         |  (f: Fruit) => f.toString,
         |  (s: String) => s match {
@@ -196,7 +196,7 @@ class FrontendFormsView extends View {
         |case object Orange extends Fruit
         |case object Banana extends Fruit
         |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Seq(Apple, Banana))
+        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
         |val favoriteFruitsStrings = favoriteFruits.transform(
         |  (f: Fruit) => f.toString,
         |  (s: String) => s match {

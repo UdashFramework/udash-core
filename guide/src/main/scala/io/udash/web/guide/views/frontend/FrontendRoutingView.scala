@@ -1,10 +1,10 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.guide.styles.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
@@ -57,7 +57,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       a(id := "url-demo-link-chocolate", href := s"${new FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
       a(id := "url-demo-link-pizza", href := s"${new FrontendRoutingState(Some("pizza")).url}")("Pizza"),
       br(), br(),
-      input(GlobalStyles.inline, BootstrapStyles.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
+      input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
     )(),
     h3("RoutingState & RoutingRegistry"),
     p(
@@ -136,7 +136,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
     div(GuideStyles.frame)(
-      input(BootstrapStyles.formControl, id := "url-demo-link-input", value := "", placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
+      input(BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "", placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
         applicationInstance.goTo(FrontendRoutingState(
           Some(js.Dynamic.global
             .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
@@ -149,7 +149,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendMVPState.url)("Model, View, Presenter & ViewPresenter"), " chapter to ",
-      "learn more about the ", a(href := References.mvpPattern)("MVP pattern"), " variation used in Udash."
+      "learn more about the ", a(href := References.MvpPattern)("MVP pattern"), " variation used in Udash."
     )
   ).render
 

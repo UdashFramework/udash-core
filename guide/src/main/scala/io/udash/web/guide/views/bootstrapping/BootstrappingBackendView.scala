@@ -22,12 +22,12 @@ class BootstrappingBackendView extends View {
     p("This chapter covers:"),
     ul(GuideStyles.defaultList)(
       li("Implementation of the server-side RPC endpoint"),
-      li("Configuration of the ", a(href := jettyHomepage)("Jetty"), " webserver to handle RPC and static files requests"),
+      li("Configuration of the ", a(href := JettyHomepage)("Jetty"), " webserver to handle RPC and static files requests"),
       li("Implementation of a simple system launcher")
     ),
     p("The backend application is expected to serve static files like HTML, JS or images and handle RPC requests from client applications."),
     p(
-      "This guide uses ", a(href := jettyHomepage)("Jetty"), " as the webserver, but of course Udash does not depend on any webserver, " +
+      "This guide uses ", a(href := JettyHomepage)("Jetty"), " as the webserver, but of course Udash does not depend on any webserver, " +
       "so you can use any implementation you like."
     ),
     h3("Server RPC implementation"),

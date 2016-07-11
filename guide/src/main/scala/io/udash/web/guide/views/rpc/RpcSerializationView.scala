@@ -22,13 +22,13 @@ class RpcSerializationView extends View {
     h2("Serialization"),
     p(
       "Everything you send via RPC has to be serializable. Udash internally uses the ",
-      a(href := References.avScalaCommonsGitHub)("AVSystem Scala Commons"), " library which supports serialization",
+      a(href := References.AvScalaCommonsGitHub)("AVSystem Scala Commons"), " library which supports serialization",
       " of basic Scala types out of the box and provides utilities for the custom data types serialization. "
     ),
     h3("GenCodecs"),
     p(
       "Udash RPC uses the ", i("GenCodec"), " mechanism from the ",
-      a(href := References.avScalaCommonsGitHub)("AVSystem Scala Commons"), " library for the data serialization. It provides ",
+      a(href := References.AvScalaCommonsGitHub)("AVSystem Scala Commons"), " library for the data serialization. It provides ",
       "serialization for a basic Scala types like: int, float, string, etc. It also brings automatic generation of serializers ",
       "for the types which are one of: "
     ),
@@ -148,7 +148,7 @@ class RpcSerializationView extends View {
     ),
     p(
       "In the Udash RPC repository you can find implementation based on the ",
-      a(href := References.upickleHomepage)("uPickle"),
+      a(href := References.UpickleHomepage)("uPickle"),
       " library."
     ),
     h2("What's next?"),

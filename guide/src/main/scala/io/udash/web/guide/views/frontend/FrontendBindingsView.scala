@@ -52,7 +52,7 @@ class FrontendBindingsView extends View {
     CodeBlock(
       """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
         |val name: Property[String] = Property[String](names.next())
-        |val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
+        |val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
         |
         |dom.window.setInterval(() => {
         |  name.set(names.next())
@@ -98,7 +98,7 @@ class FrontendBindingsView extends View {
     ),
     h3("repeat"),
     CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
+      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
         |
         |dom.window.setInterval(() => {
         |  val s: Int = integers.get.size
@@ -120,7 +120,7 @@ class FrontendBindingsView extends View {
     p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
     h3("bindValidation"),
     CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](Seq(1,2,3,4))
+      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
         |integers.addValidator(new Validator[Seq[Int]] {
         |  def apply(element: Seq[Int])
         |           (implicit ec: ExecutionContext): Future[ValidationResult] =

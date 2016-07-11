@@ -9,6 +9,7 @@ import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.homepage.styles.partials.{ButtonsStyle, HomepageStyles}
 import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.utils.StyleUtils
 import io.udash.web.commons.views.{Image, SVG, Size}
 import org.scalajs.dom.Element
 
@@ -74,17 +75,17 @@ private[views] object IndexView {
       ),
       ul(HomepageStyles.boxList)(
         li(HomepageStyles.featuresListItem)(
-          i(HomepageStyles.featuresListIcon)(Image("features_shared.png", "Shared scala code", HomepageStyles.centerBlock)),
+          i(HomepageStyles.featuresListIcon)(Image("features_shared.png", "Shared scala code", GlobalStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)("Shared scala code"),
           p(HomepageStyles.moreListDescription)("Udash brings out of the box the RPC system with a shared data model and interfaces between frontend and backend, which boosts development and keeps code bases consistent.")
         ),
         li(HomepageStyles.featuresListItem)(
-          i()(HomepageStyles.featuresListIcon)(Image("features_typesafe.png", "Type safe", HomepageStyles.centerBlock)),
+          i()(HomepageStyles.featuresListIcon)(Image("features_typesafe.png", "Type safe", GlobalStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)(span("Type safe"), br(), span(HomepageStyles.featuresListHeadInner)("HTML CSS JS")),
           p(HomepageStyles.moreListDescription)("In cooperation with Scalatags and ScalaCSS libraries, Udash provides a type safe layer over HTML, CSS and JS with powerful data binding into DOM templates.")
         ),
         li(HomepageStyles.featuresListItem)(
-          i(HomepageStyles.featuresListIcon)(Image("features_compiled.png", "Compiled to JS", HomepageStyles.centerBlock)),
+          i(HomepageStyles.featuresListIcon)(Image("features_compiled.png", "Compiled to JS", GlobalStyles.centerBlock)),
           h2(HomepageStyles.featuresListHead)("Compiled to JS"),
           p(HomepageStyles.moreListDescription)("Scala is compiled to highly efficient JavaScript with no need to maintain js. It is also easy to use it with good, old JavaScript libraries like Twitter Bootstrap or jQuery.")
         )
