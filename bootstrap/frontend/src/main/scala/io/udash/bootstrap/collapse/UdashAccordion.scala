@@ -11,7 +11,7 @@ import org.scalajs.dom._
 import scala.collection.mutable
 
 class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
-                    (panels: properties.SeqProperty[ItemType, ElemType])
+                    (panels: properties.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                     (panelStyleSelector: ItemType => PanelStyle,
                      heading: (ElemType) => dom.Element,
                      body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
@@ -19,7 +19,6 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
 
   import scalatags.JsDom.all._
 
-  override val componentId: ComponentId = UdashBootstrap.newId()
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
 
   /** Returns [[io.udash.bootstrap.collapse.UdashCollapse]] component created for selected item. */
@@ -57,6 +56,7 @@ object UdashAccordion {
     * More: <a href="http://getbootstrap.com/javascript/#collapse-example-accordion">Bootstrap Docs</a>.
     *
     * @param panels            Data items which will be represented as panels in accordion.
+    * @param componentId       Id of the root DOM node.
     * @param heading           Creates panel header.
     * @param body              Creates panel body.
     * @param panelTypeSelector Panel style.
@@ -65,8 +65,8 @@ object UdashAccordion {
     * @return `UdashAccordion` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (panels: SeqProperty[ItemType, ElemType])
+           (panels: SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (heading: (ElemType) => Element, body: (ElemType) => Element,
             panelTypeSelector: ItemType => PanelStyle = (_: ItemType) => PanelStyle.Default): UdashAccordion[ItemType, ElemType] =
-    new UdashAccordion(panels)(panelTypeSelector, heading, body)
+    new UdashAccordion(panels, componentId)(panelTypeSelector, heading, body)
 }

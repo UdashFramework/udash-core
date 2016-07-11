@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package collapse
 
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 
@@ -8,14 +9,12 @@ import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
 
-class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean)(content: Modifier*)
+class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean, override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import BootstrapTags._
   import UdashCollapse._
   import io.udash.wrappers.jquery._
-
-  override val componentId = UdashBootstrap.newId()
 
   /** Toggle state of this collapse. */
   def toggle(): Unit = jQSelector().collapse("toggle")
@@ -67,11 +66,13 @@ object UdashCollapse {
     *
     * @param parentSelector If a selector is provided, all collapsible elements under the specified parent will be closed when this collapsible item is shown.
     * @param toggleOnInit   Toggles the collapsible element on invocation.
+    * @param componentId    Id of the root DOM node.
     * @param content        Collapse component content
     * @return `UdashCollapse` component, call render to create DOM element.
     */
-  def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true)(content: Modifier*): UdashCollapse =
-    new UdashCollapse(parentSelector, toggleOnInit)(content)
+  def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true,
+            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashCollapse =
+    new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
 
   @js.native
   private trait UdashCollapseJQuery extends JQuery {

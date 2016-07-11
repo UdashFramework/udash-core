@@ -7,9 +7,7 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashLabel private(style: LabelStyle)(mds: Modifier*) extends UdashBootstrapComponent {
-  override val componentId: ComponentId = UdashBootstrap.newId()
-
+class UdashLabel private(style: LabelStyle, override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
   override lazy val render: dom.Element =
     span(id := componentId, style)(mds: _*).render
 }
@@ -20,118 +18,130 @@ object UdashLabel {
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def apply(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Default)(bind(content))
+  def apply(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Default, componentId)(bind(content))
 
   /**
     * Creates label component with default style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def apply(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Default)(content)
+  def apply(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Default, componentId)(content)
 
   /**
     * Creates label component with primary style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def primary(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Primary)(bind(content))
+  def primary(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Primary, componentId)(bind(content))
 
   /**
     * Creates label component with primary style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def primary(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Primary)(content)
+  def primary(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Primary, componentId)(content)
 
   /**
     * Creates label component with success style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def success(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Success)(bind(content))
+  def success(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Success, componentId)(bind(content))
 
   /**
     * Creates label component with success style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def success(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Success)(content)
+  def success(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Success, componentId)(content)
 
   /**
     * Creates label component with info style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def info(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Info)(bind(content))
+  def info(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Info, componentId)(bind(content))
 
   /**
     * Creates label component with info style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def info(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Info)(content)
+  def info(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Info, componentId)(content)
 
   /**
     * Creates label component with warning style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def warning(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Warning)(bind(content))
+  def warning(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Warning, componentId)(bind(content))
 
   /**
     * Creates label component with warning style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def warning(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Warning)(content)
+  def warning(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Warning, componentId)(content)
 
   /**
     * Creates label component with danger style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
     * @param content Label content - automatically synchronised with provided property content.
+    * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def danger(content: Property[_]): UdashLabel =
-    new UdashLabel(LabelStyle.Danger)(bind(content))
+  def danger(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+    new UdashLabel(LabelStyle.Danger, componentId)(bind(content))
 
   /**
     * Creates label component with danger style.
     * More: <a href="http://getbootstrap.com/javascript/#labels">Bootstrap Docs</a>.
     *
+    * @param componentId Id of the root DOM node.
     * @param content Label content.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def danger(content: Modifier*): UdashLabel =
-    new UdashLabel(LabelStyle.Danger)(content)
+  def danger(componentId: ComponentId, content: Modifier*): UdashLabel =
+    new UdashLabel(LabelStyle.Danger, componentId)(content)
 }

@@ -11,10 +11,9 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean,
-                          val active: Property[Boolean], val disabled: Property[Boolean])
+                          val active: Property[Boolean], val disabled: Property[Boolean],
+                          override val componentId: ComponentId)
                          (content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
-
-  override val componentId = UdashBootstrap.newId()
 
   private lazy val classes: List[Modifier] = buttonStyle :: size ::
     BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::
@@ -57,12 +56,14 @@ object UdashButton {
     * @param block       If true, rendered button will be a full-width block
     * @param active      Property indicating if the button is in the `active` state.
     * @param disabled    Property indicating if the button is disabled.
+    * @param componentId Id of the root DOM node.
     * @param content     Button content
     * @return `UdashButton` component, call render to create DOM element representing this button.
     */
   def apply(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
-            active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false))(content: Modifier*): UdashButton =
-    new UdashButton(buttonStyle, size, block, active, disabled)(content: _*)
+            active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
+            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton =
+    new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
 
   /**
     * Creates toggle button component. It will automatically toggle `active` property on click.
@@ -73,12 +74,14 @@ object UdashButton {
     * @param block       If true, the rendered button will be a full-width block
     * @param active      Property indicating if the button is in `active` state.
     * @param disabled    Property indicating if the button is disabled.
+    * @param componentId Id of the root DOM node.
     * @param content     Button content
     * @return `UdashButton` component, call render to create DOM element representing this button.
     */
   def toggle(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
-             active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false))(content: Modifier*): UdashButton = {
-    val button = new UdashButton(buttonStyle, size, block, active, disabled)(content: _*)
+             active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
+             componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton = {
+    val button = new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
     button.listen { case _ => active.set(!active.get) }
     button
   }
