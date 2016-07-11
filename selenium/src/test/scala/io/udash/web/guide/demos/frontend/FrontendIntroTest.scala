@@ -83,7 +83,7 @@ class FrontendIntroTest extends SeleniumTest {
 
     "randomize values on button click" in {
       val demo = driver.findElementById("frontend-intro-demo")
-      val randomizeButton = demo.findElement(new ById("randomize"))
+      val randomizeButton = eventually { demo.findElement(new ById("randomize")) }
       val minimum = demo.findElement(new ById("minimum"))
       val between = demo.findElement(new ById("between"))
       val maximum = demo.findElement(new ById("maximum"))

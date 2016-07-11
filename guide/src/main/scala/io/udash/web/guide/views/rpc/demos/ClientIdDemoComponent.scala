@@ -2,6 +2,9 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -30,8 +33,7 @@ class ClientIdDemoComponent extends Component {
   }
 
   class ClientIdDemoPresenter(model: ModelProperty[ClientIdDemoModel]) {
-    def onButtonClick(target: JQuery) = {
-      target.attr(Attributes.data(Attributes.Disabled), "true")
+    def onButtonClick() = {
       Context.serverRpc.demos().clientIdDemo().clientId() onComplete {
         case Success(cid) => println(cid); model.subProp(_.clientId).set(cid)
         case Failure(ex) => println(ex); model.subProp(_.clientId).set(ex.toString)
@@ -43,12 +45,25 @@ class ClientIdDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
+    val loadIdButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("client-id-demo")
+    )("Load client id")
+
+    loadIdButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        btn.disabled.set(true)
+        presenter.onButtonClick()
+    }
+
     def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
-      button(id := "client-id-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
-        presenter.onButtonClick(jQ(ev.target))
-        true
-      }))("Load client id"),
-      p("Your client id: ", produce(model)(cid => span(id := "client-id-demo-response", cid.clientId).render))
+      UdashInputGroup()(
+        UdashInputGroup.addon(
+          "Your client id: ",
+          produce(model)(cid => span(id := "client-id-demo-response", cid.clientId).render)
+        ),
+        UdashInputGroup.buttons(loadIdButton.render)
+      ).render
     ).render
   }
 }

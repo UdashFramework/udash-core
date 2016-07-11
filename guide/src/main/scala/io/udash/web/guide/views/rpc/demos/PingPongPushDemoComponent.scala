@@ -2,6 +2,8 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.PingClient
@@ -34,16 +36,16 @@ class PingPongPushDemoComponent extends Component {
   class PingPongPushDemoPresenter(model: ModelProperty[PingPongPushDemoModel]) {
     private var registered = false
 
-    def onButtonClick(target: JQuery) = {
-      target.attr(Attributes.data(Attributes.Disabled), "true")
-      registerCallback(target)
+    def onButtonClick(btn: UdashButton) = {
+      btn.disabled.set(true)
+      registerCallback(btn)
       Context.serverRpc.demos().pingDemo().ping(model.subProp(_.pingId).get)
     }
 
-    private def registerCallback(target: JQuery) = if (!registered) {
+    private def registerCallback(btn: UdashButton) = if (!registered) {
       val listener: Int => Any = (id: Int) => {
         model.subProp(_.pingId).set(id + 1)
-        target.removeAttr("disabled")
+        btn.disabled.set(false)
       }
       PingClient.registerPongListener(listener)
       registered = true
@@ -54,11 +56,18 @@ class PingPongPushDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
+    val pingButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("ping-pong-push-demo")
+    )("Ping(", bind(model.subProp(_.pingId)), ")")
+
+    pingButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.onButtonClick(btn)
+    }
+
     def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
-      button(id := "ping-pong-push-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
-        presenter.onButtonClick(jQ(ev.target))
-        true
-      }))(produce(model.subProp(_.pingId))(p => JsDom.StringFrag(s"Ping($p)").render.asInstanceOf[dom.Element]))
+      pingButton.render
     ).render
   }
 }

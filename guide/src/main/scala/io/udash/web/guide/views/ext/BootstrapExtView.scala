@@ -560,12 +560,12 @@ class BootstrapExtView extends View {
     ),
     h3("Labels"),
     CodeBlock(
-      s"""UdashLabel("Default").render,
-         |UdashLabel.primary("Primary").render,
-         |UdashLabel.success("Success").render,
-         |UdashLabel.info("Info").render,
-         |UdashLabel.warning("Warning").render,
-         |UdashLabel.danger("Danger").render""".stripMargin
+      s"""UdashLabel(UdashBootstrap.newId(), "Default").render,
+         |UdashLabel.primary(UdashBootstrap.newId(), "Primary").render,
+         |UdashLabel.success(UdashBootstrap.newId(), "Success").render,
+         |UdashLabel.info(UdashBootstrap.newId(), "Info").render,
+         |UdashLabel.warning(UdashBootstrap.newId(), "Warning").render,
+         |UdashLabel.danger(UdashBootstrap.newId(), "Danger").render""".stripMargin
     )(GuideStyles),
     div(cls := "bootstrap")(//force Bootstrap styles
       BootstrapDemos.labels()
@@ -597,12 +597,16 @@ class BootstrapExtView extends View {
     p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with typesafe styling and ",
     i("Property"),"-based dismissal mechanism."),
     CodeBlock(
-      s"""|val styles = Seq(DismissibleUdashAlert.info _, DismissibleUdashAlert.danger _,
-          |  DismissibleUdashAlert.success _, DismissibleUdashAlert.warning _)
+      s"""|val styles = Seq[(String) => DismissibleUdashAlert](
+          |  (title) => DismissibleUdashAlert.info(title),
+          |  (title) => DismissibleUdashAlert.danger(title),
+          |  (title) => DismissibleUdashAlert.success(title),
+          |  (title) => DismissibleUdashAlert.warning(title)
+          |)
           |val dismissed = SeqProperty[String](Seq.empty)
           |def randomDismissible(): dom.Element = {
           |  val title = randomString()
-          |  val alert = styles(Random.nextInt(styles.size))(Seq(title))
+          |  val alert = styles(Random.nextInt(styles.size))(title)
           |  alert.dismissed.listen(_ => dismissed.append(title))
           |  alert.render
           |}
@@ -782,14 +786,14 @@ class BootstrapExtView extends View {
     h3("Tooltips"),
     CodeBlock(
       s"""|import scala.concurrent.duration.DurationInt
-          |val label1 = UdashLabel("Tooltip on hover with delay").render
+          |val label1 = UdashLabel(UdashBootstrap.newId(), "Tooltip on hover with delay").render
           |val label1Tooltip = UdashTooltip(
           |  trigger = Seq(UdashTooltip.HoverTrigger),
           |  delay = UdashTooltip.Delay(500 millis, 250 millis),
           |  title = (_) => "Tooltip..."
           |)(label1)
           |
-          |val label2 = UdashLabel("Tooltip on click").render
+          |val label2 = UdashLabel(UdashBootstrap.newId(), "Tooltip on click").render
           |val label2Tooltip = UdashTooltip(
           |  trigger = Seq(UdashTooltip.ClickTrigger),
           |  delay = UdashTooltip.Delay(0 millis, 250 millis),
@@ -797,7 +801,7 @@ class BootstrapExtView extends View {
           |  title = (_) => "Tooltip 2..."
           |)(label2)
           |
-          |val label3 = UdashLabel("Tooltip with JS toggler").render
+          |val label3 = UdashLabel(UdashBootstrap.newId(), "Tooltip with JS toggler").render
           |val label3Tooltip = UdashTooltip(
           |  trigger = Seq(UdashTooltip.ManualTrigger),
           |  placement = (_, _) => Seq(UdashTooltip.RightPlacement),
@@ -818,7 +822,7 @@ class BootstrapExtView extends View {
     CodeBlock(
       s"""
          |import scala.concurrent.duration.DurationInt
-         |val label1 = UdashLabel("Popover on hover with delay").render
+         |val label1 = UdashLabel(UdashBootstrap.newId(), "Popover on hover with delay").render
          |val label1Tooltip = UdashPopover(
          |  trigger = Seq(UdashPopover.HoverTrigger),
          |  delay = UdashPopover.Delay(500 millis, 250 millis),
@@ -826,7 +830,7 @@ class BootstrapExtView extends View {
          |  content = (_) => "Content..."
          |)(label1)
          |
-         |val label2 = UdashLabel("Popover on click").render
+         |val label2 = UdashLabel(UdashBootstrap.newId(), "Popover on click").render
          |val label2Tooltip = UdashPopover(
          |  trigger = Seq(UdashPopover.ClickTrigger),
          |  delay = UdashPopover.Delay(0 millis, 250 millis),
@@ -835,7 +839,7 @@ class BootstrapExtView extends View {
          |  content = (_) => "Content..."
          |)(label2)
          |
-         |val label3 = UdashLabel("Popover with JS toggler").render
+         |val label3 = UdashLabel(UdashBootstrap.newId(), "Popover with JS toggler").render
          |val label3Tooltip = UdashPopover(
          |  trigger = Seq(UdashPopover.ManualTrigger),
          |  placement = (_, _) => Seq(UdashPopover.LeftPlacement),

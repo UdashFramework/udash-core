@@ -23,7 +23,7 @@ class IntroView extends View {
     ClickableImageFactory(ImageFactoryPrefixSet.Intro, "generator.png", "Generator example", GuideStyles.get.floatRight, GuideStyles.get.imgMedium, GuideStyles.get.imgIntro),
     p(
       "A good starting point is a generation of a project base with the Udash project generator. You can download it from ",
-      a(href := References.UdashGeneratorDownload)("here"), " ",
+      a(href := References.UdashGeneratorDownload)("here"), ". ",
       "The generator provides a command line interface which will collect some information about the project and ",
       "prepare the project base for you. "
     ),
@@ -83,10 +83,10 @@ class IntroView extends View {
     p(
       "Now you know the basics of the Udash framework. You can learn more about the Udash project configuration in the ",
       a(href := BootstrappingIntroState.url)("Udash bootstrapping"), " chapter. ",
-      "Check also: ",
+      "Check also ",
       a(href := FrontendIntroState.url)("Frontend application development"),
       " and ",
-      a(href := RpcIntroState.url)("RPC in Udash"), ""
+      a(href := RpcIntroState.url)("RPC in Udash"), ". "
     )
   ).render
 

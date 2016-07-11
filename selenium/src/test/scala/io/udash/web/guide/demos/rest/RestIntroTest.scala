@@ -24,10 +24,10 @@ class RestIntroTest extends SeleniumTest {
 
       eventually {
         val responses = callDemo.findElements(new ByTagName("div"))
-        responses.size should be(3)
-        responses.get(0).getText should be("String:")
-        responses.get(1).getText should be("Int:")
-        responses.get(2).getText should be("Class:")
+        responses.size should be(4)
+        responses.get(1).getText should be("String:")
+        responses.get(2).getText should be("Int:")
+        responses.get(3).getText should be("Class:")
       }
 
       stringButton.click()
@@ -36,10 +36,10 @@ class RestIntroTest extends SeleniumTest {
 
       eventually {
         val responses = callDemo.findElements(new ByTagName("div"))
-        responses.size should be(3)
-        responses.get(0).getText should be("String: OK")
-        responses.get(1).getText should be("Int: 123")
-        responses.get(2).getText should be("Class: RestExampleClass(42,Udash,(321.123,REST Support))")
+        responses.size should be(4)
+        responses.get(1).getText should be("String: OK")
+        responses.get(2).getText should be("Int: 123")
+        responses.get(3).getText should be("Class: RestExampleClass(42,Udash,(321.123,REST Support))")
       }
     }
   }

@@ -25,6 +25,7 @@ class RpcSerializationTest extends SeleniumTest {
 
       eventually {
         driver.findElementById("gencodec-demo-int").getText shouldNot be(empty)
+        driver.findElementById("gencodec-demo-double").getText shouldNot be(empty)
         driver.findElementById("gencodec-demo-string").getText shouldNot be(empty)
         driver.findElementById("gencodec-demo-seq").getText shouldNot be(empty)
         driver.findElementById("gencodec-demo-map").getText shouldNot be(empty)

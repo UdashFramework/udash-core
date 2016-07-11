@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
@@ -23,31 +24,31 @@ class CheckboxDemoComponent extends Component {
 
   override def getTemplate: Element = div(id := "checkbox-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
-      inputs, br, inputs
+      inputs(), br, inputs()
     )
   ).render
 
-  private val inputs = div(BootstrapStyles.row)(
+  private def inputs = div(BootstrapStyles.row)(
     div(BootstrapStyles.Grid.colMd4)(
-      div(BootstrapStyles.Form.inputGroup)(
-        div(BootstrapStyles.Form.inputGroupAddon)("Property A:"),
-        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propA, cls := "checkbox-demo-a")),
-        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "a")(bind(propA))
-      )
+      UdashInputGroup()(
+        UdashInputGroup.addon("Property A:"),
+        UdashInputGroup.addon(Checkbox(propA, cls := "checkbox-demo-a").render),
+        UdashInputGroup.addon(bind(propA))
+      ).render
     ),
     div(BootstrapStyles.Grid.colMd4)(
-      div(BootstrapStyles.Form.inputGroup)(
-        div(BootstrapStyles.Form.inputGroupAddon)("Property B:"),
-        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propB, cls := "checkbox-demo-b")),
-        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "b")(bind(propB))
-      )
+      UdashInputGroup()(
+        UdashInputGroup.addon("Property B:"),
+        UdashInputGroup.addon(Checkbox(propB, cls := "checkbox-demo-b").render),
+        UdashInputGroup.addon(bind(propB))
+      ).render
     ),
     div(BootstrapStyles.Grid.colMd4)(
-      div(BootstrapStyles.Form.inputGroup)(
-        div(BootstrapStyles.Form.inputGroupAddon)("Property C:"),
-        div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(propCAsBoolean, cls := "checkbox-demo-c")),
-        div(BootstrapStyles.Form.inputGroupAddon, BootstrapTags.dataBind := "c")(bind(propC))
-      )
+      UdashInputGroup()(
+        UdashInputGroup.addon("Property C:"),
+        UdashInputGroup.addon(Checkbox(propCAsBoolean, cls := "checkbox-demo-c").render),
+        UdashInputGroup.addon(bind(propC))
+      ).render
     )
   )
 }

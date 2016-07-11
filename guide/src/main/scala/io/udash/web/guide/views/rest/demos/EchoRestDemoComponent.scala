@@ -4,6 +4,9 @@ import io.udash._
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rest.RestExampleClass
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom._
@@ -64,34 +67,56 @@ class EchoRestDemoComponent extends Component {
 
     val content = Property("a b !@#$%^&*()_+")
 
-    // TODO migrate to bootstrap components
+    val queryButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("echo-rest-demo-query-btn")
+    )("Query")
+    val headerButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("echo-rest-demo-header-btn")
+    )("Header")
+    val urlButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("echo-rest-demo-url-btn")
+    )("URL")
+    val bodyButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("echo-rest-demo-body-btn")
+    )("Body")
+
+    queryButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.sendWithQueryRequest(content.get)
+    }
+    headerButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.sendWithHeaderRequest(content.get)
+    }
+    urlButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.sendWithURLRequest(content.get)
+    }
+    bodyButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.sendWithBodyRequest(content.get)
+    }
+
     def render: Element = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "echo-rest-demo")(
-      TextInput.debounced(content, id := "echo-rest-demo-input"),
-      button(id := "echo-rest-demo-query-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
-        onclick :+= ((ev: MouseEvent) => {
-          presenter.sendWithQueryRequest(content.get)
-          true
-        })
-      )("Query"),
-      button(id := "echo-rest-demo-header-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
-        onclick :+= ((ev: MouseEvent) => {
-          presenter.sendWithHeaderRequest(content.get)
-          true
-        })
-      )("Header"),
-      button(id := "echo-rest-demo-url-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
-        onclick :+= ((ev: MouseEvent) => {
-          presenter.sendWithURLRequest(content.get)
-          true
-        })
-      )("URL"),
-      button(id := "echo-rest-demo-body-btn", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(
-        onclick :+= ((ev: MouseEvent) => {
-          presenter.sendWithBodyRequest(content.get)
-          true
-        })
-      )("Body"),
-      div("Response: ", bind(response), id := "echo-rest-demo-response")
+      UdashInputGroup()(
+        UdashInputGroup.input(
+          TextInput.debounced(content, id := "echo-rest-demo-input").render
+        ),
+        UdashInputGroup.buttons(
+          queryButton.render,
+          headerButton.render,
+          urlButton.render,
+          bodyButton.render
+        )
+      ).render,
+      div(id := "echo-rest-demo-response")(
+        h3("Response: "),
+        bind(response)
+      )
     ).render
   }
 }
