@@ -1,5 +1,6 @@
 package io.udash.web.guide.styles.partials
 
+import io.udash.web.commons.styles.UdashStylesheet
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
@@ -10,7 +11,7 @@ import scalacss.Defaults._
 /**
   * Created by malchik on 2016-04-04.
   */
-object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with HeaderNavStyles {
+object HeaderStyles extends UdashStylesheet with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
   val header = style(
@@ -22,7 +23,7 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
 
     MediaQueries.tabletPortrait(
       style(
-        height(StyleConstants.Sizes.HeaderHeight * .7 px)
+        height(StyleConstants.Sizes.GuideHeaderHeightMobile px)
       )
     )
   )
@@ -42,7 +43,7 @@ object HeaderStyles extends StyleSheet.Inline with HeaderButtonsStyles with Head
 
     MediaQueries.tabletLandscape(
       style(
-        marginLeft(StyleConstants.Sizes.MobileMenuButton px)
+        marginLeft(StyleConstants.Sizes.GuideHeaderHeightMobile px)
       )
     ),
 

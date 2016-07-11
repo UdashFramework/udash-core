@@ -15,7 +15,7 @@ class TextAreaDemoComponent extends Component {
 
   val text: Property[String] = Property("")
 
-  override def getTemplate: Element = div(id := "text-area-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "text-area-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(BootstrapStyles.Grid.colMd4)(

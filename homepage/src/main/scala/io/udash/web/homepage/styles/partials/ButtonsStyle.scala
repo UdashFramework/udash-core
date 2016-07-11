@@ -2,13 +2,14 @@ package io.udash.web.homepage.styles.partials
 
 import java.util.concurrent.TimeUnit
 
+import io.udash.web.commons.styles.UdashStylesheet
 import io.udash.web.commons.styles.utils._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scalacss.Defaults._
 
-object ButtonsStyle extends StyleSheet.Inline {
+object ButtonsStyle extends UdashStylesheet {
   import dsl._
 
   val btn = style(

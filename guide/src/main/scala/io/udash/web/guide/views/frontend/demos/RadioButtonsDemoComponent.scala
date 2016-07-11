@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
@@ -29,7 +30,7 @@ class RadioButtonsDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "radio-buttons-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "radio-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -43,14 +44,15 @@ class RadioButtonsDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(
-      RadioButtons(
-        favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-        (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l) })
-      )
-    ),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
-  )
+  def checkboxes() =
+    UdashInputGroup()(
+      UdashInputGroup.addon("Fruits:"),
+      UdashInputGroup.addon(
+        RadioButtons(
+          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
+          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l) })
+        ).render
+      ),
+      UdashInputGroup.addon(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
+    ).render
 }

@@ -2,6 +2,7 @@ package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
@@ -28,28 +29,29 @@ class MultiSelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "multi-select-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "multi-select-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
-          checkboxes()
+          selector()
         ),
         br(),
         div(
-          checkboxes()
+          selector()
         )
       )
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.Form.inputGroupAddon)(
-      Select(
-        favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-        BootstrapStyles.Form.formControl
-      )
-    ),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
-  )
+  def selector() =
+    UdashInputGroup()(
+      UdashInputGroup.addon("Fruits:"),
+      UdashInputGroup.addon(
+        Select(
+          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
+          BootstrapStyles.Form.formControl
+        ).render
+      ),
+      UdashInputGroup.addon(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
+    ).render
 }

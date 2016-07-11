@@ -22,7 +22,7 @@ class RpcServerClientView extends View {
       "Modern web applications often notify users about some events, for example about finishing a background task. ",
       "In a Udash application it is really easy to create such notifications. All you have to do is: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement such interface in your frontend code."),
       li("Use ", i("DefaultServerRPC"), " in the frontend code to create a server connection."),
@@ -71,7 +71,7 @@ class RpcServerClientView extends View {
     new NotificationsDemoComponent,
     p("The code of the example above:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |/** Interfaces from the shared module */
         |@RPC

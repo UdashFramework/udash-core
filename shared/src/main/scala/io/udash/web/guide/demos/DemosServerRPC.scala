@@ -1,6 +1,6 @@
 package io.udash.web.guide.demos
 
-import com.avsystem.commons.rpc.RPC
+import io.udash.rpc._
 import io.udash.web.guide.demos.activity.CallServerRPC
 import io.udash.web.guide.demos.rpc.{ClientIdServerRPC, GenCodecServerRPC, NotificationsServerRPC, PingServerRPC}
 

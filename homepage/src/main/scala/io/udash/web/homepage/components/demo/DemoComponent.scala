@@ -4,6 +4,7 @@ import io.udash.core.DomWindow
 import io.udash.properties.Property
 import io.udash.view.Component
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
@@ -32,10 +33,10 @@ class DemoComponent(url: Property[String]) extends Component {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
     val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
     val urlString = s""""${entry.url}""""
-    val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.htmlClass}[href=$urlString]")
+    val tab = jQ(template).find(s".${DemoStyles.get.demoTabsLink.htmlClass}[href=$urlString]")
 
-    jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.htmlClass}").attr(DemoComponent.ActiveAttribute, "false")
-    tab.attr(DemoComponent.ActiveAttribute, "true")
+    jQ(template).not(tab).find(s".${DemoStyles.get.demoTabsLink.htmlClass}").attr(Attributes.data(Attributes.Active), "false")
+    tab.attr(Attributes.data(Attributes.Active), "true")
 
     jqPreviewContainer
       .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
@@ -71,19 +72,19 @@ class DemoComponent(url: Property[String]) extends Component {
     initCustomScroll()
   }
 
-  private val codeContainer = div(DemoStyles.demoCode).render
-  private val previewContainer = div(DemoStyles.demoPreview).render
+  private val codeContainer = div(DemoStyles.get.demoCode).render
+  private val previewContainer = div(DemoStyles.get.demoPreview).render
   private lazy val jqCodeContainer = jQ(codeContainer)
   private lazy val jqPreviewContainer = jQ(previewContainer)
 
-  private lazy val template = div(DemoStyles.demoComponent)(
-    Image("laptop.png", "", DemoStyles.laptopImage),
-    div(DemoStyles.demoBody)(
-      div(DemoStyles.demoSources)(
-        ul(DemoStyles.demoTabs)(
+  private lazy val template = div(DemoStyles.get.demoComponent)(
+    Image("laptop.png", "", DemoStyles.get.laptopImage),
+    div(DemoStyles.get.demoBody)(
+      div(DemoStyles.get.demoSources)(
+        ul(DemoStyles.get.demoTabs)(
           DemoComponent.demoEntries.map(entry =>
-            li(DemoStyles.demoTabsItem)(
-              a(DemoStyles.demoTabsLink, href := entry.url)(
+            li(DemoStyles.get.demoTabsItem)(
+              a(DemoStyles.get.demoTabsLink, href := entry.url)(
                 entry.name
               )
             )
@@ -99,8 +100,6 @@ class DemoComponent(url: Property[String]) extends Component {
 }
 
 object DemoComponent {
-  val ActiveAttribute = "data-active"
-
   def helloWorldCode = CodeBlock(
     """import scalajs.concurrent.JSExecutionContext.Implicits
       |import Implicits.queue
@@ -300,22 +299,19 @@ object DemoComponent {
       |  case UdashModal.ModalShownEvent(_) => makeProgress()
       |}
       |
-      |div(DemoStyles.demoIOWrapper)(
-      |  // apply Bootstrap styles
-      |  div(cls := "bootstrap", DemoStyles.demoBootstrap)(
-      |    UdashInputGroup()(
-      |      UdashInputGroup.addon("Modal title: "),
-      |      UdashInputGroup.input(
-      |        TextInput.debounced(text).render
-      |      ),
-      |      UdashInputGroup.buttons(
-      |        UdashButton(
-      |          disabled = disableButton
-      |        )("Go!", modal.openButtonAttrs()).render
-      |      )
-      |    ).render,
-      |    modal.render
-      |  )
+      |div(
+      |  UdashInputGroup()(
+      |    UdashInputGroup.addon("Modal title: "),
+      |    UdashInputGroup.input(
+      |      TextInput.debounced(text).render
+      |    ),
+      |    UdashInputGroup.buttons(
+      |      UdashButton(
+      |        disabled = disableButton
+      |      )("Go!", modal.openButtonAttrs()).render
+      |    )
+      |  ).render,
+      |  modal.render
       |).render
     """.stripMargin
   )(HomepageStyles)

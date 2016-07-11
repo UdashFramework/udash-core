@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
@@ -155,7 +156,7 @@ class FrontendTemplatesView extends View {
         |  )("Click me")
         |)""".stripMargin
     )(GuideStyles),
-    div(GuideStyles.frame)(
+    div(GuideStyles.get.frame)(
       a(
         ExampleStyles.btn, ExampleStyles.btnDefault, id := "example-button",
         onclick := { () => jQ("#example-button").toggleClass(ExampleStyles.btnSuccess.htmlClass)}
@@ -232,10 +233,10 @@ class FrontendTemplatesView extends View {
         |  div(ExampleStyles.innerOn)("On")
         |)""".stripMargin
     )(GuideStyles),
-    div(GuideStyles.frame)(
+    div(GuideStyles.get.frame)(
       a(ExampleStyles.swither, id := "example-switcher", data("state") := "off", onclick := { () =>
         val jqSwitcher = jQ("#example-switcher")
-        if (jqSwitcher.attr("data-state").get == "on") jqSwitcher.attr("data-state", "off") else jqSwitcher.attr("data-state", "on")
+        if (jqSwitcher.attr(Attributes.data(Attributes.State)).get == "on") jqSwitcher.attr(Attributes.data(Attributes.State), "off") else jqSwitcher.attr(Attributes.data(Attributes.State), "on")
       })(
         div(ExampleStyles.innerOff)("Off"),
         div(ExampleStyles.innerOn)("On")
@@ -309,7 +310,7 @@ class FrontendTemplatesView extends View {
         |  ExampleStyles.btn + ExampleStyles.btnDefault + ExampleStyles.btnAnimated
         |)("Hover over me")""".stripMargin
     )(GuideStyles),
-    div(GuideStyles.frame)(
+    div(GuideStyles.get.frame)(
       a(ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated)( "Hover over me" )
     ),
     h3("Media queries"),
@@ -359,7 +360,8 @@ class FrontendTemplatesView extends View {
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendPropertiesState.url)("Properties"),
-      " chapter to read about a data model in the Udash applications."
+      " chapter to read about a data model in the Udash applications. ",
+      "You might find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   ).render
 
@@ -448,7 +450,7 @@ object ExampleStyles extends StyleSheet.Inline {
       textDecoration := "none"
     ),
 
-    &.attr("data-state", "on") (
+    &.attr(Attributes.data(Attributes.State), "on") (
       unsafeChild(s".${innerOff.htmlClass}") (
         visibility.hidden
       ),
@@ -456,7 +458,7 @@ object ExampleStyles extends StyleSheet.Inline {
         visibility.visible
       )
     ),
-    &.attr("data-state", "off") (
+    &.attr(Attributes.data(Attributes.State), "off") (
       unsafeChild(s".${innerOff.htmlClass}") (
         visibility.visible
       ),

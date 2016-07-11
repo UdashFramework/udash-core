@@ -2,6 +2,9 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.GenCodecServerRPC
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -41,8 +44,8 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
   }
 
   class GenCodecsDemoPresenter(model: ModelProperty[GenCodecsDemoModel]) {
-    def onButtonClick(target: JQuery) = {
-      target.attr("disabled", "true")
+    def onButtonClick(btn: UdashButton) = {
+      btn.disabled.set(true)
       val demoRpc: GenCodecServerRPC = Context.serverRpc.demos().gencodecsDemo()
       demoRpc.sendInt(Random.nextInt()) onComplete {
         case Success(response) => model.subProp(_.int).set(response)
@@ -86,11 +89,19 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.frame)(
-      button(id := "gencodec-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
-        presenter.onButtonClick(jQ(ev.target))
-        true
-      }))("Send request"),
+    val loadIdButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("gencodec-demo")
+    )("Send request")
+
+    loadIdButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.onButtonClick(btn)
+    }
+
+    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+      loadIdButton.render,
+      h3("Results:"),
       p(
         ul(
           li("Int: ", produce(model.subProp(_.int))(response => span(id := "gencodec-demo-int", response).render)),

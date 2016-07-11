@@ -24,7 +24,7 @@ class FrontendFormsView extends View {
       "In this part of the guide you will learn means of binding properties to form elements."
     ),
     p("Let's briefly introduce all bindable form elements:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), ""),
       li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), ""),
       li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), ""),
@@ -217,7 +217,8 @@ class FrontendFormsView extends View {
     p(
       "Now you know everything you need to start frontend development using Udash. ",
       "If you want to learn more about client-server communication, check the ",
-      a(href := RpcIntroState.url)("RPC"), " chapter."
+      a(href := RpcIntroState.url)("RPC"), " chapter. ",
+      "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   ).render
 

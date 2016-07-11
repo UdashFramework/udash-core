@@ -2,6 +2,7 @@ package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Input
@@ -29,7 +30,7 @@ class CheckButtonsDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "check-buttons-demo", GuideStyles.frame)(
+  override def getTemplate: Element = div(id := "check-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -43,14 +44,15 @@ class CheckButtonsDemoComponent extends Component {
     )
   ).render
 
-  def checkboxes() = div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)("Fruits:"),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(
-      CheckButtons(
-        favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-        (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, "data-label".attr := l)(i, l) })
-      )
-    ),
-    div(BootstrapStyles.Form.inputGroupAddon, GuideStyles.blockOnMobile)(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
-  )
+  def checkboxes() =
+    UdashInputGroup()(
+      UdashInputGroup.addon("Fruits:"),
+      UdashInputGroup.addon(
+        CheckButtons(
+          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
+          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, "data-label".attr := l)(i, l) })
+        ).render
+      ),
+      UdashInputGroup.addon(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
+    ).render
 }

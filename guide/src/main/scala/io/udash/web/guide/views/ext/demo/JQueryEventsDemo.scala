@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash._
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -21,12 +22,12 @@ object JQueryEventsDemo {
     jQ("#jquery-events-demo ul").append(li("This will be added only once").render)
 
   def apply(): dom.Element = {
-    val content = div(id := "jquery-events-demo", GuideStyles.frame)(
+    val content = div(id := "jquery-events-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       ul(),
       br,
       UdashButtonGroup()(
-        UdashButton()(id := "click", "Click me").render,
-        UdashButton()(id := "off",
+        UdashButton(componentId = ComponentId("click"))("Click me").render,
+        UdashButton(componentId = ComponentId("off"))(
           onclick :+= ((_: Event) => {
             jQ("#jquery-events-demo #click")
               .off("click", onCallback)

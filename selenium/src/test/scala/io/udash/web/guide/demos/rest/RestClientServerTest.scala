@@ -32,22 +32,22 @@ class RestClientServerTest extends SeleniumTest {
 
       queryButton.click()
       eventually {
-        responseDemo.getText should be(s"Response: Query:$request")
+        responseDemo.getText should be(s"Response:\nQuery:$request")
       }
 
       headerButton.click()
       eventually {
-        responseDemo.getText should be(s"Response: Header:$request")
+        responseDemo.getText should be(s"Response:\nHeader:$request")
       }
 
       urlButton.click()
       eventually {
-        responseDemo.getText should be(s"Response: URL:$request")
+        responseDemo.getText should be(s"Response:\nURL:$request")
       }
 
       bodyButton.click()
       eventually {
-        responseDemo.getText should be(s"Response: Body:$request")
+        responseDemo.getText should be(s"Response:\nBody:$request")
       }
     }
   }

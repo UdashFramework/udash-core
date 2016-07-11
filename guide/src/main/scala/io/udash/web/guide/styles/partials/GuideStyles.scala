@@ -1,6 +1,7 @@
 package io.udash.web.guide.styles.partials
 
-import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.styles.{GlobalStyles, UdashStylesheet}
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.components.GuideMenu
@@ -11,7 +12,7 @@ import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
+object GuideStyles extends UdashStylesheet with CodeBlockStyles {
   import dsl._
 
   val main = style(
@@ -40,9 +41,12 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
     maxHeight(750 px)
   )
 
-  val imgLeft = style(float.left)
-  val imgRight = style(
-    float.right,
+  val floatLeft = style(float.left)
+  val floatRight = style(
+    float.right
+  )
+
+  val imgIntro = style(
     MediaQueries.phone(style(
       float.none,
       width(100 %%),
@@ -90,7 +94,7 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
         backgroundColor.white,
         zIndex(999),
 
-        &.attr(GuideMenu.DataActiveAttribute, "true") {
+        &.attr(Attributes.data(Attributes.Active), "true") {
           transform := "translateX(100%)"
         }
       )
@@ -209,6 +213,10 @@ object GuideStyles extends StyleSheet.Inline with CodeBlockStyles {
     display.block,
     padding(1.5 rem),
     margin(2 rem, `0`)
+  )
+
+  val useBootstrap = style(
+    addClassName("bootstrap")
   )
 
   val blockOnMobile = style(

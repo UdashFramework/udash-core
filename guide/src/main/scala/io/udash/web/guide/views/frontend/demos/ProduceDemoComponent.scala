@@ -30,18 +30,18 @@ class ProduceDemoComponent extends Component {
   }, 2000)
 
   override def getTemplate: Element = {
-    div(id := "produce-demo", GuideStyles.frame)(
+    div(id := "produce-demo", GuideStyles.get.frame)(
       p(
         "Name: ",
         produce(name)(value => b(id := "produce-demo-name")(value).render), br,
         "Integers: ",
-        produce(integers)((seq: Seq[Int]) => span(id := "produce-demo-integers")(seq.map(p => span(GuideStyles.highlightRed)(s"$p, ")): _*).render), br,
+        produce(integers)((seq: Seq[Int]) => span(id := "produce-demo-integers")(seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, ")): _*).render), br,
         "Integers (patching): ",
         produce(integers,
-          (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
+          (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.get.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
           (patch: Patch[Property[Int]], el: Element) => {
             val insertBefore = jQ(el).children().at(patch.idx)
-            patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
+            patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.get.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
             patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
           }
         )

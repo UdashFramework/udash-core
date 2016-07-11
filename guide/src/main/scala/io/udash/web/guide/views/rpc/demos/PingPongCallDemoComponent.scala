@@ -2,6 +2,9 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
@@ -31,12 +34,12 @@ class PingPongCallDemoComponent extends Component {
   }
 
   class PingPongCallDemoPresenter(model: ModelProperty[PingPongCallDemoModel]) {
-    def onButtonClick(target: JQuery) = {
-      target.attr("disabled", "true")
+    def onButtonClick(btn: UdashButton) = {
+      btn.disabled.set(true)
       Context.serverRpc.demos().pingDemo().fPing(model.subProp(_.pingId).get) onComplete {
         case Success(response) =>
           model.subProp(_.pingId).set(response + 1)
-          target.removeAttr("disabled")
+          btn.disabled.set(false)
         case Failure(ex) =>
           model.subProp(_.pingId).set(-1)
       }
@@ -47,11 +50,18 @@ class PingPongCallDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    def render: Element = span(GuideStyles.frame)(
-      button(id := "ping-pong-call-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((ev: MouseEvent) => {
-        presenter.onButtonClick(jQ(ev.target))
-        true
-      }))(produce(model.subProp(_.pingId))(p => JsDom.StringFrag(s"Ping($p)").render.asInstanceOf[dom.Element]))
+    val pingButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("ping-pong-call-demo")
+    )("Ping(", bind(model.subProp(_.pingId)), ")")
+
+    pingButton.listen {
+      case UdashButton.ButtonClickEvent(btn) =>
+        presenter.onButtonClick(btn)
+    }
+
+    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+      pingButton.render
     ).render
   }
 }

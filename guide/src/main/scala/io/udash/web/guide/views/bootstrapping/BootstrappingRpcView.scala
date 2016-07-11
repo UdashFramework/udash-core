@@ -22,7 +22,7 @@ class BootstrappingRpcView extends View {
       "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
       " module, define two traits annotated with ", i("com.avsystem.commons.rpc.RPC"), ": "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("MainClientRPC - contains methods which can be called by a server on a client application"),
       li("MainServerRPC - contains methods which can be called by a client on a server.")
     ),
@@ -37,7 +37,7 @@ class BootstrappingRpcView extends View {
       "whose abstract methods will be interpreted as remote methods by the RPC framework. Remote methods must be defined " +
       "according to following rules:"
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable")),
       li("Return type must be either Unit or Future[T] where T is a type serializable or another RPC interface"),
       li("Method must not have type parameters.")
@@ -56,14 +56,14 @@ class BootstrappingRpcView extends View {
     h4("Examples"),
     p("Example of RPC interfaces:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait MainClientRPC {
         |  def pong(id: Int): Unit
         |}""".stripMargin)(GuideStyles),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait MainServerRPC {

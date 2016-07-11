@@ -13,7 +13,7 @@ object RpcLoggingDemo {
   import scalacss.ScalatagsCss._
   import io.udash.web.guide.Context._
   def apply(model: ReadableSeqProperty[Call], loadCalls: () => Any): dom.Element =
-    span(GuideStyles.frame)(
+    span(GuideStyles.frame, GuideStyles.useBootstrap)(
       button(id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)
       (onclick :+= ((_: MouseEvent) => {
         loadCalls()

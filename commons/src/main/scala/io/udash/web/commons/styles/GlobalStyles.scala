@@ -7,7 +7,7 @@ import scala.language.postfixOps
 import scalacss.Attr
 import scalacss.Defaults._
 
-object GlobalStyles extends StyleSheet.Inline {
+object GlobalStyles extends UdashStylesheet {
   import dsl._
 
   val clearfix = style(

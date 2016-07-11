@@ -23,7 +23,7 @@ object UrlLoggingDemo {
     if (enabled.get) history.append((url, referrer))
 
   def apply(): dom.Element =
-    span(GuideStyles.frame)(
+    span(GuideStyles.frame, GuideStyles.useBootstrap)(
       form(BootstrapStyles.containerFluid)(
         div(BootstrapStyles.row)(
           div(BootstrapStyles.Grid.colMd4)(

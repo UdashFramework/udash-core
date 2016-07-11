@@ -19,13 +19,13 @@ object ErrorViewPresenter extends DefaultViewPresenterFactory[IndexState](() => 
 class ErrorView extends View {
   import scalatags.JsDom.all._
 
-  private val content = section(HomepageStyles.sectionError)(
-    div(GlobalStyles.body)(
-      div(HomepageStyles.errorInner)(
-        p(HomepageStyles.errorHead)(
-          span(GlobalStyles.red)("Oops! 404"), br(),
-          span("The link doesn't work. Or maybe it never has? You can still ", a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")), br(),
-          span("... or go "), a(GlobalStyles.red, href := IndexState(None).url)("home"), span(".")
+  private val content = section(HomepageStyles.get.sectionError)(
+    div(GlobalStyles.get.body)(
+      div(HomepageStyles.get.errorInner)(
+        p(HomepageStyles.get.errorHead)(
+          span(GlobalStyles.get.red)("Oops! 404"), br(),
+          span("The link doesn't work. Or maybe it never has? You can still ", a(GlobalStyles.get.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")), br(),
+          span("... or go "), a(GlobalStyles.get.red, href := IndexState(None).url)("home"), span(".")
         )
       )
     )
@@ -39,7 +39,7 @@ class ErrorView extends View {
 
   private def onResize(): Unit = {
     if (window.width <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
-      val h = window.height - jQ(s".${FooterStyles.footer.htmlClass}").outerHeight()
+      val h = window.height - jQ(s".${FooterStyles.get.footer.htmlClass}").outerHeight()
       jqTemplate.css("min-height", s"${h}px")
     }
   }

@@ -32,7 +32,7 @@ class RpcSerializationView extends View {
       "serialization for a basic Scala types like: int, float, string, etc. It also brings automatic generation of serializers ",
       "for the types which are one of: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("singleton type, e.g. an ", i("object")),
       li("case class whose every field type has its own ", i("GenCodec")),
       li(
@@ -138,7 +138,7 @@ class RpcSerializationView extends View {
     )(GuideStyles),
     p(
       "You have to implement five elements:",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(b("RawValue"), " - ", i("GenCodec"), " needs to be converted to this type and then this type needs to be converted into the string. Usually it is some kind of AST."),
         li(b("inputSerialization"), " - method which converts ", i("RawValue"), " into the ", i("Input"), " object."),
         li(b("outputSerialization"), " - method which returns the ", i("Output"), " object witch creates a ", i("RawValue"), " as the result."),

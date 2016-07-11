@@ -1,6 +1,7 @@
 package io.udash.web.homepage.styles.partials
 
-import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.styles.{GlobalStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils, UdashFonts}
 import io.udash.web.homepage.components.demo.DemoComponent
 
@@ -8,7 +9,7 @@ import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object DemoStyles extends StyleSheet.Inline {
+object DemoStyles extends UdashStylesheet {
   import dsl._
 
   val demoComponent = style(
@@ -60,7 +61,7 @@ object DemoStyles extends StyleSheet.Inline {
   )
 
   val demoSources = style(
-    GlobalStyles.col,
+    GlobalStyles.get.col,
     width(50 %%),
 
     MediaQueries.tabletLandscape(
@@ -79,7 +80,7 @@ object DemoStyles extends StyleSheet.Inline {
   )
 
   val demoPreview = style(
-    GlobalStyles.col,
+    GlobalStyles.get.col,
     width(50 %%),
     padding(40 px, 50 px),
 
@@ -107,7 +108,7 @@ object DemoStyles extends StyleSheet.Inline {
   )
 
   val demoTabsItem = style(
-    GlobalStyles.col,
+    GlobalStyles.get.col,
 
     MediaQueries.phone(
       style(
@@ -126,7 +127,7 @@ object DemoStyles extends StyleSheet.Inline {
     color(StyleConstants.Colors.Grey),
     zIndex(2),
 
-    &.attr(DemoComponent.ActiveAttribute, "true") (
+    &.attr(Attributes.data(Attributes.Active), "true") (
       color.white,
 
       &.before(
@@ -262,8 +263,8 @@ object DemoStyles extends StyleSheet.Inline {
   )
 
   val demoOutpuLabel = style(
-    GlobalStyles.col,
-    GlobalStyles.width33,
+    GlobalStyles.get.col,
+    GlobalStyles.get.width33,
     paddingRight(15 px),
     textAlign.right
   )
@@ -296,7 +297,7 @@ object DemoStyles extends StyleSheet.Inline {
   )
 
   val underlineLink = style(
-    GlobalStyles.underlineLink,
+    GlobalStyles.get.underlineLink,
     color.black
   )(Compose.trust)
 }

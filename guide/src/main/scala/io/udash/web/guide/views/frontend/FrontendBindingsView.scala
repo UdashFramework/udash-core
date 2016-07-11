@@ -28,7 +28,7 @@ class FrontendBindingsView extends View {
       """import io.udash._""".stripMargin
     )(GuideStyles),
     p("Let's briefly introduce all these methods:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method witch is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),

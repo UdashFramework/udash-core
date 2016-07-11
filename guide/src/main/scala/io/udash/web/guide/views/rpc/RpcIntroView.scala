@@ -29,7 +29,7 @@ class RpcIntroView extends View {
       a(href := References.ScalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("RPC interfaces with typed arguments and returned value"),
       li("Data models which can be used in RPC communication"),
       li("Model validators witch can be used both in frontend and backend")
@@ -43,7 +43,7 @@ class RpcIntroView extends View {
     new PingPongCallDemoComponent,
     p("The implementation is really simple. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongServerRPC {
@@ -71,7 +71,7 @@ class RpcIntroView extends View {
     new PingPongPushDemoComponent,
     p("This implementation is only a little more complicated. In the server RPC interface, add the following method:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongServerRPC {
@@ -80,7 +80,7 @@ class RpcIntroView extends View {
     )(GuideStyles),
     p("In the client RPC interface:"),
     CodeBlock(
-      """import com.avsystem.commons.rpc.RPC
+      """import io.udash.rpc._
         |
         |@RPC
         |trait PingPongClientRPC {

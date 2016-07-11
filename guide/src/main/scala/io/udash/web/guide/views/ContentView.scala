@@ -15,11 +15,11 @@ class ContentView extends ViewContainer {
   import scalacss.ScalatagsCss._
   import scalatags.JsDom.all._
 
-  protected val child = div(GuideStyles.contentWrapper).render
+  protected val child = div(GuideStyles.get.contentWrapper).render
 
-  private val content = main(GuideStyles.main)(
-    div(GlobalStyles.body)(
-      div(GuideStyles.menuWrapper)(
+  private val content = main(GuideStyles.get.main)(
+    div(GlobalStyles.get.body)(
+      div(GuideStyles.get.menuWrapper)(
         GuideMenu().getTemplate
       ),
       child

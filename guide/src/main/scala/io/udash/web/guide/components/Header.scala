@@ -12,10 +12,10 @@ import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav{
-  private lazy val template = header(HeaderStyles.header)(
+  private lazy val template = header(HeaderStyles.get.header)(
     div(GlobalStyles.body, GlobalStyles.clearfix)(
-      div(HeaderStyles.headerLeft)(
-        a(HeaderStyles.headerLogo, href := ExternalUrls.homepage)(
+      div(HeaderStyles.get.headerLeft)(
+        a(HeaderStyles.get.headerLogo, href := ExternalUrls.homepage)(
           Image("udash_logo_m.png", "Udash Framework", GlobalStyles.block)
         )/*,
         navigation(Seq(

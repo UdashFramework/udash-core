@@ -1,5 +1,6 @@
 package io.udash.web.homepage.styles.partials
 
+import io.udash.web.commons.styles.UdashStylesheet
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils._
 
@@ -7,7 +8,7 @@ import scala.language.postfixOps
 import scalacss.Compose
 import scalacss.Defaults._
 
-object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
+object HomepageStyles extends UdashStylesheet with CodeBlockStyles {
   import dsl._
 
   val section = style(
@@ -303,37 +304,36 @@ object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
     fontSize(1.4 rem)
   )
 
+  val moreList = style(
+    boxList,
+    paddingBottom(1 px)
+  )
+
   val moreListItem = style(
+    StyleUtils.border(),
+    marginLeft(-1 px),
+    marginBottom(-1 px),
     boxListItem,
     width :=! "calc(100% / 3)",
     minHeight(36 rem),
     padding(10.5 rem, 2 rem, 2 rem , 2 rem),
 
-    &.nthChild(2)(
-      borderLeftStyle.none,
-      borderRightStyle.none
-    ),
 
     MediaQueries.tabletLandscape(
       style(
         width(50 %%),
-        padding(4 rem, 2 rem, 4 rem , 2 rem),
-        minHeight(`0`),
 
-        &.nthChild(2)(
-          borderRightStyle.solid
-        ),
-
-        &.lastChild(
-          width(100 %%),
-          borderTopStyle.none
-      )
+        &.nthChild("odd").lastChild(
+          width(100 %%)
+        )
       )
     ),
 
     MediaQueries.tabletPortrait(
       style(
         width(100 %%),
+        minHeight(`0`),
+        padding(4 rem, 2 rem, 4 rem , 2 rem),
         borderBottomStyle.none,
 
         &.nthChild(2)(
@@ -346,6 +346,11 @@ object HomepageStyles extends StyleSheet.Inline with CodeBlockStyles {
         )
       )
     )
+  )
+
+
+  val moreListItemTwoLineTitle = style(
+    paddingTop(57 px)
   )
 
   val moreListHead = style(

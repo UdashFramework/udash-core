@@ -14,6 +14,12 @@ trait HeaderButtons {
     div(buttonStyles.headerRight)(
       ul(buttonStyles.headerSocial)(
         li(buttonStyles.headerSocialItem)(
+          a(href := ExternalUrls.udashGitter, buttonStyles.headerSocialLink, target := "_blank")(
+            SVG("gitter.svg#gitter", Size(124, 127))
+          )
+        ),
+
+        li(buttonStyles.headerSocialItem)(
           a(href := ExternalUrls.udashGithub, buttonStyles.headerSocialLink, target := "_blank")(
             SVG("github.svg#github", Size(33, 32))
           )

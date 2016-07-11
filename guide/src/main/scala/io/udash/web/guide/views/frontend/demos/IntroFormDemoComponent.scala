@@ -4,6 +4,9 @@ import java.lang.Float
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.{Element, MouseEvent}
 
@@ -74,37 +77,48 @@ class IntroFormDemoComponent extends Component {
     private val between = model.subProp(_.between).transform(i2s, s2i)
     private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
 
-    def render: Element = div(id := "frontend-intro-demo", GuideStyles.frame)(
-      div(BootstrapStyles.Form.inputGroup, GuideStyles.blockOnMobile)(
-        NumberInput.debounced(minimum)(id := "minimum", BootstrapStyles.Form.formControl),
-        span(BootstrapStyles.Form.inputGroupAddon)(" <= "),
-        NumberInput.debounced(between)(id := "between", BootstrapStyles.Form.formControl),
-        span(BootstrapStyles.Form.inputGroupAddon)(" <= "),
-        NumberInput.debounced(maximum)(id := "maximum", BootstrapStyles.Form.formControl),
-        div(BootstrapStyles.Form.inputGroupBtn)(
-          button(id := "randomize", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(onclick :+= ((_: MouseEvent) => {
-            presenter.randomize()
-            true
-          }))("Randomize")
+    val randomizeButton = UdashButton(
+      buttonStyle = ButtonStyle.Primary,
+      componentId = ComponentId("randomize")
+    )("Randomize")
+
+    randomizeButton.listen {
+      case UdashButton.ButtonClickEvent(_) =>
+        presenter.randomize()
+    }
+
+    def render: Element = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+      UdashInputGroup()(
+        UdashInputGroup.input(
+          NumberInput.debounced(minimum)(id := "minimum").render
+        ),
+        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.input(
+          NumberInput.debounced(between)(id := "between").render
+        ),
+        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.input(
+          NumberInput.debounced(maximum)(id := "maximum").render
+        ),
+        UdashInputGroup.buttons(
+          randomizeButton.render
         )
-      ),
+      ).render,
+      h3("Is valid?"),
       p(
-        b("Is valid?"),
-        br(),br(),
-        span(bindValidation(model,
+        bindValidation(model,
           _ => span(id := "valid")("...").render,
           {
             case Valid => span(id := "valid")("Yes").render
             case Invalid(errors) => span(id := "valid")(
               "No, because:",
-              ul(
+              ul(GuideStyles.get.defaultList)(
                 errors.map(e => li(e))
               )
             ).render
           },
           error => span(s"Validation error: $error").render
-        ))
-
+        )
       )
     ).render
   }

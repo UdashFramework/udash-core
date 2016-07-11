@@ -31,7 +31,7 @@ object JQueryCallbacksDemo {
   })
 
   def apply(): dom.Element = {
-    div(id := "jquery-callbacks-demo", GuideStyles.frame)(
+    div(id := "jquery-callbacks-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       "Plus:",
       ul(id := "plus"),
       "Minus:",

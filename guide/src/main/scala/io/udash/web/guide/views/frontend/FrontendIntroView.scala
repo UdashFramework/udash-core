@@ -42,7 +42,7 @@ class FrontendIntroView extends View {
       a(href := References.ScalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about the Udash ",
       a(href := RpcIntroState.url)("RPC"), " system. In this part of the guide you will read about: "
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li("Routing in Udash based applications."),
       li("The powerful Properties system for an application model."),
       li(
@@ -129,30 +129,39 @@ class FrontendIntroView extends View {
         |    private val between = model.subProp(_.between).transform(i2s, s2i)
         |    private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
         |
+        |    val randomizeButton = UdashButton(
+        |      buttonStyle = ButtonStyle.Primary
+        |    )("Randomize")
+        |
+        |    randomizeButton.listen {
+        |      case UdashButton.ButtonClickEvent(_) =>
+        |        presenter.randomize()
+        |    }
+        |
         |    def render: Element = div(id := "frontend-intro-demo")(
-        |      div(BootstrapStyles.inputGroup)(
-        |        NumberInput(minimum)(id := "minimum", BootstrapStyles.formControl),
-        |        span(BootstrapStyles.inputGroupAddon)(" <= "),
-        |        NumberInput(between)(id := "between", BootstrapStyles.formControl),
-        |        span(BootstrapStyles.inputGroupAddon)(" <= "),
-        |        NumberInput(maximum)(id := "maximum", BootstrapStyles.formControl),
-        |        div(BootstrapStyles.inputGroupBtn)(
-        |          button(
-        |            id := "randomize",
-        |            BootstrapStyles.Button.btn + BootstrapStyles.Button.btnPrimary
-        |          )(onclick :+= (ev => {
-        |            presenter.randomize()
-        |            true
-        |          }))("Randomize")
+        |      UdashInputGroup()(
+        |        UdashInputGroup.input(
+        |          NumberInput.debounced(minimum)(id := "minimum").render
+        |        ),
+        |        UdashInputGroup.addon(" <= "),
+        |        UdashInputGroup.input(
+        |          NumberInput.debounced(between)(id := "between").render
+        |        ),
+        |        UdashInputGroup.addon(" <= "),
+        |        UdashInputGroup.input(
+        |          NumberInput.debounced(maximum)(id := "maximum").render
+        |        ),
+        |        UdashInputGroup.buttons(
+        |          randomizeButton.render
         |        )
-        |      ),
-        |      div(
-        |        b("Is valid?"), br(),
+        |      ).render,
+        |      h3("Is valid?"),
+        |      p(
         |        bindValidation(model,
-        |          _ => span("...").render,
+        |          _ => span(id := "valid")("...").render,
         |          {
-        |            case Valid => span("Yes").render
-        |            case Invalid(errors) => span(
+        |            case Valid => span(id := "valid")("Yes").render
+        |            case Invalid(errors) => span(id := "valid")(
         |              "No, because:",
         |              ul(
         |                errors.map(e => li(e))

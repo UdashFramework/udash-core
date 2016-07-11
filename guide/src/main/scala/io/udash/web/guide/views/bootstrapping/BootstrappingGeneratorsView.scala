@@ -29,7 +29,7 @@ class BootstrappingGeneratorsView extends View {
     ),
     p(
       "Now you will have to configure a few settings: ",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(b("Project root directory"), " - a directory where project files will be placed."),
         li(b("Clear root directory"), " - if true, the generator will remove all files and directories from the selected project root directory."),
         li(b("Project name"), " - a name of your project."),
@@ -39,14 +39,14 @@ class BootstrappingGeneratorsView extends View {
         li(b("Module names"), " - if you selected the default Udash project, then you should select names of the modules."),
         li(
           span(b("Create basic frontend application"), " - decide if you want to generate a base of the frontend application."),
-          ul(GuideStyles.innerList)(
+          ul(GuideStyles.get.innerList)(
             li(b("Create frontend demo views"), " - decide if you want to generate frontend demo views."),
             li(b("Create ScalaCSS demo views"), " - decide if you want to add ScalaCSS to your project and generate demo views.")
           )
         ),
         li(
           span(b("Create Jetty launcher"), " - decide if you want to use a Jetty server for serving the frontend files."),
-          ul(GuideStyles.innerList)(
+          ul(GuideStyles.get.innerList)(
             li(b("Create RPC communication layer"), " - decide if you want to generate the RPC base for your project."),
             li(b("Create RPC communication layer demos"), " - decide if you want to generate RPC demo views.")
           )
@@ -61,7 +61,7 @@ class BootstrappingGeneratorsView extends View {
     ),
     p(
       "Let's go through the frontend module files first:",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(
           b("init.scala"), " - consists of the main function which starts whole application and the ", i("Context"),
           " object which contains useful vals like ", i("serverRpc"), " (for communication with server) and implicit execution context."
@@ -76,14 +76,14 @@ class BootstrappingGeneratorsView extends View {
     ),
     p(
       "The ", i("shared"), " module contains files related to the RPC system:",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(b("MainServerRPC.scala"), " - contains the main server RPC interface implemented in the ", i("backend"), " module."),
         li(b("MainClientRPC.scala"), " - contains the main client RPC interface implemented in the ", i("frontend"), " module.")
       )
     ),
     p(
       "The ", i("backend"), " module contains:",
-      ul(GuideStyles.defaultList)(
+      ul(GuideStyles.get.defaultList)(
         li(b("jetty/ApplicationServer.scala"), " - Jetty based server serving static files and handling RPC connections."),
         li(b("Launcher.scala"), " - creates and starts the application server."),
         li(b("rpc/ExposedRpcInterfaces.scala"), " - implementation of the main server RPC interface."),

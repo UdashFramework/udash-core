@@ -1,6 +1,6 @@
 package io.udash.web.guide
 
-import com.avsystem.commons.rpc.RPC
+import io.udash.rpc._
 import io.udash.web.guide.demos.DemosClientRPC
 
 @RPC

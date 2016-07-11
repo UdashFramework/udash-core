@@ -2,6 +2,7 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
@@ -64,7 +65,7 @@ class FrontendPropertiesView extends View {
       "As you can see, you can create a Property based on trait or Seq. This will be discussed later. "
     ),
     h3("Types of Properties"),
-    FrontendImage("property.png", "Properties in the Udash", GuideStyles.imgBig, GuideStyles.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "property.png", "Properties in the Udash", GuideStyles.get.imgBig, GuideStyles.get.frame),
     p("This might look quite complicated, but understanding the structure is not so hard. Let's go through it step by step."),
     p(
       i("ReadableProperty"), " is the simplest version of the data model representation. You have seen its whole API ",
@@ -82,7 +83,7 @@ class FrontendPropertiesView extends View {
     p(
       i("SeqProperty"), " represents a sequence of properties.In addition to basic collection operations, it provides two interesting methods:"
     ),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("elemProperties"), " - gives access to mutable properties representing elements of the sequence"),
       li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property")
     ),
@@ -111,14 +112,14 @@ class FrontendPropertiesView extends View {
         |responses.elemProperties.foreach(r => println(r.asModel.subProp(_.content)))""".stripMargin
     )(GuideStyles),
     p("The ", i("comment"), " property might be illustrated like:"),
-    FrontendImage("propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.imgBig, GuideStyles.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.get.imgBig, GuideStyles.get.frame),
     p(
       "We can say that the ", i("comment"), " property is a parent of ", i("author"), ", ", i("content"), " and ", i("responses"), " properties, ",
       "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), " "
     ),
     h3("Properties validation"),
     p("The Property provides two means of data model validation: "),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("addValidator"), " - adds a new validator to a property"),
       li(i("isValid"), " - returns Future containing the validation result")
     ),
@@ -146,7 +147,7 @@ class FrontendPropertiesView extends View {
         |comment.isValid                      // returns Future(Valid)""".stripMargin
     )(GuideStyles),
     p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
-    ul(GuideStyles.defaultList)(
+    ul(GuideStyles.get.defaultList)(
       li(i("Property"), " - every added validator accepts a value"),
       li(i("ModelProperty"), " - every added validator accepts the value and all subproperties are valid"),
       li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid")
