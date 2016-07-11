@@ -11,14 +11,13 @@ import scala.scalajs.js
 import scalatags.JsDom.all._
 
 class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
-                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean)
+                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
                    (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
   import io.udash.wrappers.jquery._
 
-  override val componentId: ComponentId = UdashBootstrap.newId()
   /** Dropdown menu list ID. */
   val menuId: ComponentId = UdashBootstrap.newId()
   /** Dropdown button ID. */
@@ -117,16 +116,17 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (items: properties.SeqProperty[ItemType, ElemType])
+           (items: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (itemFactory: (ElemType) => dom.Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
-    new UdashDropdown(items, false)(itemFactory)(content)
+    new UdashDropdown(items, false, componentId)(itemFactory)(content)
 
   /**
     * Creates dropup component.
     * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
     *
     * @param items Data items which will be represented as links in dropdown menu.
+    * @param componentId Id of the root DOM node.
     * @param itemFactory Creates DOM element which is inserted into dropdown menu.
     * @param content Content of the element opening dropdown.
     * @tparam ItemType Single element type in `items`.
@@ -134,10 +134,10 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def dropup[ItemType, ElemType <: Property[ItemType]]
-            (items: properties.SeqProperty[ItemType, ElemType])
+            (items: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
             (itemFactory: (ElemType) => dom.Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
-    new UdashDropdown(items, true)(itemFactory)(content)
+    new UdashDropdown(items, true, componentId)(itemFactory)(content)
 
   @js.native
   private trait UdashDropdownJQuery extends JQuery {

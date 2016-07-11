@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package pagination
 
 import io.udash._
+import io.udash.bootstrap.UdashBootstrap.ComponentId
 import org.scalajs.dom
 import org.scalajs.dom.Event
 
@@ -28,12 +29,11 @@ sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] exten
 }
 
 class UdashPagination[PageType, ElemType <: Property[PageType]] private
-                     (size: PaginationSize, showArrows: Property[Boolean], highlightActive: Property[Boolean])
+                     (size: PaginationSize, showArrows: Property[Boolean], highlightActive: Property[Boolean], override val componentId: ComponentId)
                      (val pages: properties.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
   extends PaginationComponent[PageType, ElemType] {
 
-  override val componentId = UdashBootstrap.newId()
   override lazy val render: dom.Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
@@ -69,11 +69,10 @@ class UdashPagination[PageType, ElemType <: Property[PageType]] private
   }
 }
 
-class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](aligned: Boolean)
+class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](aligned: Boolean, override val componentId: ComponentId)
                 (val pages: properties.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                 (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
 
-  override val componentId = UdashBootstrap.newId()
   override lazy val render: dom.Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
@@ -137,6 +136,7 @@ object UdashPagination {
     * @param size            Pagination component size.
     * @param showArrows      If property value is true, shows next/prev page arrows.
     * @param highlightActive If property value is true, highlights selected page.
+    * @param componentId     Id of the root DOM node.
     * @param pages           Sequence of available pages.
     * @param selectedPage    Property containing selected page index.
     * @param itemFactory     Creates button for element in pagination.
@@ -145,15 +145,17 @@ object UdashPagination {
     * @return `UdashPagination` component, call render to create DOM element.
     */
   def apply[PageType, ElemType <: Property[PageType]]
-           (size: PaginationSize = PaginationSize.Default, showArrows: Property[Boolean] = Property(true), highlightActive: Property[Boolean] = Property(true))
+           (size: PaginationSize = PaginationSize.Default, showArrows: Property[Boolean] = Property(true),
+            highlightActive: Property[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
            (pages: properties.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPagination[PageType, ElemType] =
-    new UdashPagination(size, showArrows, highlightActive)(pages, selectedPage)(itemFactory)
+    new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
 
   /**
     * Creates pager with next/prev buttons only. More: <a href="http://getbootstrap.com/components/#pagination">Bootstrap Docs</a>.
     *
     * @param aligned Show arrows aligned to site border.
+    * @param componentId Id of the root DOM node.
     * @param pages Sequence of available pages.
     * @param selectedPage Property containing selected page index.
     * @param itemFactory Creates button for element in pagination.
@@ -162,7 +164,8 @@ object UdashPagination {
     * @return `UdashPagination` component, call render to create DOM element.
     */
   def pager[PageType, ElemType <: Property[PageType]]
-           (aligned: Boolean = false)(pages: properties.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
+           (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
+           (pages: properties.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPager[PageType, ElemType] =
-    new UdashPager(aligned)(pages, selectedPage)(itemFactory)
+    new UdashPager(aligned, componentId)(pages, selectedPage)(itemFactory)
 }
