@@ -9,7 +9,7 @@ import org.scalajs.dom.Element
 import scala.scalajs.js
 
 class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
-                         backdrop: UdashModal.BackdropType, keyboard: Boolean, autoInit: Boolean)
+                         backdrop: UdashModal.BackdropType, keyboard: Boolean, autoInit: Boolean, override val componentId: ComponentId)
                         (headerFactory: Option[() => dom.Element],
                          bodyFactory: Option[() => dom.Element],
                          footerFactory: Option[() => dom.Element])
@@ -19,7 +19,6 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
   import UdashModal._
   import io.udash.wrappers.jquery._
 
-  override val componentId: ComponentId = UdashBootstrap.newId()
 
   private def jQSelector(): UdashModalJQuery =
     jQ(s"#$componentId").asModal()
@@ -97,17 +96,19 @@ object UdashModal {
     * @param backdrop      Modal backdrop type.
     * @param keyboard      If true, allows user to close modal with keyboard (Esc button).
     * @param autoInit      If true, automatically initializes modal on creation.
+    * @param componentId   Id of the root DOM node.
     * @param headerFactory Creates content of modal header. Modal will be rendered without the header if `None`.
     * @param bodyFactory   Creates content of modal body. Modal will be rendered without body if `None`.
     * @param footerFactory Creates content of modal footer. Modal without footer will be rendered if `None`.
     * @return `UdashModal` component, call render to create DOM element.
     */
   def apply(modalSize: ModalSize = ModalSize.Default, fade: Boolean = true, labelId: String = "",
-            backdrop: BackdropType = ActiveBackdrop, keyboard: Boolean = true, autoInit: Boolean = true)
+            backdrop: BackdropType = ActiveBackdrop, keyboard: Boolean = true, autoInit: Boolean = true,
+            componentId: ComponentId = UdashBootstrap.newId())
            (headerFactory: Option[() => Element] = None,
             bodyFactory: Option[() => Element] = None,
             footerFactory: Option[() => Element] = None): UdashModal =
-    new UdashModal(modalSize, fade, labelId, backdrop, keyboard, autoInit)(headerFactory, bodyFactory, footerFactory)
+    new UdashModal(modalSize, fade, labelId, backdrop, keyboard, autoInit, componentId)(headerFactory, bodyFactory, footerFactory)
 
   /** Attributes which should be added to button closing the modal window.
     * Example: `UdashButton()(UdashModal.CloseButtonAttr, "Close...")`*/

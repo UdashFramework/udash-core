@@ -10,11 +10,9 @@ import org.scalajs.dom.html.Anchor
 import scala.concurrent.ExecutionContext
 
 class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
-                      (val pages: properties.SeqProperty[ItemType, ElemType])
+                      (val pages: properties.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                       (itemFactory: (ElemType) => dom.Element,
                        isSelected: (ItemType) => Boolean)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
-  override val componentId: ComponentId = UdashBootstrap.newId()
-
   override lazy val render: Element = {
     import scalatags.JsDom.all._
     ol(id := componentId, BootstrapStyles.Navigation.breadcrumb)(
@@ -49,6 +47,7 @@ object UdashBreadcrumbs {
     * More: <a href="http://getbootstrap.com/javascript/#breadcrumbs">Bootstrap Docs</a>.
     *
     * @param pages       SeqProperty containing breadcrumbs data.
+    * @param componentId Id of the root DOM node.
     * @param itemFactory Creates DOM representation for provided item.
     * @param isSelected  Decides whether an element is selected.
     * @tparam ItemType Single element type in `items`.
@@ -56,8 +55,8 @@ object UdashBreadcrumbs {
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (pages: properties.SeqProperty[ItemType, ElemType])
+           (pages: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (itemFactory: (ElemType) => dom.Element,
             isSelected: (ItemType) => Boolean = (_: ItemType) => false)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
-    new UdashBreadcrumbs(pages)(itemFactory, isSelected)
+    new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)
 }

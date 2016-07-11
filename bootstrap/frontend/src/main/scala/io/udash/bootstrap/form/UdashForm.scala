@@ -8,8 +8,8 @@ import org.scalajs.dom
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-class UdashForm private(formStyle: Option[BootstrapStyles.BootstrapClass])(content: Modifier*) extends UdashBootstrapComponent {
-  override val componentId = UdashBootstrap.newId()
+class UdashForm private(formStyle: Option[BootstrapStyles.BootstrapClass], override val componentId: ComponentId)
+                       (content: Modifier*) extends UdashBootstrapComponent {
   override lazy val render =
     form(if (formStyle.isDefined) formStyle.get else ())(
       content
@@ -43,7 +43,19 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def apply(content: Modifier*): UdashForm =
-    new UdashForm(None)(content)
+    new UdashForm(None, UdashBootstrap.newId())(content)
+
+  /**
+    * Creates standard form with provided content. <br/>
+    * Example: `UdashForm(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms">Bootstrap Docs</a>.
+    *
+    * @param componentId Id of the root DOM node.
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def apply(componentId: ComponentId, content: Modifier*): UdashForm =
+    new UdashForm(None, componentId)(content)
 
   /**
     * Creates inline form with provided content. <br/>
@@ -54,7 +66,19 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def inline(content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formInline))(content)
+    new UdashForm(Some(BootstrapStyles.Form.formInline), UdashBootstrap.newId())(content)
+
+  /**
+    * Creates inline form with provided content. <br/>
+    * Example: `UdashForm.inline(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms-inline">Bootstrap Docs</a>.
+    *
+    * @param componentId Id of the root DOM node.
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def inline(componentId: ComponentId, content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formInline), componentId)(content)
 
   /**
     * Creates horizontal form with provided content. <br/>
@@ -65,7 +89,19 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def horizontal(content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formHorizontal))(content)
+    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), UdashBootstrap.newId())(content)
+
+  /**
+    * Creates horizontal form with provided content. <br/>
+    * Example: `UdashForm.horizontal(UdashForm.textInput()("User name")(user.subProp(_.name))).render` <br/>
+    * More: <a href="http://getbootstrap.com/css/#forms-horizontal">Bootstrap Docs</a>.
+    *
+    * @param componentId Id of the root DOM node.
+    * @param content Form content
+    * @return `UdashForm` component, call render to create DOM element.
+    */
+  def horizontal(componentId: ComponentId, content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), componentId)(content)
 
   /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
     * Example: `UdashForm(UdashForm.group(...)).render` */

@@ -280,18 +280,11 @@ object UdashCarousel {
     sealed abstract class PauseOption(val raw: String)
 
     object PauseOption {
-
-      /**
-        * Pauses the cycling of the carousel on mouseenter and resumes the cycling of the carousel on mouseleave.
-        */
+      /** Pauses the cycling of the carousel on mouseenter and resumes the cycling of the carousel on mouseleave. */
       case object Hover extends PauseOption("hover")
-
       case object False extends PauseOption("false")
-
     }
-
   }
-
 }
 
 /**
@@ -300,7 +293,7 @@ object UdashCarousel {
   * @param imgSrc  Slide image source url.
   * @param content Slide content.
   */
-case class UdashCarouselSlide(imgSrc: Url)(content: Modifier*) extends UdashBootstrapComponent {
+case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*) extends UdashBootstrapComponent {
   override lazy val render: Element =
     div(id := componentId, BootstrapStyles.item)(
     img(src := imgSrc.value),
@@ -308,6 +301,4 @@ case class UdashCarouselSlide(imgSrc: Url)(content: Modifier*) extends UdashBoot
       content
     )
   ).render
-
-  override val componentId: ComponentId = UdashBootstrap.newId()
 }
