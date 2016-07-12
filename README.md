@@ -13,13 +13,31 @@ Scala is compiled to highly efficient JavaScript with no need to maintain js. It
 ### Shared Scala code
 Udash brings out of the box the RPC system with a shared data model and interfaces between frontend and backend, which boosts development and keeps code bases consistent.
 
-# What's more?
+# Why Udash?
+
+### Reactive Data Bindings
+Automatically synchronise user interface with your data model.
+
+### Type-safe RPC & REST
+A client↔server communication based on typed interfaces. Bidirectional RPC via WebSockets out of the box.
+
+### User Interface Components
+Twitter Bootstrap components enriched by Udash features.
 
 ### Routing
 Udash serves a frontend routing mechanism. Just define matching from URL to view.
 
-### Asynchronous
-The whole framework is asynchronous by default – implementing reactive websites is much easier.
+### i18n
+Translations served by the backend or compiled into JavaScript.
+
+### Generator 
+Generate a customized application, compile and try it out in 5 minutes.
+
+### Backend independent
+Udash provides a complete support for your web application and the communication with the server but does not influence your backend implementation.
+
+### Open Source
+The whole framework code is available on GitHub under Apache v2 license.
 
 ### IDE support
 With any IDE supporting the Scala language. No extra plugin needed.
