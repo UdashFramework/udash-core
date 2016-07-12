@@ -1,6 +1,6 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.3.0-SNAPSHOT"
+version in ThisBuild := "0.3.0"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
@@ -26,7 +26,7 @@ lazy val udashGuide = project.in(file("."))
   .dependsOn(backend)
   .settings(
     publishArtifact := false,
-    mainClass in Compile := Some("io.udash.guide.Launcher")
+    mainClass in Compile := Some("io.udash.web.Launcher")
   )
 
 lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
@@ -56,7 +56,7 @@ lazy val backend = project.in(file("backend"))
     watchSources ++= (sourceDirectory in guide).value.***.get,
 
     assemblyJarName in assembly := "udash-guide.jar",
-    mainClass in assembly := Some("io.udash.guide.Launcher"),
+    mainClass in assembly := Some("io.udash.web.Launcher"),
     assemblyMergeStrategy in assembly := {
       case "JS_DEPENDENCIES" => MergeStrategy.concat
       case x =>
@@ -97,9 +97,17 @@ val commonFrontendSettings = Seq(
   artifactPath in(Compile, packageScalaJSLauncher) :=
     (target in(Compile, packageScalaJSLauncher)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-init.js",
 
-  requiresDOM in Test := true,
   persistLauncher in Test := false,
-  scalaJSUseRhino in Test := false
+  scalaJSUseRhino in Test := false,
+  scalaJSStage in Test := FastOptStage,
+  jsDependencies in Test += RuntimeDOM % Test,
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
+
+  scalacOptions += {
+    val localDir = (baseDirectory in ThisBuild).value.toURI.toString
+    val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-guide"
+    s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
+  }
 )
 
 lazy val guide = project.in(file("guide")).enablePlugins(ScalaJSPlugin)

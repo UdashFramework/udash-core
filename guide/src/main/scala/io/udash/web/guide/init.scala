@@ -13,6 +13,7 @@ import org.scalajs.dom.{Element, document}
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+import scala.util.Try
 
 object Context {
   implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -25,7 +26,7 @@ object Context {
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)
 
   import io.udash.rest._
-  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, dom.window.location.port.toInt, "/rest/")
+  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(80), "/rest/")
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),

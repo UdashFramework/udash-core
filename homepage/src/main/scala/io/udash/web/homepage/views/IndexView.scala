@@ -122,7 +122,7 @@ private[views] object IndexView {
         ),
         li(HomepageStyles.get.moreListItem)(
           h2(HomepageStyles.get.moreListHead)("Generator"),
-          p(HomepageStyles.get.moreListDescription)("Generate a customized application, compile and\u00A0try it out in a 5 minutes.")
+          p(HomepageStyles.get.moreListDescription)("Generate a customized application, compile and\u00A0try it out in 5 minutes.")
         ),
 
         li(HomepageStyles.get.moreListItem)(
@@ -131,7 +131,7 @@ private[views] object IndexView {
         ),
         li(HomepageStyles.get.moreListItem, HomepageStyles.get.moreListItemTwoLineTitle)(
           h2(HomepageStyles.get.moreListHead)("Backend independent"),
-          p(HomepageStyles.get.moreListDescription)("Udash provides a complete support for your web application and the communication with the server, but makes no influence on your backend implementation.")
+          p(HomepageStyles.get.moreListDescription)("Udash provides a complete support for your web application and the communication with the server but does not influence your backend implementation.")
         ),
         li(HomepageStyles.get.moreListItem)(
           h2(HomepageStyles.get.moreListHead)("IDE support"),
