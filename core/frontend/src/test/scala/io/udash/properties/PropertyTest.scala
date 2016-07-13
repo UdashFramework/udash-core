@@ -3,6 +3,7 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 import scala.collection.mutable
+import scala.scalajs.js.JavaScriptException
 import scala.util.Random
 
 class PropertyTest extends UdashFrontendTest {
@@ -12,11 +13,23 @@ class PropertyTest extends UdashFrontendTest {
     def i: Int
     def s: Option[String]
     def t: ST
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+      case tt: TT =>
+        i == tt.i && s == tt.s && t == tt.t
+      case _ => false
+    }
   }
 
   trait ST {
     def c: C
     def s: Seq[Char]
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+      case st: ST =>
+        c == st.c && s == st.s
+      case _ => false
+    }
   }
 
   sealed trait T
@@ -203,6 +216,88 @@ class PropertyTest extends UdashFrontendTest {
       values.size should be(4)
       values should contain(64)
       values should contain(128)
+    }
+
+    "work with simple case class" in {
+      case class Simple(i: Int, s:  String)
+      val p = ModelProperty(Simple(1, "xxx"))
+      p.get should be(Simple(1, "xxx"))
+      val i = p.subProp(_.i)
+      i.set(5)
+      val s = p.subProp(_.s)
+      s.set("asd")
+      p.get should be(Simple(5, "asd"))
+    }
+
+    "work with tuples" in {
+      val init = (123, "sth", true, C(42, "s"))
+      val p = ModelProperty(init)
+
+      var changeCount = 0
+      p.listen(_ => changeCount += 1)
+
+      p.get should be(init)
+      p.subProp(_._1).set(333)
+      p.subProp(_._2).set("sth2")
+      p.subProp(_._3).set(false)
+      val fourth = p.subModel(_._4)
+      fourth.subProp(_.i).set(24)
+      fourth.subProp(_.s).set("s2")
+      p.get should be((333, "sth2", false, C(24, "s2")))
+      changeCount should be(5)
+    }
+
+    "work with Tuple2" in {
+      val init = (123, "sth")
+      val p = ModelProperty(init)
+
+      var changeCount = 0
+      p.listen(_ => changeCount += 1)
+
+      p.get should be(init)
+      p.subProp(_._1).set(333)
+      p.subProp(_._2).set("sth2")
+      p.get should be((333, "sth2"))
+      changeCount should be(2)
+    }
+
+    "work with recursive case class" in {
+      case class Simple(i: Int, s:  Simple)
+      val p = ModelProperty(Simple(1, null))
+      p.get should be(Simple(1, null))
+      val i = p.subProp(_.i)
+      i.set(5)
+      val s = p.subModel(_.s)
+      s.set(Simple(2, Simple(3, null)))
+      p.get should be(Simple(5, Simple(2, Simple(3, null))))
+      s.subProp(_.i).get should be(2)
+      s.subProp(_.s.i).get should be(3)
+    }
+
+    "work with recursive trait" in {
+      trait T {
+        def t: T
+      }
+      val p = ModelProperty[T](new T { def t: T = null })
+      p.get.t should be(null)
+      val s = p.subModel(_.t)
+      s.set(new T { def t: T = null })
+      s.get.t should be(null)
+      p.get.t shouldNot be(null)
+    }
+
+    "work with recursive case class containing Seq" in {
+      case class Simple(i: Seq[Simple], s:  Simple)
+      val p = ModelProperty(Simple(Seq[Simple](), null))
+      p.get should be(Simple(Seq(), null))
+      val i = p.subSeq(_.i)
+      i.set(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))))
+      val s = p.subModel(_.s)
+      s.set(Simple(Seq(), Simple(Seq(), null)))
+      p.get should be(Simple(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))), Simple(Seq(), Simple(Seq(), null))))
+      s.subProp(_.i).get should be(Seq())
+      s.subProp(_.s.i).get should be(Seq())
+      i.elemProperties.isEmpty should be(false)
     }
   }
 

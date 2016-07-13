@@ -132,6 +132,70 @@ class PropertyUsageTest extends UdashFrontendTest {
     }
   }
 
+  "ReadableModelProperty based on CC" should {
+    "grant read only access to subproperties" in {
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ReadableModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.roSubProp(_.i)
+        |val t: ReadableModelProperty[T] = p.roSubModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.roSubSeq(_.s)
+        |""".stripMargin should compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ReadableModelProperty[T] = ModelProperty[T]
+        |val i: Property[Int] = p.roSubProp(_.i)
+        |val t: ReadableModelProperty[T] = p.roSubModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.roSubSeq(_.s)
+        |""".stripMargin shouldNot compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ReadableModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.roSubProp(_.i)
+        |val t: ModelProperty[T] = p.roSubModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.roSubSeq(_.s)
+        |""".stripMargin shouldNot compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ReadableModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.roSubProp(_.i)
+        |val t: ReadableModelProperty[T] = p.roSubModel(_.t)
+        |val s: SeqProperty[String, _ <: ReadableProperty[String]] = p.roSubSeq(_.s)
+        |""".stripMargin shouldNot compile
+    }
+  }
+
+  "ModelProperty based on CC" should {
+    "grant read&write access to subproperties" in {
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.subProp(_.i)
+        |val t: ReadableModelProperty[T] = p.subModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
+        |""".stripMargin should compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ModelProperty[T] = ModelProperty[T]
+        |val i: Property[Int] = p.subProp(_.i)
+        |val t: ReadableModelProperty[T] = p.subModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
+        |""".stripMargin should compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.subProp(_.i)
+        |val t: ModelProperty[T] = p.subModel(_.t)
+        |val s: ReadableSeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
+        |""".stripMargin should compile
+
+      """case class T(i: Int, t: T, s: Seq[String])
+        |val p: ModelProperty[T] = ModelProperty[T]
+        |val i: ReadableProperty[Int] = p.subProp(_.i)
+        |val t: ReadableModelProperty[T] = p.subModel(_.t)
+        |val s: SeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
+        |""".stripMargin should compile
+    }
+  }
+
   "ReadableSeqProperty" should {
     "grant read only access to contained properties" in {
       """trait T { def i: Int }
