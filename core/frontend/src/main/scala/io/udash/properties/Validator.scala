@@ -18,11 +18,19 @@ object Invalid {
     this((error +: errors).map(DefaultValidationError))
 }
 
-trait Validator[T] {
-  def apply(element: T)(implicit ec: ExecutionContext): Future[ValidationResult]
+trait Validator[ArgumentType] {
+  def apply(element: ArgumentType)(implicit ec: ExecutionContext): Future[ValidationResult]
 }
 
 object Validator {
+  class FunctionValidator[ArgumentType](f: (ArgumentType) => ValidationResult) extends Validator[ArgumentType] {
+    override def apply(element: ArgumentType)(implicit ec: ExecutionContext): Future[ValidationResult] =
+      Future(f(element))(ec)
+  }
+
+  def apply[ArgumentType](f: (ArgumentType) => ValidationResult): Validator[ArgumentType] =
+    new FunctionValidator(f)
+
   implicit class FutureOps[T](private val future: Future[T]) extends AnyVal {
     def foldValidationResult[ErrorType <: ValidationError](implicit ev: T =:= Seq[ValidationResult],
                                                            ec: ExecutionContext): Future[ValidationResult] = {

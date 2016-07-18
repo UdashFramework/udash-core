@@ -158,6 +158,10 @@ trait Property[A] extends ReadableProperty[A] {
     new PropertyRegistration(validators, v)
   }
 
+  /** Adds new validator and clears current validation result. It does not fire validation process. */
+  def addValidator(f: (A) => ValidationResult): Registration =
+    addValidator(Validator(f))
+
   /**
     * Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
     *

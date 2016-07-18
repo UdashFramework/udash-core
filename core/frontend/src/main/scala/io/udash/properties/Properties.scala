@@ -23,4 +23,5 @@ trait Properties {
   type ValidationResult                    = io.udash.properties.ValidationResult
   val  Valid                               = io.udash.properties.Valid
   val  Invalid                             = io.udash.properties.Invalid
+  val  DefaultValidationError              = io.udash.properties.DefaultValidationError
 }

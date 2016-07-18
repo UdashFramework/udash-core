@@ -219,13 +219,12 @@ class PropertyValidationTest extends UdashFrontendTest {
 
       val validRange = (0, 10)
       val p = Property(5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+      p.addValidator((element: Int) => {
           if (element < validRange._1) Invalid(ValueIsTooSmall(element, validRange._1))
           else if (element > validRange._2) Invalid(ValueIsTooBig(element, validRange._2))
           else Valid
         }
-      })
+      )
 
       p.isValid.value.get.get should be(Valid)
 
