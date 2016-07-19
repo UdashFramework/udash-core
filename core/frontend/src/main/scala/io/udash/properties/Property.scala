@@ -81,18 +81,21 @@ trait ReadableProperty[A] {
   def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer, PropertyCreator.newID())
 
-  def combine[B, O : ModelValue](property: Property[B])(combiner: (A, B) => O): Property[O] = {
-    val output = Property[O]
+  /** Combines two properties into a new one. Created property will be updated after any change in the origin ones. */
+  def combine[B, O : ModelValue](property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null)(combiner: (A, B) => O): ReadableProperty[O] = {
+    val pc = implicitly[PropertyCreator[O]]
+    val output = pc.newProperty(combinedParent)
+
     def update(x: A, y: B): Unit =
       output.set(combiner(x, y))
 
+    output.setInitValue(combiner(get, property.get))
     listen(x => update(x, property.get))
     property.listen(y => update(get, y))
-    update(get, property.get)
     output
   }
 
-  protected[properties] def parent: Property[_]
+  protected[properties] def parent: ReadableProperty[_]
 
   protected[properties] def fireValueListeners(): Unit = {
     val t = get
@@ -130,7 +133,7 @@ class TransformedReadableProperty[A, B](private val origin: ReadableProperty[A],
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
 
-  override protected[properties] def parent: Property[_] =
+  override protected[properties] def parent: ReadableProperty[_] =
     origin.parent
 
   override def validate(): Unit =
@@ -193,7 +196,7 @@ class TransformedProperty[A, B](private val origin: Property[A],
     })
 }
 
-abstract class DirectPropertyImpl[A](val parent: Property[_], override val id: UUID)
+abstract class DirectPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
                                     (implicit val executionContext: ExecutionContext)
   extends CastableProperty[A] {
 

@@ -134,6 +134,89 @@ class PropertyTest extends UdashFrontendTest {
       values should contain(Tuple2(TC1(-5), TC2("tp")))
       values should contain(C(-5, "tp"))
     }
+
+    "combine with other properties" in {
+      val p1 = Property(1)
+      val p2 = Property(2)
+
+      val sum = p1.combine(p2)(_ + _)
+      val mul = p1.combine(p2)(_ * _)
+
+      sum.get should be(3)
+      mul.get should be(2)
+
+      p1.set(12)
+
+      sum.get should be(14)
+      mul.get should be(24)
+
+      p2.set(-2)
+
+      sum.get should be(10)
+      mul.get should be(-24)
+
+      trait M {
+        def x: Double
+        def y: Double
+      }
+      object M {
+        def apply(_x: Double, _y: Double): M =
+          new M {
+            override def x: Double = _x
+            override def y: Double = _y
+          }
+      }
+
+      val m = ModelProperty[M](M(0.5, 0.3))
+
+      val mxc = sum.combine(m)(_ * _.x)
+      val myc = sum.combine(m.subProp(_.y))(_ * _)
+
+      // sum.get == 10
+      mxc.get should be(5.0)
+      myc.get should be(3.0)
+
+      var mxcChanges = 0
+      var mycChanges = 0
+      mxc.listen(_ => mxcChanges += 1)
+      myc.listen(_ => mycChanges += 1)
+
+      m.subProp(_.x).set(0.2)
+      m.subProp(_.y).set(0.1)
+
+      // sum.get == 10
+      mxc.get should be(2.0)
+      myc.get should be(1.0)
+      mxcChanges should be(1)
+      mycChanges should be(1)
+
+      val s = SeqProperty(1, 2, 3, 4)
+      val sc = sum.combine(s)((m, items) => items.map(_ * m))
+      val sqc = s.combine(sum)(_ * _)
+
+      // sum.get == 10
+      sc.get should be(Seq(10, 20, 30, 40))
+      sqc.get should be(Seq(10, 20, 30, 40))
+
+      var sqcHeadChanges = 0
+      sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+      s.replace(1, 2, 7, 8, 9)
+
+      // sum.get == 10
+      sc.get should be(Seq(10, 70, 80, 90, 40))
+      sqc.get should be(Seq(10, 70, 80, 90, 40))
+
+      sqcHeadChanges should be(0)
+
+      p1.set(0)
+      p2.set(0)
+
+      sqcHeadChanges should be(2)
+
+      // sum.get == 0
+      sc.get should be(Seq(0, 0, 0, 0, 0))
+      sqc.get should be(Seq(0, 0, 0, 0, 0))
+    }
   }
 
   "ModelProperty" should {
@@ -912,6 +995,84 @@ class PropertyTest extends UdashFrontendTest {
       doubles.get should be(Seq(8.5, 12.0, 8.2, 10.3))
       ints.get should be(Seq(8, 12, 8, 10))
       evens.get should be(Seq(8, 12, 8, 10))
+    }
+
+    "provide valid patch when combined" in {
+      val s = SeqProperty(1, 2, 3, 4)
+      val p = Property(2)
+
+      val c = s.combine(p)(_ * _)
+
+      var listenCalls = mutable.ListBuffer[Seq[Int]]()
+      c.listen(v => listenCalls += v)
+
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      c.listenStructure(patch => lastPatch = patch)
+
+      c.get should be(Seq(2, 4, 6, 8))
+
+      lastPatch = null
+      CallbackSequencer.sequence {
+        p.set(1)
+      }
+      c.get should be(Seq(1, 2, 3, 4))
+      lastPatch should be(null)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(1, 2, 3, 4))
+
+      listenCalls.clear()
+      CallbackSequencer.sequence {
+        p.set(2)
+      }
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 4, 6, 8))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.append(1)
+      c.get should be(Seq(2, 4, 6, 8, 2))
+      lastPatch.idx should be(4)
+      lastPatch.added.head.get should be(2)
+      lastPatch.removed.size should be(0)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 4, 6, 8, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.remove(1, 3)
+      c.get should be(Seq(2, 2))
+      lastPatch.idx should be(1)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.head.get should be(4)
+      lastPatch.removed.last.get should be(8)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.insert(1, 6, 7, 8)
+      c.get should be(Seq(2, 12, 14, 16, 2))
+      lastPatch.idx should be(1)
+      lastPatch.added.head.get should be(12)
+      lastPatch.added.last.get should be(16)
+      lastPatch.removed.size should be(0)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 12, 14, 16, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.remove(0, s.elemProperties.size)
+      c.get should be(Seq())
+      lastPatch.idx should be(0)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.head.get should be(2)
+      lastPatch.removed.last.get should be(2)
+      lastPatch.clearsProperty should be(true)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq())
     }
   }
 }

@@ -55,7 +55,7 @@ trait ModelProperty[A] extends ReadableModelProperty[A] with Property[A] {
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 }
 
-abstract class ModelPropertyImpl[A](val parent: Property[_], override val id: UUID)
+abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
                                    (implicit val executionContext: ExecutionContext) extends ModelProperty[A] with CastableProperty[A] {
   protected var initialized: Boolean = false
   /** Creates all sub properties and puts them in `properties`. */
