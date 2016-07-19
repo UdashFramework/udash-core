@@ -3,8 +3,8 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 import scala.collection.mutable
+import scala.util.{Random, Try}
 import scala.scalajs.js.JavaScriptException
-import scala.util.Random
 
 class PropertyTest extends UdashFrontendTest {
   case class C(i: Int, s: String)
@@ -216,6 +216,135 @@ class PropertyTest extends UdashFrontendTest {
       // sum.get == 0
       sc.get should be(Seq(0, 0, 0, 0, 0))
       sqc.get should be(Seq(0, 0, 0, 0, 0))
+    }
+
+    "transform to SeqProperty" in {
+      var elementsUpdated = 0
+      def registerElementListener(props: Seq[ReadableProperty[_]]) =
+        props.foreach(_.listen(_ => elementsUpdated += 1))
+
+      val p = Property("1,2,3,4,5")
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      registerElementListener(s.elemProperties)
+
+      var lastValue: Seq[Int] = null
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      s.listen(v => lastValue = v)
+      s.listenStructure(p => {
+        registerElementListener(p.added)
+        lastPatch = p
+      })
+
+      s.get should be(Seq(1, 2, 3, 4, 5))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("5,4,3")
+      s.get should be(Seq(5, 4, 3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("5,4,3,2")
+      s.get should be(Seq(5, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("6,5,4,3,2")
+      s.get should be(Seq(6, 5, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("6,5,7,4,3,2")
+      s.get should be(Seq(6, 5, 7, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("-1,-2,-3")
+      s.get should be(Seq(-1, -2, -3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(3)
+
+      //TODO: Does it make sense to use LCCS?
+      //It could use two patches here
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("0,-1,-2,-3,-4")
+      s.get should be(Seq(0, -1, -2, -3, -4))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(5) // could be 2 with LCCS
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("0,-1,-3,-4")
+      s.get should be(Seq(0, -1, -3, -4))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(1)
+      elementsUpdated should be(0)
+
+      p.set("-1,-2,-3")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("")
+      s.get should be(Seq())
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(0)
+
+      p.set("1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("1,0,1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch.idx should be(5)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(0)
     }
   }
 

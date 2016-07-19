@@ -72,7 +72,7 @@ trait ReadableProperty[A] {
   }
 
   /**
-    * Creates ReadableProperty[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
+    * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
     *
     * @param transformer Method transforming type A of existing Property to type B of new Property.
     * @tparam B Type of new Property.
@@ -94,6 +94,81 @@ trait ReadableProperty[A] {
     property.listen(y => update(get, y))
     output
   }
+
+  /**
+    * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
+    *
+    * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
+    * @tparam B Type of elements in new SeqProperty.
+    * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
+    */
+    def transform[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] = {
+      class ReadableSeqPropertyFromSingleValue(origin: ReadableProperty[A], override val executionContext: ExecutionContext)
+        extends ReadableSeqProperty[B, ReadableProperty[B]] {
+
+        override val id: UUID = UUID.randomUUID()
+        override protected[properties] val parent: Property[_] = null
+        private val structureListeners: mutable.Set[Patch[ReadableProperty[B]] => Any] = mutable.Set()
+
+        val pc = implicitly[PropertyCreator[B]]
+        private val children = mutable.ListBuffer.empty[Property[B]]
+
+        update(origin.get)
+        origin.listen(update)
+
+        private def structureChanged(patch: Patch[ReadableProperty[B]]): Unit =
+          structureListeners.foreach(_.apply(patch))
+
+        private def update(v: A): Unit = {
+          val transformed = transformer(v)
+          val current = get
+          val commonBegin = {
+            var tmp = 0
+            while (tmp < current.size && tmp < transformed.size && current(tmp) == transformed(tmp)) tmp += 1
+            tmp
+          }
+          val commonEnd = {
+            var tmp = 0
+            while (0 < current.size - tmp && 0 < transformed.size - tmp
+              && current(current.size - tmp - 1) == transformed(transformed.size - tmp - 1)) tmp += 1
+            tmp
+          }
+
+          val patch = if (transformed.size > current.size) {
+            val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this)(executionContext))
+            children.insertAll(commonBegin, added)
+            Patch[ReadableProperty[B]](commonBegin, Seq(), added, false)
+          } else if (transformed.size < current.size) {
+            val removed = children.slice(commonBegin, commonBegin + current.size - transformed.size)
+            children.remove(commonBegin, current.size - transformed.size)
+            Patch[ReadableProperty[B]](commonBegin, removed, Seq(), transformed.isEmpty)
+          } else null
+
+          CallbackSequencer.sequence {
+            transformed.zip(children)
+              .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
+              .foreach { case (pv, p) => p.set(pv) }
+            if (patch != null) structureChanged(patch)
+            valueChanged()
+          }
+        }
+
+        /** @return Current property value. */
+        override def get: Seq[B] =
+          children.map(_.get)
+
+        /** @return Sequence of child properties. */
+        override def elemProperties: Seq[ReadableProperty[B]] =
+          children
+
+        /** Registers listener, which will be called on every property structure change. */
+        override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
+          structureListeners += l
+          new PropertyRegistration(structureListeners, l)
+        }
+      }
+      new ReadableSeqPropertyFromSingleValue(this, executionContext)
+    }
 
   protected[properties] def parent: ReadableProperty[_]
 
