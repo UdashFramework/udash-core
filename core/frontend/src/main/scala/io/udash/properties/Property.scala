@@ -72,17 +72,17 @@ trait ReadableProperty[A] {
   }
 
   /**
-    * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
+    * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
     *
-    * @param transformer Method transforming type A of existing Property to type B of new Property.
-    * @tparam B Type of new Property.
-    * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
+    * @param property `Property[B]` to combine with `this`.
+    * @param combinedParent Parent of combined property, `null` by default.
+    * @param combiner Method combining values A and B into O.
+    * @tparam B Type of elements in provided property.
+    * @tparam O Output property elements type.
+    * @return Property[O] updated on any change in `this` or `property`.
     */
-  def transform[B](transformer: A => B): ReadableProperty[B] =
-    new TransformedReadableProperty[A, B](this, transformer, PropertyCreator.newID())
-
-  /** Combines two properties into a new one. Created property will be updated after any change in the origin ones. */
-  def combine[B, O : ModelValue](property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null)(combiner: (A, B) => O): ReadableProperty[O] = {
+  def combine[B, O : ModelValue](property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null)
+                                (combiner: (A, B) => O): ReadableProperty[O] = {
     val pc = implicitly[PropertyCreator[O]]
     val output = pc.newProperty(combinedParent)
 
@@ -96,79 +96,24 @@ trait ReadableProperty[A] {
   }
 
   /**
+    * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
+    *
+    * @param transformer Method transforming type A of existing Property to type B of new Property.
+    * @tparam B Type of new Property.
+    * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
+    */
+  def transform[B](transformer: A => B): ReadableProperty[B] =
+    new TransformedReadableProperty[A, B](this, transformer, PropertyCreator.newID())
+
+  /**
     * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
     *
     * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
-    def transform[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] = {
-      class ReadableSeqPropertyFromSingleValue(origin: ReadableProperty[A], override val executionContext: ExecutionContext)
-        extends ReadableSeqProperty[B, ReadableProperty[B]] {
-
-        override val id: UUID = UUID.randomUUID()
-        override protected[properties] val parent: Property[_] = null
-        private val structureListeners: mutable.Set[Patch[ReadableProperty[B]] => Any] = mutable.Set()
-
-        val pc = implicitly[PropertyCreator[B]]
-        private val children = mutable.ListBuffer.empty[Property[B]]
-
-        update(origin.get)
-        origin.listen(update)
-
-        private def structureChanged(patch: Patch[ReadableProperty[B]]): Unit =
-          structureListeners.foreach(_.apply(patch))
-
-        private def update(v: A): Unit = {
-          val transformed = transformer(v)
-          val current = get
-          val commonBegin = {
-            var tmp = 0
-            while (tmp < current.size && tmp < transformed.size && current(tmp) == transformed(tmp)) tmp += 1
-            tmp
-          }
-          val commonEnd = {
-            var tmp = 0
-            while (0 < current.size - tmp && 0 < transformed.size - tmp
-              && current(current.size - tmp - 1) == transformed(transformed.size - tmp - 1)) tmp += 1
-            tmp
-          }
-
-          val patch = if (transformed.size > current.size) {
-            val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this)(executionContext))
-            children.insertAll(commonBegin, added)
-            Patch[ReadableProperty[B]](commonBegin, Seq(), added, false)
-          } else if (transformed.size < current.size) {
-            val removed = children.slice(commonBegin, commonBegin + current.size - transformed.size)
-            children.remove(commonBegin, current.size - transformed.size)
-            Patch[ReadableProperty[B]](commonBegin, removed, Seq(), transformed.isEmpty)
-          } else null
-
-          CallbackSequencer.sequence {
-            transformed.zip(children)
-              .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
-              .foreach { case (pv, p) => p.set(pv) }
-            if (patch != null) structureChanged(patch)
-            valueChanged()
-          }
-        }
-
-        /** @return Current property value. */
-        override def get: Seq[B] =
-          children.map(_.get)
-
-        /** @return Sequence of child properties. */
-        override def elemProperties: Seq[ReadableProperty[B]] =
-          children
-
-        /** Registers listener, which will be called on every property structure change. */
-        override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
-          structureListeners += l
-          new PropertyRegistration(structureListeners, l)
-        }
-      }
-      new ReadableSeqPropertyFromSingleValue(this, executionContext)
-    }
+    def transform[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+      new ReadableSeqPropertyFromSingleValue(this, transformer, executionContext)
 
   protected[properties] def parent: ReadableProperty[_]
 
@@ -192,6 +137,71 @@ trait ReadableProperty[A] {
         ).foldValidationResult
       })
     } else validationResult = Future.successful(Valid)
+  }
+}
+
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
+                                                                         override val executionContext: ExecutionContext)
+  extends ReadableSeqProperty[B, ReadableProperty[B]] {
+
+  override val id: UUID = UUID.randomUUID()
+  override protected[properties] val parent: Property[_] = null
+  protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
+
+  val pc = implicitly[PropertyCreator[B]]
+  protected val children = mutable.ListBuffer.empty[Property[B]]
+
+  update(origin.get)
+  origin.listen(update)
+
+  private def structureChanged(patch: Patch[Property[B]]): Unit =
+    structureListeners.foreach(_.apply(patch))
+
+  private def update(v: A): Unit = {
+    val transformed = transformer(v)
+    val current = get
+
+    def commonIdx(s1: Iterator[B], s2: Iterator[B]): Int =
+      math.max(0,
+        s1.zipAll(s2, null, null).zipWithIndex
+          .indexWhere { case (((x, y), idx)) => x != y })
+
+    val commonBegin = commonIdx(transformed.iterator, current.iterator)
+    val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
+
+    val patch = if (transformed.size > current.size) {
+      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this)(executionContext))
+      children.insertAll(commonBegin, added)
+      Some(Patch(commonBegin, Seq(), added, false))
+    } else if (transformed.size < current.size) {
+      val removed = children.slice(commonBegin, commonBegin + current.size - transformed.size)
+      children.remove(commonBegin, current.size - transformed.size)
+      Some(Patch(commonBegin, removed, Seq(), transformed.isEmpty))
+    } else None
+
+    CallbackSequencer.sequence {
+      transformed.zip(children)
+        .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
+        .foreach { case (pv, p) => p.set(pv) }
+      patch.foreach(structureChanged)
+      valueChanged()
+    }
+  }
+
+  override def get: Seq[B] =
+    children.map(_.get)
+
+  override def elemProperties: Seq[ReadableProperty[B]] =
+    children.map(_.transform((id: B) => id))
+}
+
+class ReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
+                                                                 override val executionContext: ExecutionContext)
+  extends BaseReadableSeqPropertyFromSingleValue(origin, transformer, executionContext) {
+  /** Registers listener, which will be called on every property structure change. */
+  override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
+    structureListeners += l
+    new PropertyRegistration(structureListeners, l)
   }
 }
 
@@ -251,6 +261,43 @@ trait Property[A] extends ReadableProperty[A] {
     */
   def transform[B](transformer: A => B, revert: B => A): Property[B] =
     new TransformedProperty[A, B](this, transformer, revert, PropertyCreator.newID())
+
+  /**
+    * Creates SeqProperty[B] linked to `this`. Changes will be synchronized with `this` in both directions.
+    *
+    * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
+    * @param revert Method transforming type Seq[B] to A.
+    * @tparam B Type of elements in new SeqProperty.
+    * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
+    */
+  def transform[B : ModelValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+    new SeqPropertyFromSingleValue(this, transformer, revert, executionContext)
+}
+
+class SeqPropertyFromSingleValue[A, B : ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A,
+                                                    override val executionContext: ExecutionContext)
+  extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer, executionContext) with SeqProperty[B, Property[B]] {
+
+  override def replace(idx: Int, amount: Int, values: B*): Unit = {
+    val current = mutable.ListBuffer(get:_*)
+    current.remove(idx, amount)
+    current.insertAll(idx, values)
+    origin.set(revert(current))
+  }
+
+  override def set(t: Seq[B]): Unit =
+    origin.set(revert(t))
+
+  override def setInitValue(t: Seq[B]): Unit =
+    origin.setInitValue(revert(t))
+
+  override def elemProperties: Seq[Property[B]] =
+    children
+
+  override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
+    structureListeners += l
+    new PropertyRegistration(structureListeners, l)
+  }
 }
 
 /** Represents Property[A] transformed to Property[B]. */

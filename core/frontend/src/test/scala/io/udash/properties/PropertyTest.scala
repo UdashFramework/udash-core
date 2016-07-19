@@ -218,7 +218,7 @@ class PropertyTest extends UdashFrontendTest {
       sqc.get should be(Seq(0, 0, 0, 0, 0))
     }
 
-    "transform to SeqProperty" in {
+    "transform to ReadableSeqProperty" in {
       var elementsUpdated = 0
       def registerElementListener(props: Seq[ReadableProperty[_]]) =
         props.foreach(_.listen(_ => elementsUpdated += 1))
@@ -340,6 +340,149 @@ class PropertyTest extends UdashFrontendTest {
       elementsUpdated = 0
       p.set("1,0,1,0,1")
       s.get should be(Seq(1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch.idx should be(5)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(0)
+    }
+
+    "not allow children modification after transformation into ReadableSeqProperty" in {
+      val p = Property("1,2,3,4,5")
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      s.elemProperties.foreach {
+        case p: Property[Int] => p.set(20)
+        case p: ReadableProperty[Int] => //ignore
+      }
+
+      s.get should be(Seq(1,2,3,4,5))
+    }
+
+    "transform to SeqProperty" in {
+      var elementsUpdated = 0
+      def registerElementListener(props: Seq[ReadableProperty[_]]) =
+        props.foreach(_.listen(_ => elementsUpdated += 1))
+
+      val p = Property("1,2,3,4,5")
+      val s: SeqProperty[Int, Property[Int]] = p.transform(
+        (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
+        (s: Seq[Int]) => s.mkString(",")
+      )
+
+      registerElementListener(s.elemProperties)
+
+      var lastValue: Seq[Int] = null
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      s.listen(v => lastValue = v)
+      s.listenStructure(p => {
+        registerElementListener(p.added)
+        lastPatch = p
+      })
+
+      s.get should be(Seq(1, 2, 3, 4, 5))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(5, 4, 3))
+      p.get should be("5,4,3")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.append(2)
+      p.get should be("5,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.prepend(6)
+      p.get should be("6,5,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.insert(2, 7)
+      p.get should be("6,5,7,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(-1, -2, -3))
+      p.get should be("-1,-2,-3")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(3)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.prepend(0)
+      s.append(-4)
+      p.get should be("0,-1,-2,-3,-4")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.remove(2, 1)
+      p.get should be("0,-1,-3,-4")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(1)
+      elementsUpdated should be(0)
+
+      p.set("-1,-2,-3")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq())
+      p.get should be("")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(0)
+
+      s.set(Seq(1,0,1,0,1))
+      p.get should be("1,0,1,0,1")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.append(0, 1)
+      p.get should be("1,0,1,0,1,0,1")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(1,0,1,0,1))
+      p.get should be("1,0,1,0,1")
       lastValue should be(s.get)
       lastPatch.idx should be(5)
       lastPatch.added.size should be(0)
