@@ -3,7 +3,7 @@ package io.udash.bindings
 import java.util.concurrent.atomic.AtomicInteger
 
 import io.udash._
-import io.udash.properties.SeqProperty
+import io.udash.properties.{ImmutableValue, SeqProperty}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Element
 
@@ -46,7 +46,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle null value providing empty span element" in {
-      case class C(i: Int)
+      class C(val i: Int) {
+        override def toString: String =
+          s"C($i)"
+      }
+      implicit val allowCTpe: ImmutableValue[C] = null
 
       val p = Property[C]
       val template = div(bind(p)).render
@@ -55,7 +59,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("")
 
-      p.set(C(2))
+      p.set(new C(2))
       template.textContent should be("C(2)")
       template2.textContent should be("C(2)")
 
@@ -64,7 +68,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(0).nodeName should be("#text")
       template2.textContent should be("")
 
-      p.set(C(123))
+      p.set(new C(123))
       template.textContent should be("C(123)")
       template2.textContent should be("C(123)")
 

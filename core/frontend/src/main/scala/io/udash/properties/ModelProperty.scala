@@ -32,6 +32,7 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 
   /** ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
+    *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
     import Validator._
@@ -56,6 +57,15 @@ trait ModelProperty[A] extends ReadableModelProperty[A] with Property[A] {
 
 abstract class ModelPropertyImpl[A](val parent: Property[_], override val id: UUID)
                                    (implicit val executionContext: ExecutionContext) extends ModelProperty[A] with CastableProperty[A] {
-  def getSubProperty[T](key: String): Property[T] =
+  protected var initialized: Boolean = false
+  /** Creates all sub properties and puts them in `properties`. */
+  protected def initialize(): Unit
+
+  def getSubProperty[T](key: String): Property[T] = {
+    if (!initialized) {
+      initialized = true
+      initialize()
+    }
     properties(key).asInstanceOf[Property[T]]
+  }
 }

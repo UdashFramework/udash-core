@@ -145,7 +145,8 @@ class TransformedReadableProperty[A, B](private val origin: ReadableProperty[A],
 
 /** Property which can be modified. */
 trait Property[A] extends ReadableProperty[A] {
-  /** Changes current property value. Fires value change listeners. */
+  /** Changes current property value. Fires value change listeners.
+    * @param t Should not be null! */
   def set(t: A): Unit
 
   /** Changes current property value. Does not fire value change listeners. */
