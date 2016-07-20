@@ -17,8 +17,11 @@ trait Properties {
 
   type Patch[+P <: ReadableProperty[_]]    = io.udash.properties.Patch[P]
 
+  type ValidationError                     = io.udash.properties.ValidationError
+  type DefaultValidationError              = io.udash.properties.DefaultValidationError
   type Validator[T]                        = io.udash.properties.Validator[T]
   type ValidationResult                    = io.udash.properties.ValidationResult
   val  Valid                               = io.udash.properties.Valid
   val  Invalid                             = io.udash.properties.Invalid
+  val  DefaultValidationError              = io.udash.properties.DefaultValidationError
 }
