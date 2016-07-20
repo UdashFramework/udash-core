@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ValidationError {
@@ -32,15 +33,17 @@ object Validator {
     new FunctionValidator(f)
 
   implicit class FutureOps[T](private val future: Future[T]) extends AnyVal {
-    def foldValidationResult[ErrorType <: ValidationError](implicit ev: T =:= Seq[ValidationResult],
-                                                           ec: ExecutionContext): Future[ValidationResult] = {
-      future map {
-        case s if s.forall(r => r == Valid) => Valid
-        case s => Invalid(s.foldLeft(Seq[ValidationError]())((acc: Seq[ValidationError], r: ValidationResult) => r match {
-          case Invalid(errors) => acc ++ errors
-          case _ => acc
-        }))
+    def foldValidationResult(implicit ev: T =:= Seq[ValidationResult], ec: ExecutionContext): Future[ValidationResult] = {
+      @tailrec
+      def reduce(acc: Seq[ValidationError], results: Seq[ValidationResult]): ValidationResult = results match {
+        case Seq() =>
+          if (acc.isEmpty) Valid
+          else Invalid(acc)
+        case Seq(Valid, tl@_*) => reduce(acc, tl)
+        case Seq(Invalid(errors), tl@_*) => reduce(acc ++ errors, tl)
       }
+
+      future.map(s => reduce(Nil, s.toList))
     }
   }
 }
