@@ -285,6 +285,9 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   /** Adds `values` at the end of the sequence. */
   def append(values: A*): Unit = insert(get.size, values: _*)
 
+  /** Removes all elements from this SeqProperty. */
+  def clear(): Unit = remove(0, size)
+
   /** Transforms SeqProperty[A] into SeqProperty[B].
     *
     * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
