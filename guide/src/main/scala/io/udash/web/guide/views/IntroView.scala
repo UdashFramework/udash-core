@@ -88,9 +88,9 @@ class IntroView extends View {
       " and ",
       a(href := RpcIntroState.url)("RPC in Udash"), ". "
     )
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 
   override def renderChild(view: View): Unit = {}
 }

@@ -6,6 +6,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class TextAreaDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -15,7 +16,7 @@ class TextAreaDemoComponent extends Component {
 
   val text: Property[String] = Property("")
 
-  override def getTemplate: Element = div(id := "text-area-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "text-area-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(BootstrapStyles.Grid.colMd4)(
@@ -29,5 +30,5 @@ class TextAreaDemoComponent extends Component {
         )
       )
     )
-  ).render
+  )
 }

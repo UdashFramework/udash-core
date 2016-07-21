@@ -18,7 +18,7 @@ class RpcSerializationView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Serialization"),
     p(
       "Everything you send via RPC has to be serializable. Udash internally uses the ",
@@ -156,7 +156,7 @@ class RpcSerializationView extends View {
       "Now you know more about Udash RPC interfaces. You might also want to take a look at ",
       a(href := RpcClientServerState.url)("Client ➔ Server"), " or ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

@@ -14,11 +14,11 @@ class RestView extends ViewContainer {
 
   protected val child = div().render
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("REST in Udash"),
     p(
       "In this part of the guide you can read about REST API usage in a Udash application."
     ),
     child
-  ).render
+  )
 }

@@ -33,7 +33,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Routing"),
     p(
       "Modern web applications create user friendly URLs and use them to handle the frontend routing. Udash framework ",
@@ -151,7 +151,7 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "Take a look at the ", a(href := FrontendMVPState.url)("Model, View, Presenter & ViewPresenter"), " chapter to ",
       "learn more about the ", a(href := References.MvpPattern)("MVP pattern"), " variation used in Udash."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

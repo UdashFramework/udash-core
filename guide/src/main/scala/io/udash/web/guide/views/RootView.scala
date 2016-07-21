@@ -27,7 +27,7 @@ class RootView extends ViewContainer {
     Header.getTemplate,
     child,
     Footer.getTemplate
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 }

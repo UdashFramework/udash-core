@@ -8,6 +8,7 @@ import org.scalajs.dom.Element
 import org.scalajs.dom.html.Input
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class RadioButtonsDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -30,7 +31,7 @@ class RadioButtonsDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "radio-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "radio-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -42,7 +43,7 @@ class RadioButtonsDemoComponent extends Component {
         )
       )
     )
-  ).render
+  )
 
   def checkboxes() =
     UdashInputGroup()(

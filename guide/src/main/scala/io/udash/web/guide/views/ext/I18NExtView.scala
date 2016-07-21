@@ -16,7 +16,7 @@ case object I18NExtViewPresenter extends DefaultViewPresenterFactory[I18NExtStat
 class I18NExtView extends View {
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Udash i18n"),
     p(
       "The Udash framework supports internationalization of web applications. ",
@@ -304,7 +304,7 @@ class I18NExtView extends View {
     )(GuideStyles),
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
     DynamicRemoteTranslationsDemo()
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

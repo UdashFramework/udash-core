@@ -17,7 +17,7 @@ class RestClientServerView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("REST interface usage"),
     p(
       "Once the REST API wrapper interface is prepared, you can create a REST connector based on it. ",
@@ -56,7 +56,7 @@ class RestClientServerView extends View {
       "That wraps all the knowledge needed to start working with wrapped REST interfaces. ",
       "You may find the ", a(href := RpcIntroState.url)("RPC communication"), " chapter interesting later on. "
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

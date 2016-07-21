@@ -17,7 +17,7 @@ class BootstrappingIntroView extends View {
   import scalacss.Defaults._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Project structure"),
     p("The basic Udash project contains three modules: "),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_basic.png", "Basic modules structure.", GuideStyles.get.floatRight, GuideStyles.get.imgSmall, GuideStyles.get.imgIntro),
@@ -46,7 +46,7 @@ class BootstrappingIntroView extends View {
       "If you want to prepare a custom project, you might be interested in ",
       a(href := BootstrappingSBTState.url)("SBT configuration"), " "
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

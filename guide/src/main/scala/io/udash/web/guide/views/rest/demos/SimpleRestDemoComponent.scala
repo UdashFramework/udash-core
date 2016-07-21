@@ -14,11 +14,13 @@ import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 class SimpleRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Element = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
 
   trait ExampleModel {
     def string: String
@@ -27,7 +29,7 @@ class SimpleRestDemoComponent extends Component {
   }
 
   object SimpleRestDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val responsesModel = ModelProperty[ExampleModel]
 
       val presenter = new SimpleRestDemoPresenter(responsesModel)
@@ -42,7 +44,7 @@ class SimpleRestDemoComponent extends Component {
         case Success(response) =>
           model.subProp(_.string).set(response)
         case Failure(ex) =>
-          model.subProp(_.string).set(s"Error: $ex!")
+          ex.printStackTrace()
       }
     }
 
@@ -52,7 +54,7 @@ class SimpleRestDemoComponent extends Component {
         case Success(response) =>
           model.subProp(_.int).set(response)
         case Failure(ex) =>
-          model.subProp(_.int).set(-1)
+          ex.printStackTrace()
       }
     }
 
@@ -62,7 +64,7 @@ class SimpleRestDemoComponent extends Component {
         case Success(response) =>
           model.subProp(_.cls).set(response)
         case Failure(ex) =>
-          model.subProp(_.cls).set(null)
+          ex.printStackTrace()
       }
     }
   }
@@ -95,7 +97,7 @@ class SimpleRestDemoComponent extends Component {
       case UdashButton.ButtonClickEvent(btn) => presenter.sendClassRequest(btn)
     }
 
-    def render: Element = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(
       UdashButtonGroup()(
         loadStringButton.render,
         loadIntButton.render,
@@ -105,6 +107,6 @@ class SimpleRestDemoComponent extends Component {
       div("String: ", bind(model.subProp(_.string))),
       div("Int: ", bind(model.subProp(_.int))),
       div("Class: ", bind(model.subProp(_.cls)))
-    ).render
+    )
   }
 }

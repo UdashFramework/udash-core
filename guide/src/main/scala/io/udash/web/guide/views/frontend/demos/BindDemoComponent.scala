@@ -7,6 +7,7 @@ import org.scalajs.dom.Element
 
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
+import io.udash.web.commons.views.Component
 
 class BindDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -18,10 +19,10 @@ class BindDemoComponent extends Component {
 
   dom.window.setInterval(() => name.set(names.next()), 500)
 
-  override def getTemplate: Element = div(id := "bind-demo", GuideStyles.get.frame)(
+  override def getTemplate: Modifier = div(id := "bind-demo", GuideStyles.get.frame)(
     p(
       "Name: ",
       bind(name)
     )
-  ).render
+  )
 }

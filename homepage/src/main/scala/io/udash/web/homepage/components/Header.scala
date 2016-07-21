@@ -69,7 +69,7 @@ object Header extends HeaderButtons with HeaderNav {
     }
   }
 
-  def getTemplate: Element = template
+  def getTemplate: Modifier = template
 
   private def toggleBooleanAttribute(jqElement: JQuery, attribute: String): Unit = {
     val activeOption = jqElement.attr(attribute)

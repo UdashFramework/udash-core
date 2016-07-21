@@ -17,7 +17,7 @@ class FrontendBindingsView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Property Bindings"),
     p(
       "As every modern frontend framework Udash provides model-view template bindings. ",
@@ -78,8 +78,8 @@ class FrontendBindingsView extends View {
         |  produce(integers,
         |    (seq: Seq[Property[Int]]) =>
         |      span(seq.map(p => span(id := p.hashCode())(s"${p.get}, ")):_*).render,
-        |    (patch: Patch[Property[Int]], el: Element) => {
-        |      val insertBefore = jQ(el).children().eq(patch.idx)
+        |    (patch: Patch[Property[Int]], el: Seq[Element]) => {
+        |      val insertBefore = jQ(el:_*).children().eq(patch.idx)
         |      patch.added.foreach(p =>
         |        jQ(span(id := p.hashCode())(s"${p.get}, ").render)
         |          .insertBefore(insertBefore)
@@ -182,7 +182,7 @@ class FrontendBindingsView extends View {
     p(
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

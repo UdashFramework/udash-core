@@ -1,8 +1,8 @@
 package io.udash.web.guide.components
 
+import io.udash._
 import io.udash.web.guide.styles.partials.{GuideStyles, MenuStyles}
 import io.udash.web.guide.{Context, _}
-import io.udash.properties.Property
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.MobileMenuStyles
 import io.udash.web.commons.views.{SVG, Size}
@@ -72,7 +72,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
   private lazy val jqMobileButton = jQ(template).find(s".${MenuStyles.get.btnMobile.htmlClass}")
 
-  def getTemplate: Element = {
+  def getTemplate: Modifier = {
     initListeners()
     template
   }

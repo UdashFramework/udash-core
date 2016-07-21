@@ -16,7 +16,7 @@ case object JQueryExtViewPresenter extends DefaultViewPresenterFactory[JQueryExt
 class JQueryExtView extends View {
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Udash jQuery wrapper"),
     p(
       "The jQuery library is a very popular tool in the web development. We have created a strongly typed wrapper for jQuery, ",
@@ -111,7 +111,7 @@ class JQueryExtView extends View {
       "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), " ",
       "It also contains an example application witch presents more ways of working with this wrapper."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

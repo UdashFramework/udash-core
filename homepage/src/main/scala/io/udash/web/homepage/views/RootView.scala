@@ -32,15 +32,14 @@ class RootView extends View {
       child
     ),
     Footer.getTemplate
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 
   override def renderChild(view: View): Unit = {
     import io.udash.wrappers.jquery._
     val newChild = view.getTemplate
-    jQ(child).replaceWith(newChild)
-    child = newChild
+    newChild.applyTo(child)
 
     js.Dynamic.global.svg4everybody()
   }

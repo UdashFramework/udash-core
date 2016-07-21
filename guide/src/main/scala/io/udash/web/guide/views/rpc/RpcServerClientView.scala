@@ -16,7 +16,7 @@ class RpcServerClientView extends View {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Server ➔ client communication"),
     p(
       "Modern web applications often notify users about some events, for example about finishing a background task. ",
@@ -158,7 +158,7 @@ class RpcServerClientView extends View {
     p(
       "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

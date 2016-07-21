@@ -17,7 +17,7 @@ class RpcClientServerView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Client ➔ server communication"),
     p(
       "Every dynamic web application needs to communicate with a server, every modern application should do it asynchronously. " +
@@ -329,7 +329,7 @@ class RpcClientServerView extends View {
     p(
       "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"), " chapter interesting later on. "
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

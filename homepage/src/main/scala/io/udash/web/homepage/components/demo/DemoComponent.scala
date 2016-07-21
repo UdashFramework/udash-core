@@ -1,15 +1,14 @@
 package io.udash.web.homepage.components.demo
 
+import io.udash._
 import io.udash.core.DomWindow
-import io.udash.properties.Property
-import io.udash.view.Component
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
-import io.udash.web.commons.views.Image
+import io.udash.web.commons.views.{Component, Image}
 import io.udash.wrappers.jquery._
 import io.udash.wrappers.jquery.scrollbar._
 import org.scalajs.dom.Element
@@ -96,7 +95,7 @@ class DemoComponent(url: Property[String]) extends Component {
     )
   ).render
 
-  override def getTemplate: Element = template
+  override def getTemplate: Modifier = template
 }
 
 object DemoComponent {
@@ -137,7 +136,7 @@ object DemoComponent {
       |  TextInput(input)(
       |    onkeyup := ((ev: KeyboardEvent) =>
       |      if (ev.keyCode == ext.KeyCode.Enter) {
-      |       val n: Try[Int] = Try(input.get.toInt)
+      |        val n: Try[Int] = Try(input.get.toInt)
       |        if (n.isSuccess) {
       |          numbers.append(n.get)
       |          input.set("")
@@ -160,18 +159,15 @@ object DemoComponent {
       |val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
       |
       |val email = Property("example@mail.com")
-      |email.addValidator(new Validator[String] {
-      |  def apply(element: String)
-      |           (implicit ec: ExecutionContext) = Future {
-      |    element match {
-      |      case emailRegex(text) => Valid
-      |      case _ => Invalid(Seq("It's not an email!"))
-      |    }
+      |email.addValidator((element: String) =>
+      |  element match {
+      |    case emailRegex(text) => Valid
+      |    case _ => Invalid("It's not an email!")
       |  }
-      |})
+      |)
       |
       |div(
-      |  TextInput(email), br,
+      |  TextInput.debounced(email), br,
       |  "Valid: ", bindValidation(email,
       |    _ => span("Wait...").render,
       |    {

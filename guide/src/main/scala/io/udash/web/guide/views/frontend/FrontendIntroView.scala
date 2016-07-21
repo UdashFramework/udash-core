@@ -19,7 +19,7 @@ class FrontendIntroView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Introduction"),
     p(
       "At present JavaScript is an undisputed market leader of the frontend development. With frameworks like AngularJS, ReactJS ",
@@ -66,8 +66,8 @@ class FrontendIntroView extends View {
         |  def maximum: Int
         |}
         |
-        |class IntroFormDemoComponent extends Component {
-        |  override def getTemplate: Element = IntroFormDemoViewPresenter()
+        |class IntroFormDemoComponent {
+        |  def getTemplate: Element = IntroFormDemoViewPresenter()
         |
         |  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
         |  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
@@ -83,7 +83,7 @@ class FrontendIntroView extends View {
         |          errors += "Maximum is smaller than your value!"
         |
         |        if (errors.isEmpty) Valid
-        |        else Invalid(errors.toSeq)
+        |        else Invalid(errors.map(DefaultValidationError))
         |      }
         |  }
         |
@@ -122,8 +122,8 @@ class FrontendIntroView extends View {
         |    import scalacss.Defaults._
         |    import scalacss.ScalatagsCss._
         |
-        |    private def i2s(i: Int) = i.toString
-        |    private def s2i(s: String) = Float.parseFloat(s).toInt
+        |    private val i2s = (i: Int) => i.toString
+        |    private val s2i = (s: String) => Float.parseFloat(s).toInt
         |
         |    private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
         |    private val between = model.subProp(_.between).transform(i2s, s2i)
@@ -181,7 +181,7 @@ class FrontendIntroView extends View {
       "Take a look at the ", a(href := FrontendRoutingState(None).url)("Routing in Udash"),
       " chapter to learn more about selecting a view based on a URL."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

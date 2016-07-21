@@ -17,7 +17,7 @@ class FrontendFormsView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
     p(
       "In the ", a(href := FrontendBindingsState.url)("previous"), " chapter you could read about one way properties to Scalatags templates bindings. ",
@@ -220,7 +220,7 @@ class FrontendFormsView extends View {
       a(href := RpcIntroState.url)("RPC"), " chapter. ",
       "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

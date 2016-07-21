@@ -19,9 +19,14 @@ abstract class ViewContainer extends View {
     jqChild
       .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
         (el: Element) => {
-          jqChild
-            .html(if (view != null) view.getTemplate else null)
-            .animate(Map[String, Any]("opacity" -> 1), 200)
+          if (view != null) {
+            jqChild.children().remove()
+            view.getTemplate.applyTo(jqChild.toArray.head)
+            jqChild.animate(Map[String, Any]("opacity" -> 1), 200)
+          } else {
+            jqChild.html(null)
+              .animate(Map[String, Any]("opacity" -> 1), 200)
+          }
 
           js.Dynamic.global.Prism.highlightAll()
         })

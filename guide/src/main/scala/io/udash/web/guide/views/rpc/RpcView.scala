@@ -14,11 +14,11 @@ class RpcView extends ViewContainer {
 
   protected val child = div().render
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("RPC in Udash"),
     p(
       "In this part of the guide you can read about client-server communication in a Udash application."
     ),
     child
-  ).render
+  )
 }

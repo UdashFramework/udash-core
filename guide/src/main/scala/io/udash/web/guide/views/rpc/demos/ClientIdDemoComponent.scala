@@ -13,6 +13,8 @@ import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 trait ClientIdDemoModel {
   def clientId: String
@@ -20,10 +22,10 @@ trait ClientIdDemoModel {
 
 class ClientIdDemoComponent extends Component {
   import Context._
-  override def getTemplate: Element = ClientIdDemoViewPresenter()
+  override def getTemplate: Modifier = ClientIdDemoViewPresenter()
 
   object ClientIdDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val clientId = ModelProperty[ClientIdDemoModel]
       clientId.subProp(_.clientId).set("???")
 
@@ -56,7 +58,7 @@ class ClientIdDemoComponent extends Component {
         presenter.onButtonClick()
     }
 
-    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           "Your client id: ",
@@ -64,6 +66,6 @@ class ClientIdDemoComponent extends Component {
         ),
         UdashInputGroup.buttons(loadIdButton.render)
       ).render
-    ).render
+    )
   }
 }

@@ -25,9 +25,9 @@ object Header extends HeaderButtons with HeaderNav{
       ),
       buttons
     )
-  ).render
+  )
 
-  def getTemplate: Element = template
+  def getTemplate: Modifier = template
 
   override val buttonStyles: HeaderButtonsStyles = HeaderStyles
   override val navStyles: HeaderNavStyles = HeaderStyles

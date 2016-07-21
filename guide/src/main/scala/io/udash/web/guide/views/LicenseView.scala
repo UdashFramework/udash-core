@@ -2,7 +2,6 @@ package io.udash.web.guide.views
 
 import io.udash._
 import io.udash.web.guide._
-import org.scalajs.dom.Element
 
 import scalatags.JsDom.all._
 
@@ -162,9 +161,9 @@ class LicenseView extends View {
         liability."""),
       p("""END OF TERMS AND CONDITIONS""")
     )
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 
   override def renderChild(view: View): Unit = {}
 }

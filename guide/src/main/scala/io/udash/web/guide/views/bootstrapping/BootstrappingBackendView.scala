@@ -17,7 +17,7 @@ class BootstrappingBackendView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Bootstrapping application backend"),
     p("This chapter covers:"),
     ul(GuideStyles.get.defaultList)(
@@ -121,7 +121,7 @@ class BootstrappingBackendView extends View {
       "Now that the server-side of the application is ready, it is time to implement the ",
       a(href := BootstrappingFrontendState.url)("client-side"), " of the application."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

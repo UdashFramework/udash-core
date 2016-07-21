@@ -17,7 +17,7 @@ class BootstrappingSBTView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element =
+  override def getTemplate: Modifier =
     div(
       h2("SBT configuration"),
       p(
@@ -294,7 +294,7 @@ class BootstrappingSBTView extends View {
         "SBT configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
         " in the ", b("shared"), " module."
       )
-    ).render
+    )
 
   override def renderChild(view: View): Unit = ()
 }

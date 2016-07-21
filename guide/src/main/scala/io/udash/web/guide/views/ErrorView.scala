@@ -44,7 +44,7 @@ class ErrorView extends View {
     }
   }
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 
   override def renderChild(view: View): Unit = {}
 }

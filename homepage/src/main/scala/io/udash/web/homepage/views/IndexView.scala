@@ -38,9 +38,9 @@ class IndexView(url: Property[String]) extends View {
     IndexView.sectionFeatures,
     IndexView.sectionMore,
     IndexView.sectionDemo(url)
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 
   override def renderChild(view: View): Unit = {}
 }

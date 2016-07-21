@@ -80,14 +80,12 @@ object DemoPreview {
     val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
 
     val email = Property("example@mail.com")
-    email.addValidator(new Validator[String] {
-      def apply(element: String)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-        element match {
-          case emailRegex(text) => Valid
-          case _ => Invalid(Seq("It's not an email!"))
-        }
+    email.addValidator((element: String) =>
+      element match {
+        case emailRegex(text) => Valid
+        case _ => Invalid("It's not an email!")
       }
-    })
+    )
 
     div(DemoStyles.get.demoIOWrapper, GlobalStyles.get.table)(
       TextInput.debounced(email, maxlength := 32, DemoStyles.get.demoInlineField, GlobalStyles.get.width100),

@@ -35,7 +35,7 @@ object Footer {
         p(styles.footerCopyrights)("Proudly made by ", a(styles.footerAvsystemLink, href := ExternalUrls.avsystem, target := "_blank")("AVSystem"))
       )
     )
-  ).render
+  )
 
-  def getTemplate: Element = template
+  def getTemplate: Modifier = template
 }

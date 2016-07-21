@@ -9,6 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
+import io.udash.web.commons.views.Component
 
 class BindValidationDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -20,7 +21,7 @@ class BindValidationDemoComponent extends Component {
     override def apply(element: Seq[Int])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
       val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
       if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-      else Invalid(Seq("Sequence is not sorted!"))
+      else Invalid("Sequence is not sorted!")
     }
   })
 
@@ -32,7 +33,7 @@ class BindValidationDemoComponent extends Component {
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
   }, 1000)
 
-  override def getTemplate: Element = div(id := "validation-demo", GuideStyles.get.frame)(
+  override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.get.frame)(
     "Integers: ",
     produce(integers)((seq: Seq[Int]) => span(id := "validation-demo-integers")(seq.map(p => span(s"$p, ")): _*).render), br,
     "Is sorted: ",
@@ -44,5 +45,5 @@ class BindValidationDemoComponent extends Component {
       },
       _ => span("Validation error...").render
     )
-  ).render
+  )
 }

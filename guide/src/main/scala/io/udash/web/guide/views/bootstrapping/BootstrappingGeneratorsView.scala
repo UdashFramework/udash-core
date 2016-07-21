@@ -16,7 +16,7 @@ class BootstrappingGeneratorsView extends View {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Udash project generator"),
     p(
       "If you want to start developing with Udash as soon as possible, you may find the Udash project generator very helpful. ",
@@ -113,7 +113,7 @@ class BootstrappingGeneratorsView extends View {
       " or ",
       a(href := RpcIntroState.url)("RPC in Udash"), ""
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

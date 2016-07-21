@@ -14,6 +14,8 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 trait IntroFormDemoModel {
   def minimum: Int
@@ -22,7 +24,7 @@ trait IntroFormDemoModel {
 }
 
 class IntroFormDemoComponent extends Component {
-  override def getTemplate: Element = IntroFormDemoViewPresenter()
+  override def getTemplate: Modifier = IntroFormDemoViewPresenter()
 
   /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
   object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
@@ -33,14 +35,14 @@ class IntroFormDemoComponent extends Component {
       if (element.between > element.maximum) errors += "Maximum is smaller than your value!"
 
       if (errors.isEmpty) Valid
-      else Invalid(errors.toSeq)
+      else Invalid(errors.map(DefaultValidationError))
     }
   }
 
   /** Prepares model, view and presenter for demo component */
   object IntroFormDemoViewPresenter {
     import io.udash.web.guide.Context._
-    def apply(): Element = {
+    def apply(): Modifier = {
       val model = ModelProperty[IntroFormDemoModel]
       model.subProp(_.minimum).set(0)
       model.subProp(_.between).set(10)
@@ -70,8 +72,8 @@ class IntroFormDemoComponent extends Component {
     import JsDom.all._
     import scalacss.ScalatagsCss._
 
-    private def i2s(i: Int) = i.toString
-    private def s2i(s: String) = Float.parseFloat(s).toInt
+    private val i2s = (i: Int) => i.toString
+    private val s2i = (s: String) => Float.parseFloat(s).toInt
 
     private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
     private val between = model.subProp(_.between).transform(i2s, s2i)
@@ -87,7 +89,7 @@ class IntroFormDemoComponent extends Component {
         presenter.randomize()
     }
 
-    def render: Element = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.input(
           NumberInput.debounced(minimum)(id := "minimum").render
@@ -113,13 +115,13 @@ class IntroFormDemoComponent extends Component {
             case Invalid(errors) => span(id := "valid")(
               "No, because:",
               ul(GuideStyles.get.defaultList)(
-                errors.map(e => li(e))
+                errors.map(e => li(e.message))
               )
             ).render
           },
           error => span(s"Validation error: $error").render
         )
       )
-    ).render
+    )
   }
 }

@@ -2,7 +2,6 @@ package io.udash.web.guide.views.ext.demo
 
 import io.udash._
 import io.udash.bindings.Checkbox
-import io.udash.properties.{Property, SeqProperty}
 import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom

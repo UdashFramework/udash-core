@@ -7,6 +7,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class TextInputDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -18,11 +19,11 @@ class TextInputDemoComponent extends Component {
   val password: Property[String] = Property("")
   val age: Property[Int] = Property(1)
 
-  override def getTemplate: Element = div(id := "inputs-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "inputs-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       inputs(), br, inputs()
     )
-  ).render
+  )
 
   private def inputs() = div(BootstrapStyles.row)(
     div(BootstrapStyles.Grid.colMd4)(

@@ -7,6 +7,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class MultiSelectDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -29,7 +30,7 @@ class MultiSelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "multi-select-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "multi-select-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -41,7 +42,7 @@ class MultiSelectDemoComponent extends Component {
         )
       )
     )
-  ).render
+  )
 
   def selector() =
     UdashInputGroup()(

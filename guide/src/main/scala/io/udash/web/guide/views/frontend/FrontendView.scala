@@ -17,12 +17,12 @@ class FrontendView extends ViewContainer {
 
   protected val child = div().render
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Frontend"),
     p(
       "In this part of the guide you will read about creating a frontend application with Udash. Let's make your ",
       "frontend type safe, elegant and maintainable. "
     ),
     child
-  ).render
+  )
 }

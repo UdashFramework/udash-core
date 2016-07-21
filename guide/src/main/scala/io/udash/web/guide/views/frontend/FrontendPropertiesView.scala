@@ -17,7 +17,7 @@ class FrontendPropertiesView extends View {
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Property - the Udash Data Model"),
     p(
       "Udash provides the powerful Properties mechanism for a data model management. ",
@@ -215,7 +215,7 @@ class FrontendPropertiesView extends View {
       "Take a look at ", a(href := FrontendBindingsState.url)("Template Data Binding"),
       " chapter to read about the data model view bindings in Udash applications."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

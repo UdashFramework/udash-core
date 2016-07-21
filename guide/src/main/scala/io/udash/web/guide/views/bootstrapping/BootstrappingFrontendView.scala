@@ -20,7 +20,7 @@ class BootstrappingFrontendView extends View {
   import scalacss.Defaults._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Frontend application structure"),
     p("The frontend application consists of:"),
     ul(GuideStyles.get.defaultList)(
@@ -258,7 +258,7 @@ class BootstrappingFrontendView extends View {
       " or ",
       a(href := RpcIntroState.url)("RPC in Udash"), ""
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = ()
 }

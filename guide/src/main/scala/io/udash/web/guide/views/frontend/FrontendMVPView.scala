@@ -18,7 +18,7 @@ class FrontendMVPView extends View {
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Model, View, Presenter & ViewPresenter"),
     p("A single page in Udash app is based on four elements:"),
     ul(GuideStyles.get.defaultList)(
@@ -132,7 +132,7 @@ class FrontendMVPView extends View {
       "learn more about creating view templates and styling them in Udash. Visit the ",
       a(href := FrontendPropertiesState.url)("Properties"), " chapter to read about data model in Udash applications."
     )
-  ).render
+  )
 
   override def renderChild(view: View): Unit = {}
 }

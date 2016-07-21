@@ -8,6 +8,7 @@ import org.scalajs.dom.Element
 import org.scalajs.dom.html.Input
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class CheckButtonsDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -30,7 +31,7 @@ class CheckButtonsDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Element = div(id := "check-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "check-buttons-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(
@@ -42,7 +43,7 @@ class CheckButtonsDemoComponent extends Component {
         )
       )
     )
-  ).render
+  )
 
   def checkboxes() =
     UdashInputGroup()(
@@ -50,7 +51,7 @@ class CheckButtonsDemoComponent extends Component {
       UdashInputGroup.addon(
         CheckButtons(
           favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, "data-label".attr := l)(i, l) })
+          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, attr("data-label") := l)(i, l) })
         ).render
       ),
       UdashInputGroup.addon(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
