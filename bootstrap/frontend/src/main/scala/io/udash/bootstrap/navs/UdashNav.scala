@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package navs
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.SeqProperty
+import io.udash.properties.seq.SeqProperty
 import io.udash.{properties, _}
 import org.scalajs.dom
 
@@ -10,7 +10,7 @@ import scalatags.JsDom.all._
 
 class UdashNav[ItemType, ElemType <: Property[ItemType]] private
               (navStyle: BootstrapStyles.BootstrapClass, stacked: Boolean, justified: Boolean, override val componentId: ComponentId)
-              (val panels: properties.SeqProperty[ItemType, ElemType])
+              (val panels: SeqProperty[ItemType, ElemType])
               (elemFactory: (ElemType) => dom.Node,
                isActive: (ElemType) => ReadableProperty[Boolean],
                isDisabled: (ElemType) => ReadableProperty[Boolean],

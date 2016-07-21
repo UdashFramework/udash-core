@@ -2,6 +2,8 @@ package io.udash.properties
 
 import java.util.UUID
 
+import io.udash.properties.single.{CastableProperty, ReadableProperty}
+
 import scala.concurrent.ExecutionContext
 
 trait PropertyCreator[T] {

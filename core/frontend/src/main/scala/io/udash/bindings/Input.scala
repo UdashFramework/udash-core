@@ -1,7 +1,7 @@
 package io.udash.bindings
 
 import io.udash.bindings.modifiers.TextInputsModifier
-import io.udash.properties.Property
+import io.udash.properties.single.Property
 import org.scalajs.dom.{html, _}
 
 import scala.concurrent.duration.{Duration, DurationInt}

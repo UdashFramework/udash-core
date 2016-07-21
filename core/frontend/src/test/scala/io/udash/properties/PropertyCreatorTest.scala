@@ -3,6 +3,11 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 class PropertyCreatorTest extends UdashFrontendTest {
+  // DO NOT REMOVE THIS IMPORT!
+  import io.udash.properties.single._
+  import io.udash.properties.model._
+  import io.udash.properties.seq._
+
   "PropertyCreator" should {
     "create Property for basic types (and handle init value)" in {
       """val p = Property[String]""".stripMargin should compile

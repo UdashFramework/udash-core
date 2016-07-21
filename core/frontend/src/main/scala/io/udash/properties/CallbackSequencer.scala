@@ -1,11 +1,13 @@
 package io.udash.properties
 
+import io.udash.properties.single.Property
+
 import scala.collection.mutable
 
 /**
  * <b>Note: It can be used only in one-thread environment!</b>
   *
- * This sequencer is used in order to fire callback listeners ONCE during making many updates to [[io.udash.properties.Property]].
+ * This sequencer is used in order to fire callback listeners ONCE during making many updates to [[Property]].
  * Property implementation uses this CallbackSequencer in order to queue callbacks and invoke them after
  * running commit().
  * In code you should use sequence method to group operation over the Property.

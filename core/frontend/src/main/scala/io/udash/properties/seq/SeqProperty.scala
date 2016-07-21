@@ -1,7 +1,9 @@
-package io.udash.properties
+package io.udash.properties.seq
 
 import java.util.UUID
 
+import io.udash.properties._
+import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.utils.Registration
 
 import scala.collection.mutable

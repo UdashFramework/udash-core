@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import io.udash.properties.Property
+import io.udash.properties.single.Property
 import org.scalajs.dom._
 
 import scala.concurrent.duration.Duration
