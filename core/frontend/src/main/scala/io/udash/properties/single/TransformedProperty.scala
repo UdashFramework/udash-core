@@ -8,6 +8,7 @@ import io.udash.utils.Registration
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
+private[properties]
 class TransformedReadableProperty[A, B](private val origin: ReadableProperty[A], transformer: A => B,
                                         override val id: UUID) extends ReadableProperty[B] {
   override def listen(l: (B) => Any): Registration =
@@ -33,6 +34,7 @@ class TransformedReadableProperty[A, B](private val origin: ReadableProperty[A],
 }
 
 /** Represents Property[A] transformed to Property[B]. */
+private[properties]
 class TransformedProperty[A, B](private val origin: Property[A], transformer: A => B,
                                 revert: B => A, override val id: UUID)
   extends TransformedReadableProperty[A, B](origin, transformer, id) with Property[B] {

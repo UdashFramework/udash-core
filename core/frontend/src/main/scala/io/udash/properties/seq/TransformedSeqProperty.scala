@@ -7,6 +7,7 @@ import io.udash.utils.Registration
 
 import scala.concurrent.ExecutionContext
 
+private[properties]
 class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
 (origin: ReadableSeqProperty[A, OrigType], transformer: A => B, override val id: UUID) extends ReadableSeqProperty[B, ElemType] {
 
@@ -48,6 +49,7 @@ class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], Ori
     origin.executionContext
 }
 
+private[properties]
 class TransformedSeqProperty[A, B](origin: SeqProperty[A, Property[A]], transformer: A => B, revert: B => A, override val id: UUID)
   extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer, id) with SeqProperty[B, Property[B]] {
 

@@ -9,8 +9,9 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
-                                                                         override val executionContext: ExecutionContext)
+private[properties]
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
+                                                                        override val executionContext: ExecutionContext)
   extends ReadableSeqProperty[B, ReadableProperty[B]] {
 
   override val id: UUID = PropertyCreator.newID()
@@ -70,8 +71,9 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin:
     children
 }
 
-class ReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
-                                                            override val executionContext: ExecutionContext)
+private[properties]
+class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
+                                                           override val executionContext: ExecutionContext)
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer, executionContext) {
   /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
@@ -80,28 +82,29 @@ class ReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin: ReadableProp
   }
 }
 
-class SeqPropertyFromSingleValue[A, B : ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A,
-                                                    override val executionContext: ExecutionContext)
+private[properties]
+class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A,
+                                                   override val executionContext: ExecutionContext)
   extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer, executionContext) with SeqProperty[B, Property[B]] {
 
-    override def replace(idx: Int, amount: Int, values: B*): Unit = {
-      val current = mutable.ListBuffer(get:_*)
-      current.remove(idx, amount)
-      current.insertAll(idx, values)
-      origin.set(revert(current))
-    }
-
-    override def set(t: Seq[B]): Unit =
-      origin.set(revert(t))
-
-    override def setInitValue(t: Seq[B]): Unit =
-      origin.setInitValue(revert(t))
-
-    override def elemProperties: Seq[Property[B]] =
-      children
-
-    override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
-      structureListeners += l
-      new PropertyRegistration(structureListeners, l)
-    }
+  override def replace(idx: Int, amount: Int, values: B*): Unit = {
+    val current = mutable.ListBuffer(get: _*)
+    current.remove(idx, amount)
+    current.insertAll(idx, values)
+    origin.set(revert(current))
   }
+
+  override def set(t: Seq[B]): Unit =
+    origin.set(revert(t))
+
+  override def setInitValue(t: Seq[B]): Unit =
+    origin.setInitValue(revert(t))
+
+  override def elemProperties: Seq[Property[B]] =
+    children
+
+  override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
+    structureListeners += l
+    new PropertyRegistration(structureListeners, l)
+  }
+}

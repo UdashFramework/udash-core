@@ -8,6 +8,7 @@ import io.udash.utils.Registration
 
 import scala.concurrent.ExecutionContext
 
+private[properties]
 abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]](origin: OriginType)
   extends ReadableSeqProperty[A, ReadableProperty[A]] {
 
@@ -25,6 +26,7 @@ abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], Orig
     origin.listen(s => l(s.reverse))
 }
 
+private[properties]
 class ReversedReadableSeqProperty[A](origin: ReadableSeqProperty[A, ReadableProperty[A]])
   extends BaseReversedSeqProperty[A, ReadableProperty[A], ReadableSeqProperty[A, ReadableProperty[A]]](origin) {
 
@@ -36,6 +38,7 @@ class ReversedReadableSeqProperty[A](origin: ReadableSeqProperty[A, ReadableProp
     )))
 }
 
+private[properties]
 class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
   extends BaseReversedSeqProperty[A, Property[A], SeqProperty[A, Property[A]]](origin) with SeqProperty[A, Property[A]] {
 
