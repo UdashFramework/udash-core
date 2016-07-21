@@ -30,7 +30,7 @@ trait ReadableProperty[A] {
   implicit protected[properties] def executionContext: ExecutionContext
 
   /** Unique property ID. */
-  def id: UUID
+  val id: UUID
 
   /** @return Current property value. */
   def get: A
@@ -79,7 +79,7 @@ trait ReadableProperty[A] {
     * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
     */
   def transform[B](transformer: A => B): ReadableProperty[B] =
-    new TransformedReadableProperty[A, B](this, transformer, PropertyCreator.newID())
+    new TransformedReadableProperty[A, B](this, transformer)
 
   /**
     * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
@@ -89,7 +89,7 @@ trait ReadableProperty[A] {
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
   def transform[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
-    new ReadableSeqPropertyFromSingleValue(this, transformer, executionContext)
+    new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   protected[properties] def parent: ReadableProperty[_]
 
@@ -145,7 +145,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @return New Property[B], which will be synchronised with original Property[A].
     */
   def transform[B](transformer: A => B, revert: B => A): Property[B] =
-    new TransformedProperty[A, B](this, transformer, revert, PropertyCreator.newID())
+    new TransformedProperty[A, B](this, transformer, revert)
 
   /**
     * Creates SeqProperty[B] linked to `this`. Changes will be synchronized with `this` in both directions.
@@ -156,6 +156,6 @@ trait Property[A] extends ReadableProperty[A] {
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
   def transform[B : ModelValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
-    new SeqPropertyFromSingleValue(this, transformer, revert, executionContext)
+    new SeqPropertyFromSingleValue(this, transformer, revert)
 }
 

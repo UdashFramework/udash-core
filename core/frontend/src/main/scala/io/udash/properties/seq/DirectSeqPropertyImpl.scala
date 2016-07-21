@@ -25,7 +25,7 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     properties.remove(idx, amount)
     properties.insertAll(idx, newProperties)
 
-    fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty))
+    fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty), structureListeners)
     valueChanged()
   }
 
@@ -44,7 +44,4 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     structureListeners += l
     new PropertyRegistration(structureListeners, l)
   }
-
-  protected def fireElementsListeners(patch: Patch[CastableProperty[A]]): Unit =
-    CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => structureListeners.foreach(_.apply(patch)))
 }

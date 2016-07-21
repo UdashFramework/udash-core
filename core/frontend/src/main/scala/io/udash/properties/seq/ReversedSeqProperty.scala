@@ -9,12 +9,9 @@ import io.udash.utils.Registration
 import scala.concurrent.ExecutionContext
 
 private[properties]
-abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]](origin: OriginType)
-  extends ReadableSeqProperty[A, ReadableProperty[A]] {
-
-  override val id: UUID = PropertyCreator.newID()
-  override protected[properties] val parent: ReadableProperty[_] = null
-  override implicit protected[properties] def executionContext: ExecutionContext = origin.executionContext
+abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]]
+                                      (override protected val origin: OriginType)
+  extends ForwarderReadableSeqProperty[A, ReadableProperty[A]] {
 
   override def get: Seq[A] =
     origin.get.reverse
@@ -24,6 +21,9 @@ abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], Orig
 
   override def listen(l: (Seq[A]) => Any): Registration =
     origin.listen(s => l(s.reverse))
+
+  override protected[properties] def fireValueListeners(): Unit =
+    origin.fireValueListeners()
 }
 
 private[properties]
@@ -40,7 +40,7 @@ class ReversedReadableSeqProperty[A](origin: ReadableSeqProperty[A, ReadableProp
 
 private[properties]
 class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
-  extends BaseReversedSeqProperty[A, Property[A], SeqProperty[A, Property[A]]](origin) with SeqProperty[A, Property[A]] {
+  extends BaseReversedSeqProperty[A, Property[A], SeqProperty[A, Property[A]]](origin) with ForwarderSeqProperty[A, Property[A]] {
 
     override def setInitValue(t: Seq[A]): Unit =
       origin.setInitValue(t.reverse)

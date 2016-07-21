@@ -3,19 +3,23 @@ package seq
 
 import java.util.UUID
 
-import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
+import io.udash.properties.single._
 import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 
 private[properties]
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
-                                                                        override val executionContext: ExecutionContext)
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
+                                                     (origin: ReadableProperty[A], transformer: A => Seq[B])
   extends ReadableSeqProperty[B, ReadableProperty[B]] {
 
   override val id: UUID = PropertyCreator.newID()
-  override protected[properties] val parent: Property[_] = null
+  override protected[properties] def parent: ReadableProperty[_] = null
+
+  override implicit protected[properties] def executionContext: ExecutionContext =
+    origin.executionContext
+
   protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
 
   val pc = implicitly[PropertyCreator[B]]
@@ -33,48 +37,44 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: 
   private def update(v: A): Unit = {
     val transformed = transformer(v)
     val current = get
-    val commonBegin = {
-      var tmp = 0
-      while (tmp < current.size && tmp < transformed.size && current(tmp) == transformed(tmp)) tmp += 1
-      tmp
-    }
-    val commonEnd = {
-      var tmp = 0
-      while (0 < current.size - tmp && 0 < transformed.size - tmp
-        && current(current.size - tmp - 1) == transformed(transformed.size - tmp - 1)) tmp += 1
-      tmp
-    }
+
+    def commonIdx(s1: Iterator[B], s2: Iterator[B]): Int =
+      math.max(0,
+        s1.zipAll(s2, null, null).zipWithIndex
+          .indexWhere { case (((x, y), idx)) => x != y })
+
+    val commonBegin = commonIdx(transformed.iterator, current.iterator)
+    val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
 
     val patch = if (transformed.size > current.size) {
       val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this)(executionContext))
       children.insertAll(commonBegin, added)
-      Patch(commonBegin, Seq(), added, false)
+      Some(Patch(commonBegin, Seq(), added, false))
     } else if (transformed.size < current.size) {
       val removed = children.slice(commonBegin, commonBegin + current.size - transformed.size)
       children.remove(commonBegin, current.size - transformed.size)
-      Patch(commonBegin, removed, Seq(), transformed.isEmpty)
-    } else null
+      Some(Patch(commonBegin, removed, Seq(), transformed.isEmpty))
+    } else None
 
     CallbackSequencer.sequence {
       transformed.zip(children)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }
-      if (patch != null) structureChanged(patch)
+      patch.foreach(structureChanged)
       valueChanged()
     }
   }
 
+  override def elemProperties: Seq[ReadableProperty[B]] =
+    children.map(_.transform((id: B) => id))
+
   override def get: Seq[B] =
     children.map(_.get)
-
-  override def elemProperties: Seq[ReadableProperty[B]] =
-    children
 }
 
 private[properties]
-class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B],
-                                                           override val executionContext: ExecutionContext)
-  extends BaseReadableSeqPropertyFromSingleValue(origin, transformer, executionContext) {
+class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B])
+  extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
     structureListeners += l
@@ -83,9 +83,8 @@ class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadablePrope
 }
 
 private[properties]
-class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A,
-                                                   override val executionContext: ExecutionContext)
-  extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer, executionContext) with SeqProperty[B, Property[B]] {
+class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
+  extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer) with SeqProperty[B, Property[B]] {
 
   override def replace(idx: Int, amount: Int, values: B*): Unit = {
     val current = mutable.ListBuffer(get: _*)

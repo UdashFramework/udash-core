@@ -9,35 +9,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties]
-class TransformedReadableProperty[A, B](private val origin: ReadableProperty[A], transformer: A => B,
-                                        override val id: UUID) extends ReadableProperty[B] {
+class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
+                                        transformer: A => B) extends ForwarderReadableProperty[B] {
   override def listen(l: (B) => Any): Registration =
     origin.listen((a: A) => l(transformer(a)))
-
-  override def get: B =
-    transformer(origin.get)
 
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
 
-  override protected[properties] def parent: ReadableProperty[_] =
-    origin.parent
-
-  override def validate(): Unit =
-    origin.validate()
-
-  override protected[properties] def valueChanged(): Unit =
-    origin.valueChanged()
-
-  override implicit protected[properties] def executionContext: ExecutionContext =
-    origin.executionContext
+  override def get: B =
+    transformer(origin.get)
 }
 
 /** Represents Property[A] transformed to Property[B]. */
 private[properties]
-class TransformedProperty[A, B](private val origin: Property[A], transformer: A => B,
-                                revert: B => A, override val id: UUID)
-  extends TransformedReadableProperty[A, B](origin, transformer, id) with Property[B] {
+class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
+  extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
   override def set(t: B): Unit =
     origin.set(revert(t))

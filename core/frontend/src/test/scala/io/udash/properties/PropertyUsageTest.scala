@@ -3,7 +3,7 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 class PropertyUsageTest extends UdashFrontendTest {
-  // DO NOT REMOVE THIS IMPORTS!
+  // DO NOT REMOVE THESE IMPORTS!
   import io.udash.properties.single._
   import io.udash.properties.model._
   import io.udash.properties.seq._

@@ -9,8 +9,6 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-
-
 object SeqProperty {
   /** Creates empty DirectSeqProperty[T]. */
   def apply[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
@@ -45,7 +43,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableSeqProperty[A]. */
   def transform[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
-    new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer, PropertyCreator.newID())
+    new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer)
 
   /** Creates `ReadableSeqProperty[A]` providing reversed order of elements from `this`. */
   def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
@@ -55,7 +53,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType] =
-    new FilteredSeqProperty[A, ElemType](this, matcher, PropertyCreator.newID())
+    new FilteredSeqProperty[A, ElemType](this, matcher)
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
   def combine[B, O : ModelValue](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
@@ -115,11 +113,10 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   /** Tests whether this traversable collection is not empty. */
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
+
+  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit =
+    CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => structureListeners.foreach(_.apply(patch)))
 }
-
-
-
-
 
 trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[Seq[A]] {
   /** Replaces `amount` elements from index `idx` with provided `values`. */
@@ -150,7 +147,7 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
     *
     * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
   def transform[B](transformer: A => B, revert: B => A): SeqProperty[B, Property[B]] =
-    new TransformedSeqProperty[A, B](this, transformer, revert, PropertyCreator.newID())
+    new TransformedSeqProperty[A, B](this, transformer, revert)
 
   /** Creates `SeqProperty[A]` providing reversed order of elements from `this`. */
   override def reversed(): SeqProperty[A, Property[A]] =
