@@ -43,7 +43,7 @@ object Validator {
         case Seq(Invalid(errors), tl@_*) => reduce(acc ++ errors, tl)
       }
 
-      future.map(s => reduce(Nil, s.toList))
+      future.map(s => reduce(Nil, s))
     }
   }
 }
