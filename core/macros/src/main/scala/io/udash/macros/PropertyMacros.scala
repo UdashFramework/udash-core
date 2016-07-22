@@ -15,6 +15,7 @@ class PropertyMacros(val c: blackbox.Context) {
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
 
+  val ReadablePropertyCls = tq"$Package.ReadableProperty"
   val PropertyCls = tq"$Package.Property"
   val DirectPropertyImplCls = tq"$Package.DirectPropertyImpl"
   val SeqPropertyCls = tq"$Package.SeqProperty"
@@ -341,7 +342,7 @@ class PropertyMacros(val c: blackbox.Context) {
     q"""
        new $PropertyCreatorCls[$tpe] {
          implicit val $selfName: $PropertyCreatorCls[$tpe] = this
-         def newProperty(prt: $PropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe]
+         def newProperty(prt: $ReadablePropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe]
            = {${constructor.apply(tpe)}}
        }
     """

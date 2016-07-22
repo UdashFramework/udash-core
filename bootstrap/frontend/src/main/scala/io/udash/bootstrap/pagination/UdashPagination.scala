@@ -57,13 +57,13 @@ class UdashPagination[PageType, ElemType <: Property[PageType]] private
   protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType) = {
     import scalatags.JsDom.all._
 
-    produce(pages.combine(showArrows)((_, _))) {
-      case (_, true) =>
+    produce(showArrows.combine(pages)((_, _))) {
+      case (true, _) =>
         val elements = pages.elemProperties
-        li(BootstrapStyles.disabled.styleIf(selectedPage.transform(idx => highlightCond(idx, elements.size))))(
+        li(BootstrapStyles.disabled.styleIf(selectedPage.transform((idx: Int) => highlightCond(idx, elements.size))))(
           produce(selectedPage)(idx => itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType))
         )(onclick :+= ((_: Event) => { onClick(); false })).render
-      case (_, false) =>
+      case (false, _) =>
         span().render
     }
   }
@@ -91,7 +91,7 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
     produce(pages)(_ => {
       val elements = pages.elemProperties
       li(
-        BootstrapStyles.disabled.styleIf(selectedPage.transform(idx => highlightCond(idx, elements.size))),
+        BootstrapStyles.disabled.styleIf(selectedPage.transform((idx: Int) => highlightCond(idx, elements.size))),
         alignStyle.styleIf(aligned)
       )(
         produce(selectedPage)(idx => itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType))

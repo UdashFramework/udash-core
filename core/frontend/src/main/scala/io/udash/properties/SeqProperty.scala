@@ -59,6 +59,50 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType] =
     new FilteredSeqProperty[A, ElemType](this, matcher, PropertyCreator.newID())
 
+  /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
+  def combine[B, O : ModelValue](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
+    class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]],
+                                      p: ReadableProperty[B], override val executionContext: ExecutionContext)
+      extends ReadableSeqProperty[O, ReadableProperty[O]] {
+
+      override val id: UUID = UUID.randomUUID()
+      override protected[properties] val parent: ReadableProperty[_] = null
+
+      private val children = mutable.ListBuffer.empty[ReadableProperty[O]]
+      private val structureListeners: mutable.Set[Patch[ReadableProperty[O]] => Any] = mutable.Set()
+
+      s.elemProperties.foreach(c => children.append(c.combine(p, this)(combiner)))
+      s.listenStructure(patch => {
+        val added = patch.added.map(c => c.combine(p, this)(combiner))
+        val removed = children.slice(patch.idx, patch.idx + patch.removed.size)
+        children.remove(patch.idx, patch.removed.size)
+        children.insertAll(patch.idx, added)
+        val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
+        CallbackSequencer.queue(
+          s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+          () => structureListeners.foreach(_.apply(mappedPatch))
+        )
+        valueChanged()
+      })
+
+      /** @return Current property value. */
+      override def get: Seq[O] =
+        children.map(_.get)
+
+      /** @return Sequence of child properties. */
+      override def elemProperties: Seq[ReadableProperty[O]] =
+        children
+
+      /** Registers listener, which will be called on every property structure change. */
+      override def listenStructure(l: (Patch[ReadableProperty[O]]) => Any): Registration = {
+        structureListeners += l
+        new PropertyRegistration(structureListeners, l)
+      }
+    }
+
+    new CombinedReadableSeqProperty(this, property, executionContext)
+  }
+
   /** The size of this sequence, equivalent to length. */
   def size: Int =
     elemProperties.size
@@ -103,7 +147,7 @@ class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], Ori
   override def get: Seq[B] =
     origin.get.map(transformer)
 
-  override protected[properties] def parent: Property[_] =
+  override protected[properties] def parent: ReadableProperty[_] =
     origin.parent
 
   override def validate(): Unit =
@@ -206,7 +250,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
 
-  override protected[properties] def parent: Property[_] =
+  override protected[properties] def parent: ReadableProperty[_] =
     origin.parent
 
   override def validate(): Unit =
@@ -264,7 +308,7 @@ class TransformedSeqProperty[A, B](origin: SeqProperty[A, Property[A]], transfor
     origin.setInitValue(t.map(revert))
 }
 
-class DirectSeqPropertyImpl[A](val parent: Property[_], override val id: UUID)
+class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
                               (implicit propertyCreator: PropertyCreator[A],
                                val executionContext: ExecutionContext) extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
