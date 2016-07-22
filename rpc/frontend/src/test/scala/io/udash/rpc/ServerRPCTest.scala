@@ -1,12 +1,14 @@
 package io.udash.rpc
 
 import com.github.ghik.silencer.silent
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.AsyncUdashFrontendTest
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration.Duration
+import scala.language.postfixOps
 import scala.util.Failure
 
-class ServerRPCTest extends UdashFrontendTest with Utils {
+class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
   class MockServerConnector[RPCRequest] extends ServerConnector[RPCRequest] {
     val requests = new ArrayBuffer[RPCRequest]()
 
@@ -75,18 +77,36 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
       f1.value should be(Some(Failure(RPCFailure("cause1", "msg1"))))
       f2.value should be(Some(Failure(RPCFailure("cause2", "msg2"))))
     }
+
+    "timeout calls without response" in {
+      val (connectorMock, serverRPC) = createServerRpc()
+      val rpc = serverRPC.remoteRpc
+
+      val resp = rpc.doStuff(true)
+      connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
+      eventually {
+        resp.isCompleted should be(true)
+      }
+    }
   }
 
   def createDefaultServerRpc(): (MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest], DefaultServerRPC[TestRPC]) = {
     val connectorMock = new MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest]
     @silent
-    val serverRPC = new DefaultServerRPC[TestRPC](connectorMock)
+    val serverRPC = new DefaultServerRPC[TestRPC](connectorMock) {
+      import scala.concurrent.duration.DurationInt
+      override protected val callTimeout: Duration = 500 millis
+    }
     (connectorMock, serverRPC)
   }
 
   class UPickleServerRPC[ServerRPCType : ServerUPickleUdashRPCFramework.AsRealRPC]
                         (override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest])
     extends ServerRPC[ServerRPCType] {
+
+    import scala.concurrent.duration.DurationInt
+    override protected val callTimeout: Duration = 500 millis
+
     override val remoteFramework = ServerUPickleUdashRPCFramework
     override val localFramework = ClientUPickleUdashRPCFramework
     override val remoteRpcAsReal: ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType] = implicitly[ServerUPickleUdashRPCFramework.AsRealRPC[ServerRPCType]]
@@ -102,6 +122,10 @@ class ServerRPCTest extends UdashFrontendTest with Utils {
   class MixedServerRPC[ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
                       (override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
     extends ServerRPC[ServerRPCType] {
+
+    import scala.concurrent.duration.DurationInt
+    override protected val callTimeout: Duration = 500 millis
+
     override val remoteFramework = DefaultServerUdashRPCFramework
     override val localFramework = ClientUPickleUdashRPCFramework
     override val remoteRpcAsReal: DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType] = implicitly[DefaultServerUdashRPCFramework.AsRealRPC[ServerRPCType]]
