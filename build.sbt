@@ -109,8 +109,7 @@ lazy val `rpc-shared-JS` = `rpc-shared`.js
 lazy val `rpc-backend` = project.in(file("rpc/backend"))
   .dependsOn(`rpc-shared-JVM` % CompileAndTest)
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= rpcBackendDeps.value,
-    libraryDependencies ++= rpcBackendTestDeps.value
+    libraryDependencies ++= rpcBackendDeps.value
   )
 
 lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)

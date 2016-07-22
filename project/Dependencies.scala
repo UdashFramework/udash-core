@@ -23,8 +23,7 @@ object Dependencies extends Build {
 
   val scalaLoggingVersion = "3.4.0"
 
-  val scalatestVersion = "3.0.0-M15"
-  val scalamockVersion = "3.2.2"
+  val scalatestVersion = "3.0.0-RC4"
   val bootstrapVersion = "3.3.7"
 
   val compilerPlugins = Def.setting(Seq(
@@ -69,10 +68,6 @@ object Dependencies extends Build {
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmoshereVersion
   ))
-
-  val rpcBackendTestDeps = Def.setting(Seq(
-    "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
-  ).map(_ % Test))
 
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
