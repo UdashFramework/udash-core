@@ -1,634 +1,497 @@
 package io.udash.rpc.internals
 
-import java.io.PrintWriter
-import java.util.concurrent.TimeUnit
+import java.io.{CharArrayWriter, PrintWriter}
 
 import io.udash.rpc._
-import io.udash.testing.UdashBackendTest
+import io.udash.testing.UdashRpcBackendTest
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
-import scala.util.{Failure, Success}
-
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success, Try}
 
-class MockablePrintWriter extends PrintWriter(new java.io.CharArrayWriter())
-
-class MockableAtmosphereConfig extends AtmosphereConfig(null)
-
-trait MockableAtmosphereResource extends AtmosphereResource {
-  override def initialize(config: AtmosphereConfig,
-                          broadcaster: Broadcaster,
-                          req: AtmosphereRequest,
-                          response: AtmosphereResponse,
-                          asyncSupport: AsyncSupport[_ <: AtmosphereResource],
-                          atmosphereHandler: AtmosphereHandler) : AtmosphereResource
-}
-
-class AtmosphereResponseMock(writer: PrintWriter) extends AtmosphereResponseImpl(null, null, false) {
-  var error = false
-  var write = false
-
-  override def sendError(sc: Int): Unit = { error = true }
-  override def write(data: String): AtmosphereResponse = {
-    write = true
-    null
+class AtmosphereServiceTest extends UdashRpcBackendTest {
+  
+  def createBroadcasters(): (BroadcasterMock, BroadcasterFactoryMock, MetaBroadcasterMock) = {
+    val broadcaster = new BroadcasterMock
+    val broadcasterFactory = new BroadcasterFactoryMock(broadcaster)
+    val metaBroadcaster = new MetaBroadcasterMock
+    (broadcaster, broadcasterFactory, metaBroadcaster)
   }
 
-  override def getWriter: PrintWriter = writer
-}
+  def createTestRPC(): (mutable.Builder[String, Seq[String]], DefaultExposesServerRPC[TestRPC]) = {
+    val calls: mutable.Builder[String, Seq[String]] = Seq.newBuilder[String]
+    val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+      calls += method
+    })
+    val rpc: DefaultExposesServerRPC[TestRPC] = new DefaultExposesServerRPC[TestRPC](impl)
+    (calls, rpc)
+  }
 
-class AtmosphereServiceTest extends UdashBackendTest {
+  def createConfigs(filters: Seq[(AtmosphereResource) => Try[Any]], resolveRpcResult: ExposesServerRPC[TestRPC],
+                    broadcasterFactory: BroadcasterFactoryMock, metaBroadcaster: MetaBroadcasterMock): (AtmosphereService[TestRPC], AtmosphereConfigMock)  = {
+    val config = new AtmosphereServiceConfigMock[TestRPC](filters, resolveRpcResult)
+    val atm = new AtmosphereService[TestRPC](config)
+    val atmConfig = new AtmosphereConfigMock(broadcasterFactory, metaBroadcaster)
+    (atm, atmConfig)
+  }
+
+  def createConfigsWithoutRpc(): (AtmosphereServiceConfigMock[TestRPC], AtmosphereService[TestRPC])  = {
+    val config = new AtmosphereServiceConfigMock[TestRPC]()
+    val atm = new AtmosphereService[TestRPC](config)
+    (config, atm)
+  }
+
+  val requestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+    DefaultServerUdashRPCFramework.RPCCall(
+      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+      List(),
+      "callId1"
+    )
+  )
 
   "AtmosphereService" should {
     "init BroadcastManager" in {
       BroadcastManager.synchronized {
-        val broadcasterFactory = mock[BroadcasterFactory]
-        val metaBroadcaster = mock[MetaBroadcaster]
-        val broadcaster = mock[Broadcaster]
-        val config = mock[AtmosphereServiceConfig[TestRPC]]
-        val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (atm, atmConfig) = createConfigs(Seq.empty, null, broadcasterFactory, metaBroadcaster)
 
-        val atmConfig = mock[MockableAtmosphereConfig]
-        (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-        (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
-
-        (metaBroadcaster.broadcastTo(_: String, _: Any)).expects(*, "test").once()
+        BroadcastManager.init(null, null)
+        intercept[IllegalArgumentException] {
+          BroadcastManager.broadcastToAllClients("test")
+        }
 
         atm.init(atmConfig)
         BroadcastManager.broadcastToAllClients("test")
+
+        metaBroadcaster.broadcasts.size should be(1)
+        metaBroadcaster.broadcasts(0)._2 should be("test")
       }
     }
 
     "filter incoming fires" in {
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
-
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
-
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCFire(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))), List()
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(
+          Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")),
+          rpc, broadcasterFactory, metaBroadcaster
         )
-      ))
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().atLeastOnce().returns("uuid123")
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCFire(
+            DefaultServerUdashRPCFramework.RawInvocation("doStuffInteger", List(List(DefaultServerUdashRPCFramework.write[Int](5)))), List()
+          )
+        ))
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-      (config.resolveRpc _).expects(resource).once().returns(rpc)
-      (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      TimeUnit.SECONDS.sleep(1)
-      calls.result().size should be(0)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+
+        eventually {
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          resource.suspended should be(true)
+        }
+
+        calls.result().size should be(0)
+      }
     }
 
     "filter incoming calls" in {
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
-
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
-
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(
+          Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")),
+          rpc, broadcasterFactory, metaBroadcaster
         )
-      ))
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().atLeastOnce().returns("uuid123")
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCCall(
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            List(),
+            "callId1"
+          )
+        ))
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-      (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseFailure"))).once()
-      (config.resolveRpc _).expects(resource).once().returns(rpc)
-      (config.filters _).expects().returns(Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")))
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      TimeUnit.SECONDS.sleep(1)
-      calls.result().size should be(0)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+
+        eventually {
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) shouldNot be(empty)
+          resource.suspended should be(true)
+        }
+
+        calls.result().size should be(0)
+      }
     }
 
     "handle incoming websocket fire" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
-
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
-
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCFire(
-          DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
-          List()
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(
+          Seq((_) => Success(""), (_) => Success("")),
+          rpc, broadcasterFactory, metaBroadcaster
         )
-      ))
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().atLeastOnce().returns("uuid123")
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCFire(
+            DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
+            List()
+          )
+        ))
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("handle")
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+
+        eventually {
+          calls.result() should contain("handle")
+        }
+
+        broadcasterFactory.lookups should contain("/client/uuid123")
+        broadcaster.addedResources.size should be(1)
+        broadcaster.addedResources should contain(resource)
+        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
+        resource.suspended should be(true)
       }
     }
 
     "handle incoming websocket call" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCCall(
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            List(),
+            "callId1"
+          )
+        ))
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
-        )
-      ))
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().atLeastOnce().returns("uuid123")
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-      (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseSuccess"))).once()
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
+        eventually {
+          calls.result() should contain("doStuff")
+        }
 
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("doStuff")
+        broadcasterFactory.lookups should contain("/client/uuid123")
+        broadcaster.addedResources.size should be(1)
+        broadcaster.addedResources should contain(resource)
+        broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) shouldNot be(empty)
+        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
+        resource.suspended should be(true)
       }
-      TimeUnit.SECONDS.sleep(1)
     }
 
     "handle incoming websocket failing call" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(requestBody)
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
-        )
-      ))
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.WEBSOCKET)
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().atLeastOnce().returns("uuid123")
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+        eventually {
+          calls.result() should contain("doStuffWithFail")
+        }
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/uuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-      (broadcaster.broadcast(_: Any)).expects(where((msg: Any) => msg.toString.contains("RPCResponseFailure"))).once()
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
-
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("doStuffWithFail")
+        broadcasterFactory.lookups should contain("/client/uuid123")
+        broadcaster.addedResources.size should be(1)
+        broadcaster.addedResources should contain(resource)
+        broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) should be(empty)
+        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) shouldNot be(empty)
+        resource.suspended should be(true)
       }
-
-      Thread.sleep(10) //Wait for broadcaster.broadcast(_: Any)) call on broadcaster mock
     }
 
     "handle incoming polling fire" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCFire(
+            DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
+            List()
+          )
+        ))
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCFire(
-          DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
-          List()
-        )
-      ))
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.POLLING)
-      (resource.uuid _).expects().atLeastOnce().returns("123456-654321") // create custom brodcaster
-      (resource.setBroadcaster _).expects(broadcaster).once() // create custom brodcaster
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().never()
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
-      (resource.getResponse _).expects().never()
-      (resource.resume _).expects().once()
+        atm.init(atmConfig)
+        atm.onRequest(resource)
 
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects(*, *).once().returns(broadcaster) // create custom brodcaster
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
+        eventually {
+          calls.result() should contain("handle")
+        }
 
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("handle")
+        broadcasterFactory.lookups shouldNot be(empty)
+        broadcaster.addedResources.size should be(0)
+        resource.getBroadcaster shouldNot be(null)
+        resource.suspended should be(false)
+        resource.resumed should be(true)
       }
     }
 
     "handle incoming polling call" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+          DefaultServerUdashRPCFramework.RPCCall(
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            List(),
+            "callId1"
+          )
+        ))
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
-        )
-      ))
+        val response = new AtmosphereResponseMock(null)
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
 
-      val response = new AtmosphereResponseMock(null)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.POLLING)
-      (resource.uuid _).expects().atLeastOnce().returns("123456-654321") // create custom brodcaster
-      (resource.setBroadcaster _).expects(broadcaster).once() // create custom brodcaster
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().never()
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
-      (resource.getResponse _).expects().atLeastOnce().returns(response)
-      (resource.resume _).expects().once()
+        eventually {
+          calls.result() should contain("doStuff")
+          response.write should be(true)
+          response.error should be(false)
+        }
 
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects(*, *).once().returns(broadcaster) // create custom brodcaster
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
-
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("doStuff")
-        response.write should be(true)
-        response.error should be(false)
+        broadcasterFactory.lookups shouldNot be(empty)
+        broadcaster.addedResources.size should be(0)
+        resource.getBroadcaster shouldNot be(null)
+        resource.suspended should be(false)
+        resource.resumed should be(true)
       }
     }
 
     "handle incoming polling failing call" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(requestBody)
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
-        )
-      ))
+        val response = new AtmosphereResponseMock(null)
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
 
-      val response = new AtmosphereResponseMock(null)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.POLLING)
-      (resource.uuid _).expects().atLeastOnce().returns("123456-654321") // create custom brodcaster
-      (resource.setBroadcaster _).expects(broadcaster).once() // create custom brodcaster
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().never()
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
-      (resource.getResponse _).expects().atLeastOnce().returns(response)
-      (resource.resume _).expects().once()
+        eventually {
+          calls.result() should contain("doStuffWithFail")
+          response.write should be(true)
+          response.error should be(false)
+        }
 
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects(*, *).once().returns(broadcaster) // create custom brodcaster
-      (config.filters _).expects().returns(Seq())
-      (config.resolveRpc _).expects(resource).returns(rpc)
-
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() should contain("doStuffWithFail")
-        response.write should be(true)
-        response.error should be(false)
+        broadcasterFactory.lookups shouldNot be(empty)
+        broadcaster.addedResources.size should be(0)
+        resource.getBroadcaster shouldNot be(null)
+        resource.suspended should be(false)
+        resource.resumed should be(true)
       }
     }
 
     "handle incoming polling broken request" in {
-      val calls = Seq.newBuilder[String]
-      val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
-        calls += method
-      })
-      val rpc = new DefaultExposesServerRPC[TestRPC](impl)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(requestBody.substring(5))
 
-      val request = AtmosphereRequestImpl.newInstance()
-      request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
-        DefaultServerUdashRPCFramework.RPCCall(
-          DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
-          List(),
-          "callId1"
-        )
-      ).substring(5))
+        val response = new AtmosphereResponseMock(null)
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
 
-      val response = new AtmosphereResponseMock(null)
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+        eventually {
+          calls.result() shouldNot contain("doStuffWithFail")
+          response.write should be(false)
+          response.error should be(true)
+        }
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.POLLING)
-      (resource.uuid _).expects().atLeastOnce().returns("123456-654321") // create custom brodcaster
-      (resource.setBroadcaster _).expects(broadcaster).once() // create custom brodcaster
-      (resource.suspend _).expects().once()
-      (resource.uuid _).expects().never()
-      (resource.getRequest _).expects().atLeastOnce().returns(request)
-      (resource.getResponse _).expects().atLeastOnce().returns(response)
-      (resource.resume _).expects().never()
-      (config.resolveRpc _).expects(resource).once().returns(rpc)
-
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects(*, *).once().returns(broadcaster) // create custom brodcaster
-
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      eventually {
-        calls.result() shouldNot contain("doStuffWithFail")
-        response.write should be(false)
-        response.error should be(true)
+        broadcasterFactory.lookups shouldNot be(empty)
+        broadcaster.addedResources.size should be(0)
+        resource.getBroadcaster shouldNot be(null)
       }
     }
 
     "suspend and register SSE request" in {
-      val broadcasterFactory = mock[BroadcasterFactory]
-      val metaBroadcaster = mock[MetaBroadcaster]
-      val broadcaster = mock[Broadcaster]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val atmConfig = mock[MockableAtmosphereConfig]
-      (atmConfig.getBroadcasterFactory _).expects().once().returns(broadcasterFactory)
-      (atmConfig.metaBroadcaster _).expects().once().returns(metaBroadcaster)
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (atm, atmConfig) = createConfigs(Seq.empty, null, broadcasterFactory, metaBroadcaster)
 
-      val request = AtmosphereRequestImpl.newInstance()
+        val request = AtmosphereRequestImpl.newInstance()
+        val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().atLeastOnce().returns(TRANSPORT.SSE)
-      (resource.suspend(_: Long)).expects(*).once()
-      (resource.uuid _).expects().once().returns("sseUuid123")
+        atm.init(atmConfig)
+        atm.onRequest(resource)
 
-      (config.initRpc _).expects(resource).once()
-      (broadcasterFactory.lookup[Broadcaster](_: Any, _: Boolean)).expects("/client/sseUuid123", *).atLeastOnce().returns(broadcaster)
-      (broadcaster.addAtmosphereResource _).expects(resource).once()
-      (broadcaster.setBroadcasterLifeCyclePolicy _).expects(*).never()
-
-      atm.init(atmConfig)
-      atm.onRequest(resource)
-      TimeUnit.SECONDS.sleep(1)
+        eventually {
+          broadcasterFactory.lookups should contain("/client/sseUuid123")
+          broadcaster.addedResources.size should be(1)
+          resource.suspended should be(true)
+          resource.resumed should be(false)
+        }
+      }
     }
 
     "call onClose when connection gets closed" in {
-      val event = mock[AtmosphereResourceEvent]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val request = AtmosphereRequestImpl.newInstance()
-      val response = new AtmosphereResponseMock(null)
+        val (config, atm) = createConfigsWithoutRpc()
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().never().returns(TRANSPORT.SSE)
-      (resource.getResponse _).expects().once().returns(response)
+        val request = AtmosphereRequestImpl.newInstance()
+        val response = new AtmosphereResponseMock(null)
 
-      (event.getResource _).expects().atLeastOnce().returns(resource)
-      (event.isCancelled _).expects().once().returns(true)
-      (config.onClose _).expects(resource).once()
+        val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request, response)
+        val event = new AtmosphereResourceEventImpl(resource)
+        event.setCancelled(true)
 
-      atm.onStateChange(event)
-      TimeUnit.SECONDS.sleep(1)
+        atm.onStateChange(event)
+
+        eventually {
+          config.closed should be(true)
+        }
+      }
     }
 
     "send broadcasts over websocket" in {
-      val event = mock[AtmosphereResourceEvent]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val writer = mock[MockablePrintWriter]
-      (writer.write(_: String)).expects(*).once()
-      (writer.flush _).expects().once()
+        val (config, atm) = createConfigsWithoutRpc()
 
-      val request = AtmosphereRequestImpl.newInstance()
-      val response = new AtmosphereResponseMock(writer)
+        val request = AtmosphereRequestImpl.newInstance()
+        val out: CharArrayWriter = new java.io.CharArrayWriter()
+        val response = new AtmosphereResponseMock(new PrintWriter(out))
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request, response)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().once().returns(TRANSPORT.WEBSOCKET)
-      (resource.getResponse _).expects().once().returns(response)
-
-      (event.getMessage _).expects().atLeastOnce().returns(
-        DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
-          DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+        val event = new AtmosphereResourceEventImpl(resource)
+        event.setMessage(
+          DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
+            DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+          )
         )
-      )
-      (event.getResource _).expects().atLeastOnce().returns(resource)
-      (event.isCancelled _).expects().once().returns(false)
-      (event.isClosedByApplication _).expects().once().returns(false)
-      (event.isClosedByClient _).expects().once().returns(false)
-      (config.onClose _).expects(resource).never()
 
-      atm.onStateChange(event)
-      TimeUnit.SECONDS.sleep(1)
+        atm.onStateChange(event)
+
+        eventually {
+          config.closed should be(false)
+          out.toString.contains("\"callId\":\"call1\"") should be(true)
+        }
+      }
     }
 
     "send broadcasts over SSE" in {
-      val event = mock[AtmosphereResourceEvent]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val writer = mock[MockablePrintWriter]
-      (writer.write(_: String)).expects(*).once()
-      (writer.flush _).expects().once()
+        val (config, atm) = createConfigsWithoutRpc()
 
-      val request = AtmosphereRequestImpl.newInstance()
-      val response = new AtmosphereResponseMock(writer)
+        val request = AtmosphereRequestImpl.newInstance()
+        val out: CharArrayWriter = new java.io.CharArrayWriter()
+        val response = new AtmosphereResponseMock(new PrintWriter(out))
+        val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request, response)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().once().returns(TRANSPORT.SSE)
-      (resource.getResponse _).expects().once().returns(response)
-
-      (event.getMessage _).expects().atLeastOnce().returns(
-        DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
-          DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+        val event = new AtmosphereResourceEventImpl(resource)
+        event.setMessage(
+          DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
+            DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+          )
         )
-      )
-      (event.getResource _).expects().atLeastOnce().returns(resource)
-      (event.isCancelled _).expects().once().returns(false)
-      (event.isClosedByApplication _).expects().once().returns(false)
-      (event.isClosedByClient _).expects().once().returns(false)
-      (config.onClose _).expects(resource).never()
 
-      atm.onStateChange(event)
-      TimeUnit.SECONDS.sleep(1)
+        atm.onStateChange(event)
+
+        eventually {
+          config.closed should be(false)
+          out.toString.contains("\"callId\":\"call1\"") should be(true)
+        }
+      }
     }
 
     "send response over polling connection" in {
-      val event = mock[AtmosphereResourceEvent]
-      val config = mock[AtmosphereServiceConfig[TestRPC]]
-      val atm = new AtmosphereService[TestRPC](config)
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
 
-      val writer = mock[MockablePrintWriter]
-      (writer.write(_: String)).expects(*).once()
-      (writer.flush _).expects().never()
+        val (config, atm) = createConfigsWithoutRpc()
 
-      val request = AtmosphereRequestImpl.newInstance()
-      val response = new AtmosphereResponseMock(writer)
+        val request = AtmosphereRequestImpl.newInstance()
+        val out: CharArrayWriter = new java.io.CharArrayWriter()
+        val response = new AtmosphereResponseMock(new PrintWriter(out))
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123123123", request, response)
 
-      val resource = mock[MockableAtmosphereResource]
-      (resource.transport _).expects().once().returns(TRANSPORT.POLLING)
-      (resource.getResponse _).expects().once().returns(response)
-      (resource.resume _).expects().once()
-
-      (event.getMessage _).expects().atLeastOnce().returns(
-        DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
-          DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+        val event = new AtmosphereResourceEventImpl(resource)
+        event.setMessage(
+          DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
+            DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
+          )
         )
-      )
-      (event.getResource _).expects().atLeastOnce().returns(resource)
-      (event.isCancelled _).expects().once().returns(false)
-      (event.isClosedByApplication _).expects().once().returns(false)
-      (event.isClosedByClient _).expects().once().returns(false)
-      (config.onClose _).expects(resource).never()
 
-      atm.onStateChange(event)
-      TimeUnit.SECONDS.sleep(1)
+        atm.onStateChange(event)
+
+        eventually {
+          config.closed should be(false)
+          resource.resumed should be(true)
+          out.toString.contains("\"callId\":\"call1\"") should be(true)
+        }
+      }
     }
   }
 

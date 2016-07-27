@@ -6,7 +6,7 @@ import org.scalatest.{Assertion, Succeeded}
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.time.{Millis, Span}
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js.Date
 import scala.util.{Failure, Success}
@@ -14,15 +14,18 @@ import scala.util.{Failure, Success}
 trait FrontendTestUtils {
   import scalatags.JsDom.all.div
   def emptyComponent() = div().render
+}
 
+trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils {
   @silent
   implicit val testExecutionContext = JSExecutionContext.runNow
 }
 
-trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils with PatienceConfiguration {
   case object EventuallyTimeout extends Exception
 
+  @silent
+  override implicit def executionContext: ExecutionContext = JSExecutionContext.runNow
   override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   def eventually(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {

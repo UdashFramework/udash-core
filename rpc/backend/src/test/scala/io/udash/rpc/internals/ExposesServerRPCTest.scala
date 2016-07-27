@@ -3,12 +3,12 @@ package io.udash.rpc.internals
 import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
-import io.udash.testing.UdashBackendTest
+import io.udash.testing.UdashRpcBackendTest
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class ExposesServerRPCTest extends UdashBackendTest {
+class ExposesServerRPCTest extends UdashRpcBackendTest {
 
   def tests[T <: ExposesServerRPC[TestRPC]](createRpc: (mutable.Builder[String, Seq[String]]) => T) = {
     "handle RPC fires" in {
