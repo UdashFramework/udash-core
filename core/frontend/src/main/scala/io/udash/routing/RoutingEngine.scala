@@ -25,6 +25,8 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
     */
   def handleUrl(url: Url): Unit = {
     val newState = routingRegistry.matchUrl(url)
+    val oldState = current
+    current = newState
 
     val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(newState)
@@ -59,8 +61,6 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
       currentState.parentState.asInstanceOf[S]
     })
 
-    val oldState = current
-    current = newState
     if (newState != oldState) callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
   }
 
