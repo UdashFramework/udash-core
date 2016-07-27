@@ -78,22 +78,24 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
       val rpc = config.resolveRpc(resource)
       import rpc.localFramework._
       val input: String = readInput(resource.getRequest.getInputStream)
-      val rpcRequest = readRequest(input, rpc)
-      (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
-        case (call: RPCCall, Some(response)) =>
-          response onComplete {
-            case Success(r) =>
-              BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
-            case Failure(ex) =>
-              logger.error("RPC request handling failed", ex)
-              val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
-              BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
-          }
-        case (_, _) =>
+      if (input.nonEmpty) {
+        val rpcRequest = readRequest(input, rpc)
+        (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
+          case (call: RPCCall, Some(response)) =>
+            response onComplete {
+              case Success(r) =>
+                BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
+              case Failure(ex) =>
+                logger.error("RPC request handling failed", ex)
+                val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
+                BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
+            }
+          case (_, _) =>
+        }
       }
     } catch {
       case e: Exception =>
-        logger.debug("Error occurred while handling websocket data.", e)
+        logger.error("Error occurred while handling websocket data.", e)
     }
   }
 
@@ -127,7 +129,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     } catch {
       case e: Exception =>
         resource.getResponse.sendError(HttpServletResponse.SC_BAD_REQUEST)
-        logger.debug("Error occurred while handling polling data.", e)
+        logger.error("Error occurred while handling polling data.", e)
     }
   }
 
