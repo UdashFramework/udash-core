@@ -144,7 +144,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin:
                                                                          override val executionContext: ExecutionContext)
   extends ReadableSeqProperty[B, ReadableProperty[B]] {
 
-  override val id: UUID = UUID.randomUUID()
+  override val id: UUID = PropertyCreator.newID()
   override protected[properties] val parent: Property[_] = null
   protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
 
@@ -155,7 +155,10 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B : ModelValue](origin:
   origin.listen(update)
 
   private def structureChanged(patch: Patch[Property[B]]): Unit =
-    structureListeners.foreach(_.apply(patch))
+    CallbackSequencer.queue(
+      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+      () => structureListeners.foreach(_.apply(patch))
+    )
 
   private def update(v: A): Unit = {
     val transformed = transformer(v)

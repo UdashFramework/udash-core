@@ -28,12 +28,14 @@ object ModelPart {
   // take no parameters and return either immutable value, ModelSeq or another ModelPart
   implicit def isModelPart[T]: ModelPart[T] = macro io.udash.macros.PropertyMacros.reifyModelPart[T]
 }
+
 trait ModelSeq[T]
 object ModelSeq {
   // implement with macro that checks if T is a scala.collection.Seq (exactly, not a subtype!) whose elements
   // are either immutable values, ModelParts or other ModelSeqs
   implicit def isModelSeq[T <: Seq[_]]: ModelSeq[T] = macro io.udash.macros.PropertyMacros.reifyModelSeq[T]
 }
+
 trait ModelValue[T]
 object ModelValue {
   // implement with macro that checks if T is ImmutableValue, ModelSeq or ModelPart

@@ -256,7 +256,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -266,7 +266,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -276,7 +276,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -298,7 +298,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(2)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(5) // could be 2 with LCCS
+      elementsUpdated should be(3) // could be 0 with LCCS
 
       lastValue = null
       lastPatch = null
@@ -333,7 +333,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(2)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(2)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -400,7 +400,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -410,7 +410,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -420,7 +420,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(1)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -441,7 +441,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(1)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(2)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -476,7 +476,7 @@ class PropertyTest extends UdashFrontendTest {
       lastValue should be(s.get)
       lastPatch.added.size should be(2)
       lastPatch.removed.size should be(0)
-      elementsUpdated should be(2)
+      elementsUpdated should be(0)
 
       lastValue = null
       lastPatch = null
@@ -1336,7 +1336,7 @@ class PropertyTest extends UdashFrontendTest {
 
       listenCalls.clear()
       lastPatch = null
-      s.remove(0, s.elemProperties.size)
+      s.clear()
       c.get should be(Seq())
       lastPatch.idx should be(0)
       lastPatch.added.size should be(0)
@@ -1345,6 +1345,142 @@ class PropertyTest extends UdashFrontendTest {
       lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
+    }
+
+    "provide reversed version" in {
+      val p = SeqProperty(1,2,3)
+      val r: SeqProperty[Int, Property[Int]] = p.reversed()
+      val r2: SeqProperty[Int, Property[Int]] = r.reversed()
+
+      p.get should be(r.get.reverse)
+      p.get should be(r2.get)
+
+      var pValue = Seq.empty[Int]
+      var rValue = Seq.empty[Int]
+      var r2Value = Seq.empty[Int]
+      var pPatch: Patch[Property[Int]] = null
+      var rPatch: Patch[Property[Int]] = null
+      var r2Patch: Patch[Property[Int]] = null
+      p.listen(v => pValue = v)
+      r.listen(v => rValue = v)
+      r2.listen(v => r2Value = v)
+      p.listenStructure(v => pPatch = v)
+      r.listenStructure(v => rPatch = v)
+      r2.listenStructure(v => r2Patch = v)
+
+      p.append(4)
+
+      pValue should be(Seq(1,2,3,4))
+      rValue should be(Seq(4,3,2,1))
+      r2Value should be(Seq(1,2,3,4))
+      pPatch.idx should be(3)
+      pPatch.added.size should be(1)
+      pPatch.removed.size should be(0)
+      rPatch.idx should be(0)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(3)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.prepend(0)
+
+      pValue should be(Seq(0,1,2,3,4))
+      rValue should be(Seq(4,3,2,1,0))
+      r2Value should be(Seq(0,1,2,3,4))
+      pPatch.idx should be(0)
+      pPatch.added.size should be(1)
+      pPatch.removed.size should be(0)
+      rPatch.idx should be(4)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(0)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.replace(1, 2, 9, 9, 9)
+
+      pValue should be(Seq(0,9,9,9,3,4))
+      rValue should be(Seq(4,3,9,9,9,0))
+      r2Value should be(Seq(0,9,9,9,3,4))
+      pPatch.idx should be(1)
+      pPatch.added.size should be(3)
+      pPatch.removed.size should be(2)
+      rPatch.idx should be(2)
+      rPatch.added.size should be(3)
+      rPatch.removed.size should be(2)
+      r2Patch.idx should be(1)
+      r2Patch.added.size should be(3)
+      r2Patch.removed.size should be(2)
+    }
+
+    "provide reversed version of transformed and filtered SeqProperty" in {
+      val p = SeqProperty(-3,-2,-1,0,1,2)
+      val f = p.filter(_ >= 0).transform((i: Int) => i + 1)
+      val r: ReadableSeqProperty[Int, ReadableProperty[Int]] = f.reversed()
+      val r2: ReadableSeqProperty[Int, ReadableProperty[Int]] = r.reversed()
+
+      f.get should be(r.get.reverse)
+      f.get should be(r2.get)
+
+      var fValue = Seq.empty[Int]
+      var rValue = Seq.empty[Int]
+      var r2Value = Seq.empty[Int]
+      var fPatch: Patch[ReadableProperty[Int]] = null
+      var rPatch: Patch[ReadableProperty[Int]] = null
+      var r2Patch: Patch[ReadableProperty[Int]] = null
+      f.listen(v => fValue = v)
+      r.listen(v => rValue = v)
+      r2.listen(v => r2Value = v)
+      f.listenStructure(v => fPatch = v)
+      r.listenStructure(v => rPatch = v)
+      r2.listenStructure(v => r2Patch = v)
+
+      p.append(3)
+
+      fValue should be(Seq(1,2,3,4))
+      rValue should be(Seq(4,3,2,1))
+      r2Value should be(Seq(1,2,3,4))
+      fPatch.idx should be(3)
+      fPatch.added.size should be(1)
+      fPatch.removed.size should be(0)
+      rPatch.idx should be(0)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(3)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.prepend(-1)
+      p.prepend(0)
+
+      fValue should be(Seq(1,1,2,3,4))
+      rValue should be(Seq(4,3,2,1,1))
+      r2Value should be(Seq(1,1,2,3,4))
+      fPatch.idx should be(0)
+      fPatch.added.size should be(1)
+      fPatch.removed.size should be(0)
+      rPatch.idx should be(4)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(0)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.replace(5, 2, 8, 8, 8)
+
+      fValue should be(Seq(1,9,9,9,3,4))
+      rValue should be(Seq(4,3,9,9,9,1))
+      r2Value should be(Seq(1,9,9,9,3,4))
+      fPatch.idx should be(1)
+      fPatch.added.size should be(3)
+      fPatch.removed.size should be(2)
+      rPatch.idx should be(2)
+      rPatch.added.size should be(3)
+      rPatch.removed.size should be(2)
+      r2Patch.idx should be(1)
+      r2Patch.added.size should be(3)
+      r2Patch.removed.size should be(2)
     }
   }
 }
