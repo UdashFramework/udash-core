@@ -49,6 +49,10 @@ trait TestRPC extends RPCMethods {
   def doStuffInt(yes: Boolean): Future[Int]
 
   def innerRpc(name: String): InnerRPC
+
+  def throwingGetter(): InnerRPC
+
+  def nullGetter(): InnerRPC
 }
 
 /** Main Client RPC interface */
@@ -128,6 +132,16 @@ object TestRPC {
         def proc(): Unit =
           onProcedure("innerRpc.proc", List(Nil))
       }
+    }
+
+    override def throwingGetter(): InnerRPC = {
+      onInvocationInternal("throwingGetter", List(List()), None)
+      throw new NullPointerException
+    }
+
+    override def nullGetter(): InnerRPC = {
+      onInvocationInternal("nullGetter", List(List()), None)
+      null
     }
   }
 }
