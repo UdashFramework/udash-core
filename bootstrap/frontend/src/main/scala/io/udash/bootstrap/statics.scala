@@ -6,18 +6,18 @@ object BootstrapTags {
 
   import scalatags.JsDom.all._
 
-  val dataBackdrop = "data-backdrop".attr
-  val dataBind = "data-bind".attr
-  val dataDismiss = "data-dismiss".attr
-  val dataKeyboard = "data-keyboard".attr
-  val dataLabel = "data-label".attr
-  val dataParent = "data-parent".attr
-  val dataRide = "data-ride".attr
-  val dataShow = "data-show".attr
-  val dataSlide = "data-slide".attr
-  val dataSlideTo = "data-slide-to".attr
-  val dataTarget = "data-target".attr
-  val dataToggle = "data-toggle".attr
+  val dataBackdrop = attr("data-backdrop")
+  val dataBind = attr("data-bind")
+  val dataDismiss = attr("data-dismiss")
+  val dataKeyboard = attr("data-keyboard")
+  val dataLabel = attr("data-label")
+  val dataParent = attr("data-parent")
+  val dataRide = attr("data-ride")
+  val dataShow = attr("data-show")
+  val dataSlide = attr("data-slide")
+  val dataSlideTo = attr("data-slide-to")
+  val dataTarget = attr("data-target")
+  val dataToggle = attr("data-toggle")
 
 }
 
