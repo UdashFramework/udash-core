@@ -8,13 +8,13 @@ object Dependencies extends Build {
   val jqueryWrapperVersion = "1.0.0"
 
   val scalaJsDomVersion = "0.9.1"
-  val scalaTagsVersion = "0.5.5"
+  val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.16.1"
+  val avsCommonsVersion = "1.16.2"
 
   val atmoshereJSVersion = "2.3.0"
-  val atmoshereVersion = "2.4.4"
+  val atmoshereVersion = "2.4.5"
 
   val upickleVersion = "0.4.1"
   val jawnParserVersion = "0.8.4"
@@ -25,7 +25,7 @@ object Dependencies extends Build {
 
   val scalatestVersion = "3.0.0-M15"
   val scalamockVersion = "3.2.2"
-  val bootstrapVersion = "3.3.6"
+  val bootstrapVersion = "3.3.7"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
