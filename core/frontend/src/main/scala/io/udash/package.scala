@@ -15,6 +15,7 @@ package object udash extends io.udash.bindings.Bindings
   type Presenter[S <: State] = io.udash.core.Presenter[S]
   type ViewPresenter[S <: State] = io.udash.core.ViewPresenter[S]
   type View = io.udash.core.View
+  type FinalView = io.udash.core.FinalView
   type State = io.udash.core.State
   type RoutingRegistry[S <: State] = io.udash.core.RoutingRegistry[S]
   type ViewPresenterRegistry[S <: State] = io.udash.core.ViewPresenterRegistry[S]

@@ -29,20 +29,20 @@ trait Presenter[S <: State] {
 }
 
 /**
-  * The ViewPresenter has to prepare model, [[View]], [[Presenter]] and link them together.
+  * The ViewPresenter has to prepare model, [[io.udash.core.View]], [[io.udash.core.Presenter]] and link them together.
   * @tparam S State for which this pair is defined.
   */
 trait ViewPresenter[S <: State] {
   /**
-    * Factory method which should return ready to used instance of [[Presenter]] and [[View]].
+    * Factory method which should return ready to used instance of [[io.udash.core.Presenter]] and [[io.udash.core.View]].
     * @return pair of presenter and view for state S
     */
   def create(): (View, Presenter[S])
 }
 
 /**
-  * Abstract view which should be used in order to implement View for [[ViewPresenter]].
-  * The View implementation usually gets the model and the [[Presenter]] as constructor arguments.
+  * Abstract view which should be used in order to implement View for [[io.udash.core.ViewPresenter]].
+  * The View implementation usually gets the model and the [[io.udash.core.Presenter]] as constructor arguments.
   */
 trait View {
   /**
@@ -64,6 +64,16 @@ trait View {
   def apply() = getTemplate
 }
 
+/** A [[io.udash.core.View]] which does not have any child view. */
+trait FinalView extends View {
+  override def renderChild(view: View): Unit =
+    throw View.UnexpectedChildView
+}
+
+object View {
+  case object UnexpectedChildView extends RuntimeException("This view is not expected to render child view. Did you forget to implement renderChild method?")
+}
+
 /**
   * The class which should be used to present the state for [[io.udash.routing.RoutingEngine]].
   */
@@ -73,7 +83,7 @@ trait State {
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
-  * It should map properly [[Url]] to [[State]], and otherwise.
+  * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
   * @tparam S
   */
 trait RoutingRegistry[S <: State] {
