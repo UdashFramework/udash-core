@@ -1,7 +1,7 @@
 package io.udash.bindings
 
 import io.udash._
-import io.udash.properties.SeqProperty
+import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
 
 class SelectTest extends UdashFrontendTest {

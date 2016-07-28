@@ -1,6 +1,7 @@
 package io.udash.bindings.modifiers
 
 import io.udash.properties._
+import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom
 import org.scalajs.dom._
 

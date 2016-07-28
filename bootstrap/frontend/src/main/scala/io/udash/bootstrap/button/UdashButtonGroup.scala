@@ -3,14 +3,14 @@ package button
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.ModelPart
+import io.udash.properties.{ModelPart, seq}
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
 class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
-                      (val items: io.udash.properties.SeqProperty[ItemType, ElemType],
+                      (val items: seq.SeqProperty[ItemType, ElemType],
                        size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
                        override val componentId: ComponentId)
                       (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
@@ -80,7 +80,7 @@ object UdashButtonGroup {
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
   def reactive[ItemType, ElemType <: Property[ItemType]]
-              (items: io.udash.properties.SeqProperty[ItemType, ElemType],
+              (items: seq.SeqProperty[ItemType, ElemType],
                size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                componentId: ComponentId = UdashBootstrap.newId())
               (itemFactory: (ElemType) => dom.Element): UdashButtonGroup[ItemType, ElemType] =
@@ -97,7 +97,7 @@ object UdashButtonGroup {
     * @param justified If true, buttons will be justified
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
-  def checkboxes(items: io.udash.properties.SeqProperty[CheckboxModel, CastableProperty[CheckboxModel]],
+  def checkboxes(items: seq.SeqProperty[CheckboxModel, CastableProperty[CheckboxModel]],
                  size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                  componentId: ComponentId = UdashBootstrap.newId()): UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]] =
     new UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]](items, size, vertical, justified, false, componentId)(defaultCheckboxFactory)
@@ -116,7 +116,7 @@ object UdashButtonGroup {
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
   def radio[ItemType <: CheckboxModel : ModelPart, ElemType <: CastableProperty[ItemType]]
-           (items: io.udash.properties.SeqProperty[ItemType, ElemType],
+           (items: seq.SeqProperty[ItemType, ElemType],
             size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
            (implicit ec: ExecutionContext): UdashButtonGroup[ItemType, ElemType] = {

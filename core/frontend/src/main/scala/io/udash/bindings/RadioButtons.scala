@@ -2,7 +2,7 @@ package io.udash.bindings
 
 import java.{util => ju}
 
-import io.udash.properties.Property
+import io.udash.properties.single.Property
 import org.scalajs.dom.{html, _}
 
 import scala.concurrent.ExecutionContext

@@ -4,14 +4,14 @@ package collapse
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
-import io.udash.properties.SeqProperty
+import io.udash.properties.seq.SeqProperty
 import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.collection.mutable
 
 class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
-                    (panels: properties.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                    (panels: SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                     (panelStyleSelector: ItemType => PanelStyle,
                      heading: (ElemType) => dom.Element,
                      body: (ElemType) => dom.Element) extends UdashBootstrapComponent {

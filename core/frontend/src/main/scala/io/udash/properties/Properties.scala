@@ -1,21 +1,21 @@
 package io.udash.properties
 
 trait Properties {
-  val Property                             = io.udash.properties.Property
-  val ModelProperty                        = io.udash.properties.ModelProperty
-  val SeqProperty                          = io.udash.properties.SeqProperty
+  val Property                             = single.Property
+  val ModelProperty                        = model.ModelProperty
+  val SeqProperty                          = seq.SeqProperty
   val CallbackSequencer                    = io.udash.properties.CallbackSequencer
 
-  type CastableReadableProperty[A]         = io.udash.properties.CastableReadableProperty[A]
-  type CastableProperty[A]                 = io.udash.properties.CastableProperty[A]
-  type ReadableProperty[A]                 = io.udash.properties.ReadableProperty[A]
-  type Property[A]                         = io.udash.properties.Property[A]
-  type ReadableModelProperty[A]            = io.udash.properties.ReadableModelProperty[A]
-  type ModelProperty[A]                    = io.udash.properties.ModelProperty[A]
-  type ReadableSeqProperty[A]              = io.udash.properties.ReadableSeqProperty[A, _ <: ReadableProperty[A]]
-  type SeqProperty[A]                      = io.udash.properties.SeqProperty[A, _ <: Property[A]]
+  type CastableReadableProperty[A]         = single.CastableReadableProperty[A]
+  type CastableProperty[A]                 = single.CastableProperty[A]
+  type ReadableProperty[A]                 = single.ReadableProperty[A]
+  type Property[A]                         = single.Property[A]
+  type ReadableModelProperty[A]            = model.ReadableModelProperty[A]
+  type ModelProperty[A]                    = model.ModelProperty[A]
+  type ReadableSeqProperty[A]              = seq.ReadableSeqProperty[A, _ <: ReadableProperty[A]]
+  type SeqProperty[A]                      = seq.SeqProperty[A, _ <: Property[A]]
 
-  type Patch[+P <: ReadableProperty[_]]    = io.udash.properties.Patch[P]
+  type Patch[+P <: ReadableProperty[_]]    = seq.Patch[P]
 
   type ValidationError                     = io.udash.properties.ValidationError
   type DefaultValidationError              = io.udash.properties.DefaultValidationError

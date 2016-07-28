@@ -1,5 +1,8 @@
 package io.udash.properties
 
+import io.udash.properties.model.ModelProperty
+import io.udash.properties.seq.SeqProperty
+import io.udash.properties.single.Property
 import io.udash.testing.UdashFrontendTest
 
 import scala.concurrent.{ExecutionContext, Future}

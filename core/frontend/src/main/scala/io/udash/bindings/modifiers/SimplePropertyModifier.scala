@@ -1,7 +1,7 @@
 package io.udash.bindings.modifiers
 
 import io.udash._
-import io.udash.properties.ReadableProperty
+import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom
 
 import scalatags.JsDom

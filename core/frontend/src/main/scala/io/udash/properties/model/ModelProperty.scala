@@ -1,6 +1,10 @@
-package io.udash.properties
+package io.udash.properties.model
 
 import java.util.UUID
+
+import io.udash.properties._
+import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
+import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,17 +59,3 @@ trait ModelProperty[A] extends ReadableModelProperty[A] with Property[A] {
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 }
 
-abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
-                                   (implicit val executionContext: ExecutionContext) extends ModelProperty[A] with CastableProperty[A] {
-  protected var initialized: Boolean = false
-  /** Creates all sub properties and puts them in `properties`. */
-  protected def initialize(): Unit
-
-  def getSubProperty[T](key: String): Property[T] = {
-    if (!initialized) {
-      initialized = true
-      initialize()
-    }
-    properties(key).asInstanceOf[Property[T]]
-  }
-}

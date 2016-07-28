@@ -2,6 +2,8 @@ package io.udash.bindings
 
 import io.udash.bindings.modifiers._
 import io.udash.properties._
+import io.udash.properties.seq.{Patch, ReadableSeqProperty}
+import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom
 import org.scalajs.dom._
 
