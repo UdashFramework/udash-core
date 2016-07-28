@@ -44,6 +44,9 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
   }
 
   class GenCodecsDemoPresenter(model: ModelProperty[GenCodecsDemoModel]) {
+    def randomString(l: Int): String =
+      BigInt.probablePrime(32, Random).toString(16)
+
     def onButtonClick(btn: UdashButton) = {
       btn.disabled.set(true)
       val demoRpc: GenCodecServerRPC = Context.serverRpc.demos().gencodecsDemo()
@@ -55,23 +58,23 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
         case Success(response) => model.subProp(_.double).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendString(Random.nextString(10)) onComplete {
+      demoRpc.sendString(randomString(10)) onComplete {
         case Success(response) => model.subProp(_.string).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendSeq(Seq(Random.nextString(5), Random.nextString(5))) onComplete {
+      demoRpc.sendSeq(Seq(randomString(5), randomString(5))) onComplete {
         case Success(response) => model.subProp(_.seq).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendMap(Map(Random.nextString(5) -> Random.nextInt(), Random.nextString(5) -> Random.nextInt())) onComplete {
+      demoRpc.sendMap(Map(randomString(5) -> Random.nextInt(), randomString(5) -> Random.nextInt())) onComplete {
         case Success(response) => model.subProp(_.map).set(response.toSeq)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendCaseClass(DemoCaseClass(Random.nextInt(), Random.nextString(5), 42)) onComplete {
+      demoRpc.sendCaseClass(DemoCaseClass(Random.nextInt(), randomString(5), 42)) onComplete {
         case Success(response) => model.subProp(_.caseClass).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendClass(new DemoClass(Random.nextInt(), Random.nextString(5))) onComplete {
+      demoRpc.sendClass(new DemoClass(Random.nextInt(), randomString(5))) onComplete {
         case Success(response) =>
           model.subProp(_.clsInt).set(response.i)
           model.subProp(_.clsString).set(response.s)
