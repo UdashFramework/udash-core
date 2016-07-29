@@ -1,5 +1,6 @@
 package io.udash.bindings.modifiers
 
+import io.udash.bindings.Bindings
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom
@@ -12,7 +13,7 @@ import scalatags.generic._
 private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T],
                                  initBuilder: Future[ValidationResult] => Seq[Element],
                                  completeBuilder: ValidationResult => Seq[Element],
-                                 errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) extends Modifier[dom.Element] {
+                                 errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) extends Modifier[dom.Element] with Bindings {
 
   override def applyTo(root: dom.Element): Unit = {
     var elements: Seq[Element] = null
@@ -20,14 +21,8 @@ private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T]
     def rebuild[R](result: R, builder: R => Seq[Element]) = {
       val oldEls = elements
       elements = builder.apply(result)
-      if (oldEls == null) elements.foreach(root.appendChild)
-      else {
-        oldEls.zip(elements).foreach { case (old, fresh) => root.replaceChild(fresh, old) }
-        oldEls.drop(elements.size).foreach(root.removeChild)
-        elements.drop(oldEls.size - 1).sliding(2).foreach(s =>
-          if (s.size == 2) root.insertBefore(s(1), s(0).nextSibling)
-        )
-      }
+      if (elements.isEmpty) elements = emptyStringNode()
+      root.replaceChildren(oldEls, elements)
     }
 
     val listener = (_: T) => {

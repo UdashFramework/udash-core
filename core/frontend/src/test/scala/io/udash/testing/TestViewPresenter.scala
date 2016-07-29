@@ -20,7 +20,7 @@ class TestView extends View {
     lastChild = view
   }
 
-  override def getTemplate: Element = {
+  override def getTemplate: Modifier = {
     renderingCounter += 1
     div().render
   }

@@ -13,7 +13,7 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
                       (val items: seq.SeqProperty[ItemType, ElemType],
                        size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
                        override val componentId: ComponentId)
-                      (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+                      (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
   import io.udash.bootstrap.BootstrapTags._
 
   private lazy val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
@@ -46,7 +46,7 @@ object UdashButtonGroup {
   /** Button factory for [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. It creates group of toggle buttons. */
   val defaultCheckboxFactory = (el: CastableProperty[CheckboxModel]) => {
     val model = el.asModel
-    UdashButton.toggle(active = model.subProp(_.checked))(model.subProp(_.text).get).render
+    Seq(UdashButton.toggle(active = model.subProp(_.checked))(model.subProp(_.text).get).render)
   }
 
   /**
@@ -83,7 +83,7 @@ object UdashButtonGroup {
               (items: seq.SeqProperty[ItemType, ElemType],
                size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                componentId: ComponentId = UdashBootstrap.newId())
-              (itemFactory: (ElemType) => dom.Element): UdashButtonGroup[ItemType, ElemType] =
+              (itemFactory: (ElemType) => Seq[dom.Element]): UdashButtonGroup[ItemType, ElemType] =
     new UdashButtonGroup[ItemType, ElemType](items, size, vertical, justified, false, componentId)(itemFactory)
 
   /**

@@ -25,14 +25,7 @@ private[bindings] trait ValueModifier[T] extends Modifier[dom.Element] with Bind
       elements = if (checkNull && propertyValue == null) emptyStringNode() else builder(propertyValue)
       if (elements.isEmpty) elements = emptyStringNode()
 
-      if (oldEls == null) elements.foreach(t.appendChild)
-      else {
-        oldEls.zip(elements).foreach { case (old, fresh) => t.replaceChild(fresh, old) }
-        oldEls.drop(elements.size).foreach(t.removeChild)
-        elements.drop(oldEls.size - 1).sliding(2).foreach(s =>
-          if (s.size == 2) t.insertBefore(s(1), s(0).nextSibling)
-        )
-      }
+      t.replaceChildren(oldEls, elements)
     }
 
     listen(_ => rebuild())

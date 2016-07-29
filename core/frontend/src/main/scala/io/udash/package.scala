@@ -25,6 +25,5 @@ package object udash extends io.udash.bindings.Bindings
   type StrictLogging = io.udash.utils.StrictLogging
 
   // View
-  type Component = io.udash.view.Component
   type ViewRenderer = io.udash.view.ViewRenderer
 }

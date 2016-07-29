@@ -12,7 +12,7 @@ import scalatags.JsDom.all._
 class UdashButtonToolbar[ItemType, ElemType <: Property[ItemType]] private
                         (val items:seq.SeqProperty[ItemType, ElemType],
                          override val componentId: ComponentId)
-                        (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+                        (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
   override lazy val render: dom.Element = {
     div(role := "toolbar", BootstrapStyles.Button.btnToolbar)(
       repeat(items)(itemFactory)
@@ -56,7 +56,7 @@ object UdashButtonToolbar {
     */
   def reactive[ItemType, ElemType <: Property[ItemType]]
               (items: seq.SeqProperty[ItemType, ElemType],
-               itemFactory: (ElemType) => dom.Element,
+               itemFactory: (ElemType) => Seq[dom.Element],
                componentId: ComponentId = UdashBootstrap.newId()): UdashButtonToolbar[ItemType, ElemType] =
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
 }
