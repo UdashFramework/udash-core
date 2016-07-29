@@ -156,6 +156,66 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(2).textContent should be("")
     }
 
+    "handle Seq of produced elements" in {
+      val producer = (n: Int) => Seq.fill(n)(b(n.toString).render)
+
+      val p1 = Property[Int](1)
+      val p2 = Property[Int](2)
+      val p3 = Property[Int](3)
+      val template = div(
+        span(),
+        produce(p1)(producer),
+        produce(p2)(producer),
+        produce(p3)(producer),
+        span()
+      ).render
+
+      template.textContent should be("122333")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).nodeName should be("B")
+      template.childNodes(1).textContent should be("1")
+      template.childNodes(2).nodeName should be("B")
+      template.childNodes(2).textContent should be("2")
+      template.childNodes(3).nodeName should be("B")
+      template.childNodes(3).textContent should be("2")
+      template.childNodes(4).nodeName should be("B")
+      template.childNodes(4).textContent should be("3")
+      template.childNodes(5).nodeName should be("B")
+      template.childNodes(5).textContent should be("3")
+      template.childNodes(6).nodeName should be("B")
+      template.childNodes(6).textContent should be("3")
+      template.childNodes(7).textContent should be("")
+
+      p1.set(4)
+      template.textContent should be("444422333")
+      p2.set(3)
+      template.textContent should be("4444333333")
+      p3.set(1)
+      template.textContent should be("44443331")
+      p3.set(5)
+      template.textContent should be("444433355555")
+      p2.set(1)
+      template.textContent should be("4444155555")
+      p1.set(1)
+      template.textContent should be("1155555")
+      p2.set(2)
+      template.textContent should be("12255555")
+      p3.set(3)
+      template.textContent should be("122333")
+      p2.set(0)
+      template.textContent should be("1333")
+      p3.set(0)
+      template.textContent should be("1")
+      p1.set(0)
+      template.textContent should be("")
+      p2.set(2)
+      template.textContent should be("22")
+      p3.set(3)
+      template.textContent should be("22333")
+      p1.set(1)
+      template.textContent should be("122333")
+    }
+
     "handle null value providing empty content" in {
       val p = Property[String]("ABC")
       val template = div(
@@ -429,8 +489,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         span(),
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -476,8 +536,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val template = div(
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -526,8 +586,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       def prod(p: seq.SeqProperty[Int, Property[Int]]) = {
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(p.get).render))
@@ -682,6 +742,73 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(3).nodeName should be("I")
       template.childNodes(3).textContent should be("3")
       template.childNodes(4).textContent should be("")
+    }
+
+    "handle Seq of produced elements" in {
+      val p1 = SeqProperty[Int](1, 2, 3)
+      val p2 = SeqProperty[Int](4, 5, 6)
+      val p3 = SeqProperty[Int](7, 8, 9)
+
+      val builder = (p: Property[Int]) => Seq.fill(p.get)(b(p.get.toString).render)
+      val template = div(
+        repeat(p1)(builder),
+        repeat(p2)(builder),
+        repeat(p3)(builder)
+      ).render
+
+      def expectedChildrenCount: Int =
+        Seq(p1.get, p2.get, p3.get).flatten.sum
+
+      template.textContent should be("122333444455555666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.remove(5)
+      template.textContent should be("1223334444666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.replace(0, 1, 3)
+      template.textContent should be("333223334444666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.clear()
+      template.textContent should be("333223334444666666")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.append(0, 0, 0)
+      template.textContent should be("333223334444666666")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.clear()
+      template.textContent should be("33322333")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.clear()
+      template.textContent should be("")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.append(4, 0, 5)
+      template.textContent should be("444455555")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.append(3, 0, 2, 1, 0)
+      template.textContent should be("444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.append(1, 2, 3)
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.prepend(0)
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.set(p1.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      p2.set(p2.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      p3.set(p3.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
     }
 
     "handle null value providing empty text placeholder" in {

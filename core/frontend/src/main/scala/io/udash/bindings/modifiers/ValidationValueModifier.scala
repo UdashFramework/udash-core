@@ -10,18 +10,24 @@ import scala.util.{Failure, Success}
 import scalatags.generic._
 
 private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T],
-                                 initBuilder: Future[ValidationResult] => Element,
-                                 completeBuilder: ValidationResult => Element,
-                                 errorBuilder: Throwable => Element)(implicit ec: ExecutionContext) extends Modifier[dom.Element] {
+                                 initBuilder: Future[ValidationResult] => Seq[Element],
+                                 completeBuilder: ValidationResult => Seq[Element],
+                                 errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) extends Modifier[dom.Element] {
 
   override def applyTo(root: dom.Element): Unit = {
-    var element: Element = null
+    var elements: Seq[Element] = null
 
-    def rebuild[R](result: R, builder: R => Element) = {
-      val oldEl = element
-      element = builder.apply(result)
-      if (oldEl == null) root.appendChild(element)
-      else root.replaceChild(element, oldEl)
+    def rebuild[R](result: R, builder: R => Seq[Element]) = {
+      val oldEls = elements
+      elements = builder.apply(result)
+      if (oldEls == null) elements.foreach(root.appendChild)
+      else {
+        oldEls.zip(elements).foreach { case (old, fresh) => root.replaceChild(fresh, old) }
+        oldEls.drop(elements.size).foreach(root.removeChild)
+        elements.drop(oldEls.size - 1).sliding(2).foreach(s =>
+          if (s.size == 2) root.insertBefore(s(1), s(0).nextSibling)
+        )
+      }
     }
 
     val listener = (_: T) => {
