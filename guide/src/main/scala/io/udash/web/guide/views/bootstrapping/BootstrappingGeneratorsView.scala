@@ -51,6 +51,10 @@ class BootstrappingGeneratorsView extends View {
             li(b("Create RPC communication layer demos"), " - decide if you want to generate RPC demo views.")
           )
         ),
+        li(
+          b("Enable JsWorkbench usage"), " - decide if you want to enable ScalaJS workbench. While developing the frontend code ",
+          "will be recompiled and updated in the browser automatically when source files changes are saved."
+        ),
         li(b("Start generation"), " - decide if you want to start project generation based on the above configuration.")
       )
     ),
@@ -93,7 +97,10 @@ class BootstrappingGeneratorsView extends View {
     h2("Project compilation and running"),
     p(
       "In case of the frontend-only project, you can use the ", i("sbt compile"), " command to compile sources of your web application. ",
-      "When compilation is finished, you can find generated files in the ", i("target/UdashStatic"), " directory."
+      "When compilation is finished, you can find generated files in the ", i("target/UdashStatic"), " directory. ",
+      "If you decided to use ScalaJS Workbench open ",
+      a(href := "http://localhost:12345/target/UdashStatic/WebContent/index.html")("http://localhost:12345/target/UdashStatic/WebContent/index.html"),
+      " to test your application."
     ),
     p(
       "If you decided to create the standard project with the Jetty launcher, you can use the ", i("sbt run"), " command to ",
