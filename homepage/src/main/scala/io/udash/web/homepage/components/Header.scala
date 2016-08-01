@@ -30,11 +30,11 @@ object Header extends HeaderButtons with HeaderNav {
     )
   ).render
 
-  private lazy val navElement =  navigation(Seq(
+  private lazy val navElement = navigation(
     NavItem(ExternalUrls.guide, "Documentation"),
     NavItem(ExternalUrls.releases, "Changelog"),
     NavItem(ExternalUrls.license, "License")
-  ))
+  )
 
   private lazy val template = header(HeaderStyles.get.header)(
     div(GlobalStyles.get.body, GlobalStyles.get.clearfix)(
@@ -47,25 +47,26 @@ object Header extends HeaderButtons with HeaderNav {
     )
   ).render
 
-
   private lazy val jqNav = jQ(navElement)
   private lazy val jqMobileButton = jQ(btnMobileMenu)
 
-  jqMobileButton.on("click", (jqThis: Element, jqEvent: JQueryEvent) => {
+  jqMobileButton.click((_: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
     toggleBooleanAttribute(jqNav, Attributes.data(Attributes.Active))
     toggleBooleanAttribute(jqMobileButton, Attributes.data(Attributes.Active))
   })
 
   private def onScroll(el: Element, ev: JQueryEvent): Unit = {
-    val pin = jQ(template).attr(Attributes.data(Attributes.Pinned)).getOrElse("false").toBoolean
+    val pinnedAttr: String = Attributes.data(Attributes.Pinned)
+
+    val pin = jQ(template).attr(pinnedAttr).getOrElse("false").toBoolean
     val scrollTop = jQ(DomWindow).scrollTop()
     val introHeight = jQ(s".${HomepageStyles.get.sectionIntro.htmlClass}").height()
 
     if (scrollTop >= introHeight && !pin) {
-      jQ(template).attr(Attributes.data(Attributes.Pinned), "true")
+      jQ(template).attr(pinnedAttr, "true")
     } else if (scrollTop < introHeight && pin) {
-      jQ(template).attr(Attributes.data(Attributes.Pinned), "false")
+      jQ(template).attr(pinnedAttr, "false")
     }
   }
 

@@ -20,8 +20,17 @@ object DemoPreview {
     val name = Property("World")
 
     div(DemoStyles.get.demoIOWrapper, GlobalStyles.get.table)(
-      TextInput.debounced(name, maxlength := 16, DemoStyles.get.demoInlineField, GlobalStyles.get.width100),
-      produce(name)(name => h3(DemoStyles.get.demoInlineField, DemoStyles.get.demoOutput, GlobalStyles.get.width50)(s"Hello, $name!").render)
+      TextInput.debounced(
+        name, maxlength := 16,
+        DemoStyles.get.demoInlineField, GlobalStyles.get.width100
+      ),
+      produce(name)(name =>
+        h3(
+          DemoStyles.get.demoInlineField,
+          DemoStyles.get.demoOutput,
+          GlobalStyles.get.width50
+        )(s"Hello, $name!").render
+      )
     ).render
   }
 
@@ -45,15 +54,18 @@ object DemoPreview {
     val evens = numbers.filter(isEven)
 
     div(DemoStyles.get.demoIOWrapper)(
-      TextInput.debounced(input, `type` := "text", placeholder := "Type a number and press enter...", maxlength := 6, pattern := "\\d*", DemoStyles.get.demoInput, GlobalStyles.get.width100)(
+      TextInput.debounced(
+        input, `type` := "text", placeholder := "Type a number and press enter...",
+        maxlength := 6, pattern := "\\d*",
+        DemoStyles.get.demoInput, GlobalStyles.get.width100
+      )(
         onkeyup := ((ev: KeyboardEvent) => if (ev.keyCode == ext.KeyCode.Enter) {
-          val n: Try[Int] = Try(input.get.toInt)
-          if (n.isSuccess) {
-            numbers.append(n.get)
+          Try(input.get.toInt).foreach(n => {
+            numbers.append(n)
             input.set("")
-          }
+          })
         })
-      ), br,
+      ),
       div(DemoStyles.get.demoOutput)(
         span(DemoStyles.get.demoOutpuLabel)("Numbers: "),
         span(GlobalStyles.get.col, GlobalStyles.get.width66, GlobalStyles.get.textLeft)(repeat(numbers)(renderer))
@@ -88,7 +100,10 @@ object DemoPreview {
     )
 
     div(DemoStyles.get.demoIOWrapper, GlobalStyles.get.table)(
-      TextInput.debounced(email, maxlength := 32, DemoStyles.get.demoInlineField, GlobalStyles.get.width100),
+      TextInput.debounced(
+        email, maxlength := 32,
+        DemoStyles.get.demoInlineField, GlobalStyles.get.width100
+      ),
       span(DemoStyles.get.demoInlineField, DemoStyles.get.demoOutput, GlobalStyles.get.width50)(
         "Valid: ", bindValidation(email,
           _ => span("Wait...").render,
@@ -115,6 +130,7 @@ object DemoPreview {
 
     object Translations {
       import TranslationKey._
+
       object udash {
         val hello = key("udash.hello")
         val withArg = key1[String]("udash.withArg")
@@ -140,6 +156,7 @@ object DemoPreview {
           "udash.withArg" -> "Hola, {}!"
         ))
       )
+
       def apply(): LocalTranslationProvider =
         new LocalTranslationProvider(translations)
     }
@@ -147,11 +164,13 @@ object DemoPreview {
     implicit val translationProvider: TranslationProvider = FrontendTranslationProvider()
     implicit val lang: Property[Lang] = Property(Lang("en"))
 
-    def changeLang(l: Lang): Unit =
-      lang.set(l)
+    def changeLang(l: Lang): Unit = lang.set(l)
 
     div(DemoStyles.get.demoIOWrapper)(
-      TextInput.debounced(name, `type` := "text", placeholder := "Type your name...", DemoStyles.get.demoInput, GlobalStyles.get.width100),
+      TextInput.debounced(
+        name, `type` := "text", placeholder := "Type your name...",
+        DemoStyles.get.demoInput, GlobalStyles.get.width100
+      ),
       div(DemoStyles.get.demoOutput)(
         span(translatedDynamic(Translations.udash.hello)(_.apply()))
       ),
@@ -160,10 +179,12 @@ object DemoPreview {
       ),
       div(DemoStyles.get.demoOutput)(
         ul(
-          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("en"))))("EN")),
-          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("pl"))))("PL")),
-          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("de"))))("DE")),
-          li(DemoStyles.get.navItem)(a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang("sp"))))("SP"))
+          Seq(("en", "EN"), ("pl", "PL"), ("de", "DE"), ("sp", "SP"))
+            .map { case (key, name) =>
+              li(DemoStyles.get.navItem)(
+                a(DemoStyles.get.underlineLink, onclick := (() => changeLang(Lang(key))))(name)
+              )
+            }
         )
       )
     ).render

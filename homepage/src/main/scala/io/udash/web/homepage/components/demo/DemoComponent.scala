@@ -109,7 +109,7 @@ object DemoComponent {
       |val name = Property("World")
       |
       |div(
-      |  TextInput(name), br,
+      |  TextInput.debounced(name), br,
       |  produce(name)(name => h3(s"Hello, $name!").render)
       |).render""".stripMargin
   )(HomepageStyles)
@@ -133,14 +133,13 @@ object DemoComponent {
       |val evens = numbers.filter(isEven)
       |
       |div(
-      |  TextInput(input)(
+      |  TextInput.debounced(input)(
       |    onkeyup := ((ev: KeyboardEvent) =>
       |      if (ev.keyCode == ext.KeyCode.Enter) {
-      |        val n: Try[Int] = Try(input.get.toInt)
-      |        if (n.isSuccess) {
-      |          numbers.append(n.get)
+      |        Try(input.get.toInt).foreach(n => {
+      |          numbers.append(n)
       |          input.set("")
-      |        }
+      |        })
       |      })
       |  ), br,
       |  "Numbers: ", repeat(numbers)(renderer), br,
@@ -234,23 +233,28 @@ object DemoComponent {
       |  TextInput(name, `type` := "text",
       |            placeholder := "Type your name..."),
       |  div(
-      |    translatedDynamic(Translations.udash.hello)(_.apply())
+      |    translatedDynamic(Translations.udash.hello)(
+      |      _.apply()
+      |    )
       |  ),
       |  div(produce(name)(n => span(
-      |    translatedDynamic(Translations.udash.withArg)(_.apply(n))
+      |    translatedDynamic(Translations.udash.withArg)(
+      |      _.apply(n)
+      |    )
       |  ).render),
       |  ul(
-      |    li(a(onclick := (() => changeLang(Lang("en"))))("EN")),
-      |    li(a(onclick := (() => changeLang(Lang("pl"))))("PL")),
-      |    li(a(onclick := (() => changeLang(Lang("de"))))("DE")),
-      |    li(a(onclick := (() => changeLang(Lang("sp"))))("SP"))
+      |    Seq(("en", "EN"), ("pl", "PL"), ("de", "DE"), ("sp", "SP"))
+      |      .map { case (key, name) =>
+      |        li(a(
+      |          onclick := (() => changeLang(Lang(key)))
+      |        )(name))
+      |      }
       |  )
       |).render""".stripMargin
   )(HomepageStyles)
 
   def components = CodeBlock(
-    """
-      |import io.udash._
+    """import io.udash._
       |
       |import io.udash.bootstrap.button.UdashButton
       |import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
@@ -273,12 +277,12 @@ object DemoComponent {
       |  modalSize = ModalSize.Small
       |)(
       |  headerFactory = Some(() => h4(bind(text)).render),
-      |  bodyFactory = Some(() => {
+      |  bodyFactory = Some(() =>
       |    div(
       |      h4("Closing..."),
       |      UdashProgressBar.animated(progress)().render
       |    ).render
-      |  })
+      |  )
       |)
       |
       |def makeProgress(): Unit = progress.get match {
