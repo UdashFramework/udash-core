@@ -5,6 +5,7 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
 import io.udash.testing.UdashFrontendTest
 
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
@@ -250,6 +251,39 @@ class PropertyValidationTest extends UdashFrontendTest {
           }
         case _ => false
       }) should be(true)
+    }
+
+    "return valid result future" in {
+      val futures = mutable.ArrayBuffer[Future[ValidationResult]]()
+      val p = Property("Test")
+      p.listen((_) => {
+        val f = Seq(p.isValid, p.isValid, p.isValid)
+        futures ++= f
+        f.foreach(_ shouldNot be(null))
+      })
+      p.addValidator((_) => Valid)
+
+      p.isValid shouldNot be(null)
+
+      p.set("Test 2")
+      p.isValid shouldNot be(null)
+
+      CallbackSequencer.sequence { p.set("Test 3") }
+      p.isValid shouldNot be(null)
+
+      CallbackSequencer.sequence {
+        p.set("Test 4")
+        p.set("Test 5")
+        p.set("Test 6")
+      }
+      p.isValid shouldNot be(null)
+
+      p.set("Test 7")
+      p.set("Test 8")
+      p.set("Test 9")
+      p.isValid shouldNot be(null)
+
+      futures.forall(_.isCompleted) should be(true)
     }
   }
 }
