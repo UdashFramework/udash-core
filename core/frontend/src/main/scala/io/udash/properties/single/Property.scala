@@ -7,7 +7,7 @@ import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSing
 import io.udash.utils.Registration
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.higherKinds
 
 object Property {
@@ -106,11 +106,16 @@ trait ReadableProperty[A] {
 
   protected[properties] def validate(): Unit = {
     if (validators.nonEmpty) {
+      val p = Promise[ValidationResult]
+      validationResult = p.future
       CallbackSequencer.queue(s"${this.id.toString}:fireValidation", () => {
         import Validator._
-        validationResult = Future.sequence(
-          validators.collect { case v => v(this.get) }.toSeq
-        ).foldValidationResult
+        val currentValue = this.get
+        p.completeWith(
+          Future.sequence(
+            validators.map(_(currentValue)).toSeq
+          ).foldValidationResult
+        )
       })
     } else validationResult = Future.successful(Valid)
   }
