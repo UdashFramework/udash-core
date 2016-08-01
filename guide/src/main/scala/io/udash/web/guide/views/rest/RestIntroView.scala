@@ -14,7 +14,7 @@ import scalatags.JsDom
 
 case object RestIntroViewPresenter extends DefaultViewPresenterFactory[RestIntroState.type](() => new RestIntroView)
 
-class RestIntroView extends View {
+class RestIntroView extends FinalView {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
@@ -70,6 +70,4 @@ class RestIntroView extends View {
       a(href := RestInterfacesState.url)("REST interfaces"), " description. "
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

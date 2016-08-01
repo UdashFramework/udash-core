@@ -40,7 +40,7 @@ case object UserActivityExtViewPresenter extends ViewPresenter[UserActivityExtSt
   }
 }
 
-class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends View {
+class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
 
   import JsDom.all._
 
@@ -107,8 +107,4 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     new PingPongCallDemoComponent,
     RpcLoggingDemo(model, () => presenter.reload())
   )
-
-  override def renderChild(view: View): Unit = {
-
-  }
 }

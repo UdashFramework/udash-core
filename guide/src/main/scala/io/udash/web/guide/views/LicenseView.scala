@@ -7,7 +7,7 @@ import scalatags.JsDom.all._
 
 object LicenseViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new LicenseView)
 
-class LicenseView extends View {
+class LicenseView extends FinalView {
   private val content = div(
     h1("Udash License"),
     div(
@@ -164,6 +164,4 @@ class LicenseView extends View {
   )
 
   override def getTemplate: Modifier = content
-
-  override def renderChild(view: View): Unit = {}
 }

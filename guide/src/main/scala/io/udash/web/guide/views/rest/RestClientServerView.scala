@@ -12,7 +12,7 @@ import scalacss.ScalatagsCss._
 
 case object RestClientServerViewPresenter extends DefaultViewPresenterFactory[RestClientServerState.type](() => new RestClientServerView)
 
-class RestClientServerView extends View {
+class RestClientServerView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -57,6 +57,4 @@ class RestClientServerView extends View {
       "You may find the ", a(href := RpcIntroState.url)("RPC communication"), " chapter interesting later on. "
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

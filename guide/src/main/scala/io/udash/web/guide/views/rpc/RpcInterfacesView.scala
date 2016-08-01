@@ -13,7 +13,7 @@ import scalacss.ScalatagsCss._
 
 case object RpcInterfacesViewPresenter extends DefaultViewPresenterFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
-class RpcInterfacesView extends View {
+class RpcInterfacesView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -169,6 +169,4 @@ class RpcInterfacesView extends View {
       "the ", a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

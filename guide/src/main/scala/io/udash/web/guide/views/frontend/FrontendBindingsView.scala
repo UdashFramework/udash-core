@@ -12,7 +12,7 @@ import scalacss.ScalatagsCss._
 
 case object FrontendBindingsViewPresenter extends DefaultViewPresenterFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
-class FrontendBindingsView extends View {
+class FrontendBindingsView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -183,6 +183,4 @@ class FrontendBindingsView extends View {
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

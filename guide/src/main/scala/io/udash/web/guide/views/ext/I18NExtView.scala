@@ -13,7 +13,7 @@ import scalatags.JsDom
 case object I18NExtViewPresenter extends DefaultViewPresenterFactory[I18NExtState.type](() => new I18NExtView)
 
 
-class I18NExtView extends View {
+class I18NExtView extends FinalView {
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -305,6 +305,4 @@ class I18NExtView extends View {
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
     DynamicRemoteTranslationsDemo()
   )
-
-  override def renderChild(view: View): Unit = {}
 }

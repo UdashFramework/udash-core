@@ -20,7 +20,7 @@ import scalatags.JsDom.TypedTag
 
 case object FrontendTemplatesViewPresenter extends DefaultViewPresenterFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
-class FrontendTemplatesView extends View {
+class FrontendTemplatesView extends FinalView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
@@ -364,8 +364,6 @@ class FrontendTemplatesView extends View {
       "You might find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }
 
 object ExampleStyles extends StyleSheet.Inline {

@@ -15,7 +15,7 @@ import scalatags.JsDom.TypedTag
 case object BootstrapExtViewPresenter extends DefaultViewPresenterFactory[BootstrapExtState.type](() => new BootstrapExtView)
 
 
-class BootstrapExtView extends View {
+class BootstrapExtView extends FinalView {
   import JsDom.all._
   import scalacss.ScalatagsCss._
   import scalacss.Defaults._
@@ -987,6 +987,4 @@ class BootstrapExtView extends View {
     p("You can check the code for this page on our ", a(href := References.UdashGuideRepo)("GitHub repository"),
       ". It contains all the examples above and more, since UdashBootstrap is heavily used in the Udash Guide.")
   )
-
-  override def renderChild(view: View): Unit = {}
 }

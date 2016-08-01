@@ -11,7 +11,7 @@ import scalacss.ScalatagsCss._
 
 case object BootstrappingBackendViewPresenter extends DefaultViewPresenterFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
-class BootstrappingBackendView extends View {
+class BootstrappingBackendView extends FinalView {
   import Context._
   import io.udash.web.guide.views.References._
 
@@ -122,6 +122,4 @@ class BootstrappingBackendView extends View {
       a(href := BootstrappingFrontendState.url)("client-side"), " of the application."
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

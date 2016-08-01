@@ -13,7 +13,7 @@ import scalatags.JsDom
 
 case object RpcIntroViewPresenter extends DefaultViewPresenterFactory[RpcIntroState.type](() => new RpcIntroView)
 
-class RpcIntroView extends View {
+class RpcIntroView extends FinalView {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
@@ -112,6 +112,4 @@ class RpcIntroView extends View {
       a(href := RpcInterfacesState.url)("RPC interfaces"), "."
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

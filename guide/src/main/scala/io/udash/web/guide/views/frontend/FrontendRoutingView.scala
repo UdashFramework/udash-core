@@ -27,7 +27,7 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
   }
 }
 
-class FrontendRoutingView(url: Property[String]) extends View {
+class FrontendRoutingView(url: Property[String]) extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -152,6 +152,4 @@ class FrontendRoutingView(url: Property[String]) extends View {
       "learn more about the ", a(href := References.MvpPattern)("MVP pattern"), " variation used in Udash."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

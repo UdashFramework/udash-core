@@ -14,7 +14,7 @@ import scalacss.ScalatagsCss._
 case object FrontendIntroViewPresenter extends DefaultViewPresenterFactory[FrontendIntroState.type](() => new FrontendIntroView)
 
 
-class FrontendIntroView extends View {
+class FrontendIntroView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -182,6 +182,4 @@ class FrontendIntroView extends View {
       " chapter to learn more about selecting a view based on a URL."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

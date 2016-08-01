@@ -13,7 +13,7 @@ import scalacss.ScalatagsCss._
 
 case object RestInterfacesViewPresenter extends DefaultViewPresenterFactory[RestInterfacesState.type](() => new RestInterfacesView)
 
-class RestInterfacesView extends View {
+class RestInterfacesView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -140,6 +140,4 @@ class RestInterfacesView extends View {
       a(href := RestClientServerState.url)("Client ➔ Server"), " communication."
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

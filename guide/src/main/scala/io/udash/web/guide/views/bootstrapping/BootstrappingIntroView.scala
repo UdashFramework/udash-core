@@ -1,6 +1,6 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash._
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object BootstrappingIntroViewPresenter extends DefaultViewPresenterFactory[BootstrappingIntroState.type](() => new BootstrappingIntroView)
 
-class BootstrappingIntroView extends View {
+class BootstrappingIntroView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -47,6 +47,4 @@ class BootstrappingIntroView extends View {
       a(href := BootstrappingSBTState.url)("SBT configuration"), " "
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

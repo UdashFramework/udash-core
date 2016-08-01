@@ -12,7 +12,7 @@ import scalacss.ScalatagsCss._
 
 case object FrontendFormsViewPresenter extends DefaultViewPresenterFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
-class FrontendFormsView extends View {
+class FrontendFormsView extends FinalView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
@@ -221,6 +221,4 @@ class FrontendFormsView extends View {
       "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

@@ -13,7 +13,7 @@ import scalatags.JsDom
 case object JQueryExtViewPresenter extends DefaultViewPresenterFactory[JQueryExtState.type](() => new JQueryExtView)
 
 
-class JQueryExtView extends View {
+class JQueryExtView extends FinalView {
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -112,6 +112,4 @@ class JQueryExtView extends View {
       "It also contains an example application witch presents more ways of working with this wrapper."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

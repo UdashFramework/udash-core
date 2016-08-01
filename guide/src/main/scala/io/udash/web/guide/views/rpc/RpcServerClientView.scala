@@ -12,7 +12,7 @@ import scalacss.ScalatagsCss._
 
 case object RpcServerClientViewPresenter extends DefaultViewPresenterFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
-class RpcServerClientView extends View {
+class RpcServerClientView extends FinalView {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
@@ -159,6 +159,4 @@ class RpcServerClientView extends View {
       "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

@@ -12,7 +12,7 @@ import scalatags.JsDom
 
 case object FrontendMVPViewPresenter extends DefaultViewPresenterFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
-class FrontendMVPView extends View {
+class FrontendMVPView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -133,6 +133,4 @@ class FrontendMVPView extends View {
       a(href := FrontendPropertiesState.url)("Properties"), " chapter to read about data model in Udash applications."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }

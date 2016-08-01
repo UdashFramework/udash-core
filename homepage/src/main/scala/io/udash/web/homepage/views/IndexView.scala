@@ -30,7 +30,7 @@ class IndexPresenter(url: Property[String]) extends Presenter[IndexState] {
   }
 }
 
-class IndexView(url: Property[String]) extends View {
+class IndexView(url: Property[String]) extends FinalView {
   import scalatags.JsDom.all._
 
   private lazy val content = div(
@@ -41,8 +41,6 @@ class IndexView(url: Property[String]) extends View {
   )
 
   override def getTemplate: Modifier = content
-
-  override def renderChild(view: View): Unit = {}
 }
 
 private[views] object IndexView {

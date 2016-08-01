@@ -1,6 +1,6 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -11,7 +11,7 @@ import scalacss.ScalatagsCss._
 
 case object BootstrappingRpcViewPresenter extends DefaultViewPresenterFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
-class BootstrappingRpcView extends View {
+class BootstrappingRpcView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -76,6 +76,4 @@ class BootstrappingRpcView extends View {
       " of the application. You can also read more about ", a(href := RpcIntroState.url)("RPC in Udash"), ""
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

@@ -1,6 +1,6 @@
 package io.udash.web.guide.views
 
-import io.udash.core.View
+import io.udash._
 import io.udash.wrappers.jquery.EasingFunction
 import org.scalajs.dom._
 

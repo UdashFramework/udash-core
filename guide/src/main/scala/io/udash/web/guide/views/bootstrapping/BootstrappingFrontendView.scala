@@ -13,7 +13,7 @@ import scalatags.JsDom
 
 case object BootstrappingFrontendViewPresenter extends DefaultViewPresenterFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
-class BootstrappingFrontendView extends View {
+class BootstrappingFrontendView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -255,6 +255,4 @@ class BootstrappingFrontendView extends View {
       a(href := RpcIntroState.url)("RPC in Udash"), ""
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

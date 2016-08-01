@@ -13,7 +13,7 @@ import scalacss.ScalatagsCss._
 
 case object RpcSerializationViewPresenter extends DefaultViewPresenterFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
-class RpcSerializationView extends View {
+class RpcSerializationView extends FinalView {
   import Context._
 
   import JsDom.all._
@@ -157,6 +157,4 @@ class RpcSerializationView extends View {
       a(href := RpcClientServerState.url)("Client ➔ Server"), " or ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication."
     )
   )
-
-  override def renderChild(view: View): Unit = ()
 }

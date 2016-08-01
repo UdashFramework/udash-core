@@ -11,7 +11,7 @@ import scalatags.JsDom
 
 case object FrontendPropertiesViewPresenter extends DefaultViewPresenterFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
-class FrontendPropertiesView extends View {
+class FrontendPropertiesView extends FinalView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
@@ -216,6 +216,4 @@ class FrontendPropertiesView extends View {
       " chapter to read about the data model view bindings in Udash applications."
     )
   )
-
-  override def renderChild(view: View): Unit = {}
 }
