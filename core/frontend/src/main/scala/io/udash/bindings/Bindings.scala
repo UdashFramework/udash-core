@@ -150,5 +150,13 @@ trait Bindings {
         }
       })
     }
+
+    /**
+      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
+      * If callback returns true, other listeners which are queued will not be invoked.
+      * If callback returns false, next callback in the queue will be invoked.
+      */
+    def :+=[T <: Event](callback: (T) => Any, stopPropagation: Boolean = false): Modifier[dom.Element] =
+     :+=((v: T) => { callback(v); stopPropagation })
   }
 }
