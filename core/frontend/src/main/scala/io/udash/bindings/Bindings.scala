@@ -22,6 +22,8 @@ trait Bindings {
   val TextArea      = io.udash.bindings.TextArea
   val TextInput     = io.udash.bindings.TextInput
 
+  implicit def seqFromElement(el: dom.Element): Seq[dom.Element] = Seq(el)
+
   /** Creates empty text node, which is useful as placeholder. */
   def emptyStringNode(): dom.Element =
     JsDom.StringFrag("").render.asInstanceOf[dom.Element]
@@ -42,7 +44,7 @@ trait Bindings {
     * @param builder Element builder which will be used to create HTML element.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableProperty[T])(builder: T => Element) =
+  def produce[T](property: ReadableProperty[T])(builder: T => Seq[dom.Element]) =
     new PropertyModifier[T](property, builder, true)
 
   /**
@@ -53,7 +55,7 @@ trait Bindings {
     *                  If it is false, then null value has to be handled by builder.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableProperty[T], checkNull: Boolean)(builder: T => Element) =
+  def produce[T](property: ReadableProperty[T], checkNull: Boolean)(builder: T => Seq[dom.Element]) =
     new PropertyModifier[T](property, builder, checkNull)
 
   /**
@@ -63,7 +65,7 @@ trait Bindings {
     * @param builder Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Element) =
+  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Seq[dom.Element]) =
     new SeqAsValueModifier[T](property, builder)
 
   /**
@@ -77,8 +79,8 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                           initBuilder: Seq[E] => Element,
-                                           elementsUpdater: (Patch[E], Element) => Any) =
+                                           initBuilder: Seq[E] => Seq[Element],
+                                           elementsUpdater: (Patch[E], Seq[Element]) => Any) =
     new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**
@@ -91,7 +93,7 @@ trait Bindings {
     * @param builder Builder which is used for every element.
     * @return Modifier for repeat logic.
     */
-  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Element) =
+  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Seq[Element]) =
     new SeqPropertyModifier[T, E](property, builder)
 
   /**
@@ -105,9 +107,9 @@ trait Bindings {
     * @return Modifier for validation logic.
     */
   def bindValidation[A](property: ReadableProperty[A],
-                        initBuilder: Future[ValidationResult] => Element,
-                        completeBuilder: ValidationResult => Element,
-                        errorBuilder: Throwable => Element)(implicit ec: ExecutionContext) =
+                        initBuilder: Future[ValidationResult] => Seq[Element],
+                        completeBuilder: ValidationResult => Seq[Element],
+                        errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) =
     new ValidationValueModifier(property, initBuilder, completeBuilder, errorBuilder)
 
   /**

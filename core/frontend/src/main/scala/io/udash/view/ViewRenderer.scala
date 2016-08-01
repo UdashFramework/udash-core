@@ -6,6 +6,7 @@ import org.scalajs.dom.Element
 
 import scala.collection.mutable
 import scala.scalajs.js.timers.RawTimers
+import scalatags.generic.Modifier
 
 /**
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
@@ -32,11 +33,15 @@ private[udash] class ViewRenderer(rootElement: => Element) {
 
   private def replaceCurrentViews(path: List[View]) = {
     val rootView = mergeViews(path)
+
     views.clear()
     views.appendAll(path)
-    val child: Element = rootView.getTemplate
-    if (endpoint.hasChildNodes()) endpoint.replaceChild(child, endpoint.lastChild)
-    else endpoint.appendChild(child)
+
+    // Clear root element
+    for (_ <- 0 until endpoint.childElementCount)
+      endpoint.removeChild(endpoint.childNodes(0))
+
+    rootView.getTemplate.applyTo(endpoint)
   }
 
   /**

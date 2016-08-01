@@ -2,6 +2,8 @@ package io.udash.core
 
 import org.scalajs.dom._
 
+import scalatags.generic.Modifier
+
 /**
   * Url wrapper - just for avoiding strings.
   */
@@ -59,7 +61,7 @@ trait View {
     * Implementation of this method should return DOM representation of view.
     * @return DOM representation of view
     */
-  def getTemplate: Element
+  def getTemplate: Modifier[Element]
 
   def apply() = getTemplate
 }
@@ -67,7 +69,7 @@ trait View {
 /** A [[io.udash.core.View]] which does not have any child view. */
 trait FinalView extends View {
   override def renderChild(view: View): Unit =
-    throw View.UnexpectedChildView
+    if (view != null) throw View.UnexpectedChildView
 }
 
 object View {
