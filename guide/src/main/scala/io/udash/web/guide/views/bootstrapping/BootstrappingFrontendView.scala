@@ -134,11 +134,11 @@ class BootstrappingFrontendView extends View {
         |
         |class NewsletterSubscribeView(model: ModelProperty[SubscribeModel],
         |                              presenter: NewsletterSubscribePresenter)
-        |  extends View {
+        |  extends FinalView {
         |  import scalatags.JsDom.all._
         |
         |  /** Renders view HTML code */
-        |  override def getTemplate: Element = div(
+        |  override def getTemplate: Modifier = div(
         |    // automatic two way binding with html input
         |    TextInput(model.subProp(_.email)),
         |    // :+= operator allows to add more than one callback for one event
@@ -146,11 +146,7 @@ class BootstrappingFrontendView extends View {
         |      presenter.subscribe()
         |      true // prevent default
         |    }))("Subscribe")
-        |  ).render
-        |
-        |  /** Called if there is some child view.
-        |    * This method should place view template inside DOM. */
-        |  override def renderChild(view: View): Unit = ()
+        |  )
         |}""".stripMargin
     )(GuideStyles),
     p(
@@ -184,11 +180,11 @@ class BootstrappingFrontendView extends View {
         |
         |  private val child = div().render // Placeholder for child view
         |
-        |  override def getTemplate: dom.Element = div(
+        |  override def getTemplate: Modifier = div(
         |    h1("Newsletter"),
         |    p("Subscribe for news..."),
         |    child
-        |  ).render
+        |  )
         |
         |  /** Puts child view inside itself using jQuery. */
         |  override def renderChild(view: View): Unit = {

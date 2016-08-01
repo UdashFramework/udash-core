@@ -67,7 +67,7 @@ class FrontendIntroView extends View {
         |}
         |
         |class IntroFormDemoComponent {
-        |  def getTemplate: Element = IntroFormDemoViewPresenter()
+        |  def getTemplate: Modifier = IntroFormDemoViewPresenter()
         |
         |  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
         |  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
@@ -138,7 +138,7 @@ class FrontendIntroView extends View {
         |        presenter.randomize()
         |    }
         |
-        |    def render: Element = div(id := "frontend-intro-demo")(
+        |    def render: Modifier = div(id := "frontend-intro-demo")(
         |      UdashInputGroup()(
         |        UdashInputGroup.input(
         |          NumberInput.debounced(minimum)(id := "minimum").render
@@ -171,7 +171,7 @@ class FrontendIntroView extends View {
         |          error => span(s"Validation error: $error").render
         |        )
         |      )
-        |    ).render
+        |    )
         |  }
         |}
       """.stripMargin

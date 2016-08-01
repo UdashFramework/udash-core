@@ -32,7 +32,7 @@ class BootstrappingIntroView extends View {
         "It is compiled only to bytecode. You can write your backend logic like database access, services layer etc. there."
       ),
       li(
-        "frontend - contains frontend application code. It is compiled only to JS, it is packed into three files such as: ",
+        "frontend - contains frontend application code. It is compiled only to JS and packed into three files: ",
         i("frontend-deps.js"), ", ", i("frontend-impl.js"), " and ", i("frontend-init.js"), ""
       )
     ),

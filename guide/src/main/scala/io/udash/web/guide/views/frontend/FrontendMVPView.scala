@@ -101,7 +101,7 @@ class FrontendMVPView extends View {
         |
         |  private val child = div().render
         |
-        |  override def getTemplate: dom.Element = div(
+        |  override def getTemplate: Modifier = div(
         |    h1("Example view"),
         |    p("This is example view with buttons..."),
         |    h3("Model bind example"),
@@ -118,7 +118,7 @@ class FrontendMVPView extends View {
         |    ),
         |    h3("Below you can find my child view!"),
         |    child
-        |  ).render
+        |  )
         |
         |  override def renderChild(childView: View): Unit = {
         |    import io.udash.wrappers.jquery.jQ
