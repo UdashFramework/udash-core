@@ -21,7 +21,7 @@ object UdashForm {
 
   /** Binds provided `property` validation result to element Bootstrap validation style. */
   def validation(property: Property[_]): Modifier =
-    bindAttribute(property)((_, el) => {
+    property.reactiveApply((el, _) => {
       import BootstrapStyles.Form._
       Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
       property.isValid onComplete {
@@ -197,8 +197,5 @@ object UdashForm {
     * @param disabled Property indicating if elements are disabled. You can change it anytime.
     */
   def disabled(disabled: Property[Boolean] = Property(true))(content: Modifier*): Modifier =
-    fieldset(bindAttribute(disabled)((v, el) => {
-      if (v) el.setAttribute("disabled", "disabled")
-      else el.removeAttribute("disabled")
-    }))(content)
+    fieldset((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))(content)
 }

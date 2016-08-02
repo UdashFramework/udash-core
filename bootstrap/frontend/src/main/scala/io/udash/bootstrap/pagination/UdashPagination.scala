@@ -117,7 +117,7 @@ object UdashPagination {
   case class DefaultPage(override val name: String, override val url: Url) extends Page
 
   private def bindHref(page: CastableProperty[Page]) =
-    bindAttribute(page.asModel.subProp(_.url))((url, el) => el.setAttribute("href", url.value))
+    href.bind(page.asModel.subProp(_.url.value))
 
   /** Creates link for default pagination element model. */
   val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
