@@ -415,10 +415,10 @@ object BootstrapDemos extends StrictLogging {
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
     div(StyleUtils.center, GuideStyles.frame)(
       UdashNav.tabs(justified = true)(panels)(
-        elemFactory = (panel) => a(href := "", onclick :+= ((ev: Event) => {
-          selected.set(panel.get)
-          true
-        }))(bind(panel.asModel.subProp(_.title))).render,
+        elemFactory = (panel) => a(
+          href := "",
+          onclick :+= ((ev: Event) => selected.set(panel.get), true)
+        )(bind(panel.asModel.subProp(_.title))).render,
         isActive = (panel) => panel.combine(selected)((panel, selected) => panel.title == selected.title)
       ).render,
       div(BootstrapStyles.Well.well)(

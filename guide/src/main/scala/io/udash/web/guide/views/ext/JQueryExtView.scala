@@ -58,12 +58,11 @@ class JQueryExtView extends FinalView {
          |  button(id := "click")("Click me"),
          |  button(
          |    id := "off",
-         |    onclick :+= ((_: Event) => {
+         |    onclick :+= ((_: Event) =>
          |      jQ(".demo #click")
          |        .off("click", onCallback)
          |        .off("click", oneCallback)
-         |      false
-         |    })
+         |    )
          |  )("Off")
          |).render
          |

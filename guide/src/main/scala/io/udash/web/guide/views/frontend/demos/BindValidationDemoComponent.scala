@@ -17,12 +17,12 @@ class BindValidationDemoComponent extends Component {
   import JsDom.all._
 
   val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-  integers.addValidator(new Validator[Seq[Int]] {
-    override def apply(element: Seq[Int])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-      val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
-      if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-      else Invalid("Sequence is not sorted!")
-    }
+  integers.addValidator((element: Seq[Int]) => {
+    val zipped = element.toStream
+      .slice(0, element.size-1)
+      .zip(element.toStream.drop(1))
+    if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
+    else Invalid("Sequence is not sorted!")
   })
 
   dom.window.setInterval(() => {
@@ -35,7 +35,9 @@ class BindValidationDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.get.frame)(
     "Integers: ",
-    produce(integers)((seq: Seq[Int]) => span(id := "validation-demo-integers")(seq.map(p => span(s"$p, ")): _*).render), br,
+    span(id := "validation-demo-integers")(
+      repeat(integers)(p => span(s"${p.get}, ").render)
+    ), br,
     "Is sorted: ",
     bindValidation(integers,
       _ => span("Validation in progress...").render,

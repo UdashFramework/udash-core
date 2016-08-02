@@ -52,20 +52,15 @@ class FrontendMVPView extends FinalView {
       "which is used as Model in Udash-based applications. All you have to do is:"
     ),
     CodeBlock(
-      """trait NumbersInRange {
-        |  def minimum: Int
-        |  def maximum: Int
-        |  def numbers: Seq[Int]
-        |}
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
         |
-        |val numbers: ModelProperty[NumbersInRange] = ModelProperty[NumbersInRange]
-        |numbers.subProp(_.minimum).set(0)
-        |numbers.subProp(_.maximum).set(42)
+        |val numbers: ModelProperty[NumbersInRange] = ModelProperty(
+        |  NumbersInRange(0, 42, Seq.empty)
+        |)
         |
         |val s: SeqProperty[Int] = numbers.subSeq(_.numbers)
-        |s.set(Seq(3,7,20,32))
-        |s.replace(idx = 1, amount = 2, values = Seq(8,9,10))
-        |""".stripMargin
+        |s.set(Seq(3, 7, 20, 32))
+        |s.replace(idx = 1, amount = 2, values = Seq(8, 9, 10))""".stripMargin
     )(GuideStyles),
     p("The Properties system is described in the ", a(href := FrontendPropertiesState.url)("Properties"), " chapter."),
     h3("Presenter"),
@@ -94,7 +89,8 @@ class FrontendMVPView extends FinalView {
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
     CodeBlock(
-      """class ExampleView(model: Property[Int], presenter: ExamplePresenter) extends View {
+      """class ExampleView(model: Property[Int], presenter: ExamplePresenter)
+        |  extends View {
         |  import io.udash.guide.Context._
         |
         |  import JsDom.all._
@@ -106,14 +102,8 @@ class FrontendMVPView extends FinalView {
         |    p("This is example view with buttons..."),
         |    h3("Model bind example"),
         |    div(
-        |      button(onclick :+= (ev => {
-        |        presenter.decButtonClick()
-        |        true
-        |      }))("-"),
-        |      button(onclick :+= (ev => {
-        |        presenter.incButtonClick()
-        |        true
-        |      }))("-"),
+        |      button(onclick :+= (ev => presenter.decButtonClick(), true))("-"),
+        |      button(onclick :+= (ev => presenter.incButtonClick(), true))("-"),
         |      bind(model)
         |    ),
         |    h3("Below you can find my child view!"),

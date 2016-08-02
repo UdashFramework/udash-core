@@ -20,9 +20,6 @@ class BindDemoComponent extends Component {
   dom.window.setInterval(() => name.set(names.next()), 500)
 
   override def getTemplate: Modifier = div(id := "bind-demo", GuideStyles.get.frame)(
-    p(
-      "Name: ",
-      bind(name)
-    )
+    p("Name: ", bind(name))
   )
 }

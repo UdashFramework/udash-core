@@ -30,7 +30,9 @@ class RepeatDemoComponent extends Component {
       "Integers: ",
       span(id := "repeat-demo-integers")(repeat(integers)(p => span(GuideStyles.get.highlightRed)(s"${p.get}, ").render)), br,
       "Integers (produce): ",
-      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, ")): _*).render)
+      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(
+        seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, "))
+      ).render)
     )
   )
 }

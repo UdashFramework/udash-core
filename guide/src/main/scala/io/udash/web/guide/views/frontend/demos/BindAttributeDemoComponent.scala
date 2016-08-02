@@ -21,9 +21,6 @@ class BindAttributeDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "bind-attr-demo", GuideStyles.get.frame)(
     span("Visible: ", bind(visible), " -> "),
-    span(bindAttribute(visible)((show, el) => {
-      if (show) el.setAttribute("style", "display: inline;")
-      else el.setAttribute("style", "display: none;")
-    }))("Show/hide")
+    span((style := "display: none;").attrIfNot(visible))("Show/hide")
   )
 }

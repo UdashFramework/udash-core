@@ -17,11 +17,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 import io.udash.web.commons.views.Component
 
-trait IntroFormDemoModel {
-  def minimum: Int
-  def between: Int
-  def maximum: Int
-}
+case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 
 class IntroFormDemoComponent extends Component {
   override def getTemplate: Modifier = IntroFormDemoViewPresenter()
@@ -43,10 +39,9 @@ class IntroFormDemoComponent extends Component {
   object IntroFormDemoViewPresenter {
     import io.udash.web.guide.Context._
     def apply(): Modifier = {
-      val model = ModelProperty[IntroFormDemoModel]
-      model.subProp(_.minimum).set(0)
-      model.subProp(_.between).set(10)
-      model.subProp(_.maximum).set(42)
+      val model = ModelProperty(
+        IntroFormDemoModel(0, 10, 42)
+      )
 
       model.addValidator(IntroFormDemoModelValidator)
 
@@ -59,11 +54,12 @@ class IntroFormDemoComponent extends Component {
     private val random = new Random()
 
     /** Sets random values in demo model */
-    def randomize() = {
-      model.subProp(_.minimum).set(random.nextInt(100) - 25)
-      model.subProp(_.between).set(random.nextInt(100))
-      model.subProp(_.maximum).set(random.nextInt(100) + 25)
-    }
+    def randomize() =
+      model.set(IntroFormDemoModel(
+        random.nextInt(100) - 25,
+        random.nextInt(100),
+        random.nextInt(100) + 25
+      ))
   }
 
   class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) {
@@ -119,7 +115,8 @@ class IntroFormDemoComponent extends Component {
               )
             ).render
           },
-          error => span(s"Validation error: $error").render
+          error =>
+            span(s"Validation error: $error").render
         )
       )
     )

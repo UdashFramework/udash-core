@@ -52,10 +52,10 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
         span(id := "url-demo-link")(bind(url)), br(), br(),
         span("Click here to change URL: ")
       ),
-      a(id := "url-demo-link-apple", href := s"${new FrontendRoutingState(Some("apple")).url}")("Apple"), " | ",
-      a(id := "url-demo-link-orange", href := s"${new FrontendRoutingState(Some("orange")).url}")("Orange"), " | ",
-      a(id := "url-demo-link-chocolate", href := s"${new FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
-      a(id := "url-demo-link-pizza", href := s"${new FrontendRoutingState(Some("pizza")).url}")("Pizza"),
+      a(id := "url-demo-link-apple", href := s"${FrontendRoutingState(Some("apple")).url}")("Apple"), " | ",
+      a(id := "url-demo-link-orange", href := s"${FrontendRoutingState(Some("orange")).url}")("Orange"), " | ",
+      a(id := "url-demo-link-chocolate", href := s"${FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
+      a(id := "url-demo-link-pizza", href := s"${FrontendRoutingState(Some("pizza")).url}")("Pizza"),
       br(), br(),
       input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
     )(),
@@ -136,14 +136,17 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
     div(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
-      input(BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "", placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
-        applicationInstance.goTo(FrontendRoutingState(
-          Some(js.Dynamic.global
-            .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
-            .asInstanceOf[String])
-        ))
-        true
-      })),
+      input(
+        BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "",
+        placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
+          applicationInstance.goTo(FrontendRoutingState(
+            Some(js.Dynamic.global
+              .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
+              .asInstanceOf[String])
+          ))
+          true
+        })
+      ),
       p("This view was created with: ", span(id := "url-demo-link-init")(WindowUrlChangeProvider.currentFragment.value))
     ),
     h2("What's next?"),

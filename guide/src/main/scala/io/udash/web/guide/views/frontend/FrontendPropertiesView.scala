@@ -28,9 +28,9 @@ class FrontendPropertiesView extends FinalView {
       """val username = Property[String]
         |
         |// Register value change listener
-        |username.listen((name: String) => {
+        |username.listen((name: String) =>
         |  println(s"Username changed to: $name")
-        |})
+        |)
         |
         |username.set("Udash")
         |
@@ -46,15 +46,11 @@ class FrontendPropertiesView extends FinalView {
     )(GuideStyles),
     p("That was the simple example. Now it is time for something more complex:"),
     CodeBlock(
-      """trait NumbersInRange {
-        |  def minimum: Int
-        |  def maximum: Int
-        |  def numbers: Seq[Int]
-        |}
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
         |
-        |val numbers = ModelProperty[NumbersInRange]
-        |numbers.subProp(_.minimum).set(0)
-        |numbers.subProp(_.maximum).set(42)
+        |val numbers = ModelProperty(
+        |  NumbersInRange(0, 42, Seq.empty)
+        |)
         |
         |val s: SeqProperty[Int] = numbers.subSeq(_.numbers)
         |s.set(Seq(3,7,20,32))
@@ -62,7 +58,7 @@ class FrontendPropertiesView extends FinalView {
         |""".stripMargin
     )(GuideStyles),
     p(
-      "As you can see, you can create a Property based on trait or Seq. This will be discussed later. "
+      "As you can see, you can create a Property based on case class or Seq. This will be discussed later. "
     ),
     h3("Types of Properties"),
     ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "property.png", "Properties in the Udash", GuideStyles.get.imgBig, GuideStyles.get.frame),
@@ -74,18 +70,43 @@ class FrontendPropertiesView extends FinalView {
       "methods."
     ),
     p(
-      "If ", i("CastableProperty"), " is based on a trait like NumbersInRange above, you can call an ", i("asModel"), " method ",
+      i("ModelProperty"), " contains other properties. The structure of the property can be described with a trait or an immutable case class. ",
+      "When you create it, you can access any child property with ", i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), " methods."
+    ),
+    CodeBlock(
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |val numbers = ModelProperty[NumbersInRange]
+        |number.subProp(_.minimum).set(3)
+        |
+        |trait Person {
+        |  def name: String
+        |  def birthYear: Int
+        |}
+        |val person = ModelProperty[Person]
+        |person.subProp(_.birthYear).set(2001)""".stripMargin
+    )(GuideStyles),
+    p(
+      "If ", i("CastableProperty"), " is based on a trait or case class like NumbersInRange above, you can call an ", i("asModel"), " method ",
       "to cast it to ", i("ModelProperty"), ". Do not worry, this cast cannot fail at runtime, because it is checked ",
       "at compile time. ", i("ModelProperty"), " provides methods extracting a part of a model as ", i("Property"), " ",
       i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), ". Usage is validated at compile time like the ",
       i("asModel"), " method."
     ),
+    CodeBlock(
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |val base: CastableProperty[NumbersInRange] = ???
+        |val numbers: ModelProperty[NumbersInRange] = base.asModel
+        |//val error = base.asSeq""".stripMargin
+    )(GuideStyles),
     p(
-      i("SeqProperty"), " represents a sequence of properties.In addition to basic collection operations, it provides two interesting methods:"
+      i("SeqProperty"), " represents a sequence of properties.In addition to basic collection operations, it provides a lot of interesting methods like:"
     ),
     ul(GuideStyles.get.defaultList)(
       li(i("elemProperties"), " - gives access to mutable properties representing elements of the sequence"),
-      li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property")
+      li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property"),
+      li(i("insert"), " - adds provided elements into sequence"),
+      li(i("filter"), " - creates ", i("ReadableSeqProperty"), " containing matching elements, which will be synchronised with original property"),
+      li(i("reversed"), " - creates ", i("SeqProperty"), " containing elements in reversed order, it will be synchronised with original property")
     ),
     p(
       i("SeqProperty"), " always contains ", i("Property"), " elements, but when you call the ",
@@ -99,17 +120,15 @@ class FrontendPropertiesView extends FinalView {
         |  def name: String
         |}
         |
-        |trait Comment {
-        |  def author: User
-        |  def content: String
-        |  def responses: Seq[Comment]
-        |}
+        |case class Comment(author: User, content: String, responses: Seq[Comment])
         |
         |val comment = ModelProperty[Comment]
         |comment.subProp(_.author.name).set("John") //set author name
         |// print responses
-        |val responses: DirectSeqProperty[Comment] = comment.subSeq(_.responses)
-        |responses.elemProperties.foreach(r => println(r.asModel.subProp(_.content)))""".stripMargin
+        |val responses = comment.subSeq(_.responses)
+        |responses.elemProperties.foreach((r: CastableProperty[Comment]) =>
+        |  println(r.asModel.subProp(_.content))
+        |)""".stripMargin
     )(GuideStyles),
     p("The ", i("comment"), " property might be illustrated like:"),
     ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.get.imgBig, GuideStyles.get.frame),
@@ -138,13 +157,24 @@ class FrontendPropertiesView extends FinalView {
         |val name = comment.subProp(_.author.name)
         |name.addValidator(UserNameValidator)
         |name.set("A")
-        |name.isValid                   // returns Future(Invalid)
+        |name.isValid                         // returns Future(Invalid)
         |comment.subProp(_.author).isValid    // returns Future(Invalid)
         |comment.isValid                      // returns Future(Invalid)
         |name.set("Abcde")
-        |name.isValid                   // returns Future(Valid)
+        |name.isValid                         // returns Future(Valid)
         |comment.subProp(_.author).isValid    // returns Future(Valid)
         |comment.isValid                      // returns Future(Valid)""".stripMargin
+    )(GuideStyles),
+    p("You can also pass an anonymous function to the ", i("addValidator"), " method:"),
+    CodeBlock(
+      """val comment = ModelProperty[Comment]
+        |val name = comment.subProp(_.author.name)
+        |name.addValidator((name: String) =>
+        |  if (name.length >= 3) Valid
+        |  else Invalid(Seq("User name must contain at least 3 characters!"))
+        |)
+        |name.set("A")
+        |name.isValid                         // returns Future(Invalid)""".stripMargin
     )(GuideStyles),
     p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
     ul(GuideStyles.get.defaultList)(
@@ -199,6 +229,46 @@ class FrontendPropertiesView extends FinalView {
       "Remember that ", i("userId"), " is not a new property. All operations will be synchronized between the both ",
       "original and new property. "
     ),
+    p(
+      "It is possible to transform ", i("SeqProperty[A]"), " to ", i("SeqProperty[B]"), " and ",
+      i("Property[A]"), " to ", i("SeqProperty[B]"), ". For example:"
+    ),
+    CodeBlock(
+      """val csv = Property[String]("1,2,3,4,5")
+        |val ints: ReadableSeqProperty[Int] =
+        |  csv.transform(_.split(",").map(_.toInt).toSeq)
+        |val floats: ReadableSeqProperty[Float] =
+        |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
+    )(GuideStyles),
+    h3("Properties combining"),
+    p("You can combine two properties into a new one synchronised with both of them:"),
+    CodeBlock(
+      """val x = Property(5)
+        |val y = Property(7)
+        |val sum = x.combine(y)(_ + _)
+        |println(sum.get) // prints: 12""".stripMargin
+    )(GuideStyles),
+    p(i("SeqProperty"), " has specialized version of this method which combines every element of seq with the provided one."),
+    CodeBlock(
+      """def isOdd(i: Int) = i % 2 == 1
+        |val s = SeqProperty(1, 2, 3, 4, 5)
+        |val odds = Property(true)
+        |val filtered = s
+        |  .combine(odds)((i: Int, odds: Boolean) => (i, isOdd(i) == odds))
+        |  .filter((pair: (Int, Boolean)) => pair._2)
+        |  .transform((pair: (Int, Boolean)) => pair._1)
+        |
+        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5), true
+        |println(filtered.get)    // prints: Seq(1, 3, 5)
+        |
+        |odds.set(false)
+        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5), false
+        |println(filtered.get)    // prints: Seq(2, 4)
+        |
+        |s.append(6)
+        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5, 5), false
+        |println(filtered.get)    // prints: Seq(2, 4, 6)""".stripMargin
+    )(GuideStyles),
     h3("SeqProperty filtering"),
     p(
       "You can filter SeqProperty if you need, however you will not be able to modify the filtered property. ",

@@ -14,11 +14,10 @@ object RpcLoggingDemo {
   import io.udash.web.guide.Context._
   def apply(model: ReadableSeqProperty[Call], loadCalls: () => Any): dom.Element =
     span(GuideStyles.frame, GuideStyles.useBootstrap)(
-      button(id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)
-      (onclick :+= ((_: MouseEvent) => {
-        loadCalls()
-        true
-      }))("Load call list"),
+      button(
+        id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary,
+        onclick :+= ((_: MouseEvent) => loadCalls(), true)
+      )("Load call list"),
       produce(model)(seq =>
         ul(
           seq.map(call => li(call.toString)): _*

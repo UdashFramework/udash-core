@@ -60,11 +60,7 @@ class FrontendIntroView extends FinalView {
     new IntroFormDemoComponent(),
     CodeBlock(
       """/** Demo model interface */
-        |trait IntroFormDemoModel {
-        |  def minimum: Int
-        |  def between: Int
-        |  def maximum: Int
-        |}
+        |case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
         |
         |class IntroFormDemoComponent {
         |  def getTemplate: Modifier = IntroFormDemoViewPresenter()
@@ -91,10 +87,9 @@ class FrontendIntroView extends FinalView {
         |  object IntroFormDemoViewPresenter {
         |    import Context._
         |    def apply(): Element = {
-        |      val model = ModelProperty[IntroFormDemoModel]
-        |      model.subProp(_.minimum).set(0)
-        |      model.subProp(_.between).set(10)
-        |      model.subProp(_.maximum).set(42)
+        |      val model = ModelProperty(
+        |        IntroFormDemoModel(0, 10, 42)
+        |      )
         |
         |      model.addValidator(IntroFormDemoModelValidator)
         |
@@ -107,11 +102,12 @@ class FrontendIntroView extends FinalView {
         |    private val random = new Random()
         |
         |    /** Sets random values in demo model */
-        |    def randomize() = {
-        |      model.subProp(_.minimum).set(random.nextInt(100) - 25)
-        |      model.subProp(_.between).set(random.nextInt(100))
-        |      model.subProp(_.maximum).set(random.nextInt(100) + 25)
-        |    }
+        |    def randomize() =
+        |      model.set(IntroFormDemoModel(
+        |        random.nextInt(100) - 25,
+        |        random.nextInt(100),
+        |        random.nextInt(100) + 25
+        |      ))
         |  }
         |
         |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
@@ -151,9 +147,7 @@ class FrontendIntroView extends FinalView {
         |        UdashInputGroup.input(
         |          NumberInput.debounced(maximum)(id := "maximum").render
         |        ),
-        |        UdashInputGroup.buttons(
-        |          randomizeButton.render
-        |        )
+        |        UdashInputGroup.buttons(randomizeButton.render)
         |      ).render,
         |      h3("Is valid?"),
         |      p(
@@ -163,9 +157,7 @@ class FrontendIntroView extends FinalView {
         |            case Valid => span(id := "valid")("Yes").render
         |            case Invalid(errors) => span(id := "valid")(
         |              "No, because:",
-        |              ul(
-        |                errors.map(e => li(e))
-        |              )
+        |              ul(errors.map(e => li(e)))
         |            ).render
         |          },
         |          error => span(s"Validation error: $error").render
