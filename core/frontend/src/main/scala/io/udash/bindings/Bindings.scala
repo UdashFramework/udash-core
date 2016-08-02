@@ -4,12 +4,15 @@ import io.udash.bindings.modifiers._
 import io.udash.properties._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
+import io.udash.utils.Registration
+import io.udash.{ValidationResult => _, _}
 import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scalatags.JsDom
+import scalatags.JsDom.all.{Attr => _, _}
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 trait Bindings {
@@ -118,10 +121,11 @@ trait Bindings {
     * @param updater Element attribute updater.
     * @return Modifier for bounded property.
     */
+  @deprecated("Use `Attr.bind`, `AttrPair.attrIf` or `Property.reactiveApply` instead.", "0.4.0")
   def bindAttribute[T](property: ReadableProperty[T])(updater: (T, Element) => Any) =
     new AttrModifier[T](property, updater)
 
-  implicit class ModifierExt(attr: Attr) {
+  implicit class AttrOps(attr: Attr) {
     /** Use this to bind value which is nullable. If the value is null, attribute will be removed. */
     def :?=[B, T](value: T)(implicit ev: AttrValue[B, T]): Modifier[B] =
       if (value == null) new EmptyModifier[B] else AttrPair(attr, value, ev)
@@ -158,5 +162,67 @@ trait Bindings {
       */
     def :+=[T <: Event](callback: (T) => Any, stopPropagation: Boolean = false): Modifier[dom.Element] =
      :+=((v: T) => { callback(v); stopPropagation })
+
+    /** Sets attribute on element. */
+    def applyTo(element: dom.Element, value: String = ""): Unit =
+      element.setAttribute(attr.name, value)
+
+    /** Removes attribute on element. */
+    def removeFrom(element: dom.Element): Unit =
+      element.removeAttribute(attr.name)
+
+    /** Synchronises attribute value with property content. */
+    def bind(property: ReadableProperty[String]): Modifier[Element] =
+      property.reactiveApply {
+        case (elem, null) => removeFrom(elem)
+        case (elem, v) => applyTo(elem, v)
+      }
+  }
+
+  implicit class AttrPairOps(attr: scalatags.generic.AttrPair[dom.Element, _]) { outer =>
+    /** Sets attribute on element. */
+    def applyTo(element: dom.Element): Unit =
+      attr.applyTo(element)
+
+    /** Removes attribute on element. */
+    def removeFrom(element: dom.Element): Unit =
+      element.removeAttribute(attr.a.name)
+
+    /** Synchronises attribute with property content by adding it if value is `false` and removing otherwise. */
+    def attrIfNot(property: ReadableProperty[Boolean]): Modifier[Element] =
+      attrIf(property.transform((v: Boolean) => !v))
+
+    /** Synchronises attribute with property content by adding it if value is `true` and removing otherwise. */
+    def attrIf(property: ReadableProperty[Boolean]): Modifier[Element] =
+      property.reactiveApply(
+        (elem, apply) =>
+          if (apply) applyTo(elem)
+          else removeFrom(elem)
+      )
+
+    /** Adds attribute to element if `condition` is `true`. */
+    def attrIf(condition: Boolean): Modifier[Element] = new Modifier[Element] {
+      override def applyTo(t: Element): Unit =
+        if (condition) outer.applyTo(t)
+    }
+  }
+
+  implicit class PropertyOps[T](property: ReadableProperty[T]) {
+    /** Calls provided callback on every property value change. */
+    def reactiveApply(callback: (Element, T) => Unit): Modifier[Element] = new Modifier[Element] {
+      override def applyTo(t: Element): Unit = {
+        var registration: Registration = null
+        registration = property.listen(value =>
+          if (available(t)) callback(t, value)
+          else registration.cancel()
+        )
+        if (available(t)) callback(t, property.get)
+      }
+    }
+  }
+
+  @inline
+  private def available(e: dom.Node): Boolean = {
+    !js.isUndefined(e) && e.ne(null)
   }
 }

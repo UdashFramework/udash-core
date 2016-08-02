@@ -2,6 +2,7 @@ package io.udash.bindings
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.{ImmutableValue, seq}
 import io.udash.testing.UdashFrontendTest
@@ -1365,6 +1366,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "update element on property change" in {
       val p = Property[Int](5)
 
+      @silent
       val template = div(
         id := "someId",
         bindAttribute(p)((i: Int, el: Element) => {
@@ -1379,6 +1381,59 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(0)
       template.getAttribute("class") should be("c0")
+    }
+  }
+
+  "AttrOps" should {
+    "allow reactive attribute bind" in {
+      val p = Property("idValue")
+      val textArea = TextArea.debounced(Property(""),
+        id.bind(p)
+      ).render
+      textArea.getAttribute("id") shouldBe "idValue"
+      p.set("idValue2")
+      textArea.getAttribute("id") shouldBe "idValue2"
+      p.set(null)
+      textArea.hasAttribute("disabled") shouldBe false
+      p.set("idValue3")
+      textArea.getAttribute("id") shouldBe "idValue3"
+    }
+  }
+
+  "AttrPairOps" should {
+    "allow reactive attribute apply" in {
+      val p = Property(false)
+      val textArea = TextArea.debounced(Property(""),
+        (disabled := "disabled").attrIf(p)
+      ).render
+      textArea.hasAttribute("disabled") shouldBe false
+      p.set(true)
+      textArea.hasAttribute("disabled") shouldBe true
+      p.set(false)
+      textArea.hasAttribute("disabled") shouldBe false
+
+      val textArea2 = TextArea.debounced(Property(""),
+        (disabled := "disabled").attrIfNot(p)
+      ).render
+      textArea2.hasAttribute("disabled") shouldBe true
+      p.set(true)
+      textArea2.hasAttribute("disabled") shouldBe false
+      p.set(false)
+      textArea2.hasAttribute("disabled") shouldBe true
+    }
+  }
+
+  "PropertyOps" should {
+    "allow reactive attr changes" in {
+      val p = Property(false)
+      val textArea = TextArea.debounced(Property(""),
+        p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
+      ).render
+      textArea.getAttribute("test").toBoolean shouldBe false
+      p.set(true)
+      textArea.getAttribute("test").toBoolean shouldBe true
+      p.set(false)
+      textArea.getAttribute("test").toBoolean shouldBe false
     }
   }
 }

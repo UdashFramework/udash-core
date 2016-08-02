@@ -37,7 +37,7 @@ object UdashBreadcrumbs {
   case class DefaultBreadcrumb(override val name: String, override val url: Url) extends Breadcrumb
 
   private def bindHref(page: CastableProperty[Breadcrumb]) =
-    bindAttribute(page.asModel.subProp(_.url))((url, el) => el.setAttribute("href", url.value))
+    href.bind(page.asModel.subProp(_.url.value))
 
   /** Default breadcrumb model factory. */
   val defaultPageFactory: CastableProperty[Breadcrumb] => Anchor =
