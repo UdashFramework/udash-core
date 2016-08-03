@@ -31,8 +31,8 @@ class FrontendBindingsView extends FinalView {
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method witch is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
-      li(i("bindValidation"), " - on every change of the property validates its value and calls the builder with the result."),
-      li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state.")
+      li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
+      li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
     h3("bind"),
     CodeBlock(
@@ -91,36 +91,6 @@ class FrontendBindingsView extends FinalView {
     )(GuideStyles),
     new RepeatDemoComponent,
     p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
-    h3("bindValidation"),
-    CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |integers.addValidator((element: Seq[Int]) => {
-        |  val zipped = element.toStream
-        |    .slice(0, element.size-1)
-        |    .zip(element.toStream.drop(1))
-        |  if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-        |  else Invalid("Sequence is not sorted!")
-        |})
-        |
-        |div(
-        |  "Integers: ",
-        |  repeat(integers)(p => span(s"${p.get}, ").render), br,
-        |  "Is sorted: ",
-        |  bindValidation(integers,
-        |    _ => span("Validation in progress...").render,
-        |    {
-        |      case Valid => span("Yes").render
-        |      case Invalid(_) => span("No").render
-        |    },
-        |    _ => span("Validation error...").render
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    new BindValidationDemoComponent,
-    p(
-      "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
-      "and the result is passed to provided callbacks. "
-    ),
     h3("Attribute bindings"),
     p(
       "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
@@ -136,6 +106,40 @@ class FrontendBindingsView extends FinalView {
                 |)""".stripMargin
     )(GuideStyles),
     new BindAttributeDemoComponent,
+    h3("Validation"),
+    CodeBlock(
+      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
+        |integers.addValidator((element: Seq[Int]) => {
+        |  val zipped = element.toStream
+        |    .slice(0, element.size-1)
+        |    .zip(element.toStream.drop(1))
+        |  if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
+        |  else Invalid("Sequence is not sorted!")
+        |})
+        |
+        |div(
+        |  "Integers: ",
+        |  span((attr("data-valid") := true).attrIf(
+        |    integers.valid.transform((x: ValidationResult) => x == Valid)
+        |  ))(
+        |    repeat(integers)(p => span(s"${p.get}, ").render)
+        |  ), br,
+        |  "Is sorted: ",
+        |  valid(integers)(
+        |    {
+        |      case Valid => span(id := "validation-demo-result")("Yes").render
+        |      case Invalid(_) => span(id := "validation-demo-result")("No").render
+        |    },
+        |    progressBuilder = _ => span("Validation in progress...").render,
+        |    errorBuilder = _ => span("Validation error...").render
+        |  )
+        |)""".stripMargin
+    )(GuideStyles),
+    new BindValidationDemoComponent,
+    p(
+      "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
+      "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."
+    ),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."

@@ -105,14 +105,11 @@ object DemoPreview {
         DemoStyles.get.demoInlineField, GlobalStyles.get.width100
       ),
       span(DemoStyles.get.demoInlineField, DemoStyles.get.demoOutput, GlobalStyles.get.width50)(
-        "Valid: ", bindValidation(email,
-          _ => span("Wait...").render,
-          {
-            case Valid => span("Yes").render
-            case Invalid(_) => span("No").render
-          },
-          _ => span("ERROR").render
-        )
+        "Valid: ",
+        valid(email) {
+          case Valid => span("Yes").render
+          case Invalid(_) => span("No").render
+        }
       )
     ).render
   }

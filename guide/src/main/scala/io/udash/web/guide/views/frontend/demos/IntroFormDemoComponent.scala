@@ -22,19 +22,6 @@ case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 class IntroFormDemoComponent extends Component {
   override def getTemplate: Modifier = IntroFormDemoViewPresenter()
 
-  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
-  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
-    override def apply(element: IntroFormDemoModel)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-      val errors = mutable.ArrayBuffer[String]()
-      if (element.minimum > element.maximum) errors += "Minimum is bigger than maximum!"
-      if (element.minimum > element.between) errors += "Minimum is bigger than your value!"
-      if (element.between > element.maximum) errors += "Maximum is smaller than your value!"
-
-      if (errors.isEmpty) Valid
-      else Invalid(errors.map(DefaultValidationError))
-    }
-  }
-
   /** Prepares model, view and presenter for demo component */
   object IntroFormDemoViewPresenter {
     import io.udash.web.guide.Context._
@@ -43,7 +30,18 @@ class IntroFormDemoComponent extends Component {
         IntroFormDemoModel(0, 10, 42)
       )
 
-      model.addValidator(IntroFormDemoModelValidator)
+      model.addValidator((element: IntroFormDemoModel) => {
+        val errors = mutable.ArrayBuffer[String]()
+        if (element.minimum > element.maximum)
+          errors += "Minimum is bigger than maximum!"
+        if (element.minimum > element.between)
+          errors += "Minimum is bigger than your value!"
+        if (element.between > element.maximum)
+          errors += "Maximum is smaller than your value!"
+
+        if (errors.isEmpty) Valid
+        else Invalid(errors.map(DefaultValidationError))
+      })
 
       val presenter = new IntroFormDemoPresenter(model)
       new IntroFormDemoView(model, presenter).render
@@ -103,21 +101,16 @@ class IntroFormDemoComponent extends Component {
         )
       ).render,
       h3("Is valid?"),
-      p(
-        bindValidation(model,
-          _ => span(id := "valid")("...").render,
-          {
-            case Valid => span(id := "valid")("Yes").render
-            case Invalid(errors) => span(id := "valid")(
-              "No, because:",
-              ul(GuideStyles.get.defaultList)(
-                errors.map(e => li(e.message))
-              )
-            ).render
-          },
-          error =>
-            span(s"Validation error: $error").render
-        )
+      p(id := "valid")(
+        valid(model) {
+          case Valid => span("Yes").render
+          case Invalid(errors) => Seq(
+            span("No, because:"),
+            ul(GuideStyles.get.defaultList)(
+              errors.map(e => li(e.message))
+            )
+          ).map(_.render)
+        }
       )
     )
   }

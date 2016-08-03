@@ -31,21 +31,24 @@ class BindValidationDemoComponent extends Component {
     val amount = Random.nextInt(s - idx) + 1
     val count = Random.nextInt(5)
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
-  }, 1000)
+  }, 2000)
 
   override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.get.frame)(
     "Integers: ",
-    span(id := "validation-demo-integers")(
+    span(
+      id := "validation-demo-integers",
+      (attr("data-valid") := true).attrIf(integers.valid.transform((x: ValidationResult) => x == Valid))
+    )(
       repeat(integers)(p => span(s"${p.get}, ").render)
     ), br,
     "Is sorted: ",
-    bindValidation(integers,
-      _ => span("Validation in progress...").render,
+    valid(integers)(
       {
         case Valid => span(id := "validation-demo-result")("Yes").render
         case Invalid(_) => span(id := "validation-demo-result")("No").render
       },
-      _ => span("Validation error...").render
+      progressBuilder = _ => span("Validation in progress...").render,
+      errorBuilder = _ => span("Validation error...").render
     )
   )
 }

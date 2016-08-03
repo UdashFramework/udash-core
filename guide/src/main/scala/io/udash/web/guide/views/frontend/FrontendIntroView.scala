@@ -65,11 +65,15 @@ class FrontendIntroView extends FinalView {
         |class IntroFormDemoComponent {
         |  def getTemplate: Modifier = IntroFormDemoViewPresenter()
         |
-        |  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
-        |  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
-        |    override def apply(element: IntroFormDemoModel)
-        |                      (implicit ec: ExecutionContext): Future[ValidationResult] =
-        |      Future {
+        |  /** Prepares model, view and presenter for demo component */
+        |  object IntroFormDemoViewPresenter {
+        |    import Context._
+        |    def apply(): Element = {
+        |      val model = ModelProperty(
+        |        IntroFormDemoModel(0, 10, 42)
+        |      )
+        |
+        |      model.addValidator((element: IntroFormDemoModel) => {
         |        val errors = mutable.ArrayBuffer[String]()
         |        if (element.minimum > element.maximum)
         |          errors += "Minimum is bigger than maximum!"
@@ -80,18 +84,7 @@ class FrontendIntroView extends FinalView {
         |
         |        if (errors.isEmpty) Valid
         |        else Invalid(errors.map(DefaultValidationError))
-        |      }
-        |  }
-        |
-        |  /** Prepares model, view and presenter for demo component */
-        |  object IntroFormDemoViewPresenter {
-        |    import Context._
-        |    def apply(): Element = {
-        |      val model = ModelProperty(
-        |        IntroFormDemoModel(0, 10, 42)
-        |      )
-        |
-        |      model.addValidator(IntroFormDemoModelValidator)
+        |      })
         |
         |      val presenter = new IntroFormDemoPresenter(model)
         |      new IntroFormDemoView(model, presenter).render
@@ -165,8 +158,7 @@ class FrontendIntroView extends FinalView {
         |      )
         |    )
         |  }
-        |}
-      """.stripMargin
+        |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(

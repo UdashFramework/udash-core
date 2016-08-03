@@ -167,14 +167,11 @@ object DemoComponent {
       |
       |div(
       |  TextInput.debounced(email), br,
-      |  "Valid: ", bindValidation(email,
-      |    _ => span("Wait...").render,
-      |    {
-      |      case Valid => span("Yes").render
-      |      case Invalid(_) => span("No").render
-      |    },
-      |    _ => span("ERROR").render
-      |  )
+      |  "Valid: ",
+      |  valid(email) {
+      |    case Valid => span("Yes").render
+      |    case Invalid(_) => span("No").render
+      |  }
       |).render""".stripMargin
   )(HomepageStyles)
 
