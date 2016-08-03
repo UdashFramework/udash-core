@@ -1,6 +1,6 @@
 name := "udash"
 
-version in ThisBuild := "0.4.0-SNAPSHOT"
+version in ThisBuild := "0.4.0-M1"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
