@@ -13,8 +13,8 @@ object Dependencies extends Build {
   val servletVersion = "3.1.0"
   val avsCommonsVersion = "1.16.2"
 
-  val atmoshereJSVersion = "2.3.0"
-  val atmoshereVersion = "2.4.5"
+  val atmosphereJSVersion = "2.3.0"
+  val atmosphereVersion = "2.4.5"
 
   val upickleVersion = "0.4.1"
   val jawnParserVersion = "0.8.4"
@@ -56,7 +56,7 @@ object Dependencies extends Build {
   ).map(_ % Test))
 
   val rpcFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmoshereJSVersion / s"$atmoshereJSVersion/atmosphere.js"
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
   ))
 
   val rpcSharedJVMDeps = Def.setting(Seq(
@@ -66,7 +66,7 @@ object Dependencies extends Build {
   val rpcBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-    "org.atmosphere" % "atmosphere-runtime" % atmoshereVersion
+    "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
   val restCrossDeps = Def.setting(Seq(
