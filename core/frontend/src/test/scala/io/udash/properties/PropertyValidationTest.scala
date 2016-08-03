@@ -285,5 +285,33 @@ class PropertyValidationTest extends UdashFrontendTest {
 
       futures.forall(_.isCompleted) should be(true)
     }
+
+    "provide property with validation result" in {
+      val p = Property("Test")
+      val v = p.valid
+      p.addValidator((s) => if (s.length > 3) Valid else Invalid("Too short."))
+
+      v.get should be(Valid)
+
+      p.set("T")
+      v.get shouldNot be(Valid)
+
+      p.set("Test")
+      v.get should be(Valid)
+
+      CallbackSequencer.sequence {
+        p.set("Test 4")
+        p.set("Test")
+        p.set("Te")
+      }
+      v.get shouldNot be(Valid)
+
+      CallbackSequencer.sequence {
+        p.set("Test 4")
+        p.set("T")
+        p.set("Test 6")
+      }
+      v.get should be(Valid)
+    }
   }
 }

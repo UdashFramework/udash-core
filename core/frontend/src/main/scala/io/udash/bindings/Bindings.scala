@@ -128,7 +128,7 @@ trait Bindings {
     * to customize what HTML elements should be shown.
     *
     * @param property        Property to bind.
-    * @param initBuilder     Builder which is called when validation process is started. It will also give you an access to future of
+    * @param progressBuilder     Builder which is called when validation process is started. It will also give you an access to future of
     *                        validation results.
     * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
     * @param errorBuilder    Builder which is called, when validation process fails.
@@ -136,10 +136,10 @@ trait Bindings {
     */
   def valid[A](property: ReadableProperty[A])
               (completeBuilder: ValidationResult => Seq[Element],
-               initBuilder: Future[ValidationResult] => Seq[Element] = null,
+               progressBuilder: Future[ValidationResult] => Seq[Element] = null,
                errorBuilder: Throwable => Seq[Element] = null)
               (implicit ec: ExecutionContext) =
-  new ValidationValueModifier(property, Option(initBuilder), completeBuilder, Option(errorBuilder))
+  new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
   /**
     * Use it to update DOM elements, on every `property` change.

@@ -1315,7 +1315,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       })
 
       val template = div(
-        valid(p()
+        valid(p)(
           _ => b("done").render,
           _ => i("Validating...").render,
           _ => b("error").render

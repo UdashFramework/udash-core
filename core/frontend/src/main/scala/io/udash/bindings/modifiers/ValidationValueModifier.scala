@@ -1,5 +1,6 @@
 package io.udash.bindings.modifiers
 
+import io.udash.StrictLogging
 import io.udash.bindings.Bindings
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
@@ -13,7 +14,7 @@ import scalatags.generic._
 private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T],
                                  initBuilder: Option[Future[ValidationResult] => Seq[Element]],
                                  completeBuilder: ValidationResult => Seq[Element],
-                                 errorBuilder: Option[Throwable => Seq[Element]])(implicit ec: ExecutionContext) extends Modifier[dom.Element] with Bindings {
+                                 errorBuilder: Option[Throwable => Seq[Element]])(implicit ec: ExecutionContext) extends Modifier[dom.Element] with Bindings with StrictLogging {
 
   override def applyTo(root: dom.Element): Unit = {
     var elements: Seq[Element] = null
@@ -30,7 +31,11 @@ private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T]
       initBuilder.foreach(b => rebuild(valid, b))
       valid onComplete {
         case Success(result) => rebuild(result, completeBuilder)
-        case Failure(errors) => errorBuilder.foreach(b => rebuild(errors, b))
+        case Failure(error) =>
+          logger.error("Validation failed!")
+          error.printStackTrace()
+
+          errorBuilder.foreach(b => rebuild(error, b))
       }
     }
 
