@@ -15,13 +15,14 @@ class PropertyMacros(val c: blackbox.Context) {
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
 
-  val PropertyCls = tq"$Package.Property"
-  val DirectPropertyImplCls = tq"$Package.DirectPropertyImpl"
-  val SeqPropertyCls = tq"$Package.SeqProperty"
-  val DirectSeqPropertyImplCls = tq"$Package.DirectSeqPropertyImpl"
-  val ModelPropertyCls = tq"$Package.ModelProperty"
-  val ModelPropertyImplCls = tq"$Package.ModelPropertyImpl"
-  val CastablePropertyCls = tq"$Package.CastableProperty"
+  val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
+  val PropertyCls = tq"$Package.single.Property"
+  val DirectPropertyImplCls = tq"$Package.single.DirectPropertyImpl"
+  val SeqPropertyCls = tq"$Package.seq.SeqProperty"
+  val DirectSeqPropertyImplCls = tq"$Package.seq.DirectSeqPropertyImpl"
+  val ModelPropertyCls = tq"$Package.model.ModelProperty"
+  val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
+  val CastablePropertyCls = tq"$Package.single.CastableProperty"
   val CallbackSequencerCls = q"$Package.CallbackSequencer"
 
   val PatchCls = tq"$Package.SeqProperty.Patch"
@@ -31,9 +32,10 @@ class PropertyMacros(val c: blackbox.Context) {
 
   val ExecutionContextCls = tq"_root_.scala.concurrent.ExecutionContext"
 
-
+  private lazy val OptionTpe = typeOf[Option[_]]
   private lazy val SeqTpe = typeOf[Seq[_]]
-  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal]).map(_.typeSymbol)
+  private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
+  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product]).map(_.typeSymbol)
 
   private def fixOverride(s: Symbol) =
     if (s.isTerm && s.asTerm.isOverloaded) {
@@ -58,6 +60,19 @@ class PropertyMacros(val c: blackbox.Context) {
   private def isCaseClass(tpe: Type) =
     tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isCaseClass
 
+  //Checks, if tpe is immutable case class
+  private def isImmutableCaseClass(tpe: Type) =
+    isCaseClass(tpe) && filterMembers(tpe).filter(m => !m.isPrivate && m.isTerm)
+      .forall(m => m.asTerm.isStable && (m.typeSignatureIn(tpe).resultType == tpe || isImmutableValue(m.typeSignatureIn(tpe).resultType)))
+
+  //Checks, if tpe is case class which can be used as ModelProperty template
+  private def isModelCaseClass(tpe: Type): Boolean =
+    isCaseClass(tpe) && (
+      tpe <:< typeOf[scala.Tuple2[_, _]] || //dirty hack for Tuple2 unstable `swap` method
+      filterMembers(tpe).filter(!_.isPrivate)
+        .forall(m => m.isMethod && m.asMethod.isCaseAccessor && isModelValue(m.typeSignatureIn(tpe).resultType))
+    )
+
   //Checks, if tpe is sealed and children are immutable
   //TODO: Implement this stuff - children checking
   private def isImmutableSealedHierarchy(tpe: Type): Boolean =
@@ -66,7 +81,12 @@ class PropertyMacros(val c: blackbox.Context) {
   //Checks, if tpe is immutable collection and children are immutable
   //TODO: Implement this stuff - children checking
   private def isImmutableCollection(tpe: Type): Boolean =
-    tpe =:= SeqTpe
+    tpe <:< SeqTpe && !(tpe <:< MutableSeqTpe)
+
+  //Checks, if tpe is immutable option and children are immutable
+  //TODO: Implement this stuff - children checking
+  private def isImmutableOption(tpe: Type): Boolean =
+    tpe <:< OptionTpe
 
   //Checks, if return type of method is ModelValue
   private def doesReturnTypeForModelRequirements(symbol: Symbol, signatureType: Type): Boolean =
@@ -81,19 +101,13 @@ class PropertyMacros(val c: blackbox.Context) {
     valueType.members
       .filterNot(member => member.isSynthetic || isFromTopLevelType(member) || member.isConstructor || member.isType)
 
-  private def findInvalidModelPartBody(tpe: Type): Seq[Symbol] =
-    filterMembers(tpe).collect {
-      case s if !doesMethodMeetModelRequirements(s, tpe) => s
-    }.toSeq
-
   //Returns filtered memebrs which can be treated as Properties
   private def propertyMembers(tpe: Type) =
     filterMembers(tpe)
       .filter(s => doesMethodMeetModelRequirements(s, tpe))
 
-  private def checkModel(tree: c.Tree) = {
+  private def checkModel(tree: c.Tree) =
     c.typecheck(tree, silent = true) != EmptyTree
-  }
 
   private def isModelPart(tpe: Type): Boolean = checkModel(q"""implicitly[$ModelPartCls[$tpe]]""")
 
@@ -110,7 +124,7 @@ class PropertyMacros(val c: blackbox.Context) {
 
   def reifyImmutableValue[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
-    if (isCaseClass(valueType) || isImmutableSealedHierarchy(valueType) || isImmutableCollection(valueType)) {
+    if (isImmutableCaseClass(valueType) || isImmutableSealedHierarchy(valueType) || isImmutableCollection(valueType) || isImmutableOption(valueType)) {
       q"""null"""
     } else {
       c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelValueCls requirements. It is not case class nor " +
@@ -120,19 +134,33 @@ class PropertyMacros(val c: blackbox.Context) {
 
   def reifyModelPart[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
-    if (valueType.typeSymbol.isClass && valueType.typeSymbol.asClass.isTrait && !valueType.typeSymbol.asClass.isSealed && !isModelSeq(valueType)) {
+    if (valueType.typeSymbol.isClass && valueType.typeSymbol.asClass.isTrait && !valueType.typeSymbol.asClass.isSealed
+          && !isModelSeq(valueType) && !(valueType <:< MutableSeqTpe)) {
       q"""
-           implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
-           ..${
-              filterMembers(valueType).collect {
-                case s if isAbstractMethod(s) && !takesParameters(s) && s.isMethod => s
-              }.map(s => {
-                val resultType = s.typeSignatureIn(valueType).resultType
+         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
+         ..${
+            filterMembers(valueType).collect {
+              case s if isAbstractMethod(s) && !takesParameters(s) && s.isMethod => s
+            }.map(s => {
+              val resultType = s.typeSignatureIn(valueType).resultType
+              q"""implicitly[$ModelValueCls[$resultType]]"""
+            })
+         }
+         null
+      """
+    } else if (isModelCaseClass(valueType)) {
+      q"""
+         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
+         ..${
+            filterMembers(valueType).filter(!_.isPrivate)
+              .filter(m => m.isMethod && m.asMethod.isCaseAccessor)
+              .map(m => {
+                val resultType = m.typeSignatureIn(valueType).resultType
                 q"""implicitly[$ModelValueCls[$resultType]]"""
               })
-           }
-           null
-          """
+         }
+         null
+       """
     } else {
       c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelPartCls requirements. It must be trait. (not sealed trait) ")
     }
@@ -143,7 +171,7 @@ class PropertyMacros(val c: blackbox.Context) {
     if (isImmutableValue(valueType) || isModelPart(valueType) || isModelSeq(valueType)) {
       q"""null"""
     } else {
-      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelPartCls requirements. This is not immutable value nor valid $ModelPartCls nor $ModelSeqCls.")
+      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelValueCls requirements. This is not immutable value nor valid $ModelPartCls nor $ModelSeqCls.")
     }
   }
 
@@ -173,44 +201,98 @@ class PropertyMacros(val c: blackbox.Context) {
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
-    val members = propertyMembers(tpe).map(method => (method.asMethod.name, method.typeSignatureIn(tpe).resultType))
-
-    q"""
-      new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
-        ..${
-          members.map {
-            case (name, returnTpe) =>
-              q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)(ec)"""
-          }
-        }
-
-        val get: $tpe = new $tpe {
-          ..${
-            members.map { case (name, returnTpe) =>
-              q"""def $name = getSubProperty[$returnTpe](${name.toString}).get"""
+    if (isModelCaseClass(tpe)) {
+      val order = tpe.members.collectFirst {
+          case m: MethodSymbol if m.isPrimaryConstructor ⇒ m
+        }.get.paramLists.flatten
+        .map(m => m.name.toTermName)
+      val members = filterMembers(tpe).filter(!_.isPrivate)
+        .filter(m => m.isMethod && m.asMethod.isCaseAccessor)
+        .map(m => m.asMethod.name -> m.typeSignatureIn(tpe).resultType).toMap
+     q"""
+        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
+          override protected def initialize(): Unit = {
+            ..${
+              members.map {
+                case (name, returnTpe) =>
+                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)(ec)"""
+              }
             }
           }
-        }
 
-        def set(newValue: $tpe): Unit = {
-          $CallbackSequencerCls.sequence {
+          def get: $tpe =
+            if (!initialized) null.asInstanceOf[$tpe]
+            else new ${tpe.typeSymbol}(
+             ..${
+                order.map { case name =>
+                  val returnTpe = members(name)
+                  q"""getSubProperty[$returnTpe](${name.toString}).get"""
+                }
+              }
+            )
+
+          def set(newValue: $tpe): Unit = if (newValue != null) {
+            $CallbackSequencerCls.sequence {
+              ..${
+                members.map { case (name, returnTpe) =>
+                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name)"""
+                }
+              }
+            }
+          }
+
+          def setInitValue(newValue: $tpe): Unit = if (newValue != null) {
             ..${
               members.map { case (name, returnTpe) =>
-                q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name)"""
+                q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
               }
             }
           }
         }
+      """
+    } else {
+      val members = propertyMembers(tpe).map(method => (method.asMethod.name, method.typeSignatureIn(tpe).resultType))
+       q"""
+        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
+          override protected def initialize(): Unit = {
+            ..${
+              members.map {
+                case (name, returnTpe) =>
+                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)(ec)"""
+              }
+            }
+          }
 
-        def setInitValue(newValue: $tpe): Unit = {
-          ..${
-            members.map { case (name, returnTpe) =>
-              q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
+          def get: $tpe =
+            if (!initialized) null.asInstanceOf[$tpe]
+            else new $tpe {
+              ..${
+                members.map { case (name, returnTpe) =>
+                  q"""def $name = getSubProperty[$returnTpe](${name.toString}).get"""
+                }
+              }
+            }
+
+          def set(newValue: $tpe): Unit = if (initialized || newValue != null) {
+            $CallbackSequencerCls.sequence {
+              ..${
+                members.map { case (name, returnTpe) =>
+                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name)"""
+                }
+              }
+            }
+          }
+
+          def setInitValue(newValue: $tpe): Unit = if (initialized || newValue != null) {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
+              }
             }
           }
         }
-      }
-    """
+      """
+    }
   }
 
   def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Expr[_]): c.Tree = {
@@ -260,7 +342,7 @@ class PropertyMacros(val c: blackbox.Context) {
     q"""
        new $PropertyCreatorCls[$tpe] {
          implicit val $selfName: $PropertyCreatorCls[$tpe] = this
-         def newProperty(prt: $PropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe]
+         def newProperty(prt: $ReadablePropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe]
            = {${constructor.apply(tpe)}}
        }
     """

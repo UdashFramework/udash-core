@@ -2,8 +2,9 @@ package io.udash.bindings
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.properties.SeqProperty
+import io.udash.properties.{ImmutableValue, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Element
 
@@ -46,7 +47,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle null value providing empty span element" in {
-      case class C(i: Int)
+      class C(val i: Int) {
+        override def toString: String =
+          s"C($i)"
+      }
+      implicit val allowCTpe: ImmutableValue[C] = null
 
       val p = Property[C]
       val template = div(bind(p)).render
@@ -55,7 +60,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("")
 
-      p.set(C(2))
+      p.set(new C(2))
       template.textContent should be("C(2)")
       template2.textContent should be("C(2)")
 
@@ -64,7 +69,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(0).nodeName should be("#text")
       template2.textContent should be("")
 
-      p.set(C(123))
+      p.set(new C(123))
       template.textContent should be("C(123)")
       template2.textContent should be("C(123)")
 
@@ -150,6 +155,66 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(1).nodeName should be("B")
       template.childNodes(1).textContent should be("CBA")
       template.childNodes(2).textContent should be("")
+    }
+
+    "handle Seq of produced elements" in {
+      val producer = (n: Int) => Seq.fill(n)(b(n.toString).render)
+
+      val p1 = Property[Int](1)
+      val p2 = Property[Int](2)
+      val p3 = Property[Int](3)
+      val template = div(
+        span(),
+        produce(p1)(producer),
+        produce(p2)(producer),
+        produce(p3)(producer),
+        span()
+      ).render
+
+      template.textContent should be("122333")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).nodeName should be("B")
+      template.childNodes(1).textContent should be("1")
+      template.childNodes(2).nodeName should be("B")
+      template.childNodes(2).textContent should be("2")
+      template.childNodes(3).nodeName should be("B")
+      template.childNodes(3).textContent should be("2")
+      template.childNodes(4).nodeName should be("B")
+      template.childNodes(4).textContent should be("3")
+      template.childNodes(5).nodeName should be("B")
+      template.childNodes(5).textContent should be("3")
+      template.childNodes(6).nodeName should be("B")
+      template.childNodes(6).textContent should be("3")
+      template.childNodes(7).textContent should be("")
+
+      p1.set(4)
+      template.textContent should be("444422333")
+      p2.set(3)
+      template.textContent should be("4444333333")
+      p3.set(1)
+      template.textContent should be("44443331")
+      p3.set(5)
+      template.textContent should be("444433355555")
+      p2.set(1)
+      template.textContent should be("4444155555")
+      p1.set(1)
+      template.textContent should be("1155555")
+      p2.set(2)
+      template.textContent should be("12255555")
+      p3.set(3)
+      template.textContent should be("122333")
+      p2.set(0)
+      template.textContent should be("1333")
+      p3.set(0)
+      template.textContent should be("1")
+      p1.set(0)
+      template.textContent should be("")
+      p2.set(2)
+      template.textContent should be("22")
+      p3.set(3)
+      template.textContent should be("22333")
+      p1.set(1)
+      template.textContent should be("122333")
     }
 
     "handle null value providing empty content" in {
@@ -264,7 +329,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
   "produce for SeqProperty" should {
     "update content of DOM element" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         span(),
         produce(p)((s: Seq[Int]) => {
@@ -307,7 +372,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle null value providing empty Seq to callback" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         produce(p)((s: Seq[Int]) => {
           div(s.map(v => {
@@ -354,8 +419,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "not swap position" in {
-      val p = SeqProperty[Int](1, 2, 3)
-      val p2 = SeqProperty[Int](3, 2, 1)
+      val p = seq.SeqProperty[Int](1, 2, 3)
+      val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
         produce(p)((s: Seq[Int]) => {
@@ -390,7 +455,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work after moving element in DOM" in {
-      val p = SeqProperty[String]("A")
+      val p = seq.SeqProperty[String]("A")
       val b = span(produce(p)((v: Seq[String]) => span(v.mkString).render)).render
       val template = div(b).render
       val template2 = emptyComponent()
@@ -420,13 +485,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
   "Patching produce for SeqProperty" should {
     "init and update content of DOM element" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         span(),
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -468,12 +533,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle null value providing empty Seq to callback" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -519,11 +584,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "not swap position" in {
-      def prod(p: SeqProperty[Int, Property[Int]]) = {
+      def prod(p: seq.SeqProperty[Int, Property[Int]]) = {
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-          (patch: Patch[Property[Int]], elem: Element) => {
-            val el = jQ(elem)
+          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+            val el = jQ(elem:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(p.get).render))
@@ -532,8 +597,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         )
       }
 
-      val p = SeqProperty[Int](1, 2, 3)
-      val p2 = SeqProperty[Int](3, 2, 1)
+      val p = seq.SeqProperty[Int](1, 2, 3)
+      val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
         prod(p),
@@ -560,7 +625,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
   "repeat" should {
     "update content of DOM element" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         span(),
         repeat(p)((p: Property[Int]) => {
@@ -680,8 +745,75 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(4).textContent should be("")
     }
 
+    "handle Seq of produced elements" in {
+      val p1 = SeqProperty[Int](1, 2, 3)
+      val p2 = SeqProperty[Int](4, 5, 6)
+      val p3 = SeqProperty[Int](7, 8, 9)
+
+      val builder = (p: Property[Int]) => Seq.fill(p.get)(b(p.get.toString).render)
+      val template = div(
+        repeat(p1)(builder),
+        repeat(p2)(builder),
+        repeat(p3)(builder)
+      ).render
+
+      def expectedChildrenCount: Int =
+        Seq(p1.get, p2.get, p3.get).flatten.sum
+
+      template.textContent should be("122333444455555666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.remove(5)
+      template.textContent should be("1223334444666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.replace(0, 1, 3)
+      template.textContent should be("333223334444666666777777788888888999999999")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.clear()
+      template.textContent should be("333223334444666666")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.append(0, 0, 0)
+      template.textContent should be("333223334444666666")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.clear()
+      template.textContent should be("33322333")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.clear()
+      template.textContent should be("")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p2.append(4, 0, 5)
+      template.textContent should be("444455555")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p3.append(3, 0, 2, 1, 0)
+      template.textContent should be("444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.append(1, 2, 3)
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.prepend(0)
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+
+      p1.set(p1.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      p2.set(p2.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      p3.set(p3.get.filter(_ != 0))
+      template.textContent should be("122333444455555333221")
+      template.childElementCount should be(expectedChildrenCount)
+    }
+
     "handle null value providing empty text placeholder" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         repeat(p)((p: Property[Int]) => {
           val v = p.get
@@ -770,7 +902,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "not swap position" in {
-      def rep(p: SeqProperty[Int, Property[Int]]) = {
+      def rep(p: seq.SeqProperty[Int, Property[Int]]) = {
         repeat(p)((p: Property[Int]) => {
           val v = p.get
           if (v % 2 == 0) b(v.toString).render
@@ -778,8 +910,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         })
       }
 
-      val p = SeqProperty[Int](1, 2, 3)
-      val p2 = SeqProperty[Int](3, 2, 1)
+      val p = seq.SeqProperty[Int](1, 2, 3)
+      val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
         rep(p),
@@ -834,7 +966,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "not swap position with CallbackSequencer" in {
-      def rep(p: SeqProperty[Int, Property[Int]]) = {
+      def rep(p: seq.SeqProperty[Int, Property[Int]]) = {
         repeat(p)((p: Property[Int]) => {
           val v = p.get
           if (v % 2 == 0) b(v.toString).render
@@ -842,8 +974,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         })
       }
 
-      val p = SeqProperty[Int](1, 2, 3)
-      val p2 = SeqProperty[Int](3, 2, 1)
+      val p = seq.SeqProperty[Int](1, 2, 3)
+      val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
         rep(p),
@@ -879,7 +1011,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
       val filter = Property[NumbersFilter]
-      val numbers = SeqProperty[Int]
+      val numbers = seq.SeqProperty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -918,7 +1050,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work with filtered transformed SeqProperty" in {
-      val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
+      val doubles = seq.SeqProperty[Double](1.5, 2.3, 3.7)
       val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 
@@ -958,7 +1090,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
       val filter = Property[NumbersFilter]
-      val numbers = SeqProperty[Int]
+      val numbers = seq.SeqProperty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1012,7 +1144,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
                       override val completed: Boolean) extends TodoElement
 
       val filter = Property[TodosFilter]
-      val todos = SeqProperty[TodoElement]
+      val todos = seq.SeqProperty[TodoElement]
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]
@@ -1106,7 +1238,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work after moving element in DOM" in {
-      val p = SeqProperty[String]("A")
+      val p = seq.SeqProperty[String]("A")
       val b = span(repeat(p)((v: Property[String]) => span(v.get).render)).render
       val template = div(b).render
       val template2 = emptyComponent()
@@ -1145,9 +1277,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       })
 
       val template = div(
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         )
       ).render
@@ -1163,11 +1295,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val template = div(
         span(),
-        bindValidation(p,
-          _ => i("Validating...").render,
-          _ => b("done").render,
-          _ => b("error").render
-        ),
+        valid(p) {
+          case Valid => b("done").render
+          case Invalid(_) => b("invalid").render
+        },
         span()
       ).render
 
@@ -1184,9 +1315,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       })
 
       val template = div(
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         )
       ).render
@@ -1203,15 +1334,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val template = div(
         "1",
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         ),
         span("2"),
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("Error").render
         ),
         div("3")
@@ -1234,6 +1365,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "update element on property change" in {
       val p = Property[Int](5)
 
+      @silent
       val template = div(
         id := "someId",
         bindAttribute(p)((i: Int, el: Element) => {
@@ -1248,6 +1380,59 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(0)
       template.getAttribute("class") should be("c0")
+    }
+  }
+
+  "AttrOps" should {
+    "allow reactive attribute bind" in {
+      val p = Property("idValue")
+      val textArea = TextArea.debounced(Property(""),
+        id.bind(p)
+      ).render
+      textArea.getAttribute("id") shouldBe "idValue"
+      p.set("idValue2")
+      textArea.getAttribute("id") shouldBe "idValue2"
+      p.set(null)
+      textArea.hasAttribute("disabled") shouldBe false
+      p.set("idValue3")
+      textArea.getAttribute("id") shouldBe "idValue3"
+    }
+  }
+
+  "AttrPairOps" should {
+    "allow reactive attribute apply" in {
+      val p = Property(false)
+      val textArea = TextArea.debounced(Property(""),
+        (disabled := "disabled").attrIf(p)
+      ).render
+      textArea.hasAttribute("disabled") shouldBe false
+      p.set(true)
+      textArea.hasAttribute("disabled") shouldBe true
+      p.set(false)
+      textArea.hasAttribute("disabled") shouldBe false
+
+      val textArea2 = TextArea.debounced(Property(""),
+        (disabled := "disabled").attrIfNot(p)
+      ).render
+      textArea2.hasAttribute("disabled") shouldBe true
+      p.set(true)
+      textArea2.hasAttribute("disabled") shouldBe false
+      p.set(false)
+      textArea2.hasAttribute("disabled") shouldBe true
+    }
+  }
+
+  "PropertyOps" should {
+    "allow reactive attr changes" in {
+      val p = Property(false)
+      val textArea = TextArea.debounced(Property(""),
+        p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
+      ).render
+      textArea.getAttribute("test").toBoolean shouldBe false
+      p.set(true)
+      textArea.getAttribute("test").toBoolean shouldBe true
+      p.set(false)
+      textArea.getAttribute("test").toBoolean shouldBe false
     }
   }
 }

@@ -6,6 +6,7 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
   override val localFramework: ServerUdashRPCFramework
 
   import localFramework._
+
   /**
     * This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
     * into calls on actual RPC implementation.
@@ -18,8 +19,13 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
 
   /** Handles RPCCall and returns Future with call result. */
   def handleRpcCall(call: RPCCall): Future[RawValue] = {
-    val receiver = rawLocalRpc.resolveGetterChain(call.gettersChain)
-    receiver.call(call.invocation.rpcName, call.invocation.argLists)
+    try {
+      val receiver = rawLocalRpc.resolveGetterChain(call.gettersChain)
+      receiver.call(call.invocation.rpcName, call.invocation.argLists)
+    } catch {
+      case ex: Exception =>
+        Future.failed(ex)
+    }
   }
 
   /** Handles RPCFire */

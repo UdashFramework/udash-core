@@ -2,9 +2,9 @@ package io.udash.i18n
 
 import java.{util => ju}
 
-import io.udash.testing.UdashBackendTest
+import io.udash.testing.UdashRpcBackendTest
 
-class ResourceBundlesTranslationTemplatesProviderTest extends UdashBackendTest {
+class ResourceBundlesTranslationTemplatesProviderTest extends UdashRpcBackendTest {
   val testBundlesNames = Seq("test_translations", "test2_translations")
   val bundles = Seq("en", "pl")
     .map(lang => Lang(lang) -> testBundlesNames.map(name => ju.ResourceBundle.getBundle(name, new ju.Locale(lang))))

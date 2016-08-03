@@ -38,7 +38,10 @@ class UdashCarousel private(val content: SeqProperty[UdashCarouselSlide], val co
   override lazy val render: Element = {
     def indicators() = {
       def indicator(index: Int) =
-        li(dataTarget := s"#$componentId", dataSlideTo := index, BootstrapStyles.active.styleIf(activeIndex.transform(idx => idx == index)))
+        li(
+          dataTarget := s"#$componentId", dataSlideTo := index,
+          BootstrapStyles.active.styleIf(activeIndex.transform((idx: Int) => idx == index))
+        )
 
       produce(indices)(length =>
         ol(carouselIndicators)(

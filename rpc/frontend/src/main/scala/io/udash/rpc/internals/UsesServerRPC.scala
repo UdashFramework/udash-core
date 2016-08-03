@@ -1,8 +1,11 @@
 package io.udash.rpc.internals
 
 import io.udash.rpc._
+import org.scalajs.dom
 
+import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Future, Promise}
+import scala.language.postfixOps
 import scala.scalajs.js
 
 /**
@@ -26,6 +29,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val connector: ServerConnector[RPCRequest]
 
+  protected val callTimeout: Duration = 30 seconds
   private val pendingCalls = new js.Object().asInstanceOf[js.Dictionary[Promise[RawValue]]]
   private var cid: Int = 0
 
@@ -60,6 +64,10 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
       val callId = newCallId()
       val promise = Promise[RawValue]()
       pendingCalls.put(callId, promise)
+      dom.window.setTimeout(() => {
+        pendingCalls.remove(callId)
+          .foreach(_.failure(RPCFailure("Request timeout", s"Response missing after $callTimeout.")))
+      }, callTimeout.toMillis)
       callRemote(callId, getterChain, RawInvocation(rpcName, argLists))
       promise.future
     }

@@ -3,15 +3,16 @@ package button
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.properties.seq
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
 class UdashButtonToolbar[ItemType, ElemType <: Property[ItemType]] private
-                        (val items:io.udash.properties.SeqProperty[ItemType, ElemType],
+                        (val items:seq.SeqProperty[ItemType, ElemType],
                          override val componentId: ComponentId)
-                        (itemFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+                        (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
   override lazy val render: dom.Element = {
     div(role := "toolbar", BootstrapStyles.Button.btnToolbar)(
       repeat(items)(itemFactory)
@@ -54,8 +55,8 @@ object UdashButtonToolbar {
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
   def reactive[ItemType, ElemType <: Property[ItemType]]
-              (items: io.udash.properties.SeqProperty[ItemType, ElemType],
-               itemFactory: (ElemType) => dom.Element,
+              (items: seq.SeqProperty[ItemType, ElemType],
+               itemFactory: (ElemType) => Seq[dom.Element],
                componentId: ComponentId = UdashBootstrap.newId()): UdashButtonToolbar[ItemType, ElemType] =
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
 }

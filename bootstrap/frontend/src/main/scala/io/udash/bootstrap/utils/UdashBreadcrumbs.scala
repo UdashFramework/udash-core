@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package utils
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.properties.seq
 import io.udash.{properties, _}
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -10,7 +11,7 @@ import org.scalajs.dom.html.Anchor
 import scala.concurrent.ExecutionContext
 
 class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
-                      (val pages: properties.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                      (val pages: seq.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                       (itemFactory: (ElemType) => dom.Element,
                        isSelected: (ItemType) => Boolean)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
   override lazy val render: Element = {
@@ -36,7 +37,7 @@ object UdashBreadcrumbs {
   case class DefaultBreadcrumb(override val name: String, override val url: Url) extends Breadcrumb
 
   private def bindHref(page: CastableProperty[Breadcrumb]) =
-    bindAttribute(page.asModel.subProp(_.url))((url, el) => el.setAttribute("href", url.value))
+    href.bind(page.asModel.subProp(_.url.value))
 
   /** Default breadcrumb model factory. */
   val defaultPageFactory: CastableProperty[Breadcrumb] => Anchor =
@@ -55,7 +56,7 @@ object UdashBreadcrumbs {
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (pages: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (pages: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (itemFactory: (ElemType) => dom.Element,
             isSelected: (ItemType) => Boolean = (_: ItemType) => false)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)

@@ -1,6 +1,6 @@
 name := "udash"
 
-version in ThisBuild := "0.3.0"
+version in ThisBuild := "0.4.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
@@ -146,8 +146,7 @@ lazy val `rpc-shared-JS` = `rpc-shared`.js
 lazy val `rpc-backend` = project.in(file("rpc/backend"))
   .dependsOn(`rpc-shared-JVM` % CompileAndTest)
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= rpcBackendDeps.value,
-    libraryDependencies ++= rpcBackendTestDeps.value
+    libraryDependencies ++= rpcBackendDeps.value
   )
 
 lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)

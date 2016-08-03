@@ -1,6 +1,10 @@
-package io.udash.properties
+package io.udash.properties.model
 
 import java.util.UUID
+
+import io.udash.properties._
+import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
+import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,6 +36,7 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 
   /** ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
+    *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
     import Validator._
@@ -54,8 +59,3 @@ trait ModelProperty[A] extends ReadableModelProperty[A] with Property[A] {
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 }
 
-abstract class ModelPropertyImpl[A](val parent: Property[_], override val id: UUID)
-                                   (implicit val executionContext: ExecutionContext) extends ModelProperty[A] with CastableProperty[A] {
-  def getSubProperty[T](key: String): Property[T] =
-    properties(key).asInstanceOf[Property[T]]
-}

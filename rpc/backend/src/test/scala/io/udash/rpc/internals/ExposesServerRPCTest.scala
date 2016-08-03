@@ -3,12 +3,12 @@ package io.udash.rpc.internals
 import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
-import io.udash.testing.UdashBackendTest
+import io.udash.testing.UdashRpcBackendTest
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class ExposesServerRPCTest extends UdashBackendTest {
+class ExposesServerRPCTest extends UdashRpcBackendTest {
 
   def tests[T <: ExposesServerRPC[TestRPC]](createRpc: (mutable.Builder[String, Seq[String]]) => T) = {
     "handle RPC fires" in {
@@ -79,6 +79,37 @@ class ExposesServerRPCTest extends UdashBackendTest {
         )
       )
       calls.result() should contain("innerRpc.proc")
+    }
+
+    "handle getter error in rpc calls" in {
+      val calls = Seq.newBuilder[String]
+      val rpc: T = createRpc(calls)
+
+      import rpc.localFramework._
+      val resp1 = rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("proc", List(List())),
+          List(RawInvocation("throwingGetter", List(List()))),
+          "callId1"
+        )
+      )
+      calls.result() should contain("throwingGetter")
+      calls.result() shouldNot contain("proc")
+
+      val resp2 = rpc.handleRpcCall(
+        RPCCall(
+          RawInvocation("proc", List(List())),
+          List(RawInvocation("nullGetter", List(List()))),
+          "callId2"
+        )
+      )
+      calls.result() should contain("nullGetter")
+      calls.result() shouldNot contain("proc")
+
+      eventually {
+        resp1.value.get.isFailure should be(true)
+        resp2.value.get.isFailure should be(true)
+      }
     }
   }
 

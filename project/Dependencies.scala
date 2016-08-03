@@ -8,13 +8,13 @@ object Dependencies extends Build {
   val jqueryWrapperVersion = "1.0.0"
 
   val scalaJsDomVersion = "0.9.1"
-  val scalaTagsVersion = "0.5.5"
+  val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.16.1"
+  val avsCommonsVersion = "1.16.2"
 
-  val atmoshereJSVersion = "2.3.0"
-  val atmoshereVersion = "2.4.4"
+  val atmosphereJSVersion = "2.3.0"
+  val atmosphereVersion = "2.4.5"
 
   val upickleVersion = "0.4.1"
   val jawnParserVersion = "0.8.4"
@@ -23,9 +23,8 @@ object Dependencies extends Build {
 
   val scalaLoggingVersion = "3.4.0"
 
-  val scalatestVersion = "3.0.0-M15"
-  val scalamockVersion = "3.2.2"
-  val bootstrapVersion = "3.3.6"
+  val scalatestVersion = "3.0.0-RC4"
+  val bootstrapVersion = "3.3.7"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -57,7 +56,7 @@ object Dependencies extends Build {
   ).map(_ % Test))
 
   val rpcFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmoshereJSVersion / s"$atmoshereJSVersion/atmosphere.js"
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
   ))
 
   val rpcSharedJVMDeps = Def.setting(Seq(
@@ -67,12 +66,8 @@ object Dependencies extends Build {
   val rpcBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-    "org.atmosphere" % "atmosphere-runtime" % atmoshereVersion
+    "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
-
-  val rpcBackendTestDeps = Def.setting(Seq(
-    "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
-  ).map(_ % Test))
 
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,

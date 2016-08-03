@@ -3,6 +3,7 @@ package pagination
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom.Event
 
@@ -10,7 +11,7 @@ import scala.concurrent.ExecutionContext
 
 sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] extends UdashBootstrapComponent {
   /** Sequence of pagination elements. Pagination will automatically synchronize with this property changes. */
-  def pages: properties.SeqProperty[PageType, ElemType]
+  def pages: seq.SeqProperty[PageType, ElemType]
 
   /** Index of selected page. */
   def selectedPage: Property[Int]
@@ -30,7 +31,7 @@ sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] exten
 
 class UdashPagination[PageType, ElemType <: Property[PageType]] private
                      (size: PaginationSize, showArrows: Property[Boolean], highlightActive: Property[Boolean], override val componentId: ComponentId)
-                     (val pages: properties.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                     (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
   extends PaginationComponent[PageType, ElemType] {
 
@@ -57,20 +58,20 @@ class UdashPagination[PageType, ElemType <: Property[PageType]] private
   protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType) = {
     import scalatags.JsDom.all._
 
-    produce(pages.combine(showArrows)((_, _))) {
-      case (_, true) =>
+    produce(showArrows.combine(pages)((_, _))) {
+      case (true, _) =>
         val elements = pages.elemProperties
-        li(BootstrapStyles.disabled.styleIf(selectedPage.transform(idx => highlightCond(idx, elements.size))))(
+        li(BootstrapStyles.disabled.styleIf(selectedPage.transform((idx: Int) => highlightCond(idx, elements.size))))(
           produce(selectedPage)(idx => itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType))
         )(onclick :+= ((_: Event) => { onClick(); false })).render
-      case (_, false) =>
+      case (false, _) =>
         span().render
     }
   }
 }
 
 class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](aligned: Boolean, override val componentId: ComponentId)
-                (val pages: properties.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                 (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
 
   override lazy val render: dom.Element = {
@@ -91,7 +92,7 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
     produce(pages)(_ => {
       val elements = pages.elemProperties
       li(
-        BootstrapStyles.disabled.styleIf(selectedPage.transform(idx => highlightCond(idx, elements.size))),
+        BootstrapStyles.disabled.styleIf(selectedPage.transform((idx: Int) => highlightCond(idx, elements.size))),
         alignStyle.styleIf(aligned)
       )(
         produce(selectedPage)(idx => itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType))
@@ -116,7 +117,7 @@ object UdashPagination {
   case class DefaultPage(override val name: String, override val url: Url) extends Page
 
   private def bindHref(page: CastableProperty[Page]) =
-    bindAttribute(page.asModel.subProp(_.url))((url, el) => el.setAttribute("href", url.value))
+    href.bind(page.asModel.subProp(_.url.value))
 
   /** Creates link for default pagination element model. */
   val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
@@ -147,7 +148,7 @@ object UdashPagination {
   def apply[PageType, ElemType <: Property[PageType]]
            (size: PaginationSize = PaginationSize.Default, showArrows: Property[Boolean] = Property(true),
             highlightActive: Property[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
-           (pages: properties.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
+           (pages: seq.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPagination[PageType, ElemType] =
     new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
 
@@ -165,7 +166,7 @@ object UdashPagination {
     */
   def pager[PageType, ElemType <: Property[PageType]]
            (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
-           (pages: properties.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
+           (pages: seq.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPager[PageType, ElemType] =
     new UdashPager(aligned, componentId)(pages, selectedPage)(itemFactory)
 }

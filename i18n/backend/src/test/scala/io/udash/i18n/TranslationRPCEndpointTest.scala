@@ -1,10 +1,10 @@
 package io.udash.i18n
 
-import io.udash.testing.UdashBackendTest
+import io.udash.testing.UdashRpcBackendTest
 
 import scala.util.{Failure, Success}
 
-class TranslationRPCEndpointTest extends UdashBackendTest {
+class TranslationRPCEndpointTest extends UdashRpcBackendTest {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   val provider = new TranslationTemplatesProvider {

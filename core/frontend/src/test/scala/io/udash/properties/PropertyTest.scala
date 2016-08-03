@@ -1,9 +1,13 @@
 package io.udash.properties
 
+import io.udash.properties.model.ModelProperty
+import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
+import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashFrontendTest
 
 import scala.collection.mutable
-import scala.util.Random
+import scala.util.{Random, Try}
+import scala.scalajs.js.JavaScriptException
 
 class PropertyTest extends UdashFrontendTest {
   case class C(i: Int, s: String)
@@ -12,11 +16,23 @@ class PropertyTest extends UdashFrontendTest {
     def i: Int
     def s: Option[String]
     def t: ST
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+      case tt: TT =>
+        i == tt.i && s == tt.s && t == tt.t
+      case _ => false
+    }
   }
 
   trait ST {
     def c: C
     def s: Seq[Char]
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+      case st: ST =>
+        c == st.c && s == st.s
+      case _ => false
+    }
   }
 
   sealed trait T
@@ -121,6 +137,361 @@ class PropertyTest extends UdashFrontendTest {
       values should contain(Tuple2(TC1(-5), TC2("tp")))
       values should contain(C(-5, "tp"))
     }
+
+    "combine with other properties" in {
+      val p1 = Property(1)
+      val p2 = Property(2)
+
+      val sum = p1.combine(p2)(_ + _)
+      val mul = p1.combine(p2)(_ * _)
+
+      sum.get should be(3)
+      mul.get should be(2)
+
+      p1.set(12)
+
+      sum.get should be(14)
+      mul.get should be(24)
+
+      p2.set(-2)
+
+      sum.get should be(10)
+      mul.get should be(-24)
+
+      trait M {
+        def x: Double
+        def y: Double
+      }
+      object M {
+        def apply(_x: Double, _y: Double): M =
+          new M {
+            override def x: Double = _x
+            override def y: Double = _y
+          }
+      }
+
+      val m = ModelProperty[M](M(0.5, 0.3))
+
+      val mxc = sum.combine(m)(_ * _.x)
+      val myc = sum.combine(m.subProp(_.y))(_ * _)
+
+      // sum.get == 10
+      mxc.get should be(5.0)
+      myc.get should be(3.0)
+
+      var mxcChanges = 0
+      var mycChanges = 0
+      mxc.listen(_ => mxcChanges += 1)
+      myc.listen(_ => mycChanges += 1)
+
+      m.subProp(_.x).set(0.2)
+      m.subProp(_.y).set(0.1)
+
+      // sum.get == 10
+      mxc.get should be(2.0)
+      myc.get should be(1.0)
+      mxcChanges should be(1)
+      mycChanges should be(1)
+
+      val s = SeqProperty(1, 2, 3, 4)
+      val sc = sum.combine(s)((m, items) => items.map(_ * m))
+      val sqc = s.combine(sum)(_ * _)
+
+      // sum.get == 10
+      sc.get should be(Seq(10, 20, 30, 40))
+      sqc.get should be(Seq(10, 20, 30, 40))
+
+      var sqcHeadChanges = 0
+      sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+      s.replace(1, 2, 7, 8, 9)
+
+      // sum.get == 10
+      sc.get should be(Seq(10, 70, 80, 90, 40))
+      sqc.get should be(Seq(10, 70, 80, 90, 40))
+
+      sqcHeadChanges should be(0)
+
+      p1.set(0)
+      p2.set(0)
+
+      sqcHeadChanges should be(2)
+
+      // sum.get == 0
+      sc.get should be(Seq(0, 0, 0, 0, 0))
+      sqc.get should be(Seq(0, 0, 0, 0, 0))
+    }
+
+    "transform to ReadableSeqProperty" in {
+      var elementsUpdated = 0
+      def registerElementListener(props: Seq[ReadableProperty[_]]) =
+        props.foreach(_.listen(_ => elementsUpdated += 1))
+
+      val p = Property("1,2,3,4,5")
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      registerElementListener(s.elemProperties)
+
+      var lastValue: Seq[Int] = null
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      s.listen(v => lastValue = v)
+      s.listenStructure(p => {
+        registerElementListener(p.added)
+        lastPatch = p
+      })
+
+      s.get should be(Seq(1, 2, 3, 4, 5))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("5,4,3")
+      s.get should be(Seq(5, 4, 3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("5,4,3,2")
+      s.get should be(Seq(5, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("6,5,4,3,2")
+      s.get should be(Seq(6, 5, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("6,5,7,4,3,2")
+      s.get should be(Seq(6, 5, 7, 4, 3, 2))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("-1,-2,-3")
+      s.get should be(Seq(-1, -2, -3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(3)
+
+      //TODO: Does it make sense to use LCCS?
+      //It could use two patches here
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("0,-1,-2,-3,-4")
+      s.get should be(Seq(0, -1, -2, -3, -4))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(3) // could be 0 with LCCS
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("0,-1,-3,-4")
+      s.get should be(Seq(0, -1, -3, -4))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(1)
+      elementsUpdated should be(0)
+
+      p.set("-1,-2,-3")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("")
+      s.get should be(Seq())
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(0)
+
+      p.set("1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("1,0,1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.set("1,0,1,0,1")
+      s.get should be(Seq(1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch.idx should be(5)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(0)
+    }
+
+    "not allow children modification after transformation into ReadableSeqProperty" in {
+      val p = Property("1,2,3,4,5")
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      s.elemProperties.foreach {
+        case p: Property[Int] => p.set(20)
+        case p: ReadableProperty[Int] => //ignore
+      }
+
+      s.get should be(Seq(1,2,3,4,5))
+    }
+
+    "transform to SeqProperty" in {
+      var elementsUpdated = 0
+      def registerElementListener(props: Seq[ReadableProperty[_]]) =
+        props.foreach(_.listen(_ => elementsUpdated += 1))
+
+      val p = Property("1,2,3,4,5")
+      val s: SeqProperty[Int, Property[Int]] = p.transform(
+        (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
+        (s: Seq[Int]) => s.mkString(",")
+      )
+
+      registerElementListener(s.elemProperties)
+
+      var lastValue: Seq[Int] = null
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      s.listen(v => lastValue = v)
+      s.listenStructure(p => {
+        registerElementListener(p.added)
+        lastPatch = p
+      })
+
+      s.get should be(Seq(1, 2, 3, 4, 5))
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(5, 4, 3))
+      p.get should be("5,4,3")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.append(2)
+      p.get should be("5,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.prepend(6)
+      p.get should be("6,5,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.insert(2, 7)
+      p.get should be("6,5,7,4,3,2")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(-1, -2, -3))
+      p.get should be("-1,-2,-3")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(3)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.prepend(0)
+      s.append(-4)
+      p.get should be("0,-1,-2,-3,-4")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(1)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.remove(2, 1)
+      p.get should be("0,-1,-3,-4")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(1)
+      elementsUpdated should be(0)
+
+      p.set("-1,-2,-3")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq())
+      p.get should be("")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(3)
+      elementsUpdated should be(0)
+
+      s.set(Seq(1,0,1,0,1))
+      p.get should be("1,0,1,0,1")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.append(0, 1)
+      p.get should be("1,0,1,0,1,0,1")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(2)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.set(Seq(1,0,1,0,1))
+      p.get should be("1,0,1,0,1")
+      lastValue should be(s.get)
+      lastPatch.idx should be(5)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(0)
+    }
   }
 
   "ModelProperty" should {
@@ -203,6 +574,88 @@ class PropertyTest extends UdashFrontendTest {
       values.size should be(4)
       values should contain(64)
       values should contain(128)
+    }
+
+    "work with simple case class" in {
+      case class Simple(i: Int, s:  String)
+      val p = ModelProperty(Simple(1, "xxx"))
+      p.get should be(Simple(1, "xxx"))
+      val i = p.subProp(_.i)
+      i.set(5)
+      val s = p.subProp(_.s)
+      s.set("asd")
+      p.get should be(Simple(5, "asd"))
+    }
+
+    "work with tuples" in {
+      val init = (123, "sth", true, C(42, "s"))
+      val p = ModelProperty(init)
+
+      var changeCount = 0
+      p.listen(_ => changeCount += 1)
+
+      p.get should be(init)
+      p.subProp(_._1).set(333)
+      p.subProp(_._2).set("sth2")
+      p.subProp(_._3).set(false)
+      val fourth = p.subModel(_._4)
+      fourth.subProp(_.i).set(24)
+      fourth.subProp(_.s).set("s2")
+      p.get should be((333, "sth2", false, C(24, "s2")))
+      changeCount should be(5)
+    }
+
+    "work with Tuple2" in {
+      val init = (123, "sth")
+      val p = ModelProperty(init)
+
+      var changeCount = 0
+      p.listen(_ => changeCount += 1)
+
+      p.get should be(init)
+      p.subProp(_._1).set(333)
+      p.subProp(_._2).set("sth2")
+      p.get should be((333, "sth2"))
+      changeCount should be(2)
+    }
+
+    "work with recursive case class" in {
+      case class Simple(i: Int, s:  Simple)
+      val p = ModelProperty(Simple(1, null))
+      p.get should be(Simple(1, null))
+      val i = p.subProp(_.i)
+      i.set(5)
+      val s = p.subModel(_.s)
+      s.set(Simple(2, Simple(3, null)))
+      p.get should be(Simple(5, Simple(2, Simple(3, null))))
+      s.subProp(_.i).get should be(2)
+      s.subProp(_.s.i).get should be(3)
+    }
+
+    "work with recursive trait" in {
+      trait T {
+        def t: T
+      }
+      val p = ModelProperty[T](new T { def t: T = null })
+      p.get.t should be(null)
+      val s = p.subModel(_.t)
+      s.set(new T { def t: T = null })
+      s.get.t should be(null)
+      p.get.t shouldNot be(null)
+    }
+
+    "work with recursive case class containing Seq" in {
+      case class Simple(i: Seq[Simple], s:  Simple)
+      val p = ModelProperty(Simple(Seq[Simple](), null))
+      p.get should be(Simple(Seq(), null))
+      val i = p.subSeq(_.i)
+      i.set(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))))
+      val s = p.subModel(_.s)
+      s.set(Simple(Seq(), Simple(Seq(), null)))
+      p.get should be(Simple(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))), Simple(Seq(), Simple(Seq(), null))))
+      s.subProp(_.i).get should be(Seq())
+      s.subProp(_.s.i).get should be(Seq())
+      i.elemProperties.isEmpty should be(false)
     }
   }
 
@@ -817,6 +1270,220 @@ class PropertyTest extends UdashFrontendTest {
       doubles.get should be(Seq(8.5, 12.0, 8.2, 10.3))
       ints.get should be(Seq(8, 12, 8, 10))
       evens.get should be(Seq(8, 12, 8, 10))
+    }
+
+    "provide valid patch when combined" in {
+      val s = SeqProperty(1, 2, 3, 4)
+      val p = Property(2)
+
+      val c = s.combine(p)(_ * _)
+
+      var listenCalls = mutable.ListBuffer[Seq[Int]]()
+      c.listen(v => listenCalls += v)
+
+      var lastPatch: Patch[ReadableProperty[Int]] = null
+      c.listenStructure(patch => lastPatch = patch)
+
+      c.get should be(Seq(2, 4, 6, 8))
+
+      lastPatch = null
+      CallbackSequencer.sequence {
+        p.set(1)
+      }
+      c.get should be(Seq(1, 2, 3, 4))
+      lastPatch should be(null)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(1, 2, 3, 4))
+
+      listenCalls.clear()
+      CallbackSequencer.sequence {
+        p.set(2)
+      }
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 4, 6, 8))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.append(1)
+      c.get should be(Seq(2, 4, 6, 8, 2))
+      lastPatch.idx should be(4)
+      lastPatch.added.head.get should be(2)
+      lastPatch.removed.size should be(0)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 4, 6, 8, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.remove(1, 3)
+      c.get should be(Seq(2, 2))
+      lastPatch.idx should be(1)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.head.get should be(4)
+      lastPatch.removed.last.get should be(8)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.insert(1, 6, 7, 8)
+      c.get should be(Seq(2, 12, 14, 16, 2))
+      lastPatch.idx should be(1)
+      lastPatch.added.head.get should be(12)
+      lastPatch.added.last.get should be(16)
+      lastPatch.removed.size should be(0)
+      lastPatch.clearsProperty should be(false)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq(2, 12, 14, 16, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.clear()
+      c.get should be(Seq())
+      lastPatch.idx should be(0)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.head.get should be(2)
+      lastPatch.removed.last.get should be(2)
+      lastPatch.clearsProperty should be(true)
+      listenCalls.size should be(1)
+      listenCalls should contain(Seq())
+    }
+
+    "provide reversed version" in {
+      val p = SeqProperty(1,2,3)
+      val r: SeqProperty[Int, Property[Int]] = p.reversed()
+      val r2: SeqProperty[Int, Property[Int]] = r.reversed()
+
+      p.get should be(r.get.reverse)
+      p.get should be(r2.get)
+
+      var pValue = Seq.empty[Int]
+      var rValue = Seq.empty[Int]
+      var r2Value = Seq.empty[Int]
+      var pPatch: Patch[Property[Int]] = null
+      var rPatch: Patch[Property[Int]] = null
+      var r2Patch: Patch[Property[Int]] = null
+      p.listen(v => pValue = v)
+      r.listen(v => rValue = v)
+      r2.listen(v => r2Value = v)
+      p.listenStructure(v => pPatch = v)
+      r.listenStructure(v => rPatch = v)
+      r2.listenStructure(v => r2Patch = v)
+
+      p.append(4)
+
+      pValue should be(Seq(1,2,3,4))
+      rValue should be(Seq(4,3,2,1))
+      r2Value should be(Seq(1,2,3,4))
+      pPatch.idx should be(3)
+      pPatch.added.size should be(1)
+      pPatch.removed.size should be(0)
+      rPatch.idx should be(0)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(3)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.prepend(0)
+
+      pValue should be(Seq(0,1,2,3,4))
+      rValue should be(Seq(4,3,2,1,0))
+      r2Value should be(Seq(0,1,2,3,4))
+      pPatch.idx should be(0)
+      pPatch.added.size should be(1)
+      pPatch.removed.size should be(0)
+      rPatch.idx should be(4)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(0)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.replace(1, 2, 9, 9, 9)
+
+      pValue should be(Seq(0,9,9,9,3,4))
+      rValue should be(Seq(4,3,9,9,9,0))
+      r2Value should be(Seq(0,9,9,9,3,4))
+      pPatch.idx should be(1)
+      pPatch.added.size should be(3)
+      pPatch.removed.size should be(2)
+      rPatch.idx should be(2)
+      rPatch.added.size should be(3)
+      rPatch.removed.size should be(2)
+      r2Patch.idx should be(1)
+      r2Patch.added.size should be(3)
+      r2Patch.removed.size should be(2)
+    }
+
+    "provide reversed version of transformed and filtered SeqProperty" in {
+      val p = SeqProperty(-3,-2,-1,0,1,2)
+      val f = p.filter(_ >= 0).transform((i: Int) => i + 1)
+      val r: ReadableSeqProperty[Int, ReadableProperty[Int]] = f.reversed()
+      val r2: ReadableSeqProperty[Int, ReadableProperty[Int]] = r.reversed()
+
+      f.get should be(r.get.reverse)
+      f.get should be(r2.get)
+
+      var fValue = Seq.empty[Int]
+      var rValue = Seq.empty[Int]
+      var r2Value = Seq.empty[Int]
+      var fPatch: Patch[ReadableProperty[Int]] = null
+      var rPatch: Patch[ReadableProperty[Int]] = null
+      var r2Patch: Patch[ReadableProperty[Int]] = null
+      f.listen(v => fValue = v)
+      r.listen(v => rValue = v)
+      r2.listen(v => r2Value = v)
+      f.listenStructure(v => fPatch = v)
+      r.listenStructure(v => rPatch = v)
+      r2.listenStructure(v => r2Patch = v)
+
+      p.append(3)
+
+      fValue should be(Seq(1,2,3,4))
+      rValue should be(Seq(4,3,2,1))
+      r2Value should be(Seq(1,2,3,4))
+      fPatch.idx should be(3)
+      fPatch.added.size should be(1)
+      fPatch.removed.size should be(0)
+      rPatch.idx should be(0)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(3)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.prepend(-1)
+      p.prepend(0)
+
+      fValue should be(Seq(1,1,2,3,4))
+      rValue should be(Seq(4,3,2,1,1))
+      r2Value should be(Seq(1,1,2,3,4))
+      fPatch.idx should be(0)
+      fPatch.added.size should be(1)
+      fPatch.removed.size should be(0)
+      rPatch.idx should be(4)
+      rPatch.added.size should be(1)
+      rPatch.removed.size should be(0)
+      r2Patch.idx should be(0)
+      r2Patch.added.size should be(1)
+      r2Patch.removed.size should be(0)
+
+      p.replace(5, 2, 8, 8, 8)
+
+      fValue should be(Seq(1,9,9,9,3,4))
+      rValue should be(Seq(4,3,9,9,9,1))
+      r2Value should be(Seq(1,9,9,9,3,4))
+      fPatch.idx should be(1)
+      fPatch.added.size should be(3)
+      fPatch.removed.size should be(2)
+      rPatch.idx should be(2)
+      rPatch.added.size should be(3)
+      rPatch.removed.size should be(2)
+      r2Patch.idx should be(1)
+      r2Patch.added.size should be(3)
+      r2Patch.removed.size should be(2)
     }
   }
 }

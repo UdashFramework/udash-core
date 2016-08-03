@@ -1,7 +1,7 @@
 package io.udash.bindings
 
 import io.udash._
-import io.udash.properties.SeqProperty
+import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
 
 class SelectTest extends UdashFrontendTest {
@@ -67,7 +67,7 @@ class SelectTest extends UdashFrontendTest {
       select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
       select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
 
-      p.remove(0, 5)
+      p.clear()
       select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
       select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
       select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)

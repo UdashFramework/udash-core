@@ -4,6 +4,7 @@ package dropdown
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
+import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 
@@ -11,7 +12,7 @@ import scala.scalajs.js
 import scalatags.JsDom.all._
 
 class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
-                   (val items: properties.SeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
+                   (val items: seq.SeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
                    (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
@@ -116,7 +117,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: Property[ItemType]]
-           (items: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (items: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (itemFactory: (ElemType) => dom.Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, false, componentId)(itemFactory)(content)
@@ -134,7 +135,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def dropup[ItemType, ElemType <: Property[ItemType]]
-            (items: properties.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+            (items: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
             (itemFactory: (ElemType) => dom.Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true, componentId)(itemFactory)(content)

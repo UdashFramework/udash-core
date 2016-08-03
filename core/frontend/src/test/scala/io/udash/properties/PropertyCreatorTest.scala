@@ -3,6 +3,11 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 class PropertyCreatorTest extends UdashFrontendTest {
+  // DO NOT REMOVE THESE IMPORTS!
+  import io.udash.properties.single._
+  import io.udash.properties.model._
+  import io.udash.properties.seq._
+
   "PropertyCreator" should {
     "create Property for basic types (and handle init value)" in {
       """val p = Property[String]""".stripMargin should compile
@@ -14,12 +19,44 @@ class PropertyCreatorTest extends UdashFrontendTest {
       """val p = Property[Int](2)""".stripMargin should compile
     }
 
-    "create Property for case class" in {
+    "create Property dom.Element" in {
+      """val p = Property[org.scalajs.dom.Element]""".stripMargin should compile
+    }
+
+    "create Property for immutable case class" in {
       """case class A(s: String, i: Int)
         |val p = Property[A]""".stripMargin should compile
 
       """case class A(s: String, i: Int)
         |val p = Property[A](A("bla", 5))""".stripMargin should compile
+
+      """case class A(s: String, var i: Int)
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """case class A(s: String, i: Int) { var x = "x" }
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """case class A(s: String, i: Int) { def x = "x" }
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """case class A(s: String, i: Int) { def x = "x" }
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """class C { def x = "x" }
+        |case class A(s: String, i: Int) extends C
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """class C { var x = "x" }
+        |case class A(s: String, i: Int) extends C
+        |val p = Property[A](A("bla", 5))""".stripMargin shouldNot compile
+
+      """class C { val x = "x" }
+        |case class A(s: String, i: Int) extends C
+        |val p = Property[A](A("bla", 5))""".stripMargin should compile
+
+      """class C { var x = 5 }
+        |case class A(s: String, i: Int, c: C)
+        |val p = Property[A](A("bla", 5, new C))""".stripMargin shouldNot compile
 
       """case class A(s: String, i: Int)
         |val p = Property[A](5)""".stripMargin shouldNot typeCheck
@@ -106,10 +143,48 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |val x = p.subModel(_.x)""".stripMargin should compile
     }
 
-    "not create ModelProperty for anything other than trait" in {
+    "create model property for simple case classes" in {
+      """case class Simple(i: Int, s:  String)
+        |val p = ModelProperty[Simple](Simple(1, "x"))
+        |p.subProp(_.i).set(5)
+        |p.subProp(_.s).set("3")
+        |""".stripMargin should compile
+
+      """case class A(s: String, i: Int)
+        |val p = Property[A].asModel""".stripMargin should compile
+
+      """case class A(s: Seq[String], i: Seq[Int])
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)""".stripMargin should compile
+
+      """case class A(s: String, i: Int)
+        |case class B(a: A)
+        |val p = ModelProperty[B]
+        |val sub = p.subModel(_.a)""".stripMargin should compile
+
+      """case class A(s: Seq[String], i: Seq[Int])
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)""".stripMargin should compile
+
+      """case class A(s: Seq[String], i: A)
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin should compile
+    }
+
+    "create ModelProperty for tuples" in {
+      """val p = ModelProperty(Tuple1("String"))""".stripMargin should compile
+      """val p = ModelProperty(("String", 25))""".stripMargin should compile
+      """val p = ModelProperty(("String", 25, 3))""".stripMargin should compile
+      """val p = ModelProperty(("String", 25, 3, 4))""".stripMargin should compile
+      """val p = ModelProperty(("String", 25, 3, 4, 5))""".stripMargin should compile
+      """val p = ModelProperty(("String", 25, 3, 4, 5, 6))""".stripMargin should compile
+    }
+
+    "not create ModelProperty for anything other than trait or simple case class" in {
       """val p = Property[Int].asModel""".stripMargin shouldNot compile
 
-      """val p = Property[String].asModel""".stripMargin shouldNot compile
+      """val p = ModelProperty[String]""".stripMargin shouldNot compile
 
       """val p = Property[Seq[Int]].asModel""".stripMargin shouldNot compile
 
@@ -123,17 +198,39 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |case object B extends T
         |val p = Property[Seq[T]].asModel""".stripMargin shouldNot compile
 
-      """case class A(s: String, i: Int)
-        |val p = Property[A].asModel""".stripMargin shouldNot compile
-
-      """case class A(s: String, i: Int)
-        |val p = Property[Seq[A]].asModel""".stripMargin shouldNot compile
-
       """trait T {
         |  def i: Int
         |  def s: String
         |}
         |val p = Property[Seq[T]].asModel""".stripMargin shouldNot compile
+
+      """case class A(s: String, i: Int)
+        |val p = Property[Seq[A]].asModel""".stripMargin shouldNot compile
+
+      """case class NotSimple(i: Int, var s: String)
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """case class NotSimple(i: Int, s: String) { val t = 5 }
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """case class NotSimple(i: Int, s: String) { var t = 5 }
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """case class NotSimple(i: Int, s: String) { def t = 5 }
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """class C { val x = 5 }
+        |case class NotSimple(i: Int, s: String) extends C
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """class C { var x = 5 }
+        |case class NotSimple(i: Int, c: C)
+        |val p = ModelProperty[NotSimple]""".stripMargin shouldNot compile
+
+      """case class A(s: Seq[String], i: scala.collection.mutable.Seq[Int])
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin shouldNot compile
     }
 
     "create SeqProperty for Seq" in {
@@ -217,6 +314,12 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |case object B extends T
         |val p = Property[Seq[T]].asSeq[T]
         |val m: ModelProperty[T] = p.elemProperties.head.asModel""".stripMargin shouldNot compile
+
+      """val p = SeqProperty[(String, Option[String])]""".stripMargin should compile
+
+      """val items = SeqProperty(
+        |  Seq.fill(7)((3.1, 2.5, 4.564))
+        |)""".stripMargin should compile
     }
 
     "not create SeqProperty for anything other than Seq" in {
@@ -279,7 +382,37 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |}
         |val p = Property[T].asModel
         |val s = p.subModel(_.t).subSeq(_.s)
-        |val s2 = p.subSeq(_.t.s)""".stripMargin should compile
+        |val s2 = p.subSeq(_.t.s)
+        |val i = p.subProp(_.t.c.i)""".stripMargin should compile
+
+      """case class RestExampleClass(i: Int, s: String, tuple: (Double, String))
+        |trait ExampleModel {
+        |  def string: String
+        |  def int: Int
+        |  def cls: RestExampleClass
+        |}
+        |val responsesModel = ModelProperty[ExampleModel]""".stripMargin should compile
+
+      """sealed trait Fruit
+        |case class Apple(name: String) extends Fruit
+        |case object Orange extends Fruit
+        |
+        |case class DemoCaseClass(x: String, i: Int)
+        |
+        |trait GenCodecsDemoModel {
+        |  def int: Int
+        |  def double: Double
+        |  def string: String
+        |  def seq: Seq[String]
+        |  def map: Seq[(String, Int)]
+        |  def caseClass: DemoCaseClass
+        |  def clsInt: Int
+        |  def clsString: String
+        |  def clsVar: Int
+        |  def sealedTrait: Fruit
+        |}
+        |
+        |val GenCodecs = ModelProperty[GenCodecsDemoModel]""".stripMargin should compile
     }
 
     "not create property for mutable class" in {
@@ -298,12 +431,6 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |  def inc() = i += 1
         |}
         |val p = Property[C]""".stripMargin shouldNot compile
-
-      """import org.scalajs.dom.Element
-        |trait T {
-        |  def elements: Seq[Element]
-        |}
-        |val p = ModelProperty[T]""".stripMargin should compile
     }
   }
 }
