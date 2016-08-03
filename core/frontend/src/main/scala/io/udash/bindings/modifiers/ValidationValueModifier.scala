@@ -11,9 +11,9 @@ import scala.util.{Failure, Success}
 import scalatags.generic._
 
 private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T],
-                                 initBuilder: Future[ValidationResult] => Seq[Element],
+                                 initBuilder: Option[Future[ValidationResult] => Seq[Element]],
                                  completeBuilder: ValidationResult => Seq[Element],
-                                 errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) extends Modifier[dom.Element] with Bindings {
+                                 errorBuilder: Option[Throwable => Seq[Element]])(implicit ec: ExecutionContext) extends Modifier[dom.Element] with Bindings {
 
   override def applyTo(root: dom.Element): Unit = {
     var elements: Seq[Element] = null
@@ -27,10 +27,10 @@ private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T]
 
     val listener = (_: T) => {
       val valid: Future[ValidationResult] = property.isValid
-      rebuild(valid, initBuilder)
+      initBuilder.foreach(b => rebuild(valid, b))
       valid onComplete {
         case Success(result) => rebuild(result, completeBuilder)
-        case Failure(errors) => rebuild(errors, errorBuilder)
+        case Failure(errors) => errorBuilder.foreach(b => rebuild(errors, b))
       }
     }
 
