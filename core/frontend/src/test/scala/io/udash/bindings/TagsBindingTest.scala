@@ -1277,9 +1277,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       })
 
       val template = div(
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         )
       ).render
@@ -1295,11 +1295,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val template = div(
         span(),
-        bindValidation(p,
-          _ => i("Validating...").render,
-          _ => b("done").render,
-          _ => b("error").render
-        ),
+        valid(p) {
+          case Valid => b("done").render
+          case Invalid(_) => b("invalid").render
+        },
         span()
       ).render
 
@@ -1316,9 +1315,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       })
 
       val template = div(
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         )
       ).render
@@ -1335,15 +1334,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val template = div(
         "1",
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("error").render
         ),
         span("2"),
-        bindValidation(p,
-          _ => i("Validating...").render,
+        valid(p)(
           _ => b("done").render,
+          _ => i("Validating...").render,
           _ => b("Error").render
         ),
         div("3")

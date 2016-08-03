@@ -116,11 +116,30 @@ trait Bindings {
     * @param errorBuilder    Builder which is called, when validation process fails.
     * @return Modifier for validation logic.
     */
+  @deprecated("Use `valid` instead.", "0.4.0")
   def bindValidation[A](property: ReadableProperty[A],
                         initBuilder: Future[ValidationResult] => Seq[Element],
                         completeBuilder: ValidationResult => Seq[Element],
                         errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) =
-    new ValidationValueModifier(property, initBuilder, completeBuilder, errorBuilder)
+    new ValidationValueModifier(property, Some(initBuilder), completeBuilder, Some(errorBuilder))
+
+  /**
+    * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
+    * to customize what HTML elements should be shown.
+    *
+    * @param property        Property to bind.
+    * @param progressBuilder     Builder which is called when validation process is started. It will also give you an access to future of
+    *                        validation results.
+    * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
+    * @param errorBuilder    Builder which is called, when validation process fails.
+    * @return Modifier for validation logic.
+    */
+  def valid[A](property: ReadableProperty[A])
+              (completeBuilder: ValidationResult => Seq[Element],
+               progressBuilder: Future[ValidationResult] => Seq[Element] = null,
+               errorBuilder: Throwable => Seq[Element] = null)
+              (implicit ec: ExecutionContext) =
+  new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
   /**
     * Use it to update DOM elements, on every `property` change.
@@ -201,24 +220,6 @@ object Bindings {
       }
   }
 
-  class PropertyOps[T](private val property: ReadableProperty[T]) extends AnyVal {
-    /** Calls provided callback on every property value change. */
-    def reactiveApply(callback: (Element, T) => Unit): Modifier[Element] = new Modifier[Element] {
-      override def applyTo(t: Element): Unit = {
-        var registration: Registration = null
-        registration = property.listen(value =>
-          if (available(t)) callback(t, value)
-          else registration.cancel()
-        )
-        if (available(t)) callback(t, property.get)
-      }
-    }
-  }
-
-  @inline
-  def available(e: dom.Node): Boolean =
-    !js.isUndefined(e) && e.ne(null)
-
   class AttrPairOps(private val attr: scalatags.generic.AttrPair[dom.Element, _]) extends AnyVal { outer =>
     /** Sets attribute on element. */
     def applyTo(element: dom.Element): Unit =
@@ -247,4 +248,21 @@ object Bindings {
     }
   }
 
+  class PropertyOps[T](private val property: ReadableProperty[T]) extends AnyVal {
+    /** Calls provided callback on every property value change. */
+    def reactiveApply(callback: (Element, T) => Unit): Modifier[Element] = new Modifier[Element] {
+      override def applyTo(t: Element): Unit = {
+        var registration: Registration = null
+        registration = property.listen(value =>
+          if (available(t)) callback(t, value)
+          else registration.cancel()
+        )
+        if (available(t)) callback(t, property.get)
+      }
+    }
+  }
+
+  @inline
+  def available(e: dom.Node): Boolean =
+    !js.isUndefined(e) && e.ne(null)
 }

@@ -9,6 +9,7 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.language.higherKinds
+import scala.util.{Failure, Success}
 
 object Property {
   /** Creates empty DirectProperty[T]. */
@@ -45,6 +46,16 @@ trait ReadableProperty[A] {
   def isValid: Future[ValidationResult] = {
     if (validationResult == null) validate()
     validationResult
+  }
+
+  /** Property containing validation result. */
+  lazy val valid: ReadableProperty[ValidationResult] = {
+    val p: Property[ValidationResult] = Property(Valid)
+    listen(_ => isValid onComplete {
+      case Success(result) => p.set(result)
+      case Failure(ex) => p.set(Invalid(ex.getMessage))
+    })
+    p.transform(id => id)
   }
 
   /**
