@@ -9,6 +9,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.scalajs.concurrent.JSExecutionContext
+import scala.util.Try
 
 case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
 
@@ -16,9 +17,11 @@ case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
   * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
   * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
   */
-class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[HierarchyRoot],
-                                                                                        viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-                                                                                        viewRenderer: ViewRenderer) {
+class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue]
+                   (routingRegistry: RoutingRegistry[HierarchyRoot],
+                    viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
+                    viewRenderer: ViewRenderer) {
+
   private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]], JSExecutionContext.queue)
   private val callbacks = mutable.HashSet.empty[StateChangeEvent[HierarchyRoot] => Any]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
@@ -28,7 +31,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     *
     * @param url URL to be resolved
     */
-  def handleUrl(url: Url): Unit = {
+  def handleUrl(url: Url): Try[Unit] = Try {
     val newState = routingRegistry.matchUrl(url)
     val oldState = currentStateProp.get
     currentStateProp.set(newState)
@@ -39,9 +42,11 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     val samePath = findEqPrefix(newStatePath, currentStatePath)
     val diffPath = findDiffSuffix(newStatePath, currentStatePath)
 
-    val (viewsToLeave, viewsToAdd) =
+    val (viewsToLeave, viewsToAdd) = {
       if (samePath.isEmpty) {
-        val views = renderPath(diffPath)
+        statesMap.values.foreach { case (_, presenter) => presenter.onClose() }
+        statesMap.clear()
+        val views = resolvePath(diffPath)
         (Nil, views)
       } else {
         val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
@@ -60,11 +65,10 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
         statesMap ++= oldViewFactories
 
         val viewsToLeave = statesMap.values.map(_._1).toList
-        val views = renderPath(diffPath.slice(toUpdateStatesSize, diffPath.size))
+        val views = resolvePath(diffPath.slice(toUpdateStatesSize, diffPath.size))
         (viewsToLeave, views)
       }
-
-    viewRenderer.renderView(viewsToLeave, viewsToAdd)
+    }
 
     diffPath.foldRight(Option(newState)) { (currentState, previousState) =>
       previousState.flatMap(statesMap.get).foreach { case (_, presenter) =>
@@ -73,8 +77,10 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
       currentState.parentState
     }
 
+    viewRenderer.renderView(viewsToLeave, viewsToAdd)
+
     if (newState != oldState) callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
-  }
+  }.recover { case ex: Throwable => statesMap.clear(); throw ex }
 
   /**
     * Register a callback for the routing state change.
@@ -108,7 +114,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     }
   }
 
-  private def renderPath(path: List[HierarchyRoot]): List[View] = {
+  private def resolvePath(path: List[HierarchyRoot]): List[View] = {
     path.map { state =>
       val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
       statesMap(state) = (view, presenter)

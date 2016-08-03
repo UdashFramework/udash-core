@@ -51,6 +51,7 @@ lazy val udash = project.in(file("."))
     `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
     `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`, `rest-backend`,
     `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
+    `auth-shared-JS`, `auth-shared-JVM`, `auth-frontend`,
     `css-macros`, `css-shared-JS`, `css-shared-JVM`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
@@ -160,9 +161,20 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
   .dependsOn(`i18n-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
-  .settings(
-    jsDependencies += RuntimeDOM % Test
-  )
+
+lazy val `auth-shared` = crossProject.crossType(CrossType.Pure).in(file("auth/shared"))
+  .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
+  .settings(commonSettings: _*)
+  .jsSettings(commonJSSettings:_*)
+
+lazy val `auth-shared-JVM` = `auth-shared`.jvm
+lazy val `auth-shared-JS` = `auth-shared`.js
+
+lazy val `auth-frontend` = project.in(file("auth/frontend"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(`auth-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
 
 lazy val `css-macros` = project.in(file("css/macros"))
   .settings(commonSettings: _*)

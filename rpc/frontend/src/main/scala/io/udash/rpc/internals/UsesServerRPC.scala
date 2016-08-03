@@ -19,6 +19,8 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   override val localFramework: ClientUdashRPCFramework
   override val remoteFramework: ServerUdashRPCFramework
 
+  type RPCFailureListener = PartialFunction[Throwable, Any]
+
   import remoteFramework._
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
@@ -35,7 +37,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val callTimeout: Duration = 30 seconds
   private val pendingCalls: Dictionary[(RPCRequest, Promise[RawValue])] = js.Dictionary.empty
-  private val exceptionCallbacks: mutable.Set[Throwable => Unit] = mutable.HashSet.empty
+  private val exceptionCallbacks: mutable.Set[RPCFailureListener] = mutable.HashSet.empty
 
   private var cid: Int = 0
   private def newCallId(): String = {
@@ -44,10 +46,15 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   }
 
   /** Registers callback which will be called whenever RPC request returns failure. */
-  def registerCallFailureCallback(callback: Throwable => Unit): Registration = {
+  def registerCallFailureCallback(callback: RPCFailureListener): Registration = {
     exceptionCallbacks += callback
     new SetRegistration(exceptionCallbacks, callback)
   }
+
+  private def handleException(ex: Throwable): Unit =
+    exceptionCallbacks.foreach { pf =>
+      if (pf.isDefinedAt(ex)) pf(ex)
+    }
 
   def handleResponse(response: RPCResponse): Unit = {
     pendingCalls.remove(response.callId).foreach { case (request, promise) =>
@@ -55,11 +62,11 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
         case RPCResponseSuccess(r, _) =>
           promise.success(r)
         case RPCResponseException(_, exception, _) =>
-          exceptionCallbacks.foreach(h => h(exception))
+          handleException(exception)
           promise.failure(exception)
         case RPCResponseFailure(cause, error, _) =>
           val exception = RPCFailure(cause, error)
-          exceptionCallbacks.foreach(h => h(exception))
+          handleException(exception)
           promise.failure(exception)
       }
     }

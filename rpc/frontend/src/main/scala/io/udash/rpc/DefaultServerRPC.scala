@@ -26,7 +26,7 @@ object DefaultServerRPC {
             ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
            (localRpc: ClientRPCType, serverUrl: String = "/atm/",
             exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry,
-            rpcFailureInterceptors: Seq[(Throwable) => Unit]): ServerRPCType = {
+            rpcFailureInterceptors: Seq[PartialFunction[Throwable, Any]] = Seq.empty): ServerRPCType = {
     val clientRPC = new DefaultExposesClientRPC[ClientRPCType](localRpc)
     lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl, exceptionsRegistry)
     lazy val serverRPC: DefaultServerRPC[ServerRPCType] = new DefaultServerRPC[ServerRPCType](serverConnector)

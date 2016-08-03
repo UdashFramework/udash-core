@@ -119,17 +119,17 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val rpc = serverRPC.remoteRpc
 
       var firstCalled = false
-      serverRPC.registerCallFailureCallback { ex =>
+      serverRPC.registerCallFailureCallback { case ex =>
         firstCalled = true
       }
 
       var secondCalled = false
-      val registration = serverRPC.registerCallFailureCallback { ex =>
+      val registration = serverRPC.registerCallFailureCallback { case ex =>
         secondCalled = true
       }
 
       var thirdCalled = false
-      serverRPC.registerCallFailureCallback { ex =>
+      serverRPC.registerCallFailureCallback { case ex =>
         thirdCalled = true
       }
 
