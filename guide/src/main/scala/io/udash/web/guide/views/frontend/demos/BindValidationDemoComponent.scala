@@ -9,6 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
+import io.udash.web.commons.views.Component
 
 class BindValidationDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -16,12 +17,12 @@ class BindValidationDemoComponent extends Component {
   import JsDom.all._
 
   val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-  integers.addValidator(new Validator[Seq[Int]] {
-    override def apply(element: Seq[Int])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
-      val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
-      if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-      else Invalid(Seq("Sequence is not sorted!"))
-    }
+  integers.addValidator((element: Seq[Int]) => {
+    val zipped = element.toStream
+      .slice(0, element.size-1)
+      .zip(element.toStream.drop(1))
+    if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
+    else Invalid("Sequence is not sorted!")
   })
 
   dom.window.setInterval(() => {
@@ -30,19 +31,24 @@ class BindValidationDemoComponent extends Component {
     val amount = Random.nextInt(s - idx) + 1
     val count = Random.nextInt(5)
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
-  }, 1000)
+  }, 2000)
 
-  override def getTemplate: Element = div(id := "validation-demo", GuideStyles.get.frame)(
+  override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.get.frame)(
     "Integers: ",
-    produce(integers)((seq: Seq[Int]) => span(id := "validation-demo-integers")(seq.map(p => span(s"$p, ")): _*).render), br,
+    span(
+      id := "validation-demo-integers",
+      (attr("data-valid") := true).attrIf(integers.valid.transform((x: ValidationResult) => x == Valid))
+    )(
+      repeat(integers)(p => span(s"${p.get}, ").render)
+    ), br,
     "Is sorted: ",
-    bindValidation(integers,
-      _ => span("Validation in progress...").render,
+    valid(integers)(
       {
         case Valid => span(id := "validation-demo-result")("Yes").render
         case Invalid(_) => span(id := "validation-demo-result")("No").render
       },
-      _ => span("Validation error...").render
+      progressBuilder = _ => span("Validation in progress...").render,
+      errorBuilder = _ => span("Validation error...").render
     )
-  ).render
+  )
 }

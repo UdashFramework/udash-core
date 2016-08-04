@@ -1,15 +1,14 @@
 package io.udash.web.homepage.components.demo
 
+import io.udash._
 import io.udash.core.DomWindow
-import io.udash.properties.Property
-import io.udash.view.Component
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
-import io.udash.web.commons.views.Image
+import io.udash.web.commons.views.{Component, Image}
 import io.udash.wrappers.jquery._
 import io.udash.wrappers.jquery.scrollbar._
 import org.scalajs.dom.Element
@@ -96,7 +95,7 @@ class DemoComponent(url: Property[String]) extends Component {
     )
   ).render
 
-  override def getTemplate: Element = template
+  override def getTemplate: Modifier = template
 }
 
 object DemoComponent {
@@ -110,7 +109,7 @@ object DemoComponent {
       |val name = Property("World")
       |
       |div(
-      |  TextInput(name), br,
+      |  TextInput.debounced(name), br,
       |  produce(name)(name => h3(s"Hello, $name!").render)
       |).render""".stripMargin
   )(HomepageStyles)
@@ -134,14 +133,13 @@ object DemoComponent {
       |val evens = numbers.filter(isEven)
       |
       |div(
-      |  TextInput(input)(
+      |  TextInput.debounced(input)(
       |    onkeyup := ((ev: KeyboardEvent) =>
       |      if (ev.keyCode == ext.KeyCode.Enter) {
-      |       val n: Try[Int] = Try(input.get.toInt)
-      |        if (n.isSuccess) {
-      |          numbers.append(n.get)
+      |        Try(input.get.toInt).foreach(n => {
+      |          numbers.append(n)
       |          input.set("")
-      |        }
+      |        })
       |      })
       |  ), br,
       |  "Numbers: ", repeat(numbers)(renderer), br,
@@ -160,26 +158,20 @@ object DemoComponent {
       |val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
       |
       |val email = Property("example@mail.com")
-      |email.addValidator(new Validator[String] {
-      |  def apply(element: String)
-      |           (implicit ec: ExecutionContext) = Future {
-      |    element match {
-      |      case emailRegex(text) => Valid
-      |      case _ => Invalid(Seq("It's not an email!"))
-      |    }
+      |email.addValidator((element: String) =>
+      |  element match {
+      |    case emailRegex(text) => Valid
+      |    case _ => Invalid("It's not an email!")
       |  }
-      |})
+      |)
       |
       |div(
-      |  TextInput(email), br,
-      |  "Valid: ", bindValidation(email,
-      |    _ => span("Wait...").render,
-      |    {
-      |      case Valid => span("Yes").render
-      |      case Invalid(_) => span("No").render
-      |    },
-      |    _ => span("ERROR").render
-      |  )
+      |  TextInput.debounced(email), br,
+      |  "Valid: ",
+      |  valid(email) {
+      |    case Valid => span("Yes").render
+      |    case Invalid(_) => span("No").render
+      |  }
       |).render""".stripMargin
   )(HomepageStyles)
 
@@ -238,23 +230,28 @@ object DemoComponent {
       |  TextInput(name, `type` := "text",
       |            placeholder := "Type your name..."),
       |  div(
-      |    translatedDynamic(Translations.udash.hello)(_.apply())
+      |    translatedDynamic(Translations.udash.hello)(
+      |      _.apply()
+      |    )
       |  ),
       |  div(produce(name)(n => span(
-      |    translatedDynamic(Translations.udash.withArg)(_.apply(n))
+      |    translatedDynamic(Translations.udash.withArg)(
+      |      _.apply(n)
+      |    )
       |  ).render),
       |  ul(
-      |    li(a(onclick := (() => changeLang(Lang("en"))))("EN")),
-      |    li(a(onclick := (() => changeLang(Lang("pl"))))("PL")),
-      |    li(a(onclick := (() => changeLang(Lang("de"))))("DE")),
-      |    li(a(onclick := (() => changeLang(Lang("sp"))))("SP"))
+      |    Seq(("en", "EN"), ("pl", "PL"), ("de", "DE"), ("sp", "SP"))
+      |      .map { case (key, name) =>
+      |        li(a(
+      |          onclick := (() => changeLang(Lang(key)))
+      |        )(name))
+      |      }
       |  )
       |).render""".stripMargin
   )(HomepageStyles)
 
   def components = CodeBlock(
-    """
-      |import io.udash._
+    """import io.udash._
       |
       |import io.udash.bootstrap.button.UdashButton
       |import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
@@ -277,12 +274,12 @@ object DemoComponent {
       |  modalSize = ModalSize.Small
       |)(
       |  headerFactory = Some(() => h4(bind(text)).render),
-      |  bodyFactory = Some(() => {
+      |  bodyFactory = Some(() =>
       |    div(
       |      h4("Closing..."),
       |      UdashProgressBar.animated(progress)().render
       |    ).render
-      |  })
+      |  )
       |)
       |
       |def makeProgress(): Unit = progress.get match {

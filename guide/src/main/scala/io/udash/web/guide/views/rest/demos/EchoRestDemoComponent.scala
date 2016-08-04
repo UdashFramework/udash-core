@@ -13,14 +13,16 @@ import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 class EchoRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Element = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
 
   object SimpleRestDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val responseProperty = Property[String]
       val presenter = new SimpleRestDemoPresenter(responseProperty)
       new SimpleRestDemoView(responseProperty, presenter).render
@@ -101,7 +103,7 @@ class EchoRestDemoComponent extends Component {
         presenter.sendWithBodyRequest(content.get)
     }
 
-    def render: Element = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "echo-rest-demo")(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "echo-rest-demo")(
       UdashInputGroup()(
         UdashInputGroup.input(
           TextInput.debounced(content, id := "echo-rest-demo-input").render
@@ -117,6 +119,6 @@ class EchoRestDemoComponent extends Component {
         h3("Response: "),
         bind(response)
       )
-    ).render
+    )
   }
 }

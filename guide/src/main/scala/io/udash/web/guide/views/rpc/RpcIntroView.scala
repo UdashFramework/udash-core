@@ -13,11 +13,11 @@ import scalatags.JsDom
 
 case object RpcIntroViewPresenter extends DefaultViewPresenterFactory[RpcIntroState.type](() => new RpcIntroView)
 
-class RpcIntroView extends View {
+class RpcIntroView extends FinalView {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Introduction"),
     p(
       "In frontend applications developers usually struggle with client-server communication. REST APIs witch were popular " +
@@ -111,7 +111,5 @@ class RpcIntroView extends View {
       "Now you know the basics of the Udash RPC system. You should also take a closer look at ",
       a(href := RpcInterfacesState.url)("RPC interfaces"), "."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

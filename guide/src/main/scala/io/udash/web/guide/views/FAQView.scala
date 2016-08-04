@@ -7,16 +7,14 @@ import org.scalajs.dom.Element
 
 object FAQViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new FAQView)
 
-class FAQView extends View {
+class FAQView extends FinalView {
   import scalacss.ScalatagsCss._
   import scalatags.JsDom.all._
 
   private val content = div(
     h2("FAQ"),
     p("TODO")
-  ).render
+  )
 
-  override def getTemplate: Element = content
-
-  override def renderChild(view: View): Unit = {}
+  override def getTemplate: Modifier = content
 }

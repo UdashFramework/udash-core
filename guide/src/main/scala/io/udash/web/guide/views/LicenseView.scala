@@ -2,13 +2,12 @@ package io.udash.web.guide.views
 
 import io.udash._
 import io.udash.web.guide._
-import org.scalajs.dom.Element
 
 import scalatags.JsDom.all._
 
 object LicenseViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new LicenseView)
 
-class LicenseView extends View {
+class LicenseView extends FinalView {
   private val content = div(
     h1("Udash License"),
     div(
@@ -162,9 +161,7 @@ class LicenseView extends View {
         liability."""),
       p("""END OF TERMS AND CONDITIONS""")
     )
-  ).render
+  )
 
-  override def getTemplate: Element = content
-
-  override def renderChild(view: View): Unit = {}
+  override def getTemplate: Modifier = content
 }

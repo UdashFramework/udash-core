@@ -5,19 +5,18 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
-import org.scalajs.dom
 
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
 
 case object FrontendBindingsViewPresenter extends DefaultViewPresenterFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
-class FrontendBindingsView extends View {
+class FrontendBindingsView extends FinalView {
   import Context._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Property Bindings"),
     p(
       "As every modern frontend framework Udash provides model-view template bindings. ",
@@ -32,19 +31,17 @@ class FrontendBindingsView extends View {
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method witch is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
-      li(i("bindValidation"), " - on every change of the property validates its value and calls the builder with the result."),
-      li(i("bindAttribute"), " - on every change of the property runs passed callback witch can modify the DOM element.")
+      li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
+      li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
     h3("bind"),
     CodeBlock(
       """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
+        |
         |val name: Property[String] = Property[String](names.next())
+        |div("Name: ", bind(name)).render
         |
-        |dom.window.setInterval(() => name.set(names.next()), 500)
-        |
-        |val template: Element = div(
-        |  "Name: ", bind(name)
-        |).render""".stripMargin
+        |dom.window.setInterval(() => name.set(names.next()), 500)""".stripMargin
     )(GuideStyles),
     new BindDemoComponent,
     p("As you can see the ", i("bind"), " method automatically updates displayed name on every change of the property value."),
@@ -54,32 +51,19 @@ class FrontendBindingsView extends View {
         |val name: Property[String] = Property[String](names.next())
         |val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
         |
-        |dom.window.setInterval(() => {
-        |  name.set(names.next())
-        |
-        |  val s: Int = integers.get.size
-        |  val idx = Random.nextInt(s)
-        |  val amount = Random.nextInt(s - idx) + 1
-        |  val count = Random.nextInt(5)
-        |  integers.replace(
-        |    idx, amount,
-        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
-        |  )
-        |}, 500)
-        |
-        |val template: Element = div(
+        |div(
         |  "Name: ",
         |  produce(name)(value => b(value).render), br,
         |  "Integers: ",
         |  produce(integers)((seq: Seq[Int]) =>
-        |    span(seq.map(p => span(s"$p, ")):_*).render
+        |    seq.map(p => span(s"$p, ").render)
         |  ), br,
         |  "Integers (patching): ",
         |  produce(integers,
         |    (seq: Seq[Property[Int]]) =>
-        |      span(seq.map(p => span(id := p.hashCode())(s"${p.get}, ")):_*).render,
-        |    (patch: Patch[Property[Int]], el: Element) => {
-        |      val insertBefore = jQ(el).children().eq(patch.idx)
+        |      seq.map(p => span(id := p.hashCode())(s"${p.get}, ").render),
+        |    (patch: Patch[Property[Int]], el: Seq[Element]) => {
+        |      val insertBefore = jQ(el:_*).children().at(patch.idx)
         |      patch.added.foreach(p =>
         |        jQ(span(id := p.hashCode())(s"${p.get}, ").render)
         |          .insertBefore(insertBefore)
@@ -87,7 +71,7 @@ class FrontendBindingsView extends View {
         |      patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
         |    }
         |  )
-        |).render""".stripMargin
+        |)""".stripMargin
     )(GuideStyles),
     new ProduceDemoComponent,
     p(
@@ -100,17 +84,6 @@ class FrontendBindingsView extends View {
     CodeBlock(
       """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
         |
-        |dom.window.setInterval(() => {
-        |  val s: Int = integers.get.size
-        |  val idx = Random.nextInt(s)
-        |  val amount = Random.nextInt(s - idx) + 1
-        |  val count = Random.nextInt(5)
-        |  integers.replace(
-        |    idx, amount,
-        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
-        |  )
-        |}, 500)
-        |
         |val template: Element = div(
         |  "Integers: ",
         |  repeat(integers)(p => span(s"${p.get}, ").render)
@@ -118,71 +91,58 @@ class FrontendBindingsView extends View {
     )(GuideStyles),
     new RepeatDemoComponent,
     p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
-    h3("bindValidation"),
+    h3("Attribute bindings"),
+    p(
+      "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
+      i("Attr.bind(ReadableProperty[String])"), " synchronises attribute value with the property. ",
+      i("AttrPair.attrIf(ReadableProperty[Boolean])"), " adds attribute if the property value is ", i("true"), " and removes it otherwise. "
+    ),
+    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
+                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
+                |
+                |div(
+                |  span("Visible: ", bind(visible), " -> "),
+                |  span((style := "display: none;").attrIfNot(visible))("Show/hide")
+                |)""".stripMargin
+    )(GuideStyles),
+    new BindAttributeDemoComponent,
+    h3("Validation"),
     CodeBlock(
       """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |integers.addValidator(new Validator[Seq[Int]] {
-        |  def apply(element: Seq[Int])
-        |           (implicit ec: ExecutionContext): Future[ValidationResult] =
-        |    Future {
-        |      val zipped = element.toStream.slice(0, element.size-1).zip(element.toStream.drop(1))
-        |      if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-        |      else Invalid(Seq("Sequence is not sorted!"))
-        |    }
+        |integers.addValidator((element: Seq[Int]) => {
+        |  val zipped = element.toStream
+        |    .slice(0, element.size-1)
+        |    .zip(element.toStream.drop(1))
+        |  if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
+        |  else Invalid("Sequence is not sorted!")
         |})
         |
-        |dom.window.setInterval(() => {
-        |  val s: Int = integers.get.size
-        |  val idx = Random.nextInt(s)
-        |  val amount = Random.nextInt(s - idx) + 1
-        |  val count = Random.nextInt(5)
-        |  integers.replace(
-        |    idx, amount,
-        |    Stream.range(idx, idx + amount * count + 1, amount).toSeq:_*
-        |  )
-        |}, 1000)
-        |
-        |val template: Element = div(
+        |div(
         |  "Integers: ",
-        |  produce(integers)((seq: Seq[Int]) =>
-        |    span(seq.map(p => span(s"$p, ")): _*).render
+        |  span((attr("data-valid") := true).attrIf(
+        |    integers.valid.transform((x: ValidationResult) => x == Valid)
+        |  ))(
+        |    repeat(integers)(p => span(s"${p.get}, ").render)
         |  ), br,
         |  "Is sorted: ",
-        |  bindValidation(integers,
-        |    _ => span("Validation in progress...").render,
+        |  valid(integers)(
         |    {
-        |      case Valid => span("Yes").render
-        |      case Invalid(_) => span("No").render
+        |      case Valid => span(id := "validation-demo-result")("Yes").render
+        |      case Invalid(_) => span(id := "validation-demo-result")("No").render
         |    },
-        |    _ => span("Validation error...").render
+        |    progressBuilder = _ => span("Validation in progress...").render,
+        |    errorBuilder = _ => span("Validation error...").render
         |  )
-        |).render""".stripMargin
+        |)""".stripMargin
     )(GuideStyles),
     new BindValidationDemoComponent,
     p(
       "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
-      "and the result is passed to provided callbacks. "
+      "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."
     ),
-    h3("bindAttribute"),
-    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
-                |
-                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
-                |
-                |val template: Element = div(
-                |  span("Visible: ", bind(visible), " -> "),
-                |  span(bindAttribute(visible)((show, el) => {
-                |    if (show) el.setAttribute("style", "display: inline;")
-                |    else el.setAttribute("style", "display: none;")
-                |  }))("Show/hide")
-                |).render""".stripMargin
-    )(GuideStyles),
-    new BindAttributeDemoComponent,
-    p("On every change of the property value, passed callback is called and it can change the element attributes."),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = {}
+  )
 }

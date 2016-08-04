@@ -14,12 +14,12 @@ import scalacss.ScalatagsCss._
 case object FrontendIntroViewPresenter extends DefaultViewPresenterFactory[FrontendIntroState.type](() => new FrontendIntroView)
 
 
-class FrontendIntroView extends View {
+class FrontendIntroView extends FinalView {
   import Context._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Introduction"),
     p(
       "At present JavaScript is an undisputed market leader of the frontend development. With frameworks like AngularJS, ReactJS ",
@@ -60,20 +60,20 @@ class FrontendIntroView extends View {
     new IntroFormDemoComponent(),
     CodeBlock(
       """/** Demo model interface */
-        |trait IntroFormDemoModel {
-        |  def minimum: Int
-        |  def between: Int
-        |  def maximum: Int
-        |}
+        |case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
         |
-        |class IntroFormDemoComponent extends Component {
-        |  override def getTemplate: Element = IntroFormDemoViewPresenter()
+        |class IntroFormDemoComponent {
+        |  def getTemplate: Modifier = IntroFormDemoViewPresenter()
         |
-        |  /** IntroFormDemoModel validator, checks if minimum <= between <= maximum */
-        |  object IntroFormDemoModelValidator extends Validator[IntroFormDemoModel] {
-        |    override def apply(element: IntroFormDemoModel)
-        |                      (implicit ec: ExecutionContext): Future[ValidationResult] =
-        |      Future {
+        |  /** Prepares model, view and presenter for demo component */
+        |  object IntroFormDemoViewPresenter {
+        |    import Context._
+        |    def apply(): Element = {
+        |      val model = ModelProperty(
+        |        IntroFormDemoModel(0, 10, 42)
+        |      )
+        |
+        |      model.addValidator((element: IntroFormDemoModel) => {
         |        val errors = mutable.ArrayBuffer[String]()
         |        if (element.minimum > element.maximum)
         |          errors += "Minimum is bigger than maximum!"
@@ -83,20 +83,8 @@ class FrontendIntroView extends View {
         |          errors += "Maximum is smaller than your value!"
         |
         |        if (errors.isEmpty) Valid
-        |        else Invalid(errors.toSeq)
-        |      }
-        |  }
-        |
-        |  /** Prepares model, view and presenter for demo component */
-        |  object IntroFormDemoViewPresenter {
-        |    import Context._
-        |    def apply(): Element = {
-        |      val model = ModelProperty[IntroFormDemoModel]
-        |      model.subProp(_.minimum).set(0)
-        |      model.subProp(_.between).set(10)
-        |      model.subProp(_.maximum).set(42)
-        |
-        |      model.addValidator(IntroFormDemoModelValidator)
+        |        else Invalid(errors.map(DefaultValidationError))
+        |      })
         |
         |      val presenter = new IntroFormDemoPresenter(model)
         |      new IntroFormDemoView(model, presenter).render
@@ -107,11 +95,12 @@ class FrontendIntroView extends View {
         |    private val random = new Random()
         |
         |    /** Sets random values in demo model */
-        |    def randomize() = {
-        |      model.subProp(_.minimum).set(random.nextInt(100) - 25)
-        |      model.subProp(_.between).set(random.nextInt(100))
-        |      model.subProp(_.maximum).set(random.nextInt(100) + 25)
-        |    }
+        |    def randomize() =
+        |      model.set(IntroFormDemoModel(
+        |        random.nextInt(100) - 25,
+        |        random.nextInt(100),
+        |        random.nextInt(100) + 25
+        |      ))
         |  }
         |
         |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
@@ -122,8 +111,8 @@ class FrontendIntroView extends View {
         |    import scalacss.Defaults._
         |    import scalacss.ScalatagsCss._
         |
-        |    private def i2s(i: Int) = i.toString
-        |    private def s2i(s: String) = Float.parseFloat(s).toInt
+        |    private val i2s = (i: Int) => i.toString
+        |    private val s2i = (s: String) => Float.parseFloat(s).toInt
         |
         |    private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
         |    private val between = model.subProp(_.between).transform(i2s, s2i)
@@ -138,7 +127,7 @@ class FrontendIntroView extends View {
         |        presenter.randomize()
         |    }
         |
-        |    def render: Element = div(id := "frontend-intro-demo")(
+        |    def render: Modifier = div(id := "frontend-intro-demo")(
         |      UdashInputGroup()(
         |        UdashInputGroup.input(
         |          NumberInput.debounced(minimum)(id := "minimum").render
@@ -151,9 +140,7 @@ class FrontendIntroView extends View {
         |        UdashInputGroup.input(
         |          NumberInput.debounced(maximum)(id := "maximum").render
         |        ),
-        |        UdashInputGroup.buttons(
-        |          randomizeButton.render
-        |        )
+        |        UdashInputGroup.buttons(randomizeButton.render)
         |      ).render,
         |      h3("Is valid?"),
         |      p(
@@ -163,25 +150,20 @@ class FrontendIntroView extends View {
         |            case Valid => span(id := "valid")("Yes").render
         |            case Invalid(errors) => span(id := "valid")(
         |              "No, because:",
-        |              ul(
-        |                errors.map(e => li(e))
-        |              )
+        |              ul(errors.map(e => li(e)))
         |            ).render
         |          },
         |          error => span(s"Validation error: $error").render
         |        )
         |      )
-        |    ).render
+        |    )
         |  }
-        |}
-      """.stripMargin
+        |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendRoutingState(None).url)("Routing in Udash"),
       " chapter to learn more about selecting a view based on a URL."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = {}
+  )
 }

@@ -21,7 +21,7 @@ import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
-import io.udash.properties.SeqProperty
+import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -353,7 +353,7 @@ object BootstrapDemos extends StrictLogging {
     user.subProp(_.age).addValidator(new Validator[Int] {
       override def apply(element: Int)(implicit ec: ExecutionContext) =
         Future {
-          if (element < 0) Invalid(Seq("Age should be a non-negative integer!"))
+          if (element < 0) Invalid("Age should be a non-negative integer!")
           else Valid
         }
     })
@@ -415,10 +415,10 @@ object BootstrapDemos extends StrictLogging {
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
     div(StyleUtils.center, GuideStyles.frame)(
       UdashNav.tabs(justified = true)(panels)(
-        elemFactory = (panel) => a(href := "", onclick :+= ((ev: Event) => {
-          selected.set(panel.get)
-          true
-        }))(bind(panel.asModel.subProp(_.title))).render,
+        elemFactory = (panel) => a(
+          href := "",
+          onclick :+= ((ev: Event) => selected.set(panel.get), true)
+        )(bind(panel.asModel.subProp(_.title))).render,
         isActive = (panel) => panel.combine(selected)((panel, selected) => panel.title == selected.title)
       ).render,
       div(BootstrapStyles.Well.well)(
@@ -599,12 +599,12 @@ object BootstrapDemos extends StrictLogging {
     val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
     val listGroup = UdashListGroup(news)((news) =>
       li(
-        BootstrapStyles.active.styleIf(news.transform(_.endsWith("1"))),
-        BootstrapStyles.disabled.styleIf(news.transform(_.endsWith("2"))),
-        BootstrapStyles.List.listItemSuccess.styleIf(news.transform(_.endsWith("3"))),
-        BootstrapStyles.List.listItemDanger.styleIf(news.transform(_.endsWith("4"))),
-        BootstrapStyles.List.listItemInfo.styleIf(news.transform(_.endsWith("5"))),
-        BootstrapStyles.List.listItemWarning.styleIf(news.transform(_.endsWith("6")))
+        BootstrapStyles.active.styleIf(news.transform((s: String) => s.endsWith("1"))),
+        BootstrapStyles.disabled.styleIf(news.transform((s: String) => s.endsWith("2"))),
+        BootstrapStyles.List.listItemSuccess.styleIf(news.transform((s: String) => s.endsWith("3"))),
+        BootstrapStyles.List.listItemDanger.styleIf(news.transform((s: String) => s.endsWith("4"))),
+        BootstrapStyles.List.listItemInfo.styleIf(news.transform((s: String) => s.endsWith("5"))),
+        BootstrapStyles.List.listItemWarning.styleIf(news.transform((s: String) => s.endsWith("6")))
       )(bind(news)).render
     )
 

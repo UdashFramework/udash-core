@@ -24,7 +24,7 @@ class ContentView extends ViewContainer {
       ),
       child
     )
-  ).render
+  )
 
-  override def getTemplate: Element = content
+  override def getTemplate: Modifier = content
 }

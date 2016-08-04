@@ -1,6 +1,6 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -11,12 +11,12 @@ import scalacss.ScalatagsCss._
 
 case object BootstrappingRpcViewPresenter extends DefaultViewPresenterFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
-class BootstrappingRpcView extends View {
+class BootstrappingRpcView extends FinalView {
   import Context._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Bootstrapping RPC interfaces"),
     p(
       "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
@@ -75,7 +75,5 @@ class BootstrappingRpcView extends View {
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),
       " of the application. You can also read more about ", a(href := RpcIntroState.url)("RPC in Udash"), ""
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

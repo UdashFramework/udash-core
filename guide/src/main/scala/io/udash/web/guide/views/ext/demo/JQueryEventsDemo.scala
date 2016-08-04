@@ -28,12 +28,11 @@ object JQueryEventsDemo {
       UdashButtonGroup()(
         UdashButton(componentId = ComponentId("click"))("Click me").render,
         UdashButton(componentId = ComponentId("off"))(
-          onclick :+= ((_: Event) => {
+          onclick :+= ((_: Event) =>
             jQ("#jquery-events-demo #click")
               .off("click", onCallback)
               .off("click", oneCallback)
-            false
-          }), "Off"
+          ), "Off"
         ).render
       ).render
     ).render

@@ -1,6 +1,6 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
@@ -11,13 +11,13 @@ import scalatags.JsDom
 
 case object BootstrappingSBTViewPresenter extends DefaultViewPresenterFactory[BootstrappingSBTState.type](() => new BootstrappingSBTView)
 
-class BootstrappingSBTView extends View {
+class BootstrappingSBTView extends FinalView {
   import Context._
   import io.udash.web.guide.views.References._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element =
+  override def getTemplate: Modifier =
     div(
       h2("SBT configuration"),
       p(
@@ -294,7 +294,5 @@ class BootstrappingSBTView extends View {
         "SBT configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
         " in the ", b("shared"), " module."
       )
-    ).render
-
-  override def renderChild(view: View): Unit = ()
+    )
 }

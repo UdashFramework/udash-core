@@ -12,7 +12,7 @@ import scalatags.JsDom.all._
 
 object IntroViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new IntroView)
 
-class IntroView extends View {
+class IntroView extends FinalView {
   private val content = div(
     h1("Udash Developer's Guide"),
     p(
@@ -88,9 +88,7 @@ class IntroView extends View {
       " and ",
       a(href := RpcIntroState.url)("RPC in Udash"), ". "
     )
-  ).render
+  )
 
-  override def getTemplate: Element = content
-
-  override def renderChild(view: View): Unit = {}
+  override def getTemplate: Modifier = content
 }

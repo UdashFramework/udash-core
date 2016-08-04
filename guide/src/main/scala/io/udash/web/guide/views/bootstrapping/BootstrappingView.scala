@@ -16,7 +16,7 @@ class BootstrappingView extends ViewContainer {
 
   protected val child = div().render
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Application bootstrapping"),
     p("In this part of the guide you will read about bootstrapping an Udash application from scratch."),
     p(
@@ -24,5 +24,5 @@ class BootstrappingView extends ViewContainer {
       a(href := BootstrappingGeneratorsState.url)("Udash generators"), "")
     ),
     child
-  ).render
+  )
 }

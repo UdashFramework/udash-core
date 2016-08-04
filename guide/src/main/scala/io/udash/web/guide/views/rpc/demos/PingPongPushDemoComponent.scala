@@ -13,6 +13,8 @@ import org.scalajs.dom
 import org.scalajs.dom._
 
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 trait PingPongPushDemoModel {
   def pingId: Int
@@ -21,10 +23,10 @@ trait PingPongPushDemoModel {
 class PingPongPushDemoComponent extends Component {
   import io.udash.web.guide.Context._
 
-  override def getTemplate: Element = PingPongPushDemoViewPresenter()
+  override def getTemplate: Modifier = PingPongPushDemoViewPresenter()
 
   object PingPongPushDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val clientId = ModelProperty[PingPongPushDemoModel]
       clientId.subProp(_.pingId).set(0)
 
@@ -66,8 +68,8 @@ class PingPongPushDemoComponent extends Component {
         presenter.onButtonClick(btn)
     }
 
-    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       pingButton.render
-    ).render
+    )
   }
 }

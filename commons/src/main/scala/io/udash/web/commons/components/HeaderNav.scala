@@ -14,7 +14,7 @@ trait HeaderNav {
 
   case class NavItem(url: String, title: String)
 
-  def navigation(items: Seq[NavItem]): Element =
+  def navigation(items: NavItem*): Element =
     nav(navStyles.headerNav)(
       ul(navStyles.headerLinkList)(
         items.map(item =>

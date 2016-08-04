@@ -9,6 +9,7 @@ import org.scalajs.dom.Element
 import scala.util.Random
 import scalatags.JsDom
 import scalacss.ScalatagsCss._
+import io.udash.web.commons.views.Component
 
 class ProduceDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -29,7 +30,7 @@ class ProduceDemoComponent extends Component {
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
   }, 2000)
 
-  override def getTemplate: Element = {
+  override def getTemplate: Modifier = {
     div(id := "produce-demo", GuideStyles.get.frame)(
       p(
         "Name: ",
@@ -39,13 +40,13 @@ class ProduceDemoComponent extends Component {
         "Integers (patching): ",
         produce(integers,
           (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.get.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
-          (patch: Patch[Property[Int]], el: Element) => {
-            val insertBefore = jQ(el).children().at(patch.idx)
+          (patch: Patch[Property[Int]], els: Seq[Element]) => {
+            val insertBefore = jQ(els:_*).children().at(patch.idx)
             patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.get.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
             patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
           }
         )
       )
-    ).render
+    )
   }
 }

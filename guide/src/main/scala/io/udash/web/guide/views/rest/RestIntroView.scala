@@ -14,11 +14,11 @@ import scalatags.JsDom
 
 case object RestIntroViewPresenter extends DefaultViewPresenterFactory[RestIntroState.type](() => new RestIntroView)
 
-class RestIntroView extends View {
+class RestIntroView extends FinalView {
   import io.udash.web.guide.Context._
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Introduction"),
     p(
       "Communication via WebSockets is not always attainable. If your application needs to use a REST API, then the Udash REST ",
@@ -69,7 +69,5 @@ class RestIntroView extends View {
       "You learnt the basics of the Udash REST support. You should also take a closer look at the ",
       a(href := RestInterfacesState.url)("REST interfaces"), " description. "
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

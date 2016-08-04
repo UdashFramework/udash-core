@@ -11,13 +11,13 @@ import scalacss.ScalatagsCss._
 
 case object BootstrappingBackendViewPresenter extends DefaultViewPresenterFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
-class BootstrappingBackendView extends View {
+class BootstrappingBackendView extends FinalView {
   import Context._
   import io.udash.web.guide.views.References._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Bootstrapping application backend"),
     p("This chapter covers:"),
     ul(GuideStyles.get.defaultList)(
@@ -121,7 +121,5 @@ class BootstrappingBackendView extends View {
       "Now that the server-side of the application is ready, it is time to implement the ",
       a(href := BootstrappingFrontendState.url)("client-side"), " of the application."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

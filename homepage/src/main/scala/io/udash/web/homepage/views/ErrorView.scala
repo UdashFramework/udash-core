@@ -16,7 +16,7 @@ import scalatags.JsDom.tags2._
 
 object ErrorViewPresenter extends DefaultViewPresenterFactory[IndexState](() => new ErrorView)
 
-class ErrorView extends View {
+class ErrorView extends FinalView {
   import scalatags.JsDom.all._
 
   private val content = section(HomepageStyles.get.sectionError)(
@@ -44,7 +44,5 @@ class ErrorView extends View {
     }
   }
 
-  override def getTemplate: Element = content
-
-  override def renderChild(view: View): Unit = {}
+  override def getTemplate: Modifier = content
 }

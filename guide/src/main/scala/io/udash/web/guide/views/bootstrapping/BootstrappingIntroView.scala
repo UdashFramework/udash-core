@@ -1,6 +1,6 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash._
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -10,14 +10,14 @@ import scalatags.JsDom
 
 case object BootstrappingIntroViewPresenter extends DefaultViewPresenterFactory[BootstrappingIntroState.type](() => new BootstrappingIntroView)
 
-class BootstrappingIntroView extends View {
+class BootstrappingIntroView extends FinalView {
   import Context._
 
   import JsDom.all._
   import scalacss.Defaults._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Project structure"),
     p("The basic Udash project contains three modules: "),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_basic.png", "Basic modules structure.", GuideStyles.get.floatRight, GuideStyles.get.imgSmall, GuideStyles.get.imgIntro),
@@ -32,7 +32,7 @@ class BootstrappingIntroView extends View {
         "It is compiled only to bytecode. You can write your backend logic like database access, services layer etc. there."
       ),
       li(
-        "frontend - contains frontend application code. It is compiled only to JS, it is packed into three files such as: ",
+        "frontend - contains frontend application code. It is compiled only to JS and packed into three files: ",
         i("frontend-deps.js"), ", ", i("frontend-impl.js"), " and ", i("frontend-init.js"), ""
       )
     ),
@@ -46,7 +46,5 @@ class BootstrappingIntroView extends View {
       "If you want to prepare a custom project, you might be interested in ",
       a(href := BootstrappingSBTState.url)("SBT configuration"), " "
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

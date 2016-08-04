@@ -13,12 +13,12 @@ import scalacss.ScalatagsCss._
 
 case object RestInterfacesViewPresenter extends DefaultViewPresenterFactory[RestInterfacesState.type](() => new RestInterfacesView)
 
-class RestInterfacesView extends View {
+class RestInterfacesView extends FinalView {
   import Context._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Interfaces"),
     p(
       "Interfaces are the most important part of the Udash REST support. They make usage of existing APIs clean and maintainable. ",
@@ -139,7 +139,5 @@ class RestInterfacesView extends View {
       "Now you know more about Udash REST interfaces. You might also want to take a look at the ",
       a(href := RestClientServerState.url)("Client ➔ Server"), " communication."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

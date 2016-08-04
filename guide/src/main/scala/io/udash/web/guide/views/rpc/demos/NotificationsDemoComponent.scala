@@ -13,6 +13,8 @@ import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 trait NotificationsDemoModel {
   def registered: Boolean
@@ -22,10 +24,10 @@ trait NotificationsDemoModel {
 class NotificationsDemoComponent extends Component {
   import io.udash.web.guide.Context._
 
-  override def getTemplate: Element = NotificationsDemoViewPresenter()
+  override def getTemplate: Modifier = NotificationsDemoViewPresenter()
 
   object NotificationsDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val model = ModelProperty[NotificationsDemoModel]
       model.subProp(_.registered).set(false)
       model.subProp(_.lastMessage).set("-")
@@ -79,7 +81,7 @@ class NotificationsDemoComponent extends Component {
         presenter.onButtonClick(btn)
     }
 
-    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           span(id := "notifications-demo-response")(
@@ -89,6 +91,6 @@ class NotificationsDemoComponent extends Component {
         ),
         UdashInputGroup.buttons(registerButton.render)
       ).render
-    ).render
+    )
   }
 }

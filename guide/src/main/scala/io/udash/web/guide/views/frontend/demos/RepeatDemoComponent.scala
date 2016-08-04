@@ -7,6 +7,7 @@ import org.scalajs.dom.Element
 
 import scala.util.Random
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class RepeatDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -24,12 +25,14 @@ class RepeatDemoComponent extends Component {
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
   }, 2000)
 
-  override def getTemplate: Element = div(id := "repeat-demo", GuideStyles.get.frame)(
+  override def getTemplate: Modifier = div(id := "repeat-demo", GuideStyles.get.frame)(
     p(
       "Integers: ",
       span(id := "repeat-demo-integers")(repeat(integers)(p => span(GuideStyles.get.highlightRed)(s"${p.get}, ").render)), br,
       "Integers (produce): ",
-      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, ")): _*).render)
+      produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(
+        seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, "))
+      ).render)
     )
-  ).render
+  )
 }

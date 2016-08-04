@@ -40,11 +40,11 @@ case object UserActivityExtViewPresenter extends ViewPresenter[UserActivityExtSt
   }
 }
 
-class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends View {
+class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h1("Udash user activity monitoring"),
     p(
       """When it comes to website tracking there are a plethora of metrics at our disposal.
@@ -106,9 +106,5 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |}""".stripMargin)(GuideStyles),
     new PingPongCallDemoComponent,
     RpcLoggingDemo(model, () => presenter.reload())
-  ).render
-
-  override def renderChild(view: View): Unit = {
-
-  }
+  )
 }

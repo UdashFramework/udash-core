@@ -13,6 +13,8 @@ import org.scalajs.dom._
 
 import scala.util.{Failure, Random, Success}
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import io.udash.web.commons.views.Component
 
 trait GenCodecsDemoModel {
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
@@ -33,10 +35,10 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
   import Context._
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
 
-  override def getTemplate: Element = GenCodecsDemoViewPresenter()
+  override def getTemplate: Modifier = GenCodecsDemoViewPresenter()
 
   object GenCodecsDemoViewPresenter {
-    def apply(): Element = {
+    def apply(): Modifier = {
       val GenCodecs = ModelProperty[GenCodecsDemoModel]
       val presenter = new GenCodecsDemoPresenter(GenCodecs)
       new GenCodecsDemoView(GenCodecs, presenter).render
@@ -102,7 +104,7 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
         presenter.onButtonClick(btn)
     }
 
-    def render: Element = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       loadIdButton.render,
       h3("Results:"),
       p(
@@ -119,6 +121,6 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
           li("Fruit: ", produce(model.subProp(_.sealedTrait))(response => span(id := "gencodec-demo-sealedTrait", response.toString()).render))
         )
       )
-    ).render
+    )
   }
 }

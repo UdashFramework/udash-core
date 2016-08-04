@@ -13,12 +13,12 @@ import scalacss.ScalatagsCss._
 
 case object RpcInterfacesViewPresenter extends DefaultViewPresenterFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
-class RpcInterfacesView extends View {
+class RpcInterfacesView extends FinalView {
   import Context._
 
   import JsDom.all._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     h2("Interfaces"),
     p(
       "Interfaces are the most important part of the Udash RPC system. Thanks to the cross compilation, they make client-server " +
@@ -168,7 +168,5 @@ class RpcInterfacesView extends View {
       a(href := RpcClientServerState.url)("Client ➔ Server"), " & ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication or ",
       "the ", a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = ()
+  )
 }

@@ -7,6 +7,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.Element
 
 import scalatags.JsDom
+import io.udash.web.commons.views.Component
 
 class CheckboxDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -22,11 +23,11 @@ class CheckboxDemoComponent extends Component {
     (b: Boolean) => if (b) "Yes" else "No"
   )
 
-  override def getTemplate: Element = div(id := "checkbox-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "checkbox-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       inputs(), br, inputs()
     )
-  ).render
+  )
 
   private def inputs = div(BootstrapStyles.row)(
     div(BootstrapStyles.Grid.colMd4)(

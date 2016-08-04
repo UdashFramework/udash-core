@@ -20,13 +20,13 @@ import scalatags.JsDom.TypedTag
 
 case object FrontendTemplatesViewPresenter extends DefaultViewPresenterFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
-class FrontendTemplatesView extends View {
+class FrontendTemplatesView extends FinalView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
   import scalacss.ScalatagsCss._
 
-  override def getTemplate: dom.Element = div(
+  override def getTemplate: Modifier = div(
     ExampleStyles.render[TypedTag[HTMLStyleElement]],
     ExampleKeyframes.render[TypedTag[HTMLStyleElement]],
     h2("Scalatags & ScalaCSS"),
@@ -363,9 +363,7 @@ class FrontendTemplatesView extends View {
       " chapter to read about a data model in the Udash applications. ",
       "You might find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
     )
-  ).render
-
-  override def renderChild(view: View): Unit = {}
+  )
 }
 
 object ExampleStyles extends StyleSheet.Inline {
