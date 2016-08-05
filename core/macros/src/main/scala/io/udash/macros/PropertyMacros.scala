@@ -35,7 +35,7 @@ class PropertyMacros(val c: blackbox.Context) {
   private lazy val OptionTpe = typeOf[Option[_]]
   private lazy val SeqTpe = typeOf[Seq[_]]
   private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
-  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product]).map(_.typeSymbol)
+  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
 
   private def fixOverride(s: Symbol) =
     if (s.isTerm && s.asTerm.isOverloaded) {

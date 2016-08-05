@@ -170,6 +170,11 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |val p = Property[A].asModel
         |val s = p.subSeq(_.s)
         |val i = p.subModel(_.i)""".stripMargin should compile
+
+      """object Test {
+        |  case class Todo(name: String, editName: String, completed: Boolean = false, editing: Boolean = false)
+        |  val x = ModelProperty[Todo]
+        |}""".stripMargin should compile
     }
 
     "create ModelProperty for tuples" in {
