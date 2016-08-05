@@ -1,11 +1,11 @@
 package io.udash.bindings
 
+import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
-import io.udash._
 import org.scalajs.dom
 import org.scalajs.dom._
 
@@ -40,6 +40,19 @@ trait Bindings {
     */
   def bind[T](property: ReadableProperty[T]) =
     new SimplePropertyModifier[T](property, true)
+
+  /**
+    * Shows provided DOM elements only if property value is `true`.
+    *
+    * @param property Property to check.
+    * @param elements  Elements to show if property value is `true`.
+    * @return Modifier for bounded property.
+    */
+  def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]) =
+    new PropertyModifier[Boolean](property, {
+      case true => elements
+      case false => Seq.empty
+    }, true)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
