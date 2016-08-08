@@ -3,7 +3,7 @@ package pagination
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.seq
+import io.udash.properties.{ModelValue, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event
 
@@ -29,7 +29,7 @@ sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] exten
   def previous(): Unit = changePage(selectedPage.get - 1)
 }
 
-class UdashPagination[PageType, ElemType <: Property[PageType]] private
+class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] private
                      (size: PaginationSize, showArrows: Property[Boolean], highlightActive: Property[Boolean], override val componentId: ComponentId)
                      (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
@@ -145,7 +145,7 @@ object UdashPagination {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def apply[PageType, ElemType <: Property[PageType]]
+  def apply[PageType : ModelValue, ElemType <: Property[PageType]]
            (size: PaginationSize = PaginationSize.Default, showArrows: Property[Boolean] = Property(true),
             highlightActive: Property[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
            (pages: seq.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
