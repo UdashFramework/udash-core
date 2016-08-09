@@ -4,33 +4,30 @@ import sbt._
 object Dependencies extends Build {
 
   val versionOfScala = "2.11.8"
-  val jettyVersion = "9.3.8.v20160314"
+  val jettyVersion = "9.3.11.v20160721"
 
-  val udashVersion = "0.4.0-M1"
+  val udashVersion = "0.4.0-SNAPSHOT"
   val udashJQueryVersion = "1.0.0"
 
-  val scalaTagsVersion = "0.5.5"
   val scalaCssVersion = "0.4.1"
 
   val scalaLoggingVersion = "3.1.0"
   val logbackVersion = "1.1.3"
 
-  val avsystemCommonsVersion = "1.14.0"
+  val avsystemCommonsVersion = "1.16.2"
   val typesafeConfigVersion = "1.3.0"
-  val springVersion = "4.2.5.RELEASE"
+  val springVersion = "4.3.2.RELEASE"
   val akkaVersion = "2.4.7"
   val sprayVersion = "1.3.1"
 
-  val seleniumVersion = "2.53.0"
-  val scalatestVersion = "3.0.0-M15"
-  val scalamockVersion = "3.2.2"
+  val seleniumVersion = "2.53.1"
+  val scalatestVersion = "3.0.0"
 
   val crossDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-shared" % udashVersion exclude("com.lihaoyi", "scalatags_2.11"),
+    "io.udash" %%% "udash-core-shared" % udashVersion,
     "io.udash" %%% "udash-rest-shared" % udashVersion,
     "io.udash" %%% "udash-rpc-shared" % udashVersion,
-    "io.udash" %%% "udash-i18n-shared" % udashVersion,
-    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+    "io.udash" %%% "udash-i18n-shared" % udashVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
@@ -76,7 +73,6 @@ object Dependencies extends Build {
 
   val testDeps = Def.setting(Seq(
     /* Tests */
-    "org.scalatest" %% "scalatest" % scalatestVersion,
-    "org.scalamock" %% "scalamock-scalatest-support" % scalamockVersion
+    "org.scalatest" %% "scalatest" % scalatestVersion
   ).map(_ % Test))
 }

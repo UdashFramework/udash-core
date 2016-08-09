@@ -6,7 +6,6 @@ import com.avsystem.commons.spring.HoconBeanDefinitionReader
 import io.udash.web.server.ApplicationServer
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.remote.RemoteWebDriver
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
@@ -47,7 +46,7 @@ class InternalServerConfig extends ServerConfig {
   }
 }
 
-abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory with Eventually {
+abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with Eventually {
   override implicit val patienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
   val testingCtx = createTestingContext()
