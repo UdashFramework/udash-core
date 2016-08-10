@@ -227,7 +227,7 @@ class PropertyTest extends UdashFrontendTest {
         props.foreach(_.listen(_ => elementsUpdated += 1))
 
       val p = Property("1,2,3,4,5")
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
 
       registerElementListener(s.elemProperties)
 
@@ -352,7 +352,7 @@ class PropertyTest extends UdashFrontendTest {
 
     "not allow children modification after transformation into ReadableSeqProperty" in {
       val p = Property("1,2,3,4,5")
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
 
       s.elemProperties.foreach {
         case p: Property[Int] => p.set(20)
@@ -368,7 +368,7 @@ class PropertyTest extends UdashFrontendTest {
         props.foreach(_.listen(_ => elementsUpdated += 1))
 
       val p = Property("1,2,3,4,5")
-      val s: SeqProperty[Int, Property[Int]] = p.transform(
+      val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
         (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
         (s: Seq[Int]) => s.mkString(",")
       )
