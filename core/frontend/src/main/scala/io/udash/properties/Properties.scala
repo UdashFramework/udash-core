@@ -1,6 +1,8 @@
 package io.udash.properties
 
 trait Properties {
+  implicit val allowDomElementTpe: ImmutableValue[org.scalajs.dom.Element] = null
+
   val Property                             = single.Property
   val ModelProperty                        = model.ModelProperty
   val SeqProperty                          = seq.SeqProperty
