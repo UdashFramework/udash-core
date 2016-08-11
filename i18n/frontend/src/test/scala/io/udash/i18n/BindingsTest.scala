@@ -182,4 +182,43 @@ class BindingsTest extends UdashFrontendTest {
       template2.getAttribute("translation") should be("Translation test")
     }
   }
+
+  "TranslationKey" should {
+    "be valid Property value" in {
+      val en = Lang("en")
+      val pl = Lang("pl")
+      implicit val lang = LangProperty(en)
+      val pKey1 = TranslationKey.key1[String]("tr1")
+      val pKey2 = TranslationKey.key1[String]("tr3")
+      val pKey3 = TranslationKey.key1[String]("tr1")
+      val pKey4 = TranslationKey.key1[String]("tr3")
+
+      val translations = SeqProperty[TranslationKey1[String]](pKey1, pKey2, pKey3, pKey4)
+
+      val el = div(
+        repeat(translations)(key =>
+          span(translatedDynamic(key.get)(k => k("test"))).render
+        )
+      ).render
+
+      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
+      lang.set(pl)
+      el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test pl")
+      lang.set(en)
+      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
+
+      translations.append(pKey1)
+      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
+      lang.set(pl)
+      el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
+      lang.set(en)
+      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
+
+
+      translations.remove(1, 3)
+      el.textContent should be("Translation testTranslation test")
+      lang.set(pl)
+      el.textContent should be("Translation test plTranslation test pl")
+    }
+  }
 }
