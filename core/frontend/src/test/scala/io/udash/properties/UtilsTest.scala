@@ -55,6 +55,28 @@ class UtilsTest extends UdashFrontendTest {
       """ImmutableValue.isImmutable[ValidModelC]""".stripMargin shouldNot compile
       """ImmutableValue.isImmutable[ValidModelD]""".stripMargin shouldNot compile
     }
+
+    "allow user to create property" in {
+      import io.udash._
+      trait TraitModel {
+        def name: String
+        def data: CCWithMap
+      }
+
+      case class CCWithMap(valueMap: Map[String, Map[Int, Double]])
+      implicit val im: ImmutableValue[CCWithMap] = null
+
+      val p = ModelProperty[TraitModel]
+
+      val sp = p.subProp(_.data)
+      sp.set(CCWithMap(Map("x" -> Map(5 -> 5.5), "y" -> Map.empty)))
+
+      val m = sp.get
+      m.valueMap.contains("x") should be(true)
+      m.valueMap.contains("y") should be(true)
+      m.valueMap.contains("z") should be(false)
+      m.valueMap("x")(5) should be(5.5)
+    }
   }
 
   "ModelValue" should {

@@ -201,17 +201,23 @@ class PropertyMacros(val c: blackbox.Context) {
     val isNotSealedTrait = isClass && !valueType.typeSymbol.asClass.isSealed
     val isNotSeq = !(valueType <:< SeqTpe) && !(valueType <:< MutableSeqTpe)
 
+    lazy val isModelCC: Boolean = isModelCaseClass(valueType)
+
+    val members = filterMembers(valueType)
+    val unimplementableTraitMembers = members.collect { case s if isAbstractMethod(s) && takesParameters(s) => s }
+    val isImplementableTrait = isTrait && unimplementableTraitMembers.isEmpty
+
     val propertyMembers = if (isTrait && isNotSealedTrait && isNotSeq) {
-      filterMembers(valueType).collect {
+      members.collect {
         case s if isAbstractMethod(s) && !takesParameters(s) => s
       }
-    } else {
-      filterMembers(valueType)
+    } else if (isModelCC) {
+      members
         .filter(m => !m.isPrivate && !(valueType <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
         .filter(m => m.isMethod && m.asMethod.isCaseAccessor)
-    }
+    } else Seq.empty
 
-    if (isTrait && isNotSealedTrait && isNotSeq) {
+    if (isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait) {
       q"""
          implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
          ..${
@@ -222,8 +228,8 @@ class PropertyMacros(val c: blackbox.Context) {
          }
          null
       """
-    } else if (isModelCaseClass(valueType)) {
-      q"""
+    } else if (isModelCC) {
+        q"""
          implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
          ..${
            propertyMembers.map(m => {
@@ -242,6 +248,7 @@ class PropertyMacros(val c: blackbox.Context) {
            |Model part checks:
            |* for traits:
            |  * isTrait: $isTrait
+           |  * isImplementableTrait: $isImplementableTrait
            |  * isNotSealedTrait: $isNotSealedTrait
            |  * isNotSeq: $isNotSeq
            |  * members: ${
@@ -249,6 +256,13 @@ class PropertyMacros(val c: blackbox.Context) {
                     propertyMembers.map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType} " +
                       s"-> isModelValue: ${isModelValue(m.typeSignatureIn(valueType).resultType)};"
                     ).map(s => s"\n    - $s").mkString("")
+                  else "Visible only for traits."
+                }
+           |  * unimplementableTraitMembers: ${
+                  if (isTrait && isNotSealedTrait && isNotSeq)
+                    unimplementableTraitMembers
+                      .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType}")
+                      .map(s => s"\n    - $s").mkString("")
                   else "Visible only for traits."
                 }
            |* for simple case class:
