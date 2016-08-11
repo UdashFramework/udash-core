@@ -37,7 +37,7 @@ class BindValidationDemoComponent extends Component {
     "Integers: ",
     span(
       id := "validation-demo-integers",
-      (attr("data-valid") := true).attrIf(integers.valid.transform((x: ValidationResult) => x == Valid))
+      (attr("data-valid") := true).attrIf(integers.valid.transform(_ == Valid))
     )(
       repeat(integers)(p => span(s"${p.get}, ").render)
     ), br,

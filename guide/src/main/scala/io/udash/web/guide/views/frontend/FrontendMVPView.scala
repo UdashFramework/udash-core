@@ -112,7 +112,8 @@ class FrontendMVPView extends FinalView {
         |
         |  override def renderChild(childView: View): Unit = {
         |    import io.udash.wrappers.jquery.jQ
-        |    jQ(child).html(childView.getTemplate)
+        |    jQ(child).children().remove()
+        |    view.getTemplate.applyTo(child)
         |  }
         |}""".stripMargin
     )(GuideStyles),

@@ -236,7 +236,7 @@ class FrontendPropertiesView extends FinalView {
     CodeBlock(
       """val csv = Property[String]("1,2,3,4,5")
         |val ints: ReadableSeqProperty[Int] =
-        |  csv.transform(_.split(",").map(_.toInt).toSeq)
+        |  csv.transformToSeq(_.split(",").map(_.toInt).toSeq)
         |val floats: ReadableSeqProperty[Float] =
         |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
     )(GuideStyles),
