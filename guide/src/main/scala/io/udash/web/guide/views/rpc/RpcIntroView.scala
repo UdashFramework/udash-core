@@ -20,7 +20,7 @@ class RpcIntroView extends FinalView {
   override def getTemplate: Modifier = div(
     h2("Introduction"),
     p(
-      "In frontend applications developers usually struggle with client-server communication. REST APIs witch were popular " +
+      "In frontend applications developers usually struggle with client-server communication. REST APIs which were popular " +
       "in last few years, are hard to maintain. They are not typed, so IDEs cannot help you with refactoring. " +
       "Usually it is also impossible to share data models between the frontend and backend code. "
     ),
@@ -32,7 +32,7 @@ class RpcIntroView extends FinalView {
     ul(GuideStyles.get.defaultList)(
       li("RPC interfaces with typed arguments and returned value"),
       li("Data models which can be used in RPC communication"),
-      li("Model validators witch can be used both in frontend and backend")
+      li("Model validators which can be used both in frontend and backend")
     ),
     p(
       "Udash RPC also provides a server for client communication that works out of the box. You only have to create the RPC interface " +
