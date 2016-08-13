@@ -46,7 +46,7 @@ class RpcClientServerView extends FinalView {
     p("There are many ways of implementing the backend RPC interface. Below you can find description of three possible solutions:"),
     ul(GuideStyles.get.defaultList)(
       li(
-        "Basic implementation - the easiest way witch is useful when your service layer does not need to know anything ",
+        "Basic implementation - the easiest way which is useful when your service layer does not need to know anything ",
         "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), ") "
       ),
       li(
@@ -158,7 +158,7 @@ class RpcClientServerView extends FinalView {
     p(
       "Sometimes your services cannot be created per client connection. For example, when initialization takes too much time ",
       "or needs to share data between the clients. In such cases, you can split your backend into a service and an endpoints layer. ",
-      "The endpoint should be a lightweight implementation of the RPC interface witch will be created per client and pass calls to ",
+      "The endpoint should be a lightweight implementation of the RPC interface which will be created per client and pass calls to ",
       "the service layer. "
     ),
     CodeBlock(
@@ -311,8 +311,8 @@ class RpcClientServerView extends FinalView {
     p(
       "This time the ", i("AtmosphereServiceConfig"), " is expected to authenticate calls before passing them to the RPC endpoints. ",
       "The ", i("UserContext"), " is cached per connection, just like the RPC endpoints in the previous examples. The ", i("resolveUserContext"), " method ",
-      "uses the ", i("AuthService"), " witch somehow creates ", i("UserContext"), " basing on a resource. Notice that there is one ",
-      i("filter"), " method witch ignores all unauthenticated calls."
+      "uses the ", i("AuthService"), " which somehow creates ", i("UserContext"), " basing on a resource. Notice that there is one ",
+      i("filter"), " method which ignores all unauthenticated calls."
     ),
     p("Now it is ready to use in the following way:"),
     CodeBlock(

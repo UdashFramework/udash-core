@@ -29,7 +29,7 @@ class FrontendBindingsView extends FinalView {
     p("Let's briefly introduce all these methods:"),
     ul(GuideStyles.get.defaultList)(
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
-      li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method witch is called on every change of the property - its result is inserted into DOM."),
+      li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method which is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
       li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
       li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
