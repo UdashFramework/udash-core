@@ -3,9 +3,10 @@ package io.udash.rpc.internals
 import com.typesafe.scalalogging.LazyLogging
 import org.atmosphere.cpr._
 
-private[rpc] object BroadcastManager extends LazyLogging {
-  private var factory: BroadcasterFactory = null
-  private var metaBroadcaster: MetaBroadcaster = null
+private[rpc] trait BroadcasterInit extends LazyLogging {
+
+  private var factory: BroadcasterFactory = _
+  private var metaBroadcaster: MetaBroadcaster = _
 
   def init(factory: BroadcasterFactory, metaBroadcaster: MetaBroadcaster) = {
     if (this.factory != null || this.metaBroadcaster != null) {
@@ -16,33 +17,33 @@ private[rpc] object BroadcastManager extends LazyLogging {
     this.metaBroadcaster = metaBroadcaster
   }
 
-  def registerResource(resource: AtmosphereResource, clientId: String): Unit = {
+  protected final def withBroadcaster(clientId: String)(op: Broadcaster => Unit): Unit = {
     require(factory != null, "Init manager with BroadcasterFactory first!")
-
-    val clientBroadcaster = factory.lookup[Broadcaster](clientPath(clientId), true)
-    clientBroadcaster.addAtmosphereResource(resource)
+    op(factory.lookup[Broadcaster](clientPath(clientId), true))
   }
 
-  def sendToClient(clientId: String, msg: String): Unit = {
-    require(factory != null, "Init manager with BroadcasterFactory first!")
-
-    val clientBroadcaster = factory.lookup[Broadcaster](clientPath(clientId), true)
-    clientBroadcaster.broadcast(msg)
-  }
-
-  def broadcastToAllClients(msg: String): Unit = {
+  protected final def withMetaBroadcaster(op: MetaBroadcaster => Unit): Unit = {
     require(metaBroadcaster != null, "Init manager with MetaBroadcaster first!")
-
-    metaBroadcaster.broadcastTo(clientPath(pathWildcard), msg)
+    op(metaBroadcaster)
   }
 
-  def broadcast(msg: String): Unit = {
-    require(metaBroadcaster != null, "Init manager with MetaBroadcaster first!")
+  protected final def clientPath(clientId: String) = s"/client/$clientId"
 
-    metaBroadcaster.broadcastTo(clientPath(pathWildcard), msg)
-  }
+  protected final def pathWildcard = "*"
+}
 
-  private def clientPath(clientId: String) = s"/client/$clientId"
+private[rpc] object BroadcastManager extends BroadcasterInit {
 
-  private def pathWildcard = "*"
+  def registerResource(resource: AtmosphereResource, clientId: String): Unit =
+    withBroadcaster(clientId)(_.addAtmosphereResource(resource))
+
+  def sendToClient(clientId: String, msg: String): Unit =
+    withBroadcaster(clientId)(_.broadcast(msg))
+
+  def broadcastToAllClients(msg: String): Unit =
+    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg))
+
+  def broadcast(msg: String): Unit =
+    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg))
+
 }
