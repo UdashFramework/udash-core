@@ -23,7 +23,7 @@ object Dependencies extends Build {
 
   val scalaLoggingVersion = "3.4.0"
 
-  val scalatestVersion = "3.0.0-RC4"
+  val scalatestVersion = "3.0.0"
   val bootstrapVersion = "3.3.7"
 
   val compilerPlugins = Def.setting(Seq(
