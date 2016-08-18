@@ -1,3 +1,5 @@
+import UdashBuild._
+
 name := "udash"
 
 version in ThisBuild := "0.4.0-SNAPSHOT"
@@ -17,6 +19,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
+jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
+
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
@@ -30,7 +34,7 @@ val commonJSSettings = Seq(
   scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
+  jsEnv in Test := jsTestEnv.value,
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
