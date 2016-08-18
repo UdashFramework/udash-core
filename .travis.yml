@@ -1,12 +1,7 @@
 sudo: required
 dist: trusty
+
 language: scala
-
-scala:
-  - 2.11.8
-
-jdk:
-  - oraclejdk8
 
 before_script:
   - "export DISPLAY=:99.0"
@@ -24,4 +19,29 @@ before_script:
   - export PATH=$PWD/selenium-bin:$PATH
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION 'set (jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome))' test
+  - sbt ++$TRAVIS_SCALA_VERSION "set (jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome))" $TEST_PACKAGE
+
+jdk:
+  - oraclejdk8
+
+scala:
+  - 2.11.8
+
+env:
+  - TEST_PACKAGE=core-macros/test
+  - TEST_PACKAGE=core-sharedJVM/test
+  - TEST_PACKAGE=core-sharedJS/test
+  - TEST_PACKAGE=core-frontend/test
+  - TEST_PACKAGE=rpc-macros/test
+  - TEST_PACKAGE=rpc-sharedJVM/test
+  - TEST_PACKAGE=rpc-sharedJS/test
+  - TEST_PACKAGE=rpc-backend/test
+  - TEST_PACKAGE=rpc-frontend/test
+  - TEST_PACKAGE=rest-macros/test
+  - TEST_PACKAGE=rest-sharedJVM/test
+  - TEST_PACKAGE=rest-sharedJS/test
+  - TEST_PACKAGE=i18n-sharedJVM/test
+  - TEST_PACKAGE=i18n-sharedJS/test
+  - TEST_PACKAGE=i18n-backend/test
+  - TEST_PACKAGE=i18n-frontend/test
+  - TEST_PACKAGE=bootstrap/test
