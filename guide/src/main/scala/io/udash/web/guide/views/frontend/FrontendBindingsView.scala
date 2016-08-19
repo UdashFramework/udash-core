@@ -136,9 +136,7 @@ class FrontendBindingsView extends FinalView {
         |  "Integers: ",
         |  span((attr("data-valid") := true).attrIf(
         |    integers.valid.transform(_ == Valid)
-        |  ))(
-        |    repeat(integers)(p => span(s"${p.get}, ").render)
-        |  ), br,
+        |  ))(repeat(integers)(p => span(s"${p.get}, ").render)), br,
         |  "Is sorted: ",
         |  valid(integers)(
         |    {
