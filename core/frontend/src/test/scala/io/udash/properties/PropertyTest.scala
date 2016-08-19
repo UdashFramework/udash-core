@@ -7,7 +7,6 @@ import io.udash.testing.UdashFrontendTest
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
-import scala.scalajs.js.JavaScriptException
 
 class PropertyTest extends UdashFrontendTest {
   case class C(i: Int, s: String)
@@ -1484,6 +1483,319 @@ class PropertyTest extends UdashFrontendTest {
       r2Patch.idx should be(1)
       r2Patch.added.size should be(3)
       r2Patch.removed.size should be(2)
+    }
+
+    "zip with another ReadableProperty" in {
+      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+      val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
+      val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
+
+      val pairs = odds.zip(evens)((x, y) => (x, y))
+
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      pairs.listenStructure(p => patches.append(p))
+
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(8)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,8), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(4)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(9)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (9,4), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(3)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.append(11)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      patches.size should be(0)
+
+      numbers.append(12)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      patches.size should be(1)
+      patches.last.idx should be(5)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.append(14)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      patches.size should be(1)
+
+      numbers.append(13)
+      pairs.size should be(7)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(2)
+      patches.last.idx should be(6)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.remove(5)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,6), (9,8), (11,10), (13,12)))
+      patches.size should be(3)
+      patches.last.idx should be(2)
+      patches.last.added.size should be(4)
+      patches.last.removed.size should be(5)
+
+      numbers.remove(6)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(4)
+      patches.last.idx should be(2)
+      patches.last.added.size should be(4)
+      patches.last.removed.size should be(4)
+
+      numbers.elemProperties(7).set(20)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,20), (11,12), (13,14)))
+      patches.size should be(4)
+
+      numbers.elemProperties(7).set(10)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(4)
+
+      numbers.remove(12)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,14)))
+      patches.size should be(5)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(2)
+
+      numbers.remove(11)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (13,14)))
+      patches.size should be(6)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(1)
+
+      CallbackSequencer.sequence {
+        numbers.remove(1)
+        numbers.remove(2)
+      }
+      pairs.size should be(4)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+      patches.size should be(8)
+      patches.last.idx should be(0)
+      patches.last.added.size should be(4)
+      patches.last.removed.size should be(4)
+    }
+
+    "zip all with another ReadableProperty" in {
+      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
+      val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
+      val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
+
+      val defaultA = Property(-1)
+      val defaultB = Property(-2)
+
+      val pairs = odds.zipAll(evens)((x, y) => (x, y), defaultA, defaultB)
+
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      pairs.listenStructure(p => patches.append(p))
+
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(8)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,8), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(4)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(9)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (9,4), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(3)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      defaultB.set(256)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,256)))
+      patches.size should be(0)
+
+      defaultB.set(-2)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      patches.size should be(0)
+
+      numbers.append(10)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      patches.size should be(1)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(1)
+
+      numbers.append(11)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,-2)))
+      patches.size should be(2)
+      patches.last.idx should be(5)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.append(12)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      patches.size should be(3)
+      patches.last.idx should be(5)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(1)
+
+      numbers.append(14)
+      pairs.size should be(7)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (-1, 14)))
+      patches.size should be(4)
+      patches.last.idx should be(6)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.append(13)
+      pairs.size should be(7)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(5)
+      patches.last.idx should be(6)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(1)
+
+      numbers.remove(5)
+      pairs.size should be(7)
+      pairs.get should be(Seq((1,2), (3,4), (7,6), (9,8), (11,10), (13,12), (-1,14)))
+      patches.size should be(6)
+      patches.last.idx should be(2)
+      patches.last.added.size should be(5)
+      patches.last.removed.size should be(5)
+
+      numbers.remove(6)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(7)
+      patches.last.idx should be(2)
+      patches.last.added.size should be(4)
+      patches.last.removed.size should be(5)
+
+      numbers.elemProperties(7).set(20)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,20), (11,12), (13,14)))
+      patches.size should be(7)
+
+      numbers.elemProperties(7).set(10)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      patches.size should be(7)
+
+      numbers.remove(12)
+      pairs.size should be(6)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,14), (13,-2)))
+      patches.size should be(8)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(2)
+      patches.last.removed.size should be(2)
+
+      numbers.remove(11)
+      pairs.size should be(5)
+      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (13,14)))
+      patches.size should be(9)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(2)
+
+      CallbackSequencer.sequence {
+        numbers.remove(1)
+        numbers.remove(2)
+      }
+      pairs.size should be(4)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+      patches.size should be(11)
+      patches.last.idx should be(0)
+      patches.last.added.size should be(4)
+      patches.last.removed.size should be(4)
+    }
+
+    "zip with indexes" in {
+      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
+      val indexed = numbers.zipWithIndex
+
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      indexed.listenStructure(p => patches.append(p))
+
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(8)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(0)
+
+      numbers.elemProperties(3).set(4)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(9)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(0)
+
+      numbers.elemProperties(2).set(3)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(0)
+
+      numbers.append(10)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(1)
+      patches.last.idx should be(9)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.append(11)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(2)
+      patches.last.idx should be(10)
+      patches.last.added.size should be(1)
+      patches.last.removed.size should be(0)
+
+      numbers.remove(5)
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(3)
+      patches.last.idx should be(4)
+      patches.last.added.size should be(6)
+      patches.last.removed.size should be(7)
+
+      CallbackSequencer.sequence {
+        numbers.remove(1)
+        numbers.remove(3)
+      }
+      indexed.get should be(numbers.get.zipWithIndex)
+      patches.size should be(5)
+      patches.last.idx should be(1)
+      patches.last.added.size should be(7)
+      patches.last.removed.size should be(7)
     }
   }
 }

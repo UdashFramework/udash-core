@@ -99,6 +99,22 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     new CombinedReadableSeqProperty(this, property, executionContext)
   }
 
+  /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
+  def zip[B, O : ModelValue](property: ReadableSeqProperty[B, ReadableProperty[B]])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+    new ZippedReadableSeqProperty(this, property, combiner, executionContext)
+
+  /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
+    * Uses `defaultA` and `defaultB` to fill smaller sequence. */
+  def zipAll[B, O : ModelValue](property: ReadableSeqProperty[B, ReadableProperty[B]])
+                               (combiner: (A, B) => O,
+                                defaultA: ReadableProperty[A],
+                                defaultB: ReadableProperty[B]): ReadableSeqProperty[O, ReadableProperty[O]] =
+    new ZippedAllReadableSeqProperty(this, property, combiner, defaultA, defaultB, executionContext)
+
+  /** Zips elements from `this` SeqProperty with their indexes. */
+  lazy val zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =
+    new ZippedWithIndexReadableSeqProperty[A](this, executionContext)
+
   /** The size of this sequence, equivalent to length. */
   def size: Int =
     elemProperties.size
