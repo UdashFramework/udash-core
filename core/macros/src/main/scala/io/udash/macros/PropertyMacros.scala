@@ -35,7 +35,7 @@ class PropertyMacros(val c: blackbox.Context) {
   private lazy val OptionTpe = typeOf[Option[_]]
   private lazy val SeqTpe = typeOf[Seq[_]]
   private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
-  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product]).map(_.typeSymbol)
+  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
 
   private def fixOverride(s: Symbol) =
     if (s.isTerm && s.asTerm.isOverloaded) {
@@ -61,17 +61,23 @@ class PropertyMacros(val c: blackbox.Context) {
     tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isCaseClass
 
   //Checks, if tpe is immutable case class
-  private def isImmutableCaseClass(tpe: Type) =
-    isCaseClass(tpe) && filterMembers(tpe).filter(m => !m.isPrivate && m.isTerm)
-      .forall(m => m.asTerm.isStable && (m.typeSignatureIn(tpe).resultType == tpe || isImmutableValue(m.typeSignatureIn(tpe).resultType)))
+  private def isImmutableCaseClass(tpe: Type) = {
+    val members = filterMembers(tpe).filter(m => !m.isPrivate && m.isTerm)
+    isCaseClass(tpe) && members.forall(m => m.asTerm.isStable) && checkModel(
+      q"""
+        implicit val ${TermName(c.freshName())}: $ImmutableValueCls[$tpe] = null
+        ..${
+          members.map(m => q"""implicitly[$ImmutableValueCls[${m.typeSignatureIn(tpe).resultType}]]""")
+        }
+      """
+    )
+  }
 
   //Checks, if tpe is case class which can be used as ModelProperty template
   private def isModelCaseClass(tpe: Type): Boolean =
-    isCaseClass(tpe) && (
-      tpe <:< typeOf[scala.Tuple2[_, _]] || //dirty hack for Tuple2 unstable `swap` method
-      filterMembers(tpe).filter(!_.isPrivate)
-        .forall(m => m.isMethod && m.asMethod.isCaseAccessor && isModelValue(m.typeSignatureIn(tpe).resultType))
-    )
+    isCaseClass(tpe) &&
+      filterMembers(tpe).filter(m => !m.isPrivate && !(tpe <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
+        .forall(m => m.isMethod && m.asMethod.isCaseAccessor)
 
   //Checks, if tpe is sealed and children are immutable
   //TODO: Implement this stuff - children checking
@@ -79,14 +85,12 @@ class PropertyMacros(val c: blackbox.Context) {
     tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isSealed
 
   //Checks, if tpe is immutable collection and children are immutable
-  //TODO: Implement this stuff - children checking
-  private def isImmutableCollection(tpe: Type): Boolean =
-    tpe <:< SeqTpe && !(tpe <:< MutableSeqTpe)
+  private def isImmutableSeq(tpe: Type): Boolean =
+    tpe <:< SeqTpe && !(tpe <:< MutableSeqTpe) && tpe.typeArgs.forall(isImmutableValue)
 
   //Checks, if tpe is immutable option and children are immutable
-  //TODO: Implement this stuff - children checking
   private def isImmutableOption(tpe: Type): Boolean =
-    tpe <:< OptionTpe
+    tpe <:< OptionTpe && tpe.typeArgs.forall(isImmutableValue)
 
   //Checks, if return type of method is ModelValue
   private def doesReturnTypeForModelRequirements(symbol: Symbol, signatureType: Type): Boolean =
@@ -106,7 +110,7 @@ class PropertyMacros(val c: blackbox.Context) {
     filterMembers(tpe)
       .filter(s => doesMethodMeetModelRequirements(s, tpe))
 
-  private def checkModel(tree: c.Tree) =
+  private def checkModel(tree: c.Tree): Boolean =
     c.typecheck(tree, silent = true) != EmptyTree
 
   private def isModelPart(tpe: Type): Boolean = checkModel(q"""implicitly[$ModelPartCls[$tpe]]""")
@@ -119,70 +123,187 @@ class PropertyMacros(val c: blackbox.Context) {
 
   private def getModelPath(tree: Tree) = tree match {
     case f@Function(_, path) => path
-    case _ => c.abort(tree.pos, "Only inline lambdas supported. Please use bind(_.path.to.model).")
+    case _ => c.abort(tree.pos, "Only inline lambdas supported. Please use subProp(_.path.to.element).")
   }
 
   def reifyImmutableValue[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
-    if (isImmutableCaseClass(valueType) || isImmutableSealedHierarchy(valueType) || isImmutableCollection(valueType) || isImmutableOption(valueType)) {
+
+    val isSeq = isImmutableSeq(valueType)
+    lazy val isOption = isImmutableOption(valueType)
+    lazy val isSealedHierarchy = isImmutableSealedHierarchy(valueType)
+    lazy val isImmutableCC = isImmutableCaseClass(valueType)
+
+    if (isSeq || isOption || isSealedHierarchy || isImmutableCC) {
       q"""null"""
     } else {
-      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelValueCls requirements. It is not case class nor " +
-        s"immutable sealed hierarchy nor immutable collection.")
-    }
-  }
-
-  def reifyModelPart[T: c.WeakTypeTag]: c.Tree = {
-    val valueType = weakTypeOf[T]
-    if (valueType.typeSymbol.isClass && valueType.typeSymbol.asClass.isTrait && !valueType.typeSymbol.asClass.isSealed
-          && !isModelSeq(valueType) && !(valueType <:< MutableSeqTpe)) {
-      q"""
-         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
-         ..${
-            filterMembers(valueType).collect {
-              case s if isAbstractMethod(s) && !takesParameters(s) && s.isMethod => s
-            }.map(s => {
-              val resultType = s.typeSignatureIn(valueType).resultType
-              q"""implicitly[$ModelValueCls[$resultType]]"""
-            })
-         }
-         null
-      """
-    } else if (isModelCaseClass(valueType)) {
-      q"""
-         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
-         ..${
-            filterMembers(valueType).filter(!_.isPrivate)
-              .filter(m => m.isMethod && m.asMethod.isCaseAccessor)
-              .map(m => {
-                val resultType = m.typeSignatureIn(valueType).resultType
-                q"""implicitly[$ModelValueCls[$resultType]]"""
-              })
-         }
-         null
-       """
-    } else {
-      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelPartCls requirements. It must be trait. (not sealed trait) ")
+      val isCC = isCaseClass(valueType)
+      c.abort(c.enclosingPosition,
+        s"""
+           |The type `$valueType` does not meet immutable value requirements.
+           |
+           |Immutable value checks:
+           |  * isImmutableCaseClass: $isImmutableCC
+           |    * isCaseClass: $isCC
+           |    * members: ${
+                    if (isCC) {
+                      val members = filterMembers(valueType).filter(m => !m.isPrivate && m.isTerm)
+                      members.map(m => {
+                        val resultType = m.typeSignatureIn(valueType).resultType
+                        val stable: Boolean = m.asTerm.isStable
+                        val isImmutable = checkModel(
+                          q"""
+                            implicit val ${TermName(c.freshName())}: $ImmutableValueCls[$valueType] = null
+                            implicitly[$ImmutableValueCls[$resultType]]
+                          """
+                        )
+                        s"${m.name}: $resultType -> stable: $stable, isImmutableValue: $isImmutable; "
+                      }).map(s => s"\n      - $s").mkString("") +
+                        s"\n    Use ImmutableValue.isImmutable[${members.headOption.map(_.typeSignatureIn(valueType).resultType).getOrElse("T")}] to get more details about `isImmutableValue` check."
+                    } else "Visible only for case classes."
+                  }
+           |  * isImmutableSealedHierarchy: $isSealedHierarchy
+           |  * isImmutableSeq: $isSeq - for example: Seq[String]
+           |  * isImmutableOption: $isOption - for example: Option[String]
+           |""".stripMargin
+      )
     }
   }
 
   def reifyModelValue[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
-    if (isImmutableValue(valueType) || isModelPart(valueType) || isModelSeq(valueType)) {
+    val immutable = isImmutableValue(valueType)
+    lazy val modelPart = isModelPart(valueType)
+    lazy val modelSeq = isModelSeq(valueType)
+    if (immutable || modelPart || modelSeq) {
       q"""null"""
     } else {
-      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelValueCls requirements. This is not immutable value nor valid $ModelPartCls nor $ModelSeqCls.")
+      c.abort(c.enclosingPosition,
+        s"""
+           |The type `$valueType` does not meet model value requirements. This is not immutable value nor valid model part nor model seq.
+           |
+           |Model value checks:
+           |  * isImmutable: $immutable (check: ImmutableValue.isImmutable[$valueType] for details)
+           |  * isModelPart: $modelPart
+           |  * isModelSeq: $modelSeq
+           |
+           |Use ModelPart.isModelPart[$valueType] and ModelSeq.isModelSeq[$valueType] to get more details about `isModelPart` and `isModelSeq` checks.
+           """.stripMargin
+      )
+    }
+  }
+
+  def reifyModelPart[T: c.WeakTypeTag]: c.Tree = {
+    val valueType = weakTypeOf[T]
+
+    val isClass: Boolean = valueType.typeSymbol.isClass
+    val isTrait = isClass && valueType.typeSymbol.asClass.isTrait
+    val isNotSealedTrait = isClass && !valueType.typeSymbol.asClass.isSealed
+    val isNotSeq = !(valueType <:< SeqTpe) && !(valueType <:< MutableSeqTpe)
+
+    lazy val isModelCC: Boolean = isModelCaseClass(valueType)
+
+    val members = filterMembers(valueType)
+    val unimplementableTraitMembers = members.collect { case s if isAbstractMethod(s) && takesParameters(s) => s }
+    val isImplementableTrait = isTrait && unimplementableTraitMembers.isEmpty
+
+    val propertyMembers = if (isTrait && isNotSealedTrait && isNotSeq) {
+      members.collect {
+        case s if isAbstractMethod(s) && !takesParameters(s) => s
+      }
+    } else if (isModelCC) {
+      members
+        .filter(m => !m.isPrivate && !(valueType <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
+        .filter(m => m.isMethod && m.asMethod.isCaseAccessor)
+    } else Seq.empty
+
+    if (isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait) {
+      q"""
+         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
+         ..${
+           propertyMembers.map(s => {
+             val resultType = s.typeSignatureIn(valueType).resultType
+             q"""implicitly[$ModelValueCls[$resultType]]"""
+           })
+         }
+         null
+      """
+    } else if (isModelCC) {
+        q"""
+         implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
+         ..${
+           propertyMembers.map(m => {
+             val resultType = m.typeSignatureIn(valueType).resultType
+             q"""implicitly[$ModelValueCls[$resultType]]"""
+           })
+         }
+         null
+       """
+    } else {
+      val isCC = isCaseClass(valueType)
+      c.abort(c.enclosingPosition,
+        s"""
+           |The type `$valueType` does not meet model part requirements. It must be (not sealed) trait or simple case class.
+           |
+           |Model part checks:
+           |* for traits:
+           |  * isTrait: $isTrait
+           |  * isImplementableTrait: $isImplementableTrait
+           |  * isNotSealedTrait: $isNotSealedTrait
+           |  * isNotSeq: $isNotSeq
+           |  * members: ${
+                  if (isTrait && isNotSealedTrait && isNotSeq)
+                    propertyMembers.map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType} " +
+                      s"-> isModelValue: ${isModelValue(m.typeSignatureIn(valueType).resultType)};"
+                    ).map(s => s"\n    - $s").mkString("")
+                  else "Visible only for traits."
+                }
+           |  * unimplementableTraitMembers: ${
+                  if (isTrait && isNotSealedTrait && isNotSeq)
+                    unimplementableTraitMembers
+                      .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType}")
+                      .map(s => s"\n    - $s").mkString("")
+                  else "Visible only for traits."
+                }
+           |* for simple case class:
+           |  * isCaseClass: $isCC
+           |  * members: ${
+                  if (isCC)
+                    propertyMembers
+                      .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType} " +
+                        s"-> isCaseAccessor: ${m.isMethod && m.asMethod.isCaseAccessor}, " +
+                        s"isModelValue: ${isModelValue(m.typeSignatureIn(valueType).resultType)};"
+                      ).map(s => s"\n    - $s").mkString("")
+                  else "Visible only for case classes."
+                }
+           |
+           |Use ModelValue.isModelValue[${propertyMembers.headOption.getOrElse("T")}] to get more details about `isModelValue` check.
+          """.stripMargin
+      )
     }
   }
 
   def reifyModelSeq[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
-    if (valueType.dealias.widen.typeSymbol == SeqTpe.typeSymbol && valueType.typeArgs.forall(isModelValue)) {
+    val isSeq = valueType.dealias.widen.typeSymbol == SeqTpe.typeSymbol
+    lazy val typeArgsCheck = valueType.typeArgs.map(m => (m, isModelValue(m)))
+    if (isSeq && typeArgsCheck.forall(_._2)) {
       q"""null"""
     } else {
-      val invalidTypeArgs = valueType.typeArgs.collect { case t if !isModelValue(t) => t }
-      c.abort(c.enclosingPosition, s"The type $valueType does not meet $ModelSeqCls requirements. This must be Seq with valid ModelValues as type args." +
-        s"Invalid type args: $invalidTypeArgs")
+      c.abort(c.enclosingPosition,
+        s"""
+           |The type `$valueType` does not meet model seq requirements. This must be Seq with valid model value as type arg.
+           |
+           |Model Seq checks:
+           |  * isSeqType: $isSeq
+           |  * type arg: ${
+                  if (isSeq) typeArgsCheck.map(result => s"${result._1} -> isModelValue: ${result._2}; ").head
+                  else "Visible only for Seqs."
+                }
+           |
+           |Use ModelValue.isModelValue[${typeArgsCheck.head._1}] to get more details.
+           |""".stripMargin
+      )
     }
   }
 
@@ -201,7 +322,7 @@ class PropertyMacros(val c: blackbox.Context) {
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
-    if (isModelCaseClass(tpe)) {
+    if (isCaseClass(tpe)) {
       val order = tpe.members.collectFirst {
           case m: MethodSymbol if m.isPrimaryConstructor ⇒ m
         }.get.paramLists.flatten
@@ -358,7 +479,19 @@ class PropertyMacros(val c: blackbox.Context) {
     } else if (isModelValue(valueType)) {
       generatePropertyCreator(valueType, generateValueProperty)
     } else {
-      c.abort(c.enclosingPosition, s"$valueType should meet requirements for one of $ModelPartCls, $ModelValueCls, $ModelSeqCls.")
+      c.abort(c.enclosingPosition,
+        s"""
+           |`$valueType` should meet requirements for one of:
+           |  * model value - it has to be an immutable value (io.udash.properties.ImmutableValue[$valueType] has to exist), model part or model seq
+           |  * model part - it has to be a trait with abstract methods returning valid model values or a simple case class (contains only vals with valid model values in the primary constructor)
+           |  * model seq - it has to be Seq[T] where T is a valid model value
+           |
+           |Try to call one of these methods in your code to get more details:
+           |  * ModelValue.isModelValue[$valueType]
+           |  * ModelPart.isModelPart[$valueType]
+           |  * ModelSeq.isModelSeq[$valueType]
+           |""".stripMargin
+      )
     }
   }
 }

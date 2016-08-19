@@ -17,6 +17,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
+jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
+
 // Deployment configuration
 val deploymentConfiguration = Seq(
   publishMavenStyle := true,
@@ -67,7 +69,7 @@ val commonJSSettings = Seq(
   scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
+  jsEnv in Test := jsTestEnv.value,
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"

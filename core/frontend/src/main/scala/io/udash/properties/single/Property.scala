@@ -99,7 +99,7 @@ trait ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
-  def transform[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  def transformToSeq[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   protected[properties] def parent: ReadableProperty[_]
@@ -171,7 +171,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transform[B : ModelValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+  def transformToSeq[B : ModelValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
 }
 
