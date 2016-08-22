@@ -31,6 +31,7 @@ class FrontendBindingsView extends FinalView {
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method which is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
+      li(i("showIf"), " - shows and hides elements depending on provided property value."),
       li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
       li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
@@ -91,6 +92,20 @@ class FrontendBindingsView extends FinalView {
     )(GuideStyles),
     new RepeatDemoComponent,
     p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
+    h3("showIf"),
+    p(
+      "This binding method takes two arguments: ", i("Property[Boolean]"), " and ", i("Seq[dom.Element]"), ". ",
+      "If value of the property is ", i("true"), " it shows all passed elements and hides them otherwise."
+    ),
+    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
+                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
+                |
+                |div(
+                |  span("Visible: ", bind(visible), " -> "),
+                |  showIf(visible)(span("Show/hide").render)
+                |)""".stripMargin
+    )(GuideStyles),
+    new ShowIfDemoComponent,
     h3("Attribute bindings"),
     p(
       "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
@@ -120,10 +135,8 @@ class FrontendBindingsView extends FinalView {
         |div(
         |  "Integers: ",
         |  span((attr("data-valid") := true).attrIf(
-        |    integers.valid.transform((x: ValidationResult) => x == Valid)
-        |  ))(
-        |    repeat(integers)(p => span(s"${p.get}, ").render)
-        |  ), br,
+        |    integers.valid.transform(_ == Valid)
+        |  ))(repeat(integers)(p => span(s"${p.get}, ").render)), br,
         |  "Is sorted: ",
         |  valid(integers)(
         |    {

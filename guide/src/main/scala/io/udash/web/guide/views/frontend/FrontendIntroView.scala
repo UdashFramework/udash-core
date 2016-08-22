@@ -143,19 +143,15 @@ class FrontendIntroView extends FinalView {
         |        UdashInputGroup.buttons(randomizeButton.render)
         |      ).render,
         |      h3("Is valid?"),
-        |      p(
-        |        bindValidation(model,
-        |          _ => span(id := "valid")("...").render,
-        |          {
-        |            case Valid => span(id := "valid")("Yes").render
-        |            case Invalid(errors) => span(id := "valid")(
-        |              "No, because:",
-        |              ul(errors.map(e => li(e)))
-        |            ).render
-        |          },
-        |          error => span(s"Validation error: $error").render
-        |        )
-        |      )
+        |      p(valid(model) {
+        |        case Valid => span("Yes").render
+        |        case Invalid(errors) => Seq(
+        |          span("No, because:"),
+        |          ul(GuideStyles.get.defaultList)(
+        |            errors.map(e => li(e.message))
+        |          )
+        |        ).map(_.render)
+        |      })
         |    )
         |  }
         |}""".stripMargin

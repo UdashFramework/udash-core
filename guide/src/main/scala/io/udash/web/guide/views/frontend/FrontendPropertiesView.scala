@@ -105,8 +105,10 @@ class FrontendPropertiesView extends FinalView {
       li(i("elemProperties"), " - gives access to mutable properties representing elements of the sequence"),
       li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property"),
       li(i("insert"), " - adds provided elements into sequence"),
-      li(i("filter"), " - creates ", i("ReadableSeqProperty"), " containing matching elements, which will be synchronised with original property"),
-      li(i("reversed"), " - creates ", i("SeqProperty"), " containing elements in reversed order, it will be synchronised with original property")
+      li(i("filter"), " - creates ", i("ReadableSeqProperty"), " containing matching elements, which will be synchronised with the original property"),
+      li(i("reversed"), " - creates ", i("SeqProperty"), " containing elements in reversed order, it will be synchronised with the original property"),
+      li(i("zip/zipAll"), " - creates ", i("SeqProperty"), " containing zipped elements from ptovided sequences, it will be synchronised with the both original properties"),
+      li(i("zipWithIndex"), " - creates ", i("SeqProperty"), " containing elements zipped their indexes")
     ),
     p(
       i("SeqProperty"), " always contains ", i("Property"), " elements, but when you call the ",
@@ -236,7 +238,7 @@ class FrontendPropertiesView extends FinalView {
     CodeBlock(
       """val csv = Property[String]("1,2,3,4,5")
         |val ints: ReadableSeqProperty[Int] =
-        |  csv.transform(_.split(",").map(_.toInt).toSeq)
+        |  csv.transformToSeq(_.split(",").map(_.toInt).toSeq)
         |val floats: ReadableSeqProperty[Float] =
         |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
     )(GuideStyles),
@@ -279,6 +281,37 @@ class FrontendPropertiesView extends FinalView {
         |val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
         |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
         |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin
+    )(GuideStyles),
+    h3("SeqProperty zip/zipAll"),
+    p("It is possible to zip elements from two ", i("SeqProperties"), ". You have to pass a combiner, so you can combine the elements as you want."),
+    CodeBlock(
+      """val numbers = SeqProperty[Int](1, 2, 3)
+        |val strings = SeqProperty[String]("A", "B", "C", "D")
+        |val z = numbers.zip(strings)((_, _))
+        |//z.get == Seq((1,"A"), (2,"B"), (3,"C"))
+        |val all = numbers.zipAll(strings)((_, _), Property(-1), Property("empty"))
+        |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (-1, "D"))
+        |
+        |numbers.append(7)
+        |numbers.append(8)
+        |//z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
+        |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))""".stripMargin
+    )(GuideStyles),
+    h3("SeqProperty zipWithIndex"),
+    p("It is also very easy to create sequence of elements zipped with index."),
+    CodeBlock(
+      """val strings = SeqProperty[String]("A", "B", "C", "D")
+        |val withIdx = strings.zipWithIndex
+        |// withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3))
+        |
+        |strings.append("Another")
+        |// withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3), ("Another",4))
+        |
+        |strings.prepend("First")
+        |// withIdx.get == Seq(("First",0), ("A",1), ("B",2), ("C",3), ("D",4), ("Another",5))
+        |
+        |strings.clear()
+        |// withIdx.get == Seq()""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(

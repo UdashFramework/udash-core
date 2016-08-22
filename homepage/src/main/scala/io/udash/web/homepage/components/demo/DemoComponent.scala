@@ -100,13 +100,7 @@ class DemoComponent(url: Property[String]) extends Component {
 
 object DemoComponent {
   def helloWorldCode = CodeBlock(
-    """import scalajs.concurrent.JSExecutionContext.Implicits
-      |import Implicits.queue
-      |import org.scalajs.dom._
-      |import scalatags.JsDom.all._
-      |import io.udash._
-      |
-      |val name = Property("World")
+    """val name = Property("World")
       |
       |div(
       |  TextInput.debounced(name), br,
@@ -115,13 +109,7 @@ object DemoComponent {
   )(HomepageStyles)
 
   def propertiesCode = CodeBlock(
-    """import scalajs.concurrent.JSExecutionContext.Implicits
-      |import Implicits.queue
-      |import org.scalajs.dom._
-      |import scalatags.JsDom.all._
-      |import io.udash._
-      |
-      |def isEven(n: Int): Boolean =
+    """def isEven(n: Int): Boolean =
       |  n % 2 == 0
       |
       |def renderer(n: ReadableProperty[Int]): Element =
@@ -149,13 +137,7 @@ object DemoComponent {
   )(HomepageStyles)
 
   def validationCode = CodeBlock(
-    """import scalajs.concurrent.JSExecutionContext.Implicits
-      |import Implicits.queue
-      |import org.scalajs.dom._
-      |import scalatags.JsDom.all._
-      |import io.udash._
-      |
-      |val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
+    """val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
       |
       |val email = Property("example@mail.com")
       |email.addValidator((element: String) =>
@@ -176,15 +158,7 @@ object DemoComponent {
   )(HomepageStyles)
 
   def i18n = CodeBlock(
-    """import scalajs.concurrent.JSExecutionContext.Implicits
-      |import Implicits.queue
-      |import scalacss.ScalatagsCss._
-      |import scalatags.JsDom.all._
-      |
-      |import io.udash._
-      |import io.udash.i18n._
-      |
-      |val name = Property("World")
+    """val name = Property("World")
       |
       |object Translations {
       |  import TranslationKey._
@@ -251,20 +225,7 @@ object DemoComponent {
   )(HomepageStyles)
 
   def components = CodeBlock(
-    """import io.udash._
-      |
-      |import io.udash.bootstrap.button.UdashButton
-      |import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
-      |import io.udash.bootstrap.modal.UdashModal
-      |import io.udash.bootstrap.progressbar.UdashProgressBar
-      |
-      |import org.scalajs.dom
-      |import scalajs.concurrent.JSExecutionContext.Implicits
-      |import Implicits.queue
-      |import scalacss.ScalatagsCss._
-      |import scalatags.JsDom.all._
-      |
-      |val text = Property[String]("")
+    """val text = Property[String]("")
       |val progress = Property[Int](0)
       |val disableButton = Property(text.get.isEmpty)
       |text.listen(s => disableButton.set(s.isEmpty))

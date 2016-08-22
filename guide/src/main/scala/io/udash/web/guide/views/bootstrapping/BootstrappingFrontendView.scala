@@ -189,7 +189,8 @@ class BootstrappingFrontendView extends FinalView {
         |  /** Puts child view inside itself using jQuery. */
         |  override def renderChild(view: View): Unit = {
         |    import io.udash.wrappers.jquery.jQ
-        |    jQ(child).html(view.getTemplate)
+        |    jQ(child).children().remove()
+        |    view.getTemplate.applyTo(child)
         |  }
         |}""".stripMargin
     )(GuideStyles),

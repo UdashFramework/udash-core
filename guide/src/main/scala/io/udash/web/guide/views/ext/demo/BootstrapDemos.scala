@@ -599,12 +599,12 @@ object BootstrapDemos extends StrictLogging {
     val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
     val listGroup = UdashListGroup(news)((news) =>
       li(
-        BootstrapStyles.active.styleIf(news.transform((s: String) => s.endsWith("1"))),
-        BootstrapStyles.disabled.styleIf(news.transform((s: String) => s.endsWith("2"))),
-        BootstrapStyles.List.listItemSuccess.styleIf(news.transform((s: String) => s.endsWith("3"))),
-        BootstrapStyles.List.listItemDanger.styleIf(news.transform((s: String) => s.endsWith("4"))),
-        BootstrapStyles.List.listItemInfo.styleIf(news.transform((s: String) => s.endsWith("5"))),
-        BootstrapStyles.List.listItemWarning.styleIf(news.transform((s: String) => s.endsWith("6")))
+        BootstrapStyles.active.styleIf(news.transform(_.endsWith("1"))),
+        BootstrapStyles.disabled.styleIf(news.transform(_.endsWith("2"))),
+        BootstrapStyles.List.listItemSuccess.styleIf(news.transform(_.endsWith("3"))),
+        BootstrapStyles.List.listItemDanger.styleIf(news.transform(_.endsWith("4"))),
+        BootstrapStyles.List.listItemInfo.styleIf(news.transform(_.endsWith("5"))),
+        BootstrapStyles.List.listItemWarning.styleIf(news.transform(_.endsWith("6")))
       )(bind(news)).render
     )
 
