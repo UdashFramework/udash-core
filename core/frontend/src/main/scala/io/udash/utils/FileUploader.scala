@@ -10,21 +10,20 @@ import scala.scalajs.js
 class FileUploader(url: Url)(implicit ec: ExecutionContext) {
   import FileUploader._
 
-  def upload(input: html.Input): ReadableModelProperty[FileUploadModel] = {
-    val builder = Seq.newBuilder[File]
-    val files = input.files
-    for (i <- 0 until files.length)
-      builder += files(i)
+  /** Uploads files selected in provided `input`. */
+  def upload(input: html.Input): ReadableModelProperty[FileUploadModel] =
+    upload(
+      input.name,
+      (0 until input.files.length).map(input.files.item)
+    )
 
-    upload(input.name, builder.result())
-  }
-
+  /** Uploads provided `files` in a field named `fieldName`. */
   def upload(fieldName: String, files: Seq[File],
              extraData: Map[js.Any, js.Any] = Map.empty): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel]
     val data = new FormData()
 
-    extraData.foreach(item => data.append(item._1, item._2))
+    extraData.foreach { case (key, value) => data.append(key, value) }
     files.foreach(file => {
       data.append(s"$fieldName[]", file)
       p.subSeq(_.files).append(file)
@@ -38,7 +37,10 @@ class FileUploader(url: Url)(implicit ec: ExecutionContext) {
       }
     )
     xhr.addEventListener("load", (ev: Event) =>
-      p.subProp(_.state).set(FileUploadState.Completed)
+      p.subProp(_.state).set(xhr.status / 100 match {
+        case 2 => FileUploadState.Completed
+        case _ => FileUploadState.Failed
+      })
     )
     xhr.addEventListener("error", (ev: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
@@ -58,9 +60,11 @@ object FileUploader {
   sealed trait FileUploadState
   object FileUploadState {
     case object InProgress extends FileUploadState
-    case object Completed extends FileUploadState
-    case object Failed extends FileUploadState
-    case object Cancelled extends FileUploadState
+
+    sealed trait Done extends FileUploadState
+    case object Completed extends Done
+    case object Failed extends Done
+    case object Cancelled extends Done
   }
 
   trait FileUploadModel {
