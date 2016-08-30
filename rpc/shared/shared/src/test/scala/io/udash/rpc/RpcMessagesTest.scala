@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.EscapeUtils
 import io.udash.testing.UdashSharedTest
@@ -114,6 +115,38 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized.map should be(item.map)
     }
 
+    "handle plain numbers in JSON as Int, Long and Double" in {
+      val json = RPC.stringToRaw("123")
+      RPC.read[Int](json) should be(123)
+      RPC.read[Long](json) should be(123)
+      RPC.read[Double](json) should be(123)
+
+      val maxIntPlusOne: Long = Int.MaxValue.toLong + 1
+      val jsonLong = RPC.stringToRaw(maxIntPlusOne.toString)
+      intercept[ReadFailure](RPC.read[Int](jsonLong))
+      RPC.read[Long](jsonLong) should be(maxIntPlusOne)
+      RPC.read[Double](jsonLong) should be(maxIntPlusOne)
+
+      val jsonLongMax = RPC.stringToRaw(Long.MaxValue.toString)
+      intercept[ReadFailure](RPC.read[Int](jsonLong))
+      RPC.read[Long](jsonLongMax) should be(Long.MaxValue)
+      RPC.read[Double](jsonLongMax) should be(Long.MaxValue)
+
+      val jsonDouble = RPC.stringToRaw(Double.MaxValue.toString)
+      intercept[ReadFailure](RPC.read[Int](jsonDouble))
+      intercept[ReadFailure](RPC.read[Long](jsonDouble))
+      RPC.read[Double](jsonDouble) should be(Double.MaxValue)
+
+      val jsonDouble2 = RPC.stringToRaw("123.00")
+      RPC.read[Int](jsonDouble2) should be(123)
+      RPC.read[Long](jsonDouble2) should be(123)
+      RPC.read[Double](jsonDouble2) should be(123.0)
+
+      val brokenDouble = "312,321"
+      intercept[ReadFailure](RPC.read[Int](RPC.stringToRaw(brokenDouble)))
+      intercept[ReadFailure](RPC.read[Long](RPC.stringToRaw(brokenDouble)))
+      intercept[ReadFailure](RPC.read[Double](RPC.stringToRaw(brokenDouble)))
+    }
 
     "work with skipping" in {
       case class TwoItems(i1: CompleteItem, i2: CompleteItem)
