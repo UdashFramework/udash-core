@@ -16,7 +16,7 @@ object JawnFacade extends SimpleFacade[JValue] {
         JDouble(s.toDouble)
     }
 
-  override def jint(s: String) = JInt(s.toInt)
+  override def jint(s: String): JNum = jnum(s)
 
   override def jstring(s: String) = JString(s)
 

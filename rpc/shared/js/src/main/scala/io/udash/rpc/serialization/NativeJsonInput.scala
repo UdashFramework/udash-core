@@ -32,12 +32,10 @@ class NativeJsonInput(value: Any) extends Input { self =>
     def parseLong(): Option[Long] = {
       value match {
         case s: String =>
-          try {
-            Some(s.toLong)
-          } catch {
-            case ex: NumberFormatException =>
-              None
-          }
+          try { Some(s.toLong) }
+          catch { case ex: NumberFormatException => None }
+        case i: Int => Some(i)
+        case d: Double if d == d.toLong => Some(d.toLong)
         case _ => None
       }
     }
