@@ -102,6 +102,15 @@ trait ReadableProperty[A] {
   def transformToSeq[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
+  /** Streams value changes to the `target` property.
+    * It is not as strong relation as `transform`, because `target` can change value independently. */
+  def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {
+    @inline def update(v: A) =
+      target.set(transformer(v))
+    if (initUpdate) update(get)
+    listen(update)
+  }
+
   protected[properties] def parent: ReadableProperty[_]
 
   protected[properties] def fireValueListeners(): Unit = {
