@@ -20,7 +20,7 @@ class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boo
     BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
 
   override lazy val render: dom.html.Button =
-    button(id := componentId)(classes: _*)(
+    button(id := componentId, tpe := "button")(classes: _*)(
       onclick :+= ((_: MouseEvent) => {
         fire(ButtonClickEvent(this))
         false
