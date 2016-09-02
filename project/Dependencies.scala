@@ -11,15 +11,15 @@ object Dependencies extends Build {
   val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.16.2"
+  val avsCommonsVersion = "1.16.3"
 
   val atmosphereJSVersion = "2.3.0"
   val atmosphereVersion = "2.4.5"
 
-  val upickleVersion = "0.4.1"
-  val jawnParserVersion = "0.8.4"
+  val upickleVersion = "0.4.2"
+  val jawnParserVersion = "0.9.0"
 
-  val scalaHttpClientVersion = "1.0.0"
+  val scalaHttpClientVersion = "1.1.0"
 
   val scalaLoggingVersion = "3.4.0"
 

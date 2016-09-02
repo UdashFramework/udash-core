@@ -491,6 +491,59 @@ class PropertyTest extends UdashFrontendTest {
       lastPatch.removed.size should be(2)
       elementsUpdated should be(0)
     }
+
+    "stream value to antoher property" in {
+      val source = SeqProperty(1, 2, 3)
+      val transformed = source.transform((i: Int) => i * 2)
+      val filtered = transformed.filter(_ < 10)
+      val sum = filtered.transform((s: Seq[Int]) => s.sum)
+
+      val target = Property(42)
+      val targetWithoutInit = Property(42)
+
+      target.get should be(42)
+      targetWithoutInit.get should be(42)
+
+      // Init update
+      val r1 = sum.streamTo(target)(id => id)
+      val r2 = sum.streamTo(targetWithoutInit, initUpdate = false)(id => id * 2)
+
+      target.get should be(12)
+      targetWithoutInit.get should be(42)
+
+      // Source change
+      source.append(4)
+
+      target.get should be(20)
+      targetWithoutInit.get should be(40)
+
+      // Targets update
+      target.set(0)
+      targetWithoutInit.set(0)
+
+      target.get should be(0)
+      targetWithoutInit.get should be(0)
+
+      // Update filtered out
+      source.append(5)
+
+      target.get should be(0)
+      targetWithoutInit.get should be(0)
+
+      // Source update
+      source.remove(2)
+
+      target.get should be(16)
+      targetWithoutInit.get should be(32)
+
+      // Stream cancel and update
+      r1.cancel()
+      r2.cancel()
+      source.remove(1)
+
+      target.get should be(16)
+      targetWithoutInit.get should be(32)
+    }
   }
 
   "ModelProperty" should {

@@ -19,10 +19,13 @@ class JsonInput(value: JValue) extends Input {
 
   def readInt() = _read("Int") {
     case JInt(v) => ReadSuccessful(v)
+    case JDouble(v) if v == v.toInt => ReadSuccessful(v.toInt)
   }
 
   def readLong() = _read("Long") {
     case JString(v) => ReadSuccessful(v.toLong)
+    case JInt(v) => ReadSuccessful(v)
+    case JDouble(v) if v == v.toLong => ReadSuccessful(v.toLong)
   }
 
   def readDouble() = _read("Double") {

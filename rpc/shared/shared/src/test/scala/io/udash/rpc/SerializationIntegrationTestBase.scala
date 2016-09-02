@@ -1,6 +1,6 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.RPCMetadata
+import com.avsystem.commons.serialization.{GenCodec, Input, Output}
 import io.udash.testing.UdashSharedTest
 
 import scala.language.higherKinds
@@ -24,6 +24,33 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
 
         deserialized should be(test)
       }
+    }
+
+    "serialize and deserialize types with custom gencodec" in {
+      implicit def optionGencodec[T: GenCodec]: GenCodec[Option[T]] =
+        new GenCodec[Option[T]] {
+          override def write(output: Output, value: Option[T]): Unit =
+            value match {
+              case Some(v) => implicitly[GenCodec[T]].write(output, v)
+              case None => output.writeNull()
+            }
+
+          override def read(input: Input): Option[T] =
+            if (input.readNull().isSuccess) None
+            else Some(implicitly[GenCodec[T]].read(input))
+        }
+
+      val testOpts = Seq(
+        None,
+        Some(10L),
+        Some(Long.MaxValue)
+      )
+
+      testOpts.foreach(opt => {
+        val serialized = writer.rawToString(writer.write(opt))
+        val deserialized = reader.read[Option[Long]](reader.stringToRaw(serialized))
+        deserialized should be(opt)
+      })
     }
   }
 }

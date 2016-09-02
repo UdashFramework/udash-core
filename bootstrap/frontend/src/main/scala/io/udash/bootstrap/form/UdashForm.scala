@@ -4,6 +4,7 @@ package form
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import org.scalajs.dom
+import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
@@ -137,10 +138,15 @@ object UdashForm {
                  (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, input).render)
 
-  /** Creates textarea input group. */
+  /** Creates text area input group. */
   def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
               (property: Property[String], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, input).render)
+
+  /** Creates file input input group. */
+  def fileInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
+               (name: String, acceptMultipleFiles: Property[Boolean], selectedFiles: SeqProperty[File], input: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(FileInput(name, acceptMultipleFiles, selectedFiles)((id := inputId) +: input))
 
   /** Creates checkbox. */
   def checkbox(validation: Option[Modifier] = None)(labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =

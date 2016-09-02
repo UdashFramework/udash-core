@@ -23,6 +23,8 @@ package object udash extends io.udash.bindings.Bindings
   // Utils
   type Registration = io.udash.utils.Registration
   type StrictLogging = io.udash.utils.StrictLogging
+  type FileUploader = io.udash.utils.FileUploader
+  val  FileUploader = io.udash.utils.FileUploader
 
   // View
   type ViewRenderer = io.udash.view.ViewRenderer

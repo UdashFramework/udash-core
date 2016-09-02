@@ -15,7 +15,8 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     new JsObjectOutput(valueConsumer)
 
   def stringToRaw(string: String): RawValue =
-    upickle.json.read(string)
+    try { upickle.json.read(string) }
+    catch { case ex: upickle.Invalid => throw new GenCodec.ReadFailure("Parse error!", ex) }
 
   def rawToString(raw: Js.Value): String =
     upickle.json.write(raw)
@@ -36,6 +37,7 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
     def readLong() = value match {
       case Js.Str(num) => ReadSuccessful(num.toLong)
+      case Js.Num(num) if num == num.toLong => ReadSuccessful(num.toLong)
       case _ => ReadFailed("Not Js.Num (Long)")
     }
 
@@ -51,7 +53,7 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     }
 
     def readInt() = value match {
-      case Js.Num(num) => ReadSuccessful(num.toInt)
+      case Js.Num(num) if num == num.toInt => ReadSuccessful(num.toInt)
       case _ => ReadFailed("Not Js.Num (Int) ")
     }
 
