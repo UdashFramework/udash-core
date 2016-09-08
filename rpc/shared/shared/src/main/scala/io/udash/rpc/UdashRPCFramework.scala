@@ -1,6 +1,6 @@
 package io.udash.rpc
 
-import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework, RPCFramework}
+import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework}
 import com.avsystem.commons.serialization._
 
 import scala.language.postfixOps
@@ -42,15 +42,16 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   /* GenCodecs for internal classes of RPC framework. */
   implicit val RawInvocationCodec = new GenCodec[RawInvocation] {
     override def read(input: Input): RawInvocation = {
-      val obj = input.readObject().get
+      val obj = input.readObject()
       var rpcName: String = null
       var args: List[List[RawValue]] = null
       while (obj.hasNext) {
-        obj.nextField() match {
-          case ("rpcName", in) =>
-            rpcName = in.readString().get
-          case ("argLists", in) =>
-            args = readArgs(in.readList().get)
+        val fi = obj.nextField()
+        fi.fieldName match {
+          case "rpcName" =>
+            rpcName = fi.readString()
+          case "argLists" =>
+            args = readArgs(fi.readList())
         }
       }
       RawInvocation(rpcName, args)
@@ -70,7 +71,7 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
       while (input.hasNext) {
         val i = input.nextElement()
         val argList = List.newBuilder[RawValue]
-        val it = i.readList().get.iterator((el: Input) => argList += RawValueCodec.read(el))
+        val it = i.readList().iterator((el: Input) => argList += RawValueCodec.read(el))
         while (it.hasNext) it.next()
         argLists += argList.result()
       }
@@ -88,22 +89,23 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
 
   implicit val RPCRequestCodec = new GenCodec[RPCRequest] {
     override def read(input: Input): RPCRequest = {
-      val obj = input.readObject().get
+      val obj = input.readObject()
       var inv: RawInvocation = null
       val getters = List.newBuilder[RawInvocation]
       var callId: String = null
       var tpe: String = null
       while (obj.hasNext) {
-        obj.nextField() match {
-          case ("inv", in) =>
-            inv = RawInvocationCodec.read(in)
-          case ("getters", in) =>
-            val l = in.readList().get
+        val fi = obj.nextField()
+        fi.fieldName match {
+          case "inv" =>
+            inv = RawInvocationCodec.read(fi)
+          case "getters" =>
+            val l = fi.readList()
             while (l.hasNext) getters += RawInvocationCodec.read(l.nextElement)
-          case ("callId", in) =>
-            callId = in.readString().get
-          case ("type", in) =>
-            tpe = in.readString().get
+          case "callId" =>
+            callId = fi.readString()
+          case "type" =>
+            tpe = fi.readString()
         }
       }
 
@@ -138,24 +140,25 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
 
   implicit val RPCResponseCodec = new GenCodec[RPCResponse] {
     override def read(input: Input): RPCResponse = {
-      val obj = input.readObject().get
+      val obj = input.readObject()
       var response: Any = null
       var callId: String = null
       var cause: String = null
       var errorMsg: String = null
       var tpe: String = null
       while (obj.hasNext) {
-        obj.nextField() match {
-          case ("response", in) =>
-            response = RawValueCodec.read(in)
-          case ("callId", in) =>
-            callId = in.readString().get
-          case ("cause", in) =>
-            cause = in.readString().get
-          case ("errorMsg", in) =>
-            errorMsg = in.readString().get
-          case ("type", in) =>
-            tpe = in.readString().get
+        val fi = obj.nextField()
+        fi.fieldName match {
+          case "response" =>
+            response = RawValueCodec.read(fi)
+          case "callId" =>
+            callId = fi.readString()
+          case "cause" =>
+            cause = fi.readString()
+          case "errorMsg" =>
+            errorMsg = fi.readString()
+          case "type" =>
+            tpe = fi.readString()
         }
       }
 
@@ -186,15 +189,16 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
 
   implicit val RPCFailureCodec = new GenCodec[RPCFailure] {
     override def read(input: Input): RPCFailure = {
-      val obj = input.readObject().get
+      val obj = input.readObject()
       var remoteCause: String = null
       var remoteMessage: String = null
       while (obj.hasNext) {
-        obj.nextField() match {
-          case ("remoteCause", in) =>
-            remoteCause = in.readString().get
-          case ("remoteMessage", in) =>
-            remoteMessage = in.readString().get
+        val fi = obj.nextField()
+        fi.fieldName match {
+          case "remoteCause" =>
+            remoteCause = fi.readString()
+          case "remoteMessage" =>
+            remoteMessage = fi.readString()
         }
       }
       RPCFailure(remoteCause, remoteMessage)
