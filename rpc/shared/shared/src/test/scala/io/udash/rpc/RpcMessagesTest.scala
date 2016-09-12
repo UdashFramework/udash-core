@@ -152,9 +152,9 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       case class TwoItems(i1: CompleteItem, i2: CompleteItem)
       implicit val skippingCodec = new GenCodec[TwoItems] {
         override def read(input: Input): TwoItems = {
-          val obj = input.readObject().get
-          obj.nextField()._2.skip()
-          val i2 = GenCodec.read[CompleteItem](obj.nextField()._2)
+          val obj = input.readObject()
+          obj.nextField().skip()
+          val i2 = GenCodec.read[CompleteItem](obj.nextField())
           TwoItems(null, i2)
         }
 
