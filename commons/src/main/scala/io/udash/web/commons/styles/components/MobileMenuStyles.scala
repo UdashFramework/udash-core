@@ -7,7 +7,7 @@ import io.udash.web.commons.styles.UdashStylesheet
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUtils}
 
-import scalacss.Compose
+import scalacss.internal.Compose
 import scalacss.Defaults._
 import language.postfixOps
 

@@ -4,7 +4,7 @@ import io.udash.wrappers.jquery.jQ
 
 import scala.collection.mutable
 import scalacss.Defaults._
-import scalacss.mutable.StyleSheet.{Inline => ISS}
+import scalacss.StyleSheet.{Inline => ISS}
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2.style
 

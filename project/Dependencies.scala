@@ -6,15 +6,15 @@ object Dependencies extends Build {
   val versionOfScala = "2.11.8"
   val jettyVersion = "9.3.11.v20160721"
 
-  val udashVersion = "0.4.0-M2"
+  val udashVersion = "0.4.0-SNAPSHOT"
   val udashJQueryVersion = "1.0.0"
 
-  val scalaCssVersion = "0.4.1"
+  val scalaCssVersion = "0.5.0"
 
   val scalaLoggingVersion = "3.1.0"
   val logbackVersion = "1.1.3"
 
-  val avsystemCommonsVersion = "1.16.2"
+  val avsystemCommonsVersion = "1.17.1"
   val typesafeConfigVersion = "1.3.0"
   val springVersion = "4.3.2.RELEASE"
   val akkaVersion = "2.4.7"

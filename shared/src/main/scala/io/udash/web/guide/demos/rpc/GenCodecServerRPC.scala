@@ -22,10 +22,10 @@ object GenCodecServerRPC {
   object DemoClass {
     implicit val DemoClassCodec = new GenCodec[DemoClass] {
       override def read(input: Input): DemoClass = {
-        val list = input.readList().get
-        val i = list.nextElement().readInt().get
-        val s = list.nextElement().readString().get
-        val _v = list.nextElement().readInt().get
+        val list = input.readList()
+        val i = list.nextElement().readInt()
+        val s = list.nextElement().readString()
+        val _v = list.nextElement().readInt()
         val demo = new DemoClass(i, s)
         demo._v = _v
         demo
