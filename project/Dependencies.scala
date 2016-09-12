@@ -1,7 +1,7 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
-object Dependencies extends Build {
+object Dependencies {
   val versionOfScala = "2.11.8"
   val silencerVersion = "0.4"
 
@@ -11,7 +11,7 @@ object Dependencies extends Build {
   val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.17.0"
+  val avsCommonsVersion = "1.17.1"
 
   val atmosphereJSVersion = "2.3.0"
   val atmosphereVersion = "2.4.5"
