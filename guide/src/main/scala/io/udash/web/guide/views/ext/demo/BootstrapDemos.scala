@@ -8,6 +8,7 @@ import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
+import io.udash.bootstrap.datepicker.UdashDatePicker
 import io.udash.bootstrap.dropdown.UdashDropdown
 import io.udash.bootstrap.dropdown.UdashDropdown.{DefaultDropdownItem, DropdownEvent}
 import io.udash.bootstrap.form.{InputGroupSize, UdashForm, UdashInputGroup}
@@ -75,6 +76,100 @@ object BootstrapDemos extends StrictLogging {
         ).render
       ).render
     ).render
+
+  def datePicker(): dom.Element = {
+    import java.{util => ju}
+    val date = Property[ju.Date](new ju.Date())
+
+    val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+      format = "MMMM Do YYYY, hh:mm a",
+      locale = Some("en_GB")
+    ))
+
+    val disableWeekends = Property(false)
+    disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
+      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
+      case false => Seq.empty
+    }
+
+    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+
+    val showButton = UdashButton()("Show")
+    val hideButton = UdashButton()("Hide")
+    val enableButton = UdashButton()("Enable")
+    val disableButton = UdashButton()("Disable")
+    showButton.listen { case _ => picker.show() }
+    hideButton.listen { case _ => picker.hide() }
+    enableButton.listen { case _ => picker.enable() }
+    disableButton.listen { case _ => picker.disable() }
+
+    val events = SeqProperty[String](Seq.empty)
+    picker.listen {
+      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
+      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
+      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
+    }
+
+    div(GuideStyles.frame)(
+      UdashDatePicker.loadBootstrapDatePickerStyles(),
+      UdashInputGroup()(
+        UdashInputGroup.input(picker.render),
+        UdashInputGroup.addon(bind(date.transform(_.toString)))
+      ).render,
+      hr,
+      UdashForm(
+        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
+        UdashForm.group(
+          label("Locale"),
+          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
+        ),
+        UdashForm.checkbox()("Disable weekends")(disableWeekends),
+        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
+        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
+        UdashButtonGroup()(
+          showButton.render,
+          hideButton.render,
+          enableButton.render,
+          disableButton.render
+        ).render
+      ).render,
+      hr,
+      div(BootstrapStyles.Well.well)(
+        repeat(events)(ev => Seq(i(ev.get).render, br.render))
+      )
+    ).render
+  }
+
+  def datePickerRange(): dom.Element = {
+    import java.{util => ju}
+    val from = Property[ju.Date](new ju.Date())
+    val to = Property[ju.Date](new ju.Date())
+
+    val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+      format = "MMMM Do YYYY",
+      locale = Some("en_GB")
+    ))
+
+    val toPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+      format = "D MMMM YYYY",
+      locale = Some("pl")
+    ))
+
+    val fromPicker: UdashDatePicker = UdashDatePicker()(from, fromPickerOptions)
+    val toPicker: UdashDatePicker = UdashDatePicker()(to, toPickerOptions)
+
+    UdashDatePicker.dateRange(fromPicker, toPicker)(fromPickerOptions, toPickerOptions)
+
+    div(GuideStyles.frame)(
+      UdashDatePicker.loadBootstrapDatePickerStyles(),
+      UdashInputGroup()(
+        UdashInputGroup.addon("From"),
+        UdashInputGroup.input(fromPicker.render),
+        UdashInputGroup.addon("to"),
+        UdashInputGroup.input(toPicker.render)
+      ).render
+    ).render
+  }
 
   def tables(): dom.Element = {
     val striped = Property(true)
