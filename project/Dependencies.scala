@@ -79,6 +79,8 @@ object Dependencies {
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js"
+    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
+    "org.webjars" % "momentjs" % "2.14.1" / "2.14.1/min/moment-with-locales.js" minified "2.14.1/min/moment-with-locales.min.js",
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % "4.17.37-1" / "4.17.37-1/js/bootstrap-datetimepicker.js" minified "4.17.37-1/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
   ))
 }
