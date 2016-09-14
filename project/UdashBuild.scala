@@ -1,6 +1,6 @@
 import sbt._
 
-object UdashBuild extends Build {
+object UdashBuild {
   val CompileAndTest = "test->test;compile->compile"
 
   val publishedJS = taskKey[Attributed[File]]("JS file that gets packaged into JAR")

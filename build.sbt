@@ -1,4 +1,5 @@
 import UdashBuild._
+import Dependencies._
 
 name := "udash"
 

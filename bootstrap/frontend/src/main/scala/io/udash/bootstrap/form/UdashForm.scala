@@ -152,7 +152,7 @@ object UdashForm {
   def checkbox(validation: Option[Modifier] = None)(labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =
     div(BootstrapStyles.Form.checkbox)(
       label(
-        UdashForm.input(Checkbox(property, input).render)
+        Checkbox(property, input).render
       )(labelContent),
       validation
     )
