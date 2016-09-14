@@ -25,6 +25,8 @@ object Dependencies {
 
   val scalatestVersion = "3.0.0"
   val bootstrapVersion = "3.3.7"
+  val bootstrapDatepickerVersion = "4.17.37-1"
+  val momentJsVersion = "2.14.1"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -80,7 +82,7 @@ object Dependencies {
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars" % "momentjs" % "2.14.1" / "2.14.1/min/moment-with-locales.js" minified "2.14.1/min/moment-with-locales.min.js",
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % "4.17.37-1" / "4.17.37-1/js/bootstrap-datetimepicker.js" minified "4.17.37-1/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+    "org.webjars" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js" minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
   ))
 }
