@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 import upickle.Js
 
@@ -15,8 +16,12 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     new JsObjectOutput(valueConsumer)
 
   def stringToRaw(string: String): RawValue =
-    try { upickle.json.read(string) }
-    catch { case ex: upickle.Invalid => throw new GenCodec.ReadFailure("Parse error!", ex) }
+    try {
+      upickle.json.read(string)
+    }
+    catch {
+      case ex: upickle.Invalid => throw new ReadFailure("Parse error!", ex)
+    }
 
   def rawToString(raw: Js.Value): String =
     upickle.json.write(raw)
@@ -25,75 +30,84 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     * Created by grzesiul on 2016-02-03.
     */
   class JsObjectInput(value: Js.Value) extends Input {
+    def inputType = value match {
+      case Js.Null => InputType.Null
+      case _: Js.Arr => InputType.List
+      case _: Js.Obj => InputType.Object
+      case _ => InputType.Simple
+    }
+
     def readNull() = value match {
-      case Js.Null => ReadSuccessful(null)
-      case _ => ReadFailed("Not Js.Null")
+      case Js.Null => null
+      case _ => throw new ReadFailure("Not Js.Null")
     }
 
     def readString() = value match {
-      case Js.Str(str) => ReadSuccessful(str)
-      case _ => ReadFailed("Not Js.Str")
+      case Js.Str(str) => str
+      case _ => throw new ReadFailure("Not Js.Str")
     }
 
     def readLong() = value match {
-      case Js.Str(num) => ReadSuccessful(num.toLong)
-      case Js.Num(num) if num == num.toLong => ReadSuccessful(num.toLong)
-      case _ => ReadFailed("Not Js.Num (Long)")
+      case Js.Str(num) => num.toLong
+      case Js.Num(num) if num == num.toLong => num.toLong
+      case _ => throw new ReadFailure("Not Js.Num (Long)")
     }
 
     def readDouble() = value match {
-      case Js.Num(num) => ReadSuccessful(num)
-      case _ => ReadFailed("Not Js.Num (Double)")
+      case Js.Num(num) => num
+      case _ => throw new ReadFailure("Not Js.Num (Double)")
     }
 
     def readBoolean() = value match {
-      case Js.True => ReadSuccessful(true)
-      case Js.False => ReadSuccessful(false)
-      case _ => ReadFailed("Not Js.Bool")
+      case Js.True => true
+      case Js.False => false
+      case _ => throw new ReadFailure("Not Js.Bool")
     }
 
     def readInt() = value match {
-      case Js.Num(num) if num == num.toInt => ReadSuccessful(num.toInt)
-      case _ => ReadFailed("Not Js.Num (Int) ")
+      case Js.Num(num) if num == num.toInt => num.toInt
+      case _ => throw new ReadFailure("Not Js.Num (Int) ")
     }
 
     def readObject() = value match {
       case asObj: Js.Obj =>
 
-        ReadSuccessful(new ObjectInput {
+        new ObjectInput {
           private val it = asObj.value.iterator.map {
-            case (k, v) => (k, new JsObjectInput(v))
+            case (k, v) => new JsObjectFieldInput(k, v)
           }
 
           def nextField() = it.next()
 
           def hasNext = it.hasNext
-        })
+        }
       case _ =>
-        ReadFailed("Not Js.Obj")
+        throw new ReadFailure("Not Js.Obj")
     }
 
     def readBinary() = value match {
       case jsArr: Js.Arr if jsArr.value.forall(_.isInstanceOf[Js.Num]) =>
-        ReadSuccessful(Array(jsArr.value.map(_.asInstanceOf[Js.Num].value.toByte): _*))
-      case _ => ReadFailed("Not Js.Arr of Js.Num")
+        Array(jsArr.value.map(_.asInstanceOf[Js.Num].value.toByte): _*)
+      case _ => throw new ReadFailure("Not Js.Arr of Js.Num")
     }
 
     def readList() = value match {
       case jsArr: Js.Arr =>
-        ReadSuccessful(new ListInput {
+        new ListInput {
           private val it = jsArr.value.iterator.map(new JsObjectInput(_))
 
           def nextElement() = it.next()
 
           def hasNext = it.hasNext
-        })
+        }
       case _ =>
-        ReadFailed("Not Js.Arr")
+        throw new ReadFailure("Not Js.Arr")
     }
 
     def skip() = ()
   }
+
+  class JsObjectFieldInput(val fieldName: String, value: Js.Value) extends JsObjectInput(value) with FieldInput
 
   /**
     * Created by grzesiul on 2016-02-02.
@@ -139,28 +153,28 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
   val RawValueCodec: GenCodec[RawValue] = new GenCodec[Js.Value] {
     override def read(input: Input): Js.Value = {
-      val obj = input.readObject().get
+      val obj = input.readObject()
       val fields = obj.iterator(i => i).toMap
-      val tpe = fields("type").readString().get
+      val tpe = fields("type").readString()
       val item = fields("item")
       tpe match {
         case "Bool" =>
-          if (item.readBoolean().get) Js.True
+          if (item.readBoolean()) Js.True
           else Js.False
         case "Num" =>
-          Js.Num(item.readDouble().get)
+          Js.Num(item.readDouble())
         case "String" =>
-          Js.Str(item.readString().get)
+          Js.Str(item.readString())
         case "Obj" =>
-          val subfields = item.readList().get
+          val subfields = item.readList()
           val it = subfields.iterator(i => i).map(el => {
-            val i = el.readObject().get
+            val i = el.readObject()
             val objFields = i.iterator(i => i).toMap
-            (objFields("key").readString().get, read(objFields("item")))
+            (objFields("key").readString(), read(objFields("item")))
           })
           Js.Obj(it.toSeq: _*)
         case "Arr" =>
-          val els = item.readList().get
+          val els = item.readList()
           val it = els.iterator(i => i).map(el => read(el))
           Js.Arr(it.toSeq: _*)
         case "Null" =>

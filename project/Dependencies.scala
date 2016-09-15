@@ -1,7 +1,7 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
-object Dependencies extends Build {
+object Dependencies {
   val versionOfScala = "2.11.8"
   val silencerVersion = "0.4"
 
@@ -11,7 +11,7 @@ object Dependencies extends Build {
   val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.16.3"
+  val avsCommonsVersion = "1.17.2"
 
   val atmosphereJSVersion = "2.3.0"
   val atmosphereVersion = "2.4.5"
@@ -25,6 +25,8 @@ object Dependencies extends Build {
 
   val scalatestVersion = "3.0.0"
   val bootstrapVersion = "3.3.7"
+  val bootstrapDatepickerVersion = "4.17.37-1"
+  val momentJsVersion = "2.14.1"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion
@@ -79,6 +81,8 @@ object Dependencies extends Build {
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js"
+    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
+    "org.webjars" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js" minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
   ))
 }

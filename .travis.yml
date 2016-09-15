@@ -19,7 +19,7 @@ before_script:
   - export PATH=$PWD/selenium-bin:$PATH
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION "set (jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome))" $TEST_PACKAGE
+  - sbt ++$TRAVIS_SCALA_VERSION "set (UdashBuild.jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome))" $TEST_PACKAGE
 
 jdk:
   - oraclejdk8

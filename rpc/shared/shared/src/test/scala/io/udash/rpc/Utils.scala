@@ -21,28 +21,26 @@ trait Utils {
     list = List.fill(Random.nextInt(20))(Random.nextString(Random.nextInt(20))),
     set = List.fill(Random.nextInt(20))(Random.nextString(Random.nextInt(20))).toSet,
     obj = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(20)), Nil),
-    map = Map(Seq.fill(Random.nextInt(20))(Random.nextString(20) -> Random.nextInt()):_*)
+    map = Map(Seq.fill(Random.nextInt(20))(Random.nextString(20) -> Random.nextInt()): _*)
   )
 
   implicit val codec = GenCodec.materialize[TestCC]
   implicit val codecN = GenCodec.materialize[NestedTestCC]
   implicit val codecDN = new GenCodec[DeepNestedTestCC] {
     override def read(input: Input): DeepNestedTestCC = {
-      def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC = {
-        next.readNull() match {
-          case ReadSuccessful(_) =>
-            acc.foldLeft(null: DeepNestedTestCC)((acc: DeepNestedTestCC, n: NestedTestCC) => DeepNestedTestCC(n, acc))
-          case ReadFailed(_) =>
-            val obj = next.readObject().get
-            val n: NestedTestCC = obj.nextField() match {
-              case ("n", in) =>
-                codecN.read(in)
-            }
-            obj.nextField() match {
-              case ("nest", in) =>
-                _read(n :: acc)(in)
-            }
-        }
+      def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC = next.inputType match {
+        case InputType.Null =>
+          acc.foldLeft(null: DeepNestedTestCC)((acc: DeepNestedTestCC, n: NestedTestCC) => DeepNestedTestCC(n, acc))
+        case _ =>
+          val obj = next.readObject()
+          val n: NestedTestCC = obj.nextField() match {
+            case in if in.fieldName == "n" =>
+              codecN.read(in)
+          }
+          obj.nextField() match {
+            case in if in.fieldName == "nest" =>
+              _read(n :: acc)(in)
+          }
       }
 
       _read(Nil)(input)
