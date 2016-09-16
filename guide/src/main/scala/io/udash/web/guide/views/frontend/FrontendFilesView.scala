@@ -50,7 +50,7 @@ class FrontendFilesView extends FinalView {
         |def upload(fieldName: String, files: Seq[File],
         |           extraData: Map[Any, Any]): ReadableModelProperty[FileUploadModel]""".stripMargin
     )(GuideStyles),
-    p("The first one takes an file HTML input and uploads its content to server. The second takes a field name, a sequence of files and extra request's data."),
+    p("The first one takes a file HTML input and uploads its content to the server. The second takes a field name, a sequence of files and request's extra data."),
     p("The both methods return property containing ", i("FileUploadModel"), " which provides information about the upload progress."),
     CodeBlock(
       """trait FileUploadModel {
@@ -74,7 +74,7 @@ class FrontendFilesView extends FinalView {
     p("The ", i("udash-rpc"), " module contains two servlet templates: ", i("FileUploadServlet"), " and ", i("FileDownloadServlet"), "."),
     p(
       "The ", i("FileUploadServlet"), " contains a ", i("doPost"), " method implementation which takes files from the request ",
-      "and pass them to the abstract ", i("handleFile"), " method. You should implement this method in order to handle uploaded files."
+      "and passes them to the abstract ", i("handleFile"), " method. You should implement this method in order to handle uploaded files."
     ),
     p(
       "The ", i("FileDownloadServlet"), " contains a ", i("doGet"), " method implementation which calls the abstract ",

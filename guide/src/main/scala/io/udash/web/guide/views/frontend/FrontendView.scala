@@ -21,7 +21,7 @@ class FrontendView extends ViewContainer {
     h1("Frontend"),
     p(
       "In this part of the guide you will read about creating a frontend application with Udash. Let's make your ",
-      "frontend type safe, elegant and maintainable. "
+      "frontend type-safe, elegant and maintainable. "
     ),
     child
   )

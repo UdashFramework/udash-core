@@ -51,7 +51,7 @@ class BootstrapExtView extends FinalView {
     ),
     h2("Components"),
     p("The ", i("UdashBootstrapComponent"), " hierarchy enables you to seamlessly use Bootstrap components and integrate ",
-      "them with your Udash app, both in a completely typesafe way."),
+      "them with your Udash app, both in a completely type-safe way."),
     h3("Glyphicons & FontAwesome"),
     p("The icons from ", i("Glyphicons"), " and ", i("FontAwesome"), " packages are accessible in ", i("Icons"), " object."),
     CodeBlock(
@@ -223,7 +223,7 @@ class BootstrapExtView extends FinalView {
     ),
     h3("Button"),
     p("Bootstrap buttons are easy to use as ", i("UdashButton"), "s. They support click listening, ",
-      "provide typesafe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),
+      "provide type-safe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),
     p("This example shows a variety of available button options. Small button indicators register their clicks and are ",
       "randomly set as active or disabled by the block button action, which also clears the click history."),
     CodeBlock(
@@ -660,7 +660,7 @@ class BootstrapExtView extends FinalView {
       s"""UdashPageHeader(h1("Header ", small("Subtext"))).render""".stripMargin
     )(GuideStyles),
     h3("Alerts"),
-    p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with typesafe styling and ",
+    p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with type-safe styling and ",
     i("Property"),"-based dismissal mechanism."),
     CodeBlock(
       s"""|val styles = Seq[(String) => DismissibleUdashAlert](

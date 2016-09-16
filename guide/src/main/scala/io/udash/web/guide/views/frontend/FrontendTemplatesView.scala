@@ -92,7 +92,7 @@ class FrontendTemplatesView extends FinalView {
     )(GuideStyles),
     h2("ScalaCSS"),
     p(
-      "ScalaCSS is a library for creating CSS stylesheets with the Scala language. Using inline stylesheets is type safe ",
+      "ScalaCSS is a library for creating CSS stylesheets with the Scala language. Using inline stylesheets is type-safe ",
       "and there is no need to manually manage class names. You can create your styles like in SASS/LESS, but you have the power ",
       "of Scala and your stylesheets can be generated dynamically (that is, you can change property values at runtime)."
     ),

@@ -67,7 +67,7 @@ class FrontendPropertiesView extends FinalView {
       i("ReadableProperty"), " is the simplest version of the data model representation. You have seen its whole API ",
       "except of the ", i("transform"), " method - this one will be described later. You can create a property ",
       "with any immutable type as a parameter. ", i("Property"), " extends ", i("ReadableProperty"), " API with value changing ",
-      "methods."
+      "methods. Remember: there is no guarantee that the ", i("get"), " method called twice will return the same object."
     ),
     p(
       i("ModelProperty"), " contains other properties. The structure of the property can be described with a trait or an immutable case class. ",

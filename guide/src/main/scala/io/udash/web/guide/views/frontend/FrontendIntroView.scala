@@ -35,7 +35,7 @@ class FrontendIntroView extends FinalView {
     p(
       "The ", a(href := References.ScalaJsHomepage)("Scala.js"), " project tries to make developers lives easier. It brings us ",
       "power of the ", a(href := References.ScalaHomepage)("Scala language"), " and compiles it to JavaScript. Thanks to this, ",
-      "we can develop in a type safe, modern, developer friendly language and publish a project as a website like with JavaScript. "
+      "we can develop in a type-safe, modern, developer friendly language and publish a project as a website like with JavaScript. "
     ),
     p(
       "The Udash framework provides tools to make web applications development with ",
@@ -52,6 +52,8 @@ class FrontendIntroView extends FinalView {
       li("The properties bindings for ", a(href := References.ScalatagsHomepage)("Scalatags"), "")
     ),
     p("All these features will make your life as a frontend developer pleasant."),
+    p("To start development import Udash classes as follows:"),
+    CodeBlock("""import io.udash._""".stripMargin)(GuideStyles),
     h4("Example"),
     p(
       "Take a look at this simple form with a validation. We will not discuss the implementation here, because ",
@@ -59,101 +61,112 @@ class FrontendIntroView extends FinalView {
     ),
     new IntroFormDemoComponent(),
     CodeBlock(
-      """/** Demo model interface */
+      """import io.udash._
+        |
+        |/** Demo model */
         |case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
         |
-        |class IntroFormDemoComponent {
-        |  def getTemplate: Modifier = IntroFormDemoViewPresenter()
+        |case object FormDemoState extends State {
+        |  override def parentState: State = null // this is root state
+        |}
         |
-        |  /** Prepares model, view and presenter for demo component */
-        |  object IntroFormDemoViewPresenter {
-        |    import Context._
-        |    def apply(): Element = {
-        |      val model = ModelProperty(
-        |        IntroFormDemoModel(0, 10, 42)
+        |/** Prepares model, view and presenter for demo component */
+        |class IntroFormDemoViewPresenter extends ViewPresenter[FormDemoState.type] {
+        |  // Context object is a recommended place to keep things like
+        |  // `ExecutionContext` or server RPC connector
+        |  import io.udash.web.guide.Context._
+        |
+        |  override def create(): (View, Presenter[FormDemoState.type]) = {
+        |    val model = ModelProperty(
+        |      IntroFormDemoModel(0, 10, 42)
+        |    )
+        |
+        |    model.addValidator((element: IntroFormDemoModel) => {
+        |      val errors = mutable.ArrayBuffer[String]()
+        |      if (element.minimum > element.maximum)
+        |        errors += "Minimum is bigger than maximum!"
+        |      if (element.minimum > element.between)
+        |        errors += "Minimum is bigger than your value!"
+        |      if (element.between > element.maximum)
+        |        errors += "Maximum is smaller than your value!"
+        |
+        |      if (errors.isEmpty) Valid
+        |      else Invalid(errors.map(DefaultValidationError))
+        |    })
+        |
+        |    val presenter = new IntroFormDemoPresenter(model)
+        |    val view = new IntroFormDemoView(model, presenter)
+        |
+        |    (view, presenter)
+        |  }
+        |}
+        |
+        |class IntroFormDemoPresenter(model: ModelProperty[IntroFormDemoModel])
+        |  extends Presenter[FormDemoState.type] {
+        |
+        |  override def handleState(state: FormDemoState.type): Unit = {}
+        |
+        |  /** Sets random values in demo model */
+        |  def randomize() =
+        |    model.set(IntroFormDemoModel(
+        |      Random.nextInt(100) - 25,
+        |      Random.nextInt(100),
+        |      Random.nextInt(100) + 25
+        |    ))
+        |}
+        |
+        |class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
+        |                        presenter: IntroFormDemoPresenter) extends FinalView {
+        |  import io.udash.web.guide.Context._
+        |
+        |  import JsDom.all._
+        |  import scalacss.ScalatagsCss._
+        |
+        |  private val i2s = (i: Int) => i.toString
+        |  private val s2i = (s: String) => Float.parseFloat(s).toInt
+        |
+        |  private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
+        |  private val between = model.subProp(_.between).transform(i2s, s2i)
+        |  private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
+        |
+        |  val randomizeButton = UdashButton(
+        |    buttonStyle = ButtonStyle.Primary,
+        |    componentId = ComponentId("randomize")
+        |  )("Randomize")
+        |
+        |  randomizeButton.listen {
+        |    case UdashButton.ButtonClickEvent(_) =>
+        |      presenter.randomize()
+        |  }
+        |
+        |  def getTemplate: Modifier = div(
+        |    UdashInputGroup()(
+        |      UdashInputGroup.input(
+        |        NumberInput.debounced(minimum)(id := "minimum").render
+        |      ),
+        |      UdashInputGroup.addon(" <= "),
+        |      UdashInputGroup.input(
+        |        NumberInput.debounced(between)(id := "between").render
+        |      ),
+        |      UdashInputGroup.addon(" <= "),
+        |      UdashInputGroup.input(
+        |        NumberInput.debounced(maximum)(id := "maximum").render
+        |      ),
+        |      UdashInputGroup.buttons(
+        |        randomizeButton.render
         |      )
-        |
-        |      model.addValidator((element: IntroFormDemoModel) => {
-        |        val errors = mutable.ArrayBuffer[String]()
-        |        if (element.minimum > element.maximum)
-        |          errors += "Minimum is bigger than maximum!"
-        |        if (element.minimum > element.between)
-        |          errors += "Minimum is bigger than your value!"
-        |        if (element.between > element.maximum)
-        |          errors += "Maximum is smaller than your value!"
-        |
-        |        if (errors.isEmpty) Valid
-        |        else Invalid(errors.map(DefaultValidationError))
-        |      })
-        |
-        |      val presenter = new IntroFormDemoPresenter(model)
-        |      new IntroFormDemoView(model, presenter).render
-        |    }
-        |  }
-        |
-        |  class IntroFormDemoPresenter(model: ModelProperty[IntroFormDemoModel]) {
-        |    private val random = new Random()
-        |
-        |    /** Sets random values in demo model */
-        |    def randomize() =
-        |      model.set(IntroFormDemoModel(
-        |        random.nextInt(100) - 25,
-        |        random.nextInt(100),
-        |        random.nextInt(100) + 25
-        |      ))
-        |  }
-        |
-        |  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
-        |                          presenter: IntroFormDemoPresenter) {
-        |    import Context._
-        |
-        |    import JsDom.all._
-        |    import scalacss.Defaults._
-        |    import scalacss.ScalatagsCss._
-        |
-        |    private val i2s = (i: Int) => i.toString
-        |    private val s2i = (s: String) => Float.parseFloat(s).toInt
-        |
-        |    private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
-        |    private val between = model.subProp(_.between).transform(i2s, s2i)
-        |    private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
-        |
-        |    val randomizeButton = UdashButton(
-        |      buttonStyle = ButtonStyle.Primary
-        |    )("Randomize")
-        |
-        |    randomizeButton.listen {
-        |      case UdashButton.ButtonClickEvent(_) =>
-        |        presenter.randomize()
-        |    }
-        |
-        |    def render: Modifier = div(id := "frontend-intro-demo")(
-        |      UdashInputGroup()(
-        |        UdashInputGroup.input(
-        |          NumberInput.debounced(minimum)(id := "minimum").render
-        |        ),
-        |        UdashInputGroup.addon(" <= "),
-        |        UdashInputGroup.input(
-        |          NumberInput.debounced(between)(id := "between").render
-        |        ),
-        |        UdashInputGroup.addon(" <= "),
-        |        UdashInputGroup.input(
-        |          NumberInput.debounced(maximum)(id := "maximum").render
-        |        ),
-        |        UdashInputGroup.buttons(randomizeButton.render)
-        |      ).render,
-        |      h3("Is valid?"),
-        |      p(valid(model) {
+        |    ).render,
+        |    h3("Is valid?"),
+        |    p(id := "valid")(
+        |      valid(model) {
         |        case Valid => span("Yes").render
         |        case Invalid(errors) => Seq(
         |          span("No, because:"),
-        |          ul(GuideStyles.get.defaultList)(
-        |            errors.map(e => li(e.message))
-        |          )
+        |          ul(errors.map(e => li(e.message)))
         |        ).map(_.render)
-        |      })
+        |      }
         |    )
-        |  }
+        |  )
         |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),

@@ -78,9 +78,9 @@ private[views] object IndexView {
           p(HomepageStyles.get.moreListDescription)("Udash brings out of the box the RPC system with a shared data model and interfaces between frontend and backend, which boosts development and keeps code bases consistent.")
         ),
         li(HomepageStyles.get.featuresListItem)(
-          i()(HomepageStyles.get.featuresListIcon)(Image("features_typesafe.png", "Type safe", GlobalStyles.get.centerBlock)),
-          h2(HomepageStyles.get.featuresListHead)(span("Type safe"), br(), span(HomepageStyles.get.featuresListHeadInner)("HTML CSS JS")),
-          p(HomepageStyles.get.moreListDescription)("In cooperation with Scalatags and ScalaCSS libraries, Udash provides a type safe layer over HTML, CSS and JS with powerful data binding into DOM templates.")
+          i()(HomepageStyles.get.featuresListIcon)(Image("features_typesafe.png", "Type-safe", GlobalStyles.get.centerBlock)),
+          h2(HomepageStyles.get.featuresListHead)(span("Type-safe"), br(), span(HomepageStyles.get.featuresListHeadInner)("HTML CSS JS")),
+          p(HomepageStyles.get.moreListDescription)("In cooperation with Scalatags and ScalaCSS libraries, Udash provides a type-safe layer over HTML, CSS and JS with powerful data binding into DOM templates.")
         ),
         li(HomepageStyles.get.featuresListItem)(
           i(HomepageStyles.get.featuresListIcon)(Image("features_compiled.png", "Compiled to JS", GlobalStyles.get.centerBlock)),
