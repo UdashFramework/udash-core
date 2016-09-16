@@ -50,6 +50,8 @@ case object FrontendBindingsState extends RoutingState(FrontendState)
 
 case object FrontendFormsState extends RoutingState(FrontendState)
 
+case object FrontendFilesState extends RoutingState(FrontendState)
+
 /** RPC communication chapters */
 case object RpcState extends RoutingState(ContentState)
 

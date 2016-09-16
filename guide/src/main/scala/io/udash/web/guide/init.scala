@@ -45,7 +45,8 @@ object Context {
       MenuLink("Scalatags & ScalaCSS", FrontendTemplatesState),
       MenuLink("Properties", FrontendPropertiesState),
       MenuLink("Template Data Binding", FrontendBindingsState),
-      MenuLink("Two-way Forms Binding", FrontendFormsState)
+      MenuLink("Two-way Forms Binding", FrontendFormsState),
+      MenuLink("Files upload", FrontendFilesState)
     )),
     MenuContainer("RPC", Seq(
       MenuLink("Introduction", RpcIntroState),
