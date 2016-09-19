@@ -51,7 +51,7 @@ class FrontendFilesView extends FinalView {
         |           extraData: Map[Any, Any]): ReadableModelProperty[FileUploadModel]""".stripMargin
     )(GuideStyles),
     p("The first one takes a file HTML input and uploads its content to the server. The second takes a field name, a sequence of files and request's extra data."),
-    p("The both methods return property containing ", i("FileUploadModel"), " which provides information about the upload progress."),
+    p("Both methods return property containing ", i("FileUploadModel"), " which provides information about the upload progress."),
     CodeBlock(
       """trait FileUploadModel {
         |  def files: Seq[File]
