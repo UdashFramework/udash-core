@@ -78,7 +78,7 @@ trait RPCMethodsImpl extends RPCMethods {
     Future.failed(result)
   }
 
-  protected def onGet[T <: RPC](methodName: String, args: List[List[Any]], result: T): T = {
+  protected def onGet[T](methodName: String, args: List[List[Any]], result: T): T = {
     onInvocationInternal(methodName, args, None)
     result
   }
