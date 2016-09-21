@@ -20,7 +20,7 @@ class FrontendBindingsView extends FinalView {
     h2("Property Bindings"),
     p(
       "As every modern frontend framework Udash provides model-view template bindings. ",
-      "What really distinguishes Udash from other frameworks is the fact that it is type safe."
+      "What really distinguishes Udash from other frameworks is the fact that it is type-safe."
     ),
     p("Udash provides many ways to bind properties to Scalatags templates. To use them you have to add this import in your code:"),
     CodeBlock(

@@ -5,7 +5,7 @@ object Versions {
   val udashJQueryVersion = "1.0.0"
 
   val scalaVersion = "2.11.8"
-  val scalaJSPluginVersion = "0.6.11"
+  val scalaJSPluginVersion = "0.6.12"
 
-  val jettyVersion = "9.3.8.v20160314"
+  val jettyVersion = "9.3.11.v20160721"
 }

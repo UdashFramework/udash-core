@@ -218,7 +218,8 @@ class FrontendFormsView extends FinalView {
       "Now you know everything you need to start frontend development using Udash. ",
       "If you want to learn more about client-server communication, check the ",
       a(href := RpcIntroState.url)("RPC"), " chapter. ",
-      "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
+      "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " and ",
+      a(href := FrontendFilesState.url)("File upload"), " interesting later on."
     )
   )
 }

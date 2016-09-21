@@ -7,6 +7,7 @@ import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.core.Presenter
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.{Element, MouseEvent}
 
@@ -20,12 +21,19 @@ import io.udash.web.commons.views.Component
 case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 
 class IntroFormDemoComponent extends Component {
-  override def getTemplate: Modifier = IntroFormDemoViewPresenter()
+  override def getTemplate: Modifier = new IntroFormDemoViewPresenter().create()._1.getTemplate
+
+  case object FormDemoState extends State {
+    override def parentState: State = null // this is root state
+  }
 
   /** Prepares model, view and presenter for demo component */
-  object IntroFormDemoViewPresenter {
+  class IntroFormDemoViewPresenter extends ViewPresenter[FormDemoState.type] {
+    // Context object is a recommended place to keep things like
+    // `ExecutionContext` or server RPC connector
     import io.udash.web.guide.Context._
-    def apply(): Modifier = {
+
+    override def create(): (View, Presenter[FormDemoState.type]) = {
       val model = ModelProperty(
         IntroFormDemoModel(0, 10, 42)
       )
@@ -44,23 +52,28 @@ class IntroFormDemoComponent extends Component {
       })
 
       val presenter = new IntroFormDemoPresenter(model)
-      new IntroFormDemoView(model, presenter).render
+      val view = new IntroFormDemoView(model, presenter)
+
+      (view, presenter)
     }
   }
 
-  class IntroFormDemoPresenter(model: ModelProperty[IntroFormDemoModel]) {
-    private val random = new Random()
+  class IntroFormDemoPresenter(model: ModelProperty[IntroFormDemoModel])
+    extends Presenter[FormDemoState.type] {
+
+    override def handleState(state: FormDemoState.type): Unit = {}
 
     /** Sets random values in demo model */
     def randomize() =
       model.set(IntroFormDemoModel(
-        random.nextInt(100) - 25,
-        random.nextInt(100),
-        random.nextInt(100) + 25
+        Random.nextInt(100) - 25,
+        Random.nextInt(100),
+        Random.nextInt(100) + 25
       ))
   }
 
-  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) {
+  class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel],
+                          presenter: IntroFormDemoPresenter) extends FinalView {
     import io.udash.web.guide.Context._
 
     import JsDom.all._
@@ -83,7 +96,7 @@ class IntroFormDemoComponent extends Component {
         presenter.randomize()
     }
 
-    def render: Modifier = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def getTemplate: Modifier = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.input(
           NumberInput.debounced(minimum)(id := "minimum").render

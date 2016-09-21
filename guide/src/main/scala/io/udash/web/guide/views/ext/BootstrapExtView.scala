@@ -51,7 +51,7 @@ class BootstrapExtView extends FinalView {
     ),
     h2("Components"),
     p("The ", i("UdashBootstrapComponent"), " hierarchy enables you to seamlessly use Bootstrap components and integrate ",
-      "them with your Udash app, both in a completely typesafe way."),
+      "them with your Udash app, both in a completely type-safe way."),
     h3("Glyphicons & FontAwesome"),
     p("The icons from ", i("Glyphicons"), " and ", i("FontAwesome"), " packages are accessible in ", i("Icons"), " object."),
     CodeBlock(
@@ -72,6 +72,72 @@ class BootstrapExtView extends FinalView {
     )(GuideStyles),
     div(cls := "bootstrap")(//force Bootstrap styles
       BootstrapDemos.icons()
+    ),
+    h3("Date Picker"),
+    CodeBlock(
+      s"""import java.{util => ju}
+         |val date = Property[ju.Date](new ju.Date())
+         |
+         |val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+         |  format = "MMMM Do YYYY, hh:mm a",
+         |  locale = Some("en_GB")
+         |))
+         |
+         |val disableWeekends = Property(false)
+         |disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
+         |  case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
+         |  case false => Seq.empty
+         |}
+         |
+         |val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+         |
+         |div(
+         |  UdashDatePicker.loadBootstrapDatePickerStyles(),
+         |  UdashInputGroup()(
+         |    UdashInputGroup.input(picker.render),
+         |    UdashInputGroup.addon(bind(date.transform(_.toString)))
+         |  ).render
+         |).render""".stripMargin
+    )(GuideStyles),
+    div(cls := "bootstrap")(//force Bootstrap styles
+      BootstrapDemos.datePicker()
+    ),
+    p("It is possible to create a date range selector from two pickers."),
+    CodeBlock(
+      s"""import java.{util => ju}
+         |
+         |val from = Property[ju.Date](new ju.Date())
+         |val to = Property[ju.Date](new ju.Date())
+         |
+         |val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+         |  format = "MMMM Do YYYY",
+         |  locale = Some("en_GB")
+         |))
+         |
+         |val toPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+         |  format = "D MMMM YYYY",
+         |  locale = Some("pl")
+         |))
+         |
+         |val fromPicker: UdashDatePicker = UdashDatePicker()(from, fromPickerOptions)
+         |val toPicker: UdashDatePicker = UdashDatePicker()(to, toPickerOptions)
+         |
+         |UdashDatePicker.dateRange(
+         |  fromPicker, toPicker
+         |)(fromPickerOptions, toPickerOptions)
+         |
+         |div(
+         |  UdashDatePicker.loadBootstrapDatePickerStyles(),
+         |  UdashInputGroup()(
+         |    UdashInputGroup.addon("From"),
+         |    UdashInputGroup.input(fromPicker.render),
+         |    UdashInputGroup.addon("to"),
+         |    UdashInputGroup.input(toPicker.render)
+         |  ).render
+         |).render""".stripMargin
+    )(GuideStyles),
+    div(cls := "bootstrap")(//force Bootstrap styles
+      BootstrapDemos.datePickerRange()
     ),
     h3("Tables"),
     CodeBlock(
@@ -157,7 +223,7 @@ class BootstrapExtView extends FinalView {
     ),
     h3("Button"),
     p("Bootstrap buttons are easy to use as ", i("UdashButton"), "s. They support click listening, ",
-      "provide typesafe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),
+      "provide type-safe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),
     p("This example shows a variety of available button options. Small button indicators register their clicks and are ",
       "randomly set as active or disabled by the block button action, which also clears the click history."),
     CodeBlock(
@@ -594,7 +660,7 @@ class BootstrapExtView extends FinalView {
       s"""UdashPageHeader(h1("Header ", small("Subtext"))).render""".stripMargin
     )(GuideStyles),
     h3("Alerts"),
-    p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with typesafe styling and ",
+    p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with type-safe styling and ",
     i("Property"),"-based dismissal mechanism."),
     CodeBlock(
       s"""|val styles = Seq[(String) => DismissibleUdashAlert](

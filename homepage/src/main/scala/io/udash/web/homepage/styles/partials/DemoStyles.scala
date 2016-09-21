@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUti
 import io.udash.web.homepage.components.demo.DemoComponent
 
 import scala.language.postfixOps
-import scalacss.Compose
+import scalacss.internal.Compose
 import scalacss.Defaults._
 
 object DemoStyles extends UdashStylesheet {

@@ -9,7 +9,7 @@ import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
-import scalacss.Compose
+import scalacss.internal.Compose
 import scalacss.Defaults._
 
 object GuideStyles extends UdashStylesheet with CodeBlockStyles {

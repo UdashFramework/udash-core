@@ -34,6 +34,7 @@ class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
       case FrontendPropertiesState => FrontendPropertiesViewPresenter
       case FrontendBindingsState => FrontendBindingsViewPresenter
       case FrontendFormsState => FrontendFormsViewPresenter
+      case FrontendFilesState => FrontendFilesViewPresenter
 
       case RpcState => RpcViewPresenter
       case RpcIntroState => RpcIntroViewPresenter

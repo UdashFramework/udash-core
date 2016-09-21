@@ -1,7 +1,7 @@
 package io.udash.web.commons.styles.utils
 
 import scala.language.postfixOps
-import scalacss.AV
+import scalacss.internal.AV
 import scalacss.Defaults._
 
 object UdashFonts extends StyleSheet.Inline {
