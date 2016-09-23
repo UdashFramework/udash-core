@@ -2,16 +2,14 @@ package io.udash.web.homepage.views
 
 import io.udash._
 import io.udash.core.Presenter
+import io.udash.routing.WindowUrlChangeProvider
+import io.udash.web.commons.config.ExternalUrls
+import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.commons.views.{Image, SVG, Size}
 import io.udash.web.homepage._
 import io.udash.web.homepage.components.Buttons
 import io.udash.web.homepage.components.demo.DemoComponent
-import io.udash.web.commons.config.ExternalUrls
-import io.udash.web.homepage.styles.partials.{ButtonsStyle, HomepageStyles}
-import io.udash.routing.WindowUrlChangeProvider
-import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.commons.styles.utils.StyleUtils
-import io.udash.web.commons.views.{Image, SVG, Size}
-import org.scalajs.dom.Element
+import io.udash.web.homepage.styles.partials.HomepageStyles
 
 import scalacss.ScalatagsCss._
 
@@ -44,8 +42,8 @@ class IndexView(url: Property[String]) extends FinalView {
 }
 
 private[views] object IndexView {
-  import scalatags.JsDom.tags2._
   import scalatags.JsDom.all._
+  import scalatags.JsDom.tags2._
 
   val sectionIntro = section(HomepageStyles.get.sectionIntro)(
     div(GlobalStyles.get.body)(
