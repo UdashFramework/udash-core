@@ -47,7 +47,7 @@ object DemoStyles extends UdashStylesheet {
   val demoBody = style(
     width(990 px),
     height(600 px),
-    paddingTop(85 px),
+    paddingTop(30.px),
     margin(`0`, auto),
 
     MediaQueries.tabletLandscape(
@@ -60,34 +60,14 @@ object DemoStyles extends UdashStylesheet {
     )
   )
 
-  val demoSources = style(
+  val demoFiddle = style(
     GlobalStyles.get.col,
-    width(50 %%),
+    width(100.%%),
+    height :=! s"calc(100% - 43px)",
 
     MediaQueries.tabletLandscape(
       style(
-        width(100 %%)
-      )
-    ),
-
-    unsafeChild("::selection")(
-      backgroundColor(StyleConstants.Colors.GreyExtra)
-    ),
-
-    unsafeChild("::-moz-selection")(
-      backgroundColor(StyleConstants.Colors.GreyExtra)
-    )
-  )
-
-  val demoPreview = style(
-    GlobalStyles.get.col,
-    width(50 %%),
-    padding(40 px, 50 px),
-
-    MediaQueries.tabletLandscape(
-      style(
-        width(100 %%),
-        padding(20 px, 30 px)
+        height(400.px)
       )
     )
   )
@@ -187,21 +167,6 @@ object DemoStyles extends UdashStylesheet {
           borderRightStyle.none,
           borderBottomStyle.solid
         )
-      )
-    )
-  )
-
-  val demoCode = style(
-    position.relative,
-    textAlign.left,
-    height :=! s"calc(100% - 43px)",
-    width(100 %%),
-    marginRight(50 px),
-
-    MediaQueries.tabletLandscape(
-      style(
-        height.auto,
-        marginRight(`0`)
       )
     )
   )

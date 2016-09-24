@@ -16,6 +16,7 @@ import org.scalajs.dom.Element
 import scala.scalajs.js
 import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
+import scalatags.generic.Attr
 
 /**
   * Created by malchik on 2016-04-04.
@@ -24,9 +25,6 @@ import scalatags.JsDom.all._
 class DemoComponent(url: Property[String]) extends Component {
 
   url.listen(onUrlChange)
-
-  val window = jQ(DomWindow)
-  window.resize((element: Element, _: JQueryEvent) => onResize())
 
   private def onUrlChange(update: String) = {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
@@ -37,61 +35,31 @@ class DemoComponent(url: Property[String]) extends Component {
     jQ(template).not(tab).find(s".${DemoStyles.get.demoTabsLink.htmlClass}").attr(Attributes.data(Attributes.Active), "false")
     tab.attr(Attributes.data(Attributes.Active), "true")
 
-    jqPreviewContainer
+    jqFiddleContainer
       .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
         (el: Element) => {
-          jqPreviewContainer
-            .html(entry.preview)
+          jqFiddleContainer
+            .html(entry.fiddle)
             .animate(Map[String, Any]("opacity" -> 1), 200)
         })
-
-    jqCodeContainer
-      .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
-        (el: Element) => {
-          jq2CustomScrollbar(jqCodeContainer).destroy()
-          jqCodeContainer
-            .html(entry.code)
-            .animate(Map[String, Any]("opacity" -> 1), 200)
-
-          initCustomScroll()
-          js.Dynamic.global.Prism.highlightAll()
-        })
   }
 
-  private def initCustomScroll(): Unit = {
-    val scrollAxis = if (window.width > StyleConstants.Sizes.BodyWidth) CustomScrollbarAxis.XY else CustomScrollbarAxis.X
-    jq2CustomScrollbar(jqCodeContainer).customScrollbar(CustomScrollbarOptions
-      .axis(scrollAxis)
-      .autoHideScrollbar(true)
-    )
-  }
-
-  private def onResize(): Unit = {
-    jq2CustomScrollbar(jqCodeContainer).destroy()
-    initCustomScroll()
-  }
-
-  private val codeContainer = div(DemoStyles.get.demoCode).render
-  private val previewContainer = div(DemoStyles.get.demoPreview).render
-  private lazy val jqCodeContainer = jQ(codeContainer)
-  private lazy val jqPreviewContainer = jQ(previewContainer)
+  private val fiddleContainer = div(DemoStyles.get.demoFiddle).render
+  private lazy val jqFiddleContainer = jQ(fiddleContainer)
 
   private lazy val template = div(DemoStyles.get.demoComponent)(
     Image("laptop.png", "", DemoStyles.get.laptopImage),
     div(DemoStyles.get.demoBody)(
-      div(DemoStyles.get.demoSources)(
-        ul(DemoStyles.get.demoTabs)(
-          DemoComponent.demoEntries.map(entry =>
-            li(DemoStyles.get.demoTabsItem)(
-              a(DemoStyles.get.demoTabsLink, href := entry.url)(
-                entry.name
-              )
+      ul(DemoStyles.get.demoTabs)(
+        DemoComponent.demoEntries.map(entry =>
+          li(DemoStyles.get.demoTabsItem)(
+            a(DemoStyles.get.demoTabsLink, href := entry.url)(
+              entry.name
             )
           )
-        ),
-        codeContainer
+        )
       ),
-      previewContainer
+      fiddleContainer
     )
   ).render
 
@@ -99,188 +67,20 @@ class DemoComponent(url: Property[String]) extends Component {
 }
 
 object DemoComponent {
-  def helloWorldCode = CodeBlock(
-    """val name = Property("World")
-      |
-      |div(
-      |  TextInput.debounced(name), br,
-      |  produce(name)(name => h3(s"Hello, $name!").render)
-      |).render""".stripMargin
-  )(HomepageStyles)
-
-  def propertiesCode = CodeBlock(
-    """def isEven(n: Int): Boolean =
-      |  n % 2 == 0
-      |
-      |def renderer(n: ReadableProperty[Int]): Element =
-      |  span(s"${n.get}, ").render
-      |
-      |val input = Property("")
-      |val numbers = SeqProperty[Int](Seq.empty)
-      |val odds = numbers.filter(n => !isEven(n))
-      |val evens = numbers.filter(isEven)
-      |
-      |div(
-      |  TextInput.debounced(input)(
-      |    onkeyup := ((ev: KeyboardEvent) =>
-      |      if (ev.keyCode == ext.KeyCode.Enter) {
-      |        Try(input.get.toInt).foreach(n => {
-      |          numbers.append(n)
-      |          input.set("")
-      |        })
-      |      })
-      |  ), br,
-      |  "Numbers: ", repeat(numbers)(renderer), br,
-      |  "Evens: ", repeat(evens)(renderer), br,
-      |  "Odds: ", repeat(odds)(renderer)
-      |).render""".stripMargin
-  )(HomepageStyles)
-
-  def validationCode = CodeBlock(
-    """val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
-      |
-      |val email = Property("example@mail.com")
-      |email.addValidator((element: String) =>
-      |  element match {
-      |    case emailRegex(text) => Valid
-      |    case _ => Invalid("It's not an email!")
-      |  }
-      |)
-      |
-      |div(
-      |  TextInput.debounced(email), br,
-      |  "Valid: ",
-      |  valid(email) {
-      |    case Valid => span("Yes").render
-      |    case Invalid(_) => span("No").render
-      |  }
-      |).render""".stripMargin
-  )(HomepageStyles)
-
-  def i18n = CodeBlock(
-    """val name = Property("World")
-      |
-      |object Translations {
-      |  import TranslationKey._
-      |  object udash {
-      |    val hello = key("udash.hello")
-      |    val withArg = key1[String]("udash.withArg")
-      |  }
-      |}
-      |
-      |object FrontendTranslationProvider {
-      |  private val translations = Map(
-      |    Lang("en") -> Bundle(BundleHash("enHash"), Map(
-      |      "udash.hello" -> "Hello, Udash!",
-      |      "udash.withArg" -> "Hello, {}!"
-      |    )),
-      |    Lang("pl") -> Bundle(BundleHash("plHash"), Map(
-      |      "udash.hello" -> "Witaj, Udash!",
-      |      "udash.withArg" -> "Witaj, {}!"
-      |    )),
-      |    Lang("de") -> Bundle(BundleHash("deHash"), Map(
-      |      "udash.hello" -> "Hallo, Udash!",
-      |      "udash.withArg" -> "Hallo, {}!"
-      |    )),
-      |    Lang("sp") -> Bundle(BundleHash("spHash"), Map(
-      |      "udash.hello" -> "Hola, Udash!",
-      |      "udash.withArg" -> "Hola, {}!"
-      |    ))
-      |  )
-      |
-      |  def apply(): LocalTranslationProvider =
-      |    new LocalTranslationProvider(translations)
-      |}
-      |
-      |implicit val translationProvider: TranslationProvider =
-      |  FrontendTranslationProvider()
-      |
-      |implicit val lang: Property[Lang] =
-      |  Property(Lang("en"))
-      |
-      |def changeLang(l: Lang) = lang.set(l)
-      |
-      |div(
-      |  TextInput(name, `type` := "text",
-      |            placeholder := "Type your name..."),
-      |  div(
-      |    translatedDynamic(Translations.udash.hello)(
-      |      _.apply()
-      |    )
-      |  ),
-      |  div(produce(name)(n => span(
-      |    translatedDynamic(Translations.udash.withArg)(
-      |      _.apply(n)
-      |    )
-      |  ).render),
-      |  ul(
-      |    Seq(("en", "EN"), ("pl", "PL"), ("de", "DE"), ("sp", "SP"))
-      |      .map { case (key, name) =>
-      |        li(a(
-      |          onclick := (() => changeLang(Lang(key)))
-      |        )(name))
-      |      }
-      |  )
-      |).render""".stripMargin
-  )(HomepageStyles)
-
-  def components = CodeBlock(
-    """val text = Property[String]("")
-      |val progress = Property[Int](0)
-      |val disableButton = Property(text.get.isEmpty)
-      |text.listen(s => disableButton.set(s.isEmpty))
-      |
-      |lazy val modal: UdashModal = UdashModal(
-      |  backdrop = UdashModal.NoneBackdrop,
-      |  modalSize = ModalSize.Small
-      |)(
-      |  headerFactory = Some(() => h4(bind(text)).render),
-      |  bodyFactory = Some(() =>
-      |    div(
-      |      h4("Closing..."),
-      |      UdashProgressBar.animated(progress)().render
-      |    ).render
-      |  )
-      |)
-      |
-      |def makeProgress(): Unit = progress.get match {
-      |  case v if v >= 100 =>
-      |    text.set("")
-      |    progress.set(0)
-      |    modal.hide()
-      |  case v =>
-      |    progress.set(v + 25)
-      |    dom.window.setTimeout(() => makeProgress(), 750)
-      |}
-      |
-      |modal.listen {
-      |  case UdashModal.ModalShownEvent(_) => makeProgress()
-      |}
-      |
-      |div(
-      |  UdashInputGroup()(
-      |    UdashInputGroup.addon("Modal title: "),
-      |    UdashInputGroup.input(
-      |      TextInput.debounced(text).render
-      |    ),
-      |    UdashInputGroup.buttons(
-      |      UdashButton(
-      |        disabled = disableButton
-      |      )("Go!", modal.openButtonAttrs()).render
-      |    )
-      |  ).render,
-      |  modal.render
-      |).render
-    """.stripMargin
-  )(HomepageStyles)
+  def fiddle(fiddleId: String): Element =
+    iframe(
+      Attr("frameborder") := "0",
+      style := "width: 100%; height: 100%; overflow: hidden;",
+      src := s"https://embed.scalafiddle.io/embed?sfid=$fiddleId&theme=dark"
+    ).render
 
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")).url, DemoPreview.helloWorldDemo, helloWorldCode),
-    DemoEntry("Properties", IndexState(Option("properties")).url, DemoPreview.propertiesDemo, propertiesCode),
-    DemoEntry("Validation", IndexState(Option("validation")).url, DemoPreview.validationDemo, validationCode),
-    DemoEntry("i18n", IndexState(Option("i18n")).url, DemoPreview.i18n, i18n),
-    DemoEntry("Components", IndexState(Option("components")).url, DemoPreview.components, components)
+    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("z8zY6cP/0")),
+    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("OZe6XBJ/2")),
+    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("Yiz0JO2/0")),
+    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("ll4AVYz/0")),
+    DemoEntry("Components", IndexState(Option("components")).url, fiddle("13Wn0gZ/0"))
   )
 }
 
-case class DemoEntry(name: String, url: String, preview: Element, code: Element)
+case class DemoEntry(name: String, url: String, fiddle: Element)
