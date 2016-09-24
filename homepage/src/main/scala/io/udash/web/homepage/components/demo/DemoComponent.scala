@@ -74,13 +74,12 @@ object DemoComponent {
       src := s"https://embed.scalafiddle.io/embed?sfid=$fiddleId&theme=dark"
     ).render
 
-  //TODO: insert fiddle ids
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("gKgxQY0/1")),
-    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("gKgxQY0/1")),
-    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("gKgxQY0/1")),
-    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("gKgxQY0/1")),
-    DemoEntry("Components", IndexState(Option("components")).url, fiddle("gKgxQY0/1"))
+    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("z8zY6cP/0")),
+    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("OZe6XBJ/2")),
+    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("Yiz0JO2/0")),
+    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("ll4AVYz/0")),
+    DemoEntry("Components", IndexState(Option("components")).url, fiddle("13Wn0gZ/0"))
   )
 }
 
