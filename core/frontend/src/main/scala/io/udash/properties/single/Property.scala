@@ -114,8 +114,10 @@ trait ReadableProperty[A] {
   protected[properties] def parent: ReadableProperty[_]
 
   protected[properties] def fireValueListeners(): Unit = {
-    val t = get
-    CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => listeners.foreach(_.apply(t)))
+    CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
+      val t = get
+      listeners.foreach(_.apply(t))
+    })
   }
 
   protected[properties] def valueChanged(): Unit = {

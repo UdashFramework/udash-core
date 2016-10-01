@@ -709,6 +709,21 @@ class PropertyTest extends UdashFrontendTest {
       s.subProp(_.s.i).get should be(Seq())
       i.elemProperties.isEmpty should be(false)
     }
+
+    "not get partial value from child property" in {
+      case class TopModel(child: CCWithRequire)
+      case class CCWithRequire(a: Int, b: Int) {
+        require((a > 0 && b > 0) || (a < 0 && b < 0))
+      }
+
+      val p = ModelProperty[TopModel](TopModel(CCWithRequire(1, 2)))
+      val c = p.subModel(_.child)
+
+      c.set(CCWithRequire(-10, -5))
+
+      c.get.a should be(-10)
+      c.get.b should be(-5)
+    }
   }
 
   "SeqProperty" should {
