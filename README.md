@@ -1,4 +1,4 @@
-# Udash Core [![Build Status](https://travis-ci.org/UdashFramework/udash-core.svg?branch=master)](https://travis-ci.org/UdashFramework/udash-core) [![Join the chat at https://gitter.im/UdashFramework/udash-core](https://badges.gitter.im/UdashFramework/udash-core.svg)](https://gitter.im/UdashFramework/udash-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [<img align="right" height="50px" src="http://www.avsystem.com/avsystem_logo.png">](http://www.avsystem.com/)
+# Udash Core [![Build Status](https://travis-ci.org/UdashFramework/udash-core.svg?branch=master)](https://travis-ci.org/UdashFramework/udash-core) [![Join the chat at https://gitter.im/UdashFramework/udash-core](https://badges.gitter.im/UdashFramework/udash-core.svg)](https://gitter.im/UdashFramework/udash-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [<img align="right" height="50px" src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSoiMy6rnzARUEdR0OjHmPGxTeiAMLBFlUYwIB9baWYWmuUwTbo">](http://www.avsystem.com/)
 
 [Udash](http://udash.io/) is a Scala.js framework for building beautiful and maintainable web applications.
 
@@ -42,6 +42,16 @@ The whole framework code is available on GitHub under Apache v2 license.
 ### IDE support
 With any IDE supporting the Scala language. No extra plugin needed.
 
+# Try it on ScalaFiddle
+
+* [Hello World](https://scalafiddle.io/sf/z8zY6cP/0)
+* [Properties](https://scalafiddle.io/sf/OZe6XBJ/2)
+* [Validation](https://scalafiddle.io/sf/Yiz0JO2/0)
+* [i18n](https://scalafiddle.io/sf/ll4AVYz/0)
+* [UI Components](https://scalafiddle.io/sf/13Wn0gZ/0)
+
+Find more examples in the [Udash Demos](https://github.com/UdashFramework/udash-demos) repository.
+
 # Quick start guide
 
 A good starting point is a generation of a project base with the Udash project generator. You can download it from [here](https://github.com/UdashFramework/udash-generator/releases). The generator provides a command line interface which will collect some information about the project and prepare the project base for you.
@@ -57,92 +67,6 @@ Follow the below steps:
 7. If you selected only the frontend project, you can find static files in target/UdashStatic.
 
 Read more in the [Udash Developer's Guide](http://guide.udash.io/).
-
-### Hello World example
-
-```scala
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalatags.JsDom.all._
-import io.udash._
-
-val name = Property("World")
-
-div(
-  TextInput(name), br,
-  produce(name)(name => h3(s"Hello, $name!").render)
-).render
-```
-
-### Properties example
-
-```scala
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
-import org.scalajs.dom._
-import scalatags.JsDom.all._
-import io.udash._
-
-def isOdd(n: Int): Boolean =
-  n % 2 == 1
-
-def renderer(n: ReadableProperty[Int]): Element =
-  span(s"${n.get}, ").render
-
-val input = Property("")
-val numbers = SeqProperty[Int](Seq.empty)
-val odds = numbers.filter(isOdd)
-val evens = numbers.filter(n => !isOdd(n))
-
-div(
-  TextInput(input)(
-    onkeyup := ((ev: KeyboardEvent) => 
-      if (ev.keyCode == ext.KeyCode.Enter) {
-        val n: Try[Int] = Try(input.get.toInt)
-        if (n.isSuccess) {
-          numbers.append(n.get)
-          input.set("")
-        }
-      })
-  ), br,
-  "Numbers: ", repeat(numbers)(renderer), br,
-  "Evens: ", repeat(evens)(renderer), br,
-  "Odds: ", repeat(odds)(renderer)
-).render
-```
-
-### Form validation example
-
-```scala
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalatags.JsDom.all._
-import io.udash._
-
-val emailRegex = "([\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})".r
-
-val email = Property("example@mail.com")
-email.addValidator(new Validator[String] {
-  def apply(element: String)(implicit ec: ExecutionContext) = Future {
-    element match {
-      case emailRegex(text) => println("valid"); Valid
-      case _ => println("invalid"); Invalid(Seq("It's not an email!"))
-    }
-  }
-})
-
-div(
-  TextInput(email), br,
-  "Valid: ", bindValidation(email,
-    _ => span("Wait...").render,
-    {
-      case Valid => span("Yes").render
-      case Invalid(_) => span("No").render
-    },
-    _ => span("ERROR").render
-  )
-).render
-```
-
-Find more examples in the [Udash Demos](https://github.com/UdashFramework/udash-demos) repository.
-
 
 # Udash RPC
 
