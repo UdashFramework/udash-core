@@ -12,16 +12,20 @@ import scalatags.JsDom.all._
   * Select of finite options for single and multi selection.
   */
 object Select {
+  val defaultLabel: String => Modifier = s => StringFrag(s)
+
   /**
     * Single select for ValueProperty.
     *
     * @param property Property to bind.
     * @param options Seq of available options.
+    * @param label Provides element label.
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return HTML select tag with bound ValueProperty, applied modifiers and nested options.
     */
-  def apply(property: Property[String], options: Seq[String], xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
-    val htmlOptions = prepareHtmlOptions(options)
+  def apply(property: Property[String], options: Seq[String], label: String => Modifier)
+           (xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
+    val htmlOptions = prepareHtmlOptions(options, label)
 
     def refreshSelectedItems() = {
       htmlOptions.foreach(option => {
@@ -49,11 +53,13 @@ object Select {
     *
     * @param property Property to bind.
     * @param options Seq of available options.
+    * @param label Provides element label.
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return HTML select tag with bound SeqProperty, applied modifiers and nested options.
     */
-  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
-    val htmlOptions = prepareHtmlOptions(options)
+  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], label: String => Modifier)
+           (xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
+    val htmlOptions = prepareHtmlOptions(options, label)
 
     def refreshSelectedItems() = {
       val selection = property.get
@@ -79,9 +85,9 @@ object Select {
     select(multiple := true, bind, xs)(htmlOptions)
   }
 
-  private def prepareHtmlOptions(options: Seq[String]) = options.map(opt => {
-    val v = opt
-    //TODO provide separated function for displayed value
-    option(value := v)(v).render
-  })
+  private def prepareHtmlOptions(options: Seq[String], label: String => Modifier) =
+    options.map(opt => {
+      val v = opt
+      option(value := v)(label(v)).render
+    })
 }
