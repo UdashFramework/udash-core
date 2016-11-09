@@ -10,7 +10,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val select = Select(p, options).render
+      val select = Select(p, options, Select.defaultLabel)().render
 
       select.childElementCount should be(5)
       select.value should be("B")
@@ -25,7 +25,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val select = Select(p, options).render
+      val select = Select(p, options, Select.defaultLabel)().render
 
       select.childElementCount should be(5)
 
@@ -42,7 +42,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = SeqProperty[String]("B")
 
-      val select = Select(p, options).render
+      val select = Select(p, options, Select.defaultLabel)().render
 
       select.childElementCount should be(5)
       select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
@@ -79,7 +79,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = SeqProperty[String]("B")
 
-      val select = Select(p, options).render
+      val select = Select(p, options, Select.defaultLabel)().render
 
       select.childElementCount should be(5)
 

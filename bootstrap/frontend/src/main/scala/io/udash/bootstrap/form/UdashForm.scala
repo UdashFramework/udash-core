@@ -187,12 +187,12 @@ object UdashForm {
     )
 
   /** Creates selection input for provided `options`. `selected` property has the value of selected item. */
-  def select(selected: Property[String], options: Seq[String]): Modifier =
-    Select(selected, options, BootstrapStyles.Form.formControl)
+  def select(selected: Property[String], options: Seq[String], label: String => Modifier = Select.defaultLabel): Modifier =
+    Select(selected, options, label)(BootstrapStyles.Form.formControl)
 
   /** Creates multiple selection input for provided `options`. `selected` property contains values of selected items. */
-  def multiselect(selected: SeqProperty[String], options: Seq[String]): Modifier =
-    Select(selected, options, BootstrapStyles.Form.formControl)
+  def multiselect(selected: SeqProperty[String], options: Seq[String], label: String => Modifier = Select.defaultLabel): Modifier =
+    Select(selected, options, label)(BootstrapStyles.Form.formControl)
 
   /** Creates static control element. */
   def staticControl(content: Modifier*): Modifier =
