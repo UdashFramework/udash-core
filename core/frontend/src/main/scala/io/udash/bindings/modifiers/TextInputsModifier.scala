@@ -26,9 +26,11 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
     var propertyUpdateHandler: Int = 0
     val callback = if (debounce.nonEmpty) {
       (_: Event) => {
-        val value: String = elementValue(t)
         if (propertyUpdateHandler != 0) window.clearTimeout(propertyUpdateHandler)
-        propertyUpdateHandler = window.setTimeout(() => if (property.get != value) property.set(value), debounce.get.toMillis)
+        propertyUpdateHandler = window.setTimeout(() => {
+          val value: String = elementValue(t)
+          if (property.get != value) property.set(value)
+        }, debounce.get.toMillis)
       }
     } else {
       (_: Event) => {
