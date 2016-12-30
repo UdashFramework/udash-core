@@ -41,7 +41,7 @@ class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] pri
 
     tags2.nav(
       ul(id := componentId, BootstrapStyles.Pagination.pagination)(
-        arrow((idx, _) => idx <= 0, previous, UdashPagination.PreviousPage),
+        arrow((idx, _) => idx <= 0, previous _, UdashPagination.PreviousPage),
         repeat(pages)(page => {
           def currentIdx: Int = pages.elemProperties.indexOf(page)
           val pageIdx = Property[Int](currentIdx)
@@ -50,7 +50,7 @@ class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] pri
             itemFactory(page, UdashPagination.StandardPage)
           )(onclick :+= ((_: Event) => { changePage(pageIdx.get); false })).render
         }),
-        arrow((idx, size) => idx >= size - 1, next, UdashPagination.NextPage)
+        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.NextPage)
       )
     ).render
   }
@@ -80,8 +80,8 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
 
     tags2.nav(id := componentId)(
       ul(BootstrapStyles.Pagination.pager)(
-        arrow((idx, _) => idx <= 0, previous, UdashPagination.PreviousPage, BootstrapStyles.previous),
-        arrow((idx, size) => idx >= size - 1, next, UdashPagination.NextPage, BootstrapStyles.next)
+        arrow((idx, _) => idx <= 0, previous _, UdashPagination.PreviousPage, BootstrapStyles.previous),
+        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.NextPage, BootstrapStyles.next)
       )
     ).render
   }
