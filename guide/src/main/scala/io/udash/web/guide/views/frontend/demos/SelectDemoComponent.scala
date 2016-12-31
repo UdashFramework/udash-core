@@ -50,9 +50,8 @@ class SelectDemoComponent extends Component {
       UdashInputGroup.addon("Fruits:"),
       UdashInputGroup.addon(
         Select(
-          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-          BootstrapStyles.Form.formControl
-        ).render
+          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
+        )(BootstrapStyles.Form.formControl).render
       ),
       UdashInputGroup.addon(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
     ).render

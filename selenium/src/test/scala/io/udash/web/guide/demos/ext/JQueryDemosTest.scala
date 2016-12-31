@@ -4,8 +4,6 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
 import org.openqa.selenium.WebElement
 
-import scala.collection.JavaConversions._
-
 class JQueryDemosTest extends SeleniumTest {
   val url = "/#/ext/jquery"
 

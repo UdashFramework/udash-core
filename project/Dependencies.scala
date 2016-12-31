@@ -3,22 +3,23 @@ import sbt._
 
 object Dependencies extends Build {
 
-  val versionOfScala = "2.11.8"
+  val versionOfScala = "2.12.1"
   val jettyVersion = "9.3.11.v20160721"
 
-  val udashVersion = "0.4.0"
-  val udashJQueryVersion = "1.0.0"
+  val udashVersion = "0.5.0-SNAPSHOT"
+  val udashJQueryVersion = "1.0.1"
 
-  val scalaCssVersion = "0.5.0"
+  val scalaCssVersion = "0.5.1"
 
   val scalaLoggingVersion = "3.1.0"
   val logbackVersion = "1.1.3"
 
-  val avsystemCommonsVersion = "1.17.1"
+  val avsystemCommonsVersion = "1.19.0"
   val typesafeConfigVersion = "1.3.0"
   val springVersion = "4.3.2.RELEASE"
-  val akkaVersion = "2.4.7"
-  val sprayVersion = "1.3.1"
+  val akkaVersion = "2.4.16"
+  val akkaHttpVersion = "10.0.0"
+  val akkaHttpCorsVersion = "0.1.10"
 
   val seleniumVersion = "2.53.1"
   val scalatestVersion = "3.0.0"
@@ -61,10 +62,9 @@ object Dependencies extends Build {
     "org.springframework" % "spring-beans" % springVersion,
     "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
 
-    "io.spray" %% "spray-can" % sprayVersion,
-    "io.spray" %% "spray-routing" % sprayVersion,
-    "io.spray" %% "spray-servlet" % sprayVersion,
-    "com.typesafe.akka" %% "akka-actor" % akkaVersion
+    "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+    "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+    "ch.megard" %% "akka-http-cors" % akkaHttpCorsVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(

@@ -6,19 +6,26 @@ import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
+import io.udash.web.guide.rest.DevsGuideRest
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
-class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String) {
+class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: String, guideResourceBase: String) {
   import io.udash.web.Implicits._
   private val server = new Server(port)
 
-  def start() = server.start()
+  def start(): Unit = {
+    DevsGuideRest.start(restPort)
+    server.start()
+  }
 
-  def stop() = server.stop()
+  def stop(): Unit = {
+    DevsGuideRest.stop()
+    server.stop()
+  }
 
   private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
   private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
@@ -46,16 +53,6 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   }
   guide.addServlet(atmosphereHolder, "/atm/*")
 
-  private val restApiHolder = {
-    import spray.servlet.Servlet30ConnectorServlet
-    import spray.servlet.Initializer
-
-    guide.addEventListener(new Initializer())
-    val apiHolder = new ServletHolder(new Servlet30ConnectorServlet)
-    apiHolder
-  }
-  guide.addServlet(restApiHolder, s"/${ApplicationServer.restPrefix}/*")
-
   val contexts = new ContextHandlerCollection
   contexts.setHandlers(Array(homepage, guide))
   server.setHandler(contexts)
@@ -74,8 +71,4 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     appHolder.setInitParameter("resourceBase", resourceBase)
     appHolder
   }
-}
-
-object ApplicationServer {
-  val restPrefix = "rest"
 }

@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById, ByTagName}
 import org.openqa.selenium.WebElement
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class FrontendBindingsTest extends SeleniumTest {
   val url = "/#/frontend/bindings"
@@ -48,7 +48,7 @@ class FrontendBindingsTest extends SeleniumTest {
       }
 
       def collectIntegers(container: WebElement): String = {
-        container.findElements(new ByCssSelector("*")).foldLeft("")((result, el) => result + el.getText)
+        container.findElements(new ByCssSelector("*")).asScala.foldLeft("")((result, el) => result + el.getText)
       }
 
       var prevIntegers = ""
@@ -78,7 +78,7 @@ class FrontendBindingsTest extends SeleniumTest {
       def validation = driver.findElementById("validation-demo")
 
       def collectIntegers(container: WebElement): Seq[Int] = {
-        container.findElements(new ByCssSelector("*")).foldLeft(Seq[Int]())((result, el) =>
+        container.findElements(new ByCssSelector("*")).asScala.foldLeft(Seq[Int]())((result, el) =>
           result :+ Integer.parseInt(el.getText.stripSuffix(","))
         )
       }
@@ -101,7 +101,7 @@ class FrontendBindingsTest extends SeleniumTest {
       def validation = driver.findElementById("repeat-demo")
 
       def collectIntegers(container: WebElement): String = {
-        container.findElements(new ByCssSelector("*")).foldLeft("")((result, el) => result + el.getText)
+        container.findElements(new ByCssSelector("*")).asScala.foldLeft("")((result, el) => result + el.getText)
       }
 
       var prevIntegers = ""

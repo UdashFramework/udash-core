@@ -1,6 +1,6 @@
 name := "udash-guide"
 
-version in ThisBuild := "0.4.0"
+version in ThisBuild := "0.5.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
@@ -98,7 +98,6 @@ val commonFrontendSettings = Seq(
     (target in(Compile, packageScalaJSLauncher)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-init.js",
 
   persistLauncher in Test := false,
-  scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
   jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
