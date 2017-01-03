@@ -1136,7 +1136,7 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.added.map(_.get) should be(Seq(0, 0, 0))
       patches.last.removed.map(_.get) should be(Seq(4, 2, 4, 2, 4))
 
-      p.remove(1, 6)
+      p.remove(1, 5)
 
       states.last should be(Seq())
       patches.last.idx should be(0)

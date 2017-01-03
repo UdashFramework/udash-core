@@ -16,6 +16,6 @@ trait UrlLogging[S <: State] extends StrictLogging { app: Application[S] =>
 
   app.onStateChange((event: StateChangeEvent[S]) => {
     Future(log(matchState(event.currentState).value, Try(matchState(event.oldState).value).toOption))
-      .onFailure { case t => logger.warn("Logging url change failed: {}", t.getMessage) }
+      .failed.foreach(t => logger.warn("Logging url change failed: {}", t.getMessage))
   })
 }

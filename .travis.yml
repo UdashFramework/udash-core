@@ -26,6 +26,7 @@ jdk:
 
 scala:
   - 2.11.8
+  - 2.12.1
 
 env:
   - TEST_PACKAGE=core-macros/test

@@ -2,38 +2,38 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.11.8"
-  val silencerVersion = "0.4"
+  val versionOfScala = "2.12.1"
+  val silencerVersion = "0.5"
 
-  val jqueryWrapperVersion = "1.0.0"
+  val jqueryWrapperVersion = "1.0.1"
 
   val scalaJsDomVersion = "0.9.1"
-  val scalaTagsVersion = "0.6.0"
+  val scalaTagsVersion = "0.6.2"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.18.2"
+  val avsCommonsVersion = "1.19.0"
 
-  val atmosphereJSVersion = "2.3.0"
-  val atmosphereVersion = "2.4.5"
+  val atmosphereJSVersion = "2.3.2"
+  val atmosphereVersion = "2.4.9"
 
-  val upickleVersion = "0.4.2"
-  val jawnParserVersion = "0.9.0"
+  val upickleVersion = "0.4.4"
+  val jawnParserVersion = "0.10.4"
 
-  val scalaHttpClientVersion = "1.1.0"
+  val scalaHttpClientVersion = "2.0.0"
 
-  val scalaLoggingVersion = "3.4.0"
+  val scalaLoggingVersion = "3.5.0"
 
-  val scalatestVersion = "3.0.0"
-  val bootstrapVersion = "3.3.7"
-  val bootstrapDatepickerVersion = "4.17.37-1"
-  val momentJsVersion = "2.14.1"
+  val scalatestVersion = "3.0.1"
+  val bootstrapVersion = "3.3.7-1"
+  val bootstrapDatepickerVersion = "4.17.43"
+  val momentJsVersion = "2.17.0"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" % "silencer-plugin" % silencerVersion
+    "com.github.ghik" %% "silencer-plugin" % silencerVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
-    "com.github.ghik" % "silencer-lib" % silencerVersion
+    "com.github.ghik" %% "silencer-lib" % silencerVersion
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -77,12 +77,14 @@ object Dependencies {
   ))
 
   val bootstrapFrontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion exclude ("org.webjars", "momentjs")
   ))
 
   val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js" minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
+      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
   ))
 }

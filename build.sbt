@@ -5,6 +5,7 @@ name := "udash"
 
 version in ThisBuild := "0.5.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
+crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
@@ -20,7 +21,7 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
-jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
+jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox())
 
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
@@ -32,7 +33,6 @@ val commonSettings = Seq(
 val commonJSSettings = Seq(
   emitSourceMaps in Compile := true,
   persistLauncher in Test := false,
-  scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
   jsEnv in Test := jsTestEnv.value,
@@ -96,7 +96,7 @@ lazy val `rpc-macros` = project.in(file("rpc/macros"))
   )
 
 lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
-  .configure(_.dependsOn(`core-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`core-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rpc-macros`))
   .jvmConfigure(_.dependsOn(`rpc-macros`))
   .settings(commonSettings: _*).settings(
@@ -135,7 +135,7 @@ lazy val `rest-macros` = project.in(file("rest/macros"))
   )
 
 lazy val `rest-shared` = crossProject.crossType(CrossType.Pure).in(file("rest/shared"))
-  .configure(_.dependsOn(`rpc-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`rpc-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rest-macros`))
   .jvmConfigure(_.dependsOn(`rest-macros`))
   .settings(commonSettings: _*).settings(
@@ -147,7 +147,7 @@ lazy val `rest-shared-JVM` = `rest-shared`.jvm
 lazy val `rest-shared-JS` = `rest-shared`.js
 
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
-  .configure(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
   .jsSettings(commonJSSettings:_*)
 
