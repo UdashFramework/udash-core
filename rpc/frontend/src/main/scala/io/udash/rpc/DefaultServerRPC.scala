@@ -1,6 +1,7 @@
 package io.udash.rpc
 
 import io.udash.rpc.internals.UsesServerRPC
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.concurrent.JSExecutionContext
@@ -23,9 +24,9 @@ object DefaultServerRPC {
   /** Creates [[io.udash.rpc.DefaultServerRPC]] for provided RPC interfaces. */
   def apply[ClientRPCType : DefaultClientUdashRPCFramework.AsRawRPC,
             ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
-           (localRpc: ClientRPCType, serverUrl: String = "/atm/"): ServerRPCType = {
+           (localRpc: ClientRPCType, serverUrl: String = "/atm/", exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry): ServerRPCType = {
     val clientRPC = new DefaultExposesClientRPC[ClientRPCType](localRpc)
-    lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl)
+    lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl, exceptionsRegistry)
     lazy val serverRPC: DefaultServerRPC[ServerRPCType] = new DefaultServerRPC[ServerRPCType](serverConnector)
     serverRPC.remoteRpc
   }

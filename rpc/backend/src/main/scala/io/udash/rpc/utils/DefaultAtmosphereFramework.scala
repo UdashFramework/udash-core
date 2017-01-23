@@ -1,14 +1,16 @@
 package io.udash.rpc.utils
 
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig}
 import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
 
 import scala.concurrent.ExecutionContext
 
 /** AtmosphereFramework with default configuration for Udash. */
-class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_])
+class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_],
+                                 exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry)
                                 (implicit val executionContext: ExecutionContext) extends AtmosphereFramework {
-  addAtmosphereHandler("/*", new AtmosphereService(config))
+  addAtmosphereHandler("/*", new AtmosphereService(config, exceptionsRegistry))
   addInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_NATIVE_COMETSUPPORT, "true")
