@@ -37,6 +37,7 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/rest/client-server" => RestClientServerState
     case "/ext/i18n" => I18NExtState
     case "/ext/bootstrap" => BootstrapExtState
+    case "/ext/charts" => ChartsExtState
     case "/ext/jquery" => JQueryExtState
     case "/ext/activity" => UserActivityExtState
     case "/faq" => FAQState

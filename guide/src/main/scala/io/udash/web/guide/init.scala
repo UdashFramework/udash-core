@@ -63,6 +63,7 @@ object Context {
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
+      MenuLink("Charts", ChartsExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
       MenuLink("User activity", UserActivityExtState)
     )),

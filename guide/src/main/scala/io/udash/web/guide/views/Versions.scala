@@ -8,4 +8,5 @@ object Versions {
   val scalaJSPluginVersion = "0.6.15"
 
   val jettyVersion = "9.3.11.v20160721"
+  val highchartsVersion = "5.0.10"
 }

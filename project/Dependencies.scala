@@ -8,6 +8,7 @@ object Dependencies {
 
   val udashVersion = "0.5.0-SNAPSHOT"
   val udashJQueryVersion = "1.0.1"
+  val highchartsVarsion = "5.0.10"
 
   val scalaCssVersion = "0.5.3-RC1"
 
@@ -37,11 +38,18 @@ object Dependencies {
     "io.udash" %%% "udash-i18n-frontend" % udashVersion,
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap" % udashVersion,
+    "io.udash" %%% "udash-charts" % udashVersion,
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
     "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion
   ))
 
   val frontendJSDeps = Def.setting(Seq(
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts.src.js" minified s"$highchartsVarsion/highcharts.js" dependsOn "jquery.js",
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-3d.src.js" minified s"$highchartsVarsion/highcharts-3d.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-more.src.js" minified s"$highchartsVarsion/highcharts-more.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/exporting.src.js" minified s"$highchartsVarsion/modules/exporting.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/drilldown.src.js" minified s"$highchartsVarsion/modules/drilldown.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/heatmap.src.js" minified s"$highchartsVarsion/modules/heatmap.js" dependsOn s"$highchartsVarsion/highcharts.src.js"
   ))
 
   val homepageJSDeps = Def.setting(Seq(
