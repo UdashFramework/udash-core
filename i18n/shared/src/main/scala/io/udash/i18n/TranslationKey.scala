@@ -1,6 +1,10 @@
 package io.udash.i18n
 
+import com.avsystem.commons.serialization.{GenCodec, Input, Output}
+
 import scala.concurrent.Future
+import scala.util.Try
+import scala.util.control.NonFatal
 
 sealed trait TranslationKey {
   def key: String
@@ -14,51 +18,81 @@ trait TranslationKey0 extends TranslationKey {
 trait TranslationKey1[T] extends TranslationKey {
   def apply(arg1: T)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1)
+
+  def reduce(arg1: T): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1)
 }
 
 trait TranslationKey2[T1, T2] extends TranslationKey {
   def apply(arg1: T1, arg2: T2)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2)
+
+  def reduce(arg1: T1, arg2: T2): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2)
 }
 
 trait TranslationKey3[T1, T2, T3] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3)
 }
 
 trait TranslationKey4[T1, T2, T3, T4] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4)
 }
 
 trait TranslationKey5[T1, T2, T3, T4, T5] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4, arg5)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5)
 }
 
 trait TranslationKey6[T1, T2, T3, T4, T5, T6] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6)
 }
 
 trait TranslationKey7[T1, T2, T3, T4, T5, T6, T7] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 }
 
 trait TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 }
 
 trait TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9] extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+
+  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 }
 
 trait TranslationKeyX extends TranslationKey {
   def apply(argv: Any*)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
     provider.translate(key, argv:_*)
+
+  def reduce(argv: Any*): TranslationKey0 =
+    new TranslationKey.ReducedTranslationKey(key, argv:_*)
 }
 
 object TranslationKey {
@@ -95,6 +129,9 @@ object TranslationKey {
   def keyX(key: String): TranslationKeyX =
     new KeyX(key)
 
+  def untranslatable(key: String): TranslationKey0 =
+    new Untranslatable(key)
+
   private class Key0(override val key: String) extends TranslationKey0
   private class Key1[T](override val key: String) extends TranslationKey1[T]
   private class Key2[T1, T2](override val key: String) extends TranslationKey2[T1, T2]
@@ -106,4 +143,46 @@ object TranslationKey {
   private class Key8[T1, T2, T3, T4, T5, T6, T7, T8](override val key: String) extends TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8]
   private class Key9[T1, T2, T3, T4, T5, T6, T7, T8, T9](override val key: String) extends TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9]
   private class KeyX(override val key: String) extends TranslationKeyX
+
+  private[i18n] class ReducedTranslationKey(override val key: String, val argv: Any*) extends TranslationKey0 {
+    override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
+      provider.translate(key, argv:_*)
+  }
+
+  private[i18n] class Untranslatable(override val key: String) extends TranslationKey0 {
+    override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
+      Future.successful(Translated(key))
+  }
+}
+
+object TranslationKey0 {
+  implicit val codec: GenCodec[TranslationKey0] = GenCodec.create[TranslationKey0](
+    (input: Input) => {
+      Try(input.readList()).toOption match {
+        case Some(list) =>
+          val key = list.nextElement().readString()
+          val items = list.iterator(item => item.readString()).toList
+          list.skipRemaining()
+          if (items.nonEmpty) new TranslationKey.ReducedTranslationKey(key, items: _*)
+          else TranslationKey.key(key)
+        case None =>
+          TranslationKey.untranslatable(input.readString())
+      }
+    },
+    (output: Output, value: TranslationKey0) => {
+      value match {
+        case reduced: TranslationKey.ReducedTranslationKey =>
+          val data = output.writeList()
+          data.writeElement().writeString(value.key)
+          reduced.argv.foreach(item => data.writeElement().writeString(item.toString))
+          data.finish()
+        case untranslatable: TranslationKey.Untranslatable =>
+          output.writeString(untranslatable.key)
+        case std: TranslationKey =>
+          val data = output.writeList()
+          data.writeElement().writeString(std.key)
+          data.finish()
+      }
+    }
+  )
 }
