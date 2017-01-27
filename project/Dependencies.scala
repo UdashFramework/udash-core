@@ -58,7 +58,7 @@ object Dependencies {
   ).map(_ % Test))
 
   val rpcFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
   ))
 
   val rpcSharedJVMDeps = Def.setting(Seq(
