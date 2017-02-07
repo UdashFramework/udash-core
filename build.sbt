@@ -78,12 +78,12 @@ lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(Scala
     emitSourceMaps in Compile := true,
     libraryDependencies ++= coreFrontendDeps.value,
     persistLauncher in Compile := true,
-    publishedJS <<= Def.taskDyn {
+    publishedJS := Def.taskDyn {
       if (isSnapshot.value) Def.task((fastOptJS in Compile).value) else Def.task((fullOptJS in Compile).value)
-    },
-    publishedJSDependencies <<= Def.taskDyn {
+    }.value,
+    publishedJSDependencies := Def.taskDyn {
       if (isSnapshot.value) Def.task((packageJSDependencies in Compile).value) else Def.task((packageMinifiedJSDependencies in Compile).value)
-    }
+    }.value
   )
 
 lazy val `rpc-macros` = project.in(file("rpc/macros"))
