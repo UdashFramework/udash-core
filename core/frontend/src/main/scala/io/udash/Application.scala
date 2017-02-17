@@ -1,5 +1,6 @@
 package io.udash
 
+import io.udash.properties.ImmutableValue
 import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
 import org.scalajs.dom.Element
 
@@ -13,10 +14,10 @@ import scala.reflect.ClassTag
   * @param rootState The instance of [[io.udash.core.State]] which will treated as main state.
   * @tparam S Should be a sealed trait which extends [[io.udash.core.State]].
   */
-class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
-                                         viewPresenterRegistry: ViewPresenterRegistry[S],
-                                         rootState: S,
-                                         urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
+class Application[S <: State : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[S],
+                                                          viewPresenterRegistry: ViewPresenterRegistry[S],
+                                                          rootState: S,
+                                                          urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
   private var rootElement: Element = _
   private lazy val viewRenderer = new ViewRenderer(rootElement)
   private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewPresenterRegistry, viewRenderer, rootState)
@@ -55,7 +56,7 @@ class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
     *
     * @param callback Callback getting newState and oldState as arguments.
     */
-  def onStateChange(callback: StateChangeEvent[S] => Unit) = {
+  def onStateChange(callback: StateChangeEvent[S] => Unit): Registration = {
     routingEngine.onStateChange(callback)
   }
 
@@ -66,4 +67,8 @@ class Application[S <: State : ClassTag](routingRegistry: RoutingRegistry[S],
 
   /** Current application routing state. */
   def currentState: S = routingEngine.currentState
+
+  /** @return Property reflecting current routing state */
+  def currentStateProperty: ReadableProperty[S] = routingEngine.currentStateProperty
+
 }

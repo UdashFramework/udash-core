@@ -1,11 +1,13 @@
 package io.udash.routing
 
 import io.udash._
+import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 import scala.reflect.ClassTag
+import scala.scalajs.concurrent.JSExecutionContext
 
 case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
 
@@ -13,8 +15,9 @@ case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
   * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
   * matching [[io.udash.core.ViewPresenter]]s and rendering views via passed [[io.udash.ViewRenderer]].
   */
-class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], viewPresenterRegistry: ViewPresenterRegistry[S], viewRenderer: ViewRenderer, rootState: S) {
-  private var current: S = _
+class RoutingEngine[S <: State : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[S], viewPresenterRegistry: ViewPresenterRegistry[S],
+                                                            viewRenderer: ViewRenderer, rootState: S) {
+  private val currentStateProp = Property[S](implicitly[PropertyCreator[S]], JSExecutionContext.queue)
   private val callbacks = mutable.ArrayBuffer[StateChangeEvent[S] => Any]()
   private var statesMap = immutable.ListMap[S, (View, Presenter[_ <: S])]()
 
@@ -25,8 +28,8 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
     */
   def handleUrl(url: Url): Unit = {
     val newState = routingRegistry.matchUrl(url)
-    val oldState = current
-    current = newState
+    val oldState = currentStateProp.get
+    currentStateProp.set(newState)
 
     val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(newState)
@@ -77,7 +80,10 @@ class RoutingEngine[S <: State : ClassTag](routingRegistry: RoutingRegistry[S], 
   }
 
   /** @return Current routing state */
-  def currentState: S = current
+  def currentState: S = currentStateProp.get
+
+  /** @return Property reflecting current routing state */
+  def currentStateProperty: ReadableProperty[S] = currentStateProp.transform(identity)
 
   @tailrec
   private def getStatePath(forState: S, acc: List[S] = Nil): List[S] = forState match {
