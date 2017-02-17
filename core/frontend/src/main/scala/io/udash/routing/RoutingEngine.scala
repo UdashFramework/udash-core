@@ -5,7 +5,7 @@ import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.scalajs.concurrent.JSExecutionContext
 
@@ -19,7 +19,7 @@ class RoutingEngine[S <: State : ClassTag : ImmutableValue](routingRegistry: Rou
                                                             viewRenderer: ViewRenderer, rootState: S) {
   private val currentStateProp = Property[S](implicitly[PropertyCreator[S]], JSExecutionContext.queue)
   private val callbacks = mutable.ArrayBuffer[StateChangeEvent[S] => Any]()
-  private var statesMap = immutable.ListMap[S, (View, Presenter[_ <: S])]()
+  private val statesMap = mutable.LinkedHashMap[S, (View, Presenter[_ <: S])]()
 
   /**
     * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewPresenters.
@@ -37,32 +37,39 @@ class RoutingEngine[S <: State : ClassTag : ImmutableValue](routingRegistry: Rou
     val samePath = findEqPrefix(newStatePath, currentStatePath)
     val diffPath = findDiffSuffix(newStatePath, currentStatePath)
 
-    if (samePath.isEmpty) {
-      val views = renderPath(diffPath)
-      viewRenderer.renderView(List(), views)
-    } else {
-      val toUpdateStates = getUpdatablePath(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
-      val toRemoveStates = statesMap.slice(samePath.size + toUpdateStates.size, statesMap.size)
+    val (viewsToLeave, viewsToAdd) =
+      if (samePath.isEmpty) {
+        val views = renderPath(diffPath)
+        (Nil, views)
+      } else {
+        val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
+        val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
+        toRemoveStates.values.foreach { case (_, presenter) => presenter.onClose() }
 
-      toRemoveStates.values.foreach { case (view, presenter) => presenter.onClose() }
+        val oldViewPresenters =
+          newStatePath
+            .slice(samePath.size, samePath.size + toUpdateStatesSize)
+            .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)(scala.collection.breakOut)
+        var i = samePath.size
+        statesMap.retain { (_, _) =>
+          i -= 1
+          i >= 0
+        }
+        statesMap ++= oldViewPresenters
 
-      val oldVPs = newStatePath
-        .slice(samePath.size, samePath.size + toUpdateStates.size)
-        .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStates.size).values)
-        .toMap
-      statesMap = statesMap.slice(0, samePath.size) ++ oldVPs
+        val viewsToLeave = statesMap.values.map(_._1).toList
+        val views = renderPath(diffPath.slice(toUpdateStatesSize, diffPath.size))
+        (viewsToLeave, views)
+      }
 
-      val viewsToLeave = statesMap.values.map(_._1).toList
-      val views = renderPath(diffPath.slice(toUpdateStates.size, diffPath.size))
-      viewRenderer.renderView(viewsToLeave, views)
-    }
+    viewRenderer.renderView(viewsToLeave, viewsToAdd)
 
-    diffPath.reverse.foldLeft(newState)((previousState, currentState) => {
-      statesMap.get(previousState).foreach { case (view, presenter) =>
+    diffPath.foldRight(newState) { (currentState, previousState) =>
+      statesMap.get(previousState).foreach { case (_, presenter) =>
         presenter.asInstanceOf[Presenter[S]].handleState(currentState)
       }
       currentState.parentState.asInstanceOf[S]
-    })
+    }
 
     if (newState != oldState) callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
   }
@@ -93,20 +100,20 @@ class RoutingEngine[S <: State : ClassTag : ImmutableValue](routingRegistry: Rou
   }
 
   @tailrec
-  private def getUpdatablePath(path: List[S], oldPath: List[S], acc: List[S] = Nil): List[S] = {
+  private def getUpdatablePathSize(path: List[S], oldPath: List[S], acc: Int = 0): Int = {
     (path, oldPath) match {
       case (head1 :: tail1, head2 :: tail2)
         if viewPresenterRegistry.matchStateToResolver(head1) == viewPresenterRegistry.matchStateToResolver(head2) =>
-        getUpdatablePath(tail1, tail2, acc :+ head1)
+        getUpdatablePathSize(tail1, tail2, acc + 1)
       case _ => acc
     }
   }
 
   private def renderPath(path: List[S]): List[View] = {
-    path.map(state => {
-      val viewPresenter = viewPresenterRegistry.matchStateToResolver(state).create()
-      statesMap = statesMap + (state -> (viewPresenter._1, viewPresenter._2))
-      viewPresenter._1
-    })
+    path.map { state =>
+      val (view, presenter) = viewPresenterRegistry.matchStateToResolver(state).create()
+      statesMap += (state -> (view, presenter))
+      view
+    }
   }
 }
