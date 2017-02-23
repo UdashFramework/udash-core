@@ -1,7 +1,5 @@
 package io.udash.properties.model
 
-import java.util.UUID
-
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
@@ -10,12 +8,16 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 object ModelProperty {
-  /** Creates empty ModelProperty[T]. */
-  def apply[T](implicit pc: PropertyCreator[T], ev: ModelPart[T], ec: ExecutionContext): ModelProperty[T] =
-    Property[T].asModel
+  /** Creates an empty ModelProperty[T]. */
+  def empty[T: PropertyCreator : ModelPart](implicit ec: ExecutionContext): ModelProperty[T] =
+    Property.empty[T].asModel
+
+  /** Creates an empty ModelProperty[T]. */
+  def apply[T: PropertyCreator : ModelPart](implicit ec: ExecutionContext): ModelProperty[T] =
+    empty
 
   /** Creates ModelProperty[T] with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T], ev: ModelPart[T], ec: ExecutionContext): ModelProperty[T] =
+  def apply[T: PropertyCreator : ModelPart](init: T)(implicit ec: ExecutionContext): ModelProperty[T] =
     Property[T](init).asModel
 }
 

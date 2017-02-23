@@ -12,12 +12,16 @@ import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 object Property {
-  /** Creates empty DirectProperty[T]. */
-  def apply[T](implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
+  /** Creates an empty DirectProperty[T]. */
+  def empty[T](implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
     pc.newProperty(null)
 
+  /** Creates an empty DirectProperty[T]. */
+  def apply[T: PropertyCreator](implicit ec: ExecutionContext): CastableProperty[T] =
+    empty
+
   /** Creates DirectProperty[T] with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T]=
+  def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
     pc.newProperty(init, null)
 }
 
@@ -26,7 +30,7 @@ trait ReadableProperty[A] {
   protected[this] val listeners: mutable.Set[A => Any] = mutable.Set()
 
   protected[this] val validators: mutable.Set[Validator[A]] = mutable.Set()
-  protected[this] var validationResult: Future[ValidationResult] = null
+  protected[this] var validationResult: Future[ValidationResult] = _
 
   implicit protected[properties] def executionContext: ExecutionContext
 

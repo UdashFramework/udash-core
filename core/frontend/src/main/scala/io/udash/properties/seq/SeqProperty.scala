@@ -12,11 +12,15 @@ import scala.concurrent.{ExecutionContext, Future}
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
   def empty[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
-    Property[Seq[T]].asSeq[T]
+    Property.empty[Seq[T]].asSeq[T]
+
+  /** Creates an empty DirectSeqProperty[T]. */
+  def apply[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+    empty
 
   /** Creates a DirectSeqProperty[T] with initial value. */
   def apply[T](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
-    Property[Seq[T]](item +: more).asSeq[T]
+    apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
   def apply[T](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
