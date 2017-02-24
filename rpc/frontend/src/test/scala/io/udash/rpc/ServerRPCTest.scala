@@ -78,6 +78,29 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       f2.value should be(Some(Failure(RPCFailure("cause2", "msg2"))))
     }
 
+    "handle exception responses from server" in {
+      case class Ex(i: Int) extends Throwable
+      val exName = Ex.getClass.getName
+
+      val (connectorMock, serverRPC) = createServerRpc()
+      val rpc = serverRPC.remoteRpc
+
+      val f1 = rpc.doStuff(true)
+      val f2 = rpc.innerRpc("bla").func(123)
+      val f3 = rpc.doStuffInt(true)
+
+      import serverRPC.remoteFramework._
+      serverRPC.handleResponse(RPCResponseException(exName, Ex(1), "1"))
+      serverRPC.handleResponse(RPCResponseException(exName, Ex(2), "2"))
+
+      f1.isCompleted should be(true)
+      f2.isCompleted should be(true)
+      f3.isCompleted should be(false)
+
+      f1.value should be(Some(Failure(Ex(1))))
+      f2.value should be(Some(Failure(Ex(2))))
+    }
+
     "timeout calls without response" in {
       val (connectorMock, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc

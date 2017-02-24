@@ -118,10 +118,12 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
   class AtmosphereResponseMock(writer: PrintWriter) extends AtmosphereResponseImpl(null, null, false) {
     var error = false
     var write = false
+    var writeData: String = ""
 
     override def sendError(sc: Int): Unit = { error = true }
     override def write(data: String): AtmosphereResponse = {
       write = true
+      writeData = data
       null
     }
 

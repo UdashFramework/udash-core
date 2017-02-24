@@ -3,6 +3,7 @@ package io.udash.rpc.internals
 import com.avsystem.commons.serialization.Input
 import io.udash.utils.StrictLogging
 import io.udash.rpc._
+import io.udash.rpc.serialization.ExceptionCodecRegistry
 import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
 import org.scalajs.dom
@@ -16,7 +17,7 @@ trait ServerConnector[RPCRequest] {
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String)
+abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String, val exceptionsRegistry: ExceptionCodecRegistry)
   extends ServerConnector[RPCRequest] with StrictLogging {
   protected val clientRpc: ExposesClientRPC[_]
 
@@ -73,7 +74,7 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
       import remoteFramework.RPCResponseCodec
       val rawMsg = remoteFramework.stringToRaw(msg)
       val rawMsgInput: Input = remoteFramework.inputSerialization(rawMsg)
-      val response = RPCResponseCodec.read(rawMsgInput)
+      val response = RPCResponseCodec(exceptionsRegistry).read(rawMsgInput)
       handleResponse(response)
     } catch {
       case _: Exception =>
@@ -137,7 +138,10 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
 
 class DefaultAtmosphereServerConnector(override protected val clientRpc: DefaultExposesClientRPC[_],
                                        responseHandler: (DefaultServerUdashRPCFramework.RPCResponse) => Any,
-                                       serverUrl: String) extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl) {
+                                       serverUrl: String,
+                                       override val exceptionsRegistry: ExceptionCodecRegistry)
+  extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl, exceptionsRegistry) {
+
   override val remoteFramework = DefaultServerUdashRPCFramework
   override val localFramework = DefaultClientUdashRPCFramework
 
