@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package utils
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.seq
+import io.udash.properties.{PropertyCreator, seq}
 import io.udash.{properties, _}
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -34,6 +34,12 @@ object UdashBreadcrumbs {
     def name: String
     def url: Url
   }
+  object Breadcrumb {
+    implicit val pc: PropertyCreator[Breadcrumb] = PropertyCreator.propertyCreator[Breadcrumb]
+    implicit val pcS: PropertyCreator[Seq[Breadcrumb]] = PropertyCreator.propertyCreator[Seq[Breadcrumb]]
+    implicit val pcO: PropertyCreator[Option[Breadcrumb]] = PropertyCreator.propertyCreator[Option[Breadcrumb]]
+  }
+
   case class DefaultBreadcrumb(override val name: String, override val url: Url) extends Breadcrumb
 
   private def bindHref(page: CastableProperty[Breadcrumb]) =

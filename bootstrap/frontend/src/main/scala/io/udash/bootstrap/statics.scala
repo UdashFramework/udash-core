@@ -1,5 +1,7 @@
 package io.udash.bootstrap
 
+import io.udash.properties.PropertyCreator
+
 import scala.language.postfixOps
 
 object BootstrapTags {
@@ -23,6 +25,11 @@ object BootstrapTags {
 
 object BootstrapStyles {
   case class BootstrapClass(cls: String) extends AnyVal
+  object BootstrapClass {
+    implicit val propertyCreatorBootstrapClass: PropertyCreator[BootstrapClass] = PropertyCreator.propertyCreator[BootstrapClass]
+    implicit val propertyCreatorSBootstrapClass: PropertyCreator[Seq[BootstrapClass]] = PropertyCreator.propertyCreator[Seq[BootstrapClass]]
+    implicit val propertyCreatorOBootstrapClass: PropertyCreator[Option[BootstrapClass]] = PropertyCreator.propertyCreator[Option[BootstrapClass]]
+  }
   
   val active = BootstrapClass("active")
   val container = BootstrapClass("container")

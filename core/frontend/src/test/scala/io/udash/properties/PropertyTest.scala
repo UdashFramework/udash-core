@@ -49,6 +49,11 @@ class PropertyTest extends UdashFrontendTest {
     }
   }
 
+  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
+  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
+  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
+  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+
   def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
 
   "Property" should {

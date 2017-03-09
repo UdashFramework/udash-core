@@ -7,6 +7,7 @@ import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.Icons
+import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -304,4 +305,10 @@ case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId
       content
     )
   ).render
+}
+
+object UdashCarouselSlide {
+  implicit val pc: PropertyCreator[UdashCarouselSlide] = PropertyCreator.propertyCreator[UdashCarouselSlide]
+  implicit val pcS: PropertyCreator[Seq[UdashCarouselSlide]] = PropertyCreator.propertyCreator[Seq[UdashCarouselSlide]]
+  implicit val pcO: PropertyCreator[Option[UdashCarouselSlide]] = PropertyCreator.propertyCreator[Option[UdashCarouselSlide]]
 }

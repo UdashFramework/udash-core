@@ -29,6 +29,11 @@ class PropertyValidationTest extends UdashFrontendTest {
   case class TC1(i: Int) extends T
   case class TC2(s: String) extends T
 
+  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
+  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
+  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
+  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+
   def newTT(iv: Int, sv: Option[String], cv: C, ssv: Seq[Char]) = new TT {
     override def i: Int = iv
     override def s: Option[String] = sv
