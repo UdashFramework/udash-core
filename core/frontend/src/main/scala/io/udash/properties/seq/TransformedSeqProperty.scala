@@ -50,4 +50,7 @@ class TransformedSeqProperty[A, B](override protected val origin: SeqProperty[A,
 
   override def setInitValue(t: Seq[B]): Unit =
     origin.setInitValue(t.map(revert))
+
+  override def touch(): Unit =
+    origin.touch()
 }

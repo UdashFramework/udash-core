@@ -175,6 +175,9 @@ trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 
+  /** Fires value change listeners with current value and clears validation result. */
+  def touch(): Unit
+
   /** Adds new validator and clears current validation result. It does not fire validation process. */
   def addValidator(v: Validator[A]): Registration = {
     validators += v

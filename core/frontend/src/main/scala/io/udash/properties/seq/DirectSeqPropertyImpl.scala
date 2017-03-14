@@ -37,6 +37,9 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     properties.insertAll(0, newProperties)
   }
 
+  override def touch(): Unit =
+    replace(0, properties.size, get: _*)
+
   def get: Seq[A] =
     properties.map(_.get)
 
