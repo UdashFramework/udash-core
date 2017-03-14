@@ -23,12 +23,38 @@ object Property {
   /** Creates DirectProperty[T] with initial value. */
   def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
     pc.newProperty(init, null)
+
+  private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
+    import target.executionContext
+
+    private var value: ValidationResult = Valid
+    private var initialized: Boolean = false
+    private var p: Property[ValidationResult] = _
+    private val listener = (_: A) => target.isValid onComplete {
+      case Success(result) => p.set(result)
+      case Failure(ex) => p.set(Invalid(ex.getMessage))
+    }
+
+    def property: ReadableProperty[ValidationResult] = {
+      if (!initialized) {
+        initialized = true
+        p = Property[ValidationResult]
+        listener(target.get)
+        target.listen(listener)
+      }
+      p.transform(identity)
+    }
+
+    def clear(): Unit =
+      if (p != null) p.set(Valid)
+  }
 }
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
   protected[this] val listeners: mutable.Set[A => Any] = mutable.Set()
 
+  protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
   protected[this] val validators: mutable.Set[Validator[A]] = mutable.Set()
   protected[this] var validationResult: Future[ValidationResult] = _
 
@@ -53,14 +79,7 @@ trait ReadableProperty[A] {
   }
 
   /** Property containing validation result. */
-  lazy val valid: ReadableProperty[ValidationResult] = {
-    val p: Property[ValidationResult] = Property(Valid)
-    listen(_ => isValid onComplete {
-      case Success(result) => p.set(result)
-      case Failure(ex) => p.set(Invalid(ex.getMessage))
-    })
-    p.transform(id => id)
-  }
+  lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
 
   /**
     * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
@@ -166,6 +185,13 @@ trait Property[A] extends ReadableProperty[A] {
   /** Adds new validator and clears current validation result. It does not fire validation process. */
   def addValidator(f: (A) => ValidationResult): Registration =
     addValidator(Validator(f))
+
+  /** Removes all validators from property and clears current validation result. It does not fire validation process. */
+  def clearValidators(): Unit = {
+    validators.clear()
+    validationResult = null
+    validationProperty.clear()
+  }
 
   /**
     * Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.

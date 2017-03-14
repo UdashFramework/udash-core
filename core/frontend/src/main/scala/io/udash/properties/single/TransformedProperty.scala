@@ -37,4 +37,7 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
       override def apply(element: A)(implicit ec: ExecutionContext): Future[ValidationResult] =
         v(transformer(element))(ec)
     })
+
+  override def clearValidators(): Unit =
+    origin.clearValidators()
 }
