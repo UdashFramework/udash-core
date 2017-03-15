@@ -32,9 +32,15 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
   override def setInitValue(t: B): Unit =
     origin.setInitValue(revert(t))
 
+  override def touch(): Unit =
+    origin.touch()
+
   override def addValidator(v: Validator[B]): Registration =
     origin.addValidator(new Validator[A] {
       override def apply(element: A)(implicit ec: ExecutionContext): Future[ValidationResult] =
         v(transformer(element))(ec)
     })
+
+  override def clearValidators(): Unit =
+    origin.clearValidators()
 }

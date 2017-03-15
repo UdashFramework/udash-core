@@ -369,6 +369,14 @@ class PropertyMacros(val c: blackbox.Context) {
               }
             }
           }
+
+          def touch(): Unit = $CallbackSequencerCls.sequence {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
+              }
+            }
+          }
         }
       """
     } else {
@@ -408,6 +416,14 @@ class PropertyMacros(val c: blackbox.Context) {
             ..${
               members.map { case (name, returnTpe) =>
                 q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
+              }
+            }
+          }
+
+          def touch(): Unit = $CallbackSequencerCls.sequence {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
               }
             }
           }

@@ -99,6 +99,9 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
   override def setInitValue(t: Seq[B]): Unit =
     origin.setInitValue(revert(t))
 
+  override def touch(): Unit =
+    origin.touch()
+
   override def elemProperties: Seq[Property[B]] =
     children
 
