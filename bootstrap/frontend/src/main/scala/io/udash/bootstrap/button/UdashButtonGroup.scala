@@ -3,7 +3,7 @@ package button
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.{ModelPart, seq}
+import io.udash.properties.{ModelPart, PropertyCreator, seq}
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
@@ -39,6 +39,11 @@ object UdashButtonGroup {
   trait CheckboxModel {
     def text: String
     def checked: Boolean
+  }
+  object CheckboxModel {
+    implicit val pc: PropertyCreator[CheckboxModel] = PropertyCreator.propertyCreator[CheckboxModel]
+    implicit val pcS: PropertyCreator[Seq[CheckboxModel]] = PropertyCreator.propertyCreator[Seq[CheckboxModel]]
+    implicit val pcO: PropertyCreator[Option[CheckboxModel]] = PropertyCreator.propertyCreator[Option[CheckboxModel]]
   }
   /** Default implementation of [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. */
   case class DefaultCheckboxModel(text: String, checked: Boolean) extends CheckboxModel

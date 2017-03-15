@@ -6,6 +6,7 @@ import io.udash._
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.bootstrap.BootstrapStyles.BootstrapClass
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
@@ -277,12 +278,18 @@ object UdashDatePicker {
                                disabledHours: Seq[Int] = Seq.empty,
                                viewDate: Boolean = false,
                                tooltips: DatePickerTooltips = DatePickerTooltips())
+  object DatePickerOptions {
+    implicit val propertyCreator: PropertyCreator[DatePickerOptions] = PropertyCreator.propertyCreator[DatePickerOptions]
+  }
 
   case class DatePickerIcons(time: Seq[BootstrapClass] = Seq.empty, date: Seq[BootstrapClass] = Seq.empty,
                              up: Seq[BootstrapClass] = Seq.empty, down: Seq[BootstrapClass] = Seq.empty,
                              previous: Seq[BootstrapClass] = Seq.empty, next: Seq[BootstrapClass] = Seq.empty,
                              today: Seq[BootstrapClass] = Seq.empty, clear: Seq[BootstrapClass] = Seq.empty,
                              close: Seq[BootstrapClass] = Seq.empty)
+  object DatePickerIcons {
+    implicit val propertyCreator: PropertyCreator[DatePickerIcons] = PropertyCreator.propertyCreator[DatePickerIcons]
+  }
 
   case class DatePickerTooltips(today: String = "Go to today",
                                 clear: String = "Clear selection",
@@ -298,6 +305,9 @@ object UdashDatePicker {
                                 nextDecade: String = "Next Decade",
                                 prevCentury: String = "Previous Century",
                                 nextCentury: String = "Next Century")
+  object DatePickerTooltips {
+    implicit val propertyCreator: PropertyCreator[DatePickerTooltips] = PropertyCreator.propertyCreator[DatePickerTooltips]
+  }
 
   sealed class DayOfWeek(val id: Int)
   object DayOfWeek {
@@ -308,6 +318,8 @@ object UdashDatePicker {
     case object Thursday extends DayOfWeek(4)
     case object Friday extends DayOfWeek(5)
     case object Saturday extends DayOfWeek(6)
+
+    implicit val propertyCreator: PropertyCreator[DayOfWeek] = PropertyCreator.propertyCreator[DayOfWeek]
   }
 
   sealed class ViewMode(val id: String)
@@ -316,6 +328,8 @@ object UdashDatePicker {
     case object Months extends ViewMode("months")
     case object Years extends ViewMode("years")
     case object Decades extends ViewMode("decades")
+
+    implicit val propertyCreator: PropertyCreator[ViewMode] = PropertyCreator.propertyCreator[ViewMode]
   }
 
   sealed abstract class Placement(val name: String)

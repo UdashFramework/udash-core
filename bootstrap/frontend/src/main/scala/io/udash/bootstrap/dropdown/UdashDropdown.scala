@@ -4,7 +4,7 @@ package dropdown
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
-import io.udash.properties.seq
+import io.udash.properties.{PropertyCreator, seq}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 
@@ -92,6 +92,12 @@ object UdashDropdown {
   case class DropdownHeader(title: String) extends DefaultDropdownItem
   case object DropdownDivider extends DefaultDropdownItem
   case class DropdownDisabled(link: DropdownLink) extends DefaultDropdownItem
+
+  object DefaultDropdownItem {
+    implicit val pc: PropertyCreator[DefaultDropdownItem] = PropertyCreator.propertyCreator[DefaultDropdownItem]
+    implicit val pcS: PropertyCreator[Seq[DefaultDropdownItem]] = PropertyCreator.propertyCreator[Seq[DefaultDropdownItem]]
+    implicit val pcO: PropertyCreator[Option[DefaultDropdownItem]] = PropertyCreator.propertyCreator[Option[DefaultDropdownItem]]
+  }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(p: Property[DefaultDropdownItem]): dom.Element = {
