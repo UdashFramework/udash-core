@@ -1,5 +1,5 @@
-import UdashBuild._
 import Dependencies._
+import UdashBuild._
 
 name := "udash"
 
@@ -32,7 +32,6 @@ val commonSettings = Seq(
 
 val commonJSSettings = Seq(
   emitSourceMaps in Compile := true,
-  persistLauncher in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
   jsEnv in Test := jsTestEnv.value,
@@ -77,7 +76,6 @@ lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(Scala
   .settings(
     emitSourceMaps in Compile := true,
     libraryDependencies ++= coreFrontendDeps.value,
-    persistLauncher in Compile := true,
     publishedJS := Def.taskDyn {
       if (isSnapshot.value) Def.task((fastOptJS in Compile).value) else Def.task((fullOptJS in Compile).value)
     }.value,
