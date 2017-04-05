@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRefFactory, ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import ch.megard.akka.http.cors.CorsDirectives
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives
 import io.udash.web.guide.demos.rest.RestExampleClass
 
 import scala.concurrent.{ExecutionContext, Future}

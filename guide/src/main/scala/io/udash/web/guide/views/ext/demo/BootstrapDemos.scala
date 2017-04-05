@@ -22,6 +22,7 @@ import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
+import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
@@ -497,6 +498,9 @@ object BootstrapDemos extends StrictLogging {
     trait Panel {
       def title: String
       def content: String
+    }
+    object Panel {
+      implicit val pc: PropertyCreator[Panel] = PropertyCreator.propertyCreator[Panel]
     }
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
