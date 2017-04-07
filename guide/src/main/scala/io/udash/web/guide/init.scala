@@ -23,7 +23,7 @@ object Context {
   implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit = UrlLoggingDemo.log(url, referrer)
   }
-  val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)
+  val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
   val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, 8081, "/")

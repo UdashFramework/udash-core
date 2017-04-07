@@ -1,7 +1,7 @@
 package io.udash.web.server
 
 import com.avsystem.commons.rpc.RPCMetadata
-import io.udash.web.guide.MainServerRPC
+import io.udash.web.guide.{GuideExceptions, MainServerRPC}
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
@@ -43,7 +43,7 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
           callLogger.append(Call(rpcName, methodName, args))
       }
     })
-    val framework = new DefaultAtmosphereFramework(config)
+    val framework = new DefaultAtmosphereFramework(config, exceptionsRegistry = GuideExceptions.registry)
 
     framework.init()
 

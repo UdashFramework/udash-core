@@ -3,6 +3,7 @@ package io.udash.web
 import com.typesafe.scalalogging.LazyLogging
 import com.avsystem.commons.spring.HoconBeanDefinitionReader
 import com.typesafe.config.{Config, ConfigFactory}
+import io.udash.web.guide.GuideExceptions
 import io.udash.web.server.ApplicationServer
 import org.springframework.context.support.GenericApplicationContext
 

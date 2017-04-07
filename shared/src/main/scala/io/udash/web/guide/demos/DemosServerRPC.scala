@@ -2,7 +2,7 @@ package io.udash.web.guide.demos
 
 import io.udash.rpc._
 import io.udash.web.guide.demos.activity.CallServerRPC
-import io.udash.web.guide.demos.rpc.{ClientIdServerRPC, GenCodecServerRPC, NotificationsServerRPC, PingServerRPC}
+import io.udash.web.guide.demos.rpc._
 
 @RPC
 trait DemosServerRPC {
@@ -13,6 +13,7 @@ trait DemosServerRPC {
   def notificationsDemo(): NotificationsServerRPC
   def gencodecsDemo(): GenCodecServerRPC
   def translations(): RemoteTranslationRPC
+  def exceptions(): ExceptionsRPC
 
   def call(): CallServerRPC
 }
