@@ -1,7 +1,7 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
-object Dependencies extends Build {
+object Dependencies {
 
   val versionOfScala = "2.12.1"
   val jettyVersion = "9.3.11.v20160721"
