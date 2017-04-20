@@ -48,7 +48,7 @@ lazy val udash = project.in(file("."))
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
     `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`,
     `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
-    `bootstrap`
+    `bootstrap`, `charts`
   )
   .settings(publishArtifact := false)
 
@@ -171,4 +171,12 @@ lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(Scal
   .settings(
     libraryDependencies ++= bootstrapFrontendDeps.value,
     jsDependencies ++= bootstrapFrontendJsDeps.value
+  )
+
+lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    libraryDependencies ++= chartsFrontendDeps.value
   )

@@ -11,7 +11,7 @@ object Dependencies {
   val scalaTagsVersion = "0.6.3"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.19.11"
+  val avsCommonsVersion = "1.20.0"
 
   val atmosphereJSVersion = "2.3.2"
   val atmosphereVersion = "2.4.9"
@@ -86,5 +86,9 @@ object Dependencies {
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
       minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+  ))
+
+  val chartsFrontendDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
   ))
 }
