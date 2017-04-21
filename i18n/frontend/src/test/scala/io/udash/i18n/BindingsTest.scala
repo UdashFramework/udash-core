@@ -220,5 +220,29 @@ class BindingsTest extends UdashFrontendTest {
       lang.set(pl)
       el.textContent should be("Translation test plTranslation test pl")
     }
+
+    "work with reduced keys in property" in {
+      implicit val en = Lang("en")
+      val p: Property[TranslationKey0] = Property[TranslationKey0]
+      val key1 = TranslationKey.key1[String]("tr1")
+      p.set(key1.reduce("test"))
+      p.get.apply().value.get.get.string should be("Translation test")
+    }
+
+    "work with keys in property" in {
+      implicit val en = Lang("en")
+      val p: Property[TranslationKey] = Property[TranslationKey]
+      val key1 = TranslationKey.key1[String]("tr1")
+      p.set(key1)
+      (p.get match {
+        case key: TranslationKey1[_] => true
+        case _ => false
+      }) should be(true)
+      p.set(key1.reduce("asd"))
+      (p.get match {
+        case key: TranslationKey0 => key.apply().value.get.get.string
+        case _ => "false"
+      }) should be("Translation asd")
+    }
   }
 }

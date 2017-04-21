@@ -38,12 +38,14 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     cid.toString
   }
 
-  def handleResponse(response: RPCResponse) = {
+  def handleResponse(response: RPCResponse): Unit = {
     response match {
       case RPCResponseSuccess(r, callId) =>
         pendingCalls.remove(callId).foreach(_.success(r))
       case RPCResponseFailure(cause, error, callId) =>
         pendingCalls.remove(callId).foreach(_.failure(RPCFailure(cause, error)))
+      case RPCResponseException(_, exception, callId) =>
+        pendingCalls.remove(callId).foreach(_.failure(exception))
     }
   }
 

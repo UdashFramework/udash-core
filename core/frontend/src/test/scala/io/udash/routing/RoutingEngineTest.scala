@@ -3,8 +3,6 @@ package io.udash.routing
 import io.udash._
 import io.udash.testing._
 
-import scala.collection.mutable.ListBuffer
-
 class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
   "RoutingEngine" should {

@@ -49,6 +49,11 @@ class PropertyTest extends UdashFrontendTest {
     }
   }
 
+  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
+  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
+  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
+  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+
   def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
 
   "Property" should {
@@ -67,6 +72,8 @@ class PropertyTest extends UdashFrontendTest {
       tp.set(TC1(12))
       tp.get should be(TC1(12))
       tp.set(TO2)
+      tp.get should be(TO2)
+      tp.touch()
       tp.get should be(TO2)
 
       cp.get should be(C(1, "asd"))
@@ -91,16 +98,22 @@ class PropertyTest extends UdashFrontendTest {
       p.set(-321)
       p.set(-321)
       p.set(-321)
+      p.touch()
       tp.set(TC1(12))
       tp.set(TO2)
+      tp.touch()
       cp.set(C(12, "asd2"))
+      cp.touch()
 
-      values.size should be(5)
+      values.size should be(8)
       values(0) should be(7)
       values(1) should be(-321)
-      values(2) should be(TC1(12))
-      values(3) should be(TO2)
-      values(4) should be(C(12, "asd2"))
+      values(2) should be(-321)
+      values(3) should be(TC1(12))
+      values(4) should be(TO2)
+      values(5) should be(TO2)
+      values(6) should be(C(12, "asd2"))
+      values(7) should be(C(12, "asd2"))
     }
 
     "transform and synchronize value" in {
@@ -130,7 +143,15 @@ class PropertyTest extends UdashFrontendTest {
       cp.get should be(C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
-      values.size should be(4)
+      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      cp.get should be(C(-5, "tp"))
+      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+
+      tp.touch()
+      cp.get should be(C(-5, "tp"))
+      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+
+      values.size should be(6)
       values should contain(C(12, "asd2"))
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
@@ -153,6 +174,11 @@ class PropertyTest extends UdashFrontendTest {
       mul.get should be(24)
 
       p2.set(-2)
+
+      sum.get should be(10)
+      mul.get should be(-24)
+
+      p2.touch()
 
       sum.get should be(10)
       mul.get should be(-24)
@@ -347,11 +373,21 @@ class PropertyTest extends UdashFrontendTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.size should be(2)
       elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      p.touch()
+      s.get should be(Seq(1,0,1,0,1))
+      lastValue should be(s.get)
+      lastPatch should be(null)
+      elementsUpdated should be(0)
     }
 
     "not allow children modification after transformation into ReadableSeqProperty" in {
       val p = Property("1,2,3,4,5")
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] =
+        p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
 
       s.elemProperties.foreach {
         case p: Property[Int] => p.set(20)
@@ -490,9 +526,18 @@ class PropertyTest extends UdashFrontendTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.size should be(2)
       elementsUpdated should be(0)
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.touch()
+      p.get should be("1,0,1,0,1")
+      lastValue should be(s.get)
+      lastPatch should be(null)
+      elementsUpdated should be(0)
     }
 
-    "stream value to antoher property" in {
+    "stream value to another property" in {
       val source = SeqProperty(1, 2, 3)
       val transformed = source.transform((i: Int) => i * 2)
       val filtered = transformed.filter(_ < 10)
@@ -513,6 +558,12 @@ class PropertyTest extends UdashFrontendTest {
 
       // Source change
       source.append(4)
+
+      target.get should be(20)
+      targetWithoutInit.get should be(40)
+
+      // Source touch
+      source.touch()
 
       target.get should be(20)
       targetWithoutInit.get should be(40)
@@ -568,6 +619,12 @@ class PropertyTest extends UdashFrontendTest {
 
       p.subProp(_.t.c).set(C(321, "dsa"))
       p.get.t.c should be(C(321, "dsa"))
+
+      p.touch()
+      p.get.i should be(42)
+      p.get.s should be(Some("s"))
+      p.get.t.s.size should be(5)
+      p.get.t.c should be(C(321, "dsa"))
     }
 
     "fire listeners on value change" in {
@@ -601,6 +658,18 @@ class PropertyTest extends UdashFrontendTest {
         p.subProp(_.i).set(123)
       }
       values.size should be(6)
+
+      p.touch()
+      values.size should be(7)
+
+      p.subSeq(_.t.s).touch()
+      values.size should be(8)
+
+      p.subProp(_.s).touch()
+      values.size should be(9)
+
+      p.subModel(_.t).touch()
+      values.size should be(10)
     }
 
     "transform and synchronize value" in {
@@ -623,7 +692,11 @@ class PropertyTest extends UdashFrontendTest {
       p.get.i should be(32)
       p.get.t.c.i should be(32)
 
-      values.size should be(4)
+      t.touch()
+      p.get.i should be(32)
+      p.get.t.c.i should be(32)
+
+      values.size should be(6)
       values should contain(64)
       values should contain(128)
     }
@@ -708,6 +781,26 @@ class PropertyTest extends UdashFrontendTest {
       s.subProp(_.i).get should be(Seq())
       s.subProp(_.s.i).get should be(Seq())
       i.elemProperties.isEmpty should be(false)
+    }
+
+    "not get partial value from child property" in {
+      case class TopModel(child: CCWithRequire)
+      case class CCWithRequire(a: Int, b: Int) {
+        require((a > 0 && b > 0) || (a < 0 && b < 0))
+      }
+
+      val p = ModelProperty[TopModel](TopModel(CCWithRequire(1, 2)))
+      val c = p.subModel(_.child)
+
+      c.set(CCWithRequire(-10, -5))
+
+      c.get.a should be(-10)
+      c.get.b should be(-5)
+
+      c.touch()
+
+      c.get.a should be(-10)
+      c.get.b should be(-5)
     }
   }
 
@@ -838,11 +931,24 @@ class PropertyTest extends UdashFrontendTest {
       ptt.get(5).i should be(nextTT.i)
       ptt.get(5).s should be(nextTT.s)
       ptt.get(5).t.c should be(nextTT.t.c)
+
+      p.touch()
+      pt.touch()
+      ptt.touch()
+
+      checkProperties(expectedSize = 7)
+      p.get(5) should be(5)
+      pt.get(5) should be(TC2("asd"))
+      ptt.get(5).i should be(nextTT.i)
+      ptt.get(5).s should be(nextTT.s)
+      ptt.get(5).t.c should be(nextTT.t.c)
     }
 
     "handle null value as empty Seq" in {
       val p = SeqProperty[Int](1,2,3)
       p.set(null)
+      p.get.size should be(0)
+      p.touch()
       p.get.size should be(0)
     }
 
@@ -881,6 +987,10 @@ class PropertyTest extends UdashFrontendTest {
       p.append(1, 2)
       values.size should be(7)
       values.last should be(Seq(1, 2, 1, 7, 1, 2))
+
+      p.touch()
+      values.size should be(8)
+      values.last should be(Seq(1, 2, 1, 7, 1, 2))
     }
 
     "fire value listeners on every child change" in {
@@ -905,6 +1015,10 @@ class PropertyTest extends UdashFrontendTest {
 
       p.elemProperties(2).set(1)
       values.size should be(4)
+      values.last should be(Seq(8, 5, 1))
+
+      p.elemProperties(2).touch()
+      values.size should be(5)
       values.last should be(Seq(8, 5, 1))
     }
 
@@ -957,6 +1071,12 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.idx should be(4)
       patches.last.added.size should be(2)
       patches.last.removed.size should be(0)
+
+      p.touch()
+      patches.size should be(8)
+      patches.last.idx should be(0)
+      patches.last.added.size should be(6)
+      patches.last.removed.size should be(6)
     }
 
     "not fire structure listeners on child change" in {
@@ -994,6 +1114,11 @@ class PropertyTest extends UdashFrontendTest {
       t.get should be(15)
 
       p.set(Seq(1, 2))
+
+      p.get should be(Seq(1, 2))
+      t.get should be(3)
+
+      p.touch()
 
       p.get should be(Seq(1, 2))
       t.get should be(3)
@@ -1121,7 +1246,7 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.added.map(_.get) should be(Seq(0, 0, 0))
       patches.last.removed.map(_.get) should be(Seq(4, 2, 4, 2, 4))
 
-      p.remove(1, 6)
+      p.remove(1, 5)
 
       states.last should be(Seq())
       patches.last.idx should be(0)
@@ -1536,6 +1661,12 @@ class PropertyTest extends UdashFrontendTest {
       r2Patch.idx should be(1)
       r2Patch.added.size should be(3)
       r2Patch.removed.size should be(2)
+
+      p.touch()
+
+      fValue should be(Seq(1,9,9,9,3,4))
+      rValue should be(Seq(4,3,9,9,9,1))
+      r2Value should be(Seq(1,9,9,9,3,4))
     }
 
     "zip with another ReadableProperty" in {
@@ -1650,6 +1781,9 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
       patches.last.removed.size should be(4)
+
+      numbers.touch()
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
     }
 
     "zip all with another ReadableProperty" in {
@@ -1849,6 +1983,9 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.idx should be(1)
       patches.last.added.size should be(7)
       patches.last.removed.size should be(7)
+
+      numbers.touch()
+      indexed.get should be(numbers.get.zipWithIndex)
     }
   }
 }

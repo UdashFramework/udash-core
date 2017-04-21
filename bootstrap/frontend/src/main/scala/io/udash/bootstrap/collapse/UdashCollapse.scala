@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 
@@ -59,6 +60,12 @@ object UdashCollapse {
   case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
   case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
   case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
+
+  object CollapseEvent {
+    implicit val pc: PropertyCreator[CollapseEvent] = PropertyCreator.propertyCreator[CollapseEvent]
+    implicit val pcO: PropertyCreator[Option[CollapseEvent]] = PropertyCreator.propertyCreator[Option[CollapseEvent]]
+    implicit val pcS: PropertyCreator[Seq[CollapseEvent]] = PropertyCreator.propertyCreator[Seq[CollapseEvent]]
+  }
 
   /**
     * Creates collapsible component.

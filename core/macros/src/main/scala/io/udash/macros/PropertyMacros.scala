@@ -1,5 +1,6 @@
 package io.udash.macros
 
+import scala.collection.mutable
 import scala.reflect.macros.blackbox
 
 class PropertyMacros(val c: blackbox.Context) {
@@ -369,6 +370,14 @@ class PropertyMacros(val c: blackbox.Context) {
               }
             }
           }
+
+          def touch(): Unit = $CallbackSequencerCls.sequence {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
+              }
+            }
+          }
         }
       """
     } else {
@@ -408,6 +417,14 @@ class PropertyMacros(val c: blackbox.Context) {
             ..${
               members.map { case (name, returnTpe) =>
                 q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
+              }
+            }
+          }
+
+          def touch(): Unit = $CallbackSequencerCls.sequence {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
               }
             }
           }
@@ -494,4 +511,22 @@ class PropertyMacros(val c: blackbox.Context) {
       )
     }
   }
+
+  def autoReifyPropertyCreator[T: c.WeakTypeTag]: c.Tree = {
+    val valueType: c.universe.Type = weakTypeOf[T]
+
+    if (PropertyCreatorsCollection.creators.contains(valueType))
+      c.warning(c.enclosingPosition,
+        s"""Generating PropertyCreator[$valueType] more than once. You should create it in the companion object explicitly.
+           |Example: implicit val pc: PropertyCreator[$valueType] = PropertyCreator.propertyCreator[$valueType]
+         """.stripMargin)
+    else
+      PropertyCreatorsCollection.creators.add(valueType)
+
+    reifyPropertyCreator[T]
+  }
+}
+
+private object PropertyCreatorsCollection {
+  val creators: mutable.Set[Any] = mutable.Set.empty
 }

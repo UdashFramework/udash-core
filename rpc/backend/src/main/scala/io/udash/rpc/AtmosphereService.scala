@@ -4,8 +4,10 @@ import java.util.UUID
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletResponse
 
+import com.avsystem.commons.serialization.GenCodec
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
+import io.udash.rpc.serialization.ExceptionCodecRegistry
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
@@ -42,7 +44,9 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @param config Configuration of AtmosphereService.
   * @tparam ServerRPCType Main server side RPC interface
   */
-class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType], sseSuspendTime: FiniteDuration = 1 minute)
+class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType],
+                                       exceptionsRegistry: ExceptionCodecRegistry,
+                                       sseSuspendTime: FiniteDuration = 1 minute)
                                       (implicit val executionContext: ExecutionContext)
   extends AtmosphereServletProcessor with LazyLogging {
 
@@ -75,24 +79,10 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     BroadcastManager.registerResource(resource, uuid)
 
     try {
-      val rpc = config.resolveRpc(resource)
-      import rpc.localFramework._
-      val input: String = readInput(resource.getRequest.getInputStream)
-      if (input.nonEmpty) {
-        val rpcRequest = readRequest(input, rpc)
-        (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
-          case (call: RPCCall, Some(response)) =>
-            response onComplete {
-              case Success(r) =>
-                BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
-              case Failure(ex) =>
-                logger.error("RPC request handling failed", ex)
-                val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
-                BroadcastManager.sendToClient(uuid, rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
-            }
-          case (_, _) =>
-        }
-      }
+      handleRequest(resource,
+        data => BroadcastManager.sendToClient(uuid, data),
+        () => ()
+      )
     } catch {
       case e: Exception =>
         logger.error("Error occurred while handling websocket data.", e)
@@ -108,28 +98,46 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     try {
       resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
-      val rpc = config.resolveRpc(resource)
-      import rpc.localFramework._
-      val input: String = readInput(resource.getRequest.getInputStream)
+      handleRequest(resource,
+        data => {
+          resource.getResponse.write(data)
+          resource.resume()
+        },
+        () => resource.resume()
+      )
+    } catch {
+      case e: Exception =>
+        resource.getResponse.sendError(HttpServletResponse.SC_BAD_REQUEST)
+        logger.error("Error occurred while handling polling data.", e)
+    }
+  }
+
+  private def handleRequest(resource: AtmosphereResource, onCall: (String) => Unit, onFire: () => Unit): Unit = {
+    val rpc = config.resolveRpc(resource)
+    import rpc.localFramework._
+    implicit val codec: GenCodec[RPCResponse] = RPCResponseCodec(exceptionsRegistry)
+    val input: String = readInput(resource.getRequest.getInputStream)
+    if (input.nonEmpty) {
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
         case (call: RPCCall, Some(response)) =>
           response onComplete {
             case Success(r) =>
-              resource.getResponse.write(rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
-              resource.resume()
+              onCall(rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
             case Failure(ex) =>
-              val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ""
-              resource.getResponse.write(rawToString(write[RPCResponse](RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId))))
-              resource.resume()
+              logger.error("RPC request handling failed", ex)
+              val exceptionName = exceptionsRegistry.name(ex)
+              onCall(rawToString(write[RPCResponse](
+                if (exceptionsRegistry.contains(exceptionName)) {
+                  RPCResponseException(exceptionName, ex, call.callId)
+                } else {
+                  val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
+                  RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
+                }
+              )))
           }
-        case (_, _) =>
-          resource.resume()
+        case (_, _) => onFire()
       }
-    } catch {
-      case e: Exception =>
-        resource.getResponse.sendError(HttpServletResponse.SC_BAD_REQUEST)
-        logger.error("Error occurred while handling polling data.", e)
     }
   }
 

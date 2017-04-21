@@ -12,21 +12,51 @@ import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 object Property {
-  /** Creates empty DirectProperty[T]. */
-  def apply[T](implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
+  /** Creates an empty DirectProperty[T]. */
+  def empty[T](implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
     pc.newProperty(null)
 
+  /** Creates an empty DirectProperty[T]. */
+  def apply[T: PropertyCreator](implicit ec: ExecutionContext): CastableProperty[T] =
+    empty
+
   /** Creates DirectProperty[T] with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T]=
+  def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
     pc.newProperty(init, null)
+
+  private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
+    import target.executionContext
+
+    private var value: ValidationResult = Valid
+    private var initialized: Boolean = false
+    private var p: Property[ValidationResult] = _
+    private val listener = (_: A) => target.isValid onComplete {
+      case Success(result) => p.set(result)
+      case Failure(ex) => p.set(Invalid(ex.getMessage))
+    }
+
+    def property: ReadableProperty[ValidationResult] = {
+      if (!initialized) {
+        initialized = true
+        p = Property[ValidationResult]
+        listener(target.get)
+        target.listen(listener)
+      }
+      p.transform(identity)
+    }
+
+    def clear(): Unit =
+      if (p != null) p.set(Valid)
+  }
 }
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
   protected[this] val listeners: mutable.Set[A => Any] = mutable.Set()
 
+  protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
   protected[this] val validators: mutable.Set[Validator[A]] = mutable.Set()
-  protected[this] var validationResult: Future[ValidationResult] = null
+  protected[this] var validationResult: Future[ValidationResult] = _
 
   implicit protected[properties] def executionContext: ExecutionContext
 
@@ -49,14 +79,7 @@ trait ReadableProperty[A] {
   }
 
   /** Property containing validation result. */
-  lazy val valid: ReadableProperty[ValidationResult] = {
-    val p: Property[ValidationResult] = Property(Valid)
-    listen(_ => isValid onComplete {
-      case Success(result) => p.set(result)
-      case Failure(ex) => p.set(Invalid(ex.getMessage))
-    })
-    p.transform(id => id)
-  }
+  lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
 
   /**
     * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
@@ -114,8 +137,10 @@ trait ReadableProperty[A] {
   protected[properties] def parent: ReadableProperty[_]
 
   protected[properties] def fireValueListeners(): Unit = {
-    val t = get
-    CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => listeners.foreach(_.apply(t)))
+    CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
+      val t = get
+      listeners.foreach(_.apply(t))
+    })
   }
 
   protected[properties] def valueChanged(): Unit = {
@@ -150,6 +175,9 @@ trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 
+  /** Fires value change listeners with current value and clears validation result. */
+  def touch(): Unit
+
   /** Adds new validator and clears current validation result. It does not fire validation process. */
   def addValidator(v: Validator[A]): Registration = {
     validators += v
@@ -160,6 +188,13 @@ trait Property[A] extends ReadableProperty[A] {
   /** Adds new validator and clears current validation result. It does not fire validation process. */
   def addValidator(f: (A) => ValidationResult): Registration =
     addValidator(Validator(f))
+
+  /** Removes all validators from property and clears current validation result. It does not fire validation process. */
+  def clearValidators(): Unit = {
+    validators.clear()
+    validationResult = null
+    validationProperty.clear()
+  }
 
   /**
     * Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.

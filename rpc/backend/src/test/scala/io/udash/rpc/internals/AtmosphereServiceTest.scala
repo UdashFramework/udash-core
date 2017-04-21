@@ -2,7 +2,9 @@ package io.udash.rpc.internals
 
 import java.io.{CharArrayWriter, PrintWriter}
 
+import com.avsystem.commons.serialization.GenCodec
 import io.udash.rpc._
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.testing.UdashRpcBackendTest
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
@@ -12,7 +14,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
 class AtmosphereServiceTest extends UdashRpcBackendTest {
-  
+
+  val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
+  exceptionsRegistry.register(GenCodec.materialize[CustomRPCException])
+
   def createBroadcasters(): (BroadcasterMock, BroadcasterFactoryMock, MetaBroadcasterMock) = {
     val broadcaster = new BroadcasterMock
     val broadcasterFactory = new BroadcasterFactoryMock(broadcaster)
@@ -32,22 +37,30 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
   def createConfigs(filters: Seq[(AtmosphereResource) => Try[Any]], resolveRpcResult: ExposesServerRPC[TestRPC],
                     broadcasterFactory: BroadcasterFactoryMock, metaBroadcaster: MetaBroadcasterMock): (AtmosphereService[TestRPC], AtmosphereConfigMock)  = {
     val config = new AtmosphereServiceConfigMock[TestRPC](filters, resolveRpcResult)
-    val atm = new AtmosphereService[TestRPC](config)
+    val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry)
     val atmConfig = new AtmosphereConfigMock(broadcasterFactory, metaBroadcaster)
     (atm, atmConfig)
   }
 
   def createConfigsWithoutRpc(): (AtmosphereServiceConfigMock[TestRPC], AtmosphereService[TestRPC])  = {
     val config = new AtmosphereServiceConfigMock[TestRPC]()
-    val atm = new AtmosphereService[TestRPC](config)
+    val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry)
     (config, atm)
   }
 
-  val requestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+  val failRequestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
     DefaultServerUdashRPCFramework.RPCCall(
       DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
       List(),
       "callId1"
+    )
+  )
+
+  val exRequestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
+    DefaultServerUdashRPCFramework.RPCCall(
+      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithEx", List(List())),
+      List(),
+      "callId2"
     )
   )
 
@@ -134,6 +147,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
           broadcaster.addedResources.size should be(1)
           broadcaster.addedResources should contain(resource)
           broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) shouldNot be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseException")) should be(empty)
           resource.suspended should be(true)
         }
 
@@ -167,13 +181,14 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         eventually {
           calls.result() should contain("handle")
-        }
 
-        broadcasterFactory.lookups should contain("/client/uuid123")
-        broadcaster.addedResources.size should be(1)
-        broadcaster.addedResources should contain(resource)
-        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
-        resource.suspended should be(true)
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseException")) should be(empty)
+          resource.suspended should be(true)
+        }
       }
     }
 
@@ -201,14 +216,15 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         eventually {
           calls.result() should contain("doStuff")
-        }
 
-        broadcasterFactory.lookups should contain("/client/uuid123")
-        broadcaster.addedResources.size should be(1)
-        broadcaster.addedResources should contain(resource)
-        broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) shouldNot be(empty)
-        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
-        resource.suspended should be(true)
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) shouldNot be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseException")) should be(empty)
+          resource.suspended should be(true)
+        }
       }
     }
 
@@ -221,7 +237,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(requestBody)
+        request.body(failRequestBody)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -229,14 +245,44 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         atm.onRequest(resource)
         eventually {
           calls.result() should contain("doStuffWithFail")
-        }
 
-        broadcasterFactory.lookups should contain("/client/uuid123")
-        broadcaster.addedResources.size should be(1)
-        broadcaster.addedResources should contain(resource)
-        broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) should be(empty)
-        broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) shouldNot be(empty)
-        resource.suspended should be(true)
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) should be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) shouldNot be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseException")) should be(empty)
+          resource.suspended should be(true)
+        }
+      }
+    }
+
+    "handle incoming websocket call throwing registered exception" in {
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
+
+        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (calls, rpc) = createTestRPC()
+        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(exRequestBody)
+
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
+
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+        eventually {
+          calls.result() should contain("doStuffWithEx")
+
+          broadcasterFactory.lookups should contain("/client/uuid123")
+          broadcaster.addedResources.size should be(1)
+          broadcaster.addedResources should contain(resource)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseSuccess")) should be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseFailure")) should be(empty)
+          broadcaster.broadcasts.filter(_.contains("RPCResponseException")) shouldNot be(empty)
+          resource.suspended should be(true)
+        }
       }
     }
 
@@ -310,7 +356,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
       }
     }
 
-    "handle incoming polling failing call" in {
+    "handle incoming polling call throwing registered exception" in {
       BroadcastManager.synchronized {
         BroadcastManager.init(null, null)
 
@@ -319,7 +365,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(requestBody)
+        request.body(exRequestBody)
 
         val response = new AtmosphereResponseMock(null)
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
@@ -328,8 +374,9 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         atm.onRequest(resource)
 
         eventually {
-          calls.result() should contain("doStuffWithFail")
+          calls.result() should contain("doStuffWithEx")
           response.write should be(true)
+          response.writeData.contains("RPCResponseException") should be(true)
           response.error should be(false)
         }
 
@@ -350,7 +397,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(requestBody.substring(5))
+        request.body(failRequestBody.substring(5))
 
         val response = new AtmosphereResponseMock(null)
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
@@ -424,6 +471,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
+        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -451,6 +499,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
+        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -478,6 +527,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123123123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
+        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -493,6 +543,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         }
       }
     }
+
   }
 
 }

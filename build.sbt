@@ -1,10 +1,11 @@
-import UdashBuild._
 import Dependencies._
+import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.4.0"
+version in ThisBuild := "0.5.0-RC.1"
 scalaVersion in ThisBuild := versionOfScala
+crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
@@ -20,7 +21,7 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint:_,-missing-interpolator,-adapted-args"
 )
 
-jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
+jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox())
 
 // Deployment configuration
 val deploymentConfiguration = Seq(
@@ -68,8 +69,6 @@ val commonSettings = Seq(
 
 val commonJSSettings = Seq(
   emitSourceMaps in Compile := true,
-  persistLauncher in Test := false,
-  scalaJSUseRhino in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
   jsEnv in Test := jsTestEnv.value,
@@ -86,7 +85,7 @@ lazy val udash = project.in(file("."))
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
     `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`,
     `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
-    `bootstrap`
+    `bootstrap`, `charts`
   )
   .settings(publishArtifact := false)
 
@@ -114,13 +113,12 @@ lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(Scala
   .settings(
     emitSourceMaps in Compile := true,
     libraryDependencies ++= coreFrontendDeps.value,
-    persistLauncher in Compile := true,
-    publishedJS <<= Def.taskDyn {
+    publishedJS := Def.taskDyn {
       if (isSnapshot.value) Def.task((fastOptJS in Compile).value) else Def.task((fullOptJS in Compile).value)
-    },
-    publishedJSDependencies <<= Def.taskDyn {
+    }.value,
+    publishedJSDependencies := Def.taskDyn {
       if (isSnapshot.value) Def.task((packageJSDependencies in Compile).value) else Def.task((packageMinifiedJSDependencies in Compile).value)
-    }
+    }.value
   )
 
 lazy val `rpc-macros` = project.in(file("rpc/macros"))
@@ -133,7 +131,7 @@ lazy val `rpc-macros` = project.in(file("rpc/macros"))
   )
 
 lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
-  .configure(_.dependsOn(`core-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`core-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rpc-macros`))
   .jvmConfigure(_.dependsOn(`rpc-macros`))
   .settings(commonSettings: _*).settings(
@@ -172,7 +170,7 @@ lazy val `rest-macros` = project.in(file("rest/macros"))
   )
 
 lazy val `rest-shared` = crossProject.crossType(CrossType.Pure).in(file("rest/shared"))
-  .configure(_.dependsOn(`rpc-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`rpc-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rest-macros`))
   .jvmConfigure(_.dependsOn(`rest-macros`))
   .settings(commonSettings: _*).settings(
@@ -184,7 +182,7 @@ lazy val `rest-shared-JVM` = `rest-shared`.jvm
 lazy val `rest-shared-JS` = `rest-shared`.js
 
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
-  .configure(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
+  .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
   .jsSettings(commonJSSettings:_*)
 
@@ -210,4 +208,12 @@ lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(Scal
   .settings(
     libraryDependencies ++= bootstrapFrontendDeps.value,
     jsDependencies ++= bootstrapFrontendJsDeps.value
+  )
+
+lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    libraryDependencies ++= chartsFrontendDeps.value
   )

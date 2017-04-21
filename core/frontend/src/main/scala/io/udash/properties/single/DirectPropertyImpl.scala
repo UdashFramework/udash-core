@@ -18,4 +18,7 @@ abstract class DirectPropertyImpl[A](val parent: ReadableProperty[_], override v
 
   override def setInitValue(t: A): Unit =
     value = t
+
+  override def touch(): Unit =
+    valueChanged()
 }

@@ -11,9 +11,9 @@ abstract class FileUploadServlet(fileFields: Set[String]) extends HttpServlet {
   protected def handleFile(name: String, content: InputStream): Unit
 
   override protected def doPost(request: HttpServletRequest, response: HttpServletResponse): Unit = {
-    import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
-    request.getParts.toStream
+    request.getParts.asScala
       .filter(part => fileFields.contains(part.getName.stripSuffix("[]")))
       .foreach(filePart => {
         val fileName = Paths.get(filePart.getSubmittedFileName).getFileName.toString

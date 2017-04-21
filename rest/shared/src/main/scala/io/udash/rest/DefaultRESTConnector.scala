@@ -2,17 +2,19 @@ package io.udash.rest
 
 import java.nio.ByteBuffer
 
+import monix.execution.Scheduler.Implicits.global
 import fr.hmil.roshttp.{HttpRequest, Method}
 import fr.hmil.roshttp.body.BodyPart
 import io.udash.rest.internal.RESTConnector
 import io.udash.rest.internal.RESTConnector.HTTPMethod
+import monix.reactive.Observable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
 /** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
 class DefaultRESTConnector(val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
-  private class InternalBodyPart(override val content: ByteBuffer) extends BodyPart {
+  private class InternalBodyPart(override val content: Observable[ByteBuffer]) extends BodyPart {
     override val contentType: String = s"application/json; charset=utf-8"
   }
 
@@ -27,7 +29,7 @@ class DefaultRESTConnector(val host: String, val port: Int, val pathPrefix: Stri
 
     val response =
       if (body == null) request.send()
-      else request.send(new InternalBodyPart(ByteBuffer.wrap(body.getBytes("utf-8"))))
+      else request.send(new InternalBodyPart(Observable(ByteBuffer.wrap(body.getBytes("utf-8")))))
 
     response.flatMap(resp => {
       resp.statusCode / 100 match {

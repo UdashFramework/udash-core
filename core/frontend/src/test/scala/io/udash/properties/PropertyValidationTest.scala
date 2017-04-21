@@ -29,6 +29,11 @@ class PropertyValidationTest extends UdashFrontendTest {
   case class TC1(i: Int) extends T
   case class TC2(s: String) extends T
 
+  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
+  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
+  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
+  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+
   def newTT(iv: Int, sv: Option[String], cv: C, ssv: Seq[Char]) = new TT {
     override def i: Int = iv
     override def s: Option[String] = sv
@@ -66,6 +71,9 @@ class PropertyValidationTest extends UdashFrontendTest {
 
       p.set(C(5, "asd"))
       p.isValid.value.get.get.asInstanceOf[Invalid[ValidationError]].errors.size should be(2)
+
+      p.clearValidators()
+      p.isValid.value.get.get should be(Valid)
     }
 
     "start on isValid call (only if needed)" in {
@@ -158,6 +166,19 @@ class PropertyValidationTest extends UdashFrontendTest {
       p.subModel(_.t).isValid.value.get.get should be(Invalid("Error2"))
       p.subProp(_.t.c).isValid.value.get.get should be(Valid)
       p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+
+      p.subProp(_.i).set(2)
+      p.subSeq(_.t.s).set("0123123123")
+      p.isValid.value.get.get should be(Invalid("Error"))
+      p.subModel(_.t).isValid.value.get.get should be(Valid)
+      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+
+      p.clearValidators()
+      p.isValid.value.get.get should be(Valid)
+      p.subModel(_.t).isValid.value.get.get should be(Valid)
+      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
     }
 
     "work with SeqProperty" in {
@@ -207,6 +228,12 @@ class PropertyValidationTest extends UdashFrontendTest {
       p.isValid.value.get.get should be(Invalid("Error", "ElemError1", "ElemError2"))
 
       p.replace(0, 3, TO1)
+      p.isValid.value.get.get should be(Valid)
+
+      p.set(Seq.empty)
+      p.isValid.value.get.get should be(Invalid("Error"))
+
+      p.clearValidators()
       p.isValid.value.get.get should be(Valid)
     }
 
@@ -288,12 +315,10 @@ class PropertyValidationTest extends UdashFrontendTest {
 
     "provide property with validation result" in {
       val p = Property("Test")
-      val v = p.valid
       p.addValidator((s) => if (s.length > 3) Valid else Invalid("Too short."))
 
-      v.get should be(Valid)
-
       p.set("T")
+      val v = p.valid
       v.get shouldNot be(Valid)
 
       p.set("Test")
@@ -311,6 +336,12 @@ class PropertyValidationTest extends UdashFrontendTest {
         p.set("T")
         p.set("Test 6")
       }
+      v.get should be(Valid)
+
+      p.set("T")
+      v.get shouldNot be(Valid)
+
+      p.clearValidators()
       v.get should be(Valid)
     }
   }

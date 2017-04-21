@@ -6,6 +6,7 @@ import io.udash.rpc.utils.Logged
 import scala.concurrent.Future
 
 case class Record(i: Int, fuu: String)
+case class CustomRPCException(i: Int) extends Throwable
 
 trait RPCMethods {
   @silent
@@ -46,6 +47,8 @@ trait TestRPC extends RPCMethods {
 
   def doStuffWithFail(no: Boolean): Future[String]
 
+  def doStuffWithEx(): Future[String]
+
   def doStuffInt(yes: Boolean): Future[Int]
 
   def innerRpc(name: String): InnerRPC
@@ -78,7 +81,7 @@ trait RPCMethodsImpl extends RPCMethods {
     Future.failed(result)
   }
 
-  protected def onGet[T <: RPC](methodName: String, args: List[List[Any]], result: T): T = {
+  protected def onGet[T](methodName: String, args: List[List[Any]], result: T): T = {
     onInvocationInternal(methodName, args, None)
     result
   }
@@ -96,7 +99,7 @@ trait RPCMethodsImpl extends RPCMethods {
     onCall("doStuff", List(List(yes)), "doStuffResult")
 
   def doStuffWithFail(no: Boolean): Future[String] =
-    onFailingCall("doStuffWithFail", List(List(no)), new NoSuchElementException)
+    onFailingCall("doStuffWithFail", List(List(no)), new Exception)
 
   @silent
   override def handle: Unit =
@@ -116,7 +119,10 @@ object TestRPC {
       onCall("doStuff", List(List(yes)), "doStuffResult")
 
     override def doStuffWithFail(no: Boolean): Future[String] =
-      onFailingCall("doStuffWithFail", List(List(no)), new NoSuchElementException)
+      onFailingCall("doStuffWithFail", List(List(no)), new Exception)
+
+    override def doStuffWithEx(): Future[String] =
+      onFailingCall("doStuffWithEx", List(List()), CustomRPCException(5))
 
     override def doStuffInt(yes: Boolean): Future[Int] =
       onCall("doStuffInt", List(List(yes)), 5)

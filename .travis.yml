@@ -14,7 +14,7 @@ before_script:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   # Install Selenium chromedriver
-  - wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.25/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip -d selenium-bin
   - export PATH=$PWD/selenium-bin:$PATH
 
@@ -26,6 +26,7 @@ jdk:
 
 scala:
   - 2.11.8
+  - 2.12.1
 
 env:
   - TEST_PACKAGE=core-macros/test
