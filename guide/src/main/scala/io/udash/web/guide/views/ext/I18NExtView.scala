@@ -51,6 +51,11 @@ class I18NExtView extends FinalView {
       i("TranslationKey"), " knows the count and types of the arguments. In the above example, ",
       i("retriesLeft"), " key expects one integer as the argument."
     ),
+    p(
+      "It is possible to transform translation key with arguments to ", i("TranslationKey0"),
+      " by calling ", i(".reduce(<key_args>)"), ". You can also pass an ", i("Untranslatable"),
+      " as ", i("TranslationKey0"), " instance in order to use raw string instead of translated key."
+    ),
     h2("TranslationProvider"),
     p("When translation keys are defined, we can create ", i("Translated"), " object as follows: "),
     CodeBlock(
