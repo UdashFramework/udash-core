@@ -422,9 +422,9 @@ object UdashDatePicker {
 
   private implicit class DatePickerChangeJqEventOps(private val ev: DatePickerChangeJQEvent) extends AnyVal {
     private def sanitizeDate(maybeDate: MomentFormatWrapper | Boolean): Option[MomentFormatWrapper] =
-      maybeDate.option
-        .filter(_ != false)
-        .flatMap(momentFormat => Try(momentFormat.asInstanceOf[MomentFormatWrapper]).toOption)
+      maybeDate
+        .option
+        .collect { case wrapper: js.Date => wrapper.asInstanceOf[MomentFormatWrapper] }
 
     def dateOption: Option[MomentFormatWrapper] = ev.option.flatMap(ev => sanitizeDate(ev.date))
 
