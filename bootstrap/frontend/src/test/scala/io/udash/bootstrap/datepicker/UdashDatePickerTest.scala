@@ -1,20 +1,20 @@
 package io.udash.bootstrap.datepicker
 
+import java.{util => ju}
+
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 
+import scala.scalajs.js
 import scalatags.JsDom.all._
-import java.{util => ju}
-
-import io.udash.bootstrap.form.UdashInputGroup
 
 class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
   "UdashDatePicker component" should {
     "show/hide on method call and emit events" in {
-      import UdashDatePicker._
       val contentId = "datepicker-test-content"
       val date = Property(new ju.Date)
       val options = Property(UdashDatePicker.DatePickerOptions(
@@ -39,27 +39,27 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
       picker.hide()
       eventually {
-        (showCounter, hideCounter, changeCounter) should be(0, 0, 0) // it was hidden already
-      } flatMap { case _ =>
+        (showCounter, hideCounter, changeCounter) should be((0, 0, 0)) // it was hidden already
+      } flatMap { _ =>
         picker.show()
         eventually {
-          (showCounter, hideCounter, changeCounter) should be(1, 0, 0)
-        } flatMap { case _ =>
+          (showCounter, hideCounter, changeCounter) should be((1, 0, 0))
+        } flatMap { _ =>
           picker.hide()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be(1, 1, 0)
-          } flatMap { case _ =>
+            (showCounter, hideCounter, changeCounter) should be((1, 1, 0))
+          } flatMap { _ =>
             picker.toggle()
             eventually {
-              (showCounter, hideCounter, changeCounter) should be(2, 1, 0)
-            } flatMap { case _ =>
+              (showCounter, hideCounter, changeCounter) should be((2, 1, 0))
+            } flatMap { _ =>
               picker.toggle()
               eventually {
-                (showCounter, hideCounter, changeCounter) should be(2, 2, 0)
-              } flatMap { case _ =>
+                (showCounter, hideCounter, changeCounter) should be((2, 2, 0))
+              } flatMap { _ =>
                 date.set(new ju.Date(123123123))
                 eventually {
-                  (showCounter, hideCounter, changeCounter) should be(2, 2, 1)
+                  (showCounter, hideCounter, changeCounter) should be((2, 2, 1))
                 }
               }
             }
@@ -68,8 +68,29 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       }
     }
 
+    "not fail on null input value" in {
+      val date = Property[ju.Date](new ju.Date())
+      val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+        format = "MMMM Do YYYY, hh:mm a",
+        locale = Some("en_GB")
+      ))
+      val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+      jQ("body").append(
+        div(
+          UdashDatePicker.loadBootstrapDatePickerStyles(),
+          UdashInputGroup()(
+            UdashInputGroup.input(picker.render)
+          ).render
+        ).render
+      )
+      noException shouldBe thrownBy {
+        jQ("#" + picker.componentId.id).asDatePicker().date(null)
+      }
+    }
+
+
+
     "emit error events" in {
-      import UdashDatePicker._
       val contentId = "datepicker-test-content"
       val date = Property(new ju.Date)
       val options = Property(UdashDatePicker.DatePickerOptions(
@@ -94,27 +115,27 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
       date.set(new ju.Date(3000000000L))
       eventually {
-        (errorCounter, changeCounter) should be(0, 1)
-      } flatMap { case _ =>
+        (errorCounter, changeCounter) should be((0, 1))
+      } flatMap { _ =>
         date.set(new ju.Date(300000))
         eventually {
-          (errorCounter, changeCounter) should be(1, 1)
-        } flatMap { case _ =>
+          (errorCounter, changeCounter) should be((1, 1))
+        } flatMap { _ =>
           date.set(new ju.Date(2000000000L))
           eventually {
-            (errorCounter, changeCounter) should be(1, 2)
-          } flatMap { case _ =>
+            (errorCounter, changeCounter) should be((1, 2))
+          } flatMap { _ =>
             date.set(new ju.Date(8000000000L))
             eventually {
-              (errorCounter, changeCounter) should be(2, 2)
-            } flatMap { case _ =>
+              (errorCounter, changeCounter) should be((2, 2))
+            } flatMap { _ =>
               date.set(new ju.Date(3000000000L))
               eventually {
-                (errorCounter, changeCounter) should be(2, 3)
-              } flatMap { case _ =>
+                (errorCounter, changeCounter) should be((2, 3))
+              } flatMap { _ =>
                 date.set(new ju.Date(4000000000L))
                 eventually {
-                  (errorCounter, changeCounter) should be(2, 4)
+                  (errorCounter, changeCounter) should be((2, 4))
                 }
               }
             }
@@ -123,4 +144,17 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       }
     }
   }
+
+  private implicit class JQueryDatePickerDataExt(jQ: JQuery) {
+    def asDatePicker(): UdashDatePickerData =
+      jQ.data("DateTimePicker").get.asInstanceOf[UdashDatePickerData]
+  }
+
 }
+
+@js.native
+private[datepicker] trait UdashDatePickerData extends js.Object {
+  def date(formattedDate: String): Unit = js.native
+}
+
+

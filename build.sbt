@@ -3,9 +3,9 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.5.0-RC.1"
+version in ThisBuild := "0.5.0-RC.2"
 scalaVersion in ThisBuild := versionOfScala
-crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
+crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
@@ -18,7 +18,10 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:experimental.macros",
   "-Xfuture",
   "-Xfatal-warnings",
-  "-Xlint:_,-missing-interpolator,-adapted-args"
+  CrossVersion.partialVersion(scalaVersion.value).collect {
+    // WORKAROUND https://github.com/scala/scala/pull/5402
+    case (2, 12) => "-Xlint:-unused,_"
+  }.getOrElse("-Xlint:_")
 )
 
 jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox())
@@ -134,8 +137,8 @@ lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shar
   .configureCross(_.dependsOn(`core-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rpc-macros`))
   .jvmConfigure(_.dependsOn(`rpc-macros`))
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= rpcCrossDeps.value,
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= rpcCrossTestDeps.value
   )
   .jsSettings(commonJSSettings:_*)
@@ -193,7 +196,8 @@ lazy val `i18n-backend` = project.in(file("i18n/backend"))
   .dependsOn(`i18n-shared-JVM` % CompileAndTest, `rpc-backend` % CompileAndTest)
   .settings(commonSettings: _*)
 
-lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`i18n-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
@@ -201,7 +205,8 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(Scala
     jsDependencies += RuntimeDOM % Test
   )
 
-lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
