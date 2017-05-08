@@ -3,9 +3,9 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.5.0-RC.1"
+version in ThisBuild := "0.5.0-RC.2"
 scalaVersion in ThisBuild := versionOfScala
-crossScalaVersions in ThisBuild := Seq("2.11.8", "2.12.1")
+crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
 scalacOptions in ThisBuild ++= Seq(
@@ -18,7 +18,10 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:experimental.macros",
   "-Xfuture",
   "-Xfatal-warnings",
-  "-Xlint:_,-missing-interpolator,-adapted-args"
+  CrossVersion.partialVersion(scalaVersion.value).collect {
+    // WORKAROUND https://github.com/scala/scala/pull/5402
+    case (2, 12) => "-Xlint:-unused,_"
+  }.getOrElse("-Xlint:_")
 )
 
 jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox())

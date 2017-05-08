@@ -112,7 +112,7 @@ class RoutingEngine[S <: State : ClassTag : ImmutableValue](routingRegistry: Rou
   private def renderPath(path: List[S]): List[View] = {
     path.map { state =>
       val (view, presenter) = viewPresenterRegistry.matchStateToResolver(state).create()
-      statesMap += (state -> (view, presenter))
+      statesMap(state) = (view, presenter)
       view
     }
   }

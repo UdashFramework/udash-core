@@ -39,27 +39,27 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
       picker.hide()
       eventually {
-        (showCounter, hideCounter, changeCounter) should be(0, 0, 0) // it was hidden already
+        (showCounter, hideCounter, changeCounter) should be((0, 0, 0)) // it was hidden already
       } flatMap { _ =>
         picker.show()
         eventually {
-          (showCounter, hideCounter, changeCounter) should be(1, 0, 0)
+          (showCounter, hideCounter, changeCounter) should be((1, 0, 0))
         } flatMap { _ =>
           picker.hide()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be(1, 1, 0)
+            (showCounter, hideCounter, changeCounter) should be((1, 1, 0))
           } flatMap { _ =>
             picker.toggle()
             eventually {
-              (showCounter, hideCounter, changeCounter) should be(2, 1, 0)
+              (showCounter, hideCounter, changeCounter) should be((2, 1, 0))
             } flatMap { _ =>
               picker.toggle()
               eventually {
-                (showCounter, hideCounter, changeCounter) should be(2, 2, 0)
+                (showCounter, hideCounter, changeCounter) should be((2, 2, 0))
               } flatMap { _ =>
                 date.set(new ju.Date(123123123))
                 eventually {
-                  (showCounter, hideCounter, changeCounter) should be(2, 2, 1)
+                  (showCounter, hideCounter, changeCounter) should be((2, 2, 1))
                 }
               }
             }
@@ -115,27 +115,27 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
       date.set(new ju.Date(3000000000L))
       eventually {
-        (errorCounter, changeCounter) should be(0, 1)
+        (errorCounter, changeCounter) should be((0, 1))
       } flatMap { _ =>
         date.set(new ju.Date(300000))
         eventually {
-          (errorCounter, changeCounter) should be(1, 1)
+          (errorCounter, changeCounter) should be((1, 1))
         } flatMap { _ =>
           date.set(new ju.Date(2000000000L))
           eventually {
-            (errorCounter, changeCounter) should be(1, 2)
+            (errorCounter, changeCounter) should be((1, 2))
           } flatMap { _ =>
             date.set(new ju.Date(8000000000L))
             eventually {
-              (errorCounter, changeCounter) should be(2, 2)
+              (errorCounter, changeCounter) should be((2, 2))
             } flatMap { _ =>
               date.set(new ju.Date(3000000000L))
               eventually {
-                (errorCounter, changeCounter) should be(2, 3)
+                (errorCounter, changeCounter) should be((2, 3))
               } flatMap { _ =>
                 date.set(new ju.Date(4000000000L))
                 eventually {
-                  (errorCounter, changeCounter) should be(2, 4)
+                  (errorCounter, changeCounter) should be((2, 4))
                 }
               }
             }

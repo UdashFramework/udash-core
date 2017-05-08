@@ -2,16 +2,16 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.1"
+  val versionOfScala = "2.12.2"
   val silencerVersion = "0.5"
 
   val jqueryWrapperVersion = "1.0.1"
 
-  val scalaJsDomVersion = "0.9.1"
-  val scalaTagsVersion = "0.6.4"
+  val scalaJsDomVersion = "0.9.2"
+  val scalaTagsVersion = "0.6.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.20.2"
+  val avsCommonsVersion = "1.20.3"
 
   val atmosphereJSVersion = "2.3.2"
   val atmosphereVersion = "2.4.9"
@@ -23,7 +23,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.5.0"
 
-  val scalatestVersion = "3.0.1"
+  val scalatestVersion = "3.0.3"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.43"
   val momentJsVersion = "2.18.1"
