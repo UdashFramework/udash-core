@@ -26,14 +26,15 @@ object Dependencies {
   val scalatestVersion = "3.0.1"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.43"
-  val momentJsVersion = "2.17.0"
+  val momentJsVersion = "2.18.1"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" %% "silencer-plugin" % silencerVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-lib" % silencerVersion
+    "com.github.ghik" %% "silencer-lib" % silencerVersion,
+    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -47,10 +48,6 @@ object Dependencies {
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
-  ))
-
-  val rpcCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion
   ))
 
   val rpcCrossTestDeps = Def.setting(Seq(

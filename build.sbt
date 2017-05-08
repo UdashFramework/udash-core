@@ -97,8 +97,8 @@ lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shar
   .configureCross(_.dependsOn(`core-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rpc-macros`))
   .jvmConfigure(_.dependsOn(`rpc-macros`))
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= rpcCrossDeps.value,
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= rpcCrossTestDeps.value
   )
   .jsSettings(commonJSSettings:_*)
@@ -156,7 +156,8 @@ lazy val `i18n-backend` = project.in(file("i18n/backend"))
   .dependsOn(`i18n-shared-JVM` % CompileAndTest, `rpc-backend` % CompileAndTest)
   .settings(commonSettings: _*)
 
-lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`i18n-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
@@ -164,7 +165,8 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend")).enablePlugins(Scala
     jsDependencies += RuntimeDOM % Test
   )
 
-lazy val `bootstrap` = project.in(file("bootstrap/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
