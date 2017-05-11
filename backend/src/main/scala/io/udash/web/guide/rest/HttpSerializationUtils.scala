@@ -8,9 +8,6 @@ import com.avsystem.commons.serialization.GenCodec
 import io.udash.rpc.DefaultUdashSerialization
 
 trait HttpSerializationUtils extends DefaultUdashSerialization {
-//  implicit def optionMarshaller[T](implicit codec: GenCodec[T]) =
-//    ToResponseMarshaller.fromMarshaller()(gencodecMarshaller[Option[T]](GenCodec.optionCodec(codec)))
-
   implicit def gencodecMarshaller[T](implicit codec: GenCodec[T]): Marshaller[T, Strict] =
     Marshaller.withFixedContentType(MediaTypes.`application/json`)(
       (obj: T) => {
