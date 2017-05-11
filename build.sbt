@@ -16,7 +16,10 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:experimental.macros",
   "-Xfuture",
   "-Xfatal-warnings",
-  "-Xlint:_,-missing-interpolator,-adapted-args"
+  CrossVersion.partialVersion(scalaVersion.value).collect {
+    // WORKAROUND https://github.com/scala/scala/pull/5402
+    case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
+  }.getOrElse("-Xlint:_,-missing-interpolator,-adapted-args")
 )
 
 val commonSettings = Seq(

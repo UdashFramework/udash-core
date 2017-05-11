@@ -3,7 +3,7 @@ import sbt._
 
 object Dependencies {
 
-  val versionOfScala = "2.12.1"
+  val versionOfScala = "2.12.2"
   val jettyVersion = "9.3.11.v20160721"
 
   val udashVersion = "0.5.0-RC.2"
