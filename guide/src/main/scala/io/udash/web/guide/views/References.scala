@@ -8,6 +8,8 @@ object References {
 
   val AvScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"
   val BootstrapHomepage = "http://getbootstrap.com/"
+  val HighchartsHomepage = "http://www.highcharts.com/"
+  val HighchartsLicense = "https://shop.highsoft.com/highcharts"
   val JettyHomepage = "http://www.eclipse.org/jetty/"
   val MvpPattern = "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter"
   val NpmHomepage = "https://www.npmjs.com/"

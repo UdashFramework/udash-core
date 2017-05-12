@@ -12,6 +12,7 @@ class DemosServer(callLogger: CallLogger)(implicit clientId: ClientId) extends D
   override def notificationsDemo(): NotificationsServerRPC = new NotificationsServer
   override def gencodecsDemo(): GenCodecServerRPC = new GenCodecServer
   override def translations(): RemoteTranslationRPC = new TranslationServer
+  override def exceptions(): ExceptionsRPC = new ExceptionsServer
 
   override def call(): CallServerRPC = new CallServer(callLogger)
 }

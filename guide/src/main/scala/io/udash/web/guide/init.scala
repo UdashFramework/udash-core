@@ -23,10 +23,10 @@ object Context {
   implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit = UrlLoggingDemo.log(url, referrer)
   }
-  val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)
+  val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
-  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(80), "/rest/")
+  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, 8081, "/")
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
@@ -63,6 +63,7 @@ object Context {
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
+      MenuLink("Charts", ChartsExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
       MenuLink("User activity", UserActivityExtState)
     )),

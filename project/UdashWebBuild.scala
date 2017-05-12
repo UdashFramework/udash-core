@@ -2,7 +2,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.AutoImport._
 import sbt.Keys._
 import sbt._
 
-object UdashWebBuild extends Build {
+object UdashWebBuild {
   def copyIndex(file: File, to: File) = {
     val newFile = Path(to.toPath.toString + "/index.html")
     IO.copyFile(file, newFile.asFile)
@@ -21,7 +21,6 @@ object UdashWebBuild extends Build {
         copyIndex(indexFile, outDir)
         (fullOptJS in Compile).value
         (packageMinifiedJSDependencies in Compile).value
-        (packageScalaJSLauncher in Compile).value
       }
     } else {
       Def.task {
@@ -29,7 +28,6 @@ object UdashWebBuild extends Build {
         copyIndex(indexFile, outDir)
         (fastOptJS in Compile).value
         (packageJSDependencies in Compile).value
-        (packageScalaJSLauncher in Compile).value
       }
     }
   }

@@ -20,4 +20,8 @@ object Translations {
       val buttonLabel = key("auth.register.buttonLabel")
     }
   }
+
+  object exceptions {
+    val example = key("server.exception.example")
+  }
 }

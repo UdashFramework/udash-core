@@ -144,6 +144,10 @@ class FrontendPropertiesView extends FinalView {
       li(i("addValidator"), " - adds a new validator to a property"),
       li(i("isValid"), " - returns Future containing the validation result")
     ),
+    p(
+      "You can remove validator by calling ", i(".cancel()"), " on ", i("Registration"), " object returned by the ",
+      i("addValidator"), " method or ", i(".clearValidators()"), " on target property."
+    ),
     p("Every validator must extend ", i("Validator[T]"), ", where T is a data model type. For example:"),
     CodeBlock(
       """object UserNameValidator extends Validator[String] {

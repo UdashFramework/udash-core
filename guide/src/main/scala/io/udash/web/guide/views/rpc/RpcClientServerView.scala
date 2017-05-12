@@ -3,7 +3,7 @@ package io.udash.web.guide.views.rpc
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.rpc.demos.ClientIdDemoComponent
+import io.udash.web.guide.views.rpc.demos._
 import io.udash.web.guide.{Context, _}
 import org.scalajs.dom
 
@@ -325,6 +325,36 @@ class RpcClientServerView extends FinalView {
         |)
         |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
     )(GuideStyles),
+    h2("Exceptions handling"),
+    p(
+      "The exceptions thrown by the backend application are passed to the frontend application. In a general case ",
+      "they are passed as the ", i("RPCFailure"), " exception contaning basic data related to the error, but it is also ",
+      "possible to serialize the original exception with assigned ", i("GenCodec"), ". "
+    ),
+    p(
+      "First of all you have to create an instance of ", i("ExceptionCodecRegistry"), " in cross-compiled module and register ",
+      "codecs of your exceptions. You can use a default implementation named ", i("DefaultExceptionCodecRegistry"), "."
+    ),
+    CodeBlock(
+      """import io.udash.rpc.serialization.ExceptionCodecRegistry
+        |import io.udash.rpc.serialization.DefaultExceptionCodecRegistry
+        |
+        |object SharedExceptions {
+        |  case class ExampleException(msg: String) extends Exception(msg)
+        |
+        |  val registry: ExceptionCodecRegistry = {
+        |    val registry = new DefaultExceptionCodecRegistry
+        |    registry.register(GenCodec.materialize[ExampleException])
+        |    registry
+        |  }
+        |}""".stripMargin
+    )(GuideStyles),
+    p(
+      "Then you have to provide the registry to server connector in the frontend application and to the atmosphere service ",
+      "on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
+      "the following demo: "
+    ),
+    new ExceptionsDemoComponent().getTemplate,
     h2("What's next?"),
     p(
       "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"), " chapter interesting later on. "

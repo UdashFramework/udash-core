@@ -1,6 +1,9 @@
+import Dependencies._
+import UdashWebBuild._
+
 name := "udash-guide"
 
-version in ThisBuild := "0.4.0"
+version in ThisBuild := "0.5.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
@@ -13,7 +16,10 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:experimental.macros",
   "-Xfuture",
   "-Xfatal-warnings",
-  "-Xlint:_,-missing-interpolator,-adapted-args"
+  CrossVersion.partialVersion(scalaVersion.value).collect {
+    // WORKAROUND https://github.com/scala/scala/pull/5402
+    case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
+  }.getOrElse("-Xlint:_,-missing-interpolator,-adapted-args")
 )
 
 val commonSettings = Seq(
@@ -42,12 +48,12 @@ lazy val backend = project.in(file("backend"))
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= backendDeps.value,
 
-    (compile in Compile) <<= (compile in Compile).dependsOn(copyStatics),
+    (compile in Compile) := (compile in Compile).dependsOn(copyStatics).value,
     copyStatics := {
       copyStaticsToBackend(homepage).value
       copyStaticsToBackend(guide).value
     },
-    copyStatics <<= copyStatics.dependsOn(compileStatics in guide, compileStatics in homepage),
+    copyStatics := copyStatics.dependsOn(compileStatics in guide, compileStatics in homepage).value,
 
     mappings in (Compile, packageBin) ++= {
       prepareMappings(homepage).value ++ prepareMappings(guide).value
@@ -82,9 +88,9 @@ lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSP
 
 val commonFrontendSettings = Seq(
   jsDependencies ++= frontendJSDeps.value,
-  persistLauncher in Compile := true,
+  scalaJSUseMainModuleInitializer in Compile := true,
 
-  compile <<= (compile in Compile),
+  compile := (compile in Compile).value,
 
   artifactPath in(Compile, fastOptJS) :=
     (target in(Compile, fastOptJS)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-impl-fast.js",
@@ -94,14 +100,11 @@ val commonFrontendSettings = Seq(
     (target in(Compile, packageJSDependencies)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-deps-fast.js",
   artifactPath in(Compile, packageMinifiedJSDependencies) :=
     (target in(Compile, packageMinifiedJSDependencies)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-deps.js",
-  artifactPath in(Compile, packageScalaJSLauncher) :=
-    (target in(Compile, packageScalaJSLauncher)).value / staticFilesDir.value / "WebContent" / "scripts" / "frontend-init.js",
 
-  persistLauncher in Test := false,
-  scalaJSUseRhino in Test := false,
+  scalaJSUseMainModuleInitializer in Test := false,
   scalaJSStage in Test := FastOptStage,
   jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox),
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox()),
 
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
@@ -124,7 +127,7 @@ lazy val guide = project.in(file("guide")).enablePlugins(ScalaJSPlugin)
       compileStaticsForRelease.value
       target.value / staticFilesDir.value
     },
-    compileStatics <<= compileStatics.dependsOn(compile in Compile)
+    compileStatics := compileStatics.dependsOn(compile in Compile).value
   )
 
 lazy val homepage = project.in(file("homepage")).enablePlugins(ScalaJSPlugin)
@@ -145,7 +148,7 @@ lazy val homepage = project.in(file("homepage")).enablePlugins(ScalaJSPlugin)
       compileStaticsForRelease.value
       target.value / staticFilesDir.value
     },
-    compileStatics <<= compileStatics.dependsOn(compile in Compile)
+    compileStatics := compileStatics.dependsOn(compile in Compile).value
   )
 
 lazy val selenium = project.in(file("selenium"))

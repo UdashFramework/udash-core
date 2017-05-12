@@ -183,8 +183,8 @@ class FrontendFormsView extends FinalView {
         |
         |form(
         |  Select(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString)
-        |  )
+        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
+        |  )()
         |)""".stripMargin
     )(GuideStyles),
     new SelectDemoComponent,
@@ -208,8 +208,8 @@ class FrontendFormsView extends FinalView {
         |
         |form(
         |  Select(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString))
-        |  )
+        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
+        |  )()
         |)""".stripMargin
     )(GuideStyles),
     new MultiSelectDemoComponent,

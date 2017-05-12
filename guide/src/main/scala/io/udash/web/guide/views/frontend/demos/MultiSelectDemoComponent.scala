@@ -49,9 +49,8 @@ class MultiSelectDemoComponent extends Component {
       UdashInputGroup.addon("Fruits:"),
       UdashInputGroup.addon(
         Select(
-          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-          BootstrapStyles.Form.formControl
-        ).render
+          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
+        )(BootstrapStyles.Form.formControl).render
       ),
       UdashInputGroup.addon(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
     ).render
