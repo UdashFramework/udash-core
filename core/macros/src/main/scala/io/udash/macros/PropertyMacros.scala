@@ -1,6 +1,7 @@
 package io.udash.macros
 
 import com.avsystem.commons.macros.MacroCommons
+import com.avsystem.commons.misc.Opt
 
 import scala.collection.mutable
 import scala.reflect.macros.blackbox
@@ -36,6 +37,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
   val ExecutionContextCls = tq"_root_.scala.concurrent.ExecutionContext"
 
   private lazy val OptionTpe = typeOf[Option[_]]
+  private lazy val OptTpe = typeOf[Opt[_]]
   private lazy val SeqTpe = typeOf[Seq[_]]
   private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
   private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
@@ -91,9 +93,13 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
   private def isImmutableSeq(tpe: Type): Boolean =
     tpe <:< SeqTpe && !(tpe <:< MutableSeqTpe) && tpe.typeArgs.forall(isImmutableValue)
 
-  //Checks, if tpe is immutable option and children are immutable
+  //Checks, if tpe is immutable Option and children are immutable
   private def isImmutableOption(tpe: Type): Boolean =
     tpe <:< OptionTpe && tpe.typeArgs.forall(isImmutableValue)
+
+  //Checks, if tpe is immutable Opt and children are immutable
+  private def isImmutableOpt(tpe: Type): Boolean =
+    tpe <:< OptTpe && tpe.typeArgs.forall(isImmutableValue)
 
   //Checks, if return type of method is ModelValue
   private def doesReturnTypeForModelRequirements(symbol: Symbol, signatureType: Type): Boolean =
@@ -134,10 +140,11 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
 
     val isSeq = isImmutableSeq(valueType)
     lazy val isOption = isImmutableOption(valueType)
+    lazy val isOpt = isImmutableOpt(valueType)
     lazy val isSealedHierarchy = isImmutableSealedHierarchy(valueType)
     lazy val isImmutableCC = isImmutableCaseClass(valueType)
 
-    if (isSeq || isOption || isSealedHierarchy || isImmutableCC) {
+    if (isSeq || isOption || isOpt || isSealedHierarchy || isImmutableCC) {
       q"""null"""
     } else {
       val isCC = isCaseClass(valueType)
