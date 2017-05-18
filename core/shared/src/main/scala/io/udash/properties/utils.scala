@@ -17,7 +17,8 @@ object ImmutableValue {
   implicit val allowCharTpe: ImmutableValue[Char] = null
   implicit val allowBooleanTpe: ImmutableValue[Boolean] = null
 
-  implicit def allowImmutableCollections[T: ImmutableValue, M[_] <: collection.immutable.Traversable[T]]: ImmutableValue[M[T]] = null
+  implicit def allowImmutableCollections[T: ImmutableValue, M[_]](implicit ev: M[T] <:< collection.immutable.Traversable[T]): ImmutableValue[M[T]] = null
+
   implicit def isImmutable[T]: ImmutableValue[T] = macro io.udash.macros.PropertyMacros.reifyImmutableValue[T]
 }
 
