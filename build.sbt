@@ -51,6 +51,7 @@ lazy val udash = project.in(file("."))
     `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
     `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`,
     `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
+    `css-macros`, `css-shared-JS`, `css-shared-JVM`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
   .settings(publishArtifact := false)
@@ -166,6 +167,35 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
   .settings(commonJSSettings: _*)
   .settings(
     jsDependencies += RuntimeDOM % Test
+  )
+
+lazy val `css-macros` = project.in(file("css/macros"))
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value),
+    libraryDependencies ++= cssMacroDeps.value
+  )
+
+lazy val `css-shared` = crossProject.crossType(CrossType.Pure).in(file("css/shared"))
+  .jsConfigure(_.dependsOn(`css-macros`, `core-shared-JS` % CompileAndTest))
+  .jvmConfigure(_.dependsOn(`css-macros`, `core-shared-JVM` % CompileAndTest))
+  .settings(commonSettings: _*)
+  .jsSettings(commonJSSettings:_*)
+
+lazy val `css-shared-JVM` = `css-shared`.jvm
+lazy val `css-shared-JS` = `css-shared`.js
+
+lazy val `css-backend` = project.in(file("css/backend"))
+  .dependsOn(`css-shared-JVM` % CompileAndTest)
+  .settings(commonSettings: _*)
+
+lazy val `css-frontend` = project.in(file("css/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`css-shared-JS` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(
+    emitSourceMaps in Compile := true,
+    libraryDependencies ++= cssFrontendDeps.value
   )
 
 lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
