@@ -1,9 +1,11 @@
 package io.udash.macros
 
+import com.avsystem.commons.macros.MacroCommons
+
 import scala.collection.mutable
 import scala.reflect.macros.blackbox
 
-class PropertyMacros(val c: blackbox.Context) {
+class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
   import c.universe._
 
   val Package = q"_root_.io.udash.properties"
@@ -476,12 +478,15 @@ class PropertyMacros(val c: blackbox.Context) {
   }
 
   private def generatePropertyCreator(tpe: Type, constructor: (Type) => c.Tree): c.Tree = {
-    val selfName = c.freshName(TermName("self"))
+    val implicitSelfPc =
+      if (!c.inferImplicitValue(getType(tq"$PropertyCreatorCls[$tpe]"), withMacrosDisabled = true).isEmpty) q""
+      else q"implicit val ${c.freshName(TermName("self"))}: $PropertyCreatorCls[$tpe] = this"
     q"""
        new $PropertyCreatorCls[$tpe] {
-         implicit val $selfName: $PropertyCreatorCls[$tpe] = this
-         def newProperty(prt: $ReadablePropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe]
-           = {${constructor.apply(tpe)}}
+         $implicitSelfPc
+         def newProperty(prt: $ReadablePropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe] = {
+           ${constructor.apply(tpe)}
+         }
        }
     """
   }
