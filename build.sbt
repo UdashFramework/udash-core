@@ -181,6 +181,7 @@ lazy val `css-shared` = crossProject.crossType(CrossType.Pure).in(file("css/shar
   .jvmConfigure(_.dependsOn(`css-macros`, `core-shared-JVM` % CompileAndTest))
   .settings(commonSettings: _*)
   .jsSettings(commonJSSettings:_*)
+  .settings(libraryDependencies ++= cssMacroDeps.value)
 
 lazy val `css-shared-JVM` = `css-shared`.jvm
 lazy val `css-shared-JS` = `css-shared`.js
@@ -190,7 +191,7 @@ lazy val `css-backend` = project.in(file("css/backend"))
   .settings(commonSettings: _*)
 
 lazy val `css-frontend` = project.in(file("css/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`css-shared-JS` % CompileAndTest)
+  .dependsOn(`css-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(
@@ -200,7 +201,7 @@ lazy val `css-frontend` = project.in(file("css/frontend")).enablePlugins(ScalaJS
 
 lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-frontend` % CompileAndTest)
+  .dependsOn(`core-frontend` % CompileAndTest, `css-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(

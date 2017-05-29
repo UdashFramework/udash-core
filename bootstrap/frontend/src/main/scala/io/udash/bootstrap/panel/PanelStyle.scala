@@ -1,7 +1,9 @@
 package io.udash.bootstrap
 package panel
 
-sealed abstract class PanelStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(style)
+import io.udash.css.CssStyle
+
+sealed abstract class PanelStyle(style: CssStyle) extends ClassModifier(style)
 
 object PanelStyle {
   import BootstrapStyles.Panel._

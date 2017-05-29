@@ -1,8 +1,11 @@
 package io.udash.css
 
+import io.udash.ReadableProperty
+import io.udash.properties.PropertyCreator
+import org.scalajs.dom
 import org.scalajs.dom.Element
 
-import scalatags.JsDom.Modifier
+import scalatags.JsDom.all.Modifier
 import scalatags.text.Builder
 
 trait CssView {
@@ -54,7 +57,7 @@ trait CssView {
 
   implicit def style2Mod(s: CssStyle): Modifier = new Modifier {
     override def applyTo(t: Element): Unit =
-      t.classList.add(s.className)
+      s.addTo(t)
   }
 
   implicit def styles2Mod(s: CssStyle*): Modifier = new Modifier {
@@ -72,3 +75,5 @@ trait CssView {
     }
 
 }
+
+object CssView extends CssView

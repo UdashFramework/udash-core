@@ -3,14 +3,16 @@ package form
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-class UdashForm private(formStyle: Option[BootstrapStyles.BootstrapClass], override val componentId: ComponentId)
+class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
                        (content: Modifier*) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
   override lazy val render =
     form(if (formStyle.isDefined) formStyle.get else ())(
       content
@@ -19,6 +21,7 @@ class UdashForm private(formStyle: Option[BootstrapStyles.BootstrapClass], overr
 
 object UdashForm {
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+  import io.udash.css.CssView._
 
   /** Binds provided `property` validation result to element Bootstrap validation style. */
   def validation(property: Property[_]): Modifier =
@@ -157,11 +160,11 @@ object UdashForm {
       validation
     )
 
-  private def defaultDecorator(checkboxStyle: BootstrapStyles.BootstrapClass) =
+  private def defaultDecorator(checkboxStyle: CssStyle) =
     (input: dom.html.Input, id: String) => label(checkboxStyle)(input, id).render
 
   /** Creates checkboxes for provided elements. `selected` property contains values from selected checkboxes. */
-  def checkboxes(checkboxStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.checkbox)
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox)
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(
@@ -174,7 +177,7 @@ object UdashForm {
     )
 
   /** Creates checkboxes for provided `options`. `selected` property has the value of selected radio button. */
-  def radio(radioStyle: BootstrapStyles.BootstrapClass = BootstrapStyles.Form.radio)
+  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio)
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(

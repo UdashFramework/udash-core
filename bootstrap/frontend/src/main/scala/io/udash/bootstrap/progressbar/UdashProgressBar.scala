@@ -15,6 +15,7 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
                                             minValue: Int, maxValue: Int, minWidthEm: Int, valueStringifier: ValueStringifier,
                                             override val componentId: ComponentId)
                                            (implicit ec: ExecutionContext) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
 
   protected def modifiers = Seq(
     barStyle, role := "progressbar", aria.valuenow.bind(progress.transform(_.toString)),
@@ -44,7 +45,11 @@ class AnimatedUdashProgressBar private[progressbar](progress: Property[Int], sho
                                                     override val componentId: ComponentId)
                                                    (implicit ec: ExecutionContext)
   extends UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier, componentId) {
-  override protected lazy val modifiers: Seq[Modifier] = super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), ProgressBarStyle.Striped)
+
+  import io.udash.css.CssView._
+
+  override protected lazy val modifiers: Seq[Modifier] =
+    super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), ProgressBarStyle.Striped)
 }
 
 object UdashProgressBar {

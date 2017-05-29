@@ -10,6 +10,7 @@ import org.scalajs.dom.Element
 class UdashListGroup[ItemType, ElemType <: Property[ItemType]] private(items: SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                                                                       (body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
   import scalatags.JsDom.all._
+  import io.udash.css.CssView._
 
   override lazy val render: Element =
     ul(id := componentId, BootstrapStyles.List.listGroup)(

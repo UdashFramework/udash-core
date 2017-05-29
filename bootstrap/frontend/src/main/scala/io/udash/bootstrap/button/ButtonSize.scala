@@ -1,8 +1,10 @@
 package io.udash.bootstrap
 package button
 
-sealed abstract class ButtonSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq: _*) {
-  def this(sizeStyle: BootstrapStyles.BootstrapClass) =
+import io.udash.css.CssStyleName
+
+sealed abstract class ButtonSize(sizeStyle: Option[CssStyleName]) extends ClassModifier(sizeStyle.toSeq: _*) {
+  def this(sizeStyle: CssStyleName) =
     this(Some(sizeStyle))
 }
 

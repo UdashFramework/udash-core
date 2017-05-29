@@ -1,7 +1,9 @@
 package io.udash.bootstrap
 package button
 
-sealed abstract class ButtonStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Button.btn, style)
+import io.udash.css.CssStyle
+
+sealed abstract class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Button.btn, style)
 
 object ButtonStyle {
   import BootstrapStyles.Button._

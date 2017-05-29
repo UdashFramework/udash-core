@@ -22,6 +22,7 @@ import scalatags.JsDom.all._
 class UdashCarousel private(val content: SeqProperty[UdashCarouselSlide], val componentId: ComponentId,
                             showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
                            (implicit ec: ExecutionContext) extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
+  import io.udash.css.CssView._
   require(activeSlide >= 0, "Active slide index cannot be negative.")
 
   import BootstrapStyles.Carousel._
@@ -33,7 +34,7 @@ class UdashCarousel private(val content: SeqProperty[UdashCarouselSlide], val co
   private lazy val _activeIndex: Property[Int] = Property[Int](firstActive)
 
   content.listen(slides => _activeIndex.set(slides.zipWithIndex.collectFirst {
-    case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.cls) => idx
+    case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.className) => idx
   }.get))
 
   override lazy val render: Element = {
@@ -298,6 +299,7 @@ object UdashCarousel {
   * @param content Slide content.
   */
 case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
   override lazy val render: Element =
     div(id := componentId, BootstrapStyles.item)(
     img(src := imgSrc.value),
