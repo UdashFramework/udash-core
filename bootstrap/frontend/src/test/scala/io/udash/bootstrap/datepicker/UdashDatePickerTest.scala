@@ -16,9 +16,9 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
   "UdashDatePicker component" should {
     "show/hide on method call and emit events" in {
       val contentId = "datepicker-test-content"
-      val date = Property(new ju.Date)
+      val date = Property[Option[ju.Date]](None)
       val options = Property(UdashDatePicker.DatePickerOptions(
-        format = "YYYY MM DD"
+        format = "YYYY MM DD a"
       ))
       val picker = UdashDatePicker(ComponentId(contentId))(date, options)
 
@@ -43,23 +43,23 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       } flatMap { _ =>
         picker.show()
         eventually {
-          (showCounter, hideCounter, changeCounter) should be((1, 0, 0))
+          (showCounter, hideCounter, changeCounter) should be((1, 0, 2)) // Two changes: None -> default_now; default_now -> selected format
         } flatMap { _ =>
           picker.hide()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((1, 1, 0))
+            (showCounter, hideCounter, changeCounter) should be((1, 1, 2))
           } flatMap { _ =>
             picker.toggle()
             eventually {
-              (showCounter, hideCounter, changeCounter) should be((2, 1, 0))
+              (showCounter, hideCounter, changeCounter) should be((2, 1, 2))
             } flatMap { _ =>
               picker.toggle()
               eventually {
-                (showCounter, hideCounter, changeCounter) should be((2, 2, 0))
+                (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
               } flatMap { _ =>
-                date.set(new ju.Date(123123123))
+                date.set(Some(new ju.Date(123123123)))
                 eventually {
-                  (showCounter, hideCounter, changeCounter) should be((2, 2, 1))
+                  (showCounter, hideCounter, changeCounter) should be((2, 2, 3))
                 }
               }
             }
@@ -69,7 +69,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
     }
 
     "not fail on null input value" in {
-      val date = Property[ju.Date](new ju.Date())
+      val date = Property[Option[ju.Date]](Some(new ju.Date()))
       val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
@@ -88,11 +88,35 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       }
     }
 
-
+    "sync with property" in {
+      val date = Property[Option[ju.Date]](Some(new ju.Date()))
+      val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+        format = "MMMM Do YYYY, hh:mm a",
+        locale = Some("en_GB")
+      ))
+      val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+      val r = div(
+        UdashDatePicker.loadBootstrapDatePickerStyles(),
+        UdashInputGroup()(
+          UdashInputGroup.input(picker.render)
+        ).render
+      ).render
+      jQ("body").append(r)
+      val pickerJQ = jQ("#" + picker.componentId.id).asDatePicker()
+      pickerJQ.date("May 15th 2017, 10:59 am")
+      eventually {
+        date.get.get.getTime should be(1494838740000L)
+      } flatMap { _ =>
+        pickerJQ.date(null)
+        eventually {
+          date.get should be(None)
+        }
+      }
+    }
 
     "emit error events" in {
       val contentId = "datepicker-test-content"
-      val date = Property(new ju.Date)
+      val date = Property[Option[ju.Date]](Some(new ju.Date()))
       val options = Property(UdashDatePicker.DatePickerOptions(
         format = "YYYY MM DD",
         minDate = Some(new ju.Date(1000000000)),
@@ -113,27 +137,27 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         case UdashDatePicker.DatePickerEvent.Change(_, _, _) => changeCounter += 1
       }
 
-      date.set(new ju.Date(3000000000L))
+      date.set(Some(new ju.Date(3000000000L)))
       eventually {
         (errorCounter, changeCounter) should be((0, 1))
       } flatMap { _ =>
-        date.set(new ju.Date(300000))
+        date.set(Some(new ju.Date(300000)))
         eventually {
           (errorCounter, changeCounter) should be((1, 1))
         } flatMap { _ =>
-          date.set(new ju.Date(2000000000L))
+          date.set(Some(new ju.Date(2000000000L)))
           eventually {
             (errorCounter, changeCounter) should be((1, 2))
           } flatMap { _ =>
-            date.set(new ju.Date(8000000000L))
+            date.set(Some(new ju.Date(8000000000L)))
             eventually {
               (errorCounter, changeCounter) should be((2, 2))
             } flatMap { _ =>
-              date.set(new ju.Date(3000000000L))
+              date.set(Some(new ju.Date(3000000000L)))
               eventually {
                 (errorCounter, changeCounter) should be((2, 3))
               } flatMap { _ =>
-                date.set(new ju.Date(4000000000L))
+                date.set(Some(new ju.Date(4000000000L)))
                 eventually {
                   (errorCounter, changeCounter) should be((2, 4))
                 }

@@ -16,7 +16,7 @@ import scala.scalajs.js.|
 import scala.util.Try
 
 /** Wrapper for <a href="http://eonasdan.github.io/bootstrap-datetimepicker/">Bootstrap 3 Datepicker</a>. */
-class UdashDatePicker private[datepicker](val date: Property[ju.Date],
+class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
                                           val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
                                           override val componentId: ComponentId)
   extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
@@ -55,25 +55,26 @@ class UdashDatePicker private[datepicker](val date: Property[ju.Date],
     dateString.listen(s => jQInput.dpData().date(s))
     options.listen(opts => jQInput.dpData().options(optionsToJsDict(opts)))
 
-    jQInput.dpData().date(dateString.get)
+    date.get.foreach(d => jQInput.dpData().date(dateToMoment(d)))
 
     jQInput.on("dp.change", (_: dom.Element, ev: JQueryEvent) => {
       val event = ev.asInstanceOf[DatePickerChangeJQEvent]
       val dateOption = event.dateOption
       val oldDateOption = event.oldDateOption
-      dateOption.foreach(date => dateString.set(Try(date.format(options.get.format)).getOrElse(null)))
+      dateOption match {
+        case Some(date) => dateString.set(Try(date.format(options.get.format)).getOrElse(""))
+        case None => dateString.set("")
+      }
       fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption.map(momentToDate), oldDateOption.map(momentToDate)))
     })
     jQInput.on("dp.hide", (_: dom.Element, ev: JQueryEvent) => {
-      val date: MomentFormatWrapper = ev.asInstanceOf[DatePickerHideJQEvent].date
-      fire(UdashDatePicker.DatePickerEvent.Hide(this, momentToDate(date)))
+      fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
     })
     jQInput.on("dp.show", (_: dom.Element, ev: JQueryEvent) =>
       fire(UdashDatePicker.DatePickerEvent.Show(this))
     )
     jQInput.on("dp.error", (_: dom.Element, ev: JQueryEvent) => {
-      val date: MomentFormatWrapper = ev.asInstanceOf[DatePickerErrorJQEvent].date
-      fire(UdashDatePicker.DatePickerEvent.Error(this, momentToDate(date)))
+      fire(UdashDatePicker.DatePickerEvent.Error(this, date.get))
     })
 
     inp
@@ -164,17 +165,28 @@ class UdashDatePicker private[datepicker](val date: Property[ju.Date],
     )
   }
 
-  private def dateToMomentString(date: ju.Date): String =
-    Try(moment(options.get.locale.getOrElse("en"), date.getTime, "x").format(options.get.format)).getOrElse(null)
+  private def internalFormat = options.get.format
+  private def internalLocale = options.get.locale.getOrElse("en")
+
+  private def dateToMomentString(date: Option[ju.Date]): String =
+    date.map(d => moment(internalLocale, d.getTime, "x").format(internalFormat)).getOrElse("")
 
   private def dateToMoment(date: ju.Date): MomentFormatWrapper =
-    Try(moment(options.get.locale.getOrElse("en"), date.getTime, "x")).getOrElse(null)
+    Try(moment("en", date.getTime, "x")).getOrElse(null)
 
-  private def momentStringToDate(date: String): ju.Date =
-    Try(new ju.Date(moment(options.get.locale.getOrElse("en"), date, options.get.format).valueOf().toLong)).getOrElse(null)
+  private def momentStringToDate(date: String): Option[ju.Date] =
+    moment(internalLocale, date, internalFormat).valueOf() match {
+      case t if t.isNaN || t.isInfinity => None
+      case t => Some(new ju.Date(t.toLong))
+    }
 
   private def momentToDate(date: MomentFormatWrapper): ju.Date =
-    Try(new ju.Date(date.valueOf().toLong)).getOrElse(null)
+    Try{
+      date.valueOf() match {
+        case t if t.isNaN || t.isInfinity => null
+        case t => new ju.Date(t.toLong)
+      }
+    }.getOrElse(null)
 }
 
 object UdashDatePicker {
@@ -182,14 +194,15 @@ object UdashDatePicker {
   import scalatags.JsDom.all._
 
   /** Creates date picker component. */
-  def apply(componentId: ComponentId = UdashBootstrap.newId())(date: Property[ju.Date], options: ReadableProperty[UdashDatePicker.DatePickerOptions]): UdashDatePicker =
+  def apply(componentId: ComponentId = UdashBootstrap.newId())
+           (date: Property[Option[ju.Date]], options: ReadableProperty[UdashDatePicker.DatePickerOptions]): UdashDatePicker =
     new UdashDatePicker(date, options, componentId)
 
   /** Creates date range selector from provided date pickers. */
   def dateRange(from: UdashDatePicker, to: UdashDatePicker)(fromOptions: Property[UdashDatePicker.DatePickerOptions],
                                                             toOptions: Property[UdashDatePicker.DatePickerOptions]): Registration = {
-    val r1 = from.date.streamTo(toOptions)(d => toOptions.get.copy(minDate = Option(d)))
-    val r2 = to.date.streamTo(fromOptions)(d => fromOptions.get.copy(maxDate = Option(d)))
+    val r1 = from.date.streamTo(toOptions)(d => toOptions.get.copy(minDate = d))
+    val r2 = to.date.streamTo(fromOptions)(d => fromOptions.get.copy(maxDate = d))
     new Registration {
       override def cancel(): Unit = {
         r1.cancel()
@@ -208,12 +221,11 @@ object UdashDatePicker {
 
     case class Show(source: UdashDatePicker) extends DatePickerEvent
 
-    case class Hide(source: UdashDatePicker, date: ju.Date) extends DatePickerEvent
+    case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
 
     case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends DatePickerEvent
 
-    case class Error(source: UdashDatePicker, date: ju.Date) extends DatePickerEvent
-
+    case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
   }
 
   /**
@@ -395,7 +407,7 @@ object UdashDatePicker {
   private trait UdashDatePickerDataJQuery extends JQuery {
     def options(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
 
-    def date(formattedDate: String): Unit = js.native
+    def date(formattedDate: MomentFormatWrapper | String): Unit = js.native
 
     def show(): Unit = js.native
 
@@ -413,22 +425,27 @@ object UdashDatePicker {
       jQ.asInstanceOf[UdashDatePickerJQuery]
   }
 
-  @js.native
-  private trait DatePickerChangeJQEvent extends JQueryEvent {
-    def date: MomentFormatWrapper | Boolean = js.native
+  private def sanitizeDate(maybeDate: MomentFormatWrapper | Boolean): Option[MomentFormatWrapper] =
+    maybeDate.option.filterNot(_.isInstanceOf[Boolean]).asInstanceOf[Option[MomentFormatWrapper]]
 
+  @js.native
+  private trait DateJQEvent extends JQueryEvent {
+    def date: MomentFormatWrapper | Boolean = js.native
+  }
+
+  private implicit class DateJQEventOps(private val ev: DateJQEvent) extends AnyVal {
+    def dateOption: Option[MomentFormatWrapper] =
+      ev.option.flatMap(ev => sanitizeDate(ev.date))
+  }
+
+  @js.native
+  private trait DatePickerChangeJQEvent extends DateJQEvent {
     def oldDate: MomentFormatWrapper | Boolean = js.native
   }
 
   private implicit class DatePickerChangeJqEventOps(private val ev: DatePickerChangeJQEvent) extends AnyVal {
-    private def sanitizeDate(maybeDate: MomentFormatWrapper | Boolean): Option[MomentFormatWrapper] =
-      maybeDate
-        .option
-        .collect { case wrapper: js.Date => wrapper.asInstanceOf[MomentFormatWrapper] }
-
-    def dateOption: Option[MomentFormatWrapper] = ev.option.flatMap(ev => sanitizeDate(ev.date))
-
-    def oldDateOption: Option[MomentFormatWrapper] = ev.option.flatMap(ev => sanitizeDate(ev.oldDate))
+    def oldDateOption: Option[MomentFormatWrapper] =
+      ev.option.flatMap(ev => sanitizeDate(ev.oldDate))
   }
 
 
@@ -436,14 +453,10 @@ object UdashDatePicker {
   private trait DatePickerShowJQEvent extends JQueryEvent
 
   @js.native
-  private trait DatePickerHideJQEvent extends JQueryEvent {
-    def date: MomentFormatWrapper = js.native
-  }
+  private trait DatePickerHideJQEvent extends DateJQEvent
 
   @js.native
-  private trait DatePickerErrorJQEvent extends JQueryEvent {
-    def date: MomentFormatWrapper = js.native
-  }
+  private trait DatePickerErrorJQEvent extends DateJQEvent
 
   private def moment(locale: String, time: js.Any, format: String): MomentFormatWrapper =
     js.Dynamic.global.moment(time, format, locale).asInstanceOf[MomentFormatWrapper]
