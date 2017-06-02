@@ -1,5 +1,7 @@
 package io.udash.web.guide.views.ext.demo
 
+import java.util.concurrent.TimeUnit
+
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
@@ -80,11 +82,12 @@ object BootstrapDemos extends StrictLogging {
 
   def datePicker(): dom.Element = {
     import java.{util => ju}
-    val date = Property[ju.Date](new ju.Date())
+    val date = Property[Option[ju.Date]](Some(new ju.Date()))
 
     val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY, hh:mm a",
-      locale = Some("en_GB")
+      locale = Some("en_GB"),
+      showClear = true
     ))
 
     val disableWeekends = Property(false)
@@ -143,8 +146,10 @@ object BootstrapDemos extends StrictLogging {
 
   def datePickerRange(): dom.Element = {
     import java.{util => ju}
-    val from = Property[ju.Date](new ju.Date())
-    val to = Property[ju.Date](new ju.Date())
+    val now = new ju.Date().getTime
+    val sevenDays = TimeUnit.DAYS.toMillis(7)
+    val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
+    val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
 
     val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY",
