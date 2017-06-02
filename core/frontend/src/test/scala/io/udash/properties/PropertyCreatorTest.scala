@@ -437,5 +437,29 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |}
         |val p = Property[C]""".stripMargin shouldNot compile
     }
+
+    "handle explicit creation of property creator for recursive model" in {
+      """trait T {
+        |  def x: T
+        |}
+        |object Test {
+        |  implicit val pc: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+        |}""".stripMargin should compile
+    }
+
+    "handle explicit creation of property creator for recursive model (case class)" in {
+      """case class T(a: Int, t: T)
+        |object Test {
+        |  implicit val pc: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+        |}""".stripMargin should compile
+    }
+
+    "handle explicit creation of property creator for recursive model (case class with Seq)" in {
+      """case class T(a: Int, t: T, st: Seq[T])
+        |object Test {
+        |  implicit val pc: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+        |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator.propertyCreator[Seq[T]]
+        |}""".stripMargin should compile
+    }
   }
 }
