@@ -172,13 +172,10 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
     date.map(d => moment(internalLocale, d.getTime, "x").format(internalFormat)).getOrElse("")
 
   private def dateToMoment(date: ju.Date): MomentFormatWrapper =
-    Try(moment("en", date.getTime, "x")).getOrElse(null)
+    Try(moment(internalLocale, date.getTime, "x")).getOrElse(null)
 
   private def momentStringToDate(date: String): Option[ju.Date] =
-    moment(internalLocale, date, internalFormat).valueOf() match {
-      case t if t.isNaN || t.isInfinity => None
-      case t => Some(new ju.Date(t.toLong))
-    }
+    Option(momentToDate(moment(internalLocale, date, internalFormat)))
 
   private def momentToDate(date: MomentFormatWrapper): ju.Date =
     Try{

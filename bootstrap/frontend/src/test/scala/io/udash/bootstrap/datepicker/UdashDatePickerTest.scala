@@ -37,35 +37,44 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         case UdashDatePicker.DatePickerEvent.Change(_, _, _) => changeCounter += 1
       }
 
-      picker.hide()
-      eventually {
-        (showCounter, hideCounter, changeCounter) should be((0, 0, 0)) // it was hidden already
-      } flatMap { _ =>
-        picker.show()
-        eventually {
-          (showCounter, hideCounter, changeCounter) should be((1, 0, 2)) // Two changes: None -> default_now; default_now -> selected format
-        } flatMap { _ =>
+      for {
+        _ <- {
+          picker.hide()
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((0, 0, 0)) // it was hidden already
+          }
+        }
+        _ <- {
+          picker.show()
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((1, 0, 2)) // Two changes: None -> default_now; default_now -> selected format
+          }
+        }
+        _ <- {
           picker.hide()
           eventually {
             (showCounter, hideCounter, changeCounter) should be((1, 1, 2))
-          } flatMap { _ =>
-            picker.toggle()
-            eventually {
-              (showCounter, hideCounter, changeCounter) should be((2, 1, 2))
-            } flatMap { _ =>
-              picker.toggle()
-              eventually {
-                (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
-              } flatMap { _ =>
-                date.set(Some(new ju.Date(123123123)))
-                eventually {
-                  (showCounter, hideCounter, changeCounter) should be((2, 2, 3))
-                }
-              }
-            }
           }
         }
-      }
+        _ <- {
+          picker.toggle()
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((2, 1, 2))
+          }
+        }
+        _ <- {
+          picker.toggle()
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
+          }
+        }
+        r <- {
+          date.set(Some(new ju.Date(123123123)))
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((2, 2, 3))
+          }
+        }
+      } yield r
     }
 
     "not fail on null input value" in {
@@ -102,16 +111,25 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         ).render
       ).render
       jQ("body").append(r)
+
       val pickerJQ = jQ("#" + picker.componentId.id).asDatePicker()
-      pickerJQ.date("May 15th 2017, 10:59 am")
-      eventually {
-        date.get.get.getTime should be(1494838740000L)
-      } flatMap { _ =>
-        pickerJQ.date(null)
-        eventually {
-          date.get should be(None)
+
+      for {
+        _ <- {
+          pickerJQ.date("May 15th 2017, 10:59 am")
+          eventually {
+            // ignore time zone
+            date.get.get.getTime > 1494763200000L should be(true)
+            date.get.get.getTime < 1494936000000L should be(true)
+          }
         }
-      }
+        r <- {
+          pickerJQ.date(null)
+          eventually {
+            date.get should be(None)
+          }
+        }
+      } yield r
     }
 
     "emit error events" in {
@@ -137,35 +155,44 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         case UdashDatePicker.DatePickerEvent.Change(_, _, _) => changeCounter += 1
       }
 
-      date.set(Some(new ju.Date(3000000000L)))
-      eventually {
-        (errorCounter, changeCounter) should be((0, 1))
-      } flatMap { _ =>
-        date.set(Some(new ju.Date(300000)))
-        eventually {
-          (errorCounter, changeCounter) should be((1, 1))
-        } flatMap { _ =>
+      for {
+        _ <- {
+          date.set(Some(new ju.Date(3000000000L)))
+          eventually {
+            (errorCounter, changeCounter) should be((0, 1))
+          }
+        }
+        _ <- {
+          date.set(Some(new ju.Date(300000)))
+          eventually {
+            (errorCounter, changeCounter) should be((1, 1))
+          }
+        }
+        _ <- {
           date.set(Some(new ju.Date(2000000000L)))
           eventually {
             (errorCounter, changeCounter) should be((1, 2))
-          } flatMap { _ =>
-            date.set(Some(new ju.Date(8000000000L)))
-            eventually {
-              (errorCounter, changeCounter) should be((2, 2))
-            } flatMap { _ =>
-              date.set(Some(new ju.Date(3000000000L)))
-              eventually {
-                (errorCounter, changeCounter) should be((2, 3))
-              } flatMap { _ =>
-                date.set(Some(new ju.Date(4000000000L)))
-                eventually {
-                  (errorCounter, changeCounter) should be((2, 4))
-                }
-              }
-            }
           }
         }
-      }
+        _ <- {
+          date.set(Some(new ju.Date(8000000000L)))
+          eventually {
+            (errorCounter, changeCounter) should be((2, 2))
+          }
+        }
+        _ <- {
+          date.set(Some(new ju.Date(3000000000L)))
+          eventually {
+            (errorCounter, changeCounter) should be((2, 3))
+          }
+        }
+        r <- {
+          date.set(Some(new ju.Date(4000000000L)))
+          eventually {
+            (errorCounter, changeCounter) should be((2, 4))
+          }
+        }
+      } yield r
     }
   }
 
