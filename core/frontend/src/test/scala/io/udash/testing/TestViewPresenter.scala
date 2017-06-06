@@ -12,11 +12,11 @@ class TestViewPresenter[T <: TestState] extends ViewPresenter[T] {
 
 class TestView extends View {
   import scalatags.JsDom.all._
-  var lastChild: View = _
+  var lastChild: Option[View] = _
   var renderingCounter = 0
 
-  override def renderChild(view: View): Unit = {
-    if (view != null) view.getTemplate
+  override def renderChild(view: Option[View]): Unit = {
+    view.foreach(_.getTemplate)
     lastChild = view
   }
 

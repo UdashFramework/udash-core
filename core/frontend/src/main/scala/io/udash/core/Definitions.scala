@@ -51,11 +51,11 @@ trait View {
     * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
     * the parent view. <br/><br/>
     *
-    * <b>This method can receive null as "view" argument, then previous child view should be removed.</b>
+    * <b>This method can receive None as "view" argument, then previous child view should be removed.</b>
     *
     * @param view view which origins from child
     */
-  def renderChild(view: View): Unit
+  def renderChild(view: Option[View]): Unit
 
   /**
     * Implementation of this method should return DOM representation of view.
@@ -68,8 +68,8 @@ trait View {
 
 /** A [[io.udash.core.View]] which does not have any child view. */
 trait FinalView extends View {
-  override def renderChild(view: View): Unit =
-    if (view != null) throw View.UnexpectedChildView
+  override def renderChild(view: Option[View]): Unit =
+    if (view.isDefined) throw View.UnexpectedChildView
 }
 
 object View {
