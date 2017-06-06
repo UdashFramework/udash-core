@@ -76,11 +76,12 @@ class BootstrapExtView extends FinalView {
     h3("Date Picker"),
     CodeBlock(
       s"""import java.{util => ju}
-         |val date = Property[ju.Date](new ju.Date())
+         |val date = Property[Option[ju.Date]](Some(new ju.Date()))
          |
          |val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
          |  format = "MMMM Do YYYY, hh:mm a",
-         |  locale = Some("en_GB")
+         |  locale = Some("en_GB"),
+         |  showClear = true
          |))
          |
          |val disableWeekends = Property(false)
@@ -106,8 +107,10 @@ class BootstrapExtView extends FinalView {
     CodeBlock(
       s"""import java.{util => ju}
          |
-         |val from = Property[ju.Date](new ju.Date())
-         |val to = Property[ju.Date](new ju.Date())
+         |val now = new ju.Date().getTime
+         |val sevenDays = TimeUnit.DAYS.toMillis(7)
+         |val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
+         |val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
          |
          |val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
          |  format = "MMMM Do YYYY",
