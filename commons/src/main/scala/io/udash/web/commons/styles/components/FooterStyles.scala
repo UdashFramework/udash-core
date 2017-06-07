@@ -4,7 +4,7 @@ import io.udash.web.commons.styles.{GlobalStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 /**
   * Created by malchik on 2016-04-04.

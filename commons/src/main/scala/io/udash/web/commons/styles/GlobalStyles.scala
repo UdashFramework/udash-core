@@ -5,7 +5,7 @@ import io.udash.web.commons.styles.utils._
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scalacss.internal.Attr
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object GlobalStyles extends UdashStylesheet {
   import dsl._

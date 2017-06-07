@@ -3,7 +3,7 @@ package io.udash.web.commons.styles
 import io.udash.wrappers.jquery.jQ
 
 import scala.collection.mutable
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 import scalacss.StyleSheet.{Inline => ISS}
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2.style

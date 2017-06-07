@@ -5,7 +5,7 @@ import io.udash.web.commons.styles.utils._
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scalacss.internal.{Attr, Literal}
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 trait DefaultStyles extends StyleSheet.Inline {
   import dsl._

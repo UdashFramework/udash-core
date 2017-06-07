@@ -7,7 +7,7 @@ import io.udash.web.homepage.components.demo.DemoComponent
 
 import scala.language.postfixOps
 import scalacss.internal.Compose
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object DemoStyles extends UdashStylesheet {
   import dsl._

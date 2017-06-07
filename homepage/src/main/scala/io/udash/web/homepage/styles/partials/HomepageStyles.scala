@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
 import scalacss.internal.Compose
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object HomepageStyles extends UdashStylesheet with CodeBlockStyles {
   import dsl._

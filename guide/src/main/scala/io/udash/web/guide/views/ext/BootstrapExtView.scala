@@ -18,7 +18,7 @@ case object BootstrapExtViewPresenter extends DefaultViewPresenterFactory[Bootst
 class BootstrapExtView extends FinalView {
   import JsDom.all._
   import scalacss.ScalatagsCss._
-  import scalacss.Defaults._
+  import scalacss.ProdDefaults._
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),

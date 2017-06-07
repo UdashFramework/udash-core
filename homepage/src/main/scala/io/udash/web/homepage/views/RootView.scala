@@ -18,7 +18,7 @@ import scalatags.JsDom.tags2._
 object RootViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new RootView)
 
 class RootView extends View {
-  import scalacss.Defaults._
+  import scalacss.ProdDefaults._
   import scalacss.ScalatagsCss._
   import scalatags.JsDom.all._
 

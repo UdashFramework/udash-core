@@ -7,7 +7,7 @@ import io.udash.web.commons.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 trait HeaderNavStyles extends StyleSheet.Inline {
   import dsl._

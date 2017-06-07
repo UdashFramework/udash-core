@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUti
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 trait HeaderButtonsStyles extends StyleSheet.Inline {
   import dsl._

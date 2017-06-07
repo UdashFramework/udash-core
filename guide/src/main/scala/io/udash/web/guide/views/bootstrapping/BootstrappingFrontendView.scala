@@ -17,7 +17,7 @@ class BootstrappingFrontendView extends FinalView {
   import Context._
 
   import JsDom.all._
-  import scalacss.Defaults._
+  import scalacss.ProdDefaults._
   import scalacss.ScalatagsCss._
 
   override def getTemplate: Modifier = div(

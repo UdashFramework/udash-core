@@ -71,7 +71,7 @@ class SimpleRestDemoComponent extends Component {
 
   class SimpleRestDemoView(model: ModelProperty[ExampleModel], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
-    import scalacss.Defaults._
+    import scalacss.ProdDefaults._
     import scalacss.ScalatagsCss._
 
     val loadStringButton = UdashButton(

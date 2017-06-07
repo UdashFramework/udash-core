@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 import scalacss.internal.{AV, Attr, Length, ValueT}
 
 object StyleUtils extends StyleSheet.Inline {

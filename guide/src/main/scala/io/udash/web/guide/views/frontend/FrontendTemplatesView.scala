@@ -14,7 +14,7 @@ import org.scalajs.dom.raw.HTMLStyleElement
 
 import scala.concurrent.duration.FiniteDuration
 import scalacss.internal.{AV, Keyframes}
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 

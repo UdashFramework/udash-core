@@ -4,7 +4,7 @@ import io.udash.web.commons.styles.{DefaultStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils._
 
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object HomepageDefaultStyles extends UdashStylesheet with DefaultStyles {
   import dsl._

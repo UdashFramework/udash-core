@@ -1,7 +1,7 @@
 package io.udash.web.commons.styles.utils
 
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 /**
   * Created by malchik on 2016-03-30.

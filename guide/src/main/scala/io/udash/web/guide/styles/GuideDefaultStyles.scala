@@ -4,7 +4,7 @@ import io.udash.web.commons.styles.{DefaultStyles, UdashStylesheet}
 import io.udash.web.commons.styles.utils.{FontWeight, MediaQueries, UdashFonts}
 
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object GuideDefaultStyles extends UdashStylesheet with DefaultStyles {
   import dsl._

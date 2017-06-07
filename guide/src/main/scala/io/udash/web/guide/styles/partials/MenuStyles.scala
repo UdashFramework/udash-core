@@ -12,7 +12,7 @@ import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 import scalacss.internal.Compose
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object MenuStyles extends UdashStylesheet {
   import dsl._

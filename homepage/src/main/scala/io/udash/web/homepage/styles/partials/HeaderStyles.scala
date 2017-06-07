@@ -10,7 +10,7 @@ import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, StyleUti
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object HeaderStyles extends UdashStylesheet with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._

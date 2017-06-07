@@ -4,7 +4,7 @@ package io.udash.web.commons.styles.utils
   * Created by malchik on 2016-03-22.
   */
 
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 object StyleConstants extends StyleSheet.Inline{
   import dsl._

@@ -2,7 +2,7 @@ package io.udash.web.guide.styles.utils
 
 import io.udash.web.commons.styles.utils.StyleConstants
 
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 import scala.language.postfixOps
 
 /**

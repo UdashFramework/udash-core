@@ -1,6 +1,6 @@
 package io.udash.web.commons.styles.components
 
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 trait CodeBlockStyles extends StyleSheet.Inline {
   val codeWrapper: StyleA

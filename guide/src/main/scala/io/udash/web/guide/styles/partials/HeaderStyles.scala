@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.styles.utils.{MediaQueries, StyleUtils}
 
 import scala.language.postfixOps
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 /**
   * Created by malchik on 2016-04-04.

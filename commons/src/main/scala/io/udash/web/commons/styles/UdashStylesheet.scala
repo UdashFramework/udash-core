@@ -1,6 +1,6 @@
 package io.udash.web.commons.styles
 
-import scalacss.Defaults._
+import scalacss.ProdDefaults._
 
 /**
   * Created by malchik on 2016-04-29.
