@@ -3,7 +3,7 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.5.0"
+version in ThisBuild := "0.6.0-SNAPSHOT"
 scalaVersion in ThisBuild := versionOfScala
 crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
 organization in ThisBuild := "io.udash"
