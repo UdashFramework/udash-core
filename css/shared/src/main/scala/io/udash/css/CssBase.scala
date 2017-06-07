@@ -6,6 +6,18 @@ import scalacss.internal.DslBase.ToStyle
 import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, Dsl, DslBase, Env, FontFace, Keyframes, Macros, Percentage, Renderer, StyleA}
 import scala.language.implicitConversions
 
+/**
+  * Base trait for all stylesheets.
+  *
+  * Example:
+  * <pre>
+  * object ExampleStylesheet extends CssBase {
+  *   import dsl._
+  *
+  *   val s = style(...)
+  * }
+  * </pre>
+  */
 trait CssBase {
   class Dsl(val elementsBuffer: mutable.ArrayBuffer[CssStyle]) extends DslBase {
     implicit def compose: Compose = Compose.trust
@@ -69,18 +81,17 @@ trait CssBase {
     elementsBuffer.toVector
 
   def render(implicit renderer: Renderer[String]): String = {
-    val sb = new mutable.StringBuilder()
-    elementsBuffer.foreach {
+    elementsBuffer.iterator.map {
       case CssStyleImpl(className, impl) =>
-        sb.append(renderer.apply(
+        renderer.apply(
           Css.styleA(StyleA(
             new ClassName(className),
             Vector.empty,
             impl
           ))(Env.empty)
-        ))
+        )
       case CssKeyframes(className, steps) =>
-        sb.append(renderer.apply(Vector(
+        renderer.apply(Vector(
           Css.keyframes(Keyframes(
             new ClassName(className),
             steps.toSeq.map { case (p, impl) =>
@@ -91,9 +102,9 @@ trait CssBase {
               ))
             }
           ))(Env.empty)
-        )))
+        ))
       case CssFontFace(className, font) =>
-        sb.append(renderer.apply(Vector(
+        renderer.apply(Vector(
           Css.fontFaces(
             FontFace[String](
               className,
@@ -104,10 +115,9 @@ trait CssBase {
               unicodeRangeValue = font.unicodeRangeValue
             )
           )
-        )))
+        ))
       case _ =>
-    }
-    sb.result()
+    }.mkString
   }
 }
 

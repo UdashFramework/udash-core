@@ -2,6 +2,7 @@ package io.udash.css
 
 import scalacss.internal.{FontFace, StyleS}
 
+/** Representation of stylesheet elements. In JS it's always `CssStyleName`. */
 sealed trait CssStyle {
   val className: String
 }

@@ -1,10 +1,9 @@
 package io.udash.css
 
-import java.io.{File, PrintWriter}
-
 import scalacss.internal.Renderer
 
-class CssStringRenderer(styles: Seq[_ <: CssBase]) {
+/** Renders provided styles into `String`. Keeps styles order from provided `Seq`. */
+class CssStringRenderer(styles: Seq[CssBase]) {
   def render()(implicit renderer: Renderer[String]): String = {
     val builder = new StringBuilder
 
