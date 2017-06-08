@@ -1,5 +1,7 @@
 package io.udash.properties
 
+import scala.language.higherKinds
+
 trait ImmutableValue[A]
 object ImmutableValue {
   // implement with macro that checks if T is really fully immutable, i.e:
@@ -14,6 +16,9 @@ object ImmutableValue {
   implicit val allowStringTpe: ImmutableValue[String] = null
   implicit val allowCharTpe: ImmutableValue[Char] = null
   implicit val allowBooleanTpe: ImmutableValue[Boolean] = null
+
+  implicit def allowImmutableCollections[T: ImmutableValue, M[_]](implicit ev: M[T] <:< collection.immutable.Traversable[T]): ImmutableValue[M[T]] = null
+
   implicit def isImmutable[T]: ImmutableValue[T] = macro io.udash.macros.PropertyMacros.reifyImmutableValue[T]
 }
 

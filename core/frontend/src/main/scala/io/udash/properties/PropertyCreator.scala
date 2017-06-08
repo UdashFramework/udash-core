@@ -2,6 +2,7 @@ package io.udash.properties
 
 import java.util.UUID
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
 
 import scala.concurrent.ExecutionContext
@@ -47,6 +48,14 @@ object PropertyCreator {
   implicit val propertyCreatorOChar: PropertyCreator[Option[Char]] = propertyCreator[Option[Char]]
   implicit val propertyCreatorOBoolean: PropertyCreator[Option[Boolean]] = propertyCreator[Option[Boolean]]
 
+  implicit val propertyCreatorOptInt: PropertyCreator[Opt[Int]] = propertyCreator[Opt[Int]]
+  implicit val propertyCreatorOptLong: PropertyCreator[Opt[Long]] = propertyCreator[Opt[Long]]
+  implicit val propertyCreatorOptDouble: PropertyCreator[Opt[Double]] = propertyCreator[Opt[Double]]
+  implicit val propertyCreatorOptFloat: PropertyCreator[Opt[Float]] = propertyCreator[Opt[Float]]
+  implicit val propertyCreatorOptString: PropertyCreator[Opt[String]] = propertyCreator[Opt[String]]
+  implicit val propertyCreatorOptChar: PropertyCreator[Opt[Char]] = propertyCreator[Opt[Char]]
+  implicit val propertyCreatorOptBoolean: PropertyCreator[Opt[Boolean]] = propertyCreator[Opt[Boolean]]
+
   implicit val propertyCreatorDomElement: PropertyCreator[org.scalajs.dom.Element] = PropertyCreator.propertyCreator[org.scalajs.dom.Element]
   implicit val propertyCreatorSDomElement: PropertyCreator[Seq[org.scalajs.dom.Element]] = PropertyCreator.propertyCreator[Seq[org.scalajs.dom.Element]]
   implicit val propertyCreatorODomElement: PropertyCreator[Option[org.scalajs.dom.Element]] = PropertyCreator.propertyCreator[Option[org.scalajs.dom.Element]]
@@ -55,6 +64,5 @@ object PropertyCreator {
   implicit val propertyCreatorSJavaDate: PropertyCreator[Seq[java.util.Date]] = PropertyCreator.propertyCreator[Seq[java.util.Date]]
   implicit val propertyCreatorOJavaDate: PropertyCreator[Option[java.util.Date]] = PropertyCreator.propertyCreator[Option[java.util.Date]]
 
-  def newID(): UUID =
-    UUID.randomUUID()
+  def newID(): UUID = UUID.randomUUID()
 }
