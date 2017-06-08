@@ -175,6 +175,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
            |  * isImmutableSealedHierarchy: $isSealedHierarchy
            |  * isImmutableSeq: $isSeq - for example: Seq[String]
            |  * isImmutableOption: $isOption - for example: Option[String]
+           |  * isImmutableOpt: $isOpt - for example: Opt[String]
            |""".stripMargin
       )
     }
