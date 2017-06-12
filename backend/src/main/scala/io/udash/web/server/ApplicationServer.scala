@@ -1,12 +1,12 @@
 package io.udash.web.server
 
 import com.avsystem.commons.rpc.RPCMetadata
-import io.udash.web.guide.{GuideExceptions, MainServerRPC}
-import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import io.udash.web.guide.rest.DevsGuideRest
+import io.udash.web.guide.rpc.ExposedRpcInterfaces
+import io.udash.web.guide.{GuideExceptions, MainServerRPC}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -29,6 +29,7 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
 
   private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
   private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
+  guide.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
 
   homepage.addServlet(createStaticHandler(homepageResourceBase), "/*")
   guide.addServlet(createStaticHandler(guideResourceBase), "/*")
@@ -43,10 +44,8 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
           callLogger.append(Call(rpcName, methodName, args))
       }
     })
+
     val framework = new DefaultAtmosphereFramework(config, exceptionsRegistry = GuideExceptions.registry)
-
-    framework.init()
-
     val atmosphereHolder = new ServletHolder(new RpcServlet(framework))
     atmosphereHolder.setAsyncSupported(true)
     atmosphereHolder

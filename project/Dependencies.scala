@@ -4,9 +4,9 @@ import sbt._
 object Dependencies {
 
   val versionOfScala = "2.12.2"
-  val jettyVersion = "9.3.11.v20160721"
+  val jettyVersion = "9.4.5.v20170502"
 
-  val udashVersion = "0.5.0"
+  val udashVersion = "0.6.0-SNAPSHOT"
   val udashJQueryVersion = "1.0.1"
   val highchartsVarsion = "5.0.10"
 
@@ -15,7 +15,7 @@ object Dependencies {
   val scalaLoggingVersion = "3.5.0"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.20.3"
+  val avsystemCommonsVersion = "1.20.6"
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.8.RELEASE"
   val akkaVersion = "2.4.17"
