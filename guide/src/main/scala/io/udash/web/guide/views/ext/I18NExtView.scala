@@ -3,10 +3,9 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
 import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, FrontendTranslationsDemo, RemoteTranslationsDemo}
-import org.scalajs.dom
 
 import scalatags.JsDom
 
@@ -96,7 +95,6 @@ class I18NExtView extends FinalView {
          |
          |object FrontendTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -137,7 +135,7 @@ class I18NExtView extends FinalView {
       "Take a look at the example below. As you can see in the code sample, it uses ",
       i("translated"), " method to bind translation into DOM hierarchy. "
     ),
-    FrontendTranslationsDemo(),
+    ForceBootstrap(FrontendTranslationsDemo()),
     h3("RemoteTranslationProvider"),
     p(
       "If your application is using the Udash RPC system, you can provide translations from the server side application. ",
@@ -194,7 +192,6 @@ class I18NExtView extends FinalView {
          |
          |object RemoteTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -235,7 +232,7 @@ class I18NExtView extends FinalView {
          |}""".stripMargin
     )(GuideStyles),
     p("Take a look at the example below."),
-    RemoteTranslationsDemo(),
+    ForceBootstrap(RemoteTranslationsDemo()),
     h2("Translations binding"),
     p(
       "All translations are resolved asynchronously, so they cannot be statically added into DOM hierarchy. The Udash i18n plugin ",
@@ -265,7 +262,6 @@ class I18NExtView extends FinalView {
          |
          |object RemoteTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -308,6 +304,6 @@ class I18NExtView extends FinalView {
          |}""".stripMargin
     )(GuideStyles),
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
-    DynamicRemoteTranslationsDemo()
+    ForceBootstrap(DynamicRemoteTranslationsDemo())
   )
 }

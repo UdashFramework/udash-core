@@ -1,20 +1,21 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.{PingPongCallDemoComponent, PingPongPushDemoComponent}
-import org.scalajs.dom
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom
 
 case object RpcIntroViewPresenter extends DefaultViewPresenterFactory[RpcIntroState.type](() => new RpcIntroView)
 
-class RpcIntroView extends FinalView {
+class RpcIntroView extends FinalView with CssView {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -29,7 +30,7 @@ class RpcIntroView extends FinalView {
       a(href := References.ScalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("RPC interfaces with typed arguments and returned value"),
       li("Data models which can be used in RPC communication"),
       li("Model validators which can be used both in frontend and backend")
@@ -40,7 +41,7 @@ class RpcIntroView extends FinalView {
     ),
     h2("Ping-pong example"),
     p("Take a look at the simple ping-pong example. Click the button below and wait for a response."),
-    new PingPongCallDemoComponent,
+    ForceBootstrap(new PingPongCallDemoComponent),
     p("The implementation is really simple. In the server RPC interface, add the following method:"),
     CodeBlock(
       """import io.udash.rpc._
@@ -68,7 +69,7 @@ class RpcIntroView extends FinalView {
     )(GuideStyles),
     h2("Server push ping-pong example"),
     p("It is also possible to implement the above example using the server push mechanism."),
-    new PingPongPushDemoComponent,
+    ForceBootstrap(new PingPongPushDemoComponent),
     p("This implementation is only a little more complicated. In the server RPC interface, add the following method:"),
     CodeBlock(
       """import io.udash.rpc._

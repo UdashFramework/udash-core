@@ -10,8 +10,6 @@ object Dependencies {
   val udashJQueryVersion = "1.0.1"
   val highchartsVarsion = "5.0.10"
 
-  val scalaCssVersion = "0.5.3"
-
   val scalaLoggingVersion = "3.5.0"
   val logbackVersion = "1.2.3"
 
@@ -29,7 +27,8 @@ object Dependencies {
     "io.udash" %%% "udash-core-shared" % udashVersion,
     "io.udash" %%% "udash-rest-shared" % udashVersion,
     "io.udash" %%% "udash-rpc-shared" % udashVersion,
-    "io.udash" %%% "udash-i18n-shared" % udashVersion
+    "io.udash" %%% "udash-i18n-shared" % udashVersion,
+    "io.udash" %%% "udash-css-shared" % udashVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
@@ -39,8 +38,7 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
-    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
-    "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion
+    "io.udash" %%% "udash-css-frontend" % udashVersion
   ))
 
   val frontendJSDeps = Def.setting(Seq(
@@ -59,6 +57,7 @@ object Dependencies {
   val backendDeps = Def.setting(Seq(
     "io.udash" %% "udash-rpc-backend" % udashVersion,
     "io.udash" %% "udash-i18n-backend" % udashVersion,
+    "io.udash" %% "udash-css-backend" % udashVersion,
 
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,

@@ -71,7 +71,6 @@ class ExceptionsDemoComponent extends Component {
 
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
@@ -109,7 +108,7 @@ class ExceptionsDemoComponent extends Component {
         presenter.unknownExceptionCall()
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           "Result: ",

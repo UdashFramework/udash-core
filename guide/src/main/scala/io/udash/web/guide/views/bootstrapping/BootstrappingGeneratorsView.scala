@@ -1,17 +1,16 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object BootstrappingGeneratorsViewPresenter extends DefaultViewPresenterFactory[BootstrappingGeneratorsState.type](() => new BootstrappingGeneratorsView)
 
-class BootstrappingGeneratorsView extends FinalView {
+class BootstrappingGeneratorsView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -29,7 +28,7 @@ class BootstrappingGeneratorsView extends FinalView {
     ),
     p(
       "Now you will have to configure a few settings: ",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(b("Project root directory"), " - a directory where project files will be placed."),
         li(b("Clear root directory"), " - if true, the generator will remove all files and directories from the selected project root directory."),
         li(b("Project name"), " - a name of your project."),
@@ -39,14 +38,14 @@ class BootstrappingGeneratorsView extends FinalView {
         li(b("Module names"), " - if you selected the default Udash project, then you should select names of the modules."),
         li(
           span(b("Create basic frontend application"), " - decide if you want to generate a base of the frontend application."),
-          ul(GuideStyles.get.innerList)(
+          ul(GuideStyles.innerList)(
             li(b("Create frontend demo views"), " - decide if you want to generate frontend demo views."),
             li(b("Create ScalaCSS demo views"), " - decide if you want to add ScalaCSS to your project and generate demo views.")
           )
         ),
         li(
           span(b("Create Jetty launcher"), " - decide if you want to use a Jetty server for serving the frontend files."),
-          ul(GuideStyles.get.innerList)(
+          ul(GuideStyles.innerList)(
             li(b("Create RPC communication layer"), " - decide if you want to generate the RPC base for your project."),
             li(b("Create RPC communication layer demos"), " - decide if you want to generate RPC demo views.")
           )
@@ -65,7 +64,7 @@ class BootstrappingGeneratorsView extends FinalView {
     ),
     p(
       "Let's go through the frontend module files first:",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(
           b("init.scala"), " - consists of the main function which starts whole application and the ", i("Context"),
           " object which contains useful vals like ", i("serverRpc"), " (for communication with server) and implicit execution context."
@@ -80,14 +79,14 @@ class BootstrappingGeneratorsView extends FinalView {
     ),
     p(
       "The ", i("shared"), " module contains files related to the RPC system:",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(b("MainServerRPC.scala"), " - contains the main server RPC interface implemented in the ", i("backend"), " module."),
         li(b("MainClientRPC.scala"), " - contains the main client RPC interface implemented in the ", i("frontend"), " module.")
       )
     ),
     p(
       "The ", i("backend"), " module contains:",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(b("jetty/ApplicationServer.scala"), " - Jetty based server serving static files and handling RPC connections."),
         li(b("Launcher.scala"), " - creates and starts the application server."),
         li(b("rpc/ExposedRpcInterfaces.scala"), " - implementation of the main server RPC interface."),

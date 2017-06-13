@@ -1,20 +1,14 @@
 package io.udash.web.homepage.components.demo
 
 import io.udash._
-import io.udash.core.DomWindow
-import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.attributes.Attributes
-import io.udash.web.commons.styles.utils.StyleConstants
+import io.udash.web.commons.views.{Component, Image}
 import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
-import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
-import io.udash.web.commons.views.{Component, Image}
+import io.udash.web.homepage.styles.partials.DemoStyles
 import io.udash.wrappers.jquery._
-import io.udash.wrappers.jquery.scrollbar._
 import org.scalajs.dom.Element
 
-import scala.scalajs.js
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 import scalatags.generic.Attr
 
@@ -30,9 +24,9 @@ class DemoComponent(url: Property[String]) extends Component {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
     val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
     val urlString = s""""${entry.url}""""
-    val tab = jQ(template).find(s".${DemoStyles.get.demoTabsLink.htmlClass}[href=$urlString]")
+    val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.className}[href=$urlString]")
 
-    jQ(template).not(tab).find(s".${DemoStyles.get.demoTabsLink.htmlClass}").attr(Attributes.data(Attributes.Active), "false")
+    jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.className}").attr(Attributes.data(Attributes.Active), "false")
     tab.attr(Attributes.data(Attributes.Active), "true")
 
     jqFiddleContainer
@@ -44,16 +38,16 @@ class DemoComponent(url: Property[String]) extends Component {
         })
   }
 
-  private val fiddleContainer = div(DemoStyles.get.demoFiddle).render
+  private val fiddleContainer = div(DemoStyles.demoFiddle).render
   private lazy val jqFiddleContainer = jQ(fiddleContainer)
 
-  private lazy val template = div(DemoStyles.get.demoComponent)(
-    Image("laptop.png", "", DemoStyles.get.laptopImage),
-    div(DemoStyles.get.demoBody)(
-      ul(DemoStyles.get.demoTabs)(
+  private lazy val template = div(DemoStyles.demoComponent)(
+    Image("laptop.png", "", DemoStyles.laptopImage),
+    div(DemoStyles.demoBody)(
+      ul(DemoStyles.demoTabs)(
         DemoComponent.demoEntries.map(entry =>
-          li(DemoStyles.get.demoTabsItem)(
-            a(DemoStyles.get.demoTabsLink, href := entry.url)(
+          li(DemoStyles.demoTabsItem)(
+            a(DemoStyles.demoTabsLink, href := entry.url)(
               entry.name
             )
           )
@@ -83,4 +77,4 @@ object DemoComponent {
   )
 }
 
-case class DemoEntry(name: String, url: String, fiddle: Element)
+

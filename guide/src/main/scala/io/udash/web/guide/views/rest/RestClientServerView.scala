@@ -1,18 +1,18 @@
 package io.udash.web.guide.views.rest
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rest.demos.EchoRestDemoComponent
 import io.udash.web.guide.{Context, _}
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object RestClientServerViewPresenter extends DefaultViewPresenterFactory[RestClientServerState.type](() => new RestClientServerView)
 
-class RestClientServerView extends FinalView {
+class RestClientServerView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -50,7 +50,7 @@ class RestClientServerView extends FinalView {
         |}""".stripMargin
     )(GuideStyles),
     p("Text from the input below will be used as the call argument. Click the button to send a request."),
-    new EchoRestDemoComponent,
+    ForceBootstrap(new EchoRestDemoComponent),
     h2("What's next?"),
     p(
       "That wraps all the knowledge needed to start working with wrapped REST interfaces. ",

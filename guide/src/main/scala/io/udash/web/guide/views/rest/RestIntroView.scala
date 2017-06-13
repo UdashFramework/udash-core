@@ -1,21 +1,20 @@
 package io.udash.web.guide.views.rest
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rest.demos.SimpleRestDemoComponent
-import io.udash.web.guide.views.rpc.demos.{PingPongCallDemoComponent, PingPongPushDemoComponent}
-import org.scalajs.dom
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom
 
 case object RestIntroViewPresenter extends DefaultViewPresenterFactory[RestIntroState.type](() => new RestIntroView)
 
-class RestIntroView extends FinalView {
+class RestIntroView extends FinalView with CssView {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -35,7 +34,7 @@ class RestIntroView extends FinalView {
     ),
     h2("Simple REST example"),
     p("Take a look at the simple REST usage example. Click the buttons below and wait for a response."),
-    new SimpleRestDemoComponent,
+    ForceBootstrap(new SimpleRestDemoComponent),
     p("The Developer's Guide server publishes a REST API with the following methods:"),
     ul(GuideStyles.defaultList)(
       li("GET /simple/string"),

@@ -1,17 +1,16 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object BootstrappingBackendViewPresenter extends DefaultViewPresenterFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
-class BootstrappingBackendView extends FinalView {
+class BootstrappingBackendView extends FinalView with CssView {
   import Context._
   import io.udash.web.guide.views.References._
 
@@ -20,7 +19,7 @@ class BootstrappingBackendView extends FinalView {
   override def getTemplate: Modifier = div(
     h2("Bootstrapping application backend"),
     p("This chapter covers:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("Implementation of the server-side RPC endpoint"),
       li("Configuration of the ", a(href := JettyHomepage)("Jetty"), " webserver to handle RPC and static files requests"),
       li("Implementation of a simple system launcher")

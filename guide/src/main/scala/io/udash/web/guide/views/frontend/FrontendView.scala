@@ -2,12 +2,9 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.web.guide.FrontendState
-import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ViewContainer
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object FrontendViewPresenter extends DefaultViewPresenterFactory[FrontendState.type](() => new FrontendView)
 

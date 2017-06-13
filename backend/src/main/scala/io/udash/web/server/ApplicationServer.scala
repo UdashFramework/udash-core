@@ -1,12 +1,12 @@
 package io.udash.web.server
 
-import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import io.udash.web.guide.rest.DevsGuideRest
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.web.guide.{GuideExceptions, MainServerRPC}
+import io.udash.web.styles.CssRenderer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -18,6 +18,8 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
   private val server = new Server(port)
 
   def start(): Unit = {
+    CssRenderer.renderHomepage(s"${homepageResourceBase.stripSuffix("/")}/styles")
+    CssRenderer.renderGuide(s"${guideResourceBase.stripSuffix("/")}/styles")
     DevsGuideRest.start(restPort)
     server.start()
   }
@@ -38,7 +40,7 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
     val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) => {
       val callLogger = new CallLogger
       new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
-        override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
+        override protected val metadata: localFramework.RPCMetadata[MainServerRPC] = localFramework.RPCMetadata[MainServerRPC]
 
         override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
           callLogger.append(Call(rpcName, methodName, args))

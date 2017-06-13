@@ -2,7 +2,6 @@ package io.udash.web.guide.views.ext.demo.charts
 
 import java.util.Date
 
-import com.github.ghik.silencer.silent
 import io.udash.wrappers.highcharts.config.HighchartsConfig
 import io.udash.wrappers.highcharts.config.axis._
 import io.udash.wrappers.highcharts.config.credits.Credits

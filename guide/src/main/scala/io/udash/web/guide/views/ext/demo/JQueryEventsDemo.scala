@@ -12,9 +12,9 @@ import org.scalajs.dom.Event
 import scala.language.postfixOps
 
 object JQueryEventsDemo {
-  import scalacss.ScalatagsCss._
-  import scalatags.JsDom.all._
   import Context._
+  import io.udash.css.CssView._
+  import scalatags.JsDom.all._
 
   val onCallback = (_: dom.Element, _: JQueryEvent) =>
     jQ("#jquery-events-demo ul").append(li("This will be added on every click").render)
@@ -22,7 +22,7 @@ object JQueryEventsDemo {
     jQ("#jquery-events-demo ul").append(li("This will be added only once").render)
 
   def apply(): dom.Element = {
-    val content = div(id := "jquery-events-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    val content = div(id := "jquery-events-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       ul(),
       br,
       UdashButtonGroup()(

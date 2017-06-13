@@ -4,8 +4,8 @@ import io.udash._
 import io.udash.routing.UrlLogging
 import io.udash.rpc._
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
-import io.udash.web.guide.rpc.RPCService
 import io.udash.web.guide.demos.rest.MainServerREST
+import io.udash.web.guide.rpc.RPCService
 import io.udash.web.guide.views.ext.demo.UrlLoggingDemo
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -13,7 +13,6 @@ import org.scalajs.dom.{Element, document}
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import scala.util.Try
 
 object Context {
   implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -42,7 +41,7 @@ object Context {
       MenuLink("Introduction", FrontendIntroState),
       MenuLink("Routing", FrontendRoutingState(None)),
       MenuLink("Model, View, Presenter & ViewPresenter", FrontendMVPState),
-      MenuLink("Scalatags & ScalaCSS", FrontendTemplatesState),
+      MenuLink("Scalatags & UdashCSS", FrontendTemplatesState),
       MenuLink("Properties", FrontendPropertiesState),
       MenuLink("Template Data Binding", FrontendBindingsState),
       MenuLink("Two-way Forms Binding", FrontendFormsState),

@@ -1,12 +1,10 @@
 package io.udash.web.commons.components
 
-import io.udash.web.commons.config.ExternalUrls
-import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
-import io.udash.web.commons.views.{SVG, Size}
+import io.udash.web.commons.styles.components.HeaderNavStyles
 import org.scalajs.dom.Element
 
 trait HeaderNav {
-  import scalacss.ScalatagsCss._
+  import io.udash.css.CssView._
   import scalatags.JsDom.all._
   import scalatags.JsDom.tags2.nav
 

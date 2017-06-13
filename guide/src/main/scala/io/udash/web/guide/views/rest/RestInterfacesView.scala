@@ -1,19 +1,17 @@
 package io.udash.web.guide.views.rest
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 
 case object RestInterfacesViewPresenter extends DefaultViewPresenterFactory[RestInterfacesState.type](() => new RestInterfacesView)
 
-class RestInterfacesView extends FinalView {
+class RestInterfacesView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._

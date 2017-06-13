@@ -1,21 +1,20 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
 
 import scalatags.JsDom
 
 case object FrontendPropertiesViewPresenter extends DefaultViewPresenterFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
-class FrontendPropertiesView extends FinalView {
+class FrontendPropertiesView extends FinalView with CssView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   override def getTemplate: Modifier = div(
     h2("Property - the Udash Data Model"),
@@ -61,7 +60,7 @@ class FrontendPropertiesView extends FinalView {
       "As you can see, you can create a Property based on case class or Seq. This will be discussed later. "
     ),
     h3("Types of Properties"),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "property.png", "Properties in the Udash", GuideStyles.get.imgBig, GuideStyles.get.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "property.png", "Properties in the Udash", GuideStyles.imgBig, GuideStyles.frame),
     p("This might look quite complicated, but understanding the structure is not so hard. Let's go through it step by step."),
     p(
       i("ReadableProperty"), " is the simplest version of the data model representation. You have seen its whole API ",
@@ -101,7 +100,7 @@ class FrontendPropertiesView extends FinalView {
     p(
       i("SeqProperty"), " represents a sequence of properties.In addition to basic collection operations, it provides a lot of interesting methods like:"
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("elemProperties"), " - gives access to mutable properties representing elements of the sequence"),
       li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property"),
       li(i("insert"), " - adds provided elements into sequence"),
@@ -133,14 +132,14 @@ class FrontendPropertiesView extends FinalView {
         |)""".stripMargin
     )(GuideStyles),
     p("The ", i("comment"), " property might be illustrated like:"),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.get.imgBig, GuideStyles.get.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.imgBig, GuideStyles.frame),
     p(
       "We can say that the ", i("comment"), " property is a parent of ", i("author"), ", ", i("content"), " and ", i("responses"), " properties, ",
       "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), " "
     ),
     h3("Properties validation"),
     p("The Property provides two means of data model validation: "),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("addValidator"), " - adds a new validator to a property"),
       li(i("isValid"), " - returns Future containing the validation result")
     ),
@@ -183,7 +182,7 @@ class FrontendPropertiesView extends FinalView {
         |name.isValid                         // returns Future(Invalid)""".stripMargin
     )(GuideStyles),
     p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("Property"), " - every added validator accepts a value"),
       li(i("ModelProperty"), " - every added validator accepts the value and all subproperties are valid"),
       li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid")

@@ -3,20 +3,17 @@ package io.udash.web.guide.views.frontend.demos
 import java.lang.Float
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.core.Presenter
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.{Element, MouseEvent}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 
@@ -77,7 +74,6 @@ class IntroFormDemoComponent extends Component {
     import io.udash.web.guide.Context._
 
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     private val i2s = (i: Int) => i.toString
     private val s2i = (s: String) => Float.parseFloat(s).toInt
@@ -96,7 +92,7 @@ class IntroFormDemoComponent extends Component {
         presenter.randomize()
     }
 
-    def getTemplate: Modifier = div(id := "frontend-intro-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def getTemplate: Modifier = div(id := "frontend-intro-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.input(
           NumberInput.debounced(minimum)(id := "minimum").render
@@ -119,7 +115,7 @@ class IntroFormDemoComponent extends Component {
           case Valid => span("Yes").render
           case Invalid(errors) => Seq(
             span("No, because:"),
-            ul(GuideStyles.get.defaultList)(
+            ul(GuideStyles.defaultList)(
               errors.map(e => li(e.message))
             )
           ).map(_.render)

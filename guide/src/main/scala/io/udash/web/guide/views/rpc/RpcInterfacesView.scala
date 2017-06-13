@@ -1,19 +1,17 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 
 case object RpcInterfacesViewPresenter extends DefaultViewPresenterFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
-class RpcInterfacesView extends FinalView {
+class RpcInterfacesView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -24,12 +22,12 @@ class RpcInterfacesView extends FinalView {
       "Interfaces are the most important part of the Udash RPC system. Thanks to the cross compilation, they make client-server " +
       "communication easy to develop and maintain. You can find two types of RPC interfaces in Udash: "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("RPC"), " - the RPC interface exposed by the server-side"),
       li(i("Client RPC"), " - the RPC interface exposed by the client-side")
     ),
     p("Methods exposed by the RPC interface can be divided into three groups:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)"),
       li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient"),
       li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network")

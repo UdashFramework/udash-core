@@ -6,11 +6,11 @@ import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.views.Image
 import org.scalajs.dom.raw.Element
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 object Footer {
-  private val styles = FooterStyles.get
+  import io.udash.css.CssView._
+  private val styles = FooterStyles
   private lazy val template = footer(styles.footer)(
     div(GlobalStyles.body)(
       div(styles.footerInner)(

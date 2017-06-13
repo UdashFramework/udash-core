@@ -3,22 +3,18 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.BootstrapDemos
 import io.udash.web.guide.views.{References, Versions}
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLStyleElement
 
 import scalatags.JsDom
-import scalatags.JsDom.TypedTag
 
 case object BootstrapExtViewPresenter extends DefaultViewPresenterFactory[BootstrapExtState.type](() => new BootstrapExtView)
 
 
 class BootstrapExtView extends FinalView {
   import JsDom.all._
-  import scalacss.ScalatagsCss._
-  import scalacss.ProdDefaults._
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -29,7 +25,7 @@ class BootstrapExtView extends FinalView {
     )(GuideStyles),
     p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage)("Twitter Bootstrap"), " API."),
     h2("Statics"),
-    p(s"All Bootstrap tags and styles are available as ScalaCSS applicable styles (", i("StyleA"), ")."),
+    p(s"All Bootstrap tags and styles are available as UdashCSS styles."),
     CodeBlock(
       s"""|div(BootstrapStyles.row)(
           |  div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
@@ -46,7 +42,7 @@ class BootstrapExtView extends FinalView {
           |  )
           |)""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.statics()
     ),
     h2("Components"),
@@ -70,7 +66,7 @@ class BootstrapExtView extends FinalView {
          |  ).render
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.icons()
     ),
     h3("Date Picker"),
@@ -100,7 +96,7 @@ class BootstrapExtView extends FinalView {
          |  ).render
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.datePicker()
     ),
     p("It is possible to create a date range selector from two pickers."),
@@ -139,7 +135,7 @@ class BootstrapExtView extends FinalView {
          |  ).render
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.datePickerRange()
     ),
     h3("Tables"),
@@ -176,7 +172,7 @@ class BootstrapExtView extends FinalView {
          |  table.render
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.tables()
     ),
     h3("Dropdowns"),
@@ -262,7 +258,7 @@ class BootstrapExtView extends FinalView {
           |  buttons.map(_.render)
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.button()
     ),
     p("The example below presents helper method for creating toggle buttons."),
@@ -281,7 +277,7 @@ class BootstrapExtView extends FinalView {
           |  buttons.map(_.render)
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.toggleButton()
     ),
     h3("Button groups"),
@@ -293,7 +289,7 @@ class BootstrapExtView extends FinalView {
           |  UdashButton()("Button 3").render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.staticButtonsGroup()
     ),
     p("It is also possible to create reactive groups and toolbars:"),
@@ -306,7 +302,7 @@ class BootstrapExtView extends FinalView {
          |  ).render
          |}).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.buttonToolbar()
     ),
     p("Use ", i("checkboxes"), " method in order to create a group of buttons behaving as checkboxes:"),
@@ -330,7 +326,7 @@ class BootstrapExtView extends FinalView {
           |  )
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.checkboxButtons()
     ),
     p("The following example presents a group of buttons behaving as radio buttons:"),
@@ -354,7 +350,7 @@ class BootstrapExtView extends FinalView {
          |  )
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.radioButtons()
     ),
     h3("Button dropdowns"),
@@ -377,7 +373,7 @@ class BootstrapExtView extends FinalView {
           |  UdashDropdown(items)(UdashDropdown.defaultItemFactory)("Dropdown ").render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.buttonDropdown()
     ),
     h3("Input groups"),
@@ -405,7 +401,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.inputGroups()
     ),
     h3("Forms"),
@@ -448,7 +444,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.simpleForm()
     ),
     p("It is also possible to create an ", i("inline"), " or ", i("horizontal"), " form."),
@@ -472,7 +468,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.inlineForm()
     ),
     h3("Navs"),
@@ -508,7 +504,7 @@ class BootstrapExtView extends FinalView {
          |  )
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.navs()
     ),
     h3("Navbar"),
@@ -540,7 +536,7 @@ class BootstrapExtView extends FinalView {
          |  ).render
        """.stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.navbars()
     ),
     p("The following example presents a navbar with a dropdown item. It uses menu of this guide."),
@@ -571,7 +567,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.udashNavigation()
     ),
     h3("Breadcrumbs"),
@@ -591,7 +587,7 @@ class BootstrapExtView extends FinalView {
          |)
          |breadcrumbs.render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.breadcrumbs()
     ),
     h3("Pagination"),
@@ -624,7 +620,7 @@ class BootstrapExtView extends FinalView {
           |  pager.render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.pagination()
     ),
     h3("Labels"),
@@ -636,7 +632,7 @@ class BootstrapExtView extends FinalView {
          |UdashLabel.warning(UdashBootstrap.newId(), "Warning").render,
          |UdashLabel.danger(UdashBootstrap.newId(), "Danger").render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.labels()
     ),
     h3("Badges"),
@@ -647,7 +643,7 @@ class BootstrapExtView extends FinalView {
           |  "Button", UdashBadge(counter).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.badges()
     ),
     h3("Jumbotron"),
@@ -695,7 +691,7 @@ class BootstrapExtView extends FinalView {
           |  alerts
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.alerts()
     ),
     h3("Progress bars"),
@@ -720,7 +716,7 @@ class BootstrapExtView extends FinalView {
           |  )
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.progressBar()
     ),
     h3("List group"),
@@ -762,7 +758,7 @@ class BootstrapExtView extends FinalView {
          |  UdashPanel.footer("Panel footer")
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.panels()
     ),
     h3("Responsive embed"),
@@ -778,7 +774,7 @@ class BootstrapExtView extends FinalView {
          |  )
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.responsiveEmbed()
     ),
     h3("Wells"),
@@ -795,7 +791,7 @@ class BootstrapExtView extends FinalView {
          |  )
          |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.wells()
     ),
     h3("Modals"),
@@ -849,7 +845,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.simpleModal()
     ),
     h3("Tooltips"),
@@ -884,7 +880,7 @@ class BootstrapExtView extends FinalView {
           |  label1, label2, label3, button.render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.tooltips()
     ),
     h3("Popovers"),
@@ -931,7 +927,7 @@ class BootstrapExtView extends FinalView {
          |).render
        """.stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.popovers()
     ),
     h3("Collapse"),
@@ -966,7 +962,7 @@ class BootstrapExtView extends FinalView {
           |  collapse.render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.simpleCollapse()
     ),
     p(
@@ -999,7 +995,7 @@ class BootstrapExtView extends FinalView {
           |).render
        """.stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.accordionCollapse()
     ),
     h3("Carousel"),
@@ -1049,7 +1045,7 @@ class BootstrapExtView extends FinalView {
           |  ).render
           |).render""".stripMargin
     )(GuideStyles),
-    div(cls := "bootstrap")(//force Bootstrap styles
+    ForceBootstrap(
       BootstrapDemos.carousel()
     ),
     h2("What's next?"),

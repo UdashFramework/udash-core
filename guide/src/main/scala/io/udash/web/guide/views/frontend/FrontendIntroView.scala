@@ -1,20 +1,20 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos.IntroFormDemoComponent
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object FrontendIntroViewPresenter extends DefaultViewPresenterFactory[FrontendIntroState.type](() => new FrontendIntroView)
 
 
-class FrontendIntroView extends FinalView {
+class FrontendIntroView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -42,7 +42,7 @@ class FrontendIntroView extends FinalView {
       a(href := References.ScalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about the Udash ",
       a(href := RpcIntroState.url)("RPC"), " system. In this part of the guide you will read about: "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("Routing in Udash based applications."),
       li("The powerful Properties system for an application model."),
       li(
@@ -59,7 +59,7 @@ class FrontendIntroView extends FinalView {
       "Take a look at this simple form with a validation. We will not discuss the implementation here, because ",
       "it is quite self descriptive. All those elements will be described in detail in the following chapters."
     ),
-    new IntroFormDemoComponent(),
+    ForceBootstrap(new IntroFormDemoComponent()),
     CodeBlock(
       """import io.udash._
         |
@@ -120,7 +120,6 @@ class FrontendIntroView extends FinalView {
         |  import io.udash.web.guide.Context._
         |
         |  import JsDom.all._
-        |  import scalacss.ScalatagsCss._
         |
         |  private val i2s = (i: Int) => i.toString
         |  private val s2i = (s: String) => Float.parseFloat(s).toInt

@@ -1,18 +1,18 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos._
 import io.udash.web.guide.{Context, _}
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object RpcClientServerViewPresenter extends DefaultViewPresenterFactory[RpcClientServerState.type](() => new RpcClientServerView)
 
-class RpcClientServerView extends FinalView {
+class RpcClientServerView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -23,7 +23,7 @@ class RpcClientServerView extends FinalView {
       "Every dynamic web application needs to communicate with a server, every modern application should do it asynchronously. " +
       "In Udash all you have to do to make asynchronous server calls is:"
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement prepared interface in your backend code."),
       li("Use ", i("DefaultServerRPC"), " in the frontend code to make a server connection.")
@@ -39,12 +39,12 @@ class RpcClientServerView extends FinalView {
       i("MainClientRPC"), " and ", i("MainServerRPC"), " are root the RPC interfaces of the application. ",
       i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. Ignore it for now, this topic will be covered in the ",
       a(href := RpcServerClientState.url)("Server ➔ Client communication"), " chapter."
-    )(),
+    ),
     p("Now you can use ", i("serverRpc"), " to make RPC calls from the client to the server application."),
     CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
     h2("Backend endpoints implementation"),
     p("There are many ways of implementing the backend RPC interface. Below you can find description of three possible solutions:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(
         "Basic implementation - the easiest way which is useful when your service layer does not need to know anything ",
         "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), ") "
@@ -59,7 +59,7 @@ class RpcClientServerView extends FinalView {
       )
     ),
     p("Things to consider when implementing the backend RPC interface:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("How to create and cache the RPC endpoints?"),
       li("How to handle authentication and authorization in an endpoint?"),
       li("How to pass a required data (like ", i("ClientId"), " and ", i("UserContext"), ") to the RPC endpoints?")
@@ -153,7 +153,7 @@ class RpcClientServerView extends FinalView {
     )(GuideStyles),
     h4("Example"),
     p("Click the below button to get your ", i("ClientId"), ":"),
-    new ClientIdDemoComponent,
+    ForceBootstrap(new ClientIdDemoComponent),
     h4("Handling heavy endpoints"),
     p(
       "Sometimes your services cannot be created per client connection. For example, when initialization takes too much time ",
@@ -208,7 +208,7 @@ class RpcClientServerView extends FinalView {
     )(GuideStyles),
     h3("User-aware implementation"),
     p("More complex services might need the ", i("UserContext"), " of the method call. Look at one of possible ways to provide it:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("AtmosphereServiceConfig"), " will resolve the ", i("UserContext"), " based on a HttpServlet request and create the RPC endpoint with it"),
       li("The RPC endpoint will authorize method access"),
       li("The service will do the job")
@@ -354,7 +354,7 @@ class RpcClientServerView extends FinalView {
       "on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
       "the following demo: "
     ),
-    new ExceptionsDemoComponent().getTemplate,
+    ForceBootstrap(new ExceptionsDemoComponent().getTemplate),
     h2("What's next?"),
     p(
       "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"), " chapter interesting later on. "

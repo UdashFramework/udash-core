@@ -1,20 +1,15 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
-import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.PingClient
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom
-import org.scalajs.dom._
 
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 trait PingPongPushDemoModel {
   def pingId: Int
@@ -56,7 +51,6 @@ class PingPongPushDemoComponent extends Component {
 
   class PingPongPushDemoView(model: ModelProperty[PingPongPushDemoModel], presenter: PingPongPushDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val pingButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -68,7 +62,7 @@ class PingPongPushDemoComponent extends Component {
         presenter.onButtonClick(btn)
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       pingButton.render
     )
   }

@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.ext.demo
 
+import io.udash.i18n._
 import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.i18n._
 import org.scalajs.dom
 
 object FrontendTranslationsProvider {
@@ -24,14 +24,14 @@ object FrontendTranslationsProvider {
 }
 
 object FrontendTranslationsDemo {
+  import io.udash.css.CssView._
   import scalatags.JsDom.all._
-  import scalacss.ScalatagsCss._
 
   def apply(): dom.Element = {
     import io.udash.web.guide.Context._
     implicit val translationProvider = FrontendTranslationsProvider()
     implicit val lang = Lang("en")
-    div(id := "frontend-translations-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    div(id := "frontend-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       ul(
         li("auth.loginLabel: ", translated(Translations.auth.loginLabel())),
         li("auth.passwordLabel: ", translated(Translations.auth.passwordLabel())),

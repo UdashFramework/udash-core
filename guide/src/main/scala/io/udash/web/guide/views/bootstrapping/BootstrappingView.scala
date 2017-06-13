@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.{DefaultViewPresenterFactory, View}
+import io.udash.core.DefaultViewPresenterFactory
 import io.udash.web.guide.views.ViewContainer
 import io.udash.web.guide.{Context, _}
-import org.scalajs.dom
 
 import scalatags.JsDom
 

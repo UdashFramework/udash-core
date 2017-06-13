@@ -1,19 +1,19 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.GenCodecsDemoComponent
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object RpcSerializationViewPresenter extends DefaultViewPresenterFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
-class RpcSerializationView extends FinalView {
+class RpcSerializationView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -32,7 +32,7 @@ class RpcSerializationView extends FinalView {
       "serialization for a basic Scala types like: int, float, string, etc. It also brings automatic generation of serializers ",
       "for the types which are one of: "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("singleton type, e.g. an ", i("object")),
       li("case class whose every field type has its own ", i("GenCodec")),
       li(
@@ -115,7 +115,7 @@ class RpcSerializationView extends FinalView {
         |}""".stripMargin
     )(GuideStyles),
     p("Now this code should compile fine. Below you can test this example. "),
-    new GenCodecsDemoComponent,
+    ForceBootstrap(new GenCodecsDemoComponent),
     h3("Default JSON serialization"),
     p(
       "The ", i("GenCodec"), "s mechanism provides abstraction layer over the serialization to the raw string which is sent via websocket. ",
@@ -138,7 +138,7 @@ class RpcSerializationView extends FinalView {
     )(GuideStyles),
     p(
       "You have to implement five elements:",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(b("RawValue"), " - ", i("GenCodec"), " needs to be converted to this type and then this type needs to be converted into the string. Usually it is some kind of AST."),
         li(b("inputSerialization"), " - method which converts ", i("RawValue"), " into the ", i("Input"), " object."),
         li(b("outputSerialization"), " - method which returns the ", i("Output"), " object which creates a ", i("RawValue"), " as the result."),

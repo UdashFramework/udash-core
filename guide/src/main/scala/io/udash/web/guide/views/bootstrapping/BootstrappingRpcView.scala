@@ -1,17 +1,16 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object BootstrappingRpcViewPresenter extends DefaultViewPresenterFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
-class BootstrappingRpcView extends FinalView {
+class BootstrappingRpcView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -22,7 +21,7 @@ class BootstrappingRpcView extends FinalView {
       "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
       " module, define two traits annotated with ", i("com.avsystem.commons.rpc.RPC"), ": "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("MainClientRPC - contains methods which can be called by a server on a client application"),
       li("MainServerRPC - contains methods which can be called by a client on a server.")
     ),
@@ -37,7 +36,7 @@ class BootstrappingRpcView extends FinalView {
       "whose abstract methods will be interpreted as remote methods by the RPC framework. Remote methods must be defined " +
       "according to following rules:"
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable")),
       li("Return type must be either Unit or Future[T] where T is a type serializable or another RPC interface"),
       li("Method must not have type parameters.")

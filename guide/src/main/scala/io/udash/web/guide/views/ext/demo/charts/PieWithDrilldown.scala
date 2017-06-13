@@ -5,7 +5,6 @@ import io.udash.wrappers.highcharts.config.axis.{Axis, AxisTitle, XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.credits.Credits
 import io.udash.wrappers.highcharts.config.drilldown.Drilldown
 import io.udash.wrappers.highcharts.config.legend.Legend
-import io.udash.wrappers.highcharts.config.series.column.{SeriesColumn, SeriesColumnData}
 import io.udash.wrappers.highcharts.config.series.pie.{SeriesPie, SeriesPieData}
 import io.udash.wrappers.highcharts.config.title.Title
 

@@ -1,17 +1,17 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object FrontendBindingsViewPresenter extends DefaultViewPresenterFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
-class FrontendBindingsView extends FinalView {
+class FrontendBindingsView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -27,7 +27,7 @@ class FrontendBindingsView extends FinalView {
       """import io.udash._""".stripMargin
     )(GuideStyles),
     p("Let's briefly introduce all these methods:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method which is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),

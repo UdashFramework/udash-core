@@ -2,11 +2,11 @@ package io.udash.web.guide.views.ext
 
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.views.{References, Versions}
-import org.scalajs.dom
 
 import scalatags.JsDom
 
@@ -75,7 +75,7 @@ class JQueryExtView extends FinalView {
       "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
       "they create new object every time."
     ),
-    JQueryEventsDemo(),
+    ForceBootstrap(JQueryEventsDemo()),
     h2("jQuery callbacks"),
     p("The wrapper provides also typed API for the jQuery callbacks mechanism: "),
     CodeBlock(
@@ -104,7 +104,7 @@ class JQueryExtView extends FinalView {
          |callbacks.disable()
          |callbacks.fire(1, 2)""".stripMargin
     )(GuideStyles),
-    JQueryCallbacksDemo(),
+    ForceBootstrap(JQueryCallbacksDemo()),
     h2("What's next?"),
     p(
       "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), " ",

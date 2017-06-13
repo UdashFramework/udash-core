@@ -1,17 +1,17 @@
 package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.views.Versions
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
 case object BootstrappingSBTViewPresenter extends DefaultViewPresenterFactory[BootstrappingSBTState.type](() => new BootstrappingSBTView)
 
-class BootstrappingSBTView extends FinalView {
+class BootstrappingSBTView extends FinalView with CssView {
   import Context._
   import io.udash.web.guide.views.References._
 

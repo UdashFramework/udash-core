@@ -1,21 +1,16 @@
 package io.udash.web.guide.views.rest.demos
 
-import io.udash.web.guide.Context
 import io.udash._
-import io.udash.web.guide.demos.rest.RestExampleClass
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.web.commons.views.Component
+import io.udash.web.guide.Context
+import io.udash.web.guide.demos.rest.RestExampleClass
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 class SimpleRestDemoComponent extends Component {
   import Context._
@@ -71,8 +66,6 @@ class SimpleRestDemoComponent extends Component {
 
   class SimpleRestDemoView(model: ModelProperty[ExampleModel], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
-    import scalacss.ProdDefaults._
-    import scalacss.ScalatagsCss._
 
     val loadStringButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,

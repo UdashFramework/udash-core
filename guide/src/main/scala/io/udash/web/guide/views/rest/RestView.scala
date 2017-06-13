@@ -3,7 +3,6 @@ package io.udash.web.guide.views.rest
 import io.udash._
 import io.udash.web.guide._
 import io.udash.web.guide.views.ViewContainer
-import org.scalajs.dom
 
 import scalatags.JsDom
 
@@ -16,9 +15,7 @@ class RestView extends ViewContainer {
 
   override def getTemplate: Modifier = div(
     h1("REST in Udash"),
-    p(
-      "In this part of the guide you can read about REST API usage in a Udash application."
-    ),
+    p("In this part of the guide you can read about REST API usage in a Udash application."),
     child
   )
 }

@@ -1,27 +1,26 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
 case object FrontendMVPViewPresenter extends DefaultViewPresenterFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
-class FrontendMVPView extends FinalView {
+class FrontendMVPView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   override def getTemplate: Modifier = div(
     h2("Model, View, Presenter & ViewPresenter"),
     p("A single page in Udash app is based on four elements:"),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(
         "Model - based on the ", a(href := FrontendPropertiesState.url)("Properties"), " mechanism, ",
         "it provides one and two-ways bindings to DOM elements."
@@ -39,7 +38,7 @@ class FrontendMVPView extends FinalView {
         a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewPresenter is responsible for creating a View and a Presenter. "
       )
     ),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.get.imgBig, GuideStyles.get.frame),
+    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.imgBig, GuideStyles.frame),
     h3("ViewPresenter"),
     p(
       "The ViewPresenter responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",
@@ -119,7 +118,7 @@ class FrontendMVPView extends FinalView {
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Take a look at the ", a(href := FrontendTemplatesState.url)("Scalatags & ScalaCSS"), " chapter to ",
+      "Take a look at the ", a(href := FrontendTemplatesState.url)("Scalatags & UdashCSS"), " chapter to ",
       "learn more about creating view templates and styling them in Udash. Visit the ",
       a(href := FrontendPropertiesState.url)("Properties"), " chapter to read about data model in Udash applications."
     )

@@ -2,9 +2,11 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
+import io.udash.css.CssView
 import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
@@ -27,11 +29,10 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
   }
 }
 
-class FrontendRoutingView(url: Property[String]) extends FinalView {
+class FrontendRoutingView(url: Property[String]) extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   override def getTemplate: Modifier = div(
     h2("Routing"),
@@ -39,26 +40,28 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
       "Modern web applications create user friendly URLs and use them to handle the frontend routing. Udash framework ",
       "provides a convenient routing engine. To use it, create:"
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(i("RoutingRegistry"), " - mapping from a URL to ", i("RoutingState")),
       li(i("ViewPresenterRegistry"), " - mapping from ", i("RoutingState"), " to ", i("ViewPresenter"))
     ),
     h3("URL"),
     p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),
     CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(GuideStyles),
-    div(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
-      p(
-        span("The URL of this page is: "),
-        span(id := "url-demo-link")(bind(url)), br(), br(),
-        span("Click here to change URL: ")
-      ),
-      a(id := "url-demo-link-apple", href := s"${FrontendRoutingState(Some("apple")).url}")("Apple"), " | ",
-      a(id := "url-demo-link-orange", href := s"${FrontendRoutingState(Some("orange")).url}")("Orange"), " | ",
-      a(id := "url-demo-link-chocolate", href := s"${FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
-      a(id := "url-demo-link-pizza", href := s"${FrontendRoutingState(Some("pizza")).url}")("Pizza"),
-      br(), br(),
-      input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
-    )(),
+    ForceBootstrap(
+      div(GuideStyles.frame, GuideStyles.useBootstrap)(
+        p(
+          span("The URL of this page is: "),
+          span(id := "url-demo-link")(bind(url)), br(), br(),
+          span("Click here to change URL: ")
+        ),
+        a(id := "url-demo-link-apple", href := s"${FrontendRoutingState(Some("apple")).url}")("Apple"), " | ",
+        a(id := "url-demo-link-orange", href := s"${FrontendRoutingState(Some("orange")).url}")("Orange"), " | ",
+        a(id := "url-demo-link-chocolate", href := s"${FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
+        a(id := "url-demo-link-pizza", href := s"${FrontendRoutingState(Some("pizza")).url}")("Pizza"),
+        br(), br(),
+        input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
+      )
+    ),
     h3("RoutingState & RoutingRegistry"),
     p(
       "The URL is resolved to a ", i("RoutingState"), " on every change. The application state can describe displayed view ",
@@ -112,10 +115,10 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
       "Notice that matching for ", i("UsersListState"), " always returns the same ", i("UsersListViewPresenter"), " and ",
       "for ", i("UserDetailsState"), " always returns new ", i("UserDetailsViewPresenter"), ""
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li(
         span("The URL change: /users/details/john ➔ /users/details/david"),
-        ul(GuideStyles.get.innerList)(
+        ul(GuideStyles.innerList)(
           li("The application state changes: UserDetailsState(\"john\") ➔ UserDetailsState(\"david\")."),
           li("The ViewPresenter changes: UserDetailsViewPresenter(\"john\") ➔ UserDetailsViewPresenter(\"david\")."),
           li("The application creates new view and presenter.")
@@ -123,7 +126,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
       ),
       li(
         span("The URL change: /users/search/john ➔ /users/search/david"),
-        ul(GuideStyles.get.innerList)(
+        ul(GuideStyles.innerList)(
           li("The application state changes: UsersListState(Some(\"john\")) ➔ UsersListState(Some(\"david\"))."),
           li("The ViewPresenter stays: UsersListViewPresenter ➔ UsersListViewPresenter."),
           li("Presenter's ", i("handleState"), " method is called with the new state as an argument."),
@@ -135,19 +138,21 @@ class FrontendRoutingView(url: Property[String]) extends FinalView {
       "Below you can find input which changes the URL on every update. This change is handled like ",
       i("UsersListState"), " in the above example, so this view is not refreshed after the URL change."
     ),
-    div(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
-      input(
-        BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "",
-        placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
-          applicationInstance.goTo(FrontendRoutingState(
-            Some(js.Dynamic.global
-              .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
-              .asInstanceOf[String])
-          ))
-          true
-        })
-      ),
-      p("This view was created with: ", span(id := "url-demo-link-init")(WindowUrlChangeProvider.currentFragment.value))
+    ForceBootstrap(
+      div(GuideStyles.frame, GuideStyles.useBootstrap)(
+        input(
+          BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "",
+          placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
+            applicationInstance.goTo(FrontendRoutingState(
+              Some(js.Dynamic.global
+                .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
+                .asInstanceOf[String])
+            ))
+            true
+          })
+        ),
+        p("This view was created with: ", span(id := "url-demo-link-init")(WindowUrlChangeProvider.currentFragment.value))
+      )
     ),
     h2("What's next?"),
     p(

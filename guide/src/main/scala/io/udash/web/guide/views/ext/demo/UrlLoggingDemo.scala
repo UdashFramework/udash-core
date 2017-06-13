@@ -10,8 +10,7 @@ import scala.collection.mutable.ListBuffer
 import scalatags.JsDom.all._
 
 object UrlLoggingDemo {
-
-  import scalacss.ScalatagsCss._
+  import io.udash.css.CssView._
   import io.udash.web.guide.Context._
 
   val enabled = Property(false)

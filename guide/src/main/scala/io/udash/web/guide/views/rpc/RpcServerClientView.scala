@@ -1,19 +1,20 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos.NotificationsDemoComponent
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 case object RpcServerClientViewPresenter extends DefaultViewPresenterFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
-class RpcServerClientView extends FinalView {
+class RpcServerClientView extends FinalView with CssView {
   import io.udash.web.guide.Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -22,7 +23,7 @@ class RpcServerClientView extends FinalView {
       "Modern web applications often notify users about some events, for example about finishing a background task. ",
       "In a Udash application it is really easy to create such notifications. All you have to do is: "
     ),
-    ul(GuideStyles.get.defaultList)(
+    ul(GuideStyles.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement such interface in your frontend code."),
       li("Use ", i("DefaultServerRPC"), " in the frontend code to create a server connection."),
@@ -68,7 +69,7 @@ class RpcServerClientView extends FinalView {
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
     CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(GuideStyles),
     h2("Notifications example"),
-    new NotificationsDemoComponent,
+    ForceBootstrap(new NotificationsDemoComponent),
     p("The code of the example above:"),
     CodeBlock(
       """import io.udash.rpc._

@@ -2,12 +2,12 @@ package io.udash.web.guide.views.ext
 
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
 import io.udash.web.guide.{Context, UserActivityExtState}
-import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
@@ -80,7 +80,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
           |}""".stripMargin
     )(GuideStyles),
     p("to see it in action just enable logging below, switch to another chapter and come back here."), br,
-    UrlLoggingDemo(),
+    ForceBootstrap(UrlLoggingDemo()),
     h2("RPC call logging"),
     p("Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
       "CallLogging into your ExposesServerRPC, e.g.: "),
@@ -104,7 +104,9 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |  @Logged
         |  def fPing(id: Int): Future[Int]
         |}""".stripMargin)(GuideStyles),
-    new PingPongCallDemoComponent,
-    RpcLoggingDemo(model, () => presenter.reload())
+    ForceBootstrap(
+      new PingPongCallDemoComponent,
+      RpcLoggingDemo(model, () => presenter.reload())
+    )
   )
 }

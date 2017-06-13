@@ -7,7 +7,6 @@ import io.udash.web.guide.views.ext._
 import io.udash.web.guide.views.frontend.{FrontendFormsViewPresenter, FrontendPropertiesViewPresenter, FrontendRoutingViewPresenter, FrontendTemplatesViewPresenter, _}
 import io.udash.web.guide.views.rest._
 import io.udash.web.guide.views.rpc.{RpcIntroViewPresenter, RpcServerClientViewPresenter, _}
-import io.udash.web.guide.views._
 
 class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
   def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
