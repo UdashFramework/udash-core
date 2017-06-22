@@ -1,6 +1,5 @@
 package io.udash.rpc.internals
 
-import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.testing.UdashRpcBackendTest
@@ -141,6 +140,7 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       calls += method
     })
     new DefaultExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
+      import localFramework.RPCMetadata
 
       override protected val metadata: RPCMetadata[TestRPC] = RPCMetadata[TestRPC]
 

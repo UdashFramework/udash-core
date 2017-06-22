@@ -1,6 +1,6 @@
 package io.udash.rest.internal
 
-import com.avsystem.commons.rpc.{MetadataAnnotation, RPCMetadata}
+import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.rest._
 import io.udash.rpc.serialization.URLEncoder
 
@@ -8,7 +8,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
-abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMetadata : DefaultRESTFramework.ValidREST]
+abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashRESTFramework#ValidREST]
                        (implicit val ec: ExecutionContext) {
 
   val framework: UdashRESTFramework
@@ -26,7 +26,7 @@ abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMeta
     */
   protected def remoteRpcAsReal: AsRealRPC[ServerRPCType]
 
-  val rpcMetadata: RPCMetadata[ServerRPCType] = implicitly[RPCMetadata[ServerRPCType]]
+  val rpcMetadata: RPCMetadata[ServerRPCType]
 
   protected val connector: RESTConnector
 
@@ -57,6 +57,9 @@ abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMeta
     def findRestName(annotations: Seq[MetadataAnnotation]): Option[String] =
       annotations.find(_.isInstanceOf[RESTName]).map(_.asInstanceOf[RESTName].restName)
 
+    def findRestParamName(annotations: Seq[MetadataAnnotation]): Option[String] =
+      annotations.find(_.isInstanceOf[RESTParamName]).map(_.asInstanceOf[RESTParamName].restName)
+
     def parseInvocation(inv: framework.RawInvocation, metadata: RPCMetadata[_]): Unit = {
       val rpcMethodName: String = inv.rpcName
       val methodMetadata = metadata.signatures(rpcMethodName)
@@ -65,7 +68,7 @@ abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMeta
         urlBuilder += findRestName(methodMetadata.annotations).getOrElse(rpcMethodName)
       methodMetadata.paramMetadata.zip(inv.argLists).foreach { case (params, values) =>
         params.zip(values).foreach { case (param, value) =>
-          val paramName: String = findRestName(param.annotations).getOrElse(param.name)
+          val paramName: String = findRestParamName(param.annotations).getOrElse(param.name)
           val argTypeAnnotations = param.annotations.filter(_.isInstanceOf[ArgumentType])
           if (argTypeAnnotations.size > 1) throw new RuntimeException(s"Too many parameter type annotations! ($argTypeAnnotations)")
           argTypeAnnotations.headOption match {
@@ -99,10 +102,10 @@ abstract class UsesREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : RPCMeta
     }
 
     var metadata: RPCMetadata[_] = rpcMetadata
-    getterChain.reverse.foreach(inv => {
+    getterChain.reverse.foreach { inv =>
       parseInvocation(inv, metadata)
       metadata = metadata.getterResults(inv.rpcName)
-    })
+    }
     parseInvocation(invocation, metadata)
 
     connector.send(

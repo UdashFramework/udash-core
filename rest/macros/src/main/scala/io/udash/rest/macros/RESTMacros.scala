@@ -12,9 +12,12 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
 
   val RESTFrameworkType = getType(tq"$RestPackage.UdashRESTFramework")
   val ValidRESTCls = tq"$FrameworkObj.ValidREST"
+  val ValidServerRESTCls = tq"$FrameworkObj.ValidServerREST"
 
   val RpcNameCls = tq"io.udash.rpc.RPCName"
   val RestNameCls = tq"$RestPackage.RESTName"
+  val RestParamNameCls = tq"$RestPackage.RESTParamName"
+  val SkipRestNameCls = tq"$RestPackage.SkipRESTName"
 
   val RestMethodCls = tq"$RestPackage.RESTMethod"
   val GetCls = tq"$RestPackage.GET"
@@ -32,6 +35,8 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
   def hasAnnotation(annotations: List[Annotation], annotation: Type) = annotations.exists(_.tree.tpe <:< annotation)
   def hasRestMethodAnnotation(annotations: List[Annotation]) = hasAnnotation(annotations, getType(RestMethodCls))
   def hasArgumentTypeAnnotation(annotations: List[Annotation]) = hasAnnotation(annotations, getType(ArgumentTypeCls))
+  def hasSkipRestNameAnnotation(annotations: List[Annotation]) = hasAnnotation(annotations, getType(SkipRestNameCls))
+  def hasRESTNameOverride(annotations: List[Annotation]) = hasAnnotation(annotations, getType(RestNameCls))
 
   def countAnnotation(annotations: List[Annotation], annotation: Type) = annotations.count(_.tree.tpe <:< annotation)
   def countRestMethodAnnotation(annotations: List[Annotation]) = countAnnotation(annotations, getType(RestMethodCls))
@@ -47,7 +52,7 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
   }
 
   def checkNameOverride(annotations: List[Annotation], errorMsg: Tree => String) =
-    Seq(RpcNameCls, RestNameCls).foreach(cls =>
+    Seq(RpcNameCls, RestNameCls, RestParamNameCls).foreach(cls =>
       if (!isNameAnnotationArgumentValid(annotations, getType(cls)))
         abort(errorMsg(cls))
     )
@@ -85,29 +90,37 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     } else alreadyContainsBodyArgument
   }
 
-  def asValidRest[T: c.WeakTypeTag]: c.Tree = {
-    val restType = weakTypeOf[T]
+  private def validRest(restType: Type, isServer: Boolean): c.Tree = {
     val proxyables: List[ProxyableMember] = proxyableMethods(restType)
     val subinterfaces = proxyables.filter(proxyable => hasRpcAnnot(proxyable.returnType))
     val methods = proxyables.filterNot(proxyable => hasRpcAnnot(proxyable.returnType))
 
     val subinterfacesImplicits = subinterfaces.map(getter => {
       checkMethodNameOverride(getter, restType)
+      if (isServer && hasRESTNameOverride(getter.method.annotations))
+        abort(s"Subinterface getter cannot be annotated with RESTName annotation in server-side interface, ${getter.rpcName} in $restType does.")
       if (hasRestMethodAnnotation(getter.method.annotations))
         abort(s"Subinterface getter cannot be annotated with REST method annotation, ${getter.rpcName} in $restType does.")
+      if (isServer && hasSkipRestNameAnnotation(getter.method.annotations))
+        abort(s"Subinterface getter in server-side REST interface cannot be annotated with @SkipRESTName annotation, ${getter.rpcName} in $restType does.")
 
       getter.paramLists.foreach(paramsList =>
         paramsList.foreach(param => checkGetterParameter(param, getter, restType))
       )
 
-      q"""implicitly[$ValidRESTCls[${getter.returnType}]]"""
+      if (!isServer) q"""implicitly[$ValidRESTCls[${getter.returnType}]]"""
+      else q"""implicitly[$ValidServerRESTCls[${getter.returnType}]]"""
     })
 
     val methodsImplicits = methods.map(method => {
       var alreadyContainsBodyArgument = false
       checkMethodNameOverride(method, restType)
+      if (isServer && hasRESTNameOverride(method.method.annotations))
+        abort(s"REST method cannot be annotated with RESTName annotation in server-side interface, ${method.rpcName} in $restType does.")
       if (countRestMethodAnnotation(method.method.annotations) != 1)
         abort(s"REST method has to be annotated with exactly one REST method annotation, ${method.rpcName} in $restType has not.")
+      if (isServer && hasSkipRestNameAnnotation(method.method.annotations))
+        abort(s"REST method in server-side REST interface cannot be annotated with @SkipRESTName annotation, ${method.rpcName} in $restType does.")
 
       method.paramLists.foreach(paramsList =>
         paramsList.foreach(param =>
@@ -117,13 +130,20 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
       q"""null"""
     })
 
-    q"""
-      new $ValidRESTCls[$restType] {
-        implicit def ${c.freshName(TermName("self"))}: $ValidRESTCls[$restType] = this
+    val cls = if (!isServer) ValidRESTCls else ValidServerRESTCls
+      q"""
+      new $cls[$restType] {
+        implicit def ${c.freshName(TermName("self"))}: $cls[$restType] = this
 
         val subInterfaces = Seq(..$subinterfacesImplicits)
         val methods = Seq(..$methodsImplicits)
       }
       """
   }
+
+  def asValidRest[T: c.WeakTypeTag]: c.Tree =
+    validRest(weakTypeOf[T], isServer = false)
+
+  def asValidServerRest[T: c.WeakTypeTag]: c.Tree =
+    validRest(weakTypeOf[T], isServer = true)
 }
