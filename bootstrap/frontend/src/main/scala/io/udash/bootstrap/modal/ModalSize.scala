@@ -1,8 +1,10 @@
 package io.udash.bootstrap
 package modal
 
-sealed abstract class ModalSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq:_*) {
-  def this(sizeStyle: BootstrapStyles.BootstrapClass) = this(Some(sizeStyle))
+import io.udash.css.CssStyle
+
+sealed abstract class ModalSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq:_*) {
+  def this(sizeStyle: CssStyle) = this(Some(sizeStyle))
 }
 
 object ModalSize {

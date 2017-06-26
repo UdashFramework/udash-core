@@ -46,3 +46,9 @@ env:
   - TEST_PACKAGE=i18n-backend/test
   - TEST_PACKAGE=i18n-frontend/test
   - TEST_PACKAGE=bootstrap/test
+  - TEST_PACKAGE=charts/test
+  - TEST_PACKAGE=css-macros/test
+  - TEST_PACKAGE=css-sharedJVM/test
+  - TEST_PACKAGE=css-sharedJS/test
+  - TEST_PACKAGE=css-backend/test
+  - TEST_PACKAGE=css-frontend/test

@@ -42,10 +42,10 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
   override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
     import scalatags.Text.all._
-    div(cls := BootstrapStyles.Popover.popover.cls, role := "tooltip")(
-      div(cls := BootstrapStyles.arrow.cls),
-      h3(cls := BootstrapStyles.Popover.popoverTitle.cls),
-      div(cls := BootstrapStyles.Popover.popoverContent.cls)
+    div(cls := BootstrapStyles.Popover.popover.className, role := "tooltip")(
+      div(cls := BootstrapStyles.arrow.className),
+      h3(cls := BootstrapStyles.Popover.popoverTitle.className),
+      div(cls := BootstrapStyles.Popover.popoverContent.className)
     ).render
   }
   override protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)

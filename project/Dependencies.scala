@@ -9,6 +9,7 @@ object Dependencies {
 
   val scalaJsDomVersion = "0.9.2"
   val scalaTagsVersion = "0.6.5"
+  val scalaCssVersion = "0.5.3"
 
   val servletVersion = "3.1.0"
   val avsCommonsVersion = "1.20.6"
@@ -71,6 +72,14 @@ object Dependencies {
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
+  ))
+
+  val cssMacroDeps = Def.setting(Seq(
+    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion
+  ))
+
+  val cssFrontendDeps = Def.setting(Seq(
+    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
   val bootstrapFrontendDeps = Def.setting(Seq(

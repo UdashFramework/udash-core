@@ -3,16 +3,18 @@ package navs
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.css.CssStyle
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
 
 class UdashNavbar[ItemType, ElemType <: Property[ItemType]] private
-                 (navbarStyle: BootstrapStyles.BootstrapClass, override val componentId: ComponentId)
+                 (navbarStyle: CssStyle, override val componentId: ComponentId)
                  (brand: dom.Element, nav: UdashNav[ItemType, ElemType])
   extends UdashBootstrapComponent {
 
+  import io.udash.css.CssView._
   import BootstrapTags._
 
   private val collapseId = UdashBootstrap.newId()

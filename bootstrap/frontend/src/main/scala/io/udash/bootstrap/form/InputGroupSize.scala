@@ -1,8 +1,10 @@
 package io.udash.bootstrap
 package form
 
-sealed abstract class InputGroupSize(sizeStyle: Option[BootstrapStyles.BootstrapClass]) extends ClassModifier(sizeStyle.toSeq: _*) {
-  def this(sizeStyle: BootstrapStyles.BootstrapClass) =
+import io.udash.css.CssStyle
+
+sealed abstract class InputGroupSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq: _*) {
+  def this(sizeStyle: CssStyle) =
     this(Some(sizeStyle))
 }
 

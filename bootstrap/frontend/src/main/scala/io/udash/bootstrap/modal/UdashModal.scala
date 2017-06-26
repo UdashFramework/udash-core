@@ -15,6 +15,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
                          footerFactory: Option[() => dom.Element])
   extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
+  import io.udash.css.CssView._
   import BootstrapTags._
   import UdashModal._
   import io.udash.wrappers.jquery._
@@ -49,7 +50,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
       (footerFactory, BootstrapStyles.Modal.modalFooter)
     ).filter(_._1.nonEmpty).map { case (factory, styleName) =>
       val el = factory.get.apply()
-      el.classList.add(styleName.cls)
+      el.classList.add(styleName.className)
       el
     }
 

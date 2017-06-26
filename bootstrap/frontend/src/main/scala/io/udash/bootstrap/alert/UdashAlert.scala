@@ -11,7 +11,6 @@ import scalatags.JsDom.all._
 
 sealed class UdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
                                       (content: Modifier*) extends UdashBootstrapComponent {
-
   override lazy val render: Element = template().render
 
   protected def template() =
@@ -20,6 +19,8 @@ sealed class UdashAlert private[alert](alertStyle: AlertStyle, override val comp
 
 class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
                                           (content: Modifier*)(implicit ec: ExecutionContext) extends UdashAlert(alertStyle, componentId)() {
+  import io.udash.css.CssView._
+
   private val _dismissed = Property[Boolean](false)
   val dismissed: ReadableProperty[Boolean] = _dismissed.transform(identity)
 

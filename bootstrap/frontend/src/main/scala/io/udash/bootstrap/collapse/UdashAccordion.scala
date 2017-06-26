@@ -15,6 +15,7 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
                     (panelStyleSelector: ItemType => PanelStyle,
                      heading: (ElemType) => dom.Element,
                      body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
   import BootstrapTags._
 
   import scalatags.JsDom.all._

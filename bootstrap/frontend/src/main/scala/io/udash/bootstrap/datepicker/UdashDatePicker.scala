@@ -4,9 +4,9 @@ import java.{util => ju}
 
 import com.avsystem.commons.SharedExtensions._
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles.BootstrapClass
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
+import io.udash.css.CssStyle
 import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -21,6 +21,7 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
                                           override val componentId: ComponentId)
   extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
 
+  import io.udash.css.CssView._
   import UdashDatePicker._
 
   import scalatags.JsDom.all._
@@ -141,7 +142,7 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
       ("clear", icons.clear),
       ("close", icons.close)
     ).filter(_._2.nonEmpty).foreach(item =>
-      dict.update(item._1, item._2.map(_.cls).toJSArray)
+      dict.update(item._1, item._2.map(_.className).toJSArray)
     )
     dict
   }
@@ -187,7 +188,7 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
 }
 
 object UdashDatePicker {
-
+  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   /** Creates date picker component. */
@@ -304,11 +305,11 @@ object UdashDatePicker {
     implicit val propertyCreator: PropertyCreator[DatePickerOptions] = PropertyCreator.propertyCreator[DatePickerOptions]
   }
 
-  case class DatePickerIcons(time: Seq[BootstrapClass] = Seq.empty, date: Seq[BootstrapClass] = Seq.empty,
-                             up: Seq[BootstrapClass] = Seq.empty, down: Seq[BootstrapClass] = Seq.empty,
-                             previous: Seq[BootstrapClass] = Seq.empty, next: Seq[BootstrapClass] = Seq.empty,
-                             today: Seq[BootstrapClass] = Seq.empty, clear: Seq[BootstrapClass] = Seq.empty,
-                             close: Seq[BootstrapClass] = Seq.empty)
+  case class DatePickerIcons(time: Seq[CssStyle] = Seq.empty, date: Seq[CssStyle] = Seq.empty,
+                             up: Seq[CssStyle] = Seq.empty, down: Seq[CssStyle] = Seq.empty,
+                             previous: Seq[CssStyle] = Seq.empty, next: Seq[CssStyle] = Seq.empty,
+                             today: Seq[CssStyle] = Seq.empty, clear: Seq[CssStyle] = Seq.empty,
+                             close: Seq[CssStyle] = Seq.empty)
 
   object DatePickerIcons {
     implicit val propertyCreator: PropertyCreator[DatePickerIcons] = PropertyCreator.propertyCreator[DatePickerIcons]

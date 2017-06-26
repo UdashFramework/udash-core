@@ -16,6 +16,7 @@ class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
                    (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
+  import io.udash.css.CssView._
   import UdashDropdown._
   import io.udash.wrappers.jquery._
 
@@ -101,6 +102,7 @@ object UdashDropdown {
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(p: Property[DefaultDropdownItem]): dom.Element = {
+    import io.udash.css.CssView._
     def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
       case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
       case DropdownHeader(title) => li(BootstrapStyles.Dropdown.dropdownHeader)(produce(p)(_ => span(title).render)).render

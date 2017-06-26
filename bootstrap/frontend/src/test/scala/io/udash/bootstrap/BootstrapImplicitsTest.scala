@@ -1,12 +1,15 @@
 package io.udash.bootstrap
 
 import io.udash._
+import io.udash.css.CssStyleName
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom
 
 import scala.language.postfixOps
 
 class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
+  import io.udash.css.CssView._
+
   "StyleOps" should {
     "apply style conditionally" in {
       val textArea = TextArea.debounced(Property(""), BootstrapStyles.Form.formControl.styleIf(false)).render
@@ -35,9 +38,9 @@ class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
   }
 
   implicit class ElemOps(elem: dom.Element) {
-    def hasStyles(styles: BootstrapStyles.BootstrapClass*): Boolean =
+    def hasStyles(styles: CssStyleName*): Boolean =
       styles
-        .map(_.cls)
+        .map(_.className)
         .forall(elem.classList.contains)
   }
 }

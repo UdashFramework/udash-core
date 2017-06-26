@@ -13,6 +13,7 @@ class UdashTable[ItemType, ElemType <: Property[ItemType]] private
                 (val items: seq.SeqProperty[ItemType, ElemType])
                 (headerFactory: Option[() => dom.Element],
                  rowFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
 
   override lazy val render: Element = {
     import scalatags.JsDom.all._
