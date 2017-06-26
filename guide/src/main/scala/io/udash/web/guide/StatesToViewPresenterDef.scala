@@ -45,6 +45,7 @@ class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
       case RestIntroState => RestIntroViewPresenter
       case RestInterfacesState => RestInterfacesViewPresenter
       case RestClientServerState => RestClientServerViewPresenter
+      case RestServerState => RestServerViewPresenter
 
       case I18NExtState => I18NExtViewPresenter
       case BootstrapExtState => BootstrapExtViewPresenter

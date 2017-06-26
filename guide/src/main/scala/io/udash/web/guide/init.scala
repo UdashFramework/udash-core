@@ -25,7 +25,7 @@ object Context {
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
-  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, 8081, "/")
+  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, Option(dom.window.location.port).map(_.toInt).getOrElse(80), "/rest/")
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
@@ -57,7 +57,8 @@ object Context {
     MenuContainer("REST", Seq(
       MenuLink("Introduction", RestIntroState),
       MenuLink("Interfaces", RestInterfacesState),
-      MenuLink("Client ➔ Server", RestClientServerState)
+      MenuLink("Client ➔ Server", RestClientServerState),
+      MenuLink("Server", RestServerState)
     )),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),

@@ -44,7 +44,7 @@ class RestInterfacesView extends FinalView with CssView {
       li(i("Argument types"), " - these describe how to map the method call argument into HTTP request data")
     ),
     h3("HTTP request methods"),
-    p("Every method making server calls has to be annotated with an annotation determining used HTTP method. Take a look at the following example:"),
+    p("Every method making server calls should be annotated with an annotation determining used HTTP method. Take a look at the following example:"),
     CodeBlock(
       """import io.udash.rest._
         |
@@ -57,6 +57,10 @@ class RestInterfacesView extends FinalView with CssView {
         |  @DELETE def deleteMethod(): Future[String]
         |}""".stripMargin
     )(GuideStyles),
+    p(
+      "If you skip this annotation ", i("@GET"), " or ", i("@POST"), " will be used by default. ",
+      i("@POST"), " is selected when you use ", i("@Body"), " or ", i("@BodyValue"), " on any argument. "
+    ),
     h3("REST methods names"),
     p(
       "All methods on the path from the root REST interface to the method making HTTP request is used to create a request URL. ",
@@ -102,26 +106,32 @@ class RestInterfacesView extends FinalView with CssView {
       li(i("restServer.name().int()"), " -> ", i("POST /renamed")),
       li(i("restServer.name().cls()"), " -> ", i("PUT /renamed/class"))
     ),
+    p(
+      "These annotations can be used only in Udash REST client. You cannot skip method name in exposed interface. ",
+      "If you want to rename exposed method, use ", i("@RPCName"), " and remember that it has to be unique."
+    ),
     h3("Argument types"),
     p(
-      "Methods in a REST interface can take arguments. Every argument has to be decorated with an annotation ",
+      "Methods in a REST interface can take arguments. Every argument should be decorated with an annotation ",
       "describing how to map this argument to an HTTP request: "
     ),
     ul(GuideStyles.defaultList)(
       li(i("@URLPart"), " - the argument will be appended to the request URL after a method name"),
-      li(i("@Query"), " - the argument will be sent as a query parameter"),
+      li(i("@Query"), " - the argument will be sent as a query parameter - default method"),
       li(i("@Header"), " - the argument will be sent as a request header"),
-      li(i("@Body"), " - the argument will be sent in a request body, only one argument can be sent this way")
+      li(i("@Body"), " - the argument will be sent in a request body, only one argument can be sent this way"),
+      li(i("@BodyValue"), " - the argument will be sent as a part of request body")
     ),
     CodeBlock(
       """import io.udash.rest._
         |
         |@REST
         |trait RESTInterface {
-        |  @POST def url(@URLPart arg: String): Future[String]
-        |  @POST def query(@Query arg: String): Future[String]
-        |  @POST def header(@Header arg: String): Future[String]
+        |  @GET def url(@URLPart arg: String): Future[String]
+        |  @GET def query(@Query arg: String): Future[String]
+        |  @GET def header(@Header arg: String): Future[String]
         |  @POST def body(@Body arg: String): Future[String]
+        |  def bodyVals(@BodyValue arg: String, @BodyValue arg2: String): Future[Int]
         |}""".stripMargin
     )(GuideStyles),
     p("The above methods map to:"),
@@ -129,9 +139,9 @@ class RestInterfacesView extends FinalView with CssView {
       li(i("restServer.url(\"value\")"), " -> ", i("GET /url/value")),
       li(i("restServer.query(\"value\")"), " -> ", i("GET /query?arg=value")),
       li(i("restServer.header(\"value\")"), " -> ", i("GET /header"), " with header ", i("arg: \"value\"")),
-      li(i("restServer.body(\"value\")"), " -> ", i("GET /body"), " with body ", i("\"value\""))
+      li(i("restServer.body(\"value\")"), " -> ", i("POST /body"), " with body ", i("\"value\""))
     ),
-    p("It is possible to annotate an argument with ", i("@RESTName"), " to override the argument name in the query and header methods."),
+    p("It is possible to annotate an argument with ", i("@RESTParamName"), " to override the argument name in the query and header methods."),
     h2("What's next?"),
     p(
       "Now you know more about Udash REST interfaces. You might also want to take a look at the ",

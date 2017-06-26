@@ -3,7 +3,8 @@ package io.udash.web.server
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
-import io.udash.web.guide.rest.DevsGuideRest
+import io.udash.web.guide.demos.rest.{EchoServerREST, MainServerREST, RestExampleClass, SimpleServerREST}
+import io.udash.web.guide.rest.ExposedRestInterfaces
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.web.guide.{GuideExceptions, MainServerRPC}
 import io.udash.web.styles.CssRenderer
@@ -13,21 +14,20 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
-class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: String, guideResourceBase: String) {
+import scala.concurrent.Future
+
+class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String) {
   import io.udash.web.Implicits._
   private val server = new Server(port)
 
   def start(): Unit = {
     CssRenderer.renderHomepage(s"${homepageResourceBase.stripSuffix("/")}/styles")
     CssRenderer.renderGuide(s"${guideResourceBase.stripSuffix("/")}/styles")
-    DevsGuideRest.start(restPort)
     server.start()
   }
 
-  def stop(): Unit = {
-    DevsGuideRest.stop()
+  def stop(): Unit =
     server.stop()
-  }
 
   private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
   private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
@@ -53,6 +53,15 @@ class ApplicationServer(val port: Int, restPort: Int, homepageResourceBase: Stri
     atmosphereHolder
   }
   guide.addServlet(atmosphereHolder, "/atm/*")
+
+  private val restHolder = {
+    import io.udash.rest.server._
+    val restImpl = new ExposedRestInterfaces
+    val holder = new ServletHolder(new RestServlet(new DefaultExposesREST[MainServerREST](restImpl)))
+    holder.setAsyncSupported(true)
+    holder
+  }
+  guide.addServlet(restHolder, "/rest/*")
 
   val contexts = new ContextHandlerCollection
   contexts.setHandlers(Array(homepage, guide))

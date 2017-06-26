@@ -14,13 +14,13 @@ trait MainServerREST {
 trait SimpleServerREST {
   @GET def string(): Future[String]
   @GET def int(): Future[Int]
-  @GET @RESTName("class") def cls(): Future[RestExampleClass]
+  @GET def cls(): Future[RestExampleClass]
 }
 
 @REST
 trait EchoServerREST {
-  @GET @SkipRESTName def withQuery(@Query @RESTName("param") arg: String): Future[String]
-  @GET @SkipRESTName def withHeader(@Header @RESTName("X-test") arg: String): Future[String]
-  @GET @SkipRESTName def withUrlPart(@URLPart arg: String): Future[String]
-  @POST @SkipRESTName def withBody(@Body arg: String): Future[String]
+  def withQuery(@Query @RESTParamName("param") arg: String): Future[String]
+  def withHeader(@Header @RESTParamName("X-test") arg: String): Future[String]
+  def withUrlPart(@URLPart arg: String): Future[String]
+  def withBody(@Body arg: String): Future[String]
 }

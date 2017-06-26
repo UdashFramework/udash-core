@@ -20,4 +20,5 @@ object References {
   val ScalaHomepage = "http://www.scala-lang.org/"
   val ScalatagsHomepage = "https://github.com/lihaoyi/scalatags"
   val UpickleHomepage = "https://github.com/lihaoyi/upickle-pprint"
+  val AkkaHttpHomepage = "http://doc.akka.io/docs/akka-http/current/scala/http/"
 }

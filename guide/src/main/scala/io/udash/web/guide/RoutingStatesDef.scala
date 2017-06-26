@@ -74,6 +74,8 @@ case object RestInterfacesState extends RoutingState(RestState)
 
 case object RestClientServerState extends RoutingState(RestState)
 
+case object RestServerState extends RoutingState(RestState)
+
 /** Extensions **/
 case object BootstrapExtState extends RoutingState(ContentState)
 

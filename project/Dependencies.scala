@@ -16,9 +16,6 @@ object Dependencies {
   val avsystemCommonsVersion = "1.20.6"
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.8.RELEASE"
-  val akkaVersion = "2.4.17"
-  val akkaHttpVersion = "10.0.5"
-  val akkaHttpCorsVersion = "0.2.1"
 
   val seleniumVersion = "2.53.1"
   val scalatestVersion = "3.0.1"
@@ -56,6 +53,7 @@ object Dependencies {
 
   val backendDeps = Def.setting(Seq(
     "io.udash" %% "udash-rpc-backend" % udashVersion,
+    "io.udash" %% "udash-rest-backend" % udashVersion,
     "io.udash" %% "udash-i18n-backend" % udashVersion,
     "io.udash" %% "udash-css-backend" % udashVersion,
 
@@ -67,11 +65,7 @@ object Dependencies {
 
     "com.typesafe" % "config" % typesafeConfigVersion,
     "org.springframework" % "spring-beans" % springVersion,
-    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
-
-    "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-    "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-    "ch.megard" %% "akka-http-cors" % akkaHttpCorsVersion
+    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(

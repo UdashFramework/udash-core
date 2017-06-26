@@ -23,16 +23,15 @@ class RestIntroView extends FinalView with CssView {
       "Communication via WebSockets is not always attainable. If your application needs to use a REST API, then the Udash REST ",
       "module can help you to keep it clean, maintainable and type-safe."
     ),
-    p(
-      "The Udash REST module provides: "
-    ),
+    p("The Udash REST module provides: "),
     ul(GuideStyles.defaultList)(
-      li("REST APIs wrapped with typed interfaces"),
-      li("Type-safe API usage with results returned as Futures"),
-      li("Sending method arguments as URL part, body, query or header"),
-      li("Customizable serialization")
+      li("REST APIs wrapped with typed interfaces."),
+      li("Type-safe API usage with results returned as Futures."),
+      li("Sending method arguments as URL part, body, query or header."),
+      li("Exposing RPC interfaces as REST-like endpoints."),
+      li("Customizable serialization.")
     ),
-    h2("Simple REST example"),
+    h2("Simple REST client example"),
     p("Take a look at the simple REST usage example. Click the buttons below and wait for a response."),
     ForceBootstrap(new SimpleRestDemoComponent),
     p("The Developer's Guide server publishes a REST API with the following methods:"),

@@ -39,13 +39,9 @@ class RestClientServerView extends FinalView with CssView {
     CodeBlock(
       """@REST
         |trait EchoServerREST {
-        |  @GET @SkipRESTName
-        |  def withQuery(@Query @RESTName("param") arg: String): Future[String]
-        |  @GET @SkipRESTName
-        |  def withHeader(@Header @RESTName("X-test") arg: String): Future[String]
-        |  @GET @SkipRESTName
+        |  def withQuery(@Query @RESTParamName("param") arg: String): Future[String]
+        |  def withHeader(@Header @RESTParamName("X-test") arg: String): Future[String]
         |  def withUrlPart(@URLPart arg: String): Future[String]
-        |  @POST @SkipRESTName
         |  def withBody(@Body arg: String): Future[String]
         |}""".stripMargin
     )(GuideStyles),
@@ -53,8 +49,9 @@ class RestClientServerView extends FinalView with CssView {
     ForceBootstrap(new EchoRestDemoComponent),
     h2("What's next?"),
     p(
-      "That wraps all the knowledge needed to start working with wrapped REST interfaces. ",
-      "You may find the ", a(href := RpcIntroState.url)("RPC communication"), " chapter interesting later on. "
+      "That wraps all the knowledge needed to start working with wrapped REST interfaces. As mentioned before it is possible ",
+      "to expose prepared interfaces with ", a(href := RestServerState.url)("Udash server-side endpoint"), ". ",
+      "You may also find the ", a(href := RpcIntroState.url)("RPC communication"), " chapter interesting later on. "
     )
   )
 }
