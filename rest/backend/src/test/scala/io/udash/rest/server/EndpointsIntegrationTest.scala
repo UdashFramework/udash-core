@@ -72,20 +72,28 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
     "work with Udash REST client (8)" in {
       await(restServer.serviceTwo("token123", "en_GB").delete(222)) should be(TestRESTRecord(Some(222), "two/token123/en_GB/delete"))
     }
-    "report HTTP errors (1)" in {
+    "report valid HTTP codes (1)" in {
       intercept[HttpException[SimpleHttpResponse]](
         await(serverConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null))
       ).response.statusCode should be(404)
     }
-    "report HTTP errors (2)" in {
+    "report valid HTTP codes (2)" in {
       intercept[HttpException[SimpleHttpResponse]](
         await(serverConnector.send("/serviceOne/loadAll", RESTConnector.POST, Map.empty, Map.empty, null))
       ).response.statusCode should be(405)
     }
-    "report HTTP errors (3)" in {
+    "report valid HTTP codes (3)" in {
       intercept[HttpException[SimpleHttpResponse]](
         await(serverConnector.send("/serviceTwo/loadAll", RESTConnector.GET, Map.empty, Map.empty, null))
       ).response.statusCode should be(400)
+    }
+    "report valid HTTP codes (4)" in {
+      intercept[HttpException[SimpleHttpResponse]](
+        await(serverConnector.send("/serviceThree/loadAll", RESTConnector.GET, Map.empty, Map.empty, null))
+      ).response.statusCode should be(404)
+      intercept[HttpException[SimpleHttpResponse]](
+        await(serverConnector.send("/service_three/loadAll", RESTConnector.GET, Map.empty, Map.empty, null))
+      ).response.statusCode should be(404) // "loadAll" is interpreted as URL argument from `serviceThree` getter
     }
   }
 

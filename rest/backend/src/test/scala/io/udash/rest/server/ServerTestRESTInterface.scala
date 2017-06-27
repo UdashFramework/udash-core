@@ -9,7 +9,7 @@ import scala.concurrent.Future
 trait TestServerRESTInterface {
   def serviceOne(): TestServerRESTInternalInterface
   def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
-  /*@RESTName("service_three") */def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
+  @RPCName("service_three") def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
 }
 
 @REST
