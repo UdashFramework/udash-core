@@ -67,7 +67,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
       await(restServer.serviceOne().update(123321)(TestRESTRecord(Some(52), "test123"))) should be(TestRESTRecord(Some(123321), "one/update/Some(52)/test123"))
     }
     "work with Udash REST client (7)" in {
-      await(restServer.serviceThree("asd").modify(321)("mod")) should be(TestRESTRecord(Some(321), "three/asd/modify/mod"))
+      await(restServer.serviceThree("asd").modify(321)("mod", 5)) should be(TestRESTRecord(Some(321), "three/asd/modify/mod/5"))
     }
     "work with Udash REST client (8)" in {
       await(restServer.serviceTwo("token123", "en_GB").delete(222)) should be(TestRESTRecord(Some(222), "two/token123/en_GB/delete"))
@@ -117,8 +117,8 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
     override def update(id: Int)(record: TestRESTRecord): Future[TestRESTRecord] =
       Future.successful(TestRESTRecord(Some(id), s"$data/update/${record.id}/${record.s}"))
 
-    override def modify(id: Int)(s: String): Future[TestRESTRecord] =
-      Future.successful(TestRESTRecord(Some(id), s"$data/modify/$s"))
+    override def modify(id: Int)(s: String, i: Int): Future[TestRESTRecord] =
+      Future.successful(TestRESTRecord(Some(id), s"$data/modify/$s/$i"))
 
     override def delete(id: Int): Future[TestRESTRecord] =
       Future.successful(TestRESTRecord(Some(id), s"$data/delete"))

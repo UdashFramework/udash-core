@@ -29,11 +29,6 @@ class RestServlet(exposedInterfaces: ExposesREST[_])(implicit ec: ExecutionConte
   override def doDelete(req: HttpServletRequest, resp: HttpServletResponse): Unit =
     handle(req, resp, classOf[DELETE])
 
-  override def doOptions(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
-    // TODO implement this
-    resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED)
-  }
-
   private def handle(req: HttpServletRequest, resp: HttpServletResponse, httpMethod: Class[_ <: RESTMethod]): Unit = {
     val asyncCtx = req.startAsync()
     Future(exposedInterfaces.parseHttpRequest(req, httpMethod))(RunNowEC)

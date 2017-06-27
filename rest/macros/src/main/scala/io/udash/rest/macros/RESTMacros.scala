@@ -8,6 +8,13 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
 
   import c.universe._
 
+  sealed trait BodyArgumentsState
+  object BodyArgumentsState {
+    case object None extends BodyArgumentsState
+    case object HasBody extends BodyArgumentsState
+    case object HasBodyValue extends BodyArgumentsState
+  }
+
   val RestPackage = q"io.udash.rest"
 
   val RESTFrameworkType = getType(tq"$RestPackage.UdashRESTFramework")
@@ -28,6 +35,7 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
 
   val ArgumentTypeCls = tq"$RestPackage.ArgumentType"
   val BodyCls = tq"$RestPackage.Body"
+  val BodyValueCls = tq"$RestPackage.BodyValue"
   val HeaderCls = tq"$RestPackage.Header"
   val QueryCls = tq"$RestPackage.Query"
   val URLPartCls = tq"$RestPackage.URLPart"
@@ -75,19 +83,27 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
 
     if (hasAnnotation(param.annotations, getType(BodyCls)))
       abort(s"Subinterface getter cannot contain arguments annotated with @Body annotation, ${getter.rpcName} in $restType does.")
+    if (hasAnnotation(param.annotations, getType(BodyValueCls)))
+      abort(s"Subinterface getter cannot contain arguments annotated with @BodyValue annotation, ${getter.rpcName} in $restType does.")
   }
 
-  def checkMethodParameter(param: Symbol, method: ProxyableMember, restType: Type, alreadyContainsBodyArgument: Boolean): Boolean = {
+  def checkMethodParameter(param: Symbol, method: ProxyableMember, restType: Type, bodyArgsState: BodyArgumentsState): BodyArgumentsState = {
     checkParameterNameOverride(param, method, restType)
     checkParameterTypeAnnotations(param, method, restType)
 
     if (hasAnnotation(param.annotations, getType(BodyCls))) {
-      if (alreadyContainsBodyArgument)
+      if (bodyArgsState != BodyArgumentsState.None)
         abort(s"REST method cannot contain more than one argument annotated with @Body annotation, ${method.rpcName} in $restType does.")
       if (hasAnnotation(method.method.annotations, getType(GetCls)))
         abort(s"GET HTTP request cannot contain body argument, ${method.rpcName} in $restType does.")
-      true
-    } else alreadyContainsBodyArgument
+      BodyArgumentsState.HasBody
+    } else if (hasAnnotation(param.annotations, getType(BodyValueCls))) {
+      if (bodyArgsState == BodyArgumentsState.HasBody)
+        abort(s"REST method cannot contain arguments annotated with both @Body and @BodyValue, ${method.rpcName} in $restType does.")
+      if (hasAnnotation(method.method.annotations, getType(GetCls)))
+        abort(s"GET HTTP request cannot contain body argument, ${method.rpcName} in $restType does.")
+      BodyArgumentsState.HasBodyValue
+    } else bodyArgsState
   }
 
   private def validRest(restType: Type, isServer: Boolean): c.Tree = {
@@ -113,7 +129,7 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     })
 
     val methodsImplicits = methods.map(method => {
-      var alreadyContainsBodyArgument = false
+      var alreadyContainsBodyArgument: BodyArgumentsState = BodyArgumentsState.None
       checkMethodNameOverride(method, restType)
       if (isServer && hasRESTNameOverride(method.method.annotations))
         abort(s"REST method cannot be annotated with RESTName annotation in server-side interface, ${method.rpcName} in $restType does.")

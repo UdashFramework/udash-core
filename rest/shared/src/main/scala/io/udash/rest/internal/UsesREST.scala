@@ -49,6 +49,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
     val urlBuilder = Seq.newBuilder[String]
     val queryArgsBuilder = Map.newBuilder[String, String]
     val headersArgsBuilder = Map.newBuilder[String, String]
+    val bodyArgsBuilder = Map.newBuilder[String, RawValue]
     var body: String = null
 
     def shouldSkipRestName(annotations: Seq[MetadataAnnotation]): Boolean =
@@ -80,6 +81,8 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
               urlBuilder += rawToURLPart(value)
             case Some(_: Body) =>
               body = rawToString(value)
+            case Some(_: BodyValue) =>
+              bodyArgsBuilder.+=((paramName, value))
             case _ => throw new RuntimeException(s"Missing `${param.name}` parameter type annotations! ($argTypeAnnotations)")
           }
         }
@@ -107,6 +110,12 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       metadata = metadata.getterResults(inv.rpcName)
     }
     parseInvocation(invocation, metadata)
+
+    val bodyArgs = bodyArgsBuilder.result()
+    if (body != null && bodyArgs.nonEmpty) throw new IllegalStateException("@Body and @BodyValue annotations used at the same time!")
+    else if (body == null && bodyArgs.nonEmpty) {
+      body = rawToString(framework.write(bodyArgs)(framework.bodyValuesWriter))
+    }
 
     connector.send(
       url = s"/${urlBuilder.result().map(URLEncoder.encode).mkString("/")}",

@@ -44,6 +44,8 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
   def parseHttpRequest(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod]): (List[RawInvocation], RawInvocation) = {
     val invocations = List.newBuilder[RawInvocation]
     val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
+    val bodyContent = req.getReader.lines().toArray.mkString("\n")
+    lazy val bodyValues = read[Map[String, framework.RawValue]](stringToRaw(bodyContent))(bodyValuesReader)
 
     def findRestParamName(annotations: Seq[MetadataAnnotation]): Option[String] =
       annotations.find(_.isInstanceOf[RESTParamName]).map(_.asInstanceOf[RESTParamName].restName)
@@ -78,10 +80,13 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
               val v = nextParts.head
               nextParts = nextParts.tail
               urlPartToRaw(v, arg.typeMetadata == framework.SimplifiedType.StringType)
+            case Some(_: BodyValue) =>
+              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
+              if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(arg.name)
+              bodyValues(argName)
             case Some(_: Body) =>
-              val body = req.getReader.lines().toArray
-              if (body.isEmpty) throw ExposesREST.MissingBody(arg.name)
-              stringToRaw(body.mkString("\n"))
+              if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
+              stringToRaw(bodyContent)
             case _ =>
               throw new RuntimeException(s"Missing `${arg.name}` (REST name: `${findRestParamName(arg.annotations)}`) parameter type annotations! ($argTypeAnnotations)")
           }
@@ -112,4 +117,5 @@ object ExposesREST {
   case class MissingQueryArgument(name: String) extends BadRequestException(s"Query argument `$name` not found.")
   case class MissingURLPart(name: String) extends BadRequestException(s"URL argument `$name` not found.")
   case class MissingBody(name: String) extends BadRequestException(s"Body argument `$name` not found.")
+  case class MissingBodyValue(name: String) extends BadRequestException(s"Body argument value `$name` not found.")
 }

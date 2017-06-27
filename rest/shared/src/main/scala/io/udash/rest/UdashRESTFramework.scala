@@ -12,6 +12,9 @@ trait UdashRESTFramework extends GetterRPCFramework with FunctionRPCFramework {
   /** Transform `RawValue` to `String` for HTTP request body. */
   def rawToString(raw: RawValue): String
 
+  def bodyValuesWriter: Writer[Map[String, RawValue]]
+  def bodyValuesReader: Reader[Map[String, RawValue]]
+
   trait ValidREST[T]
 
   object ValidREST {

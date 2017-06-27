@@ -33,7 +33,11 @@ sealed trait ArgumentType
 class URLPart extends MetadataAnnotation with ArgumentType
 /** Annotated argument will be send as a query argument, eg. /method/?arg=value. */
 class Query extends MetadataAnnotation with ArgumentType
-/** Annotated argument will be send as a body part, eg. /method/ JSON(value). */
-class Body extends MetadataAnnotation with ArgumentType // TODO support for body-part arguments
+/** Annotated argument will be send as a body, eg. /method/ JSON(value).
+  * Only one argument can be annotated. It cannot be mixed with `@BodyValue`. */
+class Body extends MetadataAnnotation with ArgumentType
+/** Annotated argument will be send as a body part, eg. /method/ JSON(arg -> value).
+  * It can be used on multiple arguments. It cannot be mixed with `@Body`. */
+class BodyValue extends MetadataAnnotation with ArgumentType
 /** Annotated argument will be send as a header. */
 class Header extends MetadataAnnotation with ArgumentType
