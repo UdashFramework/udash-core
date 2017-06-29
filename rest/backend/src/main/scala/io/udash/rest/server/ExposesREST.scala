@@ -70,11 +70,6 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
               val headerValue = req.getHeader(argName)
               if (headerValue == null) throw ExposesREST.MissingHeader(argName)
               headerArgumentToRaw(headerValue, arg.typeMetadata == framework.SimplifiedType.StringType)
-            case Some(_: Query) =>
-              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
-              val param = req.getParameter(argName)
-              if (param == null) throw ExposesREST.MissingQueryArgument(argName)
-              queryArgumentToRaw(param, arg.typeMetadata == framework.SimplifiedType.StringType)
             case Some(_: URLPart) =>
               if (nextParts.isEmpty) throw ExposesREST.MissingURLPart(arg.name)
               val v = nextParts.head
@@ -87,8 +82,11 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
             case Some(_: Body) =>
               if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
               stringToRaw(bodyContent)
-            case _ =>
-              throw new RuntimeException(s"Missing `${arg.name}` (REST name: `${findRestParamName(arg.annotations)}`) parameter type annotations! ($argTypeAnnotations)")
+            case _ => // Query is a default argument type
+              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
+              val param = req.getParameter(argName)
+              if (param == null) throw ExposesREST.MissingQueryArgument(argName)
+              queryArgumentToRaw(param, arg.typeMetadata == framework.SimplifiedType.StringType)
           }
         }
       }

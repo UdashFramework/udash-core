@@ -31,7 +31,8 @@ class DELETE extends MetadataAnnotation with RESTMethod
 sealed trait ArgumentType
 /** Annotated argument will be send as an URL part, eg. /method/{value}. */
 class URLPart extends MetadataAnnotation with ArgumentType
-/** Annotated argument will be send as a query argument, eg. /method/?arg=value. */
+/** Annotated argument will be send as a query argument, eg. /method/?arg=value.
+  * It's a default argument type. */
 class Query extends MetadataAnnotation with ArgumentType
 /** Annotated argument will be send as a body, eg. /method/ JSON(value).
   * Only one argument can be annotated. It cannot be mixed with `@BodyValue`. */

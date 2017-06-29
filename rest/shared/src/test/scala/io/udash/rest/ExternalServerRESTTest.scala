@@ -445,23 +445,23 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
        """.stripMargin shouldNot typeCheck
     }
 
-    "not compile without argument type annotation" in {
+    "compile without argument type annotation (use @Query as default)" in {
       """import io.udash.rpc.RPCName
          |implicit val x: GenCodec[TestRESTRecord] = null
          |case class TestRESTRecord(id: Option[Int], s: String)
          |
          |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, lang: String): BrokenRESTInternalInterface
+         |trait RESTInterfaceWithDefaultArgType {
+         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, lang: String): RESTInternalInterface
          |}
          |
          |@REST
-         |trait BrokenRESTInternalInterface {
+         |trait RESTInternalInterface {
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |}
          |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
+         |val rest: DefaultServerREST[RESTInterfaceWithDefaultArgType] = new DefaultServerREST[RESTInterfaceWithDefaultArgType](connector)
+       """.stripMargin should compile
     }
 
     "not compile with result type other than REST interface or Future[T]" in {

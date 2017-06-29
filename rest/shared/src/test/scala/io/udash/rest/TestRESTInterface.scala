@@ -17,7 +17,7 @@ trait TestRESTInterface {
 @REST
 trait TestRESTInternalInterface {
   @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
+  @GET def load(@URLPart id: Int, @Query trash: String, /*@Query */@RESTParamName("trash_two") trash2: String): Future[TestRESTRecord] // trash2 uses default @Query
   @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]

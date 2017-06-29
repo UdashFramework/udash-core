@@ -75,15 +75,14 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
           argTypeAnnotations.headOption match {
             case Some(_: Header) =>
               headersArgsBuilder.+=((paramName, rawToHeaderArgument(value)))
-            case Some(_: Query) =>
-              queryArgsBuilder.+=((paramName, rawToQueryArgument(value)))
             case Some(_: URLPart) =>
               urlBuilder += rawToURLPart(value)
             case Some(_: Body) =>
               body = rawToString(value)
             case Some(_: BodyValue) =>
               bodyArgsBuilder.+=((paramName, value))
-            case _ => throw new RuntimeException(s"Missing `${param.name}` parameter type annotations! ($argTypeAnnotations)")
+            case _ => // Query is a default argument type
+              queryArgsBuilder.+=((paramName, rawToQueryArgument(value)))
           }
         }
       }

@@ -74,8 +74,8 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
       cls => s"@$cls annotation argument has to be non empty string, value on ${parameter.name} from ${method.rpcName} in $restType is not.")
 
   def checkParameterTypeAnnotations(parameter:  Symbol, method: ProxyableMember, restType: Type) =
-    if (countArgumentTypeAnnotation(parameter.annotations) != 1)
-      abort(s"REST method argument has to be annotated with exactly one argument type annotation, ${parameter.name} from ${method.rpcName} in $restType has not.")
+    if (countArgumentTypeAnnotation(parameter.annotations) > 1)
+      abort(s"REST method argument has to be annotated with at most one argument type annotation, ${parameter.name} from ${method.rpcName} in $restType has not.")
 
   def checkGetterParameter(param: Symbol, getter: ProxyableMember, restType: Type): Unit = {
     checkParameterNameOverride(param, getter, restType)
