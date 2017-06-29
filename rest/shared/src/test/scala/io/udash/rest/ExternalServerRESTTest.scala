@@ -407,23 +407,23 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
        """.stripMargin shouldNot typeCheck
     }
 
-    "not compile without REST method annotation" in {
+    "compile without REST method annotation (@GET or @POST as default)" in {
       """import io.udash.rpc.RPCName
          |implicit val x: GenCodec[TestRESTRecord] = null
          |case class TestRESTRecord(id: Option[Int], s: String)
          |
          |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceOne(): BrokenRESTInternalInterface
+         |trait RESTInterface {
+         |  def serviceOne(): RESTInternalInterface
          |}
          |
          |@REST
-         |trait BrokenRESTInternalInterface {
+         |trait RESTInternalInterface {
          |  def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |}
          |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
+         |val rest: DefaultServerREST[RESTInterface] = new DefaultServerREST[RESTInterface](connector)
+       """.stripMargin should compile
     }
 
     "not compile with more than one argument type annotation" in {

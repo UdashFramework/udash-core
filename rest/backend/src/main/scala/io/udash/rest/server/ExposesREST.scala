@@ -60,6 +60,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
         throw ExposesREST.NotFound(req.getPathInfo)
 
       val methodMetadata = metadata.signatures(methodName)
+      var hasBodyArgs = false
 
       val args: List[List[RawValue]] = methodMetadata.paramMetadata.map { argsList =>
         argsList.map { arg =>
@@ -78,9 +79,11 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
             case Some(_: BodyValue) =>
               val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
               if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(arg.name)
+              hasBodyArgs = true
               bodyValues(argName)
             case Some(_: Body) =>
               if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
+              hasBodyArgs = true
               stringToRaw(bodyContent)
             case _ => // Query is a default argument type
               val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
@@ -95,8 +98,12 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
 
       if (metadata.getterResults.contains(methodName))
         parseInvocations(nextParts, metadata.getterResults(methodName))
-      else if (!methodMetadata.annotations.exists(a => a.getClass == httpMethod))
-        throw new ExposesREST.MethodNotAllowed()
+      else {
+        val methodAnnotation = methodMetadata.annotations.find(_.isInstanceOf[RESTMethod])
+          .getOrElse(if (hasBodyArgs) new POST else new GET)
+        if (methodAnnotation.getClass != httpMethod)
+          throw new ExposesREST.MethodNotAllowed()
+      }
     }
 
     parseInvocations(path, rpcMetadata)

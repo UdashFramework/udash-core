@@ -17,9 +17,11 @@ class RESTName(val restName: String) extends MetadataAnnotation
 class RESTParamName(val restName: String) extends MetadataAnnotation
 
 sealed trait RESTMethod
-/** Annotated method will be send using `GET` HTTP method. */
+/** Annotated method will be send using `GET` HTTP method.
+  * It's a default for requests without body. */
 class GET extends MetadataAnnotation with RESTMethod
-/** Annotated method will be send using `POST` HTTP method. */
+/** Annotated method will be send using `POST` HTTP method.
+  * It's a default for requests with body. */
 class POST extends MetadataAnnotation with RESTMethod
 /** Annotated method will be send using `PATCH` HTTP method. */
 class PATCH extends MetadataAnnotation with RESTMethod

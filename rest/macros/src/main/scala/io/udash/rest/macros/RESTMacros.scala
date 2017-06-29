@@ -133,8 +133,8 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
       checkMethodNameOverride(method, restType)
       if (isServer && hasRESTNameOverride(method.method.annotations))
         abort(s"REST method cannot be annotated with RESTName annotation in server-side interface, ${method.rpcName} in $restType does.")
-      if (countRestMethodAnnotation(method.method.annotations) != 1)
-        abort(s"REST method has to be annotated with exactly one REST method annotation, ${method.rpcName} in $restType has not.")
+      if (countRestMethodAnnotation(method.method.annotations) > 1)
+        abort(s"REST method has to be annotated with at most one REST method annotation, ${method.rpcName} in $restType has not.")
       if (isServer && hasSkipRestNameAnnotation(method.method.annotations))
         abort(s"REST method in server-side REST interface cannot be annotated with @SkipRESTName annotation, ${method.rpcName} in $restType does.")
 

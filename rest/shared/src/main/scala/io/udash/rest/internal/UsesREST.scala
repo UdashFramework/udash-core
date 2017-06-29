@@ -88,7 +88,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       }
     }
 
-    def findRestMethod(inv: framework.RawInvocation, metadata: RPCMetadata[_]): RESTConnector.HTTPMethod = {
+    def findRestMethod(inv: framework.RawInvocation, metadata: RPCMetadata[_], hasBody: Boolean): RESTConnector.HTTPMethod = {
       val rpcMethodName: String = inv.rpcName
       val methodMetadata = metadata.signatures(rpcMethodName)
       val methodAnnotations = methodMetadata.annotations.filter(_.isInstanceOf[RESTMethod])
@@ -99,7 +99,8 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
         case Some(_: PATCH) => RESTConnector.PATCH
         case Some(_: PUT) => RESTConnector.PUT
         case Some(_: DELETE) => RESTConnector.DELETE
-        case _ => throw new RuntimeException(s"Missing method type annotations! ($methodAnnotations)")
+        case _ if hasBody => RESTConnector.POST
+        case _ => RESTConnector.GET
       }
     }
 
@@ -118,7 +119,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
 
     connector.send(
       url = s"/${urlBuilder.result().map(URLEncoder.encode).mkString("/")}",
-      method = findRestMethod(invocation, metadata),
+      method = findRestMethod(invocation, metadata, body != null),
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body

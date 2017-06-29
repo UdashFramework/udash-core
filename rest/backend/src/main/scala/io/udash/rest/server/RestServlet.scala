@@ -8,6 +8,7 @@ import io.udash.rest._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
+/** Servlet for exposing REST interfaces. */
 class RestServlet(exposedInterfaces: ExposesREST[_])(implicit ec: ExecutionContext) extends HttpServlet {
   override def service(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
     if (req.getMethod == "PATCH") doPatch(req, resp)
