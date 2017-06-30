@@ -15,9 +15,9 @@ class TestView extends View {
   var lastChild: View = _
   var renderingCounter = 0
 
-  override def renderChild(view: View): Unit = {
-    if (view != null) view.getTemplate
-    lastChild = view
+  override def renderChild(view: Option[View]): Unit = {
+    view.foreach(_.getTemplate)
+    lastChild = view.orNull
   }
 
   override def getTemplate: Modifier = {

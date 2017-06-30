@@ -15,19 +15,19 @@ private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
 
-  private def mergeViews(path: List[View]): View = {
+  private def mergeViews(path: List[View]): Option[View] = {
     if (path.size == 1) {
       val singleView: View = path.head
       views.append(singleView)
-      singleView
+      Some(singleView)
     } else {
       val lastElement = path.reduceLeft[View]((parent, child) => {
-        parent.renderChild(child)
+        parent.renderChild(Some(child))
         views.append(parent)
         child
       })
       views.append(lastElement)
-      path.head
+      path.headOption
     }
   }
 
@@ -41,7 +41,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     for (_ <- 0 until endpoint.childElementCount)
       endpoint.removeChild(endpoint.childNodes(0))
 
-    rootView.getTemplate.applyTo(endpoint)
+    rootView.foreach(_.getTemplate.applyTo(endpoint))
   }
 
   /**
@@ -65,12 +65,12 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     val currentViewsToLeave = findEqPrefix(subPathToLeave, views.toList)
 
     if (currentViewsToLeave.isEmpty) {
-      require(pathToAdd.nonEmpty, "You can not remove all views, without adding any new view.")
+      require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
       replaceCurrentViews(pathToAdd)
     } else {
       views.trimEnd(views.size - currentViewsToLeave.size)
       val rootView = currentViewsToLeave.last
-      val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else null
+      val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else None
 
       rootView.renderChild(rootViewToAttach)
     }
