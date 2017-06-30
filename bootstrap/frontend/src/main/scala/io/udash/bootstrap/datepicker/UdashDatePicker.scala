@@ -26,7 +26,6 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
 
   import scalatags.JsDom.all._
 
-  private lazy val dateString: Property[String] = date.transform(dateToMomentString, momentStringToDate)
   private lazy val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
   private lazy val jQInput = jQ(inp).asDatePicker()
 
@@ -53,20 +52,22 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
   lazy val render: dom.Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
-    dateString.listen(s => jQInput.dpData().date(s))
     options.listen(opts => jQInput.dpData().options(optionsToJsDict(opts)))
 
     date.get.foreach(d => jQInput.dpData().date(dateToMoment(d)))
+    date.listen(op => op.foreach(d => jQInput.dpData().date(dateToMoment(d))))
 
     jQInput.on("dp.change", (_: dom.Element, ev: JQueryEvent) => {
       val event = ev.asInstanceOf[DatePickerChangeJQEvent]
-      val dateOption = event.dateOption
-      val oldDateOption = event.oldDateOption
+      val dateOption = event.dateOption.map(momentToDate)
+      val oldDateOption = date.get
       dateOption match {
-        case Some(date) => dateString.set(Try(date.format(options.get.format)).getOrElse(""))
-        case None => dateString.set("")
+        case Some(d) =>
+          date.set(Option(d))
+        case None =>
+          date.set(None)
       }
-      fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption.map(momentToDate), oldDateOption.map(momentToDate)))
+      fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
     })
     jQInput.on("dp.hide", (_: dom.Element, ev: JQueryEvent) => {
       fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
@@ -169,14 +170,13 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
   private def internalFormat = options.get.format
   private def internalLocale = options.get.locale.getOrElse("en")
 
-  private def dateToMomentString(date: Option[ju.Date]): String =
-    date.map(d => moment(internalLocale, d.getTime, "x").format(internalFormat)).getOrElse("")
-
-  private def dateToMoment(date: ju.Date): MomentFormatWrapper =
-    Try(moment(internalLocale, date.getTime, "x")).getOrElse(null)
-
-  private def momentStringToDate(date: String): Option[ju.Date] =
-    Option(momentToDate(moment(internalLocale, date, internalFormat)))
+  private def dateToMoment(date: ju.Date): MomentFormatWrapper = {
+    Try {
+      val fullDate = moment(internalLocale, date.getTime, "x")
+      // removes date part which is not present in format string; it prevents multiple updates of date from one user interaction
+      moment(internalLocale, fullDate.format(internalFormat), internalFormat)
+    }.getOrElse(null)
+  }
 
   private def momentToDate(date: MomentFormatWrapper): ju.Date =
     Try{
@@ -462,7 +462,7 @@ object UdashDatePicker {
   @js.native
   private trait MomentFormatWrapper extends js.Any {
     def format(dateFormat: String): String = js.native
-
+    
     def valueOf(): Double = js.native
   }
 
