@@ -13,6 +13,8 @@ class UdashButtonToolbar[ItemType, ElemType <: Property[ItemType]] private
                         (val items:seq.SeqProperty[ItemType, ElemType],
                          override val componentId: ComponentId)
                         (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
+
   override lazy val render: dom.Element = {
     div(role := "toolbar", BootstrapStyles.Button.btnToolbar)(
       repeat(items)(itemFactory)

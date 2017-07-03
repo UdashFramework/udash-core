@@ -3,6 +3,7 @@ package pagination
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.css.CssStyle
 import io.udash.properties.{ModelValue, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event
@@ -34,6 +35,7 @@ class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] pri
                      (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
   extends PaginationComponent[PageType, ElemType] {
+  import io.udash.css.CssView._
 
   override lazy val render: dom.Element = {
     import scalatags.JsDom.all._
@@ -73,6 +75,7 @@ class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] pri
 class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](aligned: Boolean, override val componentId: ComponentId)
                 (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                 (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
+  import io.udash.css.CssView._
 
   override lazy val render: dom.Element = {
     import scalatags.JsDom.all._
@@ -86,7 +89,7 @@ class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](a
     ).render
   }
 
-  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType, alignStyle: BootstrapStyles.BootstrapClass) = {
+  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType, alignStyle: CssStyle) = {
     import scalatags.JsDom.all._
 
     produce(pages)(_ => {

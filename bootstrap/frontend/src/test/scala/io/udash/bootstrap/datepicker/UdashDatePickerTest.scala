@@ -18,7 +18,8 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](None)
       val options = Property(UdashDatePicker.DatePickerOptions(
-        format = "YYYY MM DD a"
+        format = "YYYY MM DD a",
+        useCurrent = false
       ))
       val picker = UdashDatePicker(ComponentId(contentId))(date, options)
 
@@ -47,31 +48,37 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         _ <- {
           picker.show()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((1, 0, 2)) // Two changes: None -> default_now; default_now -> selected format
+            (showCounter, hideCounter, changeCounter) should be((1, 0, 0))
+          }
+        }
+        _ <- {
+          date.set(Some(new ju.Date(123123123)))
+          eventually {
+            (showCounter, hideCounter, changeCounter) should be((1, 0, 1))
           }
         }
         _ <- {
           picker.hide()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((1, 1, 2))
+            (showCounter, hideCounter, changeCounter) should be((1, 1, 1))
           }
         }
         _ <- {
           picker.toggle()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((2, 1, 2))
+            (showCounter, hideCounter, changeCounter) should be((2, 1, 1))
           }
         }
         _ <- {
           picker.toggle()
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
+            (showCounter, hideCounter, changeCounter) should be((2, 2, 1))
           }
         }
         r <- {
-          date.set(Some(new ju.Date(123123123)))
+          date.set(Some(new ju.Date(333123123123L)))
           eventually {
-            (showCounter, hideCounter, changeCounter) should be((2, 2, 3))
+            (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
           }
         }
       } yield r

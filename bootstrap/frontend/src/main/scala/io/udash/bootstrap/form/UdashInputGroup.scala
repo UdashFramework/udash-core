@@ -7,6 +7,7 @@ import org.scalajs.dom
 import scalatags.JsDom.all._
 
 class UdashInputGroup private(groupSize: InputGroupSize, override val componentId: ComponentId)(content: Modifier*) extends UdashBootstrapComponent {
+  import io.udash.css.CssView._
   override lazy val render =
     div(BootstrapStyles.Form.inputGroup, groupSize)(
       content
@@ -14,6 +15,8 @@ class UdashInputGroup private(groupSize: InputGroupSize, override val componentI
 }
 
 object UdashInputGroup {
+  import io.udash.css.CssView._
+
   /**
     * Creates input group. More: <a href="http://getbootstrap.com/components/#input-groups">Bootstrap Docs</a>.
     *

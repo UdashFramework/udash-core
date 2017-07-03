@@ -14,6 +14,7 @@ class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boo
                           val active: Property[Boolean], val disabled: Property[Boolean],
                           override val componentId: ComponentId)
                          (content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+  import io.udash.css.CssView._
 
   private lazy val classes: List[Modifier] = buttonStyle :: size ::
     BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::

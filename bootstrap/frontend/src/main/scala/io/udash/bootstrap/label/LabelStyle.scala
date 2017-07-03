@@ -1,7 +1,9 @@
 package io.udash.bootstrap
 package label
 
-sealed abstract class LabelStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Label.label, style)
+import io.udash.css.CssStyle
+
+sealed abstract class LabelStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Label.label, style)
 
 object LabelStyle {
   import BootstrapStyles.Label._

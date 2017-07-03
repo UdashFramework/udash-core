@@ -1,7 +1,9 @@
 package io.udash.bootstrap
 package alert
 
-sealed abstract class AlertStyle(style: BootstrapStyles.BootstrapClass) extends ClassModifier(BootstrapStyles.Alert.alert, style)
+import io.udash.css.CssStyleName
+
+sealed abstract class AlertStyle(style: CssStyleName) extends ClassModifier(BootstrapStyles.Alert.alert, style)
 
 object AlertStyle {
   import BootstrapStyles.Alert._
