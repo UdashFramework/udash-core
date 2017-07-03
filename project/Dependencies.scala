@@ -11,10 +11,10 @@ object Dependencies {
   val scalaTagsVersion = "0.6.0"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.17.2"
+  val avsCommonsVersion = "1.18.2"
 
   val atmosphereJSVersion = "2.3.0"
-  val atmosphereVersion = "2.4.5"
+  val atmosphereVersion = "2.4.12"
 
   val upickleVersion = "0.4.2"
   val jawnParserVersion = "0.9.0"

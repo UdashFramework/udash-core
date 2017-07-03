@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import org.atmosphere.cpr._
@@ -10,6 +11,11 @@ import org.atmosphere.cpr._
   * @param framework Instance of initialized AtmosphereFramework, which handle RPC requests.
   */
 class RpcServlet(framework: AtmosphereFramework) extends HttpServlet {
+  override def init(config: ServletConfig): Unit = {
+    super.init(config)
+    framework.init(config)
+  }
+
   override def doTrace(req: HttpServletRequest, resp: HttpServletResponse): Unit = doPost(req, resp)
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = doPost(req, resp)
