@@ -14,7 +14,7 @@ object Dependencies {
   val avsCommonsVersion = "1.19.4"
 
   val atmosphereJSVersion = "2.3.2"
-  val atmosphereVersion = "2.4.9"
+  val atmosphereVersion = "2.4.12"
 
   val upickleVersion = "0.4.4"
   val jawnParserVersion = "0.10.4"

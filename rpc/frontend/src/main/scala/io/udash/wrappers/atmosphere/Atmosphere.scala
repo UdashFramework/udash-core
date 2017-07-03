@@ -1,7 +1,7 @@
 package io.udash.wrappers.atmosphere
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSName
+import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
 object Transport {
   type Transport = String
@@ -43,7 +43,7 @@ object State {
 }
 
 @js.native
-@JSName("atmosphere")
+@JSGlobal("atmosphere")
 object Atmosphere extends js.Object {
   def subscribe(request: AtmosphereRequest): AtmosphereRequest = js.native
 
