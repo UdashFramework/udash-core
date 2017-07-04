@@ -1,12 +1,10 @@
 package io.udash.view
 
-import io.udash.core.{View, Window}
+import io.udash.core.{ContainerView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
-import scala.scalajs.js.timers.RawTimers
-import scalatags.generic.Modifier
 
 /**
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
@@ -15,6 +13,14 @@ private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
 
+  private def renderChild(parent: View, child: Option[View]): Unit =
+    parent match {
+      case p: ContainerView =>
+        p.renderChild(child)
+      case _ =>
+        throw new RuntimeException("Final view cannot render child view! Check your states hierarchy.")
+    }
+
   private def mergeViews(path: List[View]): Option[View] = {
     if (path.size == 1) {
       val singleView: View = path.head
@@ -22,7 +28,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       Some(singleView)
     } else {
       val lastElement = path.reduceLeft[View]((parent, child) => {
-        parent.renderChild(Some(child))
+        renderChild(parent, Some(child))
         views.append(parent)
         child
       })
@@ -71,8 +77,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       views.trimEnd(views.size - currentViewsToLeave.size)
       val rootView = currentViewsToLeave.last
       val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else None
-
-      rootView.renderChild(rootViewToAttach)
+      renderChild(rootView, rootViewToAttach)
     }
   }
 }

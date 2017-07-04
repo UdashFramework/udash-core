@@ -3,14 +3,14 @@ package io.udash.testing
 import io.udash._
 import org.scalajs.dom._
 
-class TestViewPresenter[T <: TestState] extends ViewPresenter[T] {
+class TestViewFactory[T <: TestState] extends ViewFactory[T] {
   val view = new TestView
   val presenter = new TestPresenter[T]
 
   override def create(): (View, Presenter[T]) = (view, presenter)
 }
 
-class TestView extends View {
+class TestView extends ContainerView {
   import scalatags.JsDom.all._
   var lastChild: View = _
   var renderingCounter = 0

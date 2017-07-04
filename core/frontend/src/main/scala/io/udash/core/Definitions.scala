@@ -31,10 +31,10 @@ trait Presenter[S <: State] {
 }
 
 /**
-  * The ViewPresenter has to prepare model, [[io.udash.core.View]], [[io.udash.core.Presenter]] and link them together.
+  * The ViewFactory has to prepare model, [[io.udash.core.View]], [[io.udash.core.Presenter]] and link them together.
   * @tparam S State for which this pair is defined.
   */
-trait ViewPresenter[S <: State] {
+trait ViewFactory[S <: State] {
   /**
     * Factory method which should return ready to used instance of [[io.udash.core.Presenter]] and [[io.udash.core.View]].
     * @return pair of presenter and view for state S
@@ -42,11 +42,37 @@ trait ViewPresenter[S <: State] {
   def create(): (View, Presenter[S])
 }
 
+/** [[ViewFactory]] creating [[ContainerView]]. */
+trait ContainerViewFactory[S <: ContainerState] extends ViewFactory[S] {
+  override def create(): (ContainerView, Presenter[S])
+}
+
+/** [[ViewFactory]] creating [[FinalView]]. */
+trait FinalViewFactory[S <: FinalState] extends ViewFactory[S]{
+  override def create(): (FinalView, Presenter[S])
+}
+
 /**
-  * Abstract view which should be used in order to implement View for [[io.udash.core.ViewPresenter]].
+  * Abstract view which should be used in order to implement View for [[io.udash.core.ViewFactory]].
   * The View implementation usually gets the model and the [[io.udash.core.Presenter]] as constructor arguments.
   */
 trait View {
+  /**
+    * Implementation of this method should return DOM representation of view.
+    * @return DOM representation of view
+    */
+  def getTemplate: Modifier[Element]
+
+  def apply(): Modifier[Element] = getTemplate
+}
+
+/** A [[io.udash.core.View]] which can render child view. */
+trait ContainerView extends View {
+  import scalatags.JsDom.all.div
+
+  /** Default implementation renders child views inside this element. */
+  protected val childViewContainer: Element = div().render
+
   /**
     * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
     * the parent view. <br/><br/>
@@ -55,50 +81,39 @@ trait View {
     *
     * @param view view which origins from child
     */
-  def renderChild(view: Option[View]): Unit
-
-  /**
-    * Implementation of this method should return DOM representation of view.
-    * @return DOM representation of view
-    */
-  def getTemplate: Modifier[Element]
-
-  def apply() = getTemplate
+  def renderChild(view: Option[View]): Unit = {
+    while (childViewContainer.childElementCount > 0) {
+      childViewContainer.removeChild(childViewContainer.firstChild)
+    }
+    view.foreach(_.getTemplate.applyTo(childViewContainer))
+  }
 }
 
 /** A [[io.udash.core.View]] which does not have any child view. */
-trait FinalView extends View {
-  override def renderChild(view: Option[View]): Unit =
-    view.foreach(_ => throw View.UnexpectedChildView)
-}
+trait FinalView extends View
 
-object View {
-  case object UnexpectedChildView extends RuntimeException("This view is not expected to render child view. Did you forget to implement renderChild method?")
-}
-
-/**
-  * The class which should be used to present the state for [[io.udash.routing.RoutingEngine]].
-  */
+/** The class which should be used to present the state for [[io.udash.routing.RoutingEngine]]. */
 trait State {
-  def parentState: State
+  def parentState: Option[ContainerState]
 }
+/** State related to [[ContainerView]]. */
+trait ContainerState extends State
+/** State related to [[FinalView]]. */
+trait FinalState extends State
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
   * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
-  * @tparam S
   */
 trait RoutingRegistry[S <: State] {
   def matchUrl(url: Url): S
-
   def matchState(state: S): Url
 }
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
-  * It is used to map [[State]] to [[ViewPresenter]].
-  * @tparam S
+  * It is used to map [[State]] to [[ViewFactory]].
   */
-trait ViewPresenterRegistry[S <: State] {
-  def matchStateToResolver(state: S): ViewPresenter[_ <: S]
+trait ViewFactoryRegistry[S <: State] {
+  def matchStateToResolver(state: S): ViewFactory[_ <: S]
 }

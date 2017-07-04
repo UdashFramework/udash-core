@@ -9,18 +9,18 @@ import scala.reflect.ClassTag
 /**
   * Root application which is used to start single instance of app.
   *
-  * @param routingRegistry [[io.udash.core.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
-  * @param viewPresenterRegistry [[io.udash.core.ViewPresenterRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewPresenter]]
-  * @param rootState The instance of [[io.udash.core.State]] which will treated as main state.
+  * @param routingRegistry     [[io.udash.core.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
+  * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
+  * @param rootState           The instance of [[io.udash.core.State]] which will treated as main state.
   * @tparam S Should be a sealed trait which extends [[io.udash.core.State]].
   */
 class Application[S <: State : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[S],
-                                                          viewPresenterRegistry: ViewPresenterRegistry[S],
+                                                          viewFactoryRegistry: ViewFactoryRegistry[S],
                                                           rootState: S,
                                                           urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
   private var rootElement: Element = _
   private lazy val viewRenderer = new ViewRenderer(rootElement)
-  private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewPresenterRegistry, viewRenderer, rootState)
+  private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewFactoryRegistry, viewRenderer, rootState)
 
   /**
     * Starts the application using selected element as root.

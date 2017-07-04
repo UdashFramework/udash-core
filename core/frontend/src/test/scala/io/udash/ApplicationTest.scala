@@ -16,7 +16,7 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
       urlProvider.changeListeners.size should be(1)
       routing.urlsHistory should contain(initUrl)
       vpRegistry.statesHistory should contain(RootState)
-      viewPresenter.presenter.lastHandledState should be(RootState)
+      viewFactory.presenter.lastHandledState should be(RootState)
     }
 
     "change URL basing on state" in {
