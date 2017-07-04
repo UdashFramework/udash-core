@@ -11,7 +11,7 @@ import io.udash.web.homepage.components.Buttons
 import io.udash.web.homepage.components.demo.DemoComponent
 import io.udash.web.homepage.styles.partials.HomepageStyles
 
-case object IndexViewPresenter extends ViewPresenter[IndexState] {
+case object IndexViewFactory extends ViewFactory[IndexState] {
   import Context._
 
   override def create(): (View, Presenter[IndexState]) = {

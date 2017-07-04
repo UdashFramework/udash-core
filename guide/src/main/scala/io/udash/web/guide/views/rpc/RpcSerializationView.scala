@@ -11,7 +11,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object RpcSerializationViewPresenter extends DefaultViewPresenterFactory[RpcSerializationState.type](() => new RpcSerializationView)
+case object RpcSerializationViewFactory extends StaticViewFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
 class RpcSerializationView extends FinalView with CssView {
   import Context._

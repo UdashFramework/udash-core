@@ -9,7 +9,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object FrontendBindingsViewPresenter extends DefaultViewPresenterFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
+case object FrontendBindingsViewFactory extends StaticViewFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
 class FrontendBindingsView extends FinalView with CssView {
   import Context._

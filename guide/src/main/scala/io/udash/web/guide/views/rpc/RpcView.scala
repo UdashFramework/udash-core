@@ -6,7 +6,7 @@ import io.udash.web.guide.views.ViewContainer
 
 import scalatags.JsDom
 
-case object RpcViewPresenter extends DefaultViewPresenterFactory[RpcState.type](() => new RpcView)
+case object RpcViewFactory extends StaticViewFactory[RpcState.type](() => new RpcView)
 
 class RpcView extends ViewContainer {
   import JsDom.all._

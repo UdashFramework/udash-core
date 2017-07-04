@@ -31,9 +31,9 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
   import Context._
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
 
-  override def getTemplate: Modifier = GenCodecsDemoViewPresenter()
+  override def getTemplate: Modifier = GenCodecsDemoViewFactory()
 
-  object GenCodecsDemoViewPresenter {
+  object GenCodecsDemoViewFactory {
     def apply(): Modifier = {
       val GenCodecs = ModelProperty[GenCodecsDemoModel]
       val presenter = new GenCodecsDemoPresenter(GenCodecs)

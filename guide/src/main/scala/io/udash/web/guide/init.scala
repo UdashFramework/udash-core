@@ -17,9 +17,9 @@ import scala.scalajs.js.annotation.JSExport
 object Context {
   implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
   private lazy val routingRegistry = new RoutingRegistryDef
-  private lazy val viewPresenterRegistry = new StatesToViewPresenterDef
+  private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
 
-  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState) with UrlLogging[RoutingState] {
+  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoryRegistry) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit = UrlLoggingDemo.log(url, referrer)
   }
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
@@ -40,7 +40,7 @@ object Context {
     MenuContainer("Frontend", Seq(
       MenuLink("Introduction", FrontendIntroState),
       MenuLink("Routing", FrontendRoutingState(None)),
-      MenuLink("Model, View, Presenter & ViewPresenter", FrontendMVPState),
+      MenuLink("Model, View, Presenter & ViewFactory", FrontendMVPState),
       MenuLink("Scalatags & UdashCSS", FrontendTemplatesState),
       MenuLink("Properties", FrontendPropertiesState),
       MenuLink("Template Data Binding", FrontendBindingsState),
@@ -77,7 +77,7 @@ object Init extends JSApp {
 
   @JSExport
   override def main(): Unit = {
-    jQ(document).ready((jThis: Element) => {
+    jQ((jThis: Element) => {
       val appRoot = jQ("#application").get(0).get
       applicationInstance.run(appRoot)
 

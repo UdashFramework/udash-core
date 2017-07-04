@@ -6,7 +6,7 @@ import io.udash.web.guide.views.ViewContainer
 
 import scalatags.JsDom
 
-case object RestViewPresenter extends DefaultViewPresenterFactory[RestState.type](() => new RestView)
+case object RestViewFactory extends StaticViewFactory[RestState.type](() => new RestView)
 
 class RestView extends ViewContainer {
   import JsDom.all._

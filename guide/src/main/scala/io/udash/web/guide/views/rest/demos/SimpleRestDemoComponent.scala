@@ -15,7 +15,7 @@ import scalatags.JsDom.all._
 class SimpleRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewFactory()
 
   trait ExampleModel {
     def string: String
@@ -23,7 +23,7 @@ class SimpleRestDemoComponent extends Component {
     def cls: RestExampleClass
   }
 
-  object SimpleRestDemoViewPresenter {
+  object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
       val responsesModel = ModelProperty[ExampleModel]
 

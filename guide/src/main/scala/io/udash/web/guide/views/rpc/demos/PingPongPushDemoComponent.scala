@@ -18,9 +18,9 @@ trait PingPongPushDemoModel {
 class PingPongPushDemoComponent extends Component {
   import io.udash.web.guide.Context._
 
-  override def getTemplate: Modifier = PingPongPushDemoViewPresenter()
+  override def getTemplate: Modifier = PingPongPushDemoViewFactory()
 
-  object PingPongPushDemoViewPresenter {
+  object PingPongPushDemoViewFactory {
     def apply(): Modifier = {
       val clientId = ModelProperty[PingPongPushDemoModel]
       clientId.subProp(_.pingId).set(0)

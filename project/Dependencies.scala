@@ -3,22 +3,22 @@ import sbt._
 
 object Dependencies {
 
-  val versionOfScala = "2.12.2"
-  val jettyVersion = "9.4.5.v20170502"
+  val versionOfScala = "2.12.3"
+  val jettyVersion = "9.4.6.v20170531"
 
   val udashVersion = "0.6.0-SNAPSHOT"
-  val udashJQueryVersion = "1.0.1"
+  val udashJQueryVersion = "1.1.0"
   val highchartsVarsion = "5.0.10"
 
-  val scalaLoggingVersion = "3.5.0"
+  val scalaLoggingVersion = "3.7.2"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.20.6"
+  val avsystemCommonsVersion = "1.22.0"
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.8.RELEASE"
 
   val seleniumVersion = "2.53.1"
-  val scalatestVersion = "3.0.1"
+  val scalatestVersion = "3.0.3"
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core-shared" % udashVersion,

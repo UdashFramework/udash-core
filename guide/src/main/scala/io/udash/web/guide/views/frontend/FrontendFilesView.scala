@@ -10,7 +10,7 @@ import io.udash.web.guide.views.frontend.demos._
 
 import scalatags.JsDom
 
-case object FrontendFilesViewPresenter extends DefaultViewPresenterFactory[FrontendFilesState.type](() => new FrontendFilesView)
+case object FrontendFilesViewFactory extends StaticViewFactory[FrontendFilesState.type](() => new FrontendFilesView)
 
 class FrontendFilesView extends FinalView {
   import io.udash.web.guide.Context._

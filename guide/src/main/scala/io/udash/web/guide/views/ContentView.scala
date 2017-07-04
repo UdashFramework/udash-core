@@ -8,7 +8,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 
 import scalatags.JsDom.tags2._
 
-object ContentViewPresenter extends DefaultViewPresenterFactory[ContentState.type](() => new ContentView)
+object ContentViewFactory extends StaticViewFactory[ContentState.type](() => new ContentView)
 
 class ContentView extends ViewContainer {
   import io.udash.css.CssView._

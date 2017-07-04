@@ -8,7 +8,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object BootstrappingGeneratorsViewPresenter extends DefaultViewPresenterFactory[BootstrappingGeneratorsState.type](() => new BootstrappingGeneratorsView)
+case object BootstrappingGeneratorsViewFactory extends StaticViewFactory[BootstrappingGeneratorsState.type](() => new BootstrappingGeneratorsView)
 
 class BootstrappingGeneratorsView extends FinalView with CssView {
   import Context._
@@ -71,7 +71,7 @@ class BootstrappingGeneratorsView extends FinalView with CssView {
         ),
         li(b("states.scala"), " - contains application states definition."),
         li(b("RoutingRegistryDef.scala"), " - contains the application routing definition."),
-        li(b("StatesToViewPresenterDef.scala"), " - contains mapping from the application state to ViewPresenter."),
+        li(b("StatesToViewFactoryDef.scala"), " - contains mapping from the application state to ViewFactory."),
         li(b("rpc/RPCService.scala"), " - contains implementation of the main client RPC interface."),
         li(b("styles/DemoStyles.scala"), " - contains example ScalaCSS styles."),
         li(b("views/*.scala"), " - contains application views.")

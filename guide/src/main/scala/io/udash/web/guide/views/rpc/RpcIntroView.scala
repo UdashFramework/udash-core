@@ -11,7 +11,7 @@ import io.udash.web.guide.views.rpc.demos.{PingPongCallDemoComponent, PingPongPu
 
 import scalatags.JsDom
 
-case object RpcIntroViewPresenter extends DefaultViewPresenterFactory[RpcIntroState.type](() => new RpcIntroView)
+case object RpcIntroViewFactory extends StaticViewFactory[RpcIntroState.type](() => new RpcIntroView)
 
 class RpcIntroView extends FinalView with CssView {
   import io.udash.web.guide.Context._

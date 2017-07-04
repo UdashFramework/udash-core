@@ -17,7 +17,7 @@ import scala.concurrent.duration.FiniteDuration
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 
-case object FrontendTemplatesViewPresenter extends DefaultViewPresenterFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
+case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
 class FrontendTemplatesView extends FinalView with CssView {
   import io.udash.web.guide.Context._

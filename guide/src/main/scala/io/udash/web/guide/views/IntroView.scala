@@ -9,7 +9,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 
 import scalatags.JsDom.all._
 
-object IntroViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new IntroView)
+object IntroViewFactory extends StaticViewFactory[RootState.type](() => new IntroView)
 
 class IntroView extends FinalView with CssView {
   private val content = div(
@@ -55,8 +55,8 @@ class IntroView extends FinalView with CssView {
       ol(GuideStyles.stepsList)(
         li("Add a new state in ", b("states.scala"), ""),
         li("Add route pointing to this state in ", b("RoutingRegistryDef.scala"), ""),
-        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewPresenter"), " in the ", b("views/YourView.scala"), ""),
-        li("Add mapping from the new state to your ViewPresenter in ", b("StatesToViewPresenterDef.scala"), "")
+        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewFactory"), " in the ", b("views/YourView.scala"), ""),
+        li("Add mapping from the new state to your ViewFactory in ", b("StatesToViewFactoryDef.scala"), "")
       )
     ),
     p("If you selected the ScalaCSS demo in the generator settings, you can modify those styles in ", b("styles/DemoStyles.scala"), ""),

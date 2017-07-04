@@ -10,7 +10,7 @@ import io.udash.web.guide.views.{References, Versions}
 
 import scalatags.JsDom
 
-case object JQueryExtViewPresenter extends DefaultViewPresenterFactory[JQueryExtState.type](() => new JQueryExtView)
+case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](() => new JQueryExtView)
 
 
 class JQueryExtView extends FinalView {

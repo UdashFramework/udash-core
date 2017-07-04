@@ -10,7 +10,7 @@ import io.udash.web.guide.views.frontend.demos._
 
 import scalatags.JsDom
 
-case object FrontendFormsViewPresenter extends DefaultViewPresenterFactory[FrontendFormsState.type](() => new FrontendFormsView)
+case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
 class FrontendFormsView extends FinalView with CssView {
   import io.udash.web.guide.Context._

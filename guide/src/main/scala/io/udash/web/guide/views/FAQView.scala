@@ -3,7 +3,7 @@ package io.udash.web.guide.views
 import io.udash._
 import io.udash.web.guide.RootState
 
-object FAQViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new FAQView)
+object FAQViewFactory extends StaticViewFactory[RootState.type](() => new FAQView)
 
 class FAQView extends FinalView {
   import scalatags.JsDom.all._

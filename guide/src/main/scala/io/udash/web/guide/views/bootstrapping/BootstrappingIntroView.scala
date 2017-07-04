@@ -8,7 +8,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object BootstrappingIntroViewPresenter extends DefaultViewPresenterFactory[BootstrappingIntroState.type](() => new BootstrappingIntroView)
+case object BootstrappingIntroViewFactory extends StaticViewFactory[BootstrappingIntroState.type](() => new BootstrappingIntroView)
 
 class BootstrappingIntroView extends FinalView with CssView {
   import Context._

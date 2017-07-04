@@ -11,7 +11,7 @@ import io.udash.web.guide.views.References
 
 import scalatags.JsDom
 
-case object BootstrappingFrontendViewPresenter extends DefaultViewPresenterFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
+case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
 class BootstrappingFrontendView extends FinalView with CssView {
   import Context._
@@ -24,27 +24,39 @@ class BootstrappingFrontendView extends FinalView with CssView {
     ul(GuideStyles.defaultList)(
       li("Routing system - bidirectional mapping between URLs and states"),
       li(
-        span("ViewPresenters - a logical pairing between a view and a presenter"),
+        span("ViewFactories - a logical pairing between a view and a presenter"),
         ul(GuideStyles.innerList)(
-          li("Mapping from states to ViewPresenters"),
+          li("Mapping from states to ViewFactories"),
           li("Views & Presenters")
       )),
       li("Client RPC")
     ),
     h3("States"),
     p(
-      "A Udash application is based on states. The application state determines the created ViewPresenters structure and is determined " +
+      "A Udash application is based on states. The application state determines the created ViewFactories structure and is determined ",
       "by a URL. The application states structure is your decision, Udash requires only that all states must extend ",
-      i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. " +
+      i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
+      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express place of the state in hierarchy. ",
       "For example:"
     ),
     CodeBlock(
-      """sealed abstract class RoutingState(val parentState: RoutingState) extends State
-        |case object RootState extends RoutingState(null)
-        |case object LandingPageState extends RoutingState(RootState)
-        |case object NewsletterState extends RoutingState(RootState)
-        |case object SubscribeState extends RoutingState(NewsletterState)
-        |case object UnsubscribeState extends RoutingState(NewsletterState)""".stripMargin
+      """sealed abstract class RoutingState(
+        |  val parentState: Option[ContainerRoutingState]
+        |) extends State[RoutingState]
+        |
+        |sealed abstract class ContainerRoutingState(
+        |  parentState: Option[ContainerRoutingState]
+        |) extends RoutingState(parentState) with ContainerState[RoutingState]
+        |
+        |sealed abstract class FinalRoutingState(
+        |  parentState: Option[ContainerRoutingState]
+        |) extends RoutingState(parentState) with FinalState[RoutingState]
+        |
+        |case object RootState extends ContainerRoutingState(None)
+        |case object LandingPageState extends FinalRoutingState(Some(RootState))
+        |case object NewsletterState extends ContainerRoutingState(Some(RootState))
+        |case object SubscribeState extends FinalRoutingState(Some(NewsletterState))
+        |case object UnsubscribeState extends FinalRoutingState(Some(NewsletterState))""".stripMargin
     )(GuideStyles),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
     h3("Routing system"),
@@ -76,32 +88,32 @@ class BootstrappingFrontendView extends FinalView with CssView {
       i("(PartialFunction[String, RoutingState], PartialFunction[RoutingState, String])"),
       ". It is useful, when given mapping is an one to one relation."
     ),
-    h3("View, Presenter & ViewPresenter"),
+    h3("View, Presenter & ViewFactory"),
     p(
-      "ViewPresenter is a pair of View and Presenter. ", i("ViewPresenterRegistry"), " is responsible " +
-      "for matching a current application state to ViewPresenter. Below you can find an example implementation of ",
-      i("ViewPresenterRegistry"), ""
+      "ViewFactory creates a pair of View and Presenter. ", i("ViewFactoryRegistry"), " is responsible " +
+      "for matching a current application state to ViewFactory. Below you can find an example implementation of ",
+      i("ViewFactoryRegistry"), ""
     ),
-    CodeBlock("""class StatesToViewPresenterDef extends ViewPresenterRegistry[RoutingState] {
-                |  def matchStateToResolver(state: RoutingState): ViewPresenter[_ <: RoutingState] =
+    CodeBlock("""class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
+                |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
                 |    state match {
-                |      case RootState => RootViewPresenter
-                |      case LandingPageState => LandingPageViewPresenter
-                |      case NewsletterState => NewsletterViewPresenter
-                |      case SubscribeState => NewsletterSubscribeViewPresenter
-                |      case UnsubscribeState => NewsletterUnsubscribeViewPresenter
-                |      case _ => ErrorViewPresenter
+                |      case RootState => RootViewFactory
+                |      case LandingPageState => LandingPageViewFactory
+                |      case NewsletterState => NewsletterViewFactory
+                |      case SubscribeState => NewsletterSubscribeViewFactory
+                |      case UnsubscribeState => NewsletterUnsubscribeViewFactory
+                |      case _ => ErrorViewFactory
                 |    }
                 |}""".stripMargin
     )(GuideStyles),
-    p("Each ViewPresenter is expected to initialize a View and a Presenter. At this point you can create the shared model for them."),
+    p("Each ViewFactory is expected to initialize a View and a Presenter. At this point you can create the shared model for them."),
     CodeBlock(
       """trait SubscribeModel {
         |  def email: String
         |}
         |
-        |case object NewsletterSubscribeViewPresenter
-        |  extends ViewPresenter[SubscribeState.type] {
+        |case object NewsletterSubscribeViewFactory
+        |  extends ViewFactory[SubscribeState.type] {
         |
         |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
         |
@@ -148,14 +160,14 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "The above example shows simple View, Presenter and ViewPresenter implementations. ",
+      "The above example shows simple View, Presenter and ViewFactory implementations. ",
       ul(GuideStyles.defaultList)(
         li(
           i("SubscribeModel"), " is a model trait which is used to create shared ", i("ModelProperty"), " ",
           a(href := FrontendPropertiesState.url)("Properties in Udash"), " are described in other part of this guide. "
         ),
         li(
-          i("NewsletterSubscribeViewPresenter"), " creates a model, view, presenter and connects them together "
+          i("NewsletterSubscribeViewFactory"), " creates a model, view, presenter and connects them together "
         ),
         li(
           i("NewsletterSubscribePresenter"), " initializes an email in the model and exposes the ", i("subscribe"), " method. "
@@ -167,10 +179,10 @@ class BootstrappingFrontendView extends FinalView with CssView {
         li("View ignores child views, because it is the final view.")
       )
     ),
-    p("If the view does not need a presenter, you can use ", i("DefaultViewPresenterFactory"), ""),
+    p("If the view does not need a presenter, you can use ", i("StaticViewFactory"), ""),
     CodeBlock(
-      """case object NewsletterViewPresenter
-        |  extends DefaultViewPresenterFactory[NewsletterState.type](() => new NewsletterView)
+      """case object NewsletterViewFactory
+        |  extends StaticViewFactory[NewsletterState.type](() => new NewsletterView)
         |
         |class NewsletterView extends View {
         |  import Context._
@@ -203,10 +215,10 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |
         |  private implicit val executionContext = JSExecutionContext.Implicits.queue
         |  private lazy val routingRegistry = new RoutingRegistryDef
-        |  private lazy val viewPresenterRegistry = new StatesToViewPresenterDef
+        |  private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
         |
         |  implicit val applicationInstance = new Application[RoutingState](
-        |    routingRegistry, viewPresenterRegistry, RootState
+        |    routingRegistry, viewFactoryRegistry, RootState
         |  )
         |}""".stripMargin
     )(GuideStyles),

@@ -10,7 +10,7 @@ import io.udash.web.guide.views.{References, Versions}
 
 import scalatags.JsDom
 
-case object BootstrapExtViewPresenter extends DefaultViewPresenterFactory[BootstrapExtState.type](() => new BootstrapExtView)
+case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.type](() => new BootstrapExtView)
 
 
 class BootstrapExtView extends FinalView {

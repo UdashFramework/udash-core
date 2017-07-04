@@ -11,7 +11,7 @@ import org.scalajs.dom.Element
 
 import scalatags.JsDom
 
-case object ChartsExtViewPresenter extends DefaultViewPresenterFactory[ChartsExtState.type](() => new ChartsExtView)
+case object ChartsExtViewFactory extends StaticViewFactory[ChartsExtState.type](() => new ChartsExtView)
 
 
 class ChartsExtView extends FinalView {

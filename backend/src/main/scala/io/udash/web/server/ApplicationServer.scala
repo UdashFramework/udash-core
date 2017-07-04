@@ -40,7 +40,8 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) => {
       val callLogger = new CallLogger
       new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
-        override protected val metadata: localFramework.RPCMetadata[MainServerRPC] = localFramework.RPCMetadata[MainServerRPC]
+        import localFramework.RPCMetadata
+        override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
 
         override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
           callLogger.append(Call(rpcName, methodName, args))
@@ -57,7 +58,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   private val restHolder = {
     import io.udash.rest.server._
     val restImpl = new ExposedRestInterfaces
-    val holder = new ServletHolder(new RestServlet(new DefaultExposesREST[MainServerREST](restImpl)))
+    val holder = new ServletHolder(new DefaultRestServlet(new DefaultExposesREST[MainServerREST](restImpl)))
     holder.setAsyncSupported(true)
     holder
   }

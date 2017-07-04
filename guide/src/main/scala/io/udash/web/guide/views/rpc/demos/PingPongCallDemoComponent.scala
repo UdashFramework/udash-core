@@ -18,9 +18,9 @@ trait PingPongCallDemoModel {
 class PingPongCallDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = PingPongCallDemoViewPresenter()
+  override def getTemplate: Modifier = PingPongCallDemoViewFactory()
 
-  object PingPongCallDemoViewPresenter {
+  object PingPongCallDemoViewFactory {
     def apply(): Modifier = {
       val clientId = ModelProperty[PingPongCallDemoModel]
       clientId.subProp(_.pingId).set(0)

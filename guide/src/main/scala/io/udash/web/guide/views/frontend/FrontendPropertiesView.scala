@@ -9,7 +9,7 @@ import io.udash.web.guide.styles.partials.GuideStyles
 
 import scalatags.JsDom
 
-case object FrontendPropertiesViewPresenter extends DefaultViewPresenterFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
+case object FrontendPropertiesViewFactory extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
 class FrontendPropertiesView extends FinalView with CssView {
   import io.udash.web.guide.Context._

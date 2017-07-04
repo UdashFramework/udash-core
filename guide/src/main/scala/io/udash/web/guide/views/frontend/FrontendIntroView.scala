@@ -11,7 +11,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object FrontendIntroViewPresenter extends DefaultViewPresenterFactory[FrontendIntroState.type](() => new FrontendIntroView)
+case object FrontendIntroViewFactory extends StaticViewFactory[FrontendIntroState.type](() => new FrontendIntroView)
 
 
 class FrontendIntroView extends FinalView with CssView {
@@ -66,17 +66,17 @@ class FrontendIntroView extends FinalView with CssView {
         |/** Demo model */
         |case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
         |
-        |case object FormDemoState extends State {
-        |  override def parentState: State = null // this is root state
+        |class FormDemoState extends State[FormDemoState] {
+        |  override def parentState = None
         |}
         |
         |/** Prepares model, view and presenter for demo component */
-        |class IntroFormDemoViewPresenter extends ViewPresenter[FormDemoState.type] {
+        |class IntroFormDemoViewFactory extends ViewFactory[FormDemoState] {
         |  // Context object is a recommended place to keep things like
         |  // `ExecutionContext` or server RPC connector
         |  import io.udash.web.guide.Context._
         |
-        |  override def create(): (View, Presenter[FormDemoState.type]) = {
+        |  override def create(): (View, Presenter[FormDemoState]) = {
         |    val model = ModelProperty(
         |      IntroFormDemoModel(0, 10, 42)
         |    )
@@ -102,9 +102,9 @@ class FrontendIntroView extends FinalView with CssView {
         |}
         |
         |class IntroFormDemoPresenter(model: ModelProperty[IntroFormDemoModel])
-        |  extends Presenter[FormDemoState.type] {
+        |  extends Presenter[FormDemoState] {
         |
-        |  override def handleState(state: FormDemoState.type): Unit = {}
+        |  override def handleState(state: FormDemoState): Unit = {}
         |
         |  /** Sets random values in demo model */
         |  def randomize() =

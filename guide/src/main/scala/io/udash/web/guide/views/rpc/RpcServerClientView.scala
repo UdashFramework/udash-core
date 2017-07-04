@@ -10,7 +10,7 @@ import io.udash.web.guide.views.rpc.demos.NotificationsDemoComponent
 
 import scalatags.JsDom
 
-case object RpcServerClientViewPresenter extends DefaultViewPresenterFactory[RpcServerClientState.type](() => new RpcServerClientView)
+case object RpcServerClientViewFactory extends StaticViewFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
 class RpcServerClientView extends FinalView with CssView {
   import io.udash.web.guide.Context._

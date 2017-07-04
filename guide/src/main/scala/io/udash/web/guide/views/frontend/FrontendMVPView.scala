@@ -10,7 +10,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object FrontendMVPViewPresenter extends DefaultViewPresenterFactory[FrontendMVPState.type](() => new FrontendMVPView)
+case object FrontendMVPViewFactory extends StaticViewFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
 class FrontendMVPView extends FinalView with CssView {
   import Context._
@@ -18,7 +18,7 @@ class FrontendMVPView extends FinalView with CssView {
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
-    h2("Model, View, Presenter & ViewPresenter"),
+    h2("Model, View, Presenter & ViewFactory"),
     p("A single page in Udash app is based on four elements:"),
     ul(GuideStyles.defaultList)(
       li(
@@ -34,15 +34,15 @@ class FrontendMVPView extends FinalView with CssView {
         "application state changes."
       ),
       li(
-        "ViewPresenter - extends ", i("ViewPresenter"), ", it was discussed in detail ",
-        a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewPresenter is responsible for creating a View and a Presenter. "
+        "ViewFactory - extends ", i("ViewFactory"), ", it was discussed in detail ",
+        a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewFactory is responsible for creating a View and a Presenter. "
       )
     ),
     ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.imgBig, GuideStyles.frame),
-    h3("ViewPresenter"),
+    h3("ViewFactory"),
     p(
-      "The ViewPresenter responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",
-      "If you want to create a static view, then you can use ", i("DefaultViewPresenterFactory"), " which ",
+      "The ViewFactory responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",
+      "If you want to create a static view, then you can use ", i("StaticViewFactory"), " which ",
       "will create ", i("EmptyPresenter"), " for your view."
     ),
     h3("Model"),

@@ -15,9 +15,9 @@ import scalatags.JsDom.all._
 class EchoRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewFactory()
 
-  object SimpleRestDemoViewPresenter {
+  object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
       val responseProperty = Property[String]
       val presenter = new SimpleRestDemoPresenter(responseProperty)

@@ -6,7 +6,7 @@ import io.udash.web.guide.views.ViewContainer
 
 import scalatags.JsDom
 
-case object FrontendViewPresenter extends DefaultViewPresenterFactory[FrontendState.type](() => new FrontendView)
+case object FrontendViewFactory extends StaticViewFactory[FrontendState.type](() => new FrontendView)
 
 
 class FrontendView extends ViewContainer {

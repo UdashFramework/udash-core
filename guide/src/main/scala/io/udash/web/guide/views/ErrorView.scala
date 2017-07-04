@@ -14,7 +14,7 @@ import org.scalajs.dom.Element
 
 import scalatags.JsDom.tags2._
 
-object ErrorViewPresenter extends DefaultViewPresenterFactory[ErrorState.type](() => new ErrorView)
+object ErrorViewFactory extends StaticViewFactory[ErrorState.type](() => new ErrorView)
 
 class ErrorView extends FinalView with CssView {
   import scalatags.JsDom.all._

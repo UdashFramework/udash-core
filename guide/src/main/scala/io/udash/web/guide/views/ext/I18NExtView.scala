@@ -9,7 +9,7 @@ import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, Fronten
 
 import scalatags.JsDom
 
-case object I18NExtViewPresenter extends DefaultViewPresenterFactory[I18NExtState.type](() => new I18NExtView)
+case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() => new I18NExtView)
 
 
 class I18NExtView extends FinalView {

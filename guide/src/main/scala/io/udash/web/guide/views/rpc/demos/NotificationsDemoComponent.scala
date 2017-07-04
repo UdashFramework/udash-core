@@ -20,9 +20,9 @@ trait NotificationsDemoModel {
 class NotificationsDemoComponent extends Component {
   import io.udash.web.guide.Context._
 
-  override def getTemplate: Modifier = NotificationsDemoViewPresenter()
+  override def getTemplate: Modifier = NotificationsDemoViewFactory()
 
-  object NotificationsDemoViewPresenter {
+  object NotificationsDemoViewFactory {
     def apply(): Modifier = {
       val model = ModelProperty[NotificationsDemoModel]
       model.subProp(_.registered).set(false)

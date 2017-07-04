@@ -10,7 +10,7 @@ import io.udash.web.guide.views.rest.demos.SimpleRestDemoComponent
 
 import scalatags.JsDom
 
-case object RestIntroViewPresenter extends DefaultViewPresenterFactory[RestIntroState.type](() => new RestIntroView)
+case object RestIntroViewFactory extends StaticViewFactory[RestIntroState.type](() => new RestIntroView)
 
 class RestIntroView extends FinalView with CssView {
   import io.udash.web.guide.Context._

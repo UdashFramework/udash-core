@@ -24,9 +24,9 @@ case class ExceptionsDemoModel(
 
 class ExceptionsDemoComponent extends Component {
   import Context._
-  override def getTemplate: Modifier = ExceptionsDemoViewPresenter()
+  override def getTemplate: Modifier = ExceptionsDemoViewFactory()
 
-  object ExceptionsDemoViewPresenter {
+  object ExceptionsDemoViewFactory {
     def apply(): Modifier = {
       val model = ModelProperty[ExceptionsDemoModel]
       val presenter = new ExceptionsDemoPresenter(model)

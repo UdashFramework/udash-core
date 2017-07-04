@@ -18,9 +18,9 @@ trait ClientIdDemoModel {
 
 class ClientIdDemoComponent extends Component {
   import Context._
-  override def getTemplate: Modifier = ClientIdDemoViewPresenter()
+  override def getTemplate: Modifier = ClientIdDemoViewFactory()
 
-  object ClientIdDemoViewPresenter {
+  object ClientIdDemoViewFactory {
     def apply(): Modifier = {
       val clientId = ModelProperty[ClientIdDemoModel]
       clientId.subProp(_.clientId).set("???")

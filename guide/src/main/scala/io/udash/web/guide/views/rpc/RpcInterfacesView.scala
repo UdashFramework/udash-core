@@ -9,7 +9,7 @@ import io.udash.web.guide.{Context, _}
 import scalatags.JsDom
 
 
-case object RpcInterfacesViewPresenter extends DefaultViewPresenterFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
+case object RpcInterfacesViewFactory extends StaticViewFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
 class RpcInterfacesView extends FinalView with CssView {
   import Context._

@@ -8,7 +8,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object BootstrappingBackendViewPresenter extends DefaultViewPresenterFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
+case object BootstrappingBackendViewFactory extends StaticViewFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
 class BootstrappingBackendView extends FinalView with CssView {
   import Context._

@@ -1,12 +1,12 @@
 package io.udash.web.guide.views.bootstrapping
 
-import io.udash.core.DefaultViewPresenterFactory
+import io.udash._
 import io.udash.web.guide.views.ViewContainer
 import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object BootstrappingViewPresenter extends DefaultViewPresenterFactory[BootstrappingState.type](() => new BootstrappingView)
+case object BootstrappingViewFactory extends StaticViewFactory[BootstrappingState.type](() => new BootstrappingView)
 
 class BootstrappingView extends ViewContainer {
   import Context._

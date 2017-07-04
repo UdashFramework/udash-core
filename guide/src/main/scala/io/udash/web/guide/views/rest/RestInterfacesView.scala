@@ -9,7 +9,7 @@ import io.udash.web.guide.{Context, _}
 import scalatags.JsDom
 
 
-case object RestInterfacesViewPresenter extends DefaultViewPresenterFactory[RestInterfacesState.type](() => new RestInterfacesView)
+case object RestInterfacesViewFactory extends StaticViewFactory[RestInterfacesState.type](() => new RestInterfacesView)
 
 class RestInterfacesView extends FinalView with CssView {
   import Context._

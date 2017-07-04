@@ -8,7 +8,7 @@ import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object BootstrappingRpcViewPresenter extends DefaultViewPresenterFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
+case object BootstrappingRpcViewFactory extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
 class BootstrappingRpcView extends FinalView with CssView {
   import Context._

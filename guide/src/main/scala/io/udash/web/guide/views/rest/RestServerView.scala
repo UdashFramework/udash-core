@@ -3,15 +3,13 @@ package io.udash.web.guide.views.rest
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
-import io.udash.web.guide.views.rest.demos.EchoRestDemoComponent
 import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
 
-case object RestServerViewPresenter extends DefaultViewPresenterFactory[RestServerState.type](() => new RestServerView)
+case object RestServerViewFactory extends StaticViewFactory[RestServerState.type](() => new RestServerView)
 
 class RestServerView extends FinalView with CssView {
   import Context._

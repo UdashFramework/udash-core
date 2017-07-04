@@ -11,28 +11,23 @@ import org.scalajs.dom.Element
 import scala.scalajs.js
 import scalatags.JsDom.tags2._
 
-object RootViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new RootView)
+object RootViewFactory extends StaticViewFactory[RootState.type](() => new RootView)
 
-class RootView extends View with CssView {
+class RootView extends ContainerView with CssView {
   import scalatags.JsDom.all._
-
-  private var child: Element =
-    div().render
 
   private val content = div(
     Header.getTemplate,
     main(GlobalStyles.main)(
-      child
+      childViewContainer
     ),
     Footer.getTemplate
   )
 
   override def getTemplate: Modifier = content
 
-  override def renderChild(view: View): Unit = {
-    val newChild = view.getTemplate
-    newChild.applyTo(child)
-
+  override def renderChild(view: Option[View]): Unit = {
+    super.renderChild(view)
     js.Dynamic.global.svg4everybody()
   }
 }

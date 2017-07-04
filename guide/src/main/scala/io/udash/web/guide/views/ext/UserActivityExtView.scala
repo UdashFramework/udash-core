@@ -29,7 +29,7 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
 }
 
 
-case object UserActivityExtViewPresenter extends ViewPresenter[UserActivityExtState.type] {
+case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.type] {
 
   import io.udash.web.guide.Context._
 
@@ -61,7 +61,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     p("You can see this mechanism in action here in the guide. We've already provided the implementation: "),
     CodeBlock(
       s"""val application = new Application[RoutingState](
-          |  routingRegistry, viewPresenterRegistry, RootState
+          |  routingRegistry, viewFactoryRegistry, RootState
           |) with UrlLogging[RoutingState] {
           |  override protected def log(url: String, referrer: Option[String]): Unit =
           |    UrlLoggingDemo.log(url, referrer)
