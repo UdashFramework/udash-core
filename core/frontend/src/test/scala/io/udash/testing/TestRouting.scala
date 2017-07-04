@@ -24,6 +24,6 @@ trait TestRouting {
                                       state2vp: Map[TestState, ViewFactory[_ <: TestState]] = Map.empty
                                      ): Unit = {
     initTestRouting(routing, state2vp)
-    routingEngine = new RoutingEngine[TestState](routing, vpRegistry, renderer, RootState)
+    routingEngine = new RoutingEngine[TestState](routing, vpRegistry, renderer)
   }
 }

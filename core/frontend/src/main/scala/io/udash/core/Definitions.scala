@@ -63,6 +63,7 @@ trait View {
     */
   def getTemplate: Modifier[Element]
 
+  @deprecated("Use `getTemplate` instead.", "0.6.0")
   def apply(): Modifier[Element] = getTemplate
 }
 
@@ -79,6 +80,8 @@ trait ContainerView extends View {
     *
     * <b>This method can receive `None` as "view" argument, then previous child view should be removed.</b>
     *
+    * The default implementation removes everything from `childViewContainer` and renders new subview inside.
+    *
     * @param view view which origins from child
     */
   def renderChild(view: Option[View]): Unit = {
@@ -94,7 +97,8 @@ trait FinalView extends View
 
 /** The class which should be used to present the state for [[io.udash.routing.RoutingEngine]]. */
 trait State {
-  def parentState: Option[ContainerState]
+  type HierarchyRoot <: State { type HierarchyRoot = State.this.HierarchyRoot }
+  def parentState: Option[ContainerState with HierarchyRoot]
 }
 /** State related to [[ContainerView]]. */
 trait ContainerState extends State
@@ -105,15 +109,15 @@ trait FinalState extends State
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
   * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
   */
-trait RoutingRegistry[S <: State] {
-  def matchUrl(url: Url): S
-  def matchState(state: S): Url
+trait RoutingRegistry[HierarchyRoot <: State] {
+  def matchUrl(url: Url): HierarchyRoot
+  def matchState(state: HierarchyRoot): Url
 }
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
   * It is used to map [[State]] to [[ViewFactory]].
   */
-trait ViewFactoryRegistry[S <: State] {
-  def matchStateToResolver(state: S): ViewFactory[_ <: S]
+trait ViewFactoryRegistry[HierarchyRoot <: State] {
+  def matchStateToResolver(state: HierarchyRoot): ViewFactory[_ <: HierarchyRoot]
 }

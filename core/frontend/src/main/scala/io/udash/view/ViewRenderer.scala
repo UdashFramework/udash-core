@@ -1,6 +1,6 @@
 package io.udash.view
 
-import io.udash.core.{ContainerView, View}
+import io.udash.core.{ContainerView, FinalView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
@@ -17,7 +17,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     parent match {
       case p: ContainerView =>
         p.renderChild(child)
-      case _ =>
+      case p: FinalView =>
         throw new RuntimeException("Final view cannot render child view! Check your states hierarchy.")
     }
 
@@ -74,10 +74,13 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
       replaceCurrentViews(pathToAdd)
     } else {
-      views.trimEnd(views.size - currentViewsToLeave.size)
+      val removedViews = views.size - currentViewsToLeave.size
+      views.trimEnd(removedViews)
       val rootView = currentViewsToLeave.last
       val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else None
-      renderChild(rootView, rootViewToAttach)
+      if (removedViews > 0 || rootViewToAttach.isDefined) {
+        renderChild(rootView, rootViewToAttach)
+      }
     }
   }
 }

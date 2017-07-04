@@ -8,7 +8,7 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
     initTestRouting()
     val initUrl = Url("/")
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
-    val app = new Application[TestState](routing, vpRegistry, RootState, urlProvider)
+    val app = new Application[TestState](routing, vpRegistry, urlProvider)
 
     app.run(emptyComponent())
 

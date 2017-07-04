@@ -11,23 +11,21 @@ import scala.reflect.ClassTag
   *
   * @param routingRegistry     [[io.udash.core.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
   * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
-  * @param rootState           The instance of [[io.udash.core.State]] which will treated as main state.
-  * @tparam S Should be a sealed trait which extends [[io.udash.core.State]].
+  * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
   */
-class Application[S <: State : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[S],
-                                                          viewFactoryRegistry: ViewFactoryRegistry[S],
-                                                          rootState: S,
-                                                          urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
+class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[HierarchyRoot],
+                                                                                      viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
+                                                                                      urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
   private var rootElement: Element = _
   private lazy val viewRenderer = new ViewRenderer(rootElement)
-  private lazy val routingEngine = new RoutingEngine[S](routingRegistry, viewFactoryRegistry, viewRenderer, rootState)
+  private lazy val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
   /**
     * Starts the application using selected element as root.
     *
     * @param attachElement Root element of application.
     */
-  def run(attachElement: Element): Unit = {
+  final def run(attachElement: Element): Unit = {
     rootElement = attachElement
 
     urlChangeProvider.onFragmentChange(routingEngine.handleUrl)
@@ -39,36 +37,35 @@ class Application[S <: State : ClassTag : ImmutableValue](routingRegistry: Routi
     *
     * @param state New application routing state,
     */
-  def goTo(state: S): Unit = {
+  def goTo(state: HierarchyRoot): Unit = {
     val url = routingRegistry.matchState(state)
     urlChangeProvider.changeFragment(url)
   }
 
-  /**
-    * Redirects to selected URL.
-    */
-  def redirectTo(url: String): Unit = {
+  /** Redirects to selected URL. */
+  def redirectTo(url: String): Unit =
     urlChangeProvider.changeUrl(url)
-  }
 
   /**
     * Register callback for routing state change.
     *
     * @param callback Callback getting newState and oldState as arguments.
     */
-  def onStateChange(callback: StateChangeEvent[S] => Unit): Registration = {
+  def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Unit): Registration =
     routingEngine.onStateChange(callback)
-  }
 
   /**
     * @return URL matched to the provided state.
     */
-  def matchState(state: S): Url = routingRegistry.matchState(state)
+  def matchState(state: HierarchyRoot): Url =
+    routingRegistry.matchState(state)
 
   /** Current application routing state. */
-  def currentState: S = routingEngine.currentState
+  def currentState: HierarchyRoot =
+    routingEngine.currentState
 
   /** @return Property reflecting current routing state */
-  def currentStateProperty: ReadableProperty[S] = routingEngine.currentStateProperty
+  def currentStateProperty: ReadableProperty[HierarchyRoot] =
+    routingEngine.currentStateProperty
 
 }

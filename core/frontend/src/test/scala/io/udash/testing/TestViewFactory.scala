@@ -26,7 +26,17 @@ class TestView extends ContainerView {
   }
 }
 
+class TestFinalView extends FinalView {
+  import scalatags.JsDom.all._
+  var renderingCounter = 0
+
+  override def getTemplate: Modifier = {
+    renderingCounter += 1
+    div().render
+  }
+}
+
 class TestPresenter[T <: TestState] extends Presenter[T] {
-  var lastHandledState: State = _
+  var lastHandledState: T = _
   override def handleState(state: T): Unit = lastHandledState = state
 }

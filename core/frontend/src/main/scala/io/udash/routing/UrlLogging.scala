@@ -9,7 +9,7 @@ import scala.util.Try
 /**
   * RoutingRegistry mixin simplifying logging app navigation.
   */
-trait UrlLogging[S <: State] extends StrictLogging { app: Application[S] =>
+trait UrlLogging[S <: GState[S]] extends StrictLogging { app: Application[S] =>
 
   implicit protected val loggingEC: ExecutionContext = JSExecutionContext.queue
   protected def log(url: String, referrer: Option[String]): Unit

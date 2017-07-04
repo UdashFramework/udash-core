@@ -28,14 +28,15 @@ package object udash extends io.udash.bindings.Bindings
   type FinalView = io.udash.core.FinalView
 
   type State = io.udash.core.State
+  type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
   type ContainerState = io.udash.core.ContainerState
   type FinalState = io.udash.core.FinalState
 
-  type RoutingRegistry[S <: State] = io.udash.core.RoutingRegistry[S]
+  type RoutingRegistry[HierarchyRoot <: State] = io.udash.core.RoutingRegistry[HierarchyRoot]
 
   @deprecated("Renamed to `ViewFactoryRegistry`.", "0.6.0")
-  type ViewPresenterRegistry[S <: State] = io.udash.core.ViewFactoryRegistry[S]
-  type ViewFactoryRegistry[S <: State] = io.udash.core.ViewFactoryRegistry[S]
+  type ViewPresenterRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]
+  type ViewFactoryRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]
 
   // Utils
   type Registration = io.udash.utils.Registration
