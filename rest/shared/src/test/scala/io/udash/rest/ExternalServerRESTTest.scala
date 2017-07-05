@@ -146,6 +146,23 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       resp.value.get should matchPattern { case Failure(ex: GenCodec.ReadFailure) => }
     }
 
+    "handle RPC fires" in {
+      restServer.serviceOne().fireAndForget(123)
+      connector.url should be(s"/serviceOne/fireAndForget")
+      connector.method should be(RESTConnector.POST)
+      connector.queryArguments should be(Map.empty)
+      connector.headers should be(Map.empty)
+      connector.body should be("123")
+
+      restServer.serviceTwo("token_123", "pl").deeper().fire(123)
+      connector.url should be(s"/serviceTwo/deeper/fire/123")
+      connector.method should be(RESTConnector.GET)
+      connector.queryArguments should be(Map.empty)
+      connector.headers("X_AUTH_TOKEN") should be("token_123")
+      connector.headers("lang") should be("pl")
+      connector.body should be(null)
+    }
+
     "compile recursive interface" in {
       """import io.udash.rpc.RPCName
          |case class TestRESTRecord(id: Option[Int], s: String)
@@ -462,92 +479,6 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
          |
          |val rest: DefaultServerREST[RESTInterfaceWithDefaultArgType] = new DefaultServerREST[RESTInterfaceWithDefaultArgType](connector)
        """.stripMargin should compile
-    }
-
-    "not compile with result type other than REST interface or Future[T]" in {
-      """import io.udash.rpc.RPCName
-         |implicit val x: GenCodec[TestRESTRecord] = null
-         |case class TestRESTRecord(id: Option[Int], s: String)
-         |
-         |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceOne(): BrokenRESTInternalInterface
-         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): Unit
-         |  @RESTName("service_three") def serviceThree(@URLPart arg: String): BrokenRESTInternalInterface
-         |}
-         |
-         |@REST
-         |trait BrokenRESTInternalInterface {
-         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
-         |}
-         |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
-
-      """import io.udash.rpc.RPCName
-         |implicit val x: GenCodec[TestRESTRecord] = null
-         |case class TestRESTRecord(id: Option[Int], s: String)
-         |
-         |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceOne(): BrokenRESTInternalInterface
-         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): BrokenRESTInternalInterface
-         |  @RESTName("service_three") def serviceThree(@URLPart arg: String): BrokenRESTInternalInterface
-         |}
-         |
-         |@REST
-         |trait BrokenRESTInternalInterface {
-         |  @GET @RESTName("load") @RPCName("loadAll") def load(): Seq[TestRESTRecord]
-         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
-         |}
-         |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
-
-      """import io.udash.rpc.RPCName
-         |implicit val x: GenCodec[TestRESTRecord] = null
-         |case class TestRESTRecord(id: Option[Int], s: String)
-         |
-         |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceOne(): BrokenRESTInternalInterface
-         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): BrokenRESTInternalInterface
-         |  @RESTName("service_three") def serviceThree(@URLPart arg: String): BrokenRESTInternalInterface
-         |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-         |}
-         |
-         |@REST
-         |trait BrokenRESTInternalInterface {
-         |  @GET @RESTName("load") @RPCName("loadAll") def load(): Unit
-         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
-         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
-         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-         |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-         |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
-         |}
-         |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
-
-      """import io.udash.rpc.RPCName
-         |implicit val x: GenCodec[TestRESTRecord] = null
-         |case class TestRESTRecord(id: Option[Int], s: String)
-         |
-         |@REST
-         |trait BrokenRESTInterface {
-         |  def serviceOne(): BrokenRESTInternalInterface
-         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): BrokenRESTInternalInterface
-         |  @RESTName("service_three") def serviceThree(@URLPart arg: String): Option[BrokenRESTInternalInterface]
-         |}
-         |
-         |@REST
-         |trait BrokenRESTInternalInterface {
-         |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-         |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
-         |}
-         |
-         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-       """.stripMargin shouldNot typeCheck
     }
 
     "not compile with empty @RESTName or @RPCName or @RESTParamName" in {

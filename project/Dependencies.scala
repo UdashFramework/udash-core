@@ -24,6 +24,8 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.5.0"
 
+  val jettyVersion = "9.4.6.v20170531"
+
   val scalatestVersion = "3.0.3"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.43"
@@ -77,8 +79,8 @@ object Dependencies {
   val restBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-    "org.eclipse.jetty" % "jetty-server" % "9.3.11.v20160721" % Test,
-    "org.eclipse.jetty" % "jetty-servlet" % "9.3.11.v20160721" % Test
+    "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
 
   val cssMacroDeps = Def.setting(Seq(

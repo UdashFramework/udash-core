@@ -2,7 +2,6 @@ package io.udash.rest.server
 
 import javax.servlet.http.HttpServletRequest
 
-import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.rest.{UdashRESTFramework, _}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +33,13 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
   def handleRestCall(getterChain: List[RawInvocation], invocation: RawInvocation)(implicit ec: ExecutionContext): Future[String] = {
     try {
       val receiver = rawLocalRpc.resolveGetterChain(getterChain)
-      receiver.call(invocation.rpcName, invocation.argLists).map(rawToString)
+      try {
+        receiver.call(invocation.rpcName, invocation.argLists).map(rawToString)
+      } catch {
+        case _: Throwable =>
+          receiver.fire(invocation.rpcName, invocation.argLists)
+          Future.successful("")
+      }
     } catch {
       case ex: Exception =>
         Future.failed(ex)
@@ -44,11 +49,13 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
   def parseHttpRequest(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod]): (List[RawInvocation], RawInvocation) = {
     val invocations = List.newBuilder[RawInvocation]
     val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
-    val bodyContent = req.getReader.lines().toArray.mkString("\n")
+    lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
     lazy val bodyValues = read[Map[String, framework.RawValue]](stringToRaw(bodyContent))(bodyValuesReader)
 
-    def findRestParamName(annotations: Seq[MetadataAnnotation]): Option[String] =
-      annotations.find(_.isInstanceOf[RESTParamName]).map(_.asInstanceOf[RESTParamName].restName)
+    def findRestParamName(data: framework.ParamMetadata): String =
+      data.annotations.collectFirst {
+        case rpn: RESTParamName => rpn.restName
+      }.getOrElse(data.name)
 
     def parseInvocations(path: Seq[String], metadata: RPCMetadata[_]): Unit = {
       if (path.isEmpty) throw ExposesREST.NotFound(req.getPathInfo)
@@ -64,10 +71,12 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
 
       val args: List[List[RawValue]] = methodMetadata.paramMetadata.map { argsList =>
         argsList.map { arg =>
-          val argTypeAnnotations = arg.annotations.filter(_.isInstanceOf[ArgumentType])
-          argTypeAnnotations.headOption match {
+          val argTypeAnnotation = arg.annotations.collectFirst {
+            case at: ArgumentType => at
+          }
+          argTypeAnnotation match {
             case Some(_: Header) =>
-              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
+              val argName = findRestParamName(arg)
               val headerValue = req.getHeader(argName)
               if (headerValue == null) throw ExposesREST.MissingHeader(argName)
               headerArgumentToRaw(headerValue, arg.typeMetadata == framework.SimplifiedType.StringType)
@@ -77,16 +86,16 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
               nextParts = nextParts.tail
               urlPartToRaw(v, arg.typeMetadata == framework.SimplifiedType.StringType)
             case Some(_: BodyValue) =>
-              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
-              if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(arg.name)
+              val argName = findRestParamName(arg)
+              if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(argName)
               hasBodyArgs = true
               bodyValues(argName)
             case Some(_: Body) =>
               if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
               hasBodyArgs = true
               stringToRaw(bodyContent)
-            case _ => // Query is a default argument type
-              val argName = findRestParamName(arg.annotations).getOrElse(arg.name)
+            case Some(_: Query) | None => // Query is a default argument type
+              val argName = findRestParamName(arg)
               val param = req.getParameter(argName)
               if (param == null) throw ExposesREST.MissingQueryArgument(argName)
               queryArgumentToRaw(param, arg.typeMetadata == framework.SimplifiedType.StringType)
@@ -116,6 +125,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
 object ExposesREST {
   case class NotFound(path: String) extends RuntimeException(s"Resource `$path` not found.")
   class MethodNotAllowed extends RuntimeException("Method not allowed.")
+  case class Unauthorized(msg: String) extends RuntimeException(msg)
 
   abstract class BadRequestException(msg: String) extends RuntimeException(msg)
   case class MissingHeader(name: String) extends BadRequestException(s"Header `$name` not found.")

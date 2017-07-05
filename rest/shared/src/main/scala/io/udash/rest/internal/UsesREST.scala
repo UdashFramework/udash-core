@@ -37,15 +37,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
   /** Transform `RawValue` into String used as URL part. */
   def rawToURLPart(raw: RawValue): String
 
-  private val pendingCalls = mutable.Map.empty[String, Promise[RawValue]]
-  private var cid: Int = 0
-
-  private def newCallId() = {
-    cid += 1
-    cid.toString
-  }
-
-  private def callRemote(callId: String, getterChain: List[RawInvocation], invocation: RawInvocation): Unit = {
+  private def callRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Future[RawValue] = {
     val urlBuilder = Seq.newBuilder[String]
     val queryArgsBuilder = Map.newBuilder[String, String]
     val headersArgsBuilder = Map.newBuilder[String, String]
@@ -56,10 +48,14 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       annotations.exists(_.isInstanceOf[SkipRESTName])
 
     def findRestName(annotations: Seq[MetadataAnnotation]): Option[String] =
-      annotations.find(_.isInstanceOf[RESTName]).map(_.asInstanceOf[RESTName].restName)
+      annotations.collectFirst {
+        case a: RESTName => a.restName
+      }
 
-    def findRestParamName(annotations: Seq[MetadataAnnotation]): Option[String] =
-      annotations.find(_.isInstanceOf[RESTParamName]).map(_.asInstanceOf[RESTParamName].restName)
+    def findRestParamName(data: framework.ParamMetadata): String =
+      data.annotations.collectFirst {
+        case rpn: RESTParamName => rpn.restName
+      }.getOrElse(data.name)
 
     def parseInvocation(inv: framework.RawInvocation, metadata: RPCMetadata[_]): Unit = {
       val rpcMethodName: String = inv.rpcName
@@ -69,20 +65,19 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
         urlBuilder += findRestName(methodMetadata.annotations).getOrElse(rpcMethodName)
       methodMetadata.paramMetadata.zip(inv.argLists).foreach { case (params, values) =>
         params.zip(values).foreach { case (param, value) =>
-          val paramName: String = findRestParamName(param.annotations).getOrElse(param.name)
-          val argTypeAnnotations = param.annotations.filter(_.isInstanceOf[ArgumentType])
-          if (argTypeAnnotations.size > 1) throw new RuntimeException(s"Too many parameter type annotations! ($argTypeAnnotations)")
-          argTypeAnnotations.headOption match {
+          val paramName: String = findRestParamName(param)
+          val argTypeAnnotations = param.annotations.collectFirst { case x: ArgumentType => x }
+          argTypeAnnotations match {
             case Some(_: Header) =>
-              headersArgsBuilder.+=((paramName, rawToHeaderArgument(value)))
+              headersArgsBuilder += (paramName -> rawToHeaderArgument(value))
             case Some(_: URLPart) =>
               urlBuilder += rawToURLPart(value)
             case Some(_: Body) =>
               body = rawToString(value)
             case Some(_: BodyValue) =>
-              bodyArgsBuilder.+=((paramName, value))
-            case _ => // Query is a default argument type
-              queryArgsBuilder.+=((paramName, rawToQueryArgument(value)))
+              bodyArgsBuilder += (paramName -> value)
+            case Some(_: Query) | None => // Query is a default argument type
+              queryArgsBuilder += (paramName ->  rawToQueryArgument(value))
           }
         }
       }
@@ -99,8 +94,9 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
         case Some(_: PATCH) => RESTConnector.PATCH
         case Some(_: PUT) => RESTConnector.PUT
         case Some(_: DELETE) => RESTConnector.DELETE
-        case _ if hasBody => RESTConnector.POST
-        case _ => RESTConnector.GET
+        // default GET/POST method
+        case None if hasBody => RESTConnector.POST
+        case None => RESTConnector.GET
       }
     }
 
@@ -123,19 +119,16 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body
-    ) onComplete {
-      case Success(text) => pendingCalls.remove(callId).foreach(p => p.success(stringToRaw(text)))
-      case Failure(ex) => pendingCalls.remove(callId).foreach(p => p.failure(ex))
-    }
+    ).map(stringToRaw)
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
     def call(rpcName: String, argLists: List[List[RawValue]]): Future[RawValue] = {
-      val callId = newCallId()
-      val promise = Promise[RawValue]()
-      pendingCalls.put(callId, promise)
-      callRemote(callId, getterChain, RawInvocation(rpcName, argLists))
-      promise.future
+      callRemote(getterChain, RawInvocation(rpcName, argLists))
+    }
+
+    def fire(rpcName: String, argLists: List[List[RawValue]]): Unit = {
+      callRemote(getterChain, RawInvocation(rpcName, argLists))
     }
 
     def get(rpcName: String, argLists: List[List[RawValue]]): RawRPC =

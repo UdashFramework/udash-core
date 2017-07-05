@@ -22,10 +22,12 @@ trait TestRESTInternalInterface {
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
   @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+  def fireAndForget(@Body id: Int): Unit
   def deeper(): TestRESTDeepInterface
 }
 
 @REST
 trait TestRESTDeepInterface {
   @GET def load(@URLPart id: Int): Future[TestRESTRecord]
+  @GET def fire(@URLPart id: Int): Unit
 }

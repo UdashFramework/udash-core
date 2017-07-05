@@ -1,9 +1,9 @@
 package io.udash.rest
 
-import com.avsystem.commons.rpc.{FunctionRPCFramework, GetterRPCFramework}
+import com.avsystem.commons.rpc.{FunctionRPCFramework, GetterRPCFramework, ProcedureRPCFramework}
 
-trait UdashRESTFramework extends GetterRPCFramework with FunctionRPCFramework {
-  trait RawRPC extends GetterRawRPC with FunctionRawRPC
+trait UdashRESTFramework extends GetterRPCFramework with ProcedureRPCFramework with FunctionRPCFramework {
+  trait RawRPC extends GetterRawRPC with ProcedureRawRPC with FunctionRawRPC
 
   type ParamTypeMetadata[T] = SimplifiedType[T]
 
@@ -41,7 +41,8 @@ trait UdashRESTFramework extends GetterRPCFramework with FunctionRPCFramework {
     implicit object ShortType extends SimplifiedType[Short]
     implicit object ByteType extends SimplifiedType[Byte]
     implicit object StringType extends SimplifiedType[String]
-    class AnyRefSimplifiedType[T <: AnyRef] extends SimplifiedType[T]
-    implicit def anyRefSimplifiedType[T <: AnyRef]: SimplifiedType[T] = new AnyRefSimplifiedType[T]
+    implicit object BooleanType extends SimplifiedType[Boolean]
+    class AnyRefSimplifiedType[T] extends SimplifiedType[T]
+    implicit def anyRefSimplifiedType[T]: SimplifiedType[T] = new AnyRefSimplifiedType[T]
   }
 }

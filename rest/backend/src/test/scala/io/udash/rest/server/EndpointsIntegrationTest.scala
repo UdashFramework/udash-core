@@ -10,13 +10,17 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.Eventually
 
+import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
-class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
+class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
+  val firesBuffer = mutable.ArrayBuffer.empty[String]
 
   val port = 44598
   val contextPrefix = "/rest_api/"
@@ -25,15 +29,16 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
   context.setSessionHandler(new SessionHandler)
   context.setGzipHandler(new GzipHandler)
 
-  val holder = new ServletHolder(new RestServlet(new DefaultExposesREST[TestServerRESTInterface](new TestServerRESTInterfaceImpl)))
+  val holder = new ServletHolder(new DefaultRestServlet(new DefaultExposesREST[TestServerRESTInterface](new TestServerRESTInterfaceImpl(firesBuffer))))
   holder.setAsyncSupported(true)
   context.addServlet(holder, s"${contextPrefix}*")
   server.setHandler(context)
 
   val restServer = DefaultServerREST[TestServerRESTInterface]("127.0.0.1", port, contextPrefix)
+  val serverConnector = new DefaultRESTConnector("127.0.0.1", port, contextPrefix)
 
   def await[T](f: Future[T]): T =
-    Await.result(f, 5 seconds)
+    Await.result(f, 3 seconds)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -41,11 +46,9 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
   }
 
   override protected def afterAll(): Unit = {
-    server.stop()
     super.afterAll()
+    server.stop()
   }
-
-  val serverConnector = new DefaultRESTConnector("127.0.0.1", port, contextPrefix)
 
   "REST endpoint" should {
     "work with Udash REST client (1)" in {
@@ -72,6 +75,27 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
     "work with Udash REST client (8)" in {
       await(restServer.serviceTwo("token123", "en_GB").delete(222)) should be(TestRESTRecord(Some(222), "two/token123/en_GB/delete"))
     }
+    "work with Udash REST client (9)" in {
+      firesBuffer.clear()
+      restServer.serviceTwo("token123", "en_GB").fireAndForget(321)
+      eventually {
+        firesBuffer.contains("two/token123/en_GB/fireAndForget/321") should be(true)
+      }
+    }
+    "work with Udash REST client (10)" in {
+      firesBuffer.clear()
+      restServer.serviceTwo("token123", "en_GB").deeper().fire(123321)
+      eventually {
+        firesBuffer.contains("two/token123/en_GB/deeper/fire/123321") should be(true)
+      }
+    }
+    "work with Udash REST client (11)" in {
+      firesBuffer.clear()
+      restServer.serviceOne().deeper().fire(123321)
+      eventually {
+        firesBuffer.contains("one/deeper/fire/123321") should be(true)
+      }
+    }
     "report valid HTTP codes (1)" in {
       intercept[HttpException[SimpleHttpResponse]](
         await(serverConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null))
@@ -95,20 +119,31 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
         await(serverConnector.send("/service_three/loadAll", RESTConnector.GET, Map.empty, Map.empty, null))
       ).response.statusCode should be(404) // "loadAll" is interpreted as URL argument from `serviceThree` getter
     }
+    "report valid HTTP codes (5)" in {
+      intercept[HttpException[SimpleHttpResponse]](
+        await(restServer.auth("invalid_pass").load())
+      ).response.statusCode should be(401)
+
+      await(restServer.auth("TurboSecureAPI").load(42, "a\\bc", "q:/we")) should be(TestRESTRecord(Some(42), "auth/load/a\\bc/q:/we"))
+    }
   }
 
-  private class TestServerRESTInterfaceImpl extends TestServerRESTInterface {
+  private class TestServerRESTInterfaceImpl(fires: mutable.ArrayBuffer[String]) extends TestServerRESTInterface {
     override def serviceOne(): TestServerRESTInternalInterface =
-      new TestServerRESTInternalInterfaceImpl("one")
+      new TestServerRESTInternalInterfaceImpl("one", fires)
 
     override def serviceTwo(token: String, lang: String): TestServerRESTInternalInterface =
-      new TestServerRESTInternalInterfaceImpl(s"two/$token/$lang")
+      new TestServerRESTInternalInterfaceImpl(s"two/$token/$lang", fires)
 
     override def serviceThree(arg: String): TestServerRESTInternalInterface =
-      new TestServerRESTInternalInterfaceImpl(s"three/$arg")
+      new TestServerRESTInternalInterfaceImpl(s"three/$arg", fires)
+
+    override def auth(pass: String): TestServerRESTInternalInterface =
+      if (pass == "TurboSecureAPI") new TestServerRESTInternalInterfaceImpl("auth", fires)
+      else throw ExposesREST.Unauthorized("Invalid password")
   }
 
-  private class TestServerRESTInternalInterfaceImpl(data: String) extends TestServerRESTInternalInterface {
+  private class TestServerRESTInternalInterfaceImpl(data: String, fires: mutable.ArrayBuffer[String])  extends TestServerRESTInternalInterface {
     override def load(): Future[Seq[TestRESTRecord]] =
       Future.successful(Seq(
         TestRESTRecord(Some(1), s"$data/load"),
@@ -132,11 +167,19 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll {
       Future.successful(TestRESTRecord(Some(id), s"$data/delete"))
 
     override def deeper(): TestServerRESTDeepInterface =
-      new TestServerRESTDeepInterfaceImpl(s"$data/deeper")
+      new TestServerRESTDeepInterfaceImpl(s"$data/deeper", fires)
+
+    override def fireAndForget(id: Int): Unit = {
+      fires += s"$data/fireAndForget/$id"
+    }
   }
 
-  private class TestServerRESTDeepInterfaceImpl(data: String) extends TestServerRESTDeepInterface {
+  private class TestServerRESTDeepInterfaceImpl(data: String, fires: mutable.ArrayBuffer[String]) extends TestServerRESTDeepInterface {
     override def load(id: Int): Future[TestRESTRecord] =
       Future.successful(TestRESTRecord(Some(id), data))
+
+    override def fire(id: Int): Unit = {
+      fires += s"$data/fire/$id"
+    }
   }
 }

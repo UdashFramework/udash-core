@@ -10,13 +10,13 @@ object DefaultRESTFramework extends UdashRESTFramework with AutoUdashRPCFramewor
       val obj = in.readObject()
       while (obj.hasNext) {
         val f = obj.nextField()
-        data.+=((f.fieldName, stringToRaw(f.readString())))
+        data += (f.fieldName -> stringToRaw(f.readString()))
       }
       data.result()
     },
     (out, e) => {
       val obj = out.writeObject()
-      e.foreach { case (key, value) =>
+      for ((key, value) <- e) {
         obj.writeField(key).writeString(rawToString(value))
       }
       obj.finish()
