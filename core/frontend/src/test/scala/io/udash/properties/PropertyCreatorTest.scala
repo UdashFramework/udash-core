@@ -148,6 +148,26 @@ class PropertyCreatorTest extends UdashFrontendTest {
       """trait T {
         |  def i: Int
         |  def s: String
+        |  var x: Int = 5
+        |}
+        |trait T2 {
+        |  def t: T
+        |}
+        |val p = Property[T2].asModel""".stripMargin shouldNot compile
+
+      """trait T {
+        |  def i: Int
+        |  def s: String
+        |  var x: Int = 5
+        |}
+        |trait T2 {
+        |  val t: T
+        |}
+        |val p = Property[T2].asModel""".stripMargin shouldNot compile
+
+      """trait T {
+        |  def i: Int
+        |  def s: String
         |  val x: Int = 5
         |}
         |val p = Property[T].asModel

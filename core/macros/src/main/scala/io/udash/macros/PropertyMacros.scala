@@ -127,26 +127,23 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     valueType.members
       .filterNot(member => member.isSynthetic || isFromTopLevelType(member) || member.isConstructor || member.isType)
 
-  //Checks, if return type of method is ModelValue
-  private def doesReturnTypeForModelRequirements(symbol: Symbol, signatureType: Type): Boolean =
-    symbol.isMethod && isModelValue(symbol.typeSignatureIn(signatureType).resultType)
-
   //Checks, if method or val is abstract, without parameters and returns ImmutableValue type
   private def doesMeetTraitModelRequirements(s: Symbol, signatureType: Type): Boolean =
-    doesMeetTraitElementsRequirements(s, signatureType) && doesReturnTypeForModelRequirements(s, signatureType)
+    doesMeetTraitElementsRequirements(s, signatureType) && isModelValue(s.typeSignatureIn(signatureType).resultType)
 
   //Checks, if method or val is abstract, without parameters and returns ImmutableValue type
   private def doesMeetTraitElementsRequirements(s: Symbol, signatureType: Type): Boolean =
-    (isAbstractMethod(s) && !takesParameters(s)) || isAbstractVal(s)
+    (isAbstractMethod(s) && !takesParameters(s)) || isAbstractVal(s) ||
+      (s.isAbstract && s.isMethod && s.asMethod.isAccessor && s.asMethod.accessed == NoSymbol) // val in trait in scala 2.11
 
   //Returns filtered memebrs which can be treated as Properties in trait based ModelProperty
   private def traitBasedPropertyMembers(tpe: Type): Seq[Symbol] =
-    filterMembers(tpe)
+    filterMembers(tpe).filter(!_.isPrivate)
       .filter(s => doesMeetTraitModelRequirements(s, tpe)).toSeq
 
   //Returns filtered memebrs which can be treated as Properties in trait based ModelProperty (with checking subtypes)
-  private def traitBasedPropertyElements(tpe: Type): Seq[Symbol] =
-    filterMembers(tpe)
+  private def traitBasedPropertyPossibleMemebers(tpe: Type): Seq[Symbol] =
+    filterMembers(tpe).filter(!_.isPrivate)
       .filter(s => doesMeetTraitElementsRequirements(s, tpe)).toSeq
 
   //Returns filtered memebrs which can be treated as Properties in case class based ModelProperty
@@ -162,7 +159,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     if (cache.contains(tpe)) true
     else {
       cache += tpe
-      val r = c.typecheck(tree, silent = true) != EmptyTree
+      val r = checkModel(tree)
       if (!r) cache -= tpe
       r
     }
@@ -184,7 +181,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     case _ => c.abort(tree.pos, "Only inline lambdas supported. Please use `subProp(_.path.to.element)`.")
   }
 
-  def isValidModelPart(tpe: Type, name: Name): Boolean =
+  def isValidSubproperty(tpe: Type, name: Name): Boolean =
     traitBasedPropertyMembers(tpe).map(_.name).contains(name) || ccBasedPropertyMembers(tpe).map(_.name).contains(name)
 
   def reifyImmutableValue[T: c.WeakTypeTag]: c.Tree = {
@@ -228,6 +225,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
            |  * isImmutableSeq: $isSeq - for example: Seq[String]
            |  * isImmutableOption: $isOption - for example: Option[String]
            |  * isImmutableOpt: $isOpt - for example: Opt[String]
+           |
            |""".stripMargin
       )
     }
@@ -251,7 +249,8 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
            |  * isModelSeq: $modelSeq
            |
            |Use ModelPart.isModelPart[$valueType] and ModelSeq.isModelSeq[$valueType] to get more details about `isModelPart` and `isModelSeq` checks.
-           """.stripMargin
+           |
+           |""".stripMargin
       )
     }
   }
@@ -277,7 +276,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     val isImplementableTrait = isTrait && unimplementableTraitMembers.isEmpty && doesNotContainVars
 
     val propertyElementsToTypeCheck = if (isTrait && isNotSealedTrait && isNotSeq) {
-      traitBasedPropertyElements(valueType)
+      traitBasedPropertyPossibleMemebers(valueType)
     } else if (isModelCC) {
       ccBasedPropertyMembers(valueType)
     } else Seq.empty
@@ -308,7 +307,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
       val isCC = isCaseClass(valueType)
       c.abort(c.enclosingPosition,
         s"""
-           |The type `$valueType` does not meet model part requirements. It must be (not sealed) trait or simple case class.
+           |The type `$valueType` does not meet model part requirements. It must be (not sealed) trait or immutable case class.
            |
            |Model part checks:
            |* for traits:
@@ -331,7 +330,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
                       .map(s => s"\n    - $s").mkString("")
                   else "Visible only for traits."
                 }
-           |* for simple case class:
+           |* for case class:
            |  * isCaseClass: $isCC
            |  * hasOneParamsListInPrimaryConstructor: ${
                 isCC && findPrimaryConstructor(valueType).paramLists.size == 1
@@ -349,7 +348,8 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
                 }
            |
            |Use ModelValue.isModelValue[${propertyElementsToTypeCheck.headOption.getOrElse("T")}] to get more details about `isModelValue` check.
-          """.stripMargin
+           |
+           |""".stripMargin
       )
     }
   }
@@ -373,6 +373,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
                 }
            |
            |Use ModelValue.isModelValue[${typeArgsCheck.head._1}] to get more details.
+           |
            |""".stripMargin
       )
     }
@@ -505,19 +506,42 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     val modelPath = getModelPath(f.tree)
 
     def checkIfPathIsModelPart(tree: Tree): Boolean = tree match {
-      case s@Select(next, t) if isModelPart(s.tpe) && isValidModelPart(next.tpe, t) => checkIfPathIsModelPart(next)
-      case Ident(_) => true
-      case _ => false
+      case Ident(_) =>
+        true
+      case s@Select(next, t) if isModelPart(s.tpe) && isValidSubproperty(next.tpe, t) =>
+        checkIfPathIsModelPart(next)
+      case s@Select(next, t) =>
+        c.abort(c.enclosingPosition,
+          s"""
+             |The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.
+             | * $t ${if (isValidSubproperty(next.tpe, t)) "is" else "is NOT"} a valid subproperty (abstract val/def for trait based model or constructor element for case class based model)
+             | * ${s.tpe} ${if (isModelPart(s.tpe)) "is" else "is NOT"} a ModelPart (check ModelPart.isModelPart[${s.tpe}])
+             |
+             |""".stripMargin
+        )
+      case _ =>
+        c.abort(c.enclosingPosition, s"The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.")
     }
 
     def checkIfIsValidPath(tree: Tree): Boolean = tree match {
-      case s@Select(next, t) if (isImmutableValue(s.tpe) || isModelSeq(s.tpe) || isModelPart(s.tpe)) && isValidModelPart(next.tpe, t) => checkIfPathIsModelPart(next)
-      case _ => false
+      case s@Select(next, t) if (isImmutableValue(s.tpe) || isModelSeq(s.tpe) || isModelPart(s.tpe)) && isValidSubproperty(next.tpe, t) =>
+        checkIfPathIsModelPart(next)
+      case s@Select(next, t) =>
+        c.abort(c.enclosingPosition,
+          s"""
+             |The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.
+             | * $t ${if (isValidSubproperty(next.tpe, t)) "is" else "is NOT"} a valid subproperty (abstract val/def for trait based model or constructor element for case class based model)
+             | * ${s.tpe} ${if (isImmutableValue(s.tpe)) "is" else "is NOT"} an immutable value (check ImmutableValue.isImmutable[${s.tpe}])
+             | * ${s.tpe} ${if (isModelPart(s.tpe)) "is" else "is NOT"} a ModelPart (check ModelPart.isModelPart[${s.tpe}])
+             | * ${s.tpe} ${if (isModelSeq(s.tpe)) "is" else "is NOT"} a ModelSeq (check ModelSeq.isModelSeq[${s.tpe}])
+             |
+             |""".stripMargin
+        )
+      case _ =>
+        c.abort(c.enclosingPosition, s"The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.")
     }
 
-    if (!checkIfIsValidPath(modelPath)) {
-      c.abort(c.enclosingPosition, s"The path must consist of ModelParts and only leaf can be ImmutableValue or $ModelSeqCls.")
-    }
+    checkIfIsValidPath(modelPath)
 
     def parsePath(tree: Tree, acc: List[(Select, TermName)] = List()): List[(Select, TermName)] = tree match {
       case s@Select(next, t@TermName(_)) => parsePath(next, (s, t) :: acc)
@@ -568,13 +592,15 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
         s"""
            |`$valueType` should meet requirements for one of:
            |  * model value - it has to be an immutable value (io.udash.properties.ImmutableValue[$valueType] has to exist), model part or model seq
-           |  * model part - it has to be a trait with abstract methods returning valid model values or a simple case class (contains only vals with valid model values in the primary constructor)
+           |  * model part - it has to be a trait with abstract methods returning valid model values or an immutable case class
            |  * model seq - it has to be Seq[T] where T is a valid model value
            |
            |Try to call one of these methods in your code to get more details:
+           |  * ImmutableValue.isImmutable[$valueType]
            |  * ModelValue.isModelValue[$valueType]
            |  * ModelPart.isModelPart[$valueType]
            |  * ModelSeq.isModelSeq[$valueType]
+           |
            |""".stripMargin
       )
     }
@@ -586,8 +612,9 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     if (PropertyMacrosCache.creators.contains(valueType))
       c.warning(c.enclosingPosition,
         s"""Generating PropertyCreator[$valueType] more than once. You should create it in the companion object explicitly.
-           |Example: implicit val pc: PropertyCreator[$valueType] = PropertyCreator.propertyCreator[$valueType]
-         """.stripMargin)
+           |Example: implicit val pc: PropertyCreator[$valueType] = PropertyCreator.propertyCreator
+           |
+           |""".stripMargin)
     else
       PropertyMacrosCache.creators.add(valueType)
 
