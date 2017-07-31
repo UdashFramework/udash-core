@@ -1,5 +1,7 @@
 package io.udash.rest.server
 
+import javax.servlet.http.HttpServletRequest
+
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse}
 import io.udash.rest._
@@ -29,7 +31,8 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   context.setSessionHandler(new SessionHandler)
   context.setGzipHandler(new GzipHandler)
 
-  val holder = new ServletHolder(new DefaultRestServlet(new DefaultExposesREST[TestServerRESTInterface](new TestServerRESTInterfaceImpl(firesBuffer))))
+  private val servlet = new AuthRestServlet(new DefaultExposesREST[TestServerRESTInterface](new TestServerRESTInterfaceImpl(firesBuffer)))
+  val holder = new ServletHolder(servlet)
   holder.setAsyncSupported(true)
   context.addServlet(holder, s"${contextPrefix}*")
   server.setHandler(context)
@@ -79,6 +82,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       firesBuffer.clear()
       restServer.serviceTwo("token123", "en_GB").fireAndForget(321)
       eventually {
+        println(firesBuffer)
         firesBuffer.contains("two/token123/en_GB/fireAndForget/321") should be(true)
       }
     }
@@ -125,6 +129,13 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       ).response.statusCode should be(401)
 
       await(restServer.auth("TurboSecureAPI").load(42, "a\\bc", "q:/we")) should be(TestRESTRecord(Some(42), "auth/load/a\\bc/q:/we"))
+    }
+    "handle endpoint creation fail" in {
+      servlet.throwAuthError = true
+      intercept[HttpException[SimpleHttpResponse]](
+        await(restServer.auth("invalid_pass").load())
+      ).response.statusCode should be(401)
+      servlet.throwAuthError = false
     }
   }
 
@@ -181,5 +192,13 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     override def fire(id: Int): Unit = {
       fires += s"$data/fire/$id"
     }
+  }
+
+  private class AuthRestServlet(exposedInterfaces: ExposesREST[_])(implicit ec: ExecutionContext) extends RestServlet {
+    var throwAuthError: Boolean = false
+
+    override protected def createEndpoint(req: HttpServletRequest): ExposesREST[_] =
+      if (throwAuthError) throw ExposesREST.Unauthorized("")
+      else exposedInterfaces
   }
 }

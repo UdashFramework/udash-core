@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest
 import io.udash.rest.{UdashRESTFramework, _}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
+import scala.util.control.NonFatal
 
 /**
   * Base trait for anything that exposes REST interface.
@@ -30,23 +32,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
   /** Transform `String` from URL part into `RawValue`. */
   def urlPartToRaw(raw: String, isStringArg: Boolean): RawValue
 
-  def handleRestCall(getterChain: List[RawInvocation], invocation: RawInvocation)(implicit ec: ExecutionContext): Future[String] = {
-    try {
-      val receiver = rawLocalRpc.resolveGetterChain(getterChain)
-      try {
-        receiver.call(invocation.rpcName, invocation.argLists).map(rawToString)
-      } catch {
-        case _: Throwable =>
-          receiver.fire(invocation.rpcName, invocation.argLists)
-          Future.successful("")
-      }
-    } catch {
-      case ex: Exception =>
-        Future.failed(ex)
-    }
-  }
-
-  def parseHttpRequest(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod]): (List[RawInvocation], RawInvocation) = {
+  def handleRestCall(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod])(implicit ec: ExecutionContext): Future[String] = {
     val invocations = List.newBuilder[RawInvocation]
     val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
@@ -115,10 +101,21 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
       }
     }
 
-    parseInvocations(path, rpcMetadata)
+    Future {
+      parseInvocations(path, rpcMetadata)
 
-    val result = invocations.result().reverse
-    (result.tail, result.head)
+      val result = invocations.result().reverse
+      (rawLocalRpc.resolveGetterChain(result.tail), result.head)
+    }.flatMap { case (receiver, invocation) =>
+      Try(
+        receiver
+          .call(invocation.rpcName, invocation.argLists)
+          .map(rawToString)
+      ).recover { case NonFatal(_) =>
+        receiver.fire(invocation.rpcName, invocation.argLists)
+        Future.successful("")
+      }.get
+    }
   }
 }
 
