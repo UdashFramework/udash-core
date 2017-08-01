@@ -12,15 +12,19 @@ object PropertyErrorManualTest {
 
   /**
     * Expected error:
+    *
     * `manual.PropertyErrorManualTest.ClassicClass` should meet requirements for one of:
     *   * model value - it has to be an immutable value (io.udash.properties.ImmutableValue[manual.PropertyErrorManualTest.ClassicClass] has to exist), model part or model seq
-    *   * model part - it has to be a trait with abstract methods returning valid model values or a simple case class (contains only vals with valid model values in the primary constructor)
+    *   * model part - it has to be a trait with abstract methods returning valid model values or an immutable case class
     *   * model seq - it has to be Seq[T] where T is a valid model value
     *
     * Try to call one of these methods in your code to get more details:
+    *   * ImmutableValue.isImmutable[manual.PropertyErrorManualTest.ClassicClass]
     *   * ModelValue.isModelValue[manual.PropertyErrorManualTest.ClassicClass]
     *   * ModelPart.isModelPart[manual.PropertyErrorManualTest.ClassicClass]
     *   * ModelSeq.isModelSeq[manual.PropertyErrorManualTest.ClassicClass]
+    *
+    *     val classicClassProperty = Property[ClassicClass]
     */
 //  object GeneralPropertyError {
 //    val classicClassProperty = Property[ClassicClass]
@@ -43,7 +47,7 @@ object PropertyErrorManualTest {
 
   /**
     * Expected error:
-    * The type `manual.PropertyErrorManualTest.ClassicClass` does not meet model part requirements. It must be (not sealed) trait or simple case class.
+    * The type `manual.PropertyErrorManualTest.ClassicClass` does not meet model part requirements. It must be (not sealed) trait or immutable case class.
     *
     * Model part checks:
     * * for traits:
@@ -51,7 +55,7 @@ object PropertyErrorManualTest {
     *   * isNotSealedTrait: true
     *   * isNotSeq: true
     *   * members: Visible only for traits.
-    * * for simple case class:
+    * * for case class:
     *   * isCaseClass: false
     *   * members: Visible only for case classes.
     *
@@ -91,10 +95,11 @@ object PropertyErrorManualTest {
     * Expected error:
     * `manual.PropertyErrorManualTest.A` should meet requirements for one of:
     *   * model value - it has to be an immutable value (io.udash.properties.ImmutableValue[manual.PropertyErrorManualTest.A] has to exist), model part or model seq
-    *   * model part - it has to be a trait with abstract methods returning valid model values or a simple case class (contains only vals with valid model values in the primary constructor)
+    *   * model part - it has to be a trait with abstract methods returning valid model values or an immutable case class
     *   * model seq - it has to be Seq[T] where T is a valid model value
     *
     * Try to call one of these methods in your code to get more details:
+    *   * ImmutableValue.isImmutable[manual.PropertyErrorManualTest.A]
     *   * ModelValue.isModelValue[manual.PropertyErrorManualTest.A]
     *   * ModelPart.isModelPart[manual.PropertyErrorManualTest.A]
     *   * ModelSeq.isModelSeq[manual.PropertyErrorManualTest.A]
@@ -205,5 +210,46 @@ object PropertyErrorManualTest {
 //    ImmutableValue.isImmutable[CCA]
 //    ImmutableValue.isImmutable[CCB]
 //    ImmutableValue.isImmutable[CCD]
+//  }
+
+  trait PathTestA {
+    def s: String
+    def b: PathTestB
+
+    def test2: PathTestB = null
+  }
+
+  trait PathTestB {
+    def s: String
+    def a: PathTestA
+
+    def test: String = "asd"
+  }
+
+  /**
+    * The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.
+    *  * test is NOT a valid subproperty (unimplemented def for trait based model or constructor element for case class based model)
+    *  * String is an immutable value (check ImmutableValue.isImmutable[String])
+    *  * String is NOT a ModelPart (check ModelPart.isModelPart[String])
+    *  * String is NOT a ModelSeq (check ModelSeq.isModelSeq[String])
+    *
+    *     p.subProp(_.b.a.b.test)
+    */
+//  object PathTestError {
+//    val p = ModelProperty.empty[PathTestA]
+//    p.subProp(_.b.a.b.test)
+//  }
+
+
+  /**
+    * The path must consist of ModelParts and only leaf can be ImmutableValue or ModelSeq.
+    *  * test2 is NOT a valid subproperty (unimplemented def for trait based model or constructor element for case class based model)
+    *  * manual.PropertyErrorManualTest.PathTestB is a ModelPart (check ModelPart.isModelPart[manual.PropertyErrorManualTest.PathTestB])
+    *
+    *     p.subProp(_.b.a.test2.a.b.a.s)
+    */
+//  object PathTestError2 {
+//    val p = ModelProperty.empty[PathTestA]
+//    p.subProp(_.b.a.test2.a.b.a.s)
 //  }
 }

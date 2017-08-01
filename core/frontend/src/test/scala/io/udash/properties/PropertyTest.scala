@@ -802,6 +802,54 @@ class PropertyTest extends UdashFrontendTest {
       c.get.a should be(-10)
       c.get.b should be(-5)
     }
+
+    "handle trait with implemented defs and vals" in {
+      trait ModelWithImplDef {
+        def x: Int
+        def y: Int = 5
+      }
+      trait ModelWithImplVal {
+        val x: Int
+        val y: Int = 5
+      }
+
+      val p1 = ModelProperty[ModelWithImplDef]
+      val p2 = ModelProperty[ModelWithImplVal]
+
+      p1.subProp(_.x).set(12)
+      p1.subProp(_.x).get should be(12)
+      p1.get.x should be(12)
+      p1.get.y should be(5)
+
+      p2.subProp(_.x).set(12)
+      p2.subProp(_.x).get should be(12)
+      p2.get.x should be(12)
+      p2.get.y should be(5)
+    }
+
+    "handle case class with implemented defs and vals" in {
+      trait Utils {
+        val userLabel: String = "User:"
+      }
+      case class User(login: String, name: Option[String]) extends Utils {
+        val displayName: String = name.getOrElse(login)
+
+        def withLabel: String =
+          s"$userLabel $displayName"
+      }
+
+      val p = ModelProperty[User](User("udash", Some("Udash Framework")))
+      p.get.withLabel should be("User: Udash Framework")
+
+      p.subProp(_.name).set(None)
+      p.get.withLabel should be("User: udash")
+
+      p.subProp(_.login).set("tester")
+      p.get.withLabel should be("User: tester")
+
+      p.subProp(_.name).set(Some("Test Test"))
+      p.get.withLabel should be("User: Test Test")
+    }
   }
 
   "SeqProperty" should {
