@@ -30,8 +30,8 @@ scala:
 
 env:
   - TEST_PACKAGE="core-macros/test core-sharedJVM/test core-sharedJS/test core-frontend/test"
-  - TEST_PACKAGE="rpc-macros/test rpc-sharedJVM/test rpc-sharedJS/test rpc-backend/test rpc-frontend/test"
-  - TEST_PACKAGE="rest-macros/test rest-sharedJVM/test rest-sharedJS/test"
+  - TEST_PACKAGE="rpc-sharedJVM/test rpc-sharedJS/test rpc-backend/test rpc-frontend/test"
+  - TEST_PACKAGE="rest-macros/test rest-sharedJVM/test rest-sharedJS/test rest-backend/test"
   - TEST_PACKAGE="i18n-sharedJVM/test i18n-sharedJS/test i18n-backend/test i18n-frontend/test"
   - TEST_PACKAGE=bootstrap/test
   - TEST_PACKAGE=charts/test

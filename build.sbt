@@ -48,8 +48,8 @@ val commonJSSettings = Seq(
 lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
-    `rpc-macros`, `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
-    `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`,
+    `rpc-shared-JS`, `rpc-shared-JVM`, `rpc-frontend`, `rpc-backend`,
+    `rest-macros`, `rest-shared-JS`, `rest-shared-JVM`, `rest-backend`,
     `i18n-shared-JS`, `i18n-shared-JVM`, `i18n-frontend`, `i18n-backend`,
     `css-macros`, `css-shared-JS`, `css-shared-JVM`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
@@ -88,19 +88,8 @@ lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(Scala
     }.value
   )
 
-lazy val `rpc-macros` = project.in(file("rpc/macros"))
-  .dependsOn(`core-macros`)
-  .settings(commonSettings: _*).settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
-    )
-  )
-
 lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shared"))
   .configureCross(_.dependsOn(`core-shared` % CompileAndTest))
-  .jsConfigure(_.dependsOn(`rpc-macros`))
-  .jvmConfigure(_.dependsOn(`rpc-macros`))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= rpcCrossTestDeps.value
@@ -128,7 +117,6 @@ lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJS
   )
 
 lazy val `rest-macros` = project.in(file("rest/macros"))
-  .dependsOn(`rpc-macros`)
   .settings(commonSettings: _*).settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
@@ -147,6 +135,13 @@ lazy val `rest-shared` = crossProject.crossType(CrossType.Pure).in(file("rest/sh
 
 lazy val `rest-shared-JVM` = `rest-shared`.jvm
 lazy val `rest-shared-JS` = `rest-shared`.js
+
+lazy val `rest-backend` = project.in(file("rest/backend"))
+  .dependsOn(`rest-shared-JVM` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= restBackendDeps.value
+  )
 
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
   .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))

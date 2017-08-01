@@ -10,6 +10,9 @@ import scala.language.postfixOps
 trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
   type RawRPC <: GetterRawRPC with ProcedureRawRPC
 
+  class ParamTypeMetadata[+T]
+  implicit object ParamTypeMetadata extends ParamTypeMetadata[Nothing]
+
   val RawValueCodec: GenCodec[RawValue]
 
   private implicit def rawCodec: GenCodec[RawValue] =

@@ -1,6 +1,5 @@
 package io.udash.rpc.utils
 
-import com.avsystem.commons.rpc.RPCMetadata
 import io.udash.rpc.ExposesServerRPC
 
 import scala.concurrent.Future
@@ -9,7 +8,7 @@ import scala.concurrent.Future
   * ExposesServerRPC mixin simplifying RPC calls logging.
   */
 trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
-
+  import localFramework.RPCMetadata
   protected val metadata: RPCMetadata[ServerRPCType]
 
   def log(rpcName: String, methodName: String, args: Seq[String]): Unit
