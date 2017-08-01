@@ -7,6 +7,9 @@ trait UdashRESTFramework extends GetterRPCFramework with ProcedureRPCFramework w
 
   type ParamTypeMetadata[T] = SimplifiedType[T]
 
+  class ResultTypeMetadata[+T]
+  implicit object ResultTypeMetadata extends ResultTypeMetadata[Nothing]
+
   /** Transform `String` received from HTTP response to `RawValue`. */
   def stringToRaw(string: String): RawValue
   /** Transform `RawValue` to `String` for HTTP request body. */

@@ -19,9 +19,9 @@ object UdashBootstrap {
 
   /** Loads FontAwesome styles. */
   def loadFontAwesome(): dom.Element =
-    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css").render
+    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css").render
 
   /** Loads Bootstrap styles. */
   def loadBootstrapStyles(): dom.Element =
-    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css").render
+    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css").render
 }

@@ -2,29 +2,29 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.2"
+  val versionOfScala = "2.12.3"
   val silencerVersion = "0.5"
 
   val jqueryWrapperVersion = "1.1.0"
 
-  val scalaJsDomVersion = "0.9.2"
+  val scalaJsDomVersion = "0.9.3"
   val scalaTagsVersion = "0.6.5"
   val scalaCssVersion = "0.5.3"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.21.0"
+  val avsCommonsVersion = "1.22.0"
 
   val atmosphereJSVersion = "2.3.2"
-  val atmosphereVersion = "2.4.12"
+  val atmosphereVersion = "2.4.13"
 
-  val upickleVersion = "0.4.4"
+  val upickleVersion = "0.4.4" // Tests only
   val jawnParserVersion = "0.10.4"
 
-  val scalaHttpClientVersion = "2.0.1"
+  val scalaHttpClientVersion = "2.0.2"
 
-  val scalaLoggingVersion = "3.5.0"
+  val scalaLoggingVersion = "3.7.2"
 
-  val jettyVersion = "9.4.6.v20170531"
+  val jettyVersion = "9.4.6.v20170531" // Tests only
 
   val scalatestVersion = "3.0.3"
   val bootstrapVersion = "3.3.7-1"

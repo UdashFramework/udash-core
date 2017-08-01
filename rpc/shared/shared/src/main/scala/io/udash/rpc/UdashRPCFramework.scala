@@ -13,6 +13,9 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   class ParamTypeMetadata[+T]
   implicit object ParamTypeMetadata extends ParamTypeMetadata[Nothing]
 
+  class ResultTypeMetadata[+T]
+  implicit object ResultTypeMetadata extends ResultTypeMetadata[Nothing]
+
   val RawValueCodec: GenCodec[RawValue]
 
   private implicit def rawCodec: GenCodec[RawValue] =
