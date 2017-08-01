@@ -14,12 +14,12 @@ before_script:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   # Install Selenium chromedriver
-  - wget http://chromedriver.storage.googleapis.com/2.25/chromedriver_linux64.zip
+  - wget http://chromedriver.storage.googleapis.com/2.30/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip -d selenium-bin
   - export PATH=$PWD/selenium-bin:$PATH
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION "set (UdashBuild.jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome))" $TEST_PACKAGE
+  - sbt ++$TRAVIS_SCALA_VERSION "set (UdashBuild.jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome().withChromeOptions({val options = new org.openqa.selenium.chrome.ChromeOptions(); options.addArguments(\"--headless --disable-gpu\"); options })))" $TEST_PACKAGE
 
 jdk:
   - oraclejdk8
@@ -29,26 +29,10 @@ scala:
   - 2.12.2
 
 env:
-  - TEST_PACKAGE=core-macros/test
-  - TEST_PACKAGE=core-sharedJVM/test
-  - TEST_PACKAGE=core-sharedJS/test
-  - TEST_PACKAGE=core-frontend/test
-  - TEST_PACKAGE=rpc-macros/test
-  - TEST_PACKAGE=rpc-sharedJVM/test
-  - TEST_PACKAGE=rpc-sharedJS/test
-  - TEST_PACKAGE=rpc-backend/test
-  - TEST_PACKAGE=rpc-frontend/test
-  - TEST_PACKAGE=rest-macros/test
-  - TEST_PACKAGE=rest-sharedJVM/test
-  - TEST_PACKAGE=rest-sharedJS/test
-  - TEST_PACKAGE=i18n-sharedJVM/test
-  - TEST_PACKAGE=i18n-sharedJS/test
-  - TEST_PACKAGE=i18n-backend/test
-  - TEST_PACKAGE=i18n-frontend/test
+  - TEST_PACKAGE="core-macros/test core-sharedJVM/test core-sharedJS/test core-frontend/test"
+  - TEST_PACKAGE="rpc-sharedJVM/test rpc-sharedJS/test rpc-backend/test rpc-frontend/test"
+  - TEST_PACKAGE="rest-macros/test rest-sharedJVM/test rest-sharedJS/test rest-backend/test"
+  - TEST_PACKAGE="i18n-sharedJVM/test i18n-sharedJS/test i18n-backend/test i18n-frontend/test"
   - TEST_PACKAGE=bootstrap/test
   - TEST_PACKAGE=charts/test
-  - TEST_PACKAGE=css-macros/test
-  - TEST_PACKAGE=css-sharedJVM/test
-  - TEST_PACKAGE=css-sharedJS/test
-  - TEST_PACKAGE=css-backend/test
-  - TEST_PACKAGE=css-frontend/test
+  - TEST_PACKAGE="css-macros/test css-sharedJVM/test css-sharedJS/test css-backend/test css-frontend/test"

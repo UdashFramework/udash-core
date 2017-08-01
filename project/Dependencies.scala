@@ -5,14 +5,14 @@ object Dependencies {
   val versionOfScala = "2.12.2"
   val silencerVersion = "0.5"
 
-  val jqueryWrapperVersion = "1.0.1"
+  val jqueryWrapperVersion = "1.1.0"
 
   val scalaJsDomVersion = "0.9.2"
   val scalaTagsVersion = "0.6.5"
   val scalaCssVersion = "0.5.3"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.20.6"
+  val avsCommonsVersion = "1.21.0"
 
   val atmosphereJSVersion = "2.3.2"
   val atmosphereVersion = "2.4.12"
@@ -23,6 +23,8 @@ object Dependencies {
   val scalaHttpClientVersion = "2.0.1"
 
   val scalaLoggingVersion = "3.5.0"
+
+  val jettyVersion = "9.4.6.v20170531"
 
   val scalatestVersion = "3.0.3"
   val bootstrapVersion = "3.3.7-1"
@@ -72,6 +74,13 @@ object Dependencies {
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
+  ))
+
+  val restBackendDeps = Def.setting(Seq(
+    "javax.servlet" % "javax.servlet-api" % servletVersion,
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+    "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
 
   val cssMacroDeps = Def.setting(Seq(
