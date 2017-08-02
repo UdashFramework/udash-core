@@ -2,13 +2,13 @@ package io.udash.properties
 
 import scala.language.higherKinds
 
-trait ImmutableValue[A]
+/**
+  * Evidence that type `T` is immutable.
+  *
+  * It's generated automatically by macros, but you can create it manually to force treating `T` as immutable.
+  */
+trait ImmutableValue[T]
 object ImmutableValue {
-  // implement with macro that checks if T is really fully immutable, i.e:
-  // * it's a simple type like String, Int, etc
-  // * it's a case class whose every field is immutable
-  // * it's a sealed trait whose case classes are immutable
-  // * it's an immutable collection of immutable element types
   implicit val allowIntTpe: ImmutableValue[Int] = null
   implicit val allowLongTpe: ImmutableValue[Long] = null
   implicit val allowDoubleTpe: ImmutableValue[Double] = null
@@ -22,22 +22,47 @@ object ImmutableValue {
   implicit def isImmutable[T]: ImmutableValue[T] = macro io.udash.macros.PropertyMacros.reifyImmutableValue[T]
 }
 
+/**
+  * Evidence that type `T` can be used to create ModelProperty.
+  *
+  * There are two valid model bases:
+  * <ul>
+  *  <li>trait (not sealed trait) with following restrictions:<ul>
+  *    <li>it cannot contain vars</li>
+  *    <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
+  *    <li>all abstract vals and defs (without parameters) are considered as subproperties</li>
+  *    <li>all abstract vals and defs types have to be valid [[io.udash.properties.ModelValue]]</li>
+  *  </ul></li>
+  *  <li>case class with following restrictions:<ul>
+  *    <li>it cannot contain vars</li>
+  *    <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
+  *    <li>it cannot have more than one parameters list in primary constructor</li>
+  *    <li>all elements of primary constructor are considered as subproperties</li>
+  *    <li>all types of subproperties have to be valid [[io.udash.properties.ModelValue]]</li>
+  *  </ul></li>
+  * </ul>
+  */
 trait ModelPart[T]
 object ModelPart {
-  // implement with macro that checks if T is a trait that contains only abstract methods that
-  // take no parameters and return either immutable value, ModelSeq or another ModelPart
   implicit def isModelPart[T]: ModelPart[T] = macro io.udash.macros.PropertyMacros.reifyModelPart[T]
 }
 
+/**
+  * Evidence that type `T` can be used to create SeqProperty.
+  *
+  * `T` has to be Seq[X] and `X` has to be valid [[io.udash.properties.ModelValue]].
+  */
 trait ModelSeq[T]
 object ModelSeq {
-  // implement with macro that checks if T is a scala.collection.Seq (exactly, not a subtype!) whose elements
-  // are either immutable values, ModelParts or other ModelSeqs
   implicit def isModelSeq[T <: Seq[_]]: ModelSeq[T] = macro io.udash.macros.PropertyMacros.reifyModelSeq[T]
 }
 
+/**
+  * Evidence that type `T` can be used to create Property.
+  *
+  * `T` has to be immutable ([[io.udash.properties.ImmutableValue]]), valid [[io.udash.properties.ModelPart]] or valid [[io.udash.properties.ModelSeq]].
+  */
 trait ModelValue[T]
 object ModelValue {
-  // implement with macro that checks if T is ImmutableValue, ModelSeq or ModelPart
   implicit def isModelValue[T]: ModelValue[T] = macro io.udash.macros.PropertyMacros.reifyModelValue[T]
 }
