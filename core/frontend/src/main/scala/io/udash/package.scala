@@ -5,20 +5,38 @@ package object udash extends io.udash.bindings.Bindings
                         with io.udash.routing.Routing
 {
   // Defaults
-  type DefaultViewPresenterFactory[S <: State] = io.udash.core.DefaultViewPresenterFactory[S]
+  @deprecated("Renamed to `StaticViewFactory`.", "0.6.0")
+  type DefaultViewPresenterFactory[S <: State] = io.udash.core.StaticViewFactory[S]
+  type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
   type EmptyPresenter[S <: State] = io.udash.core.EmptyPresenter[S]
   val  Window = io.udash.core.Window
 
   // Definitions
   val  Url = io.udash.core.Url
   type Url = io.udash.core.Url
+
   type Presenter[S <: State] = io.udash.core.Presenter[S]
-  type ViewPresenter[S <: State] = io.udash.core.ViewPresenter[S]
+
+  @deprecated("Use `ContainerViewFactory`, `FinalViewFactory` or `ViewFactory` instead.", "0.6.0")
+  type ViewPresenter[S <: State] = io.udash.core.ViewFactory[S]
+  type ViewFactory[S <: State] = io.udash.core.ViewFactory[S]
+  type ContainerViewFactory[S <: ContainerState] = io.udash.core.ContainerViewFactory[S]
+  type FinalViewFactory[S <: FinalState] = io.udash.core.FinalViewFactory[S]
+
   type View = io.udash.core.View
+  type ContainerView = io.udash.core.ContainerView
   type FinalView = io.udash.core.FinalView
+
   type State = io.udash.core.State
-  type RoutingRegistry[S <: State] = io.udash.core.RoutingRegistry[S]
-  type ViewPresenterRegistry[S <: State] = io.udash.core.ViewPresenterRegistry[S]
+  type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
+  type ContainerState = io.udash.core.ContainerState
+  type FinalState = io.udash.core.FinalState
+
+  type RoutingRegistry[HierarchyRoot <: State] = io.udash.core.RoutingRegistry[HierarchyRoot]
+
+  @deprecated("Renamed to `ViewFactoryRegistry`.", "0.6.0")
+  type ViewPresenterRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]
+  type ViewFactoryRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]
 
   // Utils
   type Registration = io.udash.utils.Registration

@@ -1,12 +1,10 @@
 package io.udash.view
 
-import io.udash.core.{View, Window}
+import io.udash.core.{ContainerView, FinalView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
-import scala.scalajs.js.timers.RawTimers
-import scalatags.generic.Modifier
 
 /**
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
@@ -15,19 +13,27 @@ private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
 
-  private def mergeViews(path: List[View]): View = {
+  private def renderChild(parent: View, child: Option[View]): Unit =
+    parent match {
+      case p: ContainerView =>
+        p.renderChild(child)
+      case p: FinalView =>
+        throw new RuntimeException("Final view cannot render child view! Check your states hierarchy.")
+    }
+
+  private def mergeViews(path: List[View]): Option[View] = {
     if (path.size == 1) {
       val singleView: View = path.head
       views.append(singleView)
-      singleView
+      Some(singleView)
     } else {
       val lastElement = path.reduceLeft[View]((parent, child) => {
-        parent.renderChild(child)
+        renderChild(parent, Some(child))
         views.append(parent)
         child
       })
       views.append(lastElement)
-      path.head
+      path.headOption
     }
   }
 
@@ -41,7 +47,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     for (_ <- 0 until endpoint.childElementCount)
       endpoint.removeChild(endpoint.childNodes(0))
 
-    rootView.getTemplate.applyTo(endpoint)
+    rootView.foreach(_.getTemplate.applyTo(endpoint))
   }
 
   /**
@@ -65,14 +71,16 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     val currentViewsToLeave = findEqPrefix(subPathToLeave, views.toList)
 
     if (currentViewsToLeave.isEmpty) {
-      require(pathToAdd.nonEmpty, "You can not remove all views, without adding any new view.")
+      require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
       replaceCurrentViews(pathToAdd)
     } else {
-      views.trimEnd(views.size - currentViewsToLeave.size)
+      val removedViews = views.size - currentViewsToLeave.size
+      views.trimEnd(removedViews)
       val rootView = currentViewsToLeave.last
-      val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else null
-
-      rootView.renderChild(rootViewToAttach)
+      val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else None
+      if (removedViews > 0 || rootViewToAttach.isDefined) {
+        renderChild(rootView, rootViewToAttach)
+      }
     }
   }
 }
