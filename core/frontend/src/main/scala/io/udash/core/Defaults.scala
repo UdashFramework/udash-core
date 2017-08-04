@@ -1,8 +1,9 @@
 package io.udash.core
 
 /** Creates view with [[io.udash.core.EmptyPresenter]]. Useful for static views. */
-abstract class DefaultViewPresenterFactory[S <: State](viewCreator: () => View) extends ViewPresenter[S] {
-  override def create(): (View, Presenter[S]) = (viewCreator.apply(), new EmptyPresenter[S])
+abstract class StaticViewFactory[S <: State](viewCreator: () => View) extends ViewFactory[S] {
+  override def create(): (View, Presenter[S]) =
+    (viewCreator.apply(), new EmptyPresenter[S])
 }
 
 /** Ignores state changes. Useful for static views. */

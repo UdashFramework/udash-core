@@ -15,7 +15,7 @@ class UrlLoggingTest extends UdashFrontendTest with TestRouting {
       initTestRouting()
       val initUrl = Url("/")
       val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
-      val app = new Application[TestState](routing, vpRegistry, RootState, urlProvider) with UrlLogging[TestState] {
+      val app = new Application[TestState](routing, vpRegistry, urlProvider) with UrlLogging[TestState] {
         override implicit protected val loggingEC: ExecutionContext = testExecutionContext
         override protected def log(url: String, referrer: Option[String]): Unit = {
           urlWithRef += ((url, referrer))

@@ -1,6 +1,6 @@
 package io.udash.view
 
-import io.udash.testing.{TestView, UdashFrontendTest}
+import io.udash.testing.{TestFinalView, TestView, UdashFrontendTest}
 
 class ViewRendererTest extends UdashFrontendTest {
   import scalatags.JsDom.all._
@@ -157,6 +157,60 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewA.renderingCounter should be(1)
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
+    }
+
+    "not try to call renderChild on FinalView" in {
+      val renderer = new ViewRenderer(emptyComponent())
+
+      val rootView = new TestView
+      val childViewA = new TestView
+      val childViewB = new TestView
+      val childViewC = new TestFinalView
+
+      renderer.renderView(Nil, rootView :: Nil)
+      renderer.renderView(rootView :: Nil, childViewA :: childViewB :: childViewC :: Nil)
+
+      rootView.lastChild should be(childViewA)
+      childViewA.lastChild should be(childViewB)
+      childViewB.lastChild should be(childViewC)
+
+      rootView.renderingCounter should be(1)
+      childViewA.renderingCounter should be(1)
+      childViewB.renderingCounter should be(1)
+      childViewC.renderingCounter should be(1)
+
+      renderer.renderView(rootView :: childViewA :: childViewB :: childViewC :: Nil, Nil)
+
+      rootView.lastChild should be(childViewA)
+      childViewA.lastChild should be(childViewB)
+      childViewB.lastChild should be(childViewC)
+
+      rootView.renderingCounter should be(1)
+      childViewA.renderingCounter should be(1)
+      childViewB.renderingCounter should be(1)
+      childViewC.renderingCounter should be(1)
+
+      renderer.renderView(rootView :: childViewA :: childViewB :: Nil, Nil)
+
+      rootView.lastChild should be(childViewA)
+      childViewA.lastChild should be(childViewB)
+      childViewB.lastChild should be(null)
+
+      rootView.renderingCounter should be(1)
+      childViewA.renderingCounter should be(1)
+      childViewB.renderingCounter should be(1)
+      childViewC.renderingCounter should be(1)
+
+      renderer.renderView(rootView :: childViewA :: childViewB :: Nil, childViewC :: Nil)
+
+      rootView.lastChild should be(childViewA)
+      childViewA.lastChild should be(childViewB)
+      childViewB.lastChild should be(childViewC)
+
+      rootView.renderingCounter should be(1)
+      childViewA.renderingCounter should be(1)
+      childViewB.renderingCounter should be(1)
+      childViewC.renderingCounter should be(2)
     }
   }
 }
