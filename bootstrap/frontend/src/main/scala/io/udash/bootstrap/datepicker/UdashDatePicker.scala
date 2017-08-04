@@ -26,8 +26,8 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
 
   import scalatags.JsDom.all._
 
-  private lazy val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
-  private lazy val jQInput = jQ(inp).asDatePicker()
+  private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
+  private val jQInput = jQ(inp).asDatePicker()
 
   /** Shows date picker widget. */
   def show(): Unit =
@@ -49,7 +49,7 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
   def disable(): Unit =
     jQInput.dpData().disable()
 
-  lazy val render: dom.Element = {
+  val render: dom.Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
     options.listen(opts => jQInput.dpData().options(optionsToJsDict(opts)))

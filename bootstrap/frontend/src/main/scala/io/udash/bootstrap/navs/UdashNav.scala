@@ -3,15 +3,15 @@ package navs
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
-import io.udash.properties.seq.SeqProperty
+import io.udash.properties.seq
 import io.udash.{properties, _}
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashNav[ItemType, ElemType <: Property[ItemType]] private
+class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private
               (navStyle: CssStyle, stacked: Boolean, justified: Boolean, override val componentId: ComponentId)
-              (val panels: SeqProperty[ItemType, ElemType])
+              (val panels: seq.ReadableSeqProperty[ItemType, ElemType])
               (elemFactory: (ElemType) => dom.Node,
                isActive: (ElemType) => ReadableProperty[Boolean],
                isDisabled: (ElemType) => ReadableProperty[Boolean],
@@ -19,7 +19,7 @@ class UdashNav[ItemType, ElemType <: Property[ItemType]] private
   extends UdashBootstrapComponent {
   import io.udash.css.CssView._
 
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     ul(
       id := componentId,
       BootstrapStyles.Navigation.nav, navStyle,
@@ -53,9 +53,9 @@ object UdashNav {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNav` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
-           (panels: SeqProperty[ItemType, ElemType])
+           (panels: seq.ReadableSeqProperty[ItemType, ElemType])
            (elemFactory: (ElemType) => dom.Node,
             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
@@ -76,9 +76,9 @@ object UdashNav {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNav` component, call render to create DOM element.
     */
-  def pills[ItemType, ElemType <: Property[ItemType]]
+  def pills[ItemType, ElemType <: ReadableProperty[ItemType]]
            (stacked: Boolean = false, justified: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
-           (panels: SeqProperty[ItemType, ElemType])
+           (panels: seq.ReadableSeqProperty[ItemType, ElemType])
            (elemFactory: (ElemType) => dom.Node,
             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
@@ -99,9 +99,9 @@ object UdashNav {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNav` component, call render to create DOM element.
     */
-  def tabs[ItemType, ElemType <: Property[ItemType]]
+  def tabs[ItemType, ElemType <: ReadableProperty[ItemType]]
           (stacked: Boolean = false, justified: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
-          (panels: SeqProperty[ItemType, ElemType])
+          (panels: seq.ReadableSeqProperty[ItemType, ElemType])
           (elemFactory: (ElemType) => dom.Node,
            isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
            isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
@@ -122,8 +122,8 @@ object UdashNav {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNav` component, call render to create DOM element.
     */
-  def navbar[ItemType, ElemType <: Property[ItemType]]
-            (panels: SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+  def navbar[ItemType, ElemType <: ReadableProperty[ItemType]]
+            (panels: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
             (elemFactory: (ElemType) => dom.Node,
              isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
              isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),

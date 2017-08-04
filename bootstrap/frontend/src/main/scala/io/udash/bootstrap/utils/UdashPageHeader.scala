@@ -9,7 +9,7 @@ import scalatags.JsDom.all._
 
 class UdashPageHeader private(override val componentId: ComponentId, mds: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     span(id := componentId, BootstrapStyles.Typography.pageHeader)(mds).render
 }
 
@@ -22,7 +22,7 @@ object UdashPageHeader {
     * @param componentId Id of the root DOM node.
     * @return `UdashPageHeader` component, call render to create DOM element.
     */
-  def apply(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashPageHeader =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashPageHeader =
     new UdashPageHeader(componentId, bind(content))
 
   /**

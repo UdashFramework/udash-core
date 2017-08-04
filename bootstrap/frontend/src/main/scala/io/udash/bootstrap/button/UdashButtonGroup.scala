@@ -9,20 +9,20 @@ import org.scalajs.dom
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
-                      (val items: seq.SeqProperty[ItemType, ElemType],
+class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                      (val items: seq.ReadableSeqProperty[ItemType, ElemType],
                        size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
                        override val componentId: ComponentId)
                       (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
   import io.udash.bootstrap.BootstrapTags._
 
-  private lazy val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
+  private val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
     BootstrapStyles.Button.btnGroupVertical.styleIf(vertical) ::
     BootstrapStyles.Button.btnGroupJustified.styleIf(justified) ::
     size :: Nil
 
-  override lazy val render: dom.Element = {
+  override val render: dom.Element =
     div(id := componentId, role := "group", classes, if (toggle) dataToggle := "buttons" else ())(
       repeat(items)(
         // "To use justified button groups with <button> elements, you must wrap each button in a button group.
@@ -32,7 +32,6 @@ class UdashButtonGroup[ItemType, ElemType <: Property[ItemType]] private
         else itemFactory
       )
     ).render
-  }
 }
 
 object UdashButtonGroup {
@@ -85,8 +84,8 @@ object UdashButtonGroup {
     * @tparam ElemType Type of the property containing every element in the `items` sequence.
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
-  def reactive[ItemType, ElemType <: Property[ItemType]]
-              (items: seq.SeqProperty[ItemType, ElemType],
+  def reactive[ItemType, ElemType <: ReadableProperty[ItemType]]
+              (items: seq.ReadableSeqProperty[ItemType, ElemType],
                size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                componentId: ComponentId = UdashBootstrap.newId())
               (itemFactory: (ElemType) => Seq[dom.Element]): UdashButtonGroup[ItemType, ElemType] =
@@ -103,7 +102,7 @@ object UdashButtonGroup {
     * @param justified If true, buttons will be justified
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
-  def checkboxes(items: seq.SeqProperty[CheckboxModel, CastableProperty[CheckboxModel]],
+  def checkboxes(items: seq.ReadableSeqProperty[CheckboxModel, CastableProperty[CheckboxModel]],
                  size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                  componentId: ComponentId = UdashBootstrap.newId()): UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]] =
     new UdashButtonGroup[CheckboxModel, CastableProperty[CheckboxModel]](items, size, vertical, justified, false, componentId)(defaultCheckboxFactory)
@@ -122,7 +121,7 @@ object UdashButtonGroup {
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
   def radio[ItemType <: CheckboxModel : ModelPart, ElemType <: CastableProperty[ItemType]]
-           (items: seq.SeqProperty[ItemType, ElemType],
+           (items: seq.ReadableSeqProperty[ItemType, ElemType],
             size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
            (implicit ec: ExecutionContext): UdashButtonGroup[ItemType, ElemType] = {

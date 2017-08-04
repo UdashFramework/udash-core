@@ -11,8 +11,8 @@ import org.scalajs.dom
 import scala.scalajs.js
 import scalatags.JsDom.all._
 
-class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
-                   (val items: seq.SeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
+class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                   (val items: seq.ReadableSeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
                    (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
@@ -80,12 +80,12 @@ class UdashDropdown[ItemType, ElemType <: Property[ItemType]] private
 }
 
 object UdashDropdown {
-  sealed abstract class DropdownEvent[ItemType, ElemType <: Property[ItemType]](override val source: UdashDropdown[ItemType, ElemType]) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
-  case class DropdownShowEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownShownEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownHideEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownHiddenEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class SelectionEvent[ItemType, ElemType <: Property[ItemType]](dropdown: UdashDropdown[ItemType, ElemType], item: ItemType) extends DropdownEvent(dropdown)
+  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](override val source: UdashDropdown[ItemType, ElemType]) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
+  case class DropdownShowEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownShownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownHideEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class DropdownHiddenEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
+  case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType], item: ItemType) extends DropdownEvent(dropdown)
 
   /** Default dropdown elements. */
   sealed trait DefaultDropdownItem
@@ -101,7 +101,7 @@ object UdashDropdown {
   }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(p: Property[DefaultDropdownItem]): dom.Element = {
+  def defaultItemFactory(p: ReadableProperty[DefaultDropdownItem]): dom.Element = {
     import io.udash.css.CssView._
     def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
       case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
@@ -124,8 +124,8 @@ object UdashDropdown {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashDropdown` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
-           (items: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (itemFactory: (ElemType) => dom.Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, false, componentId)(itemFactory)(content)
@@ -142,8 +142,8 @@ object UdashDropdown {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashDropdown` component, call render to create DOM element.
     */
-  def dropup[ItemType, ElemType <: Property[ItemType]]
-            (items: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+  def dropup[ItemType, ElemType <: ReadableProperty[ItemType]]
+            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
             (itemFactory: (ElemType) => dom.Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true, componentId)(itemFactory)(content)

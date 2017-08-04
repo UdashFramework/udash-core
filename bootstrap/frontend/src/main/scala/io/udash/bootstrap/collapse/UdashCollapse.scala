@@ -37,7 +37,7 @@ class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolea
     )
   }
 
-  override lazy val render: Element = {
+  override val render: Element = {
     val el = div(
       dataParent := parentSelector.getOrElse("false"), dataToggle := toggleOnInit,
       BootstrapStyles.Collapse.collapse, id := componentId

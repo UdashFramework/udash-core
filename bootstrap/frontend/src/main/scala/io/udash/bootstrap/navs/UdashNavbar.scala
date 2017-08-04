@@ -9,7 +9,7 @@ import org.scalajs.dom
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
 
-class UdashNavbar[ItemType, ElemType <: Property[ItemType]] private
+class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
                  (navbarStyle: CssStyle, override val componentId: ComponentId)
                  (brand: dom.Element, nav: UdashNav[ItemType, ElemType])
   extends UdashBootstrapComponent {
@@ -19,7 +19,7 @@ class UdashNavbar[ItemType, ElemType <: Property[ItemType]] private
 
   private val collapseId = UdashBootstrap.newId()
 
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     tags2.nav(id := componentId, BootstrapStyles.Navigation.navbar, navbarStyle)(
       div(BootstrapStyles.containerFluid)(
         div(BootstrapStyles.Navigation.navbarHeader)(
@@ -48,7 +48,7 @@ object UdashNavbar {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNavbar` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.Navigation.navbarDefault, componentId)(brand, nav)
 
@@ -62,7 +62,7 @@ object UdashNavbar {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashNavbar` component, call render to create DOM element.
     */
-  def inverted[ItemType, ElemType <: Property[ItemType]]
+  def inverted[ItemType, ElemType <: ReadableProperty[ItemType]]
               (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.Navigation.navbarInverse, componentId)(brand, nav)
 }

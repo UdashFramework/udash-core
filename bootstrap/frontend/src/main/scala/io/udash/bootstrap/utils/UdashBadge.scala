@@ -22,7 +22,7 @@ object UdashBadge {
     * @param componentId Id of the root DOM node.
     * @return `UdashBadge` component, call render to create DOM element.
     */
-  def apply(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashBadge =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashBadge =
     new UdashBadge(componentId)(bind(content))
 
   /**

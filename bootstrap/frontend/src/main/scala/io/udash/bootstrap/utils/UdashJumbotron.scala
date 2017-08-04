@@ -9,7 +9,7 @@ import scalatags.JsDom.all._
 
 class UdashJumbotron private(override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     div(id := componentId, BootstrapStyles.jumbotron)(mds).render
 }
 
@@ -22,7 +22,7 @@ object UdashJumbotron {
     * @param componentId Id of the root DOM node.
     * @return `UdashJumbotron` component, call render to create DOM element.
     */
-  def apply(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashJumbotron =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashJumbotron =
     new UdashJumbotron(componentId)(bind(content))
 
   /**

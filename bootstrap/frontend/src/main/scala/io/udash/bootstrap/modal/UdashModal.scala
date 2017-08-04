@@ -43,7 +43,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
       dataTarget := s"#$componentId"
     )
 
-  override lazy val render: Element = {
+  override val render: Element = {
     val content = Seq(
       (headerFactory, BootstrapStyles.Modal.modalHeader),
       (bodyFactory, BootstrapStyles.Modal.modalBody),

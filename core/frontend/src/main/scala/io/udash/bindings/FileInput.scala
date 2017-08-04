@@ -18,7 +18,7 @@ object FileInput {
     * @param selectedFiles This property contains information about files selected by user.
     * @return
     */
-  def apply(inputName: String, acceptMultipleFiles: Property[Boolean], selectedFiles: SeqProperty[File])
+  def apply(inputName: String, acceptMultipleFiles: ReadableProperty[Boolean], selectedFiles: SeqProperty[File])
            (inputMds: Modifier[dom.Element]*): html.Input = {
     import scalatags.JsDom.all._
     val inp = input(

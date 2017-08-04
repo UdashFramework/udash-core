@@ -11,9 +11,9 @@ import scalatags.JsDom.all._
 
 sealed class UdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
                                       (content: Modifier*) extends UdashBootstrapComponent {
-  override lazy val render: Element = template().render
+  override val render: Element = template().render
 
-  protected def template() =
+  protected final def template() =
     div(id := componentId, alertStyle, role := "alert")(content: _*)
 }
 
@@ -31,9 +31,9 @@ class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val 
   )
   button.listen { case ev => _dismissed.set(true) }
 
-  private lazy val buttonRendered = button.render
+  private val buttonRendered = button.render
 
-  override lazy val render: Element = template()(
+  override val render: Element = template()(
     BootstrapStyles.Alert.alertDismissible,
     buttonRendered, content
   ).render
@@ -55,27 +55,27 @@ trait AlertCompanion[T <: UdashAlert] {
   def success(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Success, componentId)(content: _*)
 
-  /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def info(content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Info, UdashBootstrap.newId())(content: _*)
 
-  /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def info(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Info, componentId)(content: _*)
 
-  /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def warning(content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Warning, UdashBootstrap.newId())(content: _*)
 
-  /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def warning(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Warning, componentId)(content: _*)
 
-  /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def danger(content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Danger, UdashBootstrap.newId())(content: _*)
 
-  /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.. */
+  /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def danger(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
     create(Danger, componentId)(content: _*)
 }
