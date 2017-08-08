@@ -5,20 +5,30 @@ import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
+import org.scalajs.dom.html.Div
 
 import scala.concurrent.ExecutionContext
+import scalatags.JsDom
 import scalatags.JsDom.all._
 
-sealed class UdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
-                                      (content: Modifier*) extends UdashBootstrapComponent {
-  override val render: Element = template().render
+sealed abstract class UdashAlertBase(alertStyle: AlertStyle, override val componentId: ComponentId)
+  extends UdashBootstrapComponent {
 
-  protected final def template() =
-    div(id := componentId, alertStyle, role := "alert")(content: _*)
+  protected final def template: JsDom.TypedTag[Div] =
+    div(id := componentId, alertStyle, role := "alert")
+
 }
 
-class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
-                                          (content: Modifier*)(implicit ec: ExecutionContext) extends UdashAlert(alertStyle, componentId)() {
+final class UdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)(content: Modifier*)
+  extends UdashAlertBase(alertStyle, componentId) {
+
+  override val render: Element = template(content).render
+}
+
+final class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
+                                                (content: Modifier*)(implicit ec: ExecutionContext)
+  extends UdashAlertBase(alertStyle, componentId) {
+
   import io.udash.css.CssView._
 
   private val _dismissed = Property[Boolean](false)
@@ -33,7 +43,7 @@ class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val 
 
   private val buttonRendered = button.render
 
-  override val render: Element = template()(
+  override val render: Element = template(
     BootstrapStyles.Alert.alertDismissible,
     buttonRendered, content
   ).render
@@ -42,7 +52,7 @@ class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val 
     buttonRendered.click()
 }
 
-trait AlertCompanion[T <: UdashAlert] {
+trait AlertCompanion[T <: UdashAlertBase] {
   import AlertStyle._
 
   protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*)(implicit ec: ExecutionContext): T

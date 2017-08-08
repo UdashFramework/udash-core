@@ -9,11 +9,11 @@ import org.scalajs.dom
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                      (val items: seq.ReadableSeqProperty[ItemType, ElemType],
-                       size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
-                       override val componentId: ComponentId)
-                      (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                            (val items: seq.ReadableSeqProperty[ItemType, ElemType],
+                             size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
+                             override val componentId: ComponentId)
+                            (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
   import io.udash.bootstrap.BootstrapTags._
 

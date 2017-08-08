@@ -10,11 +10,14 @@ import org.scalajs.dom.html.Anchor
 
 import scala.concurrent.ExecutionContext
 
-class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                      (val pages: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                      (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean)
-                      (implicit ec: ExecutionContext) extends UdashBootstrapComponent {
+final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                            (val pages: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                            (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean)
+                            (implicit ec: ExecutionContext)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
+
   override val render: Element = {
     import scalatags.JsDom.all._
     ol(id := componentId, BootstrapStyles.Navigation.breadcrumb)(

@@ -11,11 +11,13 @@ import org.scalajs.dom._
 
 import scala.collection.mutable
 
-class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                    (panels: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                    (panelStyleSelector: ItemType => PanelStyle,
-                     heading: (ElemType) => dom.Element,
-                     body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                          (panels: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                          (panelStyleSelector: ItemType => PanelStyle,
+                           heading: (ElemType) => dom.Element,
+                           body: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
   import BootstrapTags._
 

@@ -7,7 +7,8 @@ import org.scalajs.dom
 import scala.language.postfixOps
 import scala.scalajs.js
 
-class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery) extends Listenable[UdashTooltip, UdashTooltip.TooltipEvent] {
+final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
+  extends Listenable[UdashTooltip, UdashTooltip.TooltipEvent] {
   /** Shows the tooltip. */
   def show(): Unit =
     selector.tooltip("show")

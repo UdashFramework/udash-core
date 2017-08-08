@@ -9,10 +9,12 @@ import org.scalajs.dom
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                        (val items:seq.ReadableSeqProperty[ItemType, ElemType],
-                         override val componentId: ComponentId)
-                        (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                              (val items:seq.ReadableSeqProperty[ItemType, ElemType],
+                               override val componentId: ComponentId)
+                              (itemFactory: (ElemType) => Seq[dom.Element])
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
   override val render: dom.Element =

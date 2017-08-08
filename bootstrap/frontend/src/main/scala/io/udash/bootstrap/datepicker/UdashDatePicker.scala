@@ -16,9 +16,9 @@ import scala.scalajs.js.|
 import scala.util.Try
 
 /** Wrapper for <a href="http://eonasdan.github.io/bootstrap-datetimepicker/">Bootstrap 3 Datepicker</a>. */
-class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
-                                          val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
-                                          override val componentId: ComponentId)
+final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
+                                                val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
+                                                override val componentId: ComponentId)
   extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
 
   import io.udash.css.CssView._

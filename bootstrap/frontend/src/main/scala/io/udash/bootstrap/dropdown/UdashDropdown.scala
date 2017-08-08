@@ -11,9 +11,10 @@ import org.scalajs.dom
 import scala.scalajs.js
 import scalatags.JsDom.all._
 
-class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                   (val items: seq.ReadableSeqProperty[ItemType, ElemType], dropup: Boolean, override val componentId: ComponentId)
-                   (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
+final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                         (val items: seq.ReadableSeqProperty[ItemType, ElemType], dropup: Boolean,
+                          override val componentId: ComponentId)
+                         (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import io.udash.css.CssView._

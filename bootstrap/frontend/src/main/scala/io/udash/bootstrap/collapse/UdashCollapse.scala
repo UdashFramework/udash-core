@@ -10,7 +10,8 @@ import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
 
-class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean, override val componentId: ComponentId)(content: Modifier*)
+final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean,
+                                  override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import io.udash.css.CssView._

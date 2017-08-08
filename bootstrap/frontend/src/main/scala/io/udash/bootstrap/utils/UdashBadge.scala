@@ -7,9 +7,9 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashBadge private(override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
+final class UdashBadge private(override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     span(id := componentId, BootstrapStyles.Label.badge)(mds).render
 }
 

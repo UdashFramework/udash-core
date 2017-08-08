@@ -7,9 +7,11 @@ import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
-class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                    (items: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                    (body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                          (items: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                          (body: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import scalatags.JsDom.all._
   import io.udash.css.CssView._
 

@@ -30,12 +30,13 @@ sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType
   def previous(): Unit = changePage(selectedPage.get - 1)
 }
 
-class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[PageType]] private
-                     (size: PaginationSize, showArrows: ReadableProperty[Boolean],
-                      highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
-                     (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                     (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
+final class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[PageType]] private
+                           (size: PaginationSize, showArrows: ReadableProperty[Boolean],
+                            highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
+                           (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                           (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
   extends PaginationComponent[PageType, ElemType] {
+
   import io.udash.css.CssView._
 
   override val render: dom.Element = {
@@ -73,9 +74,12 @@ class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[PageTy
   }
 }
 
-class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private[pagination](aligned: Boolean, override val componentId: ComponentId)
-                (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
+final class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private[pagination]
+                      (aligned: Boolean, override val componentId: ComponentId)
+                      (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
+  extends PaginationComponent[PageType, ElemType] {
+
   import io.udash.css.CssView._
 
   override val render: dom.Element = {

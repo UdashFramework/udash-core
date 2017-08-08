@@ -19,16 +19,18 @@ import scala.scalajs.js.Dictionary
 import scala.util.Try
 import scalatags.JsDom.all._
 
-class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlide], val componentId: ComponentId,
-                            showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
-                           (implicit ec: ExecutionContext) extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
-  import io.udash.css.CssView._
-  require(activeSlide >= 0, "Active slide index cannot be negative.")
+final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlide], val componentId: ComponentId,
+                                  showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
+                                 (implicit ec: ExecutionContext)
+  extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
 
   import BootstrapStyles.Carousel._
   import BootstrapTags._
   import UdashCarousel._
   import io.udash.wrappers.jquery._
+  import io.udash.css.CssView._
+
+  require(activeSlide >= 0, "Active slide index cannot be negative.")
 
   private val indices = content.transform((slides: Seq[UdashCarouselSlide]) => slides.length)
   private val _activeIndex: Property[Int] = Property[Int](firstActive)

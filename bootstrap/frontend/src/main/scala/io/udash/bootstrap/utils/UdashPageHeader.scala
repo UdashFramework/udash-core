@@ -7,8 +7,11 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashPageHeader private(override val componentId: ComponentId, mds: Modifier*) extends UdashBootstrapComponent {
+final class UdashPageHeader private(override val componentId: ComponentId, mds: Modifier*)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
+
   override val render: dom.Element =
     span(id := componentId, BootstrapStyles.Typography.pageHeader)(mds).render
 }

@@ -10,9 +10,11 @@ import org.scalajs.dom._
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
-                       (content: Modifier*) extends UdashBootstrapComponent {
+final class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
+                             (content: Modifier*) extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
+
   override val render =
     form(if (formStyle.isDefined) formStyle.get else ())(
       content

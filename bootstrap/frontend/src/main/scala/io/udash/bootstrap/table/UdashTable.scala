@@ -7,12 +7,14 @@ import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom._
 
-class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                (striped: ReadableProperty[Boolean], bordered: ReadableProperty[Boolean], hover: ReadableProperty[Boolean],
-                 condensed: ReadableProperty[Boolean], override val componentId: ComponentId)
-                (val items: seq.ReadableSeqProperty[ItemType, ElemType])
-                (headerFactory: Option[() => dom.Element],
-                 rowFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                      (striped: ReadableProperty[Boolean], bordered: ReadableProperty[Boolean], hover: ReadableProperty[Boolean],
+                       condensed: ReadableProperty[Boolean], override val componentId: ComponentId)
+                      (val items: seq.ReadableSeqProperty[ItemType, ElemType])
+                      (headerFactory: Option[() => dom.Element],
+                       rowFactory: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
   override val render: Element = {

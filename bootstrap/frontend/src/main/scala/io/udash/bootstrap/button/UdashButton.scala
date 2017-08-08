@@ -10,9 +10,10 @@ import org.scalajs.dom._
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean, val active: Property[Boolean],
-                          val disabled: Property[Boolean], override val componentId: ComponentId)
-                         (content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean, val active: Property[Boolean],
+                                val disabled: Property[Boolean], override val componentId: ComponentId)(content: Modifier*)
+  extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+
   import io.udash.css.CssView._
 
   private val classes: List[Modifier] = buttonStyle :: size ::

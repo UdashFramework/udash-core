@@ -7,7 +7,9 @@ import org.scalajs.dom
 import scala.language.postfixOps
 import scala.scalajs.js
 
-class UdashPopover(selector: UdashPopover.UdashPopoverJQuery) extends Listenable[UdashPopover, UdashPopover.TooltipEvent] {
+final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
+  extends Listenable[UdashPopover, UdashPopover.TooltipEvent] {
+
   /** Shows popover. */
   def show(): Unit =
     selector.popover("show")

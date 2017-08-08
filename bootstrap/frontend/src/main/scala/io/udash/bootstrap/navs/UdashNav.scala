@@ -9,13 +9,13 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private
-              (navStyle: CssStyle, stacked: Boolean, justified: Boolean, override val componentId: ComponentId)
-              (val panels: seq.ReadableSeqProperty[ItemType, ElemType])
-              (elemFactory: (ElemType) => dom.Node,
-               isActive: (ElemType) => ReadableProperty[Boolean],
-               isDisabled: (ElemType) => ReadableProperty[Boolean],
-               isDropdown: (ElemType) => ReadableProperty[Boolean])
+final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                    (navStyle: CssStyle, stacked: Boolean, justified: Boolean, override val componentId: ComponentId)
+                    (val panels: seq.ReadableSeqProperty[ItemType, ElemType])
+                    (elemFactory: (ElemType) => dom.Node,
+                     isActive: (ElemType) => ReadableProperty[Boolean],
+                     isDisabled: (ElemType) => ReadableProperty[Boolean],
+                     isDropdown: (ElemType) => ReadableProperty[Boolean])
   extends UdashBootstrapComponent {
   import io.udash.css.CssView._
 

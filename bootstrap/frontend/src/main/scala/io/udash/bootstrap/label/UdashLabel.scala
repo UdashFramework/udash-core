@@ -7,7 +7,9 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashLabel private(style: LabelStyle, override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
+final class UdashLabel private(style: LabelStyle, override val componentId: ComponentId)(mds: Modifier*)
+  extends UdashBootstrapComponent {
+
   override val render: dom.Element =
     span(id := componentId, style)(mds: _*).render
 }
