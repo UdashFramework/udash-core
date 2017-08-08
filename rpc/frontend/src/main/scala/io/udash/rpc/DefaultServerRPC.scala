@@ -24,10 +24,13 @@ object DefaultServerRPC {
   /** Creates [[io.udash.rpc.DefaultServerRPC]] for provided RPC interfaces. */
   def apply[ClientRPCType : DefaultClientUdashRPCFramework.AsRawRPC,
             ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
-           (localRpc: ClientRPCType, serverUrl: String = "/atm/", exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry): ServerRPCType = {
+           (localRpc: ClientRPCType, serverUrl: String = "/atm/",
+            exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry,
+            rpcFailureInterceptors: Seq[(Throwable) => Unit]): ServerRPCType = {
     val clientRPC = new DefaultExposesClientRPC[ClientRPCType](localRpc)
     lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl, exceptionsRegistry)
     lazy val serverRPC: DefaultServerRPC[ServerRPCType] = new DefaultServerRPC[ServerRPCType](serverConnector)
+    rpcFailureInterceptors.foreach(serverRPC.registerCallFailureCallback)
     serverRPC.remoteRpc
   }
 }

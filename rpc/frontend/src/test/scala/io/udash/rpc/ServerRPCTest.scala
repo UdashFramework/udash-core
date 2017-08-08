@@ -1,6 +1,7 @@
 package io.udash.rpc
 
 import com.github.ghik.silencer.silent
+import io.udash.rpc.internals.UsesServerRPC
 import io.udash.testing.AsyncUdashFrontendTest
 
 import scala.collection.mutable.ArrayBuffer
@@ -109,6 +110,39 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
       eventually {
         resp.isCompleted should be(true)
+        resp.value.get.failed.get.isInstanceOf[UsesServerRPC.CallTimeout] should be(true)
+      }
+    }
+
+    "call failure interceptors" in {
+      val (connectorMock, serverRPC) = createServerRpc()
+      val rpc = serverRPC.remoteRpc
+
+      var firstCalled = false
+      serverRPC.registerCallFailureCallback { ex =>
+        firstCalled = true
+      }
+
+      var secondCalled = false
+      val registration = serverRPC.registerCallFailureCallback { ex =>
+        secondCalled = true
+      }
+
+      var thirdCalled = false
+      serverRPC.registerCallFailureCallback { ex =>
+        thirdCalled = true
+      }
+
+      registration.cancel()
+
+      val resp = rpc.doStuff(true)
+      connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
+      eventually {
+        resp.isCompleted should be(true)
+        resp.value.get.failed.get.isInstanceOf[UsesServerRPC.CallTimeout] should be(true)
+        firstCalled should be(true)
+        secondCalled should be(false)
+        thirdCalled should be(true)
       }
     }
   }
