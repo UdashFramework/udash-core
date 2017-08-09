@@ -11,10 +11,15 @@ import org.scalajs.dom.Element
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-class UdashProgressBar private[progressbar](val progress: Property[Int], val showPercentage: Property[Boolean], barStyle: ProgressBarStyle,
-                                            minValue: Int, maxValue: Int, minWidthEm: Int, valueStringifier: ValueStringifier,
-                                            override val componentId: ComponentId)
-                                           (implicit ec: ExecutionContext) extends UdashBootstrapComponent {
+sealed abstract class UdashProgressBarBase private[progressbar](val progress: ReadableProperty[Int],
+                                                                val showPercentage: ReadableProperty[Boolean],
+                                                                barStyle: ProgressBarStyle, minValue: Int,
+                                                                maxValue: Int, minWidthEm: Int,
+                                                                valueStringifier: ValueStringifier,
+                                                                override val componentId: ComponentId)
+                                                               (implicit ec: ExecutionContext)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
   protected def modifiers = Seq(
@@ -23,32 +28,36 @@ class UdashProgressBar private[progressbar](val progress: Property[Int], val sho
     aria.valuemin := minValue, aria.valuemax := maxValue, minWidth := s"${minWidthEm}em"
   )
 
-  lazy val stringifiedValue: ReadableProperty[String] = progress.transform(valueStringifier)
-
-  override lazy val render: Element =
+  override final val render: Element = {
+    val stringifiedValue: ReadableProperty[String] = progress.transform(valueStringifier)
     div(BootstrapStyles.ProgressBar.progress)(
       div(id := componentId, modifiers)(
-      produce(showPercentage)(shouldShow =>
-        (
-          if (shouldShow) div(bind(stringifiedValue))
-          else span(BootstrapStyles.Visibility.srOnly)(bind(stringifiedValue))
-        ).render
+        produce(showPercentage) { shouldShow =>
+          if (shouldShow) div(bind(stringifiedValue)).render
+          else span(BootstrapStyles.Visibility.srOnly)(bind(stringifiedValue)).render
+        }
       )
-    )
-  ).render
+    ).render
+  }
 
 }
 
-class AnimatedUdashProgressBar private[progressbar](progress: Property[Int], showPercentage: Property[Boolean],
-                                                    val animate: Property[Boolean], barStyle: ProgressBarStyle,
-                                                    minValue: Int, maxValue: Int, minWidthEm: Int, valueStringifier: ValueStringifier,
-                                                    override val componentId: ComponentId)
-                                                   (implicit ec: ExecutionContext)
-  extends UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier, componentId) {
+final class UdashProgressBar private[progressbar](progress: ReadableProperty[Int], showPercentage: ReadableProperty[Boolean],
+                                                  barStyle: ProgressBarStyle, minValue: Int, maxValue: Int, minWidthEm: Int,
+                                                  valueStringifier: ValueStringifier, override val componentId: ComponentId)
+                                                 (implicit ec: ExecutionContext)
+  extends UdashProgressBarBase(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier, componentId)
+
+final class AnimatedUdashProgressBar private[progressbar](progress: ReadableProperty[Int], showPercentage: ReadableProperty[Boolean],
+                                                          animate: ReadableProperty[Boolean], barStyle: ProgressBarStyle,
+                                                          minValue: Int, maxValue: Int, minWidthEm: Int,
+                                                          valueStringifier: ValueStringifier, override val componentId: ComponentId)
+                                                         (implicit ec: ExecutionContext)
+  extends UdashProgressBarBase(progress, showPercentage, barStyle, minValue, maxValue, minWidthEm, valueStringifier, componentId) {
 
   import io.udash.css.CssView._
 
-  override protected lazy val modifiers: Seq[Modifier] =
+  override protected def modifiers: Seq[Modifier] =
     super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), ProgressBarStyle.Striped)
 }
 
@@ -76,7 +85,7 @@ object UdashProgressBar {
     * @param valueStringifier Converts progress to string displayed inside component.
     * @return `UdashProgressBar` component, call render to create DOM element.
     */
-  def apply(progress: Property[Int] = Property(0), showPercentage: Property[Boolean] = Property(true),
+  def apply(progress: ReadableProperty[Int] = Property(0), showPercentage: ReadableProperty[Boolean] = Property(true),
             barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2,
             componentId: ComponentId = UdashBootstrap.newId())
            (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): UdashProgressBar =
@@ -97,9 +106,9 @@ object UdashProgressBar {
     * @param valueStringifier Converts progress to string displayed inside component.
     * @return `UdashProgressBar` component, call render to create DOM element.
     */
-  def animated(progress: Property[Int] = Property(0), showPercentage: Property[Boolean] = Property(true), animate: Property[Boolean] = Property(true),
-               barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2,
-               componentId: ComponentId = UdashBootstrap.newId())
+  def animated(progress: ReadableProperty[Int] = Property(0), showPercentage: ReadableProperty[Boolean] = Property(true),
+               animate: ReadableProperty[Boolean] = Property(true), barStyle: ProgressBarStyle = Default, minValue: Int = 0,
+               maxValue: Int = 100, minWidth: Int = 2, componentId: ComponentId = UdashBootstrap.newId())
               (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue))(implicit ec: ExecutionContext): AnimatedUdashProgressBar =
     new AnimatedUdashProgressBar(progress, showPercentage, animate, barStyle, minValue, maxValue, minWidth, valueStringifier, componentId)
 

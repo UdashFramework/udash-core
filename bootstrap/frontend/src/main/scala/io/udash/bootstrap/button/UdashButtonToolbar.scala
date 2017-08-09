@@ -9,17 +9,18 @@ import org.scalajs.dom
 import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
-class UdashButtonToolbar[ItemType, ElemType <: Property[ItemType]] private
-                        (val items:seq.SeqProperty[ItemType, ElemType],
-                         override val componentId: ComponentId)
-                        (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                              (val items:seq.ReadableSeqProperty[ItemType, ElemType],
+                               override val componentId: ComponentId)
+                              (itemFactory: (ElemType) => Seq[dom.Element])
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
-  override lazy val render: dom.Element = {
+  override val render: dom.Element =
     div(role := "toolbar", BootstrapStyles.Button.btnToolbar)(
       repeat(items)(itemFactory)
     ).render
-  }
 }
 
 object UdashButtonToolbar {
@@ -56,8 +57,8 @@ object UdashButtonToolbar {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
-  def reactive[ItemType, ElemType <: Property[ItemType]]
-              (items: seq.SeqProperty[ItemType, ElemType],
+  def reactive[ItemType, ElemType <: ReadableProperty[ItemType]]
+              (items: seq.ReadableSeqProperty[ItemType, ElemType],
                itemFactory: (ElemType) => Seq[dom.Element],
                componentId: ComponentId = UdashBootstrap.newId()): UdashButtonToolbar[ItemType, ElemType] =
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)

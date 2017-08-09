@@ -10,12 +10,15 @@ import org.scalajs.dom.html.Anchor
 
 import scala.concurrent.ExecutionContext
 
-class UdashBreadcrumbs[ItemType, ElemType <: Property[ItemType]] private
-                      (val pages: seq.SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                      (itemFactory: (ElemType) => dom.Element,
-                       isSelected: (ItemType) => Boolean)(implicit ec: ExecutionContext) extends UdashBootstrapComponent {
+final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                            (val pages: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                            (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean)
+                            (implicit ec: ExecutionContext)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
-  override lazy val render: Element = {
+
+  override val render: Element = {
     import scalatags.JsDom.all._
     ol(id := componentId, BootstrapStyles.Navigation.breadcrumb)(
       repeat(pages)(page => {
@@ -62,9 +65,9 @@ object UdashBreadcrumbs {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
-           (pages: seq.SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
-           (itemFactory: (ElemType) => dom.Element,
-            isSelected: (ItemType) => Boolean = (_: ItemType) => false)(implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
+           (pages: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false)
+           (implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)
 }

@@ -10,10 +10,12 @@ import org.scalajs.dom._
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
-                       (content: Modifier*) extends UdashBootstrapComponent {
+final class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
+                             (content: Modifier*) extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
-  override lazy val render =
+
+  override val render =
     form(if (formStyle.isDefined) formStyle.get else ())(
       content
     ).render
@@ -24,7 +26,7 @@ object UdashForm {
   import io.udash.css.CssView._
 
   /** Binds provided `property` validation result to element Bootstrap validation style. */
-  def validation(property: Property[_]): Modifier =
+  def validation(property: ReadableProperty[_]): Modifier =
     property.reactiveApply((el, _) => {
       import BootstrapStyles.Form._
       Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
@@ -121,7 +123,7 @@ object UdashForm {
   private def inputGroup(inputId: ComponentId, validation: Option[Modifier])
                         (labelContent: Modifier*)(input: dom.Element): Modifier =
     group(
-      label(`for` := inputId)(labelContent),
+      if (labelContent.nonEmpty) label(`for` := inputId)(labelContent) else (),
       UdashForm.input(input),
       validation
     )
@@ -148,7 +150,7 @@ object UdashForm {
 
   /** Creates file input input group. */
   def fileInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-               (name: String, acceptMultipleFiles: Property[Boolean], selectedFiles: SeqProperty[File], input: Modifier*): Modifier =
+               (name: String, acceptMultipleFiles: ReadableProperty[Boolean], selectedFiles: SeqProperty[File], input: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(FileInput(name, acceptMultipleFiles, selectedFiles)((id := inputId) +: input))
 
   /** Creates checkbox. */
@@ -205,6 +207,6 @@ object UdashForm {
     *
     * @param disabled Property indicating if elements are disabled. You can change it anytime.
     */
-  def disabled(disabled: Property[Boolean] = Property(true))(content: Modifier*): Modifier =
+  def disabled(disabled: ReadableProperty[Boolean] = Property(true))(content: Modifier*): Modifier =
     fieldset((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))(content)
 }

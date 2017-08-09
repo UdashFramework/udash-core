@@ -10,9 +10,9 @@ import org.scalajs.dom.Event
 
 import scala.concurrent.ExecutionContext
 
-sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] extends UdashBootstrapComponent {
+sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType]] extends UdashBootstrapComponent {
   /** Sequence of pagination elements. Pagination will automatically synchronize with this property changes. */
-  def pages: seq.SeqProperty[PageType, ElemType]
+  def pages: seq.ReadableSeqProperty[PageType, ElemType]
 
   /** Index of selected page. */
   def selectedPage: Property[Int]
@@ -30,14 +30,16 @@ sealed trait PaginationComponent[PageType, ElemType <: Property[PageType]] exten
   def previous(): Unit = changePage(selectedPage.get - 1)
 }
 
-class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] private
-                     (size: PaginationSize, showArrows: Property[Boolean], highlightActive: Property[Boolean], override val componentId: ComponentId)
-                     (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                     (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
+final class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[PageType]] private
+                           (size: PaginationSize, showArrows: ReadableProperty[Boolean],
+                            highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
+                           (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                           (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext)
   extends PaginationComponent[PageType, ElemType] {
+
   import io.udash.css.CssView._
 
-  override lazy val render: dom.Element = {
+  override val render: dom.Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -72,12 +74,15 @@ class UdashPagination[PageType : ModelValue, ElemType <: Property[PageType]] pri
   }
 }
 
-class UdashPager[PageType, ElemType <: Property[PageType]] private[pagination](aligned: Boolean, override val componentId: ComponentId)
-                (val pages: seq.SeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element) extends PaginationComponent[PageType, ElemType] {
+final class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private[pagination]
+                      (aligned: Boolean, override val componentId: ComponentId)
+                      (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
+                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
+  extends PaginationComponent[PageType, ElemType] {
+
   import io.udash.css.CssView._
 
-  override lazy val render: dom.Element = {
+  override val render: dom.Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -148,10 +153,10 @@ object UdashPagination {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def apply[PageType : ModelValue, ElemType <: Property[PageType]]
-           (size: PaginationSize = PaginationSize.Default, showArrows: Property[Boolean] = Property(true),
-            highlightActive: Property[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
-           (pages: seq.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
+  def apply[PageType : ModelValue, ElemType <: ReadableProperty[PageType]]
+           (size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
+            highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
+           (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPagination[PageType, ElemType] =
     new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
 
@@ -167,9 +172,9 @@ object UdashPagination {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def pager[PageType, ElemType <: Property[PageType]]
+  def pager[PageType, ElemType <: ReadableProperty[PageType]]
            (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
-           (pages: seq.SeqProperty[PageType, ElemType], selectedPage: Property[Int])
+           (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)(implicit ec: ExecutionContext): UdashPager[PageType, ElemType] =
     new UdashPager(aligned, componentId)(pages, selectedPage)(itemFactory)
 }
