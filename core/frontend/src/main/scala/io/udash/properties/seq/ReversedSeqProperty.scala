@@ -45,8 +45,8 @@ class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
     override def setInitValue(t: Seq[A]): Unit =
       origin.setInitValue(t.reverse)
 
-    override def set(t: Seq[A]): Unit =
-      origin.set(t.reverse)
+    override def set(t: Seq[A], force: Boolean = false): Unit =
+      origin.set(t.reverse, force)
 
     override def touch(): Unit =
       origin.touch()

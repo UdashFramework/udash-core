@@ -75,6 +75,12 @@ class PropertyTest extends UdashFrontendTest {
       tp.get should be(TO2)
       tp.touch()
       tp.get should be(TO2)
+      tp.set(TO2, force = true)
+      tp.get should be(TO2)
+      tp.set(TC1(12))
+      tp.get should be(TC1(12))
+      tp.set(TO2, force = true)
+      tp.get should be(TO2)
 
       cp.get should be(C(1, "asd"))
       cp.set(C(12, "asd2"))
@@ -96,24 +102,32 @@ class PropertyTest extends UdashFrontendTest {
       p.set(7)
       p.set(-321)
       p.set(-321)
-      p.set(-321)
+      p.set(-321, force = true)
       p.set(-321)
       p.touch()
+      tp.set(TC1(12))
+      tp.set(TC1(12), force = true)
       tp.set(TC1(12))
       tp.set(TO2)
       tp.touch()
       cp.set(C(12, "asd2"))
       cp.touch()
+      cp.set(C(12, "asd2"), force = true)
+      cp.set(C(12, "asd3"), force = true)
 
-      values.size should be(8)
+      values.size should be(12)
       values(0) should be(7)
       values(1) should be(-321)
       values(2) should be(-321)
-      values(3) should be(TC1(12))
-      values(4) should be(TO2)
-      values(5) should be(TO2)
-      values(6) should be(C(12, "asd2"))
-      values(7) should be(C(12, "asd2"))
+      values(3) should be(-321)
+      values(4) should be(TC1(12))
+      values(5) should be(TC1(12))
+      values(6) should be(TO2)
+      values(7) should be(TO2)
+      values(8) should be(C(12, "asd2"))
+      values(9) should be(C(12, "asd2"))
+      values(10) should be(C(12, "asd2"))
+      values(11) should be(C(12, "asd3"))
     }
 
     "transform and synchronize value" in {
@@ -151,7 +165,11 @@ class PropertyTest extends UdashFrontendTest {
       cp.get should be(C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
-      values.size should be(6)
+      tp.set(Tuple2(TC1(-5), TC2("tp")), force = true)
+      cp.get should be(C(-5, "tp"))
+      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+
+      values.size should be(8)
       values should contain(C(12, "asd2"))
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
@@ -670,6 +688,18 @@ class PropertyTest extends UdashFrontendTest {
 
       p.subModel(_.t).touch()
       values.size should be(10)
+
+      p.subProp(_.t.s).set("qweasd")
+      values.size should be(11)
+
+      p.subProp(_.t.s).set("asd2", force = true)
+      values.size should be(12)
+
+      p.subProp(_.t.s).set("asd2", force = true)
+      values.size should be(13)
+
+      p.subProp(_.t.s).set("asd2")
+      values.size should be(13)
     }
 
     "transform and synchronize value" in {

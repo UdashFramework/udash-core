@@ -169,8 +169,9 @@ trait ReadableProperty[A] {
 /** Property which can be modified. */
 trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Fires value change listeners.
-    * @param t Should not be null! */
-  def set(t: A): Unit
+    * @param t Should not be null!
+    * @param force If true, the value change listeners will be fired even if value didn't change. */
+  def set(t: A, force: Boolean = false): Unit
 
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit

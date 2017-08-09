@@ -29,8 +29,10 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     valueChanged()
   }
 
-  override def set(t: Seq[A]): Unit =
-    replace(0, properties.size, t: _*)
+  override def set(t: Seq[A], force: Boolean = false): Unit =
+    if (force || t == null || properties.size != t.size || t != get) {
+      replace(0, properties.size, t: _*)
+    }
 
   override def setInitValue(t: Seq[A]): Unit = {
     val newProperties = t.map(value => propertyCreator.newProperty(value, this))

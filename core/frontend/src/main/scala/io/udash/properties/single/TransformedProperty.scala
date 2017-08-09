@@ -26,8 +26,8 @@ private[properties]
 class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
   extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
-  override def set(t: B): Unit =
-    origin.set(revert(t))
+  override def set(t: B, force: Boolean = false): Unit =
+    origin.set(revert(t), force)
 
   override def setInitValue(t: B): Unit =
     origin.setInitValue(revert(t))

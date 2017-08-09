@@ -45,8 +45,8 @@ class TransformedSeqProperty[A, B](override protected val origin: SeqProperty[A,
   override def replace(idx: Int, amount: Int, values: B*): Unit =
     origin.replace(idx, amount, values.map(revert): _*)
 
-  override def set(t: Seq[B]): Unit =
-    origin.set(t.map(revert))
+  override def set(t: Seq[B], force: Boolean = false): Unit =
+    origin.set(t.map(revert), force)
 
   override def setInitValue(t: Seq[B]): Unit =
     origin.setInitValue(t.map(revert))

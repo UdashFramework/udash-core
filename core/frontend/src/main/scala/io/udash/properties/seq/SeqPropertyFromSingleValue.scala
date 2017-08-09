@@ -93,8 +93,8 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
     origin.set(revert(current))
   }
 
-  override def set(t: Seq[B]): Unit =
-    origin.set(revert(t))
+  override def set(t: Seq[B], force: Boolean = false): Unit =
+    origin.set(revert(t), force)
 
   override def setInitValue(t: Seq[B]): Unit =
     origin.setInitValue(revert(t))
