@@ -49,4 +49,9 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     structureListeners += l
     new PropertyRegistration(structureListeners, l)
   }
+
+  override def clearListeners(): Unit = {
+    super.clearListeners()
+    structureListeners.clear()
+  }
 }

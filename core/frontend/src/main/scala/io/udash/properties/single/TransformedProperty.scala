@@ -46,4 +46,7 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
 
   override def clearValidators(): Unit =
     origin.clearValidators()
+
+  override def clearListeners(): Unit =
+    origin.clearListeners()
 }

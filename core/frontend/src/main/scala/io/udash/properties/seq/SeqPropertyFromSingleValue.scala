@@ -109,4 +109,10 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
     structureListeners += l
     new PropertyRegistration(structureListeners, l)
   }
+
+  /** Removes all listeners from property. */
+  override def clearListeners(): Unit = {
+    super.clearListeners()
+    structureListeners.clear()
+  }
 }

@@ -209,6 +209,11 @@ trait Property[A] extends ReadableProperty[A] {
     validationProperty.clear()
   }
 
+  /** Removes all listeners from property. */
+  def clearListeners(): Unit = {
+    listeners.clear()
+  }
+
   /**
     * Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
     *

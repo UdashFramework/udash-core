@@ -121,6 +121,10 @@ class PropertyTest extends UdashFrontendTest {
       cp.set(C(12, "asd2"), force = true)
       cp.set(C(12, "asd3"), force = true)
 
+      p.clearListeners()
+      p.set(1)
+      p.touch()
+
       values.size should be(12)
       values(0) should be(7)
       values(1) should be(-321)
@@ -725,6 +729,11 @@ class PropertyTest extends UdashFrontendTest {
       p.subProp(_.t.s).set("asd2")
       values.size should be(13)
 
+      p.clearListeners()
+      p.subModel(_.t).touch()
+      p.subProp(_.t.s).set("qwerty")
+      values.size should be(13)
+
       oneTimeValues.size should be(1)
       oneTimeValues.head should be(init)
     }
@@ -1100,6 +1109,11 @@ class PropertyTest extends UdashFrontendTest {
       values.size should be(8)
       values.last should be(Seq(1, 2, 1, 7, 1, 2))
 
+      p.clearListeners()
+      p.touch()
+      p.remove(7)
+      values.size should be(8)
+
       oneTimeValues.size should be(1)
       oneTimeValues.last should be(Seq(1, 2, 3))
     }
@@ -1188,6 +1202,11 @@ class PropertyTest extends UdashFrontendTest {
       patches.last.idx should be(0)
       patches.last.added.size should be(6)
       patches.last.removed.size should be(6)
+
+      p.clearListeners()
+      p.touch()
+      p.append(1, 2)
+      patches.size should be(8)
     }
 
     "not fire structure listeners on child change" in {
