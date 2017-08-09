@@ -22,6 +22,9 @@ abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], Orig
   override def listen(l: (Seq[A]) => Any): Registration =
     origin.listen(s => l(s.reverse))
 
+  override def listenOnce(l: (Seq[A]) => Any): Registration =
+    origin.listenOnce(s => l(s.reverse))
+
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
 }

@@ -72,6 +72,18 @@ trait ReadableProperty[A] {
     new PropertyRegistration(listeners, l)
   }
 
+  /** Registers listener which will be called on the next value change. This listener will be fired only once. */
+  def listenOnce(l: A => Any): Registration = {
+    val wrapper: A => Any = new Function1[A, Any] {
+      override def apply(v: A): Any = {
+        listeners -= this
+        l(v)
+      }
+    }
+    listeners += wrapper
+    new PropertyRegistration(listeners, wrapper)
+  }
+
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   def isValid: Future[ValidationResult] = {
     if (validationResult == null) validate()

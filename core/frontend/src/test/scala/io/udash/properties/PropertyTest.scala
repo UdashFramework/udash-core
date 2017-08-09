@@ -89,7 +89,9 @@ class PropertyTest extends UdashFrontendTest {
 
     "fire listeners on value change" in {
       val values = mutable.ArrayBuffer[Any]()
+      val oneTimeValues = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
+      val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val p = Property[Int](5)
       val tp = Property[T](TO1)
@@ -98,6 +100,10 @@ class PropertyTest extends UdashFrontendTest {
       p.listen(listener)
       tp.listen(listener)
       cp.listen(listener)
+
+      p.listenOnce(oneTimeListener)
+      tp.listenOnce(oneTimeListener)
+      cp.listenOnce(oneTimeListener)
 
       p.set(7)
       p.set(-321)
@@ -128,11 +134,18 @@ class PropertyTest extends UdashFrontendTest {
       values(9) should be(C(12, "asd2"))
       values(10) should be(C(12, "asd2"))
       values(11) should be(C(12, "asd3"))
+
+      oneTimeValues.size should be(3)
+      oneTimeValues(0) should be(7)
+      oneTimeValues(1) should be(TC1(12))
+      oneTimeValues(2) should be(C(12, "asd2"))
     }
 
     "transform and synchronize value" in {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
+      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](C(1, "asd"))
       val tp = cp.transform[(T, T)](
@@ -145,6 +158,9 @@ class PropertyTest extends UdashFrontendTest {
 
       tp.listen(listener)
       cp.listen(listener)
+
+      tp.listenOnce(oneTimeListener)
+      cp.listenOnce(oneTimeListener)
 
       cp.get should be(C(1, "asd"))
       tp.get should be(Tuple2(TC1(1), TC2("asd")))
@@ -174,6 +190,10 @@ class PropertyTest extends UdashFrontendTest {
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
       values should contain(C(-5, "tp"))
+
+      oneTimeValues.size should be(2)
+      oneTimeValues should contain(C(12, "asd2"))
+      oneTimeValues should contain(Tuple2(TC1(12), TC2("asd2")))
     }
 
     "combine with other properties" in {
@@ -648,11 +668,15 @@ class PropertyTest extends UdashFrontendTest {
     "fire listeners on value change" in {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
+      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val p = ModelProperty[TT]
       p.listen(listener)
+      p.listenOnce(oneTimeListener)
 
-      p.set(newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c')))
+      val init = newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c'))
+      p.set(init)
       values.size should be(1)
 
       p.subProp(_.i).set(42)
@@ -700,6 +724,9 @@ class PropertyTest extends UdashFrontendTest {
 
       p.subProp(_.t.s).set("asd2")
       values.size should be(13)
+
+      oneTimeValues.size should be(1)
+      oneTimeValues.head should be(init)
     }
 
     "transform and synchronize value" in {
@@ -1035,8 +1062,11 @@ class PropertyTest extends UdashFrontendTest {
 
       val values = mutable.ArrayBuffer[Seq[Int]]()
       val listener = (s: Seq[Int]) => values += s
+      val oneTimeValues = mutable.ArrayBuffer[Seq[Int]]()
+      val oneTImeListener = (s: Seq[Int]) => oneTimeValues += s
 
       p.listen(listener)
+      p.listenOnce(oneTImeListener)
 
       p.set(Seq(1,2,3))
       values.size should be(1)
@@ -1069,6 +1099,9 @@ class PropertyTest extends UdashFrontendTest {
       p.touch()
       values.size should be(8)
       values.last should be(Seq(1, 2, 1, 7, 1, 2))
+
+      oneTimeValues.size should be(1)
+      oneTimeValues.last should be(Seq(1, 2, 3))
     }
 
     "fire value listeners on every child change" in {

@@ -14,6 +14,9 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
   override def listen(l: (B) => Any): Registration =
     origin.listen((a: A) => l(transformer(a)))
 
+  override def listenOnce(l: (B) => Any): Registration =
+    origin.listenOnce((a: A) => l(transformer(a)))
+
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
 
