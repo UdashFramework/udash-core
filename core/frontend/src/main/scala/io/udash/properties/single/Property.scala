@@ -4,7 +4,7 @@ import java.util.UUID
 
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue, SeqProperty, SeqPropertyFromSingleValue}
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -69,7 +69,7 @@ trait ReadableProperty[A] {
   /** Registers listener which will be called on value change. */
   def listen(l: A => Any): Registration = {
     listeners += l
-    new PropertyRegistration(listeners, l)
+    new SetRegistration(listeners, l)
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
@@ -81,7 +81,7 @@ trait ReadableProperty[A] {
       }
     }
     listeners += wrapper
-    new PropertyRegistration(listeners, wrapper)
+    new SetRegistration(listeners, wrapper)
   }
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
@@ -195,7 +195,7 @@ trait Property[A] extends ReadableProperty[A] {
   def addValidator(v: Validator[A]): Registration = {
     validators += v
     validationResult = null
-    new PropertyRegistration(validators, v)
+    new SetRegistration(validators, v)
   }
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */

@@ -3,8 +3,8 @@ package io.udash.properties.seq
 import java.util.UUID
 
 import io.udash.properties.single.ReadableProperty
-import io.udash.properties.{CallbackSequencer, ModelValue, PropertyCreator, PropertyRegistration}
-import io.udash.utils.Registration
+import io.udash.properties.{CallbackSequencer, ModelValue, PropertyCreator}
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
@@ -43,7 +43,7 @@ abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, Readable
 
   override def listenStructure(l: (Patch[ReadableProperty[O]]) => Any): Registration = {
     structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+    new SetRegistration(structureListeners, l)
   }
 }
 

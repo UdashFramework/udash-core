@@ -636,6 +636,14 @@ class PropertyTest extends UdashFrontendTest {
 
       target.get should be(16)
       targetWithoutInit.get should be(32)
+
+      // Restart streaming
+      r1.restart()
+      r2.restart()
+      source.touch()
+
+      target.get should be(14)
+      targetWithoutInit.get should be(28)
     }
   }
 

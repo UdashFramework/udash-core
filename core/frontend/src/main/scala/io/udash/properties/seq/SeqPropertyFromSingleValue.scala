@@ -4,7 +4,7 @@ package seq
 import java.util.UUID
 
 import io.udash.properties.single._
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
@@ -78,7 +78,7 @@ class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadablePrope
   /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
     structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+    new SetRegistration(structureListeners, l)
   }
 }
 
@@ -107,7 +107,7 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
 
   override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
     structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+    new SetRegistration(structureListeners, l)
   }
 
   /** Removes all listeners from property. */

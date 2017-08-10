@@ -4,7 +4,7 @@ import java.util.UUID
 
 import io.udash.properties._
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -96,7 +96,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
       /** Registers listener, which will be called on every property structure change. */
       override def listenStructure(l: (Patch[ReadableProperty[O]]) => Any): Registration = {
         structureListeners += l
-        new PropertyRegistration(structureListeners, l)
+        new SetRegistration(structureListeners, l)
       }
     }
 

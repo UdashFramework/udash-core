@@ -3,6 +3,7 @@ package io.udash.routing
 import io.udash._
 import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.utils.FilteringUtils._
+import io.udash.utils.SetRegistration
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -19,8 +20,8 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
                                                                                         viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
                                                                                         viewRenderer: ViewRenderer) {
   private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]], JSExecutionContext.queue)
-  private val callbacks = mutable.ArrayBuffer[StateChangeEvent[HierarchyRoot] => Any]()
-  private val statesMap = mutable.LinkedHashMap[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]()
+  private val callbacks = mutable.HashSet.empty[StateChangeEvent[HierarchyRoot] => Any]
+  private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
   /**
     * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewFactories.
@@ -82,9 +83,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     */
   def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Any): Registration = {
     callbacks += callback
-    new Registration {
-      override def cancel(): Unit = callbacks -= callback
-    }
+    new SetRegistration(callbacks, callback)
   }
 
   /** @return Current routing state */

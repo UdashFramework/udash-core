@@ -1,5 +1,6 @@
 package io.udash.bootstrap
 
+import io.udash.utils.{Registration, SetRegistration}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
 import org.scalajs.dom
 
@@ -18,12 +19,7 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
     */
   def listen(onEvent: EventHandler): Registration = {
     onClickActions += onEvent
-    new Registration(onEvent)
-  }
-
-  class Registration private[Listenable](onEvent: EventHandler) extends io.udash.utils.Registration {
-    override def cancel(): Unit =
-      onClickActions -= onEvent
+    new SetRegistration(onClickActions, onEvent)
   }
 
   protected def fire(event: EventType): Unit =

@@ -206,6 +206,11 @@ object UdashDatePicker {
         r1.cancel()
         r2.cancel()
       }
+
+      override def restart(): Unit = {
+        r1.restart()
+        r2.restart()
+      }
     }
   }
 
