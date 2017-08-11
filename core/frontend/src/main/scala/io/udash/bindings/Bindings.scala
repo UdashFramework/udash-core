@@ -2,7 +2,7 @@ package io.udash.bindings
 
 import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
-import io.udash.bindings.modifiers._
+import io.udash.bindings.modifiers.{Binding, _}
 import io.udash.properties.ImmutableValue
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
@@ -42,7 +42,7 @@ trait Bindings {
     * @param property Property to bind.
     * @return Modifier for bound property.
     */
-  def bind[T](property: ReadableProperty[T]) =
+  def bind[T](property: ReadableProperty[T]): Binding =
     new SimplePropertyModifier[T](property, true)
 
   /**
@@ -52,25 +52,16 @@ trait Bindings {
     * @param elements  Elements to show if property value is `true`.
     * @return Modifier for bounded property.
     */
-  def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]) =
-    new PropertyModifier[Boolean](property, {
-      case true => elements
-      case false => Seq.empty
-    }, true)
+  def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]): Binding =
+    new PropertyModifier[Boolean](
+      property,
+      (show: Boolean, _) => if (show) elements else Seq.empty,
+      true
+    )
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     * If property value is null, empty text node will be added as placeholder.
-    *
-    * @param property Property to bind.
-    * @param builder  Element builder which will be used to create HTML element.
-    * @return Modifier for bounded property.
-    */
-  def produce[T](property: ReadableProperty[T])(builder: T => Seq[dom.Element]) =
-    new PropertyModifier[T](property, builder, true)
-
-  /**
-    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     *
     * @param property  Property to bind.
     * @param builder   Element builder which will be used to create HTML element.
@@ -78,7 +69,32 @@ trait Bindings {
     *                  If it is false, then null value has to be handled by builder.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableProperty[T], checkNull: Boolean)(builder: T => Seq[dom.Element]) =
+  def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[dom.Element]): Binding =
+    new PropertyModifier[T](property, builder, checkNull)
+
+  /**
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * For example:
+    * <pre>
+    *   produceWithNested(property) { case (data, nested) =>
+    *     div(data,
+    *       nested(produce(anotherProperty) { innerData => span(innerData).render })
+    *     ).render
+    *   }
+    * </pre>
+    *
+    * @param property  Property to bind.
+    * @param builder   Element builder which will be used to create HTML element.
+    * @param checkNull If it is true, then null value of property will result in rendering empty text node.
+    *                  If it is false, then null value has to be handled by builder.
+    * @return Modifier for bounded property.
+    */
+  def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: (T, Binding => Binding) => Seq[dom.Element]): Binding =
     new PropertyModifier[T](property, builder, checkNull)
 
   /**
@@ -89,7 +105,22 @@ trait Bindings {
     * @param builder  Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Seq[dom.Element]) =
+  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Seq[dom.Element]): Binding =
+    new SeqAsValueModifier[T](property, builder)
+
+  /**
+    * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * Notice that on every property change, whole element representing property will be rendered again.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property Property to bind.
+    * @param builder  Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @return Modifier for bounded property.
+    */
+  def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
+                          (builder: (Seq[T], Binding => Binding) => Seq[dom.Element]): Binding =
     new SeqAsValueModifier[T](property, builder)
 
   /**
@@ -105,7 +136,26 @@ trait Bindings {
     */
   def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
                                            initBuilder: Seq[E] => Seq[Element],
-                                           elementsUpdater: (Patch[E], Seq[Element]) => Any) =
+                                           elementsUpdater: (Patch[E], Seq[Element]) => Any): Binding =
+    new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
+
+  /**
+    * Use it to bind sequence property into DOM structure, given `initBuilder` will be used to generate DOM element at start.
+    * Then it listens to structure change and calls `elementsUpdater` to handle each structure change. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties value changes,
+    * you should use another binding method inside `initBuilder` and `elementsUpdater`.<br/><br/>
+    *
+    * The builder and updater take nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property        Property to bind.
+    * @param initBuilder     Element builder which will be used to create initial HTML element.
+    * @param elementsUpdater Function used to update element basing on patch.
+    * @return Modifier for bounded property.
+    */
+  def produceWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
+                                                     initBuilder: (Seq[E], Binding => Binding) => Seq[Element],
+                                                     elementsUpdater: (Patch[E], Seq[Element], Binding => Binding) => Any): Binding =
     new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**
@@ -119,7 +169,25 @@ trait Bindings {
     * @param builder  Builder which is used for every element.
     * @return Modifier for repeat logic.
     */
-  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Seq[Element]) =
+  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Seq[Element]): Binding =
+    new SeqPropertyModifier[T, E](property, builder)
+
+  /**
+    * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
+    * sequence and also removes those which were removed. You only need to provide builder which is used to
+    * create HTML element for each sequence member. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
+    * another binding method inside `builder`.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property Property to bind.
+    * @param builder  Builder which is used for every element.
+    * @return Modifier for repeat logic.
+    */
+  def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])
+                                                   (builder: (E, Binding => Binding) => Seq[Element]): Binding =
     new SeqPropertyModifier[T, E](property, builder)
 
   /**
@@ -137,7 +205,7 @@ trait Bindings {
   def bindValidation[A](property: ReadableProperty[A],
                         initBuilder: Future[ValidationResult] => Seq[Element],
                         completeBuilder: ValidationResult => Seq[Element],
-                        errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext) =
+                        errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext): Binding =
     new ValidationValueModifier(property, Some(initBuilder), completeBuilder, Some(errorBuilder))
 
   /**
@@ -155,8 +223,29 @@ trait Bindings {
               (completeBuilder: ValidationResult => Seq[Element],
                progressBuilder: Future[ValidationResult] => Seq[Element] = null,
                errorBuilder: Throwable => Seq[Element] = null)
-              (implicit ec: ExecutionContext) =
-  new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
+              (implicit ec: ExecutionContext): Binding =
+    new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
+
+  /**
+    * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
+    * to customize what HTML elements should be shown.<br/><br/>
+    *
+    * The builders take nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property        Property to bind.
+    * @param progressBuilder     Builder which is called when validation process is started. It will also give you an access to future of
+    *                        validation results.
+    * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
+    * @param errorBuilder    Builder which is called, when validation process fails.
+    * @return Modifier for validation logic.
+    */
+  def validWithNested[A](property: ReadableProperty[A])
+                        (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Element],
+                         progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Element] = null,
+                         errorBuilder: (Throwable, Binding => Binding) => Seq[Element] = null)
+                        (implicit ec: ExecutionContext): Binding =
+    new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
   /**
     * Use it to update DOM elements, on every `property` change.
@@ -166,7 +255,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   @deprecated("Use `Attr.bind`, `AttrPair.attrIf` or `Property.reactiveApply` instead.", "0.4.0")
-  def bindAttribute[T](property: ReadableProperty[T])(updater: (T, Element) => Any) =
+  def bindAttribute[T](property: ReadableProperty[T])(updater: (T, Element) => Any): Binding =
     new AttrModifier[T](property, updater)
 
   implicit def toAttrOps(attr: Attr): AttrOps =
@@ -180,7 +269,7 @@ trait Bindings {
 
 }
 
-object Bindings {
+object Bindings extends Bindings {
 
   class AttrOps(private val attr: Attr) extends AnyVal {
     /** Use this to bind value which is nullable. If the value is null, attribute will be removed. */
@@ -247,11 +336,15 @@ object Bindings {
       element.removeAttribute(attr.a.name)
 
     /** Synchronises attribute with property content by adding it if value is `false` and removing otherwise. */
-    def attrIfNot(property: ReadableProperty[Boolean]): Modifier[Element] =
-      attrIf(property.transform((v: Boolean) => !v))
+    def attrIfNot(property: ReadableProperty[Boolean]): Binding =
+      property.reactiveApply(
+        (elem, apply) =>
+          if (apply) removeFrom(elem)
+          else applyTo(elem)
+      )
 
     /** Synchronises attribute with property content by adding it if value is `true` and removing otherwise. */
-    def attrIf(property: ReadableProperty[Boolean]): Modifier[Element] =
+    def attrIf(property: ReadableProperty[Boolean]): Binding =
       property.reactiveApply(
         (elem, apply) =>
           if (apply) applyTo(elem)
@@ -267,12 +360,11 @@ object Bindings {
 
   class PropertyOps[T](private val property: ReadableProperty[T]) extends AnyVal {
     /** Calls provided callback on every property value change. */
-    def reactiveApply(callback: (Element, T) => Unit): Modifier[Element] = new Modifier[Element] {
+    def reactiveApply(callback: (Element, T) => Unit): Binding = new Binding {
       override def applyTo(t: Element): Unit = {
-        var registration: Registration = null
-        registration = property.listen(value =>
+        propertyListeners += property.listen(value =>
           if (available(t)) callback(t, value)
-          else registration.cancel()
+          else kill()
         )
         if (available(t)) callback(t, property.get)
       }

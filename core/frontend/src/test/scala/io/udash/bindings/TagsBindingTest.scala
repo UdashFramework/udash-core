@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.github.ghik.silencer.silent
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{ImmutableValue, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Element
@@ -131,6 +132,22 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set("CBA")
       template.textContent should be("CBA")
       template2.textContent should be("")
+    }
+
+    "stop updates after `kill` call" in {
+      val p = Property[String]("A")
+      val binding = bind(p)
+      val template = div(binding).render
+
+      template.textContent should be("A")
+
+      p.set("B")
+      template.textContent should be("B")
+
+      binding.kill()
+
+      p.set("C")
+      template.textContent should be("B")
     }
   }
 
@@ -427,6 +444,59 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("CBA")
       template2.textContent should be("")
     }
+
+    "stop updates after `kill` call" in {
+      val p = Property[String]("A")
+      val binding = produce(p) { v => span(v * 3).render }
+      val template = div(binding).render
+
+      template.textContent should be("AAA")
+
+      p.set("B")
+      template.textContent should be("BBB")
+
+      binding.kill()
+
+      p.set("C")
+      template.textContent should be("BBB")
+    }
+
+    "clean nested bindings" in {
+      val p = Property[String]("A")
+      val p2 = Property[String]("a")
+
+      var externalCounter = 0
+      var internalCounter = 0
+
+      val template = div(
+        produceWithNested(p) { case (v, nested) =>
+          externalCounter += 1
+          div(v, nested(produce(p2) { v2 =>
+            internalCounter += 1
+            span(v2).render
+          })).render
+        }
+      ).render
+
+      template.textContent should be("Aa")
+      externalCounter should be(1)
+      internalCounter should be(1)
+
+      p.set("B")
+      template.textContent should be("Ba")
+      externalCounter should be(2)
+      internalCounter should be(2)
+
+      p.set("C")
+      template.textContent should be("Ca")
+      externalCounter should be(3)
+      internalCounter should be(3)
+
+      p2.set("b")
+      template.textContent should be("Cb")
+      externalCounter should be(3)
+      internalCounter should be(4)
+    }
   }
 
   "produce for SeqProperty" should {
@@ -583,6 +653,72 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("CBA")
       template2.textContent should be("")
     }
+
+    "stop updates after `kill` call" in {
+      val p = SeqProperty[Int](1,2,3,4,5)
+      val binding = produce(p) { v => span(v.mkString(",")).render }
+      val template = div(binding).render
+
+      template.textContent should be("1,2,3,4,5")
+
+      p.append(7)
+      template.textContent should be("1,2,3,4,5,7")
+
+      binding.kill()
+
+      p.remove(2)
+      template.textContent should be("1,2,3,4,5,7")
+    }
+
+    "clean nested bindings" in {
+      val p = SeqProperty[Int](1,2,3)
+      val p2 = SeqProperty[Int](3,4,5)
+
+      var externalCounter = 0
+      var internalCounter = 0
+
+      val template = div(
+        produceWithNested(p) { case (v, nested) =>
+          externalCounter += 1
+          div(v.mkString(","), nested(produce(p2) { v2 =>
+            internalCounter += 1
+            span(v2.mkString("|")).render
+          })).render
+        }
+      ).render
+
+      template.textContent should be("1,2,33|4|5")
+      externalCounter should be(1)
+      internalCounter should be(1)
+
+      p.append(7)
+      template.textContent should be("1,2,3,73|4|5")
+      externalCounter should be(2)
+      internalCounter should be(2)
+
+      p.remove(2)
+      template.textContent should be("1,3,73|4|5")
+      externalCounter should be(3)
+      internalCounter should be(3)
+
+      p2.append(8)
+      template.textContent should be("1,3,73|4|5|8")
+      externalCounter should be(3)
+      internalCounter should be(4)
+    }
+  }
+
+  def prod(p: seq.SeqProperty[Int, Property[Int]]): Binding = {
+    produce(p,
+      (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
+      (patch: Patch[Property[Int]], elem: Seq[Element]) => {
+        val el = jQ(elem:_*)
+        val insertBefore = el.children().at(patch.idx)
+        if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
+        else patch.added.foreach(p => el.append(span(p.get).render))
+        patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
+      }
+    )
   }
 
   "Patching produce for SeqProperty" should {
@@ -686,19 +822,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "not swap position" in {
-      def prod(p: seq.SeqProperty[Int, Property[Int]]) = {
-        produce(p,
-          (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-            val el = jQ(elem:_*)
-            val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
-            else patch.added.foreach(p => el.append(span(p.get).render))
-            patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
-          }
-        )
-      }
-
       val p = seq.SeqProperty[Int](1, 2, 3)
       val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
@@ -722,6 +845,22 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(Seq(1, 2, 5))
       template.textContent should be("A125B3C")
+    }
+
+    "stop updates after `kill` call" in {
+      val p = SeqProperty[Int](1,2,3,4,5)
+      val binding = prod(p)
+      val template = div(binding).render
+
+      template.textContent should be("12345")
+
+      p.append(7)
+      template.textContent should be("123457")
+
+      binding.kill()
+
+      p.remove(2)
+      template.textContent should be("123457")
     }
   }
 
@@ -1366,6 +1505,58 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("CBA")
       template2.textContent should be("")
     }
+
+    "stop updates after `kill` call" in {
+      val p = SeqProperty[Int](1,2,3,4,5)
+      val binding = repeat(p) { el =>
+        span(el.get).render
+      }
+      val template = div(binding).render
+
+      template.textContent should be("12345")
+
+      p.append(7)
+      template.textContent should be("123457")
+
+      binding.kill()
+
+      p.remove(2)
+      template.textContent should be("123457")
+    }
+
+    "clean nested bindings" in {
+      var counter = 0
+      var internalCounter = 0
+      val p = SeqProperty[Int](1,2,3,4,5)
+      val binding = repeatWithNested(p) { (el, nested) =>
+        counter += 1
+        span(nested(produce(el) { v =>
+          internalCounter += 1
+          i(v).render
+        })).render
+      }
+      val template = div(binding).render
+
+      template.textContent should be("12345")
+      counter should be(5)
+      internalCounter should be(5)
+
+      p.append(7)
+      template.textContent should be("123457")
+      counter should be(6)
+      internalCounter should be(6)
+
+      val second = p.elemProperties(1)
+      p.remove(2)
+      template.textContent should be("13457")
+      counter should be(6)
+      internalCounter should be(6)
+
+      second.set(9)
+      template.textContent should be("13457")
+      counter should be(6)
+      internalCounter should be(6)
+    }
   }
 
   "bindValidation" should {
@@ -1461,6 +1652,59 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set(-5)
       template.textContent should be("1error2Error3")
     }
+
+    "stop updates after `kill` call" in {
+      val p = Property[Int](5)
+      p.addValidator(new Validator[Int] {
+        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] =
+          Future.successful(Valid)
+      })
+
+      val binding = valid(p)(
+        _ => b("done", p.get).render
+      )
+      val template = div(binding).render
+
+      template.textContent should be("done5")
+
+      p.set(7)
+      template.textContent should be("done7")
+
+      binding.kill()
+      p.set(12)
+      template.textContent should be("done7")
+    }
+
+    "clean nested bindings" in {
+      val p = Property[Int](5)
+      p.addValidator(new Validator[Int] {
+        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] =
+          Future.successful(Valid)
+      })
+
+      var counter = 0
+
+      val binding = validWithNested(p)(
+        (_, nested) => b("done", nested(produce(p) { v => counter += 1; span(v).render })).render
+      )
+      val template = div(binding).render
+
+      template.textContent should be("done5")
+      counter should be(1)
+
+      p.set(7)
+      template.textContent should be("done7")
+
+      p.set(12)
+      template.textContent should be("done12")
+      counter <= 5 should be(true) // the old produce may be fired one more time before removal - it depends on listeners fire order
+      val copyCtr = counter
+
+      binding.kill()
+      p.set(15)
+      template.textContent should be("done12")
+      counter should be(copyCtr)
+    }
   }
 
   "bindAttribute" should {
@@ -1468,11 +1712,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property[Int](5)
 
       @silent
+      val binding = bindAttribute(p)((i: Int, el: Element) => {
+        el.setAttribute("class", s"c$i")
+      })
       val template = div(
         id := "someId",
-        bindAttribute(p)((i: Int, el: Element) => {
-          el.setAttribute("class", s"c$i")
-        })
+        binding
       ).render
 
       template.getAttribute("class") should be("c5")
@@ -1481,6 +1726,10 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.getAttribute("class") should be("c-8")
 
       p.set(0)
+      template.getAttribute("class") should be("c0")
+
+      binding.kill()
+      p.set(12)
       template.getAttribute("class") should be("c0")
     }
   }
@@ -1504,22 +1753,27 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
   "AttrPairOps" should {
     "allow reactive attribute apply" in {
       val p = Property(false)
-      val textArea = TextArea.debounced(Property(""),
-        (disabled := "disabled").attrIf(p)
-      ).render
+      val binding = (disabled := "disabled").attrIf(p)
+      val textArea = TextArea.debounced(Property(""), binding).render
       textArea.hasAttribute("disabled") shouldBe false
       p.set(true)
       textArea.hasAttribute("disabled") shouldBe true
       p.set(false)
       textArea.hasAttribute("disabled") shouldBe false
+      binding.kill()
+      p.set(true)
+      textArea.hasAttribute("disabled") shouldBe false
 
-      val textArea2 = TextArea.debounced(Property(""),
-        (disabled := "disabled").attrIfNot(p)
-      ).render
+      p.set(false)
+      val binding2 = (disabled := "disabled").attrIfNot(p)
+      val textArea2 = TextArea.debounced(Property(""), binding2).render
       textArea2.hasAttribute("disabled") shouldBe true
       p.set(true)
       textArea2.hasAttribute("disabled") shouldBe false
       p.set(false)
+      textArea2.hasAttribute("disabled") shouldBe true
+      binding2.kill()
+      p.set(true)
       textArea2.hasAttribute("disabled") shouldBe true
     }
   }
@@ -1527,13 +1781,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
   "PropertyOps" should {
     "allow reactive attr changes" in {
       val p = Property(false)
-      val textArea = TextArea.debounced(Property(""),
-        p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
-      ).render
+      val binding = p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
+      val textArea = TextArea.debounced(Property(""), binding).render
       textArea.getAttribute("test").toBoolean shouldBe false
       p.set(true)
       textArea.getAttribute("test").toBoolean shouldBe true
       p.set(false)
+      textArea.getAttribute("test").toBoolean shouldBe false
+      binding.kill()
+      p.set(true)
       textArea.getAttribute("test").toBoolean shouldBe false
     }
   }
