@@ -9,8 +9,8 @@ import scalatags.generic.Modifier
 
 /** Modifier representing data binding. */
 trait Binding extends Modifier[dom.Element] {
-  protected var propertyListeners: js.Array[Registration] = js.Array()
-  protected var nestedBindings: js.Array[Binding] = js.Array()
+  protected final val propertyListeners: js.Array[Registration] = js.Array()
+  protected final val nestedBindings: js.Array[Binding] = js.Array()
 
   protected def nestedInterceptor(binding: Binding): Binding =
     binding.setup { nestedBindings += _ }

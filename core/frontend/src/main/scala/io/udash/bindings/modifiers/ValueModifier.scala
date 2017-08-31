@@ -25,7 +25,7 @@ trait ValueModifier[T] extends Binding {
   override def applyTo(t: dom.Element): Unit = {
     var elements: Seq[Element] = Seq.empty
 
-    def rebuild(propertyValue: T) = {
+    def rebuild(propertyValue: T): Unit = {
       killNestedBindings()
 
       val oldEls = elements
