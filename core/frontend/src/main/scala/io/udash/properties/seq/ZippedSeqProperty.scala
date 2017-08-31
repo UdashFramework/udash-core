@@ -41,9 +41,9 @@ abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, Readable
   override def elemProperties: Seq[ReadableProperty[O]] =
     children
 
-  override def listenStructure(l: (Patch[ReadableProperty[O]]) => Any): Registration = {
-    structureListeners += l
-    new SetRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[ReadableProperty[O]]) => Any): Registration = {
+    structureListeners += structureListener
+    new SetRegistration(structureListeners, structureListener)
   }
 }
 

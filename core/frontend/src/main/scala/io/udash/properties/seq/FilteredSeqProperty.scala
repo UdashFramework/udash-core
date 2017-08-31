@@ -62,9 +62,9 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
     }
   })
 
-  override def listenStructure(l: (Patch[ElemType]) => Any): Registration = {
-    structureListeners.add(l)
-    new SetRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
+    structureListeners.add(structureListener)
+    new SetRegistration(structureListeners, structureListener)
   }
 
   override def elemProperties: Seq[ElemType] =

@@ -67,17 +67,17 @@ trait ReadableProperty[A] {
   def get: A
 
   /** Registers listener which will be called on value change. */
-  def listen(l: A => Any): Registration = {
-    listeners += l
-    new SetRegistration(listeners, l)
+  def listen(valueListener: A => Any): Registration = {
+    listeners += valueListener
+    new SetRegistration(listeners, valueListener)
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
-  def listenOnce(l: A => Any): Registration = {
+  def listenOnce(valueListener: A => Any): Registration = {
     val wrapper: A => Any = new Function1[A, Any] {
       override def apply(v: A): Any = {
         listeners -= this
-        l(v)
+        valueListener(v)
       }
     }
     listeners += wrapper

@@ -17,9 +17,9 @@ class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], Ori
   override def elemProperties: Seq[ElemType] =
     origin.elemProperties.map(p => transformElement(p))
 
-  override def listenStructure(l: (Patch[ElemType]) => Any): Registration =
+  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration =
     origin.listenStructure(patch =>
-      l(Patch[ElemType](
+      structureListener(Patch[ElemType](
         patch.idx,
         patch.removed.map(p => transformElement(p)),
         patch.added.map(p => transformElement(p)),
@@ -27,11 +27,11 @@ class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], Ori
       ))
     )
 
-  override def listen(l: (Seq[B]) => Any): Registration =
-    origin.listen((seq: Seq[A]) => l(seq.map(transformer)))
+  override def listen(valueListener: (Seq[B]) => Any): Registration =
+    origin.listen((seq: Seq[A]) => valueListener(seq.map(transformer)))
 
-  override def listenOnce(l: (Seq[B]) => Any): Registration =
-    origin.listenOnce((seq: Seq[A]) => l(seq.map(transformer)))
+  override def listenOnce(valueListener: (Seq[B]) => Any): Registration =
+    origin.listenOnce((seq: Seq[A]) => valueListener(seq.map(transformer)))
 
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()

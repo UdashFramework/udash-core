@@ -76,9 +76,9 @@ private[properties]
 class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
-  override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
-    structureListeners += l
-    new SetRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[ReadableProperty[B]]) => Any): Registration = {
+    structureListeners += structureListener
+    new SetRegistration(structureListeners, structureListener)
   }
 }
 
@@ -105,9 +105,9 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
   override def elemProperties: Seq[Property[B]] =
     children
 
-  override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
-    structureListeners += l
-    new SetRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[Property[B]]) => Any): Registration = {
+    structureListeners += structureListener
+    new SetRegistration(structureListeners, structureListener)
   }
 
   /** Removes all listeners from property. */

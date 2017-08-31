@@ -19,11 +19,11 @@ abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], Orig
   override def elemProperties: Seq[ElemType] =
     origin.elemProperties.reverse
 
-  override def listen(l: (Seq[A]) => Any): Registration =
-    origin.listen(s => l(s.reverse))
+  override def listen(valueListener: (Seq[A]) => Any): Registration =
+    origin.listen(s => valueListener(s.reverse))
 
-  override def listenOnce(l: (Seq[A]) => Any): Registration =
-    origin.listenOnce(s => l(s.reverse))
+  override def listenOnce(valueListener: (Seq[A]) => Any): Registration =
+    origin.listenOnce(s => valueListener(s.reverse))
 
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
@@ -33,8 +33,8 @@ private[properties]
 class ReversedReadableSeqProperty[A](origin: ReadableSeqProperty[A, ReadableProperty[A]])
   extends BaseReversedSeqProperty[A, ReadableProperty[A], ReadableSeqProperty[A, ReadableProperty[A]]](origin) {
 
-  override def listenStructure(l: (Patch[ReadableProperty[A]]) => Any): Registration =
-    origin.listenStructure((patch) => l(patch.copy(
+  override def listenStructure(structureListener: (Patch[ReadableProperty[A]]) => Any): Registration =
+    origin.listenStructure((patch) => structureListener(patch.copy(
       idx = origin.size - patch.idx - patch.added.size,
       removed = patch.removed.reverse,
       added = patch.added.reverse
@@ -57,8 +57,8 @@ class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
     override def replace(idx: Int, amount: Int, values: A*): Unit =
       origin.replace(origin.size - idx, amount, values.reverse:_*)
 
-    override def listenStructure(l: (Patch[Property[A]]) => Any): Registration =
-      origin.listenStructure((patch) => l(patch.copy(
+    override def listenStructure(structureListener: (Patch[Property[A]]) => Any): Registration =
+      origin.listenStructure((patch) => structureListener(patch.copy(
         idx = origin.size - patch.idx - patch.added.size,
         removed = patch.removed.reverse,
         added = patch.added.reverse

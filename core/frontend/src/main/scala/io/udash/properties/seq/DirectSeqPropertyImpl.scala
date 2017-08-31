@@ -30,7 +30,7 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
   }
 
   override def set(t: Seq[A], force: Boolean = false): Unit =
-    if (force || t == null || properties.size != t.size || t != get) {
+    if (force || t != get) {
       replace(0, properties.size, t: _*)
     }
 
