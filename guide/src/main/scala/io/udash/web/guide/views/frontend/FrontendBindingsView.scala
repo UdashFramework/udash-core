@@ -153,6 +153,32 @@ class FrontendBindingsView extends FinalView with CssView {
       "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
       "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."
     ),
+    h2("Nested bindings"),
+    p("Sometimes you want to create property binding inside another binding builder. For example:"),
+    CodeBlock(
+      """val p = Property("A")
+        |val p2 = Property("a")
+        |produce(p) { v =>
+        |  div(v, bind(p2)).render
+        |}""".stripMargin
+    )(GuideStyles),
+    p(
+      "When you change ", i("p"), " value, the builder creates a new element with a new binding inside, but unfortunately ",
+      "the old one is still working. There is no way to kill or reuse the old binding, so it will be working as long ",
+      "as you keep ", i("p2"), " reference."
+    ),
+    p(
+      "Every binding creating DOM elements has version supporting nested bindings. For example: ",
+      i("produceWithNested"), " and ", i("repeatWithNested"), ". These bindings provide not only the property value, ",
+      "but also the interceptor which prepares the nested binding to be removed when it's no longer needed."
+    ),
+    CodeBlock(
+      """val p = Property("A")
+        |val p2 = Property("a")
+        |produceWithNested(p) { (v, nested) =>
+        |  div(v, nested(bind(p2))).render
+        |}""".stripMargin
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."
