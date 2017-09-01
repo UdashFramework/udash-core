@@ -355,9 +355,16 @@ class RpcClientServerView extends FinalView with CssView {
       "the following demo: "
     ),
     ForceBootstrap(new ExceptionsDemoComponent().getTemplate),
+    p(
+      "In some cases you may want to handle exceptions globally. ", i("DefaultServerRPC"), " constructor takes ",
+      i("rpcFailureInterceptors"), " argument, every passed callback will be executed on every RPC call failure. ",
+      "You can also register callback in ", i("DefaultServerRPC"), " instance with ",
+      i("registerCallFailureCallback"), "."
+    ),
     h2("What's next?"),
     p(
-      "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"), " chapter interesting later on. "
+      "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"),
+      " chapter interesting later on. "
     )
   )
 }
