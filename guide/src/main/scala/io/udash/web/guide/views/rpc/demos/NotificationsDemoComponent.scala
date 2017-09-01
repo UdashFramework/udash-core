@@ -72,7 +72,7 @@ class NotificationsDemoComponent extends Component {
     ))
 
     registerButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 

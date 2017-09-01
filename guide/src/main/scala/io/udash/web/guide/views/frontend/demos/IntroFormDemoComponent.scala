@@ -89,7 +89,7 @@ class IntroFormDemoComponent extends Component {
     )("Randomize")
 
     randomizeButton.listen {
-      case UdashButton.ButtonClickEvent(_) =>
+      case UdashButton.ButtonClickEvent(_, _) =>
         presenter.randomize()
     }
 

@@ -81,13 +81,13 @@ class SimpleRestDemoComponent extends Component {
     )("Get class")
 
     loadStringButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendStringRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendStringRequest(btn)
     }
     loadIntButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendIntRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendIntRequest(btn)
     }
     loadClassButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendClassRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendClassRequest(btn)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(

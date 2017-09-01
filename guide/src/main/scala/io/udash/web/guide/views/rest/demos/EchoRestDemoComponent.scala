@@ -82,19 +82,19 @@ class EchoRestDemoComponent extends Component {
     )("Body")
 
     queryButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithQueryRequest(content.get)
     }
     headerButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithHeaderRequest(content.get)
     }
     urlButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithURLRequest(content.get)
     }
     bodyButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithBodyRequest(content.get)
     }
 

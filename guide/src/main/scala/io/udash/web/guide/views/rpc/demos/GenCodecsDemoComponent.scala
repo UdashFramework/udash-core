@@ -95,7 +95,7 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
     )("Send request")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 

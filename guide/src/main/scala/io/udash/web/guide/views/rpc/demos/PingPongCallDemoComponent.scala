@@ -52,7 +52,7 @@ class PingPongCallDemoComponent extends Component {
     )("Ping(", bind(model.subProp(_.pingId)), ")")
 
     pingButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 
