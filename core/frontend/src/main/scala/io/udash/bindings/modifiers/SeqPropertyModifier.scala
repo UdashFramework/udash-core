@@ -1,16 +1,44 @@
 package io.udash.bindings.modifiers
 
-import io.udash.bindings._
+import com.avsystem.commons.SharedExtensions._
+import io.udash.bindings.Bindings._
 import io.udash.properties._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
-import org.scalajs.dom
 import org.scalajs.dom._
 
-import scalatags.generic._
+import scala.scalajs.js
 
-private[bindings] class SeqPropertyModifier[T, E <: ReadableProperty[T]]
-  (property: ReadableSeqProperty[T, E], builder: E => Seq[Element]) extends Modifier[dom.Element] with Bindings {
+private[bindings]
+class SeqPropertyModifier[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
+                                                       builder: (E, Binding => Binding) => Seq[Element])
+  extends Binding {
+
+  def this(property: ReadableSeqProperty[T, E], builder: E => Seq[Element]) = {
+    this(property, (d, _) => builder(d))
+  }
+
+  protected val nestedBindingsByProperty: js.Dictionary[js.Array[Binding]] = js.Dictionary.empty
+
+  def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
+    super.nestedInterceptor(binding)
+    binding.setup { b =>
+      val id: String = p.id.toString
+      if (!nestedBindingsByProperty.contains(id)) {
+        nestedBindingsByProperty(id) = js.Array()
+      }
+      nestedBindingsByProperty(id).push(b)
+    }
+  }
+
+  def clearPropertyAwareNestedInterceptor(p: E): Unit = {
+    val id = p.id.toString
+    if (nestedBindingsByProperty.contains(id)) {
+      nestedBindingsByProperty(id).foreach(_.kill())
+      nestedBindingsByProperty(id).length = 0
+      nestedBindingsByProperty.remove(id)
+    }
+  }
 
   private def indexOf(nodes: NodeList, node: Node): Int = {
     var i = 0
@@ -24,12 +52,15 @@ private[bindings] class SeqPropertyModifier[T, E <: ReadableProperty[T]]
     val producedElementsCount = scala.collection.mutable.ArrayBuffer[Int]()
 
     CallbackSequencer.finalCallback(() => {
-      property.listenStructure((patch: Patch[E]) => if (patch.added.nonEmpty || patch.removed.nonEmpty) {
+      propertyListeners += property.listenStructure((patch: Patch[E]) => if (patch.added.nonEmpty || patch.removed.nonEmpty) {
+        // Clean up nested bindings
+        patch.removed.foreach(clearPropertyAwareNestedInterceptor)
+
         val firstIndex = indexOf(root.childNodes, firstElement)
         val elementsBefore = producedElementsCount.slice(0, patch.idx).sum
 
         // Add new elements
-        val newElements = patch.added.map(builder.apply)
+        val newElements = patch.added.map(p => builder(p, propertyAwareNestedInterceptor(p)))
         val newElementsFlatten: Seq[Element] = newElements.flatten
         val insertBefore = root.childNodes(elementsBefore + firstIndex)
         if (insertBefore == null) newElementsFlatten.foreach(root.appendChild)
@@ -81,7 +112,7 @@ private[bindings] class SeqPropertyModifier[T, E <: ReadableProperty[T]]
     })
 
     property.elemProperties.foreach(element => {
-      val els = builder.apply(element)
+      val els = builder(element, propertyAwareNestedInterceptor(element))
       producedElementsCount.append(els.size)
       if (firstElement == null) firstElement = els.head
       els.foreach(root.appendChild)
