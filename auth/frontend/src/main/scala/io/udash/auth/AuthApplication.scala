@@ -14,7 +14,7 @@ object AuthApplication {
       * @param authFailedRedirectState application will redirect user to this state after auth fail
       */
     def withDefaultRoutingFailureListener(authFailedRedirectState: HierarchyRoot): Application[HierarchyRoot] = {
-      application.registerRoutingFailureListener {
+      application.onRoutingFailure {
         case _: UnauthorizedException | _: UnauthenticatedException if application.currentState != authFailedRedirectState =>
           application.goTo(authFailedRedirectState)
       }

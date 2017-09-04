@@ -2,6 +2,7 @@ package io.udash
 
 import io.udash.properties.ImmutableValue
 import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
+import io.udash.utils.{CallbacksHandler, SetRegistration}
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
@@ -20,10 +21,8 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
   urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider
 ) extends StrictLogging {
 
-  type RoutingFailureListener = PartialFunction[Throwable, Any]
-
   private var rootElement: Element = _
-  private val routingFailureListeners: mutable.ArrayBuffer[RoutingFailureListener] = mutable.ArrayBuffer.empty
+  private val routingFailureListeners = new CallbacksHandler[Throwable]
   private lazy val viewRenderer = new ViewRenderer(rootElement)
   private lazy val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
@@ -43,20 +42,18 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
       .recover { case ex: Throwable => handleRoutingFailure(ex) }
   }
 
-  def registerRoutingFailureListener(listener: RoutingFailureListener): Registration = {
-    routingFailureListeners += listener
-    new Registration {
-      override def cancel(): Unit =
-        routingFailureListeners -= listener
-    }
-  }
+  /**
+    * Registers callback which will be called after routing failure.
+    *
+    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+    */
+  def onRoutingFailure(listener: routingFailureListeners.CallbackType): Registration =
+    routingFailureListeners.register(listener)
 
   protected def handleRoutingFailure(ex: Throwable): Unit = {
     logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}")
-    ex.printStackTrace()
-    routingFailureListeners.foreach { pf =>
-      if (pf.isDefinedAt(ex)) pf(ex)
-    }
+    routingFailureListeners.fire(ex)
   }
 
   /**

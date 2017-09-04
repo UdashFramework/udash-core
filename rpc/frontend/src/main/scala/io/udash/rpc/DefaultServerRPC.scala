@@ -30,7 +30,7 @@ object DefaultServerRPC {
     val clientRPC = new DefaultExposesClientRPC[ClientRPCType](localRpc)
     lazy val serverConnector = new DefaultAtmosphereServerConnector(clientRPC, (resp) => serverRPC.handleResponse(resp), serverUrl, exceptionsRegistry)
     lazy val serverRPC: DefaultServerRPC[ServerRPCType] = new DefaultServerRPC[ServerRPCType](serverConnector)
-    rpcFailureInterceptors.foreach(serverRPC.registerCallFailureCallback)
+    rpcFailureInterceptors.foreach(serverRPC.onCallFailure)
     serverRPC.remoteRpc
   }
 }

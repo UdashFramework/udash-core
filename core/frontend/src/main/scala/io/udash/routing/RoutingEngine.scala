@@ -3,7 +3,7 @@ package io.udash.routing
 import io.udash._
 import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.utils.FilteringUtils._
-import io.udash.utils.SetRegistration
+import io.udash.utils.{CallbacksHandler, SetRegistration}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -23,7 +23,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
                     viewRenderer: ViewRenderer) {
 
   private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]], JSExecutionContext.queue)
-  private val callbacks = mutable.HashSet.empty[StateChangeEvent[HierarchyRoot] => Any]
+  private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
   /**
@@ -79,7 +79,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
 
     viewRenderer.renderView(viewsToLeave, viewsToAdd)
 
-    if (newState != oldState) callbacks.foreach(_.apply(StateChangeEvent(newState, oldState)))
+    if (newState != oldState) callbacks.fire(StateChangeEvent(newState, oldState))
   }.recover { case ex: Throwable => statesMap.clear(); throw ex }
 
   /**
@@ -87,10 +87,19 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     *
     * @param callback Callback getting StateChangeEvent as arguments
     */
-  def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Any): Registration = {
-    callbacks += callback
-    new SetRegistration(callbacks, callback)
-  }
+  def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Any): Registration =
+    onStateChange(PartialFunction(callback))
+
+  /**
+    * Register a callback for the routing state change.
+    *
+    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+    *
+    * @param callback Callback (PartialFunction) getting StateChangeEvent as arguments
+    */
+  def onStateChange(callback: callbacks.CallbackType): Registration =
+    callbacks.register(callback)
 
   /** @return Current routing state */
   def currentState: HierarchyRoot = currentStateProp.get

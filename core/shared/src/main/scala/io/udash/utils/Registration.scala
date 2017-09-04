@@ -12,6 +12,6 @@ trait Registration {
 }
 
 private[udash] class SetRegistration[ElementType](s: mutable.Set[ElementType], el: ElementType) extends Registration {
-  override def cancel(): Unit = s -= el
-  override def restart(): Unit = s += el
+  override def cancel(): Unit = s.synchronized { s -= el }
+  override def restart(): Unit = s.synchronized { s += el }
 }
