@@ -80,7 +80,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       var calls = 0
       var lastCallbackEvent: StateChangeEvent[TestState] = null
-      routingEngine.onStateChange(ev => {
+      val reg = routingEngine.onStateChange(ev => {
         lastCallbackEvent = ev
         calls += 1
       })
@@ -137,6 +137,20 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      reg.cancel()
+      routingEngine.handleUrl(Url("/abcd/123"))
+
+      calls should be(6)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 234))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      reg.restart()
+      routingEngine.handleUrl(Url("/next"))
+
+      calls should be(7)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 123))
       lastCallbackEvent.currentState should be(NextObjectState)
     }
 

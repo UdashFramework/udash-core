@@ -14,4 +14,6 @@ trait ForwarderSeqProperty[A, +ElemType <: Property[A]]
 
   protected def origin: SeqProperty[_, _]
 
+  override def clearListeners(): Unit =
+    origin.clearListeners()
 }

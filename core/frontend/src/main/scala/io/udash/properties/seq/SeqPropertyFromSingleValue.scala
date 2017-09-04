@@ -4,7 +4,7 @@ package seq
 import java.util.UUID
 
 import io.udash.properties.single._
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
@@ -76,9 +76,9 @@ private[properties]
 class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
-  override def listenStructure(l: (Patch[ReadableProperty[B]]) => Any): Registration = {
-    structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[ReadableProperty[B]]) => Any): Registration = {
+    structureListeners += structureListener
+    new SetRegistration(structureListeners, structureListener)
   }
 }
 
@@ -93,8 +93,8 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
     origin.set(revert(current))
   }
 
-  override def set(t: Seq[B]): Unit =
-    origin.set(revert(t))
+  override def set(t: Seq[B], force: Boolean = false): Unit =
+    origin.set(revert(t), force)
 
   override def setInitValue(t: Seq[B]): Unit =
     origin.setInitValue(revert(t))
@@ -105,8 +105,14 @@ class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transfor
   override def elemProperties: Seq[Property[B]] =
     children
 
-  override def listenStructure(l: (Patch[Property[B]]) => Any): Registration = {
-    structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[Property[B]]) => Any): Registration = {
+    structureListeners += structureListener
+    new SetRegistration(structureListeners, structureListener)
+  }
+
+  /** Removes all listeners from property. */
+  override def clearListeners(): Unit = {
+    super.clearListeners()
+    structureListeners.clear()
   }
 }

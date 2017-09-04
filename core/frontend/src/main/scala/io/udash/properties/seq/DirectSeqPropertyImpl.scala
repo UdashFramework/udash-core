@@ -2,9 +2,9 @@ package io.udash.properties.seq
 
 import java.util.UUID
 
-import io.udash.properties.{CallbackSequencer, PropertyCreator, PropertyRegistration}
+import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
@@ -29,8 +29,10 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     valueChanged()
   }
 
-  override def set(t: Seq[A]): Unit =
-    replace(0, properties.size, t: _*)
+  override def set(t: Seq[A], force: Boolean = false): Unit =
+    if (force || t != get) {
+      replace(0, properties.size, t: _*)
+    }
 
   override def setInitValue(t: Seq[A]): Unit = {
     val newProperties = t.map(value => propertyCreator.newProperty(value, this))
@@ -45,6 +47,11 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
 
   override def listenStructure(l: (Patch[CastableProperty[A]]) => Any): Registration = {
     structureListeners += l
-    new PropertyRegistration(structureListeners, l)
+    new SetRegistration(structureListeners, l)
+  }
+
+  override def clearListeners(): Unit = {
+    super.clearListeners()
+    structureListeners.clear()
   }
 }

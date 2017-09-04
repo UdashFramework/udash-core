@@ -1,8 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.PropertyRegistration
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 
@@ -63,9 +62,9 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
     }
   })
 
-  override def listenStructure(l: (Patch[ElemType]) => Any): Registration = {
-    structureListeners.add(l)
-    new PropertyRegistration(structureListeners, l)
+  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
+    structureListeners.add(structureListener)
+    new SetRegistration(structureListeners, structureListener)
   }
 
   override def elemProperties: Seq[ElemType] =

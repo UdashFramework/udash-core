@@ -1,7 +1,7 @@
 package io.udash.rpc.internals
 
 import io.udash.rpc._
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 import org.scalajs.dom
 import com.avsystem.commons.SharedExtensions._
 
@@ -35,7 +35,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val callTimeout: Duration = 30 seconds
   private val pendingCalls: Dictionary[(RPCRequest, Promise[RawValue])] = js.Dictionary.empty
-  private val exceptionCallbacks: mutable.ArrayBuffer[Throwable => Unit] = mutable.ArrayBuffer.empty
+  private val exceptionCallbacks: mutable.Set[Throwable => Unit] = mutable.HashSet.empty
 
   private var cid: Int = 0
   private def newCallId(): String = {
@@ -46,9 +46,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   /** Registers callback which will be called whenever RPC request returns failure. */
   def registerCallFailureCallback(callback: Throwable => Unit): Registration = {
     exceptionCallbacks += callback
-    new Registration {
-      override def cancel(): Unit = exceptionCallbacks -= callback
-    }
+    new SetRegistration(exceptionCallbacks, callback)
   }
 
   def handleResponse(response: RPCResponse): Unit = {

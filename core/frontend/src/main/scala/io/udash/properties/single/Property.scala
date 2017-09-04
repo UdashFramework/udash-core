@@ -4,7 +4,7 @@ import java.util.UUID
 
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue, SeqProperty, SeqPropertyFromSingleValue}
-import io.udash.utils.Registration
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -67,9 +67,21 @@ trait ReadableProperty[A] {
   def get: A
 
   /** Registers listener which will be called on value change. */
-  def listen(l: A => Any): Registration = {
-    listeners += l
-    new PropertyRegistration(listeners, l)
+  def listen(valueListener: A => Any): Registration = {
+    listeners += valueListener
+    new SetRegistration(listeners, valueListener)
+  }
+
+  /** Registers listener which will be called on the next value change. This listener will be fired only once. */
+  def listenOnce(valueListener: A => Any): Registration = {
+    val wrapper: A => Any = new Function1[A, Any] {
+      override def apply(v: A): Any = {
+        listeners -= this
+        valueListener(v)
+      }
+    }
+    listeners += wrapper
+    new SetRegistration(listeners, wrapper)
   }
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
@@ -169,8 +181,9 @@ trait ReadableProperty[A] {
 /** Property which can be modified. */
 trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Fires value change listeners.
-    * @param t Should not be null! */
-  def set(t: A): Unit
+    * @param t Should not be null!
+    * @param force If true, the value change listeners will be fired even if value didn't change. */
+  def set(t: A, force: Boolean = false): Unit
 
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
@@ -182,7 +195,7 @@ trait Property[A] extends ReadableProperty[A] {
   def addValidator(v: Validator[A]): Registration = {
     validators += v
     validationResult = null
-    new PropertyRegistration(validators, v)
+    new SetRegistration(validators, v)
   }
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */
@@ -194,6 +207,11 @@ trait Property[A] extends ReadableProperty[A] {
     validators.clear()
     validationResult = null
     validationProperty.clear()
+  }
+
+  /** Removes all listeners from property. */
+  def clearListeners(): Unit = {
+    listeners.clear()
   }
 
   /**
