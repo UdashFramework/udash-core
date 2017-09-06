@@ -171,6 +171,20 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
         p("This view was created with: ", span(id := "url-demo-link-init")(WindowUrlChangeProvider.currentFragment.value))
       )
     ),
+    h3("Handling routing errors"),
+    p(
+      "In some cases (for example authorization) it is useful to throw an exception in routing registry or presenter's ",
+      i("handleState"), " method. These exceptions are handled by ", i("Application"), " in which you can register ",
+      "a routing failure callback with the ", i("onRoutingFailure"), " method."
+    ),
+    p("Take a look at routing failure handler from authorization utilities: "),
+    CodeBlock(
+      """application.onRoutingFailure {
+        |  case _: UnauthorizedException | _: UnauthenticatedException
+        |    if application.currentState != authFailedRedirectState =>
+        |    application.goTo(authFailedRedirectState)
+        |}""".stripMargin
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendMVPState.url)("Model, View, Presenter & ViewFactory"), " chapter to ",

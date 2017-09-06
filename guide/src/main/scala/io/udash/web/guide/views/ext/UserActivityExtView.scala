@@ -7,7 +7,7 @@ import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
-import io.udash.web.guide.{Context, UserActivityExtState}
+import io.udash.web.guide._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
@@ -41,6 +41,7 @@ case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.
 }
 
 class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
+  import Context._
 
   import JsDom.all._
 
@@ -107,6 +108,11 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     ForceBootstrap(
       new PingPongCallDemoComponent,
       RpcLoggingDemo(model, () => presenter.reload())
+    ),
+    h2("What's next?"),
+    p(
+      "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
+      a(href := AuthorizationExtState.url)("Authorization utilities"), "."
     )
   )
 }

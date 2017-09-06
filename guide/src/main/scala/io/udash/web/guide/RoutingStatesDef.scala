@@ -82,6 +82,8 @@ case object RestServerState extends FinalRoutingState(Some(RestState))
 /** Extensions **/
 case object BootstrapExtState extends FinalRoutingState(Some(ContentState))
 
+case object AuthorizationExtState extends FinalRoutingState(Some(ContentState))
+
 case object ChartsExtState extends FinalRoutingState(Some(ContentState))
 
 case object JQueryExtState extends FinalRoutingState(Some(ContentState))

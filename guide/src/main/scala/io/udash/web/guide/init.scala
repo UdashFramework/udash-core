@@ -62,6 +62,7 @@ object Context {
     )),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
+      MenuLink("Authorization", AuthorizationExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
       MenuLink("Charts", ChartsExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
