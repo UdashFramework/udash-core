@@ -253,6 +253,111 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
   }
 
+  "showIfElse" should {
+    "update content of DOM element" in {
+      val p = Property[Boolean](true)
+      val element = h1("Test")
+      val elseElement = h1("Else")
+      val template = div(
+        span(),
+        showIfElse(p)(element.render, elseElement.render),
+        span()
+      ).render
+      val template2 = div(showIfElse(p)(element.render, elseElement.render)).render
+
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+
+      p.set(false)
+      template.textContent should be("Else")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Else")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Else")
+
+      p.set(true)
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+    }
+
+    "not swap position" in {
+      val p = Property(true)
+      val p2 = Property(false)
+
+      val element = h1("Test").render
+      val element2 = h1("ABC").render
+      val elseElement = h1("Else").render
+
+      val template = div(
+        "1",
+        showIfElse(p)(element, elseElement),
+        span("2"),
+        showIf(p2)(element2),
+        div("3")
+      ).render
+
+      template.textContent should be("1Test23")
+
+      p.set(false)
+      template.textContent should be("1Else23")
+
+      p2.set(true)
+      template.textContent should be("1Else2ABC3")
+
+      p.set(true)
+      template.textContent should be("1Test2ABC3")
+
+      p.set(false)
+      template.textContent should be("1Else2ABC3")
+
+      p2.set(false)
+      template.textContent should be("1Else23")
+    }
+
+    "work after moving element in DOM" in {
+      val p = Property(true)
+      val element = h1("Test").render
+      val elseElement = h1("Else").render
+      val b = span(showIfElse(p)(element, elseElement)).render
+      val template = div(b).render
+      val template2 = emptyComponent()
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("Else")
+      template2.textContent should be("")
+
+      p.set(true)
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      template.removeChild(b)
+      template2.appendChild(b)
+
+      template.textContent should be("")
+      template2.textContent should be("Test")
+
+      p.set(false)
+      template.textContent should be("")
+      template2.textContent should be("Else")
+
+      jQ(template2).children().remove()
+      jQ(template).append(b)
+
+      p.set(true)
+      template.textContent should be("Test")
+      template2.textContent should be("")
+    }
+  }
+
   "produce" should {
     "update content of DOM element" in {
       val p = Property[String]("ABC")

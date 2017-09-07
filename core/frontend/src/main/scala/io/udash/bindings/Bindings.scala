@@ -53,9 +53,20 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]): Binding =
+    showIfElse(property)(elements, Seq.empty)
+
+  /**
+    * Switches provided DOM elements depending on property value.
+    *
+    * @param property Property to check.
+    * @param elements  Elements to show if property value is `true`.
+    * @param elseElements Elements to show if property value is `false`.
+    * @return Modifier for bounded property.
+    */
+  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[dom.Element], elseElements: Seq[dom.Element]): Binding =
     new PropertyModifier[Boolean](
       property,
-      (show: Boolean, _) => if (show) elements else Seq.empty,
+      (show: Boolean, _) => if (show) elements else elseElements,
       true
     )
 
