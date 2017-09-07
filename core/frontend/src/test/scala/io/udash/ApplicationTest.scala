@@ -45,8 +45,9 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
       app.goTo(NextObjectState)
       app.goTo(ObjectState)
       app.goTo(NextObjectState)
+      app.reload()
 
-      counter should be(6)
+      counter should be(7)
     }
 
     "register callback for routing failure" in {
