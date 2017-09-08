@@ -16,9 +16,9 @@ import scala.scalajs.js.|
 import scala.util.Try
 
 /** Wrapper for <a href="http://eonasdan.github.io/bootstrap-datetimepicker/">Bootstrap 3 Datepicker</a>. */
-class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
-                                          val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
-                                          override val componentId: ComponentId)
+final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
+                                                val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
+                                                override val componentId: ComponentId)
   extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
 
   import io.udash.css.CssView._
@@ -26,8 +26,8 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
 
   import scalatags.JsDom.all._
 
-  private lazy val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
-  private lazy val jQInput = jQ(inp).asDatePicker()
+  private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
+  private val jQInput = jQ(inp).asDatePicker()
 
   /** Shows date picker widget. */
   def show(): Unit =
@@ -49,7 +49,7 @@ class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
   def disable(): Unit =
     jQInput.dpData().disable()
 
-  lazy val render: dom.Element = {
+  val render: dom.Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
     options.listen(opts => jQInput.dpData().options(optionsToJsDict(opts)))
@@ -205,6 +205,11 @@ object UdashDatePicker {
       override def cancel(): Unit = {
         r1.cancel()
         r2.cancel()
+      }
+
+      override def restart(): Unit = {
+        r1.restart()
+        r2.restart()
       }
     }
   }

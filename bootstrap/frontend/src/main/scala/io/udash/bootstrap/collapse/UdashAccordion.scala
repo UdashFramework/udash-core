@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import io.udash._
+import io.udash.properties.seq
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
 import io.udash.properties.seq.SeqProperty
@@ -10,11 +11,13 @@ import org.scalajs.dom._
 
 import scala.collection.mutable
 
-class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
-                    (panels: SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                    (panelStyleSelector: ItemType => PanelStyle,
-                     heading: (ElemType) => dom.Element,
-                     body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                          (panels: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                          (panelStyleSelector: ItemType => PanelStyle,
+                           heading: (ElemType) => dom.Element,
+                           body: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
   import BootstrapTags._
 
@@ -26,7 +29,7 @@ class UdashAccordion[ItemType, ElemType <: Property[ItemType]] private
   def collapseOf(panel: ElemType): Option[UdashCollapse] =
     collapses.get(panel)
 
-  override lazy val render: Element =
+  override val render: Element =
     div(BootstrapStyles.Panel.panelGroup, id := componentId, role := "tablist", aria.multiselectable := true)(
       repeat(panels)(item => {
         val headingId = UdashBootstrap.newId()
@@ -65,8 +68,8 @@ object UdashAccordion {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashAccordion` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
-           (panels: SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
+           (panels: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (heading: (ElemType) => Element, body: (ElemType) => Element,
             panelTypeSelector: ItemType => PanelStyle = (_: ItemType) => PanelStyle.Default): UdashAccordion[ItemType, ElemType] =
     new UdashAccordion(panels, componentId)(panelTypeSelector, heading, body)

@@ -6,9 +6,12 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashInputGroup private(groupSize: InputGroupSize, override val componentId: ComponentId)(content: Modifier*) extends UdashBootstrapComponent {
+final class UdashInputGroup private(groupSize: InputGroupSize, override val componentId: ComponentId)(content: Modifier*)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
-  override lazy val render =
+
+  override val render: dom.Element =
     div(BootstrapStyles.Form.inputGroup, groupSize)(
       content
     ).render

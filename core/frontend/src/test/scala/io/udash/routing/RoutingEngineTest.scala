@@ -80,7 +80,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       var calls = 0
       var lastCallbackEvent: StateChangeEvent[TestState] = null
-      routingEngine.onStateChange(ev => {
+      val reg = routingEngine.onStateChange(ev => {
         lastCallbackEvent = ev
         calls += 1
       })
@@ -138,6 +138,20 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
+
+      reg.cancel()
+      routingEngine.handleUrl(Url("/abcd/123"))
+
+      calls should be(6)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 234))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      reg.restart()
+      routingEngine.handleUrl(Url("/next"))
+
+      calls should be(7)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 123))
+      lastCallbackEvent.currentState should be(NextObjectState)
     }
 
     "return valid current app state" in {
@@ -160,6 +174,55 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       routingEngine.handleUrl(Url("/next"))
       routingEngine.currentState should be(NextObjectState)
+    }
+
+    "not render views if presenter throws exception on state handling" in {
+      class ExceptionPresenter[S <: State] extends Presenter[S] {
+        override def handleState(state: S): Unit = {
+          throw new RuntimeException
+        }
+      }
+
+      class ExceptionViewFactory[S <: State](view: View) extends ViewFactory[S] {
+        override def create(): (View, Presenter[S]) = {
+          (view, new ExceptionPresenter[S])
+        }
+      }
+
+      val rootView = new TestView
+      val objectView = new TestView
+      val nextObjectView = new TestView
+      val classView = new TestView
+      val class2View = new TestView
+      val errorView = new TestView
+      val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map(
+        RootState -> new StaticViewFactory[RootState.type](() => rootView),
+        ObjectState -> new ExceptionViewFactory[ObjectState.type](objectView),
+        NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
+        ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),
+        ClassState("abcd", 234) -> new ExceptionViewFactory[ClassState](class2View),
+        ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
+      )
+
+      initTestRoutingEngine(state2vp = state2VP)
+
+      routingEngine.handleUrl(Url("/"))
+      renderer.views.size should be(0)
+
+      routingEngine.handleUrl(Url("/next"))
+      renderer.views.size should be(0)
+
+      routingEngine.handleUrl(Url("/"))
+      renderer.views.size should be(0)
+
+      routingEngine.handleUrl(Url("/abc/1"))
+      renderer.views.size should be(0)
+
+      routingEngine.handleUrl(Url("/abcd/234"))
+      renderer.views.size should be(0)
+
+      routingEngine.handleUrl(Url("/next"))
+      renderer.views.size should be(0)
     }
   }
 }

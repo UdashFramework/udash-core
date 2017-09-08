@@ -19,25 +19,27 @@ import scala.scalajs.js.Dictionary
 import scala.util.Try
 import scalatags.JsDom.all._
 
-class UdashCarousel private(val content: SeqProperty[UdashCarouselSlide], val componentId: ComponentId,
-                            showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
-                           (implicit ec: ExecutionContext) extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
-  import io.udash.css.CssView._
-  require(activeSlide >= 0, "Active slide index cannot be negative.")
+final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlide], val componentId: ComponentId,
+                                  showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
+                                 (implicit ec: ExecutionContext)
+  extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
 
   import BootstrapStyles.Carousel._
   import BootstrapTags._
   import UdashCarousel._
   import io.udash.wrappers.jquery._
+  import io.udash.css.CssView._
 
-  private lazy val indices = content.transform((slides: Seq[UdashCarouselSlide]) => slides.length)
-  private lazy val _activeIndex: Property[Int] = Property[Int](firstActive)
+  require(activeSlide >= 0, "Active slide index cannot be negative.")
+
+  private val indices = content.transform((slides: Seq[UdashCarouselSlide]) => slides.length)
+  private val _activeIndex: Property[Int] = Property[Int](firstActive)
 
   content.listen(slides => _activeIndex.set(slides.zipWithIndex.collectFirst {
     case (sl, idx) if jQ(sl.render).hasClass(BootstrapStyles.active.className) => idx
   }.get))
 
-  override lazy val render: Element = {
+  override val render: Element = {
     def indicators() = {
       def indicator(index: Int) =
         li(
@@ -161,7 +163,7 @@ object UdashCarousel {
     * @param ec               ExecutionContext for carousel internal properties
     * @return `UdashCarousel` component
     */
-  def apply(content: SeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
+  def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
             showIndicators: Boolean = true, activeSlide: Int = 0, animationOptions: AnimationOptions = AnimationOptions())
            (implicit ec: ExecutionContext): UdashCarousel =
     new UdashCarousel(content, componentId, showIndicators, activeSlide, animationOptions)

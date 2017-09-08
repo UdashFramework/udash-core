@@ -10,20 +10,20 @@ import org.scalajs.dom._
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean,
-                          val active: Property[Boolean], val disabled: Property[Boolean],
-                          override val componentId: ComponentId)
-                         (content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean, val active: Property[Boolean],
+                                val disabled: Property[Boolean], override val componentId: ComponentId)(content: Modifier*)
+  extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+
   import io.udash.css.CssView._
 
-  private lazy val classes: List[Modifier] = buttonStyle :: size ::
+  private val classes: List[Modifier] = buttonStyle :: size ::
     BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::
     BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
 
-  override lazy val render: dom.html.Button =
+  override val render: dom.html.Button =
     button(id := componentId, tpe := "button")(classes: _*)(
-      onclick :+= ((_: MouseEvent) => {
-        fire(ButtonClickEvent(this))
+      onclick :+= ((me: MouseEvent) => {
+        fire(ButtonClickEvent(this, me))
         false
       })
     )(content: _*).render
@@ -35,9 +35,9 @@ class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boo
     active.listen(v => if (v) selected.set(inputId.id))
     if (active.get) selected.set(inputId.id)
     label(id := componentId)(classes: _*)(
-      onclick :+= ((_: MouseEvent) => {
+      onclick :+= ((me: MouseEvent) => {
         selected.set(inputId.id)
-        fire(ButtonClickEvent(this))
+        fire(ButtonClickEvent(this, me))
         false
       })
     )(in)(content: _*).render
@@ -45,7 +45,7 @@ class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boo
 }
 
 object UdashButton {
-  case class ButtonClickEvent(source: UdashButton) extends ListenableEvent[UdashButton]
+  case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent) extends ListenableEvent[UdashButton]
 
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 

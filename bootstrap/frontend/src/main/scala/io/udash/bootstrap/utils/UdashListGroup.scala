@@ -3,16 +3,19 @@ package utils
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.seq.SeqProperty
+import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
-class UdashListGroup[ItemType, ElemType <: Property[ItemType]] private(items: SeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                                                                      (body: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                          (items: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
+                          (body: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import scalatags.JsDom.all._
   import io.udash.css.CssView._
 
-  override lazy val render: Element =
+  override val render: Element =
     ul(id := componentId, BootstrapStyles.List.listGroup)(
       repeat(items)(item => {
         val el = body(item)
@@ -34,8 +37,8 @@ object UdashListGroup {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
-           (items: SeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
            (body: (ElemType) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, componentId)(body)
 }

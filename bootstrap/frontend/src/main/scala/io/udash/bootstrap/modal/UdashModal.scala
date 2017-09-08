@@ -8,11 +8,12 @@ import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
-class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
-                         backdrop: UdashModal.BackdropType, keyboard: Boolean, autoInit: Boolean, override val componentId: ComponentId)
-                        (headerFactory: Option[() => dom.Element],
-                         bodyFactory: Option[() => dom.Element],
-                         footerFactory: Option[() => dom.Element])
+final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
+                               backdrop: UdashModal.BackdropType, keyboard: Boolean,
+                               autoInit: Boolean, override val componentId: ComponentId)
+                              (headerFactory: Option[() => dom.Element],
+                               bodyFactory: Option[() => dom.Element],
+                               footerFactory: Option[() => dom.Element])
   extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
   import io.udash.css.CssView._
@@ -43,7 +44,7 @@ class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
       dataTarget := s"#$componentId"
     )
 
-  override lazy val render: Element = {
+  override val render: Element = {
     val content = Seq(
       (headerFactory, BootstrapStyles.Modal.modalHeader),
       (bodyFactory, BootstrapStyles.Modal.modalBody),

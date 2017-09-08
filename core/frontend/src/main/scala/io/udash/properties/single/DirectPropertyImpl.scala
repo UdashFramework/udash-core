@@ -10,8 +10,8 @@ abstract class DirectPropertyImpl[A](val parent: ReadableProperty[_], override v
 
   override def get: A = value
 
-  override def set(t: A): Unit =
-    if (value != t) {
+  override def set(t: A, force: Boolean = false): Unit =
+    if (force || value != t) {
       value = t
       valueChanged()
     }

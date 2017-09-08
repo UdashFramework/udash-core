@@ -7,15 +7,17 @@ import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom._
 
-class UdashTable[ItemType, ElemType <: Property[ItemType]] private
-                (striped: Property[Boolean], bordered: Property[Boolean], hover: Property[Boolean],
-                 condensed: Property[Boolean], override val componentId: ComponentId)
-                (val items: seq.SeqProperty[ItemType, ElemType])
-                (headerFactory: Option[() => dom.Element],
-                 rowFactory: (ElemType) => dom.Element) extends UdashBootstrapComponent {
+final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
+                      (striped: ReadableProperty[Boolean], bordered: ReadableProperty[Boolean], hover: ReadableProperty[Boolean],
+                       condensed: ReadableProperty[Boolean], override val componentId: ComponentId)
+                      (val items: seq.ReadableSeqProperty[ItemType, ElemType])
+                      (headerFactory: Option[() => dom.Element],
+                       rowFactory: (ElemType) => dom.Element)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
-  override lazy val render: Element = {
+  override val render: Element = {
     import scalatags.JsDom.all._
 
     table(
@@ -55,11 +57,11 @@ object UdashTable {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashTable` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: Property[ItemType]]
-           (striped: Property[Boolean] = Property(false), bordered: Property[Boolean] = Property(false),
-            hover: Property[Boolean] = Property(false), condensed: Property[Boolean] = Property(false),
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
+           (striped: ReadableProperty[Boolean] = Property(false), bordered: ReadableProperty[Boolean] = Property(false),
+            hover: ReadableProperty[Boolean] = Property(false), condensed: ReadableProperty[Boolean] = Property(false),
             componentId: ComponentId = UdashBootstrap.newId())
-           (items: seq.SeqProperty[ItemType, ElemType])
+           (items: seq.ReadableSeqProperty[ItemType, ElemType])
            (rowFactory: (ElemType) => dom.Element,
             headerFactory: Option[() => dom.Element] = None): UdashTable[ItemType, ElemType] =
     new UdashTable(striped, bordered, hover, condensed, componentId)(items)(headerFactory, rowFactory)

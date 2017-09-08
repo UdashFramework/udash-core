@@ -421,11 +421,11 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
               }
             )
 
-          def set(newValue: $tpe): Unit = if (newValue != null) {
+          def set(newValue: $tpe, force: Boolean = false): Unit = if (newValue != null) {
             $CallbackSequencerCls.sequence {
               ..${
                 members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name)"""
+                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name, force)"""
                 }
               }
             }
@@ -471,11 +471,11 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
               }
             }
 
-          def set(newValue: $tpe): Unit = if (initialized || newValue != null) {
+          def set(newValue: $tpe, force: Boolean = false): Unit = if (initialized || newValue != null) {
             $CallbackSequencerCls.sequence {
               ..${
                 members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name)"""
+                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name, force)"""
                 }
               }
             }

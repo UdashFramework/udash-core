@@ -7,9 +7,9 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-class UdashBadge private(override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
+final class UdashBadge private(override val componentId: ComponentId)(mds: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
-  override lazy val render: dom.Element =
+  override val render: dom.Element =
     span(id := componentId, BootstrapStyles.Label.badge)(mds).render
 }
 
@@ -22,7 +22,7 @@ object UdashBadge {
     * @param componentId Id of the root DOM node.
     * @return `UdashBadge` component, call render to create DOM element.
     */
-  def apply(content: Property[_], componentId: ComponentId = UdashBootstrap.newId()): UdashBadge =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashBadge =
     new UdashBadge(componentId)(bind(content))
 
   /**

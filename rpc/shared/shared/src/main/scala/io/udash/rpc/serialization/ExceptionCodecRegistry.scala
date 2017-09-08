@@ -16,12 +16,17 @@ trait ExceptionCodecRegistry {
   def name[T <: Throwable](ex: T): String
 }
 
-private[serialization] abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
+abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
   import scala.reflect._
 
-  protected val codecs: mutable.Map[String, GenCodec[_]] = mutable.Map.empty
-  private val exceptionWriter = (output: Output, ex: Throwable) => if (ex.getMessage == null) output.writeNull() else output.writeString(ex.getMessage)
-  private val exceptionReader = (input: Input) => if (input.inputType == InputType.Null) input.readNull() else input.readString()
+  protected final val codecs: mutable.Map[String, GenCodec[_]] = mutable.Map.empty
+
+  protected final val exceptionWriter: (Output, Throwable) => Unit =
+    (output: Output, ex: Throwable) => if (ex.getMessage == null) output.writeNull() else output.writeString(ex.getMessage)
+
+  protected final val exceptionReader: (Input) => String =
+    (input: Input) => if (input.inputType == InputType.Null) input.readNull() else input.readString()
+
   register(GenCodec.create((input) => new NullPointerException(exceptionReader(input)), exceptionWriter))
   register(GenCodec.create((input) => new ClassCastException(exceptionReader(input)), exceptionWriter))
   register(GenCodec.create((input) => new IndexOutOfBoundsException(exceptionReader(input)), exceptionWriter))

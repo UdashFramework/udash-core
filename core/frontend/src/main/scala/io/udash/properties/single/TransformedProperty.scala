@@ -11,8 +11,11 @@ import scala.concurrent.{ExecutionContext, Future}
 private[properties]
 class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
                                         transformer: A => B) extends ForwarderReadableProperty[B] {
-  override def listen(l: (B) => Any): Registration =
-    origin.listen((a: A) => l(transformer(a)))
+  override def listen(valueListener: (B) => Any): Registration =
+    origin.listen((a: A) => valueListener(transformer(a)))
+
+  override def listenOnce(valueListener: (B) => Any): Registration =
+    origin.listenOnce((a: A) => valueListener(transformer(a)))
 
   override protected[properties] def fireValueListeners(): Unit =
     origin.fireValueListeners()
@@ -26,8 +29,8 @@ private[properties]
 class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
   extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
-  override def set(t: B): Unit =
-    origin.set(revert(t))
+  override def set(t: B, force: Boolean = false): Unit =
+    origin.set(revert(t), force)
 
   override def setInitValue(t: B): Unit =
     origin.setInitValue(revert(t))
@@ -43,4 +46,7 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
 
   override def clearValidators(): Unit =
     origin.clearValidators()
+
+  override def clearListeners(): Unit =
+    origin.clearListeners()
 }
