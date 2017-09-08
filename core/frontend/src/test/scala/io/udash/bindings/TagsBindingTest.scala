@@ -1664,6 +1664,38 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
   }
 
+  "repeatWithIndex" should {
+    "provide property with element index" in {
+      val p = SeqProperty("a", "b", "c", "d")
+
+      val el = div(
+        repeatWithIndex(p) { case (item, idx, nested) =>
+          span(nested(bind(idx)), nested(bind(item))).render
+        }
+      ).render
+
+      el.textContent should be("0a1b2c3d")
+
+      p.append("e")
+      el.textContent should be("0a1b2c3d4e")
+
+      p.remove("b")
+      el.textContent should be("0a1c2d3e")
+
+      p.insert(1, "B")
+      el.textContent should be("0a1B2c3d4e")
+
+      p.clear()
+      el.textContent should be("")
+
+      p.set(Seq("x", "y", "z"))
+      el.textContent should be("0x1y2z")
+
+      p.replace(1, 2, "a", "B")
+      el.textContent should be("0x1a2B")
+    }
+  }
+
   "bindValidation" should {
     "render init view on validation start" in {
       val p = Property[Int](5)
