@@ -2,8 +2,10 @@ package io.udash
 
 import io.udash.properties.ImmutableValue
 import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
+import io.udash.utils.{CallbacksHandler, SetRegistration}
 import org.scalajs.dom.Element
 
+import scala.collection.mutable
 import scala.reflect.ClassTag
 
 /**
@@ -13,10 +15,14 @@ import scala.reflect.ClassTag
   * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
   * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
   */
-class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue](routingRegistry: RoutingRegistry[HierarchyRoot],
-                                                                                      viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-                                                                                      urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider) {
+class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue](
+  routingRegistry: RoutingRegistry[HierarchyRoot],
+  viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
+  urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider
+) extends StrictLogging {
+
   private var rootElement: Element = _
+  private val routingFailureListeners = new CallbacksHandler[Throwable]
   private lazy val viewRenderer = new ViewRenderer(rootElement)
   private lazy val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
@@ -28,8 +34,26 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
   final def run(attachElement: Element): Unit = {
     rootElement = attachElement
 
-    urlChangeProvider.onFragmentChange(routingEngine.handleUrl)
+    urlChangeProvider.onFragmentChange { frag =>
+      routingEngine.handleUrl(frag)
+        .recover { case ex: Throwable => handleRoutingFailure(ex) }
+    }
     routingEngine.handleUrl(urlChangeProvider.currentFragment)
+      .recover { case ex: Throwable => handleRoutingFailure(ex) }
+  }
+
+  /**
+    * Registers callback which will be called after routing failure.
+    *
+    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+    */
+  def onRoutingFailure(listener: routingFailureListeners.CallbackType): Registration =
+    routingFailureListeners.register(listener)
+
+  protected def handleRoutingFailure(ex: Throwable): Unit = {
+    logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}")
+    routingFailureListeners.fire(ex)
   }
 
   /**

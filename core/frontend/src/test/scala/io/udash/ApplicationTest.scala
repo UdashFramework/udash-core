@@ -49,6 +49,32 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
       counter should be(6)
     }
 
+    "register callback for routing failure" in {
+      var failCounter = 0
+      def callback: PartialFunction[Throwable, Any] = { case _ =>
+        failCounter += 1
+        throw new NullPointerException
+      }
+
+      var counter = 0
+      app.onStateChange(_ => counter += 1)
+
+      app.onRoutingFailure(callback)
+      app.onRoutingFailure(callback)
+      app.onRoutingFailure(callback)
+      app.onRoutingFailure(callback)
+
+      app.goTo(ObjectState)
+      app.goTo(NextObjectState)
+      app.goTo(ThrowExceptionState)
+      app.goTo(NextObjectState)
+      app.goTo(ThrowExceptionState)
+      app.goTo(NextObjectState)
+
+      counter should be(4)
+      failCounter should be(8)
+    }
+
     "return URL of state" in {
       app.matchState(ObjectState).value should be("/")
       app.matchState(NextObjectState).value should be("/next")

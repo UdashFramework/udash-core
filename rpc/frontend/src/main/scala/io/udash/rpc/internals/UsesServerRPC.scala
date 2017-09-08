@@ -1,7 +1,7 @@
 package io.udash.rpc.internals
 
 import io.udash.rpc._
-import io.udash.utils.{Registration, SetRegistration}
+import io.udash.utils.{CallbacksHandler, Registration, SetRegistration}
 import org.scalajs.dom
 import com.avsystem.commons.SharedExtensions._
 
@@ -35,7 +35,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val callTimeout: Duration = 30 seconds
   private val pendingCalls: Dictionary[(RPCRequest, Promise[RawValue])] = js.Dictionary.empty
-  private val exceptionCallbacks: mutable.Set[Throwable => Unit] = mutable.HashSet.empty
+  private val exceptionCallbacks = new CallbacksHandler[Throwable]
 
   private var cid: Int = 0
   private def newCallId(): String = {
@@ -43,11 +43,17 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     cid.toString
   }
 
-  /** Registers callback which will be called whenever RPC request returns failure. */
-  def registerCallFailureCallback(callback: Throwable => Unit): Registration = {
-    exceptionCallbacks += callback
-    new SetRegistration(exceptionCallbacks, callback)
-  }
+  /**
+    * Registers callback which will be called whenever RPC request returns failure.
+    *
+    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+    */
+  def onCallFailure(callback: exceptionCallbacks.CallbackType): Registration =
+    exceptionCallbacks.register(callback)
+
+  private def handleException(ex: Throwable): Unit =
+    exceptionCallbacks.fire(ex)
 
   def handleResponse(response: RPCResponse): Unit = {
     pendingCalls.remove(response.callId).foreach { case (request, promise) =>
@@ -55,11 +61,11 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
         case RPCResponseSuccess(r, _) =>
           promise.success(r)
         case RPCResponseException(_, exception, _) =>
-          exceptionCallbacks.foreach(h => h(exception))
+          handleException(exception)
           promise.failure(exception)
         case RPCResponseFailure(cause, error, _) =>
           val exception = RPCFailure(cause, error)
-          exceptionCallbacks.foreach(h => h(exception))
+          handleException(exception)
           promise.failure(exception)
       }
     }

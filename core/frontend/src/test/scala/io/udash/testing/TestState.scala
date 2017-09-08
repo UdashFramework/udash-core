@@ -11,5 +11,6 @@ sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) ex
 case object RootState extends ContainerTestState(None)
 case class ClassState(arg: String, arg2: Int) extends FinalTestState(Some(RootState))
 case object ObjectState extends ContainerTestState(Some(RootState))
+case object ThrowExceptionState extends ContainerTestState(Some(RootState))
 case object NextObjectState extends FinalTestState(Some(ObjectState))
 case object ErrorState extends FinalTestState(Some(RootState))
