@@ -15,6 +15,9 @@ object HighchartsUtils {
       val cleaned: Object = cleanJsObject(config)
       js.Dynamic.global.Highcharts.chart(jq.get(0).get, cleaned).asInstanceOf[io.udash.wrappers.highcharts.api.Chart]
     }
+
+    def highcharts(): api.Chart =
+      jq.asInstanceOf[js.Dynamic].highcharts().asInstanceOf[api.Chart]
   }
 
   def globalSettings: HighchartsConfig = js.Dynamic.global.Highcharts.getOptions().asInstanceOf[HighchartsConfig]
