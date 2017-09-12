@@ -11,17 +11,17 @@ import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.generic.Modifier
 
-private[i18n] class TranslationBinding(translation: Future[Translated], placeholder: Option[dom.Element])
+private[i18n] class TranslationBinding(translation: Future[Translated], placeholder: Option[Element])
                                       (implicit ec: ExecutionContext)
-  extends Modifier[dom.Element] with Bindings with StrictLogging {
-  override def applyTo(t: dom.Element): Unit = {
-    val holder: Element = placeholder.getOrElse(emptyStringNode())
+  extends Modifier[Element] with Bindings with StrictLogging {
+  override def applyTo(t: Element): Unit = {
+    val holder: Node = placeholder.getOrElse(emptyStringNode())
     t.appendChild(holder)
 
     translation onComplete {
       case Success(text) =>
         t.replaceChild(
-          JsDom.StringFrag(text.string).render.asInstanceOf[dom.Element],
+          JsDom.StringFrag(text.string).render,
           holder
         )
       case Failure(ex) =>

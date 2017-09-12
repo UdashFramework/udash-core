@@ -7,7 +7,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{ImmutableValue, seq}
 import io.udash.testing.UdashFrontendTest
-import org.scalajs.dom.Element
+import org.scalajs.dom.{Element, Node}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -816,8 +816,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
   def prod(p: seq.SeqProperty[Int, Property[Int]]): Binding = {
     produce(p,
       (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-      (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-        val el = jQ(elem:_*)
+      (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+        val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
         val insertBefore = el.children().at(patch.idx)
         if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
         else patch.added.foreach(p => el.append(span(p.get).render))
@@ -833,8 +833,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         span(),
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-            val el = jQ(elem:_*)
+          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -880,8 +880,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val template = div(
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-            val el = jQ(elem:_*)
+          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))

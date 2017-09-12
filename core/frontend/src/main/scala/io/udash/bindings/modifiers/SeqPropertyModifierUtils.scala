@@ -13,7 +13,7 @@ private[bindings]
 trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
 
   protected val property: ReadableSeqProperty[T, E]
-  protected def build(item: E): Seq[Element]
+  protected def build(item: E): Seq[Node]
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
@@ -46,7 +46,7 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
     i
   }
 
-  protected def handlePatch(root: Element)(patch: Patch[E]): Unit =
+  protected def handlePatch(root: Node)(patch: Patch[E]): Unit =
     if (patch.added.nonEmpty || patch.removed.nonEmpty) {
       // Clean up nested bindings
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
@@ -56,7 +56,7 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
 
       // Add new elements
       val newElements = patch.added.map(build)
-      val newElementsFlatten: Seq[Element] = newElements.flatten
+      val newElementsFlatten: Seq[Node] = newElements.flatten
       val insertBefore = root.childNodes(elementsBefore + firstIndex)
       if (insertBefore == null) newElementsFlatten.foreach(root.appendChild)
       else newElementsFlatten.foreach(el => root.insertBefore(el, insertBefore))

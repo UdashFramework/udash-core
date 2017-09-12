@@ -1,10 +1,10 @@
 package io.udash.bindings
 
-import org.scalajs.dom.Element
+import org.scalajs.dom.Node
 
 package object modifiers {
-  implicit class ElementExts(val el: Element) extends AnyVal {
-    def replaceChildren(oldChildren: Seq[Element], newChildren: Seq[Element]): Unit = {
+  implicit class ElementExts(val el: Node) extends AnyVal {
+    def replaceChildren(oldChildren: Seq[Node], newChildren: Seq[Node]): Unit = {
       if (oldChildren == null || oldChildren.isEmpty) newChildren.foreach(el.appendChild)
       else {
         oldChildren.zip(newChildren).foreach { case (old, fresh) => el.replaceChild(fresh, old) }

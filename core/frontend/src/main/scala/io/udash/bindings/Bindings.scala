@@ -6,8 +6,6 @@ import io.udash.bindings.modifiers.{Binding, _}
 import io.udash.properties.ImmutableValue
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.Registration
-import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,11 +27,12 @@ trait Bindings {
   val TextArea      = io.udash.bindings.TextArea
   val TextInput     = io.udash.bindings.TextInput
 
-  implicit def seqFromElement(el: dom.Element): Seq[dom.Element] = Seq(el)
+  implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
+  implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
 
   /** Creates empty text node, which is useful as placeholder. */
-  def emptyStringNode(): dom.Element =
-    JsDom.StringFrag("").render.asInstanceOf[dom.Element]
+  def emptyStringNode(): Node =
+    JsDom.StringFrag("").render
 
   /**
     * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
@@ -52,7 +51,7 @@ trait Bindings {
     * @param elements  Elements to show if property value is `true`.
     * @return Modifier for bounded property.
     */
-  def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]): Binding =
+  def showIf(property: ReadableProperty[Boolean])(elements: Seq[Node]): Binding =
     showIfElse(property)(elements, Seq.empty)
 
   /**
@@ -63,7 +62,7 @@ trait Bindings {
     * @param elseElements Elements to show if property value is `false`.
     * @return Modifier for bounded property.
     */
-  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[dom.Element], elseElements: Seq[dom.Element]): Binding =
+  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
     new PropertyModifier[Boolean](
       property,
       (show: Boolean, _) => if (show) elements else elseElements,
@@ -80,7 +79,7 @@ trait Bindings {
     *                  If it is false, then null value has to be handled by builder.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[dom.Element]): Binding =
+  def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull)
 
   /**
@@ -105,7 +104,7 @@ trait Bindings {
     *                  If it is false, then null value has to be handled by builder.
     * @return Modifier for bounded property.
     */
-  def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: (T, Binding => Binding) => Seq[dom.Element]): Binding =
+  def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: (T, Binding => Binding) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull)
 
   /**
@@ -116,7 +115,7 @@ trait Bindings {
     * @param builder  Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
     * @return Modifier for bounded property.
     */
-  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Seq[dom.Element]): Binding =
+  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])(builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder)
 
   /**
@@ -131,7 +130,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-                          (builder: (Seq[T], Binding => Binding) => Seq[dom.Element]): Binding =
+                          (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder)
 
   /**
@@ -146,8 +145,8 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                           initBuilder: Seq[E] => Seq[Element],
-                                           elementsUpdater: (Patch[E], Seq[Element]) => Any): Binding =
+                                           initBuilder: Seq[E] => Seq[Node],
+                                           elementsUpdater: (Patch[E], Seq[Node]) => Any): Binding =
     new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**
@@ -165,8 +164,8 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                     initBuilder: (Seq[E], Binding => Binding) => Seq[Element],
-                                                     elementsUpdater: (Patch[E], Seq[Element], Binding => Binding) => Any): Binding =
+                                                     initBuilder: (Seq[E], Binding => Binding) => Seq[Node],
+                                                     elementsUpdater: (Patch[E], Seq[Node], Binding => Binding) => Any): Binding =
     new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**
@@ -180,7 +179,7 @@ trait Bindings {
     * @param builder  Builder which is used for every element.
     * @return Modifier for repeat logic.
     */
-  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Seq[Element]): Binding =
+  def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])(builder: (E) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder)
 
   /**
@@ -198,7 +197,7 @@ trait Bindings {
     * @return Modifier for repeat logic.
     */
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])
-                                                   (builder: (E, Binding => Binding) => Seq[Element]): Binding =
+                                                   (builder: (E, Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder)
 
   /**
@@ -216,7 +215,7 @@ trait Bindings {
     * @return Modifier for repeat logic.
     */
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])
-                                                  (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Element]): Binding =
+                                                  (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder)
 
   /**
@@ -249,9 +248,9 @@ trait Bindings {
     * @return Modifier for validation logic.
     */
   def valid[A](property: ReadableProperty[A])
-              (completeBuilder: ValidationResult => Seq[Element],
-               progressBuilder: Future[ValidationResult] => Seq[Element] = null,
-               errorBuilder: Throwable => Seq[Element] = null)
+              (completeBuilder: ValidationResult => Seq[Node],
+               progressBuilder: Future[ValidationResult] => Seq[Node] = null,
+               errorBuilder: Throwable => Seq[Node] = null)
               (implicit ec: ExecutionContext): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
@@ -270,9 +269,9 @@ trait Bindings {
     * @return Modifier for validation logic.
     */
   def validWithNested[A](property: ReadableProperty[A])
-                        (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Element],
-                         progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Element] = null,
-                         errorBuilder: (Throwable, Binding => Binding) => Seq[Element] = null)
+                        (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
+                         progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Node] = null,
+                         errorBuilder: (Throwable, Binding => Binding) => Seq[Node] = null)
                         (implicit ec: ExecutionContext): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
@@ -290,7 +289,7 @@ trait Bindings {
   implicit def toAttrOps(attr: Attr): AttrOps =
     new AttrOps(attr)
 
-  implicit def toAttrPairOps(attr: scalatags.generic.AttrPair[dom.Element, _]): AttrPairOps =
+  implicit def toAttrPairOps(attr: scalatags.generic.AttrPair[Element, _]): AttrPairOps =
     new AttrPairOps(attr)
 
   implicit def toPropertyOps[T](property: ReadableProperty[T]): PropertyOps[T] =
@@ -311,8 +310,8 @@ object Bindings extends Bindings {
       * If callback returns true, other listeners which are queued will not be invoked.
       * If callback returns false, next callback in the queue will be invoked.
       */
-    def :+=[T <: Event](callback: (T) => Boolean): Modifier[dom.Element] = {
-      AttrPair(attr, callback, new AttrValue[dom.Element, (T) => Boolean] {
+    def :+=[T <: Event](callback: (T) => Boolean): Modifier[Element] = {
+      AttrPair(attr, callback, new AttrValue[Element, (T) => Boolean] {
         override def apply(el: Element, attr: Attr, callback: (T) => Boolean): Unit = {
           val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
           val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
@@ -336,15 +335,15 @@ object Bindings extends Bindings {
       * If callback returns true, other listeners which are queued will not be invoked.
       * If callback returns false, next callback in the queue will be invoked.
       */
-    def :+=[T <: Event](callback: (T) => Any, stopPropagation: Boolean = false): Modifier[dom.Element] =
+    def :+=[T <: Event](callback: (T) => Any, stopPropagation: Boolean = false): Modifier[Element] =
      :+=((v: T) => { callback(v); stopPropagation })
 
     /** Sets attribute on element. */
-    def applyTo(element: dom.Element, value: String = ""): Unit =
+    def applyTo(element: Element, value: String = ""): Unit =
       element.setAttribute(attr.name, value)
 
     /** Removes attribute on element. */
-    def removeFrom(element: dom.Element): Unit =
+    def removeFrom(element: Element): Unit =
       element.removeAttribute(attr.name)
 
     /** Synchronises attribute value with property content. */
@@ -355,13 +354,13 @@ object Bindings extends Bindings {
       }
   }
 
-  class AttrPairOps(private val attr: scalatags.generic.AttrPair[dom.Element, _]) extends AnyVal { outer =>
+  class AttrPairOps(private val attr: scalatags.generic.AttrPair[Element, _]) extends AnyVal { outer =>
     /** Sets attribute on element. */
-    def applyTo(element: dom.Element): Unit =
+    def applyTo(element: Element): Unit =
       attr.applyTo(element)
 
     /** Removes attribute on element. */
-    def removeFrom(element: dom.Element): Unit =
+    def removeFrom(element: Element): Unit =
       element.removeAttribute(attr.a.name)
 
     /** Synchronises attribute with property content by adding it if value is `false` and removing otherwise. */
@@ -401,6 +400,6 @@ object Bindings extends Bindings {
   }
 
   @inline
-  def available(e: dom.Node): Boolean =
+  def available(e: Node): Boolean =
     !js.isUndefined(e) && e.ne(null)
 }

@@ -3,14 +3,14 @@ package io.udash.bindings.modifiers
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
-import org.scalajs.dom
+import org.scalajs.dom.Node
 
 private[bindings]
 class SeqAsValueModifier[T](override val property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
-                            override val builder: (Seq[T], Binding => Binding) => Seq[dom.Element])
+                            override val builder: (Seq[T], Binding => Binding) => Seq[Node])
   extends ValueModifier[Seq[T]] {
 
-  def this(property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], builder: Seq[T] => Seq[dom.Element]) = {
+  def this(property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], builder: Seq[T] => Seq[Node]) = {
     this(property, (data: Seq[T], _: Binding => Binding) => builder(data))
   }
 
