@@ -53,8 +53,8 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
       }
     }
 
+    propertyListeners.push(property.listen(listener))
     listener(property.get)
-    propertyListeners += property.listen(listener)
   }
 }
 

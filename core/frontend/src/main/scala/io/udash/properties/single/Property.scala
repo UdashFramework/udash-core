@@ -151,7 +151,9 @@ trait ReadableProperty[A] {
   protected[properties] def fireValueListeners(): Unit = {
     CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
-      listeners.foreach(_.apply(t))
+      val cpy = mutable.Set.empty[A => Any]
+      cpy ++= listeners
+      cpy.foreach(_.apply(t))
     })
   }
 

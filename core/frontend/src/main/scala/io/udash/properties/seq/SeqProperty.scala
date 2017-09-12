@@ -134,8 +134,11 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
 
-  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit =
-    CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => structureListeners.foreach(_.apply(patch)))
+  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit = {
+    val cpy = mutable.Set.empty[(Patch[ItemType]) => Any]
+    cpy ++= structureListeners
+    CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
+  }
 }
 
 trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[Seq[A]] {
