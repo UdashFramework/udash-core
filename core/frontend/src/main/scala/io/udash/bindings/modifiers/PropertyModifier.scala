@@ -7,11 +7,12 @@ import org.scalajs.dom.Node
 private[bindings]
 class PropertyModifier[T](override val property: ReadableProperty[T],
                           override val builder: ((T, Binding => Binding) => Seq[Node]),
-                          override val checkNull: Boolean)
+                          override val checkNull: Boolean,
+                          override val customElementsReplace: DOMManipulator#ReplaceMethod)
   extends ValueModifier[T] {
 
   def this(property: ReadableProperty[T], builder: (T => Seq[Node]), checkNull: Boolean) = {
-    this(property, (data: T, _: Binding => Binding) => builder(data), checkNull)
+    this(property, (data: T, _: Binding => Binding) => builder(data), checkNull, DOMManipulator.defaultElementReplace)
   }
 
   def listen(callback: T => Unit): Registration =

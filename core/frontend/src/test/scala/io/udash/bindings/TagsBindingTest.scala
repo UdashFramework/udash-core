@@ -251,6 +251,41 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("Test")
       template2.textContent should be("")
     }
+
+    "use custom elements replace method" in {
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_.textContent = "OLD")
+        res
+      }
+      val p = Property[Boolean](true)
+      val element = h1("Test").render
+      val template = div(
+        span(),
+        showIf(p, customReplace(true))(element),
+        span()
+      ).render
+      val element2 = h1("Test").render
+      val template2 = div(
+        span(),
+        showIf(p, customReplace(false))(element2),
+        span()
+      ).render
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("")
+      element.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+
+      p.set(true)
+      template.textContent should be("OLD")
+      element.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+    }
   }
 
   "showIfElse" should {
@@ -355,6 +390,47 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set(true)
       template.textContent should be("Test")
       template2.textContent should be("")
+    }
+
+    "use custom elements replace method" in {
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_.textContent = "OLD")
+        res
+      }
+      val p = Property[Boolean](true)
+      val element = h1("Test").render
+      val elementElse = h1("Else").render
+      val template = div(
+        span(),
+        showIfElse(p, customReplace(true))(element, elementElse),
+        span()
+      ).render
+      val element2 = h1("Test").render
+      val elementElse2 = h1("Else").render
+      val template2 = div(
+        span(),
+        showIfElse(p, customReplace(false))(element2, elementElse2),
+        span()
+      ).render
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("Else")
+      element.textContent should be("OLD")
+      elementElse.textContent should be("Else")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+      elementElse2.textContent should be("Else")
+
+      p.set(true)
+      template.textContent should be("OLD")
+      element.textContent should be("OLD")
+      elementElse.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+      elementElse2.textContent should be("OLD")
     }
   }
 
@@ -602,6 +678,39 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       externalCounter should be(3)
       internalCounter should be(4)
     }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        res
+      }
+      val p = Property[Boolean](true)
+      val template = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(true), checkNull = false)((v, _) => div(v.toString).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(false), checkNull = false)((v, _) => div(v.toString).render),
+        span()
+      ).render
+
+      template.textContent should be("true")
+      template2.textContent should be("")
+      oldCounter should be(0)
+
+      p.set(false)
+      template.textContent should be("false")
+      template2.textContent should be("")
+      oldCounter should be(2)
+
+      p.set(true)
+      template.textContent should be("true")
+      template2.textContent should be("")
+      oldCounter should be(4)
+    }
   }
 
   "produce for SeqProperty" should {
@@ -810,6 +919,39 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("1,3,73|4|5|8")
       externalCounter should be(3)
       internalCounter should be(4)
+    }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        res
+      }
+      val p = SeqProperty[String]("a", "b", "c")
+      val template = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(true))((v, _) => div(v.mkString(",")).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(false))((v, _) => div(v.mkString(",")).render),
+        span()
+      ).render
+
+      template.textContent should be("a,b,c")
+      template2.textContent should be("")
+      oldCounter should be(0)
+
+      p.set(Seq("x", "y"))
+      template.textContent should be("x,y")
+      template2.textContent should be("")
+      oldCounter should be(2)
+
+      p.append("z")
+      template.textContent should be("x,y,z")
+      template2.textContent should be("")
+      oldCounter should be(4)
     }
   }
 
@@ -1661,6 +1803,48 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("13457")
       counter should be(6)
       internalCounter should be(6)
+    }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      var newCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        newEls.foreach(_ => newCounter += 1)
+        res
+      }
+      def customInsert(res: Boolean) = (root: Node, before: Node, newEls: Seq[Node]) => {
+        newEls.foreach(_ => newCounter += 1)
+        res
+      }
+      val p = SeqProperty[String]("a", "b", "c")
+      val template = div(
+        span(),
+        repeat(p, customElementsReplace = customReplace(true), customElementsInsert = customInsert(true))(v => div(v.get).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        repeat(p, customElementsReplace = customReplace(false), customElementsInsert = customInsert(false))(v => div(v.get).render),
+        span()
+      ).render
+
+      template.textContent should be("abc")
+      template2.textContent should be("")
+      oldCounter should be(0)
+      newCounter should be(6)
+
+      p.set(Seq("x", "y"))
+      template.textContent should be("xy")
+      template2.textContent should be("")
+      oldCounter should be(6)
+      newCounter should be(10)
+
+      p.append("z")
+      template.textContent should be("xyz")
+      template2.textContent should be("")
+      oldCounter should be(6)
+      newCounter should be(12)
     }
   }
 

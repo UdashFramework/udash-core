@@ -10,7 +10,7 @@ import org.scalajs.dom._
 import scala.scalajs.js
 
 private[bindings]
-trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
+trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
 
   protected val property: ReadableSeqProperty[T, E]
   protected def build(item: E): Seq[Node]
@@ -58,13 +58,13 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
       val newElements = patch.added.map(build)
       val newElementsFlatten: Seq[Node] = newElements.flatten
       val insertBefore = root.childNodes(elementsBefore + firstIndex)
-      if (insertBefore == null) newElementsFlatten.foreach(root.appendChild)
-      else newElementsFlatten.foreach(el => root.insertBefore(el, insertBefore))
+      if (insertBefore == null) replace(root)(Seq.empty, newElementsFlatten)
+      else insert(root)(insertBefore, newElementsFlatten)
 
       if (firstElementIsPlaceholder) {
         if (newElementsFlatten.nonEmpty) {
           // Replace placeholder with first element of sequence
-          root.removeChild(insertBefore)
+          replace(root)(Seq(insertBefore), Seq.empty)
           firstElement = newElementsFlatten.head
           firstElementIsPlaceholder = false
         }
@@ -76,19 +76,19 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
           elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
         // Remove elements form second to the last
-        (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
+        val nodesToRemove = (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
-          .foreach(root.removeChild)
+        replace(root)(nodesToRemove, Seq.empty)
 
         if (patch.clearsProperty) {
           // Replace old head of sequence with placeholder
           val newFirstElement = emptyStringNode()
-          root.replaceChild(newFirstElement, firstElement)
+          replace(root)(Seq(firstElement), Seq(newFirstElement))
           firstElement = newFirstElement
           firstElementIsPlaceholder = true
         } else {
           // Remove first element from patch.removed sequence
-          if (patch.removed.nonEmpty) root.removeChild(root.childNodes(childToRemoveIdx(0)))
+          if (patch.removed.nonEmpty) replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), Seq.empty)
 
           // Update firstElement
           if (newElementsFlatten.isEmpty && patch.idx == 0)
@@ -114,13 +114,13 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding {
       val els = build(element)
       producedElementsCount.append(els.size)
       if (firstElement == null) firstElement = els.head
-      els.foreach(root.appendChild)
+      replace(root)(Seq.empty, els)
     }
 
     if (firstElement == null) {
       val el = emptyStringNode()
       firstElement = el
-      root.appendChild(el)
+      replace(root)(Seq.empty, Seq(el))
       firstElementIsPlaceholder = true
     }
   }

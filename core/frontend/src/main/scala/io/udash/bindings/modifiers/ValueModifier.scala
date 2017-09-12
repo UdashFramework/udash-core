@@ -7,16 +7,13 @@ import org.scalajs.dom
 import org.scalajs.dom._
 
 private[bindings]
-trait ValueModifier[T] extends Binding {
+trait ValueModifier[T] extends Binding with DOMManipulator {
   import Bindings._
 
   protected def property: ReadableProperty[T]
   protected def builder: ((T, Binding => Binding) => Seq[Node])
   protected def checkNull: Boolean
   protected def listen(callback: T => Unit): Registration
-
-  protected def replace(root: Node)(oldElements: Seq[Node], newElements: Seq[Node]): Unit =
-    root.replaceChildren(oldElements, newElements)
 
   override def applyTo(t: dom.Element): Unit = {
     var elements: Seq[Node] = Seq.empty
