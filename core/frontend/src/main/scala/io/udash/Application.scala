@@ -42,6 +42,10 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
       .recover { case ex: Throwable => handleRoutingFailure(ex) }
   }
 
+  def reload(): Unit = {
+    routingEngine.handleUrl(urlChangeProvider.currentFragment, fullReload = true)
+  }
+
   /**
     * Registers callback which will be called after routing failure.
     *

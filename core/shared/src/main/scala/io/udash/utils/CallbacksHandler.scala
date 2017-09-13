@@ -23,11 +23,11 @@ class CallbacksHandler[ItemType] {
   /** Calls each registered callback and swallows exceptions thrown in callbacks. */
   def fire(item: ItemType): Unit = callbacks.synchronized {
     callbacks.foreach { pf =>
-      /** From PF docs:
-        * Note that expression `pf.applyOrElse(x, default)` is equivalent to
-        *  {{{ if(pf isDefinedAt x) pf(x) else default(x) }}}
-        * except that `applyOrElse` method can be implemented more efficiently.
-        */
+      /* From PF docs:
+       * Note that expression `pf.applyOrElse(x, default)` is equivalent to
+       *  {{{ if(pf isDefinedAt x) pf(x) else default(x) }}}
+       * except that `applyOrElse` method can be implemented more efficiently.
+       */
       Try(pf.applyOrElse(item, (_: ItemType) => ()))
     }
   }
