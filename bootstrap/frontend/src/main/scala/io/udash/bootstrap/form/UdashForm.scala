@@ -22,14 +22,16 @@ final class UdashForm private(formStyle: Option[CssStyle], override val componen
 }
 
 object UdashForm {
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
   import io.udash.css.CssView._
 
   /** Binds provided `property` validation result to element Bootstrap validation style. */
   def validation(property: ReadableProperty[_]): Modifier =
     property.reactiveApply((el, _) => {
       import BootstrapStyles.Form._
+      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
       Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
+
       property.isValid onComplete {
         case Success(Valid) =>
           hasSuccess.addTo(el)

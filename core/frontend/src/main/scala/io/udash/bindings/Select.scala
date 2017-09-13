@@ -4,7 +4,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom.{html, _}
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -24,7 +23,7 @@ object Select {
     * @return HTML select tag with bound ValueProperty, applied modifiers and nested options.
     */
   def apply(property: Property[String], options: Seq[String], label: String => Modifier)
-           (xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
+           (xs: Modifier*): JsDom.TypedTag[html.Select] = {
     val htmlOptions = prepareHtmlOptions(options, label)
 
     def refreshSelectedItems() = {
@@ -57,8 +56,9 @@ object Select {
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return HTML select tag with bound SeqProperty, applied modifiers and nested options.
     */
-  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], label: String => Modifier)
-           (xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Select] = {
+  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]],
+            options: Seq[String], label: String => Modifier)
+           (xs: Modifier*): JsDom.TypedTag[html.Select] = {
     val htmlOptions = prepareHtmlOptions(options, label)
 
     def refreshSelectedItems() = {

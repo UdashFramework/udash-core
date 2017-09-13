@@ -3,7 +3,8 @@ package io.udash.testing
 import io.udash._
 import io.udash.routing.RoutingEngine
 
-trait TestRouting { self: UdashFrontendTest =>
+trait TestRouting {
+
   var routing: TestRoutingRegistry = _
   var viewFactory: TestViewFactory[ErrorState.type] = _
   var vpRegistry: TestViewFactoryRegistry = _

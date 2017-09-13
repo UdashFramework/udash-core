@@ -21,8 +21,8 @@ final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Dat
                                                 override val componentId: ComponentId)
   extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
 
-  import io.udash.css.CssView._
   import UdashDatePicker._
+  import io.udash.css.CssView._
 
   import scalatags.JsDom.all._
 

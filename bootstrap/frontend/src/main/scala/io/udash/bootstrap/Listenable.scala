@@ -1,10 +1,8 @@
 package io.udash.bootstrap
 
-import io.udash.utils.{CallbacksHandler, Registration, SetRegistration}
+import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
 import org.scalajs.dom
-
-import scala.collection.mutable
 
 /** Bootstrap component exposing events. */
 trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] {

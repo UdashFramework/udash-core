@@ -1,7 +1,7 @@
 package io.udash.properties
 
 import scala.annotation.tailrec
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait ValidationError {
   def message: String
@@ -32,20 +32,23 @@ object Invalid {
 }
 
 trait Validator[ArgumentType] {
-  def apply(element: ArgumentType)(implicit ec: ExecutionContext): Future[ValidationResult]
+  def apply(element: ArgumentType): Future[ValidationResult]
 }
 
 object Validator {
   class FunctionValidator[ArgumentType](f: (ArgumentType) => ValidationResult) extends Validator[ArgumentType] {
-    override def apply(element: ArgumentType)(implicit ec: ExecutionContext): Future[ValidationResult] =
-      Future(f(element))(ec)
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
+    override def apply(element: ArgumentType): Future[ValidationResult] =
+      Future(f(element))
   }
 
   def apply[ArgumentType](f: (ArgumentType) => ValidationResult): Validator[ArgumentType] =
     new FunctionValidator(f)
 
   implicit class FutureOps[T](private val future: Future[T]) extends AnyVal {
-    def foldValidationResult(implicit ev: T =:= Seq[ValidationResult], ec: ExecutionContext): Future[ValidationResult] = {
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    def foldValidationResult(implicit ev: T =:= Seq[ValidationResult]): Future[ValidationResult] = {
       @tailrec
       def reduce(acc: Seq[ValidationError], results: Seq[ValidationResult]): ValidationResult = results match {
         case Seq() =>

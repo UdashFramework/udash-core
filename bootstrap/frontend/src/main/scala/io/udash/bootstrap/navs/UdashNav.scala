@@ -1,10 +1,10 @@
 package io.udash.bootstrap
 package navs
 
+import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
 import io.udash.properties.seq
-import io.udash.{properties, _}
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -37,7 +37,6 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private
 }
 
 object UdashNav {
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   /**
     * Creates default navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.

@@ -2,9 +2,6 @@ package io.udash.rpc.internals
 
 import io.udash.rpc._
 
-import scala.concurrent.ExecutionContext
-import scala.scalajs.concurrent.JSExecutionContext
-
 abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPCType) extends ExposesLocalRPC[ClientRPCType] {
   override val localFramework: ClientUdashRPCFramework
 
@@ -21,9 +18,6 @@ abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPC
     val receiver = localRpcAsRaw.asRaw(localRpc).resolveGetterChain(fire.gettersChain)
     receiver.fire(fire.invocation.rpcName, fire.invocation.argLists)
   }
-
-  protected implicit def executionContext: ExecutionContext =
-    JSExecutionContext.queue
 }
 
 class DefaultExposesClientRPC[ClientRPCType](local: ClientRPCType)

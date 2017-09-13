@@ -7,11 +7,10 @@ import io.udash.properties.single.{CastableProperty, ReadableProperty}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
 
 class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
-                              (implicit propertyCreator: PropertyCreator[A],
-                               val executionContext: ExecutionContext) extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
+                              (implicit propertyCreator: PropertyCreator[A])
+  extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = mutable.ListBuffer[CastableProperty[A]]()
   private val structureListeners: mutable.Set[Patch[CastableProperty[A]] => Any] = mutable.Set()

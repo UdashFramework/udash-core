@@ -12,8 +12,9 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
                           (body: (ElemType) => dom.Element)
   extends UdashBootstrapComponent {
 
-  import scalatags.JsDom.all._
   import io.udash.css.CssView._
+
+  import scalatags.JsDom.all._
 
   override val render: Element =
     ul(id := componentId, BootstrapStyles.List.listGroup)(

@@ -1,13 +1,12 @@
 package io.udash.utils
 
 import io.udash._
-import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 import org.scalajs.dom._
+import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
-import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 
-class FileUploader(url: Url)(implicit ec: ExecutionContext) {
+class FileUploader(url: Url) {
   import FileUploader._
 
   /** Uploads files selected in provided `input`. */

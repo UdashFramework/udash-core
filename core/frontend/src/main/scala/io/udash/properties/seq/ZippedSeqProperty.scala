@@ -7,7 +7,6 @@ import io.udash.properties.{CallbackSequencer, ModelValue, PropertyCreator}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
 
 private[properties]
 abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, ReadableProperty[O]] {
@@ -51,8 +50,7 @@ private[properties]
 class ZippedReadableSeqProperty[A, B, O : ModelValue]
                                (s: ReadableSeqProperty[A, ReadableProperty[A]],
                                 p: ReadableSeqProperty[B, ReadableProperty[B]],
-                                combiner: (A, B) => O,
-                                override val executionContext: ExecutionContext)
+                                combiner: (A, B) => O)
   extends ZippedSeqPropertyUtils[O] {
 
   protected final def appendChildren(toCombine: Seq[(ReadableProperty[A], ReadableProperty[B])]): Unit =
@@ -70,17 +68,15 @@ private[properties]
 class ZippedAllReadableSeqProperty[A, B, O : ModelValue]
                                   (s: ReadableSeqProperty[A, ReadableProperty[A]],
                                    p: ReadableSeqProperty[B, ReadableProperty[B]],
-                                   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B],
-                                   override val executionContext: ExecutionContext)
-  extends ZippedReadableSeqProperty(s, p, combiner, executionContext) {
+                                   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B])
+  extends ZippedReadableSeqProperty(s, p, combiner) {
 
   override protected def update(fromIdx: Int): Unit =
     appendChildren(s.elemProperties.zipAll(p.elemProperties, defaultA, defaultB).drop(fromIdx))
 }
 
 private[properties]
-class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadableProperty[A]],
-                                            override val executionContext: ExecutionContext)
+class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadableProperty[A]])
   extends ZippedSeqPropertyUtils[(A, Int)] {
 
   protected final def appendChildren(toCombine: Seq[(ReadableProperty[A], Int)]): Unit =

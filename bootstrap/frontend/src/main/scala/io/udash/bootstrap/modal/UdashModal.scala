@@ -16,9 +16,9 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
                                footerFactory: Option[() => dom.Element])
   extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
-  import io.udash.css.CssView._
   import BootstrapTags._
   import UdashModal._
+  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 
 

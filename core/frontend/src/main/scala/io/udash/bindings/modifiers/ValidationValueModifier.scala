@@ -6,7 +6,7 @@ import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 private[bindings]
@@ -15,12 +15,10 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
                                  completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                                  errorBuilder: Option[(Throwable, Binding => Binding) => Seq[Node]],
                                  override val customElementsReplace: DOMManipulator.ReplaceMethod)
-                                (implicit ec: ExecutionContext)
   extends Binding with DOMManipulator with StrictLogging {
 
   def this(property: ReadableProperty[T], initBuilder: Option[Future[ValidationResult] => Seq[Node]],
-           completeBuilder: ValidationResult => Seq[Node], errorBuilder: Option[Throwable => Seq[Node]])
-          (implicit ec: ExecutionContext) = {
+           completeBuilder: ValidationResult => Seq[Node], errorBuilder: Option[Throwable => Seq[Node]]) = {
     this(
       property,
       initBuilder.map(c => (d, _) => c(d)),
@@ -43,6 +41,7 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
     }
 
     val listener = (_: T) => {
+      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
       val valid: Future[ValidationResult] = property.isValid
       initBuilder.foreach(b => rebuild(valid, b))
       valid onComplete {
@@ -53,6 +52,9 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
       }
     }
 
+    val markerNode = emptyStringNode()
+    elements = Seq(markerNode)
+    replace(root)(Seq.empty, elements)
     propertyListeners.push(property.listen(listener))
     listener(property.get)
   }

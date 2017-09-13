@@ -47,8 +47,6 @@ final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, bloc
 object UdashButton {
   case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent) extends ListenableEvent[UdashButton]
 
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-
   /**
     * Creates button component, more: <a href="http://getbootstrap.com/css/#buttons">Bootstrap Docs</a>.
     *
