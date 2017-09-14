@@ -5,10 +5,14 @@ import scala.language.postfixOps
 object SecondStylesheetExample extends CssBase {
   import dsl._
 
-  val test: CssStyle = style(
-    margin(12 px, auto),
+  def utils(x: Int): CssStyle = mixin(
+    margin(x px, auto),
     textAlign.left,
-    cursor.pointer,
+    cursor.pointer
+  )
+
+  val test: CssStyle = style(
+    utils(12),
 
     &.hover(
       cursor.zoomIn

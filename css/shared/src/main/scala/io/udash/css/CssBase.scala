@@ -25,24 +25,88 @@ trait CssBase {
     def &(): Cond =
       Cond.empty
 
+    /**
+      * Creates CSS style which will not be rendered. <br/><br/>
+      *
+      * Example:
+      * <pre>
+      *   def utils(x: Int): CssStyle = mixin(
+      *     margin(x px, auto),
+      *     textAlign.left,
+      *     cursor.pointer
+      *   )
+      * </pre>
+      */
+    def mixin(impl: ToStyle*): CssStyle =
+      macro io.udash.css.macros.StyleMacros.mixin
+
+    /** Creates CSS style with auto-generated name. */
+
+    /**
+      * Creates CSS style with auto-generated name. <br/><br/>
+      *
+      * Example:
+      * <pre>
+      *   val example: CssStyle = style(
+      *     utils(12), // mixin usage
+      *
+      *     &.hover(
+      *       cursor.zoomIn
+      *     ),
+      *
+      *     media.not.handheld.landscape.maxWidth(640 px)(
+      *       width(400 px)
+      *     )
+      *   )
+      * </pre>
+      */
     def style(impl: ToStyle*): CssStyle =
       macro io.udash.css.macros.StyleMacros.style
 
+    /** Creates CSS style with provided name. */
     def namedStyle(className: String, impl: ToStyle*): CssStyle =
       macro io.udash.css.macros.StyleMacros.namedStyle
 
+    /** Creates CSS keyframe. */
     def keyframe(impl: ToStyle*): Seq[ToStyle] =
       impl
 
+    /**
+      * Creates CSS keyframes animation with auto-generated name. <br/><br/>
+      *
+      * Example:
+      * <pre>
+      *   val animation = keyframes(
+      *     0d -> keyframe(height(10 px)),
+      *     20d -> keyframe(height(50 px)),
+      *     100d -> keyframe(height(200 px))
+      *   )
+      * </pre>
+      */
     def keyframes(impl: (Double, Seq[ToStyle])*): CssStyle =
       macro io.udash.css.macros.StyleMacros.keyframes
 
+    /** Creates CSS keyframes animation with provided name. */
     def namedKeyframes(className: String, impl: (Double, Seq[ToStyle])*): CssStyle =
       macro io.udash.css.macros.StyleMacros.namedKeyframes
 
+    /**
+      * Creates CSS fontface with auto-generated name. <br/><br/>
+      *
+      * Example:
+      * <pre>
+      *   val ff = fontFace(
+      *     _.src("url(font.woff)")
+      *       .fontStretch.expanded
+      *       .fontStyle.italic
+      *       .unicodeRange(0, 5)
+      *   )
+      * </pre>
+      */
     def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.fontFace
 
+    /** Creates CSS fontface with provided name. */
     def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.nameFontFace
 
@@ -76,9 +140,6 @@ trait CssBase {
 
   private val elementsBuffer = mutable.ArrayBuffer.empty[CssStyle]
   val dsl: Dsl = new Dsl(elementsBuffer)
-
-  def elements: Seq[CssStyle] =
-    elementsBuffer.toVector
 
   def render(implicit renderer: Renderer[String]): String = {
     elementsBuffer.iterator.map {
