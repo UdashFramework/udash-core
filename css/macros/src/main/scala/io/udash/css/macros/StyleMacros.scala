@@ -1,10 +1,12 @@
 package io.udash.css.macros
 
+import com.avsystem.commons.macros.MacroCommons
+
 import scala.reflect.macros.blackbox
 import scalacss.internal.DslBase.ToStyle
 import scalacss.internal.FontFace
 
-class StyleMacros(val c: blackbox.Context) {
+class StyleMacros(val c: blackbox.Context) extends MacroCommons {
   import c.universe._
 
   val Package = q"_root_.io.udash.css"
@@ -17,13 +19,6 @@ class StyleMacros(val c: blackbox.Context) {
   val Dsl = q"scalacss.internal.Dsl"
   val Compose = q"scalacss.internal.Compose"
   val FontSrcSelector = tq"scalacss.internal.FontFace.FontSrcSelector"
-
-  val isScalaJs = try {
-    c.typecheck(q"import scalajs.js.native")
-    true
-  } catch {
-    case _: Throwable => false
-  }
 
   private def handleScalaJs(name: Tree, other: Tree): Tree =
     if (isScalaJs) {

@@ -2,7 +2,7 @@ package io.udash.properties.single
 
 import java.util.UUID
 
-abstract class DirectPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
+class DirectPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
   extends CastableProperty[A] {
 
   private var value: A = _
