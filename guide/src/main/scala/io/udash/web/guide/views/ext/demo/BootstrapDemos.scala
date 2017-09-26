@@ -269,13 +269,11 @@ object BootstrapDemos extends StrictLogging with CssView {
     })
 
     val push = UdashButton(size = ButtonSize.Large, block = true)("Push the button!")
-    push.listen {
-      case _ =>
-        clicks.set(Seq.empty)
-        buttons.foreach(button => {
-          val random = Random.nextBoolean()
-          button.disabled.set(random)
-        })
+    push.listen { case _ =>
+      clicks.set(Seq.empty)
+      buttons.foreach { button =>
+        button.disabled.set(Random.nextBoolean())
+      }
     }
 
     div(GuideStyles.frame)(
