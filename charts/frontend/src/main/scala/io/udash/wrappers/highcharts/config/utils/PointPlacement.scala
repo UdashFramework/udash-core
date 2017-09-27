@@ -4,11 +4,11 @@ package utils
 
 import scala.scalajs.js.|
 
-sealed abstract class PointPlacement(val name: String | Double)
+sealed class PointPlacement(val name: String | Double)
 
 object PointPlacement {
-  case object OnTick extends PointPlacement("on")
-  case object BetweenPrev extends PointPlacement(-0.5)
-  case object BetweenNext extends PointPlacement(0.5)
+  val OnTick = new PointPlacement("on")
+  val BetweenPrev = new PointPlacement(-0.5)
+  val BetweenNext = new PointPlacement(0.5)
   case class Custom(override val name: String | Double) extends PointPlacement(name)
 }

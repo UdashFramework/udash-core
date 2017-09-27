@@ -3,15 +3,15 @@ package panel
 
 import io.udash.css.CssStyle
 
-sealed abstract class PanelStyle(style: CssStyle) extends ClassModifier(style)
+final class PanelStyle(style: CssStyle) extends ClassModifier(style)
 
 object PanelStyle {
   import BootstrapStyles.Panel._
 
-  case object Default extends PanelStyle(panelDefault)
-  case object Primary extends PanelStyle(panelPrimary)
-  case object Success extends PanelStyle(panelSuccess)
-  case object Info extends PanelStyle(panelInfo)
-  case object Warning extends PanelStyle(panelWarning)
-  case object Danger extends PanelStyle(panelDanger)
+  val Default = new PanelStyle(panelDefault)
+  val Primary = new PanelStyle(panelPrimary)
+  val Success = new PanelStyle(panelSuccess)
+  val Info = new PanelStyle(panelInfo)
+  val Warning = new PanelStyle(panelWarning)
+  val Danger = new PanelStyle(panelDanger)
 }

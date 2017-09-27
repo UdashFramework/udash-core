@@ -85,16 +85,16 @@ class ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
 object ColorAxis {
   import scala.scalajs.js.JSConverters._
 
-  sealed class DataClassColor(val value: String)
+  final class DataClassColor(val value: String) extends AnyVal
   object DataClassColor {
-    case object Tween extends DataClassColor("tween")
-    case object Category extends DataClassColor("category")
+    val Tween = new DataClassColor("tween")
+    val Category = new DataClassColor("category")
   }
 
-  sealed class InterpolationType(val value: String)
+  final class InterpolationType(val value: String) extends AnyVal
   object InterpolationType {
-    case object Linear extends InterpolationType("linear")
-    case object Logarithmic extends InterpolationType("logarithmic")
+    val Linear = new InterpolationType("linear")
+    val Logarithmic = new InterpolationType("logarithmic")
   }
 
   /**

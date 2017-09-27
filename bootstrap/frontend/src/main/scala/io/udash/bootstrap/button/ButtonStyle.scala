@@ -3,17 +3,17 @@ package button
 
 import io.udash.css.CssStyle
 
-sealed abstract class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Button.btn, style)
+sealed class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Button.btn, style)
 
 object ButtonStyle {
   import BootstrapStyles.Button._
 
-  case object Default extends ButtonStyle(btnDefault)
-  case object Primary extends ButtonStyle(btnPrimary)
-  case object Success extends ButtonStyle(btnSuccess)
-  case object Info extends ButtonStyle(btnInfo)
-  case object Warning extends ButtonStyle(btnWarning)
-  case object Danger extends ButtonStyle(btnDanger)
-  case object Link extends ButtonStyle(btnLink)
+  val Default = new ButtonStyle(btnDefault)
+  val Primary = new ButtonStyle(btnPrimary)
+  val Success = new ButtonStyle(btnSuccess)
+  val Info = new ButtonStyle(btnInfo)
+  val Warning = new ButtonStyle(btnWarning)
+  val Danger = new ButtonStyle(btnDanger)
+  val Link = new ButtonStyle(btnLink)
 }
 

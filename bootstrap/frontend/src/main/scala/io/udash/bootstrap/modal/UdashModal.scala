@@ -78,10 +78,10 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
 }
 
 object UdashModal {
-  sealed class BackdropType(val jsValue: String)
-  case object ActiveBackdrop extends BackdropType("true")
-  case object StaticBackdrop extends BackdropType("static")
-  case object NoneBackdrop extends BackdropType("false")
+  final class BackdropType(val jsValue: String)
+  val ActiveBackdrop = new BackdropType("true")
+  val StaticBackdrop = new BackdropType("static")
+  val NoneBackdrop = new BackdropType("false")
 
   sealed trait ModalEvent extends ListenableEvent[UdashModal]
   case class ModalShowEvent(source: UdashModal) extends ModalEvent

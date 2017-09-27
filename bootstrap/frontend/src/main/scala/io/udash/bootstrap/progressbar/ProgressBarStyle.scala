@@ -3,7 +3,7 @@ package progressbar
 
 import io.udash.css.CssStyle
 
-sealed abstract class ProgressBarStyle(style: Option[CssStyle])
+final class ProgressBarStyle(style: Option[CssStyle])
   extends ClassModifier(Seq(Some(BootstrapStyles.ProgressBar.progressBar), style).flatten: _*) {
 
   def this(style: CssStyle) = this(Some(style))
@@ -12,10 +12,10 @@ sealed abstract class ProgressBarStyle(style: Option[CssStyle])
 object ProgressBarStyle {
   import BootstrapStyles.ProgressBar._
 
-  case object Default extends ProgressBarStyle(None)
-  case object Striped extends ProgressBarStyle(progressBarStriped)
-  case object Success extends ProgressBarStyle(progressBarSuccess)
-  case object Info extends ProgressBarStyle(progressBarInfo)
-  case object Warning extends ProgressBarStyle(progressBarWarning)
-  case object Danger extends ProgressBarStyle(progressBarDanger)
+  val Default = new ProgressBarStyle(None)
+  val Striped = new ProgressBarStyle(progressBarStriped)
+  val Success = new ProgressBarStyle(progressBarSuccess)
+  val Info = new ProgressBarStyle(progressBarInfo)
+  val Warning = new ProgressBarStyle(progressBarWarning)
+  val Danger = new ProgressBarStyle(progressBarDanger)
 }

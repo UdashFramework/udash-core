@@ -77,18 +77,18 @@ class SeriesTreemap extends MapSeries {
 object SeriesTreemap {
   import scala.scalajs.js.JSConverters._
 
-  sealed class LayoutAlgorithm(val name: String)
+  final class LayoutAlgorithm(val name: String) extends AnyVal
   object LayoutAlgorithm {
-    case object SliceAndDice extends LayoutAlgorithm("sliceAndDice")
-    case object Stripes extends LayoutAlgorithm("stripes")
-    case object Squarified extends LayoutAlgorithm("squarified")
-    case object Strip extends LayoutAlgorithm("strip")
+    val SliceAndDice = new LayoutAlgorithm("sliceAndDice")
+    val Stripes = new LayoutAlgorithm("stripes")
+    val Squarified = new LayoutAlgorithm("squarified")
+    val Strip = new LayoutAlgorithm("strip")
   }
 
-  sealed class LayoutStartingDirection(val name: String)
+  final class LayoutStartingDirection(val name: String) extends AnyVal
   object LayoutStartingDirection {
-    case object Vertical extends LayoutStartingDirection("vertical")
-    case object Horizontal extends LayoutStartingDirection("horizontal")
+    val Vertical = new LayoutStartingDirection("vertical")
+    val Horizontal = new LayoutStartingDirection("horizontal")
   }
 
   /**

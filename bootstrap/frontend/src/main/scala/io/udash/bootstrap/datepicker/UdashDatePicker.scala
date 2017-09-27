@@ -7,7 +7,7 @@ import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.css.CssStyle
-import io.udash.properties.PropertyCreator
+import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
@@ -224,13 +224,9 @@ object UdashDatePicker {
   sealed trait DatePickerEvent extends ListenableEvent[UdashDatePicker]
 
   object DatePickerEvent {
-
     case class Show(source: UdashDatePicker) extends DatePickerEvent
-
     case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
-
     case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends DatePickerEvent
-
     case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
   }
 
@@ -342,61 +338,43 @@ object UdashDatePicker {
     implicit val propertyCreator: PropertyCreator[DatePickerTooltips] = PropertyCreator.propertyCreator[DatePickerTooltips]
   }
 
-  sealed class DayOfWeek(val id: Int)
-
+  final class DayOfWeek(val id: Int)
   object DayOfWeek {
+    val Sunday = new DayOfWeek(0)
+    val Monday = new DayOfWeek(1)
+    val Tuesday = new DayOfWeek(2)
+    val Wednesday = new DayOfWeek(3)
+    val Thursday = new DayOfWeek(4)
+    val Friday = new DayOfWeek(5)
+    val Saturday = new DayOfWeek(6)
 
-    case object Sunday extends DayOfWeek(0)
-
-    case object Monday extends DayOfWeek(1)
-
-    case object Tuesday extends DayOfWeek(2)
-
-    case object Wednesday extends DayOfWeek(3)
-
-    case object Thursday extends DayOfWeek(4)
-
-    case object Friday extends DayOfWeek(5)
-
-    case object Saturday extends DayOfWeek(6)
-
+    implicit val immutable: ImmutableValue[DayOfWeek] = null // TODO remove
     implicit val propertyCreator: PropertyCreator[DayOfWeek] = PropertyCreator.propertyCreator[DayOfWeek]
   }
 
-  sealed class ViewMode(val id: String)
-
+  final class ViewMode(val id: String)
   object ViewMode {
+    val Days = new ViewMode("days")
+    val Months = new ViewMode("months")
+    val Years = new ViewMode("years")
+    val Decades = new ViewMode("decades")
 
-    case object Days extends ViewMode("days")
-
-    case object Months extends ViewMode("months")
-
-    case object Years extends ViewMode("years")
-
-    case object Decades extends ViewMode("decades")
-
+    implicit val immutable: ImmutableValue[ViewMode] = null // TODO remove
     implicit val propertyCreator: PropertyCreator[ViewMode] = PropertyCreator.propertyCreator[ViewMode]
   }
 
-  sealed abstract class Placement(val name: String)
-
+  sealed class Placement(val name: String)
   object Placement {
+    val DefaultPlacement = new Placement("default")
+    val AutoPlacement = new Placement("auto")
 
-    case object DefaultPlacement extends Placement("default")
+    final class VerticalPlacement(name: String) extends Placement(name)
+    val TopPlacement = new VerticalPlacement("top")
+    val BottomPlacement = new VerticalPlacement("bottom")
 
-    case object AutoPlacement extends Placement("auto")
-
-    sealed abstract class VerticalPlacement(name: String) extends Placement(name)
-
-    case object TopPlacement extends VerticalPlacement("top")
-
-    case object BottomPlacement extends VerticalPlacement("bottom")
-
-    sealed abstract class HorizontalPlacement(name: String) extends Placement(name)
-
-    case object LeftPlacement extends HorizontalPlacement("left")
-
-    case object RightPlacement extends HorizontalPlacement("right")
+    final class HorizontalPlacement(name: String) extends Placement(name)
+    val LeftPlacement = new HorizontalPlacement("left")
+    val RightPlacement = new HorizontalPlacement("right")
 
   }
 

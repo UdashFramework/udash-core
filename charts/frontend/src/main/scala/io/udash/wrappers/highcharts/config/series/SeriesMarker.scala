@@ -85,13 +85,13 @@ class SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
 object SeriesMarker {
   import scala.scalajs.js.JSConverters._
 
-  sealed abstract class Symbol(val value: String)
+  sealed class Symbol(val value: String)
   object Symbol {
-    case object Circle extends Symbol("circle")
-    case object Square extends Symbol("square")
-    case object Diamond extends Symbol("diamond")
-    case object Triangle extends Symbol("triangle")
-    case object TriangleDown extends Symbol("triangle-down")
+    val Circle = new Symbol("circle")
+    val Square = new Symbol("square")
+    val Diamond = new Symbol("diamond")
+    val Triangle = new Symbol("triangle")
+    val TriangleDown = new Symbol("triangle-down")
     case class Url(url: String) extends Symbol(s"url($url)")
   }
 

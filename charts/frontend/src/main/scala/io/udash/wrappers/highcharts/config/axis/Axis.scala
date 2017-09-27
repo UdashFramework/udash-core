@@ -505,11 +505,11 @@ object Axis {
     def tickPositions: js.Array[Double] = js.native
   }
 
-  sealed class Type(val name: String)
+  final class Type(val name: String) extends AnyVal
   object Type {
-    case object Linear extends Type("linear")
-    case object Logarithmic extends Type("logarithmic")
-    case object DateTime extends Type("datetime")
-    case object Category extends Type("category")
+    val Linear = new Type("linear")
+    val Logarithmic = new Type("logarithmic")
+    val DateTime = new Type("datetime")
+    val Category = new Type("category")
   }
 }

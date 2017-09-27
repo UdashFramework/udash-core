@@ -207,9 +207,7 @@ object UdashCarousel {
     sealed trait Direction
 
     object Direction {
-
       case object Left extends Direction
-
       case object Right extends Direction
 
       /**
@@ -281,13 +279,12 @@ object UdashCarousel {
   }
 
   object AnimationOptions {
-
-    sealed abstract class PauseOption(val raw: String)
+    final class PauseOption(val raw: String)
 
     object PauseOption {
       /** Pauses the cycling of the carousel on mouseenter and resumes the cycling of the carousel on mouseleave. */
-      case object Hover extends PauseOption("hover")
-      case object False extends PauseOption("false")
+      val Hover = new PauseOption("hover")
+      val False = new PauseOption("false")
     }
   }
 }

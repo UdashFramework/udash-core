@@ -11,18 +11,18 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
   case class Delay(show: Duration, hide: Duration)
   case class Viewport(selector: String, padding: Int)
 
-  sealed abstract class Placement(val name: String)
-  case object AutoPlacement extends Placement("auto")
-  case object TopPlacement extends Placement("top")
-  case object BottomPlacement extends Placement("bottom")
-  case object LeftPlacement extends Placement("left")
-  case object RightPlacement extends Placement("right")
+  final class Placement(val name: String)
+  val AutoPlacement = new Placement("auto")
+  val TopPlacement = new Placement("top")
+  val BottomPlacement = new Placement("bottom")
+  val LeftPlacement = new Placement("left")
+  val RightPlacement = new Placement("right")
 
-  sealed abstract class Trigger(val name: String)
-  case object ClickTrigger extends Trigger("click")
-  case object HoverTrigger extends Trigger("hover")
-  case object FocusTrigger extends Trigger("focus")
-  case object ManualTrigger extends Trigger("manual")
+  final class Trigger(val name: String)
+  val ClickTrigger = new Trigger("click")
+  val HoverTrigger = new Trigger("hover")
+  val FocusTrigger = new Trigger("focus")
+  val ManualTrigger = new Trigger("manual")
 
   sealed trait TooltipEvent extends ListenableEvent[TooltipType]
   case class TooltipShowEvent(source: TooltipType) extends TooltipEvent
