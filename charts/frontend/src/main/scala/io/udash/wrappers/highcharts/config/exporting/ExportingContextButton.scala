@@ -10,7 +10,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class ExportingContextButton extends js.Object {
+trait ExportingContextButton extends js.Object {
 
   /**
     * Alignment for the buttons.

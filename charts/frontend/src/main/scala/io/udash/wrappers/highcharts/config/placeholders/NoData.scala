@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class NoData extends js.Object {
+trait NoData extends js.Object {
 
   /**
     * An object of additional SVG attributes for the no-data label.

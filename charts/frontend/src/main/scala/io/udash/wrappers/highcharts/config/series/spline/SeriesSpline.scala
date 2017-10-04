@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesSpline extends StrictLineSeries {
+trait SeriesSpline extends StrictLineSeries {
   override type Data = js.Array[SeriesSplineData | js.Array[String | Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "spline"
 }
 
 object SeriesSpline {
@@ -167,6 +166,7 @@ object SeriesSpline {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesSpline {
+      override val `type`: String = "spline"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

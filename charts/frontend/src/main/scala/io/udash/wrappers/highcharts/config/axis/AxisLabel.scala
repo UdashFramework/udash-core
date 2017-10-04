@@ -10,7 +10,7 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 @js.annotation.ScalaJSDefined
-class AxisLabel[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
+trait AxisLabel[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
   /**
     * What part of the string the given position is anchored to. Can be one of <code>"left"</code>,
     * <code>"center"</code> or <code>"right"</code>. Defaults to an intelligent guess based on which side of the
@@ -228,7 +228,7 @@ trait AxisLabelCompanion[AxisType <: BaseAxis[AxisType, _], AxisLabelsType <: Ax
 }
 
 @js.annotation.ScalaJSDefined
-class XAxisLabel extends AxisLabel[XAxis]
+trait XAxisLabel extends AxisLabel[XAxis]
 object XAxisLabel extends AxisLabelCompanion[XAxis, XAxisLabel] {
   /**
     * @param align What part of the string the given position is anchored to. Can be one of <code>"left"</code>, <code>"center"</code> or <code>"right"</code>. Defaults to an intelligent guess based on which side of the chart the axis is on and the rotation of the label.
@@ -277,7 +277,7 @@ object XAxisLabel extends AxisLabelCompanion[XAxis, XAxisLabel] {
 }
 
 @js.annotation.ScalaJSDefined
-class YAxisLabel extends AxisLabel[YAxis]
+trait YAxisLabel extends AxisLabel[YAxis]
 object YAxisLabel extends AxisLabelCompanion[YAxis, YAxisLabel] {
   /**
     * @param align What part of the string the given position is anchored to. Can be one of <code>"left"</code>, <code>"center"</code> or <code>"right"</code>. Defaults to an intelligent guess based on which side of the chart the axis is on and the rotation of the label.
@@ -319,7 +319,7 @@ object YAxisLabel extends AxisLabelCompanion[YAxis, YAxisLabel] {
 }
 
 @js.annotation.ScalaJSDefined
-class ZAxisLabel extends AxisLabel[ZAxis]
+trait ZAxisLabel extends AxisLabel[ZAxis]
 object ZAxisLabel extends AxisLabelCompanion[ZAxis, ZAxisLabel] {
   /**
     * @param align What part of the string the given position is anchored to. Can be one of <code>"left"</code>, <code>"center"</code> or <code>"right"</code>. Defaults to an intelligent guess based on which side of the chart the axis is on and the rotation of the label.
@@ -368,7 +368,7 @@ object ZAxisLabel extends AxisLabelCompanion[ZAxis, ZAxisLabel] {
 }
 
 @js.annotation.ScalaJSDefined
-class ColorAxisLabel extends AxisLabel[ColorAxis]
+trait ColorAxisLabel extends AxisLabel[ColorAxis]
 object ColorAxisLabel extends AxisLabelCompanion[ColorAxis, ColorAxisLabel] {
   /**
     * @param align What part of the string the given position is anchored to. Can be one of <code>"left"</code>, <code>"center"</code> or <code>"right"</code>. Defaults to an intelligent guess based on which side of the chart the axis is on and the rotation of the label.

@@ -10,7 +10,7 @@ import scala.scalajs.js.ThisFunction
 
 
 @js.annotation.ScalaJSDefined
-class YAxisStackLabels extends js.Object {
+trait YAxisStackLabels extends js.Object {
 
   /**
     * Defines the horizontal alignment of the stack total label.  Can be one of <code>"left"</code>, <code>"center"</code>

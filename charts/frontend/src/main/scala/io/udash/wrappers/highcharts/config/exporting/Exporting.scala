@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Exporting extends js.Object {
+trait Exporting extends js.Object {
 
   /**
     * <p>Experimental setting to allow HTML inside the chart (added through the <code>useHTML</code> options),

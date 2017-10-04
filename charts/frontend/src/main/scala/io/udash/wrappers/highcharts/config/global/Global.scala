@@ -6,7 +6,7 @@ package global
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class Global extends js.Object {
+trait Global extends js.Object {
 
   /**
     * A custom <code>Date</code> class for advanced date handling. For example, <a href="https://github.com/tahajahangir/jdate">JDate</a> can be hooked in to handle Jalali dates.

@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class BaseSeriesData[DataLabels <: BaseSeriesDataLabels] extends js.Object {
+trait BaseSeriesData[DataLabels <: BaseSeriesDataLabels] extends js.Object {
 
   /**
     * Individual color for the point. By default the color is pulled from the global <code>colors</code> array.
@@ -72,7 +72,7 @@ class BaseSeriesData[DataLabels <: BaseSeriesDataLabels] extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class BaseXSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
+trait BaseXSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The x value of the point.
     */
@@ -80,7 +80,7 @@ class BaseXSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData
 }
 
 @js.annotation.ScalaJSDefined
-class BaseYSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
+trait BaseYSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The y value of the point.
     */
@@ -88,7 +88,7 @@ class BaseYSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData
 }
 
 @js.annotation.ScalaJSDefined
-class BaseTwoDimSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
+trait BaseTwoDimSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The x value of the point.
     */
@@ -101,6 +101,6 @@ class BaseTwoDimSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSerie
 }
 
 @js.annotation.ScalaJSDefined
-class BaseTwoDimMarkerSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseTwoDimSeriesData[DataLabels] {
+trait BaseTwoDimMarkerSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseTwoDimSeriesData[DataLabels] {
   val marker: js.UndefOr[SeriesDataMarker] = js.undefined
 }

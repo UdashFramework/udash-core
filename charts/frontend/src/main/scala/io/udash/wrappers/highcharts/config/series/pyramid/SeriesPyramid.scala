@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesPyramid extends PieLikeSeries {
+trait SeriesPyramid extends PieLikeSeries {
   override type Data = js.Array[SeriesPyramidData | Double]
   override type DataLabels = SeriesConnectorDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "pyramid"
 
   /**
     * The height of the funnel or pyramid. If it is a number it defines the pixel height, if it is a percentage string it is the percentage of the plot area height.
@@ -155,6 +154,7 @@ object SeriesPyramid {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesPyramid {
+      override val `type`: String = "pyramid"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

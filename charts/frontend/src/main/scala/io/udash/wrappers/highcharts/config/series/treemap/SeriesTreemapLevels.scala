@@ -10,7 +10,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesTreemapLevels extends js.Object {
+trait SeriesTreemapLevels extends js.Object {
   /**
     * Can set borderColor on all points which lies on the same level.
     */

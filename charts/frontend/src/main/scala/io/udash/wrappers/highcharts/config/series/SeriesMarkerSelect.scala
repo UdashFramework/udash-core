@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class SeriesMarkerSelect extends js.Object {
+trait SeriesMarkerSelect extends js.Object {
   /**
     * Enable or disable visible feedback for selection.
     *

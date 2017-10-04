@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class Pane extends js.Object {
+trait Pane extends js.Object {
 
   /**
     * An object, or array of objects, for backgrounds.

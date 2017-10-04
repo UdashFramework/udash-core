@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesHeatmap extends MapSeries {
+trait SeriesHeatmap extends MapSeries {
   override type Data = js.Array[SeriesHeatmapData | js.Array[String | Double]]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "heatmap"
 
   /**
     * The corner radius of the border surrounding each column or bar.
@@ -172,6 +171,7 @@ object SeriesHeatmap {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesHeatmap {
+      override val `type`: String = "heatmap"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

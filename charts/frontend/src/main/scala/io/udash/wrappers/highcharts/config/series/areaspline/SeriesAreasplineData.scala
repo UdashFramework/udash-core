@@ -10,7 +10,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesAreasplineData extends SeriesAreaData
+trait SeriesAreasplineData extends SeriesAreaData
 
 object SeriesAreasplineData {
   import scala.scalajs.js.JSConverters._

@@ -8,7 +8,7 @@ import io.udash.wrappers.highcharts.config.utils.{Align, VerticalAlign}
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class Subtitle extends AbstractTitle
+trait Subtitle extends AbstractTitle
 
 object Subtitle {
   import scala.scalajs.js.JSConverters._

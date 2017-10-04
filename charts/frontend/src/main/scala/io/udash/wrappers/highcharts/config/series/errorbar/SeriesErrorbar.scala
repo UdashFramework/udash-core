@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesErrorbar extends CandleLikeSeries {
+trait SeriesErrorbar extends CandleLikeSeries {
   override type Data = js.Array[SeriesErrorbarData | js.Array[String | Double]]
   override type DataLabels = BaseSeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "errorbar"
 }
 
 object SeriesErrorbar {
@@ -187,6 +186,7 @@ object SeriesErrorbar {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesErrorbar {
+      override val `type`: String = "errorbar"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

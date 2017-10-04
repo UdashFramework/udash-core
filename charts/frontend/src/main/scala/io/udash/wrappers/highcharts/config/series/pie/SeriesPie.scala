@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesPie extends PieLikeSeries {
+trait SeriesPie extends PieLikeSeries {
   override type Data = js.Array[SeriesPieData | Double]
   override type DataLabels = SeriesConnectorDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "pie"
 
   /**
     * The end angle of the pie in degrees where 0 is top and 90 is right. Defaults to <code>startAngle</code> plus 360.
@@ -185,6 +184,7 @@ object SeriesPie {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesPie {
+      override val `type`: String = "pie"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

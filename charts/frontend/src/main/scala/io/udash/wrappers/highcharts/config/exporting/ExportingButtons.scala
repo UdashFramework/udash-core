@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class ExportingButtons extends js.Object {
+trait ExportingButtons extends js.Object {
 
   /**
     * Options for the export button.

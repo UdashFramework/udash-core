@@ -8,7 +8,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
+trait ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
 
   /**
     * A class name that opens for styling the axis by CSS, especially in Highcharts styled mode. The class name is applied to group elements for the grid, axis elements and labels.

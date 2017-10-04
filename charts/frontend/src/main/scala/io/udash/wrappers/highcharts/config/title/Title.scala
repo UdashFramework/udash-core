@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Title extends AbstractTitle {
+trait Title extends AbstractTitle {
   /**
     * The margin between the title and the plot area, or if a subtitle is present, the margin between the subtitle and the plot area.
     *

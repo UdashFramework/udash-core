@@ -10,9 +10,8 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesSolidgauge extends GaugeSeries {
+trait SeriesSolidgauge extends GaugeSeries {
   override type Data = js.Array[SeriesSolidgaugeData | Double]
-  override val `type`: String = "solidgauge"
 
   /**
     * Whether the strokes of the solid gauge should be <code>round</code> or <code>square</code>.
@@ -124,6 +123,7 @@ object SeriesSolidgauge {
     val zIndexOuter = zIndex
 
     new SeriesSolidgauge {
+      override val `type`: String = "solidgauge"
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter
       override val className = classNameOuter

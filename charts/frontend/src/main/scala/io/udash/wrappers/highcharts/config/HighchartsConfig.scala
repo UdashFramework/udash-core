@@ -24,7 +24,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class HighchartsConfig extends js.Object {
+trait HighchartsConfig extends js.Object {
   /**
     * <p>Options for configuring accessibility for the chart.
     * Requires the <a href="//code.highcharts.com/modules/accessibility.js">accessibility module</a> to be loaded.

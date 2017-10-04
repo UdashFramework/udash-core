@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesGaugeDial extends js.Object {
+trait SeriesGaugeDial extends js.Object {
 
   /**
     * The background or fill color of the gauge's dial. 

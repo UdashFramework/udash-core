@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
+trait BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
 
   /**
     * Enable or disable the point marker. If <code>null</code>, the markers are hidden when the data is dense,
@@ -77,10 +77,10 @@ class BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
+trait SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
 
 @js.annotation.ScalaJSDefined
-class SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
+trait SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
 
 object SeriesMarker {
   import scala.scalajs.js.JSConverters._

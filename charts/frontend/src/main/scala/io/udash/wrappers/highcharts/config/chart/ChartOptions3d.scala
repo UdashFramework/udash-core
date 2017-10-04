@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class ChartOptions3d extends js.Object {
+trait ChartOptions3d extends js.Object {
 
   /**
     * One of the two rotation angles for the chart.

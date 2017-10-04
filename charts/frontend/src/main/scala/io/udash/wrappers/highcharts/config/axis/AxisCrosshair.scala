@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class AxisCrosshair extends js.Object {
+trait AxisCrosshair extends js.Object {
 
   /**
     * A class name for the crosshair, especially as a hook for styling.

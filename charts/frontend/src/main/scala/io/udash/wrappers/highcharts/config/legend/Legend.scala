@@ -11,7 +11,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class Legend extends js.Object {
+trait Legend extends js.Object {
   /**
     * <p>The horizontal alignment of the legend box within the chart area. Valid values are <code>left</code>, <code>center</code> and <code>right</code>.</p>
     *

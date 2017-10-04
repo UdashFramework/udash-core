@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 @js.annotation.ScalaJSDefined
-class SeriesEvents extends js.Object {
+trait SeriesEvents extends js.Object {
 
   /**
     * Fires after the series has finished its initial animation, or in case animation is disabled, immediately as the series is displayed.

@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesPyramidData extends BaseYSeriesData[SeriesConnectorDataLabels] {
+trait SeriesPyramidData extends BaseYSeriesData[SeriesConnectorDataLabels] {
   /**
     * The sequential index of the data point in the legend.
     */

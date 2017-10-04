@@ -10,7 +10,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class Chart extends js.Object {
+trait Chart extends js.Object {
 
   /**
     * <p>When using multiple axis, the ticks of two or more opposite axes will  automatically be aligned by adding

@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesTreemapData extends BaseSeriesData[SeriesDataLabels] {
+trait SeriesTreemapData extends BaseSeriesData[SeriesDataLabels] {
   /**
     * Serves a purpose only if a colorAxis object is defined in the chart options. This value will decide which color the point gets from the scale of the colorAxis.
     *
