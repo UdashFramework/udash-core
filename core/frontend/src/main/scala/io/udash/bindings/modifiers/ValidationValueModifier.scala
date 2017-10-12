@@ -14,7 +14,7 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
                                  initBuilder: Option[(Future[ValidationResult], Binding => Binding) => Seq[Node]],
                                  completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                                  errorBuilder: Option[(Throwable, Binding => Binding) => Seq[Node]],
-                                 override val customElementsReplace: DOMManipulator#ReplaceMethod)
+                                 override val customElementsReplace: DOMManipulator.ReplaceMethod)
                                 (implicit ec: ExecutionContext)
   extends Binding with DOMManipulator with StrictLogging {
 

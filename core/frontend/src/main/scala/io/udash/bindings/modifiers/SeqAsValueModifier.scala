@@ -8,11 +8,11 @@ import org.scalajs.dom.Node
 private[bindings]
 class SeqAsValueModifier[T](override val property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
                             override val builder: (Seq[T], Binding => Binding) => Seq[Node],
-                            override val customElementsReplace: DOMManipulator#ReplaceMethod)
+                            override val customElementsReplace: DOMManipulator.ReplaceMethod)
   extends ValueModifier[Seq[T]] {
 
   def this(property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], builder: Seq[T] => Seq[Node],
-           customElementsReplace: DOMManipulator#ReplaceMethod) = {
+           customElementsReplace: DOMManipulator.ReplaceMethod) = {
     this(property, (data: Seq[T], _: Binding => Binding) => builder(data), customElementsReplace)
   }
 

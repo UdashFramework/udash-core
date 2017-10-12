@@ -62,7 +62,7 @@ trait Bindings {
     * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
     * @return Modifier for bounded property.
     */
-  def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator#ReplaceMethod)
+  def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
             (elements: Seq[Node]): Binding =
     showIfElse(property, customElementsReplace)(elements, Seq.empty)
 
@@ -86,7 +86,7 @@ trait Bindings {
     * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
     * @return Modifier for bounded property.
     */
-  def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator#ReplaceMethod)
+  def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
                 (elements: Seq[Node], elseElements: Seq[Node]): Binding =
     new PropertyModifier[Boolean](
       property,
@@ -156,7 +156,7 @@ trait Bindings {
     * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
     * @return Modifier for bounded property.
     */
-  def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator#ReplaceMethod, checkNull: Boolean)
+  def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
                           (builder: (T, Binding => Binding) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
@@ -182,7 +182,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
-                 customElementsReplace: DOMManipulator#ReplaceMethod)
+                 customElementsReplace: DOMManipulator.ReplaceMethod)
                 (builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
@@ -214,7 +214,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
-                           customElementsReplace: DOMManipulator#ReplaceMethod)
+                           customElementsReplace: DOMManipulator.ReplaceMethod)
                           (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
@@ -266,8 +266,8 @@ trait Bindings {
     * @return Modifier for repeat logic.
     */
   def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                          customElementsReplace: DOMManipulator#ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                          customElementsInsert: DOMManipulator#InsertMethod = DOMManipulator.defaultElementInsert)
+                                          customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
+                                          customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
                                          (builder: (E) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -287,8 +287,8 @@ trait Bindings {
     * @return Modifier for repeat logic.
     */
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                    customElementsReplace: DOMManipulator#ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                                    customElementsInsert: DOMManipulator#InsertMethod = DOMManipulator.defaultElementInsert)
+                                                    customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
+                                                    customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
                                                    (builder: (E, Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -308,8 +308,8 @@ trait Bindings {
     * @return Modifier for repeat logic.
     */
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                   customElementsReplace: DOMManipulator#ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                                   customElementsInsert: DOMManipulator#InsertMethod = DOMManipulator.defaultElementInsert)
+                                                   customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
+                                                   customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
                                                   (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -368,7 +368,7 @@ trait Bindings {
                         (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                          progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Node] = null,
                          errorBuilder: (Throwable, Binding => Binding) => Seq[Node] = null,
-                         customElementsReplace: DOMManipulator#ReplaceMethod = DOMManipulator.defaultElementReplace)
+                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace)
                         (implicit ec: ExecutionContext): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
 

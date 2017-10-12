@@ -8,7 +8,7 @@ private[bindings]
 class PropertyModifier[T](override val property: ReadableProperty[T],
                           override val builder: ((T, Binding => Binding) => Seq[Node]),
                           override val checkNull: Boolean,
-                          override val customElementsReplace: DOMManipulator#ReplaceMethod)
+                          override val customElementsReplace: DOMManipulator.ReplaceMethod)
   extends ValueModifier[T] {
 
   def this(property: ReadableProperty[T], builder: (T => Seq[Node]), checkNull: Boolean) = {

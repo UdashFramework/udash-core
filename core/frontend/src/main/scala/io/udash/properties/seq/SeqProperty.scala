@@ -135,8 +135,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     elemProperties.nonEmpty
 
   protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit = {
-    val cpy = mutable.Set.empty[(Patch[ItemType]) => Any]
-    cpy ++= structureListeners
+    val cpy = structureListeners.toSet
     CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
 }

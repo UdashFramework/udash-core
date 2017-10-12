@@ -4,8 +4,7 @@ import org.scalajs.dom.{Element, Node}
 
 private[bindings]
 trait DOMManipulator {
-  type ReplaceMethod = (Node, Seq[Node], Seq[Node]) => Boolean
-  type InsertMethod = (Node, Node, Seq[Node]) => Boolean
+  import DOMManipulator._
 
   /**
     * Provides custom child elements replace method. This method takes
@@ -19,7 +18,7 @@ trait DOMManipulator {
     * root element, ref node and new children. It should return `true`,
     * if it does not insert elements in DOM.
     */
-  def customElementsInsert: InsertMethod = DOMManipulator.defaultElementInsert
+  def customElementsInsert: InsertMethod = defaultElementInsert
 
   protected def replace(root: Node)(oldElements: Seq[Node], newElements: Seq[Node]): Unit =
     if (customElementsReplace(root, oldElements, newElements)) {
@@ -34,6 +33,9 @@ trait DOMManipulator {
 
 private[bindings]
 object DOMManipulator {
-  val defaultElementReplace: DOMManipulator#ReplaceMethod = (_, _, _) => true
-  val defaultElementInsert: DOMManipulator#InsertMethod = (_, _, _) => true
+  type ReplaceMethod = (Node, Seq[Node], Seq[Node]) => Boolean
+  type InsertMethod = (Node, Node, Seq[Node]) => Boolean
+
+  val defaultElementReplace: ReplaceMethod = (_, _, _) => true
+  val defaultElementInsert: InsertMethod = (_, _, _) => true
 }
