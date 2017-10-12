@@ -8,14 +8,14 @@ object Dependencies {
   val jqueryWrapperVersion = "1.1.0"
 
   val scalaJsDomVersion = "0.9.3"
-  val scalaTagsVersion = "0.6.5"
+  val scalaTagsVersion = "0.6.7"
   val scalaCssVersion = "0.5.3"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.22.0"
+  val avsCommonsVersion = "1.23.1"
 
-  val atmosphereJSVersion = "2.3.2"
-  val atmosphereVersion = "2.4.13"
+  val atmosphereJSVersion = "2.3.4"
+  val atmosphereVersion = "2.4.14"
 
   val upickleVersion = "0.4.4" // Tests only
   val jawnParserVersion = "0.10.4"
@@ -24,7 +24,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.7.2"
 
-  val jettyVersion = "9.4.6.v20170531" // Tests only
+  val jettyVersion = "9.4.7.v20170914" // Tests only
 
   val scalatestVersion = "3.0.3"
   val bootstrapVersion = "3.3.7-1"

@@ -1819,28 +1819,52 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           Future.successful(Valid)
       })
 
-      var counter = 0
+      var nestedIdGen = 0
+      val nestedCalls = mutable.Set.empty[Int]
 
       val binding = validWithNested(p)(
-        (_, nested) => b("done", nested(produce(p) { v => counter += 1; span(v).render })).render
+        (_, nested) => {
+          val nestedId = nestedIdGen
+          nestedIdGen += 1
+          b("done", nested(produce(p) { v => nestedCalls += nestedId; span(v).render })).render
+        }
       )
       val template = div(binding).render
 
       template.textContent should be("done5")
-      counter should be(1)
+      nestedCalls should contain(0)
 
+      nestedCalls.clear()
       p.set(7)
       template.textContent should be("done7")
+      nestedCalls should contain(1)
 
+      nestedCalls.clear()
       p.set(12)
       template.textContent should be("done12")
-      counter <= 5 should be(true) // the old produce may be fired one more time before removal - it depends on listeners fire order
-      val copyCtr = counter
+      nestedCalls shouldNot contain(0)
+      nestedCalls should contain(2)
+
+      nestedCalls.clear()
+      p.set(7)
+      template.textContent should be("done7")
+      nestedCalls shouldNot contain(0)
+      nestedCalls shouldNot contain(1)
+      nestedCalls should contain(3)
+
+      nestedCalls.clear()
+      p.set(12)
+      template.textContent should be("done12")
+      nestedCalls shouldNot contain(0)
+      nestedCalls shouldNot contain(1)
+      nestedCalls shouldNot contain(2)
+      nestedCalls should contain(4)
 
       binding.kill()
+      nestedCalls.clear()
       p.set(15)
       template.textContent should be("done12")
-      counter should be(copyCtr)
+      nestedCalls.isEmpty should be(true)
     }
   }
 
