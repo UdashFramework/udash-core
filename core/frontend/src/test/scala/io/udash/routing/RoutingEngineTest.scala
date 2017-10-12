@@ -73,6 +73,15 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectView)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd should be(objectView :: nextObjectView :: Nil)
+
+      routingEngine.handleUrl(Url("/next"), fullReload = true)
+
+      renderer.views.size should be(3)
+      renderer.views(0) should be(rootView)
+      renderer.views(1) should be(objectView)
+      renderer.views(2) should be(nextObjectView)
+      renderer.lastSubPathToLeave.size should be(0)
+      renderer.lastPathToAdd should be(rootView :: objectView :: nextObjectView :: Nil)
     }
 
     "fire state change callbacks" in {
@@ -152,6 +161,18 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       calls should be(7)
       lastCallbackEvent.oldState should be(ClassState("abcd", 123))
       lastCallbackEvent.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/next"))
+
+      calls should be(7)
+      lastCallbackEvent.oldState should be(ClassState("abcd", 123))
+      lastCallbackEvent.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/next"), fullReload = true)
+
+      calls should be(8)
+      lastCallbackEvent.oldState should be(NextObjectState)
+      lastCallbackEvent.currentState should be(NextObjectState)
     }
 
     "return valid current app state" in {
@@ -174,6 +195,12 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       routingEngine.handleUrl(Url("/next"))
       routingEngine.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/next"), fullReload = true)
+      routingEngine.currentState should be(NextObjectState)
+
+      routingEngine.handleUrl(Url("/abcd/234"), fullReload = true)
+      routingEngine.currentState should be(ClassState("abcd", 234))
     }
 
     "not render views if presenter throws exception on state handling" in {

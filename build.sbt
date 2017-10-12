@@ -71,9 +71,9 @@ val commonSettings = Seq(
 ) ++ deploymentConfiguration
 
 val commonJSSettings = Seq(
+  parallelExecution in Test := false,
   emitSourceMaps in Compile := true,
   scalaJSStage in Test := FastOptStage,
-  jsDependencies in Test += RuntimeDOM % Test,
   jsEnv in Test := jsTestEnv.value,
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString

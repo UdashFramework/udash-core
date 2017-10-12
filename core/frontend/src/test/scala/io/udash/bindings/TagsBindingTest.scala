@@ -253,6 +253,111 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
   }
 
+  "showIfElse" should {
+    "update content of DOM element" in {
+      val p = Property[Boolean](true)
+      val element = h1("Test")
+      val elseElement = h1("Else")
+      val template = div(
+        span(),
+        showIfElse(p)(element.render, elseElement.render),
+        span()
+      ).render
+      val template2 = div(showIfElse(p)(element.render, elseElement.render)).render
+
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+
+      p.set(false)
+      template.textContent should be("Else")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Else")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Else")
+
+      p.set(true)
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+    }
+
+    "not swap position" in {
+      val p = Property(true)
+      val p2 = Property(false)
+
+      val element = h1("Test").render
+      val element2 = h1("ABC").render
+      val elseElement = h1("Else").render
+
+      val template = div(
+        "1",
+        showIfElse(p)(element, elseElement),
+        span("2"),
+        showIf(p2)(element2),
+        div("3")
+      ).render
+
+      template.textContent should be("1Test23")
+
+      p.set(false)
+      template.textContent should be("1Else23")
+
+      p2.set(true)
+      template.textContent should be("1Else2ABC3")
+
+      p.set(true)
+      template.textContent should be("1Test2ABC3")
+
+      p.set(false)
+      template.textContent should be("1Else2ABC3")
+
+      p2.set(false)
+      template.textContent should be("1Else23")
+    }
+
+    "work after moving element in DOM" in {
+      val p = Property(true)
+      val element = h1("Test").render
+      val elseElement = h1("Else").render
+      val b = span(showIfElse(p)(element, elseElement)).render
+      val template = div(b).render
+      val template2 = emptyComponent()
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("Else")
+      template2.textContent should be("")
+
+      p.set(true)
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      template.removeChild(b)
+      template2.appendChild(b)
+
+      template.textContent should be("")
+      template2.textContent should be("Test")
+
+      p.set(false)
+      template.textContent should be("")
+      template2.textContent should be("Else")
+
+      jQ(template2).children().remove()
+      jQ(template).append(b)
+
+      p.set(true)
+      template.textContent should be("Test")
+      template2.textContent should be("")
+    }
+  }
+
   "produce" should {
     "update content of DOM element" in {
       val p = Property[String]("ABC")
@@ -1559,6 +1664,38 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
   }
 
+  "repeatWithIndex" should {
+    "provide property with element index" in {
+      val p = SeqProperty("a", "b", "c", "d")
+
+      val el = div(
+        repeatWithIndex(p) { case (item, idx, nested) =>
+          span(nested(bind(idx)), nested(bind(item))).render
+        }
+      ).render
+
+      el.textContent should be("0a1b2c3d")
+
+      p.append("e")
+      el.textContent should be("0a1b2c3d4e")
+
+      p.remove("b")
+      el.textContent should be("0a1c2d3e")
+
+      p.insert(1, "B")
+      el.textContent should be("0a1B2c3d4e")
+
+      p.clear()
+      el.textContent should be("")
+
+      p.set(Seq("x", "y", "z"))
+      el.textContent should be("0x1y2z")
+
+      p.replace(1, 2, "a", "B")
+      el.textContent should be("0x1a2B")
+    }
+  }
+
   "bindValidation" should {
     "render init view on validation start" in {
       val p = Property[Int](5)
@@ -1682,28 +1819,52 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           Future.successful(Valid)
       })
 
-      var counter = 0
+      var nestedIdGen = 0
+      val nestedCalls = mutable.Set.empty[Int]
 
       val binding = validWithNested(p)(
-        (_, nested) => b("done", nested(produce(p) { v => counter += 1; span(v).render })).render
+        (_, nested) => {
+          val nestedId = nestedIdGen
+          nestedIdGen += 1
+          b("done", nested(produce(p) { v => nestedCalls += nestedId; span(v).render })).render
+        }
       )
       val template = div(binding).render
 
       template.textContent should be("done5")
-      counter should be(1)
+      nestedCalls should contain(0)
 
+      nestedCalls.clear()
       p.set(7)
       template.textContent should be("done7")
+      nestedCalls should contain(1)
 
+      nestedCalls.clear()
       p.set(12)
       template.textContent should be("done12")
-      counter <= 5 should be(true) // the old produce may be fired one more time before removal - it depends on listeners fire order
-      val copyCtr = counter
+      nestedCalls shouldNot contain(0)
+      nestedCalls should contain(2)
+
+      nestedCalls.clear()
+      p.set(7)
+      template.textContent should be("done7")
+      nestedCalls shouldNot contain(0)
+      nestedCalls shouldNot contain(1)
+      nestedCalls should contain(3)
+
+      nestedCalls.clear()
+      p.set(12)
+      template.textContent should be("done12")
+      nestedCalls shouldNot contain(0)
+      nestedCalls shouldNot contain(1)
+      nestedCalls shouldNot contain(2)
+      nestedCalls should contain(4)
 
       binding.kill()
+      nestedCalls.clear()
       p.set(15)
       template.textContent should be("done12")
-      counter should be(copyCtr)
+      nestedCalls.isEmpty should be(true)
     }
   }
 

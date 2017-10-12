@@ -53,9 +53,20 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def showIf(property: ReadableProperty[Boolean])(elements: Seq[dom.Element]): Binding =
+    showIfElse(property)(elements, Seq.empty)
+
+  /**
+    * Switches provided DOM elements depending on property value.
+    *
+    * @param property Property to check.
+    * @param elements  Elements to show if property value is `true`.
+    * @param elseElements Elements to show if property value is `false`.
+    * @return Modifier for bounded property.
+    */
+  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[dom.Element], elseElements: Seq[dom.Element]): Binding =
     new PropertyModifier[Boolean](
       property,
-      (show: Boolean, _) => if (show) elements else Seq.empty,
+      (show: Boolean, _) => if (show) elements else elseElements,
       true
     )
 
@@ -189,6 +200,24 @@ trait Bindings {
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])
                                                    (builder: (E, Binding => Binding) => Seq[Element]): Binding =
     new SeqPropertyModifier[T, E](property, builder)
+
+  /**
+    * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
+    * sequence and also removes those which were removed. You only need to provide builder which is used to
+    * create HTML element for each sequence member. This modifier provides also property with element index in sequence. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
+    * another binding method inside `builder`.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property Property to bind.
+    * @param builder  Builder which is used for every element.
+    * @return Modifier for repeat logic.
+    */
+  def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E])
+                                                  (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Element]): Binding =
+    new SeqPropertyWithIndexModifier[T, E](property, builder)
 
   /**
     * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able

@@ -31,7 +31,9 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     *
     * @param url URL to be resolved
     */
-  def handleUrl(url: Url): Try[Unit] = Try {
+  def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
+    if (fullReload) clearAllPresenters()
+
     val newState = routingRegistry.matchUrl(url)
     val oldState = currentStateProp.get
     currentStateProp.set(newState)
@@ -44,10 +46,8 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
 
     val (viewsToLeave, viewsToAdd) = {
       if (samePath.isEmpty) {
-        statesMap.values.foreach { case (_, presenter) => presenter.onClose() }
-        statesMap.clear()
-        val views = resolvePath(diffPath)
-        (Nil, views)
+        clearAllPresenters()
+        (Nil, resolvePath(diffPath))
       } else {
         val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
         val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
@@ -79,7 +79,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
 
     viewRenderer.renderView(viewsToLeave, viewsToAdd)
 
-    if (newState != oldState) callbacks.fire(StateChangeEvent(newState, oldState))
+    if (fullReload || newState != oldState) callbacks.fire(StateChangeEvent(newState, oldState))
   }.recover { case ex: Throwable => statesMap.clear(); throw ex }
 
   /**
@@ -121,6 +121,11 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
           getUpdatablePathSize(tail1, tail2, acc + 1)
       case _ => acc
     }
+  }
+
+  private def clearAllPresenters(): Unit = {
+    statesMap.values.foreach { case (_, presenter) => presenter.onClose() }
+    statesMap.clear()
   }
 
   private def resolvePath(path: List[HierarchyRoot]): List[View] = {

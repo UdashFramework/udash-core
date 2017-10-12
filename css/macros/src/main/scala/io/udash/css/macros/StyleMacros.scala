@@ -27,13 +27,7 @@ class StyleMacros(val c: blackbox.Context) {
 
   private def handleScalaJs(name: Tree, other: Tree): Tree =
     if (isScalaJs) {
-      q"""
-        {
-          val tmp = new $StyleNameCls($name)
-          ${c.prefix}.elementsBuffer += tmp
-          tmp
-        }
-      """
+      q"""new $StyleNameCls($name)"""
     } else other
 
   private def style(name: Tree, impl: Expr[ToStyle]*): c.Tree =
@@ -45,6 +39,11 @@ class StyleMacros(val c: blackbox.Context) {
           tmp
         }
       """)
+
+  def mixin(impl: Expr[ToStyle]*): Tree = {
+    val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
+    handleScalaJs(q"$fullName", q"""new $StyleImplCls($fullName, $Dsl.style(..$impl)($Compose.trust))""")
+  }
 
   def style(impl: Expr[ToStyle]*): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
