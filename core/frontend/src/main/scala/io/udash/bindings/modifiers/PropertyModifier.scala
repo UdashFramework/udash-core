@@ -12,7 +12,7 @@ class PropertyModifier[T](override val property: ReadableProperty[T],
   extends ValueModifier[T] {
 
   def this(property: ReadableProperty[T], builder: (T => Seq[Node]), checkNull: Boolean) = {
-    this(property, (data: T, _: Binding => Binding) => builder(data), checkNull, DOMManipulator.defaultElementReplace)
+    this(property, (data: T, _: Binding => Binding) => builder(data), checkNull, DOMManipulator.DefaultElementReplace)
   }
 
   def listen(callback: T => Unit): Registration =

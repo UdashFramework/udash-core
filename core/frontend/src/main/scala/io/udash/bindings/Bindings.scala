@@ -59,7 +59,9 @@ trait Bindings {
     *
     * @param property Property to check.
     * @param elements  Elements to show if property value is `true`.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for bounded property.
     */
   def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
@@ -75,7 +77,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
-    showIfElse(property, DOMManipulator.defaultElementReplace)(elements, elseElements)
+    showIfElse(property, DOMManipulator.DefaultElementReplace)(elements, elseElements)
 
   /**
     * Switches provided DOM elements depending on property value.
@@ -83,7 +85,9 @@ trait Bindings {
     * @param property Property to check.
     * @param elements  Elements to show if property value is `true`.
     * @param elseElements Elements to show if property value is `false`.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for bounded property.
     */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
@@ -131,7 +135,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
                           (builder: (T, Binding => Binding) => Seq[Node]): Binding =
-    new PropertyModifier[T](property, builder, checkNull, DOMManipulator.defaultElementReplace)
+    new PropertyModifier[T](property, builder, checkNull, DOMManipulator.DefaultElementReplace)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -153,7 +157,9 @@ trait Bindings {
     * @param builder               Element builder which will be used to create HTML element.
     * @param checkNull             If it is true, then null value of property will result in rendering empty text node.
     *                              If it is false, then null value has to be handled by builder.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
@@ -170,7 +176,7 @@ trait Bindings {
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
                 (builder: Seq[T] => Seq[Node]): Binding =
-    new SeqAsValueModifier[T](property, builder, DOMManipulator.defaultElementReplace)
+    new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -178,7 +184,9 @@ trait Bindings {
     *
     * @param property              Property to bind.
     * @param builder               Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for bounded property.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
@@ -199,7 +207,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
                           (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
-    new SeqAsValueModifier[T](property, builder, DOMManipulator.defaultElementReplace)
+    new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -210,7 +218,9 @@ trait Bindings {
     *
     * @param property              Property to bind.
     * @param builder               Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
@@ -262,12 +272,17 @@ trait Bindings {
     *
     * @param property Property to bind.
     * @param builder  Builder which is used for every element.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsInsert Takes root element, ref node and new children. It should return `true`,
+    *                             if it does not insert elements in DOM. Is such a case the default implementation
+    *                             will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for repeat logic.
     */
   def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                          customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                          customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
+                                          customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
+                                          customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
                                          (builder: (E) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -283,12 +298,17 @@ trait Bindings {
     *
     * @param property Property to bind.
     * @param builder  Builder which is used for every element.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsInsert Takes root element, ref node and new children. It should return `true`,
+    *                             if it does not insert elements in DOM. Is such a case the default implementation
+    *                             will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for repeat logic.
     */
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                    customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                                    customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
+                                                    customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
+                                                    customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
                                                    (builder: (E, Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -304,12 +324,17 @@ trait Bindings {
     *
     * @param property Property to bind.
     * @param builder  Builder which is used for every element.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsInsert Takes root element, ref node and new children. It should return `true`,
+    *                             if it does not insert elements in DOM. Is such a case the default implementation
+    *                             will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for repeat logic.
     */
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                   customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace,
-                                                   customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.defaultElementInsert)
+                                                   customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
+                                                   customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
                                                   (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
@@ -361,14 +386,16 @@ trait Bindings {
     *                              validation results.
     * @param completeBuilder       Builder which is called when validation process is completed. It will give an access to validation results.
     * @param errorBuilder          Builder which is called, when validation process fails.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`, if it did not replace elements in DOM.
+    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return Modifier for validation logic.
     */
   def validWithNested[A](property: ReadableProperty[A])
                         (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                          progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Node] = null,
                          errorBuilder: (Throwable, Binding => Binding) => Seq[Node] = null,
-                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.defaultElementReplace)
+                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace)
                         (implicit ec: ExecutionContext): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
 

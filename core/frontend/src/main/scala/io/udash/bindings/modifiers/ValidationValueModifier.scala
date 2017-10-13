@@ -26,7 +26,7 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
       initBuilder.map(c => (d, _) => c(d)),
       (d, _) => completeBuilder(d),
       errorBuilder.map(c => (d, _) => c(d)),
-      DOMManipulator.defaultElementReplace
+      DOMManipulator.DefaultElementReplace
     )
   }
 
