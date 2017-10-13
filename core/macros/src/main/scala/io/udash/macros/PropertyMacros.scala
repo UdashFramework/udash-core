@@ -394,12 +394,8 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
-    if (isCaseClass(tpe)) {
-      val order = findPrimaryConstructor(tpe).paramLists.flatten.map(m => m.name.toTermName)
-      val members = ccBasedPropertyMembers(tpe)
-        .map(m => m.asMethod.name -> m.typeSignatureIn(tpe).resultType).toMap
-
-     q"""
+    def impl(members: Map[TermName, Type], getCreator: Tree): Tree = {
+      q"""
         new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
           override protected def initialize(): Unit = {
             ..${
@@ -411,80 +407,41 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
           }
 
           def get: $tpe =
-            if (!initialized) null.asInstanceOf[$tpe]
-            else new ${tpe.typeSymbol}(
-             ..${
-                order.map { case name =>
-                  val returnTpe = members(name)
-                  q"""getSubProperty[$returnTpe](${name.toString}).get"""
-                }
-              }
-            )
+            if (isEmpty) null.asInstanceOf[$tpe]
+            else $getCreator
 
           def set(newValue: $tpe, force: Boolean = false): Unit = if (newValue != null) {
+            isEmpty = false
             $CallbackSequencerCls.sequence {
               ..${
                 members.map { case (name, returnTpe) =>
                   q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name, force)"""
+                }
+              }
+            }
+          } else if (!isEmpty) {
+            $CallbackSequencerCls.sequence {
+              ..${
+                members.map { case (name, returnTpe) =>
+                  q"""getSubProperty[$returnTpe](${name.toString}).set(null.asInstanceOf[$returnTpe])"""
                 }
               }
             }
           }
 
           def setInitValue(newValue: $tpe): Unit = if (newValue != null) {
+            isEmpty = false
             ..${
               members.map { case (name, returnTpe) =>
                 q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
               }
             }
-          }
-
-          def touch(): Unit = $CallbackSequencerCls.sequence {
-            ..${
-              members.map { case (name, returnTpe) =>
-                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
-              }
-            }
-          }
-        }
-      """
-    } else {
-      val members = traitBasedPropertyMembers(tpe).map(method => (method.asMethod.name, method.typeSignatureIn(tpe).resultType))
-       q"""
-        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
-          override protected def initialize(): Unit = {
-            ..${
-              members.map {
-                case (name, returnTpe) =>
-                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)(ec)"""
-              }
-            }
-          }
-
-          def get: $tpe =
-            if (!initialized) null.asInstanceOf[$tpe]
-            else new $tpe {
-              ..${
-                members.map { case (name, returnTpe) =>
-                  q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${name.toString}).get"""
-                }
-              }
-            }
-
-          def set(newValue: $tpe, force: Boolean = false): Unit = if (initialized || newValue != null) {
+          } else if (!isEmpty) {
             $CallbackSequencerCls.sequence {
               ..${
                 members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name, force)"""
+                  q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(null.asInstanceOf[$returnTpe])"""
                 }
-              }
-            }
-          }
-
-          def setInitValue(newValue: $tpe): Unit = if (initialized || newValue != null) {
-            ..${
-              members.map { case (name, returnTpe) =>
-                q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
               }
             }
           }
@@ -498,6 +455,39 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
           }
         }
       """
+    }
+
+    if (isCaseClass(tpe)) {
+      val order = findPrimaryConstructor(tpe).paramLists.flatten.map(m => m.name.toTermName)
+      val members = ccBasedPropertyMembers(tpe)
+        .map(m => m.asMethod.name -> m.typeSignatureIn(tpe).resultType).toMap
+
+      impl(members,
+        q"""
+          new ${tpe.typeSymbol}(
+            ..${
+              order.map { case name =>
+                val returnTpe = members(name)
+                q"""getSubProperty[$returnTpe](${name.toString}).get"""
+              }
+            }
+          )
+         """
+      )
+    } else {
+      val members = traitBasedPropertyMembers(tpe).map(method => (method.asMethod.name, method.typeSignatureIn(tpe).resultType))
+
+      impl(members.toMap,
+        q"""
+          new $tpe {
+            ..${
+              members.map { case (name, returnTpe) =>
+                q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${name.toString}).get"""
+              }
+            }
+          }
+        """
+      )
     }
   }
 
