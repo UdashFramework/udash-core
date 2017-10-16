@@ -1,7 +1,7 @@
 package io.udash.bindings
 
-import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.properties.seq.SeqProperty
+import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom.{html, _}
 
 import scala.concurrent.ExecutionContext

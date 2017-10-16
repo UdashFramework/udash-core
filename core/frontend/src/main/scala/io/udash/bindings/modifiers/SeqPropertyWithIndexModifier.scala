@@ -1,20 +1,18 @@
 package io.udash.bindings.modifiers
 
 import com.avsystem.commons.SharedExtensions._
-import io.udash.bindings.Bindings._
-import io.udash.properties._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom._
 
 import scala.collection.mutable
-import scala.scalajs.js
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 private[bindings]
 class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val property: ReadableSeqProperty[T, E],
-                                                                builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Element])
+                                                                builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node],
+                                                                override val customElementsReplace: DOMManipulator.ReplaceMethod,
+                                                                override val customElementsInsert: DOMManipulator.InsertMethod)
   extends SeqPropertyModifierUtils[T, E] {
 
   private val indexes: mutable.HashMap[E, Property[Int]] = mutable.HashMap.empty
@@ -23,10 +21,10 @@ class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val pro
     if (indexes.contains(p)) indexes(p)
     else Property(0).setup { indexes(p) = _ }
 
-  override protected def build(item: E): Seq[Element] =
+  override protected def build(item: E): Seq[Node] =
     builder(item, indexProperty(item), propertyAwareNestedInterceptor(item))
 
-  override protected def handlePatch(root: Element)(patch: Patch[E]): Unit = {
+  override protected def handlePatch(root: Node)(patch: Patch[E]): Unit = {
     super.handlePatch(root)(patch)
     patch.removed.foreach(indexes.remove)
     property.elemProperties.zipWithIndex.drop(patch.idx).foreach { case (p, i) =>
