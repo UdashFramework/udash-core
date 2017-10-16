@@ -924,6 +924,44 @@ class PropertyTest extends UdashFrontendTest {
       p.subProp(_.name).set(Some("Test Test"))
       p.get.withLabel should be("User: Test Test")
     }
+
+    "handle empty model property after subProp call" in {
+      case class Test(a: String, s: SubTest)
+      case class SubTest(x: Int)
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subModel(_.s)
+
+      p.get should be(null)
+      sub.get should be(null)
+
+      sub.subProp(_.x).set(7)
+
+      p.get should be(Test(null, SubTest(7)))
+      sub.get should be(SubTest(7))
+    }
+
+    "handle empty model property after subProp call (trait version)" in {
+      trait Test {
+        def a: String
+        def s: SubTest
+      }
+      trait SubTest {
+        def x: Int
+      }
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subModel(_.s)
+
+      p.get should be(null)
+      sub.get should be(null)
+
+      sub.subProp(_.x).set(7)
+
+      p.get.a should be(null)
+      p.get.s.x should be(7)
+      sub.get.x should be(7)
+    }
   }
 
   "SeqProperty" should {

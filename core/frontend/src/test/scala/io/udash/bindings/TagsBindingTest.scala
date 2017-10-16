@@ -464,6 +464,58 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes.apply(0).textContent should be("")
     }
 
+    "handle empty case class based model properties" in {
+      case class Test(i: Int, subType: SubTest)
+      case class SubTest(i: Int)
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subProp(_.subType)
+      val template = div(
+        produce(p) { t =>
+          div(t.i, t.subType.i).render
+        },
+        produce(sub) { t =>
+          div(t.i).render
+        }
+      ).render
+
+      template.textContent should be("")
+
+      p.set(Test(5, SubTest(7)))
+      template.textContent should be("577")
+    }
+
+    "handle empty trait based model properties" in {
+      trait Test {
+        def i: Int
+        def subType: SubTest
+      }
+      trait SubTest {
+        def i: Int
+      }
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subProp(_.subType)
+      val template = div(
+        produce(p) { t =>
+          div(t.i, t.subType.i).render
+        },
+        produce(sub) { t =>
+          div(t.i).render
+        }
+      ).render
+
+      template.textContent should be("")
+
+      p.set(new Test {
+        override def i = 5
+        override def subType = new SubTest {
+          override def i = 7
+        }
+      })
+      template.textContent should be("577")
+    }
+
     "allow custom null handling" in {
       val p = Property[String]("ABC")
       val template = div(
