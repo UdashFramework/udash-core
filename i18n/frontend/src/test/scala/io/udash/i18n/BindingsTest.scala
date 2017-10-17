@@ -2,15 +2,12 @@ package io.udash.i18n
 
 import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
 
-import scala.concurrent.Promise
+import scala.concurrent.{Future, Promise}
 
-class BindingsTest extends UdashFrontendTest {
+class BindingsTest extends AsyncUdashFrontendTest {
   import scalatags.JsDom.all._
-
-  @silent
-  implicit val ec = scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
   implicit val provider: TranslationProvider = new LocalTranslationProvider(Map(
     Lang("en") -> Bundle(BundleHash("hash1"), Map(
@@ -60,8 +57,14 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
-      template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+      for {
+        _ <- eventually {
+          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+        }
+        r <- eventually {
+          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+        }
+      } yield r
     }
 
     "handle custom placeholder" in {
@@ -73,11 +76,17 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.textContent should be("placeholder")
-
-      p.success(Translated("Udash"))
-
-      template.textContent should be("Udash")
+      for {
+        _ <- eventually {
+          template.textContent should be("placeholder")
+        }
+        _ <- Future {
+          p.success(Translated("Udash"))
+        }
+        r <- eventually {
+          template.textContent should be("Udash")
+        }
+      } yield r
     }
 
     "handle None as placeholder" in {
@@ -89,11 +98,17 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.textContent should be("")
-
-      p.success(Translated("Udash"))
-
-      template.textContent should be("Udash")
+      for {
+        _ <- eventually {
+          template.textContent should be("")
+        }
+        _ <- Future {
+          p.success(Translated("Udash"))
+        }
+        r <- eventually {
+          template.textContent should be("Udash")
+        }
+      } yield r
     }
   }
 
@@ -112,8 +127,14 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.getAttribute("translation") should be("Translation test")
-      template2.getAttribute("translation") should be("Translation test pl")
+      for {
+        _ <- eventually {
+          template.getAttribute("translation") should be("Translation test")
+        }
+        r <- eventually {
+          template2.getAttribute("translation") should be("Translation test pl")
+        }
+      } yield r
     }
   }
 
@@ -144,14 +165,20 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
-      template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
-
-      en.set(Lang("pl"))
-      pl.set(Lang("en"))
-
-      template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
-      template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+      for {
+        _ <- eventually {
+          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+        }
+        _ <- Future {
+          en.set(Lang("pl"))
+          pl.set(Lang("en"))
+        }
+        r <- eventually {
+          template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+          template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+        }
+      } yield r
     }
   }
 
@@ -172,14 +199,20 @@ class BindingsTest extends UdashFrontendTest {
         ).render
       }
 
-      template.getAttribute("translation") should be("Translation test")
-      template2.getAttribute("translation") should be("Translation test pl")
-
-      en.set(Lang("pl"))
-      pl.set(Lang("en"))
-
-      template.getAttribute("translation") should be("Translation test pl")
-      template2.getAttribute("translation") should be("Translation test")
+      for {
+        _ <- eventually {
+          template.getAttribute("translation") should be("Translation test")
+          template2.getAttribute("translation") should be("Translation test pl")
+        }
+        _ <- Future {
+          en.set(Lang("pl"))
+          pl.set(Lang("en"))
+        }
+        r <- eventually {
+          template.getAttribute("translation") should be("Translation test pl")
+          template2.getAttribute("translation") should be("Translation test")
+        }
+      } yield r
     }
   }
 
@@ -201,24 +234,53 @@ class BindingsTest extends UdashFrontendTest {
         )
       ).render
 
-      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
-      lang.set(pl)
-      el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test pl")
-      lang.set(en)
-      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
-
-      translations.append(pKey1)
-      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
-      lang.set(pl)
-      el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
-      lang.set(en)
-      el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
-
-
-      translations.remove(1, 3)
-      el.textContent should be("Translation testTranslation test")
-      lang.set(pl)
-      el.textContent should be("Translation test plTranslation test pl")
+      for {
+        _ <- eventually {
+          el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
+        }
+        _ <- Future {
+          lang.set(pl)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test pl")
+        }
+        _ <- Future {
+          lang.set(en)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
+        }
+        _ <- Future {
+          translations.append(pKey1)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
+        }
+        _ <- Future {
+          lang.set(pl)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
+        }
+        _ <- Future {
+          lang.set(en)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
+        }
+        _ <- Future {
+          translations.remove(1, 3)
+        }
+        _ <- eventually {
+          el.textContent should be("Translation testTranslation test")
+        }
+        _ <- Future {
+          lang.set(pl)
+        }
+        r <- eventually {
+          el.textContent should be("Translation test plTranslation test pl")
+        }
+      } yield r
     }
 
     "work with reduced keys in property" in {
@@ -226,7 +288,7 @@ class BindingsTest extends UdashFrontendTest {
       val p: Property[TranslationKey0] = Property[TranslationKey0]
       val key1 = TranslationKey.key1[String]("tr1")
       p.set(key1.reduce("test"))
-      p.get.apply().value.get.get.string should be("Translation test")
+      eventually(p.get.apply().value.get.get.string should be("Translation test"))
     }
 
     "work with keys in property" in {
@@ -234,15 +296,24 @@ class BindingsTest extends UdashFrontendTest {
       val p: Property[TranslationKey] = Property[TranslationKey]
       val key1 = TranslationKey.key1[String]("tr1")
       p.set(key1)
-      (p.get match {
-        case key: TranslationKey1[_] => true
-        case _ => false
-      }) should be(true)
-      p.set(key1.reduce("asd"))
-      (p.get match {
-        case key: TranslationKey0 => key.apply().value.get.get.string
-        case _ => "false"
-      }) should be("Translation asd")
+
+      for {
+        _ <- eventually {
+          (p.get match {
+            case key: TranslationKey1[_] => true
+            case _ => false
+          }) should be(true)
+        }
+        _ <- Future {
+          p.set(key1.reduce("asd"))
+        }
+        r <- eventually {
+          (p.get match {
+            case key: TranslationKey0 => key.apply().value.get.get.string
+            case _ => "false"
+          }) should be("Translation asd")
+        }
+      } yield r
     }
   }
 }

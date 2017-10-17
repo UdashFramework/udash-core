@@ -17,8 +17,8 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
                          (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
-  import io.udash.css.CssView._
   import UdashDropdown._
+  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 
   /** Dropdown menu list ID. */

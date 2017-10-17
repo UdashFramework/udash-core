@@ -1,12 +1,7 @@
 package io.udash.properties.seq
 
-import java.util.UUID
-
-import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
-
-import scala.concurrent.ExecutionContext
 
 private[properties]
 abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]]

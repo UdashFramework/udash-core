@@ -5,19 +5,19 @@ import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object ModelProperty {
   /** Creates an empty ModelProperty[T]. */
-  def empty[T: PropertyCreator : ModelPart](implicit ec: ExecutionContext): ModelProperty[T] =
+  def empty[T: PropertyCreator : ModelPart]: ModelProperty[T] =
     Property.empty[T].asModel
 
   /** Creates an empty ModelProperty[T]. */
-  def apply[T: PropertyCreator : ModelPart](implicit ec: ExecutionContext): ModelProperty[T] =
+  def apply[T: PropertyCreator : ModelPart]: ModelProperty[T] =
     empty
 
   /** Creates ModelProperty[T] with initial value. */
-  def apply[T: PropertyCreator : ModelPart](init: T)(implicit ec: ExecutionContext): ModelProperty[T] =
+  def apply[T: PropertyCreator : ModelPart](init: T): ModelProperty[T] =
     Property[T](init).asModel
 }
 
@@ -41,8 +41,12 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import Validator._
-    Future.sequence(Seq(super.isValid) ++ properties.values.map(p => p.isValid)).foldValidationResult
+    if (validationResult == null) {
+      validationResult = Future.sequence(Seq(super.isValid) ++ properties.values.map(p => p.isValid)).foldValidationResult
+    }
+    validationResult
   }
 }
 

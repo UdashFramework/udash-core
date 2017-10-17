@@ -8,7 +8,6 @@ import io.udash.utils.{CallbacksHandler, SetRegistration}
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.reflect.ClassTag
-import scala.scalajs.concurrent.JSExecutionContext
 import scala.util.Try
 
 case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
@@ -22,7 +21,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
                     viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
                     viewRenderer: ViewRenderer) {
 
-  private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]], JSExecutionContext.queue)
+  private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]])
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 

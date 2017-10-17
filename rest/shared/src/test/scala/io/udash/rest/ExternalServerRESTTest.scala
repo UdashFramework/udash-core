@@ -1,6 +1,5 @@
 package io.udash.rest
 
-import com.avsystem.commons.concurrent.RunNowEC
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.internal.RESTConnector
 import io.udash.rest.internal.RESTConnector.HTTPMethod
@@ -11,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
 class DefaultServerRESTTest extends AsyncUdashSharedTest {
-  implicit val testExecutionContext: ExecutionContext = RunNowEC
+  implicit val testExecutionContext: ExecutionContext = ExecutionContext.Implicits.global
 
   class ConnectorMock extends RESTConnector {
     var url: String = null
@@ -45,122 +44,151 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       val responses = Seq.newBuilder[Future[org.scalatest.Assertion]]
 
       connector.response = rest.framework.write(r3)
-      responses += restServer.serviceOne().create(r).map(_ should be(r3))
-      connector.url should be("/serviceOne/create")
-      connector.method should be(RESTConnector.POST)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      for {
+        _ <- eventually {
+          responses += restServer.serviceOne().create(r).map(_ should be(r3))
+          connector.url should be("/serviceOne/create")
+          connector.method should be(RESTConnector.POST)
+          connector.queryArguments should be(Map.empty)
+          connector.headers should be(Map.empty)
+          rest.framework.read[TestRESTRecord](connector.body) should be(r)
+        }
 
-      connector.response = rest.framework.write(r2)
-      responses += restServer.serviceOne().update(r2.id.get)(r2).map(_ should be(r2))
-      connector.url should be(s"/serviceOne/update/${r2.id.get}")
-      connector.method should be(RESTConnector.PUT)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      rest.framework.read[TestRESTRecord](connector.body) should be(r2)
+        _ <- Future { connector.response = rest.framework.write(r2) }
+        _ <- eventually {
+          responses += restServer.serviceOne().update(r2.id.get)(r2).map(_ should be(r2))
+          connector.url should be(s"/serviceOne/update/${r2.id.get}")
+          connector.method should be(RESTConnector.PUT)
+          connector.queryArguments should be(Map.empty)
+          connector.headers should be(Map.empty)
+          rest.framework.read[TestRESTRecord](connector.body) should be(r2)
+        }
 
-      connector.response = rest.framework.write(r3)
-      responses += restServer.serviceOne().modify(r2.id.get)("test", 5).map(_ should be(r3))
-      connector.url should be(s"/serviceOne/change/${r2.id.get}")
-      connector.method should be(RESTConnector.PATCH)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      rest.framework.read[Map[String, rest.framework.RawValue]](connector.body) should be(Map("s" -> "\"test\"", "i" -> "5")) // in this framework RawValue = String
+        _ <- Future { connector.response = rest.framework.write(r3) }
+        _ <- eventually {
+          responses += restServer.serviceOne().modify(r2.id.get)("test", 5).map(_ should be(r3))
+          connector.url should be(s"/serviceOne/change/${r2.id.get}")
+          connector.method should be(RESTConnector.PATCH)
+          connector.queryArguments should be(Map.empty)
+          connector.headers should be(Map.empty)
+          rest.framework.read[Map[String, rest.framework.RawValue]](connector.body) should be(Map("s" -> "\"test\"", "i" -> "5")) // in this framework RawValue = String
+        }
 
-      connector.response = rest.framework.write(r)
-      responses += restServer.serviceOne().delete(r2.id.get).map(_ should be(r))
-      connector.url should be(s"/serviceOne/remove/${r2.id.get}")
-      connector.method should be(RESTConnector.DELETE)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      connector.body should be(null)
-      Future.sequence(responses.result()).map(_.fold(Succeeded)((x, y) => Succeeded))
+        _ <- Future { connector.response = rest.framework.write(r) }
+        r <- eventually {
+          responses += restServer.serviceOne().delete(r2.id.get).map(_ should be(r))
+          connector.url should be(s"/serviceOne/remove/${r2.id.get}")
+          connector.method should be(RESTConnector.DELETE)
+          connector.queryArguments should be(Map.empty)
+          connector.headers should be(Map.empty)
+          connector.body should be(null)
+          Future.sequence(responses.result()).map(_.fold(Succeeded)((x, y) => Succeeded))
+        }
+      } yield r
     }
 
     "handle deep interfaces" in {
       restServer.serviceOne().deeper().load(r2.id.get)
-      connector.url should be(s"/serviceOne/deeper/load/${r2.id.get}")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
+      eventually {
+        connector.url should be(s"/serviceOne/deeper/load/${r2.id.get}")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+      }
     }
 
     "handle methods with skipped REST name" in {
       restServer.serviceSkip().deeper().load(r2.id.get)
-      connector.url should be(s"/deeper/load/${r2.id.get}")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
+      eventually {
+        connector.url should be(s"/deeper/load/${r2.id.get}")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+      }
     }
 
     "handle overloaded methods" in {
       val s = Seq(r, r2, r3)
       connector.response = rest.framework.write(s)
       val resp = restServer.serviceOne().load()
-      connector.url should be(s"/serviceOne/load")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      connector.body should be(null)
-      resp.map(_ should be(s))
+      eventually {
+        connector.url should be(s"/serviceOne/load")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+        connector.body should be(null)
+        resp.map(_ should be(s))
+      }
     }
 
     "handle query arguments" in {
       restServer.serviceOne().load(r3.id.get, "trashValue", "thrashValue 123")
-      connector.url should be(s"/serviceOne/load/${r3.id.get}")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments("trash") should be("trashValue")
-      connector.queryArguments("trash_two") should be("thrashValue 123")
-      connector.headers should be(Map.empty)
-      connector.body should be(null)
+      eventually {
+        connector.url should be(s"/serviceOne/load/${r3.id.get}")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments("trash") should be("trashValue")
+        connector.queryArguments("trash_two") should be("thrashValue 123")
+        connector.headers should be(Map.empty)
+        connector.body should be(null)
+      }
     }
 
     "handle header arguments" in {
       restServer.serviceTwo("token_123", "pl").create(r)
-      connector.url should be("/serviceTwo/create")
-      connector.method should be(RESTConnector.POST)
-      connector.queryArguments should be(Map.empty)
-      connector.headers("X_AUTH_TOKEN") should be("token_123")
-      connector.headers("lang") should be("pl")
-      rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      eventually {
+        connector.url should be("/serviceTwo/create")
+        connector.method should be(RESTConnector.POST)
+        connector.queryArguments should be(Map.empty)
+        connector.headers("X_AUTH_TOKEN") should be("token_123")
+        connector.headers("lang") should be("pl")
+        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      }
     }
 
     "handle overrided method name" in {
       restServer.serviceThree("abc").create(r)
-      connector.url should be("/service_three/abc/create")
-      connector.method should be(RESTConnector.POST)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      eventually {
+        connector.url should be("/service_three/abc/create")
+        connector.method should be(RESTConnector.POST)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      }
     }
 
     "handle broken HTTP response" in {
       connector.response = rest.framework.write(r2)
       val resp = restServer.serviceOne().load()
-      connector.url should be(s"/serviceOne/load")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      connector.body should be(null)
-      resp.value.get should matchPattern { case Failure(ex: GenCodec.ReadFailure) => }
+      eventually {
+        connector.url should be(s"/serviceOne/load")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+        connector.body should be(null)
+        resp.value.get should matchPattern { case Failure(ex: GenCodec.ReadFailure) => }
+      }
     }
 
     "handle RPC fires" in {
       restServer.serviceOne().fireAndForget(123)
-      connector.url should be(s"/serviceOne/fireAndForget")
-      connector.method should be(RESTConnector.POST)
-      connector.queryArguments should be(Map.empty)
-      connector.headers should be(Map.empty)
-      connector.body should be("123")
-
-      restServer.serviceTwo("token_123", "pl").deeper().fire(123)
-      connector.url should be(s"/serviceTwo/deeper/fire/123")
-      connector.method should be(RESTConnector.GET)
-      connector.queryArguments should be(Map.empty)
-      connector.headers("X_AUTH_TOKEN") should be("token_123")
-      connector.headers("lang") should be("pl")
-      connector.body should be(null)
+      for {
+        _ <- eventually {
+          connector.url should be(s"/serviceOne/fireAndForget")
+          connector.method should be(RESTConnector.POST)
+          connector.queryArguments should be(Map.empty)
+          connector.headers should be(Map.empty)
+          connector.body should be("123")
+        }
+        _ <- Future { restServer.serviceTwo("token_123", "pl").deeper().fire(123) }
+        r <- eventually {
+          connector.url should be(s"/serviceTwo/deeper/fire/123")
+          connector.method should be(RESTConnector.GET)
+          connector.queryArguments should be(Map.empty)
+          connector.headers("X_AUTH_TOKEN") should be("token_123")
+          connector.headers("lang") should be("pl")
+          connector.body should be(null)
+        }
+      } yield r
     }
 
     "compile recursive interface" in {

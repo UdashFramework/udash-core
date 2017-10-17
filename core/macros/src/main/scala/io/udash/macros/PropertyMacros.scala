@@ -34,8 +34,6 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
   val MutableMap = q"_root_.scala.collection.mutable.Map"
   val StringCls = tq"String"
 
-  val ExecutionContextCls = tq"_root_.scala.concurrent.ExecutionContext"
-
   private lazy val OptionTpe = typeOf[Option[_]]
   private lazy val OptTpe = typeOf[Opt[_]]
   private lazy val SeqTpe = typeOf[Seq[_]]
@@ -381,7 +379,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
 
   private def generateValueProperty(tpe: Type): c.Tree = {
     q"""
-      new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec){}
+      new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()){}
     """
   }
 
@@ -389,19 +387,19 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     val elementTpe = tpe.typeArgs.head
     q"""{
        implicit val elemCreator = implicitly[$PropertyCreatorCls[$elementTpe]]
-       new $DirectSeqPropertyImplCls[$elementTpe](prt, $PropertyCreatorCompanion.newID())(elemCreator, ec)
+       new $DirectSeqPropertyImplCls[$elementTpe](prt, $PropertyCreatorCompanion.newID())(elemCreator)
       }"""
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
     def impl(members: Map[TermName, Type], getCreator: Tree): Tree = {
       q"""
-        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())(ec) {
+        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()) {
           override protected def initialize(): Unit = {
             ..${
               members.map {
                 case (name, returnTpe) =>
-                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)(ec)"""
+                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)"""
               }
             }
           }
@@ -561,7 +559,7 @@ class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
     q"""
        new $PropertyCreatorCls[$tpe] {
          $implicitSelfPc
-         def newProperty(prt: $ReadablePropertyCls[_])(implicit ec: $ExecutionContextCls): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe] = {
+         def newProperty(prt: $ReadablePropertyCls[_]): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe] = {
            ${constructor.apply(tpe)}
          }
        }

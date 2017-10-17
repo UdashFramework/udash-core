@@ -6,7 +6,6 @@ import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom._
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
 
 private[bindings]
 class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val property: ReadableSeqProperty[T, E],

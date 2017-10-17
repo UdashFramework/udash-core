@@ -7,23 +7,23 @@ import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
-  def empty[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+  def empty[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.empty[Seq[T]].asSeq[T]
 
   /** Creates an empty DirectSeqProperty[T]. */
-  def apply[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     empty
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]], ec: ExecutionContext): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]], ev: ModelSeq[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property[Seq[T]](init).asSeq[T]
 }
 
@@ -39,8 +39,12 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import Validator._
-    Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
+    if (validationResult == null) {
+      validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
+    }
+    validationResult
   }
 
   /** Transforms ReadableSeqProperty[A] into ReadableSeqProperty[B].
@@ -61,8 +65,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
   def combine[B, O: ModelValue](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
-    class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]],
-                                      p: ReadableProperty[B], override val executionContext: ExecutionContext)
+    class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B])
       extends ReadableSeqProperty[O, ReadableProperty[O]] {
 
       override val id: UUID = PropertyCreator.newID()
@@ -100,12 +103,12 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
       }
     }
 
-    new CombinedReadableSeqProperty(this, property, executionContext)
+    new CombinedReadableSeqProperty(this, property)
   }
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
   def zip[B, O: ModelValue](property: ReadableSeqProperty[B, ReadableProperty[B]])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
-    new ZippedReadableSeqProperty(this, property, combiner, executionContext)
+    new ZippedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
     * Uses `defaultA` and `defaultB` to fill smaller sequence. */
@@ -113,11 +116,11 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
                               (combiner: (A, B) => O,
                                defaultA: ReadableProperty[A],
                                defaultB: ReadableProperty[B]): ReadableSeqProperty[O, ReadableProperty[O]] =
-    new ZippedAllReadableSeqProperty(this, property, combiner, defaultA, defaultB, executionContext)
+    new ZippedAllReadableSeqProperty(this, property, combiner, defaultA, defaultB)
 
   /** Zips elements from `this` SeqProperty with their indexes. */
   lazy val zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =
-    new ZippedWithIndexReadableSeqProperty[A](this, executionContext)
+    new ZippedWithIndexReadableSeqProperty[A](this)
 
   /** The size of this sequence, equivalent to length. */
   def size: Int =

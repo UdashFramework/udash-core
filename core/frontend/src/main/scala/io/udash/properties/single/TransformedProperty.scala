@@ -1,11 +1,9 @@
 package io.udash.properties
 package single
 
-import java.util.UUID
-
 import io.udash.utils.Registration
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties]
@@ -40,8 +38,8 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
 
   override def addValidator(v: Validator[B]): Registration =
     origin.addValidator(new Validator[A] {
-      override def apply(element: A)(implicit ec: ExecutionContext): Future[ValidationResult] =
-        v(transformer(element))(ec)
+      override def apply(element: A): Future[ValidationResult] =
+        v(transformer(element))
     })
 
   override def clearValidators(): Unit =

@@ -4,7 +4,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom.{html, _}
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -19,7 +18,8 @@ object CheckButtons {
     * @param xs Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
-  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Element] = {
+  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String],
+            decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*): JsDom.TypedTag[html.Element] = {
     val htmlInputs = prepareHtmlInputs(options)(xs:_*)
     val bind = prepareBind(property, htmlInputs)
     htmlInputs.foreach(bind.applyTo)
@@ -29,7 +29,7 @@ object CheckButtons {
   private def prepareHtmlInputs(options: Seq[String])(xs: Modifier*) =
     options.map(opt => input(tpe := "checkbox", value := opt)(xs:_*).render)
 
-  private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]], htmlInputs: Seq[html.Input])(implicit ec: ExecutionContext): JsDom.Modifier = {
+  private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]], htmlInputs: Seq[html.Input]): JsDom.Modifier = {
     def updateInput(t: html.Input) = {
       val selection = property.get
       t.checked = selection.contains(t.value)

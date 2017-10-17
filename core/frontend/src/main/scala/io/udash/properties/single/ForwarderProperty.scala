@@ -1,9 +1,10 @@
 package io.udash.properties.single
+
 import java.util.UUID
 
 import io.udash.properties.{PropertyCreator, ValidationResult}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait ForwarderReadableProperty[A] extends ReadableProperty[A] {
   protected def origin: ReadableProperty[_]
@@ -19,9 +20,6 @@ trait ForwarderReadableProperty[A] extends ReadableProperty[A] {
 
   override protected[properties] def valueChanged(): Unit =
     origin.valueChanged()
-
-  override implicit protected[properties] def executionContext: ExecutionContext =
-    origin.executionContext
 }
 
 trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with Property[A] {

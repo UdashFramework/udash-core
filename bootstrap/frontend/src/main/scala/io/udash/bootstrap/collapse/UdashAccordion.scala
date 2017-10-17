@@ -2,10 +2,9 @@ package io.udash.bootstrap
 package collapse
 
 import io.udash._
-import io.udash.properties.seq
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
-import io.udash.properties.seq.SeqProperty
+import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom._
 
@@ -18,8 +17,8 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
                            body: (ElemType) => dom.Element)
   extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
   import BootstrapTags._
+  import io.udash.css.CssView._
 
   import scalatags.JsDom.all._
 

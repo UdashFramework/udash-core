@@ -8,10 +8,9 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.scalajs.js
 import scalatags.JsDom
-import scalatags.JsDom.all.{Attr => _}
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 trait Bindings {
@@ -353,7 +352,7 @@ trait Bindings {
   def bindValidation[A](property: ReadableProperty[A],
                         initBuilder: Future[ValidationResult] => Seq[Element],
                         completeBuilder: ValidationResult => Seq[Element],
-                        errorBuilder: Throwable => Seq[Element])(implicit ec: ExecutionContext): Binding =
+                        errorBuilder: Throwable => Seq[Element]): Binding =
     new ValidationValueModifier(property, Some(initBuilder), completeBuilder, Some(errorBuilder))
 
   /**
@@ -370,8 +369,7 @@ trait Bindings {
   def valid[A](property: ReadableProperty[A])
               (completeBuilder: ValidationResult => Seq[Node],
                progressBuilder: Future[ValidationResult] => Seq[Node] = null,
-               errorBuilder: Throwable => Seq[Node] = null)
-              (implicit ec: ExecutionContext): Binding =
+               errorBuilder: Throwable => Seq[Node] = null): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
 
   /**
@@ -395,8 +393,7 @@ trait Bindings {
                         (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                          progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Node] = null,
                          errorBuilder: (Throwable, Binding => Binding) => Seq[Node] = null,
-                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace)
-                        (implicit ec: ExecutionContext): Binding =
+                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
 
   /**

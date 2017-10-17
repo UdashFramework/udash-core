@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 
 import io.udash.css.CssStyleName
-import io.udash.properties.PropertyCreator
 
 import scala.language.postfixOps
 

@@ -3,13 +3,7 @@ package io.udash.rpc
 import io.udash.rpc.internals.UsesServerRPC
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 
-import scala.concurrent.ExecutionContext
-import scala.scalajs.concurrent.JSExecutionContext
-
-abstract class ServerRPC[ServerRPCType] extends UsesServerRPC[ServerRPCType] {
-  implicit def executionContext: ExecutionContext =
-    JSExecutionContext.queue
-}
+abstract class ServerRPC[ServerRPCType] extends UsesServerRPC[ServerRPCType]
 
 /** Default implementation of [[io.udash.rpc.ServerRPC]]. */
 class DefaultServerRPC[ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]

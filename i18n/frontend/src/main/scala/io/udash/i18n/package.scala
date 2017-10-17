@@ -4,7 +4,7 @@ import io.udash.i18n.bindings.{AttrTranslationBinding, DynamicAttrTranslationBin
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scalatags.generic.Modifier
 
 package object i18n {
@@ -22,7 +22,7 @@ package object i18n {
     * @param translation Future containing translated string or error.
     * @param placeholder Placeholder, if `None` passed it will be empty text node.
     */
-  def translated(translation: Future[Translated], placeholder: Option[dom.Element] = None)(implicit ec: ExecutionContext): Modifier[dom.Element] =
+  def translated(translation: Future[Translated], placeholder: Option[dom.Element] = None): Modifier[dom.Element] =
     new TranslationBinding(translation, placeholder)
 
   /**
@@ -32,7 +32,7 @@ package object i18n {
     * @param placeholder Placeholder, if `None` passed it will be empty text node.
     */
   def translatedDynamic[Key <: TranslationKey](key: Key, placeholder: Option[dom.Element] = None)(translator: (Key) => Future[Translated])
-                                       (implicit ec: ExecutionContext, lang: LangProperty): Modifier[dom.Element] =
+                                       (implicit lang: LangProperty): Modifier[dom.Element] =
     new DynamicTranslationBinding(key, translator, placeholder)
 
   /**
@@ -40,7 +40,7 @@ package object i18n {
     * @param translation Future containing translated string or error.
     * @param attr Attribute name which gonna be updated when `translation` text become ready.
     */
-  def translatedAttr(translation: Future[Translated], attr: String)(implicit ec: ExecutionContext): Modifier[dom.Element] =
+  def translatedAttr(translation: Future[Translated], attr: String): Modifier[dom.Element] =
     new AttrTranslationBinding(translation, attr)
 
   /**
@@ -50,6 +50,6 @@ package object i18n {
     * @param attr Attribute name which gonna be updated when `translation` text become ready.
     */
   def translatedAttrDynamic[Key <: TranslationKey](key: Key, attr: String)(translator: (Key) => Future[Translated])
-                                                  (implicit ec: ExecutionContext, lang: LangProperty): Modifier[dom.Element] =
+                                                  (implicit lang: LangProperty): Modifier[dom.Element] =
     new DynamicAttrTranslationBinding(key, translator, attr)
 }

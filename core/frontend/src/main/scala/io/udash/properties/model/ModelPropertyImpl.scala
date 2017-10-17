@@ -5,10 +5,8 @@ import java.util.UUID
 
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 
-import scala.concurrent.ExecutionContext
 
 abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
-                                   (implicit val executionContext: ExecutionContext)
   extends ModelProperty[A] with CastableProperty[A] {
 
   /** False if subproperties were not created yet. */
