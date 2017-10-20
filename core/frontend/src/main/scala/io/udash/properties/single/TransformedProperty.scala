@@ -9,8 +9,8 @@ import scala.concurrent.Future
 private[properties]
 class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
                                         transformer: A => B) extends ForwarderReadableProperty[B] {
-  override def listen(valueListener: (B) => Any): Registration =
-    origin.listen((a: A) => valueListener(transformer(a)))
+  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration =
+    origin.listen((a: A) => valueListener(transformer(a)), initUpdate)
 
   override def listenOnce(valueListener: (B) => Any): Registration =
     origin.listenOnce((a: A) => valueListener(transformer(a)))
