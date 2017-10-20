@@ -63,9 +63,13 @@ trait ReadableProperty[A] {
   /** @return Current property value. */
   def get: A
 
-  /** Registers listener which will be called on value change. */
-  def listen(valueListener: A => Any): Registration = {
+  /**
+    * Registers listener which will be called on value change.
+    * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
+    */
+  def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
+    if (initUpdate) valueListener(this.get)
     new SetRegistration(listeners, valueListener)
   }
 

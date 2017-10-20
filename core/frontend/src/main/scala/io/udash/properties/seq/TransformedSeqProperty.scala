@@ -27,8 +27,8 @@ class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], Ori
       ))
     )
 
-  override def listen(valueListener: (Seq[B]) => Any): Registration =
-    origin.listen((seq: Seq[A]) => valueListener(seq.map(transformer)))
+  override def listen(valueListener: (Seq[B]) => Any, initUpdate: Boolean = false): Registration =
+    origin.listen((seq: Seq[A]) => valueListener(seq.map(transformer)), initUpdate)
 
   override def listenOnce(valueListener: (Seq[B]) => Any): Registration =
     origin.listenOnce((seq: Seq[A]) => valueListener(seq.map(transformer)))
