@@ -1,12 +1,12 @@
 package io.udash.macros
 
-import com.avsystem.commons.macros.MacroCommons
+import com.avsystem.commons.macros.AbstractMacroCommons
 import com.avsystem.commons.misc.Opt
 
 import scala.collection.mutable
 import scala.reflect.macros.blackbox
 
-class PropertyMacros(val c: blackbox.Context) extends MacroCommons {
+class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
   import c.universe._
 
   val Package = q"_root_.io.udash.properties"
