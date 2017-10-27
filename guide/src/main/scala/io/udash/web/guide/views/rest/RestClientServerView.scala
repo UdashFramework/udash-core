@@ -26,7 +26,7 @@ class RestClientServerView extends FinalView {
     CodeBlock(
       """val restServer = DefaultServerREST[MainServerREST](
         |  dom.window.location.hostname,
-        |  dom.window.location.port.toInt,
+        |  Try(dom.window.location.port.toInt).getOrElse(80),
         |  "/rest"
         |)""".stripMargin
     )(GuideStyles),
