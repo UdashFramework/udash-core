@@ -98,7 +98,7 @@ class PropertyValidationTest extends AsyncUdashFrontendTest {
         _ <- eventually(p.isValid.value.get.get should be(Invalid("Error")))
         _ <- eventually(fired should be(true))
 
-        _ <- Future(fired = false)
+        _ <- Future { fired = false }
         _ <- eventually(p.isValid.value.get.get should be(Invalid("Error"))) //it should not rerun validation
         _ <- eventually(fired should be(false))
 

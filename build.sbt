@@ -24,7 +24,14 @@ scalacOptions in ThisBuild ++= Seq(
   }.getOrElse("-Xlint:_")
 )
 
-jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox())
+jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
+  import org.openqa.selenium.chrome.ChromeOptions
+  val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
+  val chromeOptions = new ChromeOptions()
+  chromeOptions.addArguments("--headless --disable-gpu")
+  chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
+  chrome
+})
 
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,

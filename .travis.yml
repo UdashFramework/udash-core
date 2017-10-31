@@ -19,14 +19,14 @@ before_script:
   - export PATH=$PWD/selenium-bin:$PATH
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION "set (UdashBuild.jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Chrome().withChromeOptions({val options = new org.openqa.selenium.chrome.ChromeOptions(); options.addArguments(\"--headless --disable-gpu\"); options })))" $TEST_PACKAGE
+  - sbt ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
 
 jdk:
   - oraclejdk8
 
 scala:
   - 2.11.11
-  - 2.12.2
+  - 2.12.4
 
 env:
   - TEST_PACKAGE="core-macros/test core-sharedJVM/test core-sharedJS/test core-frontend/test"
