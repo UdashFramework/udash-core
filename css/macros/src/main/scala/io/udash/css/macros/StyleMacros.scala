@@ -1,12 +1,12 @@
 package io.udash.css.macros
 
-import com.avsystem.commons.macros.MacroCommons
+import com.avsystem.commons.macros.AbstractMacroCommons
 
 import scala.reflect.macros.blackbox
 import scalacss.internal.DslBase.ToStyle
 import scalacss.internal.FontFace
 
-class StyleMacros(val c: blackbox.Context) extends MacroCommons {
+class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons(c) {
   import c.universe._
 
   val Package = q"_root_.io.udash.css"
