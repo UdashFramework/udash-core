@@ -1,3 +1,4 @@
+import com.typesafe.sbt.SbtPgp.autoImportImpl.PgpKeys._
 import Dependencies._
 import UdashBuild._
 
@@ -89,6 +90,16 @@ val commonJSSettings = Seq(
   }
 )
 
+val noPublishSettings = Seq(
+  publishArtifact := false,
+  publish := {},
+  publishLocal := {},
+  publishM2 := {},
+  publishSigned := {},
+  publishLocalSigned := {},
+  doc := (target in doc).value,
+)
+
 lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
@@ -99,7 +110,7 @@ lazy val udash = project.in(file("."))
     `css-macros`, `css-shared-JS`, `css-shared-JVM`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
-  .settings(publishArtifact := false)
+  .settings(noPublishSettings:_*)
 
 lazy val `core-macros` = project.in(file("core/macros"))
   .settings(commonSettings: _*)
