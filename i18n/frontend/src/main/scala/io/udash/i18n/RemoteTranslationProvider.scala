@@ -4,8 +4,8 @@ import java.{util => ju}
 
 import org.scalajs.dom.ext.Storage
 
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.util.Try
 
@@ -20,7 +20,10 @@ import scala.util.Try
 class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
                                 cache: Option[Storage], ttl: FiniteDuration,
                                 missingTranslationError: String = "Missing translation")
-                               (implicit ec: ExecutionContext) extends FrontendTranslationProvider {
+  extends FrontendTranslationProvider {
+
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
   protected def storageKey(key: String)(implicit lang: Lang) = s"udash-i18n_${lang.lang}_$key"
   protected val cacheHashKey = "udash-i18n-cache-hash"
   protected val cacheTTLKey = "udash-i18n-cache-ttl"

@@ -145,6 +145,31 @@ class PropertyTest extends UdashFrontendTest {
       oneTimeValues(2) should be(C(12, "asd2"))
     }
 
+    "fire listener callback when registered with initUpdate flag" in {
+      val values = mutable.ArrayBuffer[Any]()
+      val listener = (v: Any) => values += v
+
+      val p = Property[Int](5)
+      val tp = Property[T](TO1)
+      val cp = Property[C](C(1, "asd"))
+
+      p.listen(listener, initUpdate = true)
+      tp.listen(listener, initUpdate = true)
+      cp.listen(listener, initUpdate = true)
+
+      p.set(7)
+      tp.set(TC1(12))
+      cp.set(C(12, "asd2"))
+
+      values.size should be(6)
+      values(0) should be(5)
+      values(1) should be(TO1)
+      values(2) should be(C(1, "asd"))
+      values(3) should be(7)
+      values(4) should be(TC1(12))
+      values(5) should be(C(12, "asd2"))
+    }
+
     "transform and synchronize value" in {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
@@ -248,8 +273,10 @@ class PropertyTest extends UdashFrontendTest {
 
       var mxcChanges = 0
       var mycChanges = 0
+      var mycChangesWithInit = 0
       mxc.listen(_ => mxcChanges += 1)
       myc.listen(_ => mycChanges += 1)
+      myc.listen(_ => mycChangesWithInit += 1, initUpdate = true)
 
       m.subProp(_.x).set(0.2)
       m.subProp(_.y).set(0.1)
@@ -259,6 +286,7 @@ class PropertyTest extends UdashFrontendTest {
       myc.get should be(1.0)
       mxcChanges should be(1)
       mycChanges should be(1)
+      mycChangesWithInit should be(2)
 
       val s = SeqProperty(1, 2, 3, 4)
       val sc = sum.combine(s)((m, items) => items.map(_ * m))
@@ -684,8 +712,11 @@ class PropertyTest extends UdashFrontendTest {
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val p = ModelProperty[TT]
-      p.listen(listener)
+      p.listen(listener, initUpdate = true)
       p.listenOnce(oneTimeListener)
+
+      values.size should be(1)
+      values.clear()
 
       val init = newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c'))
       p.set(init)
@@ -924,6 +955,44 @@ class PropertyTest extends UdashFrontendTest {
       p.subProp(_.name).set(Some("Test Test"))
       p.get.withLabel should be("User: Test Test")
     }
+
+    "handle empty model property after subProp call" in {
+      case class Test(a: String, s: SubTest)
+      case class SubTest(x: Int)
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subModel(_.s)
+
+      p.get should be(null)
+      sub.get should be(null)
+
+      sub.subProp(_.x).set(7)
+
+      p.get should be(Test(null, SubTest(7)))
+      sub.get should be(SubTest(7))
+    }
+
+    "handle empty model property after subProp call (trait version)" in {
+      trait Test {
+        def a: String
+        def s: SubTest
+      }
+      trait SubTest {
+        def x: Int
+      }
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subModel(_.s)
+
+      p.get should be(null)
+      sub.get should be(null)
+
+      sub.subProp(_.x).set(7)
+
+      p.get.a should be(null)
+      p.get.s.x should be(7)
+      sub.get.x should be(7)
+    }
   }
 
   "SeqProperty" should {
@@ -1075,15 +1144,18 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "fire value listeners on structure change" in {
-      val p = SeqProperty[Int]
+      val p = SeqProperty[Int](Seq(0, 0, 0))
 
       val values = mutable.ArrayBuffer[Seq[Int]]()
       val listener = (s: Seq[Int]) => values += s
       val oneTimeValues = mutable.ArrayBuffer[Seq[Int]]()
       val oneTImeListener = (s: Seq[Int]) => oneTimeValues += s
 
-      p.listen(listener)
+      p.listen(listener, initUpdate = true)
       p.listenOnce(oneTImeListener)
+
+      values.size should be(1)
+      values.clear()
 
       p.set(Seq(1,2,3))
       values.size should be(1)

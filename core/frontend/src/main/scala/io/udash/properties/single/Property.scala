@@ -7,26 +7,25 @@ import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSing
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 object Property {
   /** Creates an empty DirectProperty[T]. */
-  def empty[T](implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
+  def empty[T](implicit pc: PropertyCreator[T]): CastableProperty[T] =
     pc.newProperty(null)
 
   /** Creates an empty DirectProperty[T]. */
-  def apply[T: PropertyCreator](implicit ec: ExecutionContext): CastableProperty[T] =
+  def apply[T: PropertyCreator]: CastableProperty[T] =
     empty
 
   /** Creates DirectProperty[T] with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T], ec: ExecutionContext): CastableProperty[T] =
+  def apply[T](init: T)(implicit pc: PropertyCreator[T]): CastableProperty[T] =
     pc.newProperty(init, null)
 
   private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
-    import target.executionContext
-
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     private var value: ValidationResult = Valid
     private var initialized: Boolean = false
     private var p: Property[ValidationResult] = _
@@ -58,17 +57,19 @@ trait ReadableProperty[A] {
   protected[this] val validators: mutable.Set[Validator[A]] = mutable.Set()
   protected[this] var validationResult: Future[ValidationResult] = _
 
-  implicit protected[properties] def executionContext: ExecutionContext
-
   /** Unique property ID. */
   val id: UUID
 
   /** @return Current property value. */
   def get: A
 
-  /** Registers listener which will be called on value change. */
-  def listen(valueListener: A => Any): Registration = {
+  /**
+    * Registers listener which will be called on value change.
+    * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
+    */
+  def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
+    if (initUpdate) valueListener(this.get)
     new SetRegistration(listeners, valueListener)
   }
 
@@ -151,7 +152,8 @@ trait ReadableProperty[A] {
   protected[properties] def fireValueListeners(): Unit = {
     CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
-      listeners.foreach(_.apply(t))
+      val cpy = listeners.toSet
+      cpy.foreach(_.apply(t))
     })
   }
 
@@ -162,17 +164,18 @@ trait ReadableProperty[A] {
   }
 
   protected[properties] def validate(): Unit = {
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     if (validators.nonEmpty) {
       val p = Promise[ValidationResult]
       validationResult = p.future
       CallbackSequencer.queue(s"${this.id.toString}:fireValidation", () => {
         import Validator._
         val currentValue = this.get
-        p.completeWith(
+        p.completeWith {
           Future.sequence(
-            validators.map(_(currentValue)).toSeq
+            validators.map(_ (currentValue)).toSeq
           ).foldValidationResult
-        )
+        }
       })
     } else validationResult = Future.successful(Valid)
   }

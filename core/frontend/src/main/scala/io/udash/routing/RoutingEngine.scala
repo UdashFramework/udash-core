@@ -8,7 +8,6 @@ import io.udash.utils.{CallbacksHandler, SetRegistration}
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.reflect.ClassTag
-import scala.scalajs.concurrent.JSExecutionContext
 import scala.util.Try
 
 case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
@@ -22,7 +21,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
                     viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
                     viewRenderer: ViewRenderer) {
 
-  private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]], JSExecutionContext.queue)
+  private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]])
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
@@ -45,29 +44,24 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Immutabl
     val diffPath = findDiffSuffix(newStatePath, currentStatePath)
 
     val (viewsToLeave, viewsToAdd) = {
-      if (samePath.isEmpty) {
-        clearAllPresenters()
-        (Nil, resolvePath(diffPath))
-      } else {
-        val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
-        val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-        toRemoveStates.values.foreach { case (_, presenter) => presenter.onClose() }
+      val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
+      val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
+      toRemoveStates.values.foreach { case (_, presenter) => presenter.onClose() }
 
-        val oldViewFactories =
-          newStatePath
-            .slice(samePath.size, samePath.size + toUpdateStatesSize)
-            .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)(scala.collection.breakOut)
-        var i = samePath.size
-        statesMap.retain { (_, _) =>
-          i -= 1
-          i >= 0
-        }
-        statesMap ++= oldViewFactories
-
-        val viewsToLeave = statesMap.values.map(_._1).toList
-        val views = resolvePath(diffPath.slice(toUpdateStatesSize, diffPath.size))
-        (viewsToLeave, views)
+      val oldViewFactories =
+        newStatePath
+          .slice(samePath.size, samePath.size + toUpdateStatesSize)
+          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)(scala.collection.breakOut)
+      var i = samePath.size
+      statesMap.retain { (_, _) =>
+        i -= 1
+        i >= 0
       }
+      statesMap ++= oldViewFactories
+
+      val viewsToLeave = statesMap.values.map(_._1).toList
+      val views = resolvePath(diffPath.slice(toUpdateStatesSize, diffPath.size))
+      (viewsToLeave, views)
     }
 
     diffPath.foldRight(Option(newState)) { (currentState, previousState) =>

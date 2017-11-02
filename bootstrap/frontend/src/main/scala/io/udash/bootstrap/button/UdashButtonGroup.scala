@@ -6,7 +6,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.{ModelPart, PropertyCreator, seq}
 import org.scalajs.dom
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
 final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
@@ -14,8 +13,8 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
                              size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
                              override val componentId: ComponentId)
                             (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
-  import io.udash.css.CssView._
   import io.udash.bootstrap.BootstrapTags._
+  import io.udash.css.CssView._
 
   private val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
     BootstrapStyles.Button.btnGroupVertical.styleIf(vertical) ::
@@ -67,7 +66,7 @@ object UdashButtonGroup {
     */
   def apply(size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
-           (buttons: dom.Element*)(implicit ec: ExecutionContext): UdashButtonGroup[dom.Element, Property[dom.Element]] =
+           (buttons: dom.Element*): UdashButtonGroup[dom.Element, Property[dom.Element]] =
     reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](buttons), size, vertical, justified)(_.get)
 
 
@@ -124,7 +123,7 @@ object UdashButtonGroup {
            (items: seq.ReadableSeqProperty[ItemType, ElemType],
             size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
-           (implicit ec: ExecutionContext): UdashButtonGroup[ItemType, ElemType] = {
+           : UdashButtonGroup[ItemType, ElemType] = {
     val radioId = UdashBootstrap.newId()
     val selected = Property[String]("")
     new UdashButtonGroup[ItemType, ElemType](items, size, vertical, justified, true, componentId)(el => {

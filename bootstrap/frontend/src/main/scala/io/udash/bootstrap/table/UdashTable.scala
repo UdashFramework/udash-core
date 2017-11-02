@@ -39,7 +39,6 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
 }
 
 object UdashTable {
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   /**
     * Creates progress bar component.

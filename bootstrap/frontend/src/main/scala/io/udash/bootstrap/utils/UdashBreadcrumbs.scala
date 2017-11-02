@@ -1,19 +1,16 @@
 package io.udash.bootstrap
 package utils
 
+import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.{PropertyCreator, seq}
-import io.udash.{properties, _}
 import org.scalajs.dom
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Anchor
 
-import scala.concurrent.ExecutionContext
-
 final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] private
                             (val pages: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                             (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean)
-                            (implicit ec: ExecutionContext)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
@@ -67,7 +64,6 @@ object UdashBreadcrumbs {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (pages: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
-           (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false)
-           (implicit ec: ExecutionContext): UdashBreadcrumbs[ItemType, ElemType] =
+           (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)
 }

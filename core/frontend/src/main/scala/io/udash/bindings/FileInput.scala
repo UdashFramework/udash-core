@@ -4,11 +4,9 @@ import io.udash._
 import org.scalajs.dom
 import org.scalajs.dom.{Event, File, html}
 
-import scalatags.JsDom
 import scalatags.generic.Modifier
 
 object FileInput {
-  import io.udash.utils.FileUploader._
 
   /**
     * Creates file input providing information about selected files.

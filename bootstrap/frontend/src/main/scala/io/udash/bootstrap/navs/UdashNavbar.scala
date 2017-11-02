@@ -14,8 +14,8 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
                        (brand: dom.Element, nav: UdashNav[ItemType, ElemType])
   extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
   import BootstrapTags._
+  import io.udash.css.CssView._
 
   private val collapseId = UdashBootstrap.newId()
 

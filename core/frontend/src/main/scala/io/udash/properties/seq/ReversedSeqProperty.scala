@@ -1,12 +1,7 @@
 package io.udash.properties.seq
 
-import java.util.UUID
-
-import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
-
-import scala.concurrent.ExecutionContext
 
 private[properties]
 abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]]
@@ -19,8 +14,8 @@ abstract class BaseReversedSeqProperty[A, +ElemType <: ReadableProperty[A], Orig
   override def elemProperties: Seq[ElemType] =
     origin.elemProperties.reverse
 
-  override def listen(valueListener: (Seq[A]) => Any): Registration =
-    origin.listen(s => valueListener(s.reverse))
+  override def listen(valueListener: (Seq[A]) => Any, initUpdate: Boolean = false): Registration =
+    origin.listen(s => valueListener(s.reverse), initUpdate)
 
   override def listenOnce(valueListener: (Seq[A]) => Any): Registration =
     origin.listenOnce(s => valueListener(s.reverse))

@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package tooltip
 
 import org.scalajs.dom
+
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.language.postfixOps
 import scala.scalajs.js

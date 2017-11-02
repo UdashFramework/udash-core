@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 
 import io.udash.css.CssStyleName
-import io.udash.properties.PropertyCreator
 
 import scala.language.postfixOps
 
@@ -388,10 +387,14 @@ object BootstrapStyles {
     val caption = CssStyleName("caption")
     val thumbnail = CssStyleName("thumbnail")
 
+    @deprecated("Use `UdashIcons.FontAwesome.fa` instead.", "0.6.0")
     val _fa = CssStyleName("fa")
+    @deprecated("Use `UdashIcons.Glyphicon.glyphicon` instead.", "0.6.0")
     val _glyphicon = CssStyleName("glyphicon")
 
+    @deprecated("Use `UdashIcons.FontAwesome` instead.", "0.6.0")
     def fa(name: String) = Seq(_fa, CssStyleName(s"fa-$name"))
+    @deprecated("Use `UdashIcons.FontAwesome` instead.", "0.6.0")
     def glyphicon(name: String) = Seq(_glyphicon, CssStyleName(s"glyphicon-$name"))
   }
 

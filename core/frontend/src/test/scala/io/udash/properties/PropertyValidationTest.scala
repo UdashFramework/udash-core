@@ -3,14 +3,16 @@ package io.udash.properties
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.AsyncUdashFrontendTest
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Random
 
-class PropertyValidationTest extends UdashFrontendTest {
-  case class C(i: Int, s: String)
+class PropertyValidationTest extends AsyncUdashFrontendTest {
+  case class C(i: Int, s: String) {
+    private var thisShouldBeStandardProperty: Int = 17
+  }
 
   trait TT {
     def i: Int
@@ -29,6 +31,7 @@ class PropertyValidationTest extends UdashFrontendTest {
   case class TC1(i: Int) extends T
   case class TC2(s: String) extends T
 
+  implicit val immutableC: ImmutableValue[C] = null
   implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
   implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
   implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
@@ -49,38 +52,36 @@ class PropertyValidationTest extends UdashFrontendTest {
     "work with standard Property" in {
       val p = Property[C](C(2, "asd"))
       p.addValidator(new Validator[C] {
-        override def apply(element: C)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: C): Future[ValidationResult] = Future {
           if (element.i < element.s.length) Valid
           else Invalid("i should be smaller then s length.")
         }
       })
       p.addValidator(new Validator[C] {
-        override def apply(element: C)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: C): Future[ValidationResult] = Future {
           if (element.i < 5) Valid
           else Invalid("i should be smaller then 5.")
         }
       })
 
-      p.isValid.value.get.get should be(Valid)
-
-      p.set(C(4, "asd"))
-      p.isValid.value.get.get should be(Invalid("i should be smaller then s length."))
-
-      p.set(C(5, "qweasdzxc"))
-      p.isValid.value.get.get should be(Invalid("i should be smaller then 5."))
-
-      p.set(C(5, "asd"))
-      p.isValid.value.get.get.asInstanceOf[Invalid[ValidationError]].errors.size should be(2)
-
-      p.clearValidators()
-      p.isValid.value.get.get should be(Valid)
+      for {
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.set(C(4, "asd")))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("i should be smaller then s length.")))
+        _ <- Future(p.set(C(5, "qweasdzxc")))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("i should be smaller then 5.")))
+        _ <- Future(p.set(C(5, "asd")))
+        _ <- eventually(p.isValid.value.get.get.asInstanceOf[Invalid[ValidationError]].errors.size should be(2))
+        _ <- Future(p.clearValidators())
+        r <- eventually(p.isValid.value.get.get should be(Valid))
+      } yield r
     }
 
     "start on isValid call (only if needed)" in {
       val p = Property[Int](5)
       var fired = false
       p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = {
+        override def apply(element: Int): Future[ValidationResult] = {
           fired = true
           Future {
             if (element < 0) Valid
@@ -89,109 +90,125 @@ class PropertyValidationTest extends UdashFrontendTest {
         }
       })
 
-      fired should be(false)
+      for {
+        _ <- eventually(fired should be(false))
 
-      p.set(7)
-      fired should be(false)
+        _ <- Future(p.set(7))
+        _ <- eventually(fired should be(false))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("Error")))
+        _ <- eventually(fired should be(true))
 
-      p.isValid.value.get.get should be(Invalid("Error"))
-      fired should be(true)
+        _ <- Future { fired = false }
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("Error"))) //it should not rerun validation
+        _ <- eventually(fired should be(false))
 
-      fired = false
-      p.isValid.value.get.get should be(Invalid("Error")) //it should not rerun validation
-      fired should be(false)
-
-      fired = false
-      p.set(-3)
-      p.isValid.value.get.get should be(Valid) //it should rerun validation
-      fired should be(true)
+        _ <- Future(p.set(-3))
+        _ <- eventually(p.isValid.value.get.get should be(Valid)) //it should rerun validation
+        r <- eventually(fired should be(true))
+      } yield r
     }
 
     "work with ModelProperty" in {
       val p = ModelProperty[TT](newTT(5, Some(""), C(5, "01234567890123"), "0123456"))
       p.addValidator(new Validator[TT] {
-        override def apply(element: TT)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: TT): Future[ValidationResult] = Future {
           if (element.i == element.t.c.i) Valid
           else Invalid("Error")
         }
       })
       p.subModel(_.t).addValidator(new Validator[ST] {
-        override def apply(element: ST)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: ST): Future[ValidationResult] = Future {
           if (element.s.length > 5) Valid
           else Invalid("Error2")
         }
       })
       p.subProp(_.t.c).addValidator(new Validator[C] {
-        override def apply(element: C)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: C): Future[ValidationResult] = Future {
           if (element.s.length > 10) Valid
           else Invalid("Error3")
         }
       })
 
-      p.isValid.value.get.get should be(Valid)
-
-      p.set(newTT(5, Some(""), C(5, "01234567890123"), "0123"))
-      p.isValid.value.get.get should be(Invalid("Error2"))
-      p.subModel(_.t).isValid.value.get.get should be(Invalid("Error2"))
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.set(newTT(5, Some(""), C(2, "012"), "01234567"))
-      p.isValid.value.get.get should be(Invalid("Error", "Error3"))
-      p.subModel(_.t).isValid.value.get.get should be(Invalid("Error3"))
-      p.subProp(_.t.c).isValid.value.get.get should be(Invalid("Error3"))
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.subProp(_.t.c).set(C(5, "012323"))
-      p.isValid.value.get.get should be(Invalid("Error3"))
-      p.subModel(_.t).isValid.value.get.get should be(Invalid("Error3"))
-      p.subProp(_.t.c).isValid.value.get.get should be(Invalid("Error3"))
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.subProp(_.t.c).set(C(5, "01234567890123"))
-      p.isValid.value.get.get should be(Valid)
-      p.subModel(_.t).isValid.value.get.get should be(Valid)
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.subProp(_.i).set(2)
-      p.isValid.value.get.get should be(Invalid("Error"))
-      p.subModel(_.t).isValid.value.get.get should be(Valid)
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.subProp(_.i).set(5)
-      p.subSeq(_.t.s).set("0")
-      p.isValid.value.get.get should be(Invalid("Error2"))
-      p.subModel(_.t).isValid.value.get.get should be(Invalid("Error2"))
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.subProp(_.i).set(2)
-      p.subSeq(_.t.s).set("0123123123")
-      p.isValid.value.get.get should be(Invalid("Error"))
-      p.subModel(_.t).isValid.value.get.get should be(Valid)
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
-
-      p.clearValidators()
-      p.isValid.value.get.get should be(Valid)
-      p.subModel(_.t).isValid.value.get.get should be(Valid)
-      p.subProp(_.t.c).isValid.value.get.get should be(Valid)
-      p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+      for {
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.set(newTT(5, Some(""), C(5, "01234567890123"), "0123")))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error2"))
+          p.subModel(_.t).isValid.value.get.get should be(Invalid("Error2"))
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future(p.set(newTT(5, Some(""), C(2, "012"), "01234567")))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error", "Error3"))
+          p.subModel(_.t).isValid.value.get.get should be(Invalid("Error3"))
+          p.subProp(_.t.c).isValid.value.get.get should be(Invalid("Error3"))
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future(p.subProp(_.t.c).set(C(5, "012323")))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error3"))
+          p.subModel(_.t).isValid.value.get.get should be(Invalid("Error3"))
+          p.subProp(_.t.c).isValid.value.get.get should be(Invalid("Error3"))
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future(p.subProp(_.t.c).set(C(5, "01234567890123")))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Valid)
+          p.subModel(_.t).isValid.value.get.get should be(Valid)
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future(p.subProp(_.i).set(2))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error"))
+          p.subModel(_.t).isValid.value.get.get should be(Valid)
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future {
+          p.subProp(_.i).set(5)
+          p.subSeq(_.t.s).set("0")
+        }
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error2"))
+          p.subModel(_.t).isValid.value.get.get should be(Invalid("Error2"))
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future {
+          p.subProp(_.i).set(2)
+          p.subSeq(_.t.s).set("0123123123")
+        }
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error"))
+          p.subModel(_.t).isValid.value.get.get should be(Valid)
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+        _ <- Future {
+          p.clearValidators()
+        }
+        r <- eventually {
+          p.isValid.value.get.get should be(Valid)
+          p.subModel(_.t).isValid.value.get.get should be(Valid)
+          p.subProp(_.t.c).isValid.value.get.get should be(Valid)
+          p.subSeq(_.t.s).isValid.value.get.get should be(Valid)
+        }
+      } yield r
     }
 
     "work with SeqProperty" in {
       val p = SeqProperty[T](TO1, TO2)
       p.addValidator(new Validator[Seq[T]] {
-        override def apply(element: Seq[T])(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+        override def apply(element: Seq[T]): Future[ValidationResult] = Future {
           if (element.contains(TO1)) Valid
           else Invalid("Error")
         }
       })
       p.listenStructure(patch => {
         patch.added.foreach(_.addValidator(new Validator[T] {
-          override def apply(element: T)(implicit ec: ExecutionContext): Future[ValidationResult] = Future {
+          override def apply(element: T): Future[ValidationResult] = Future {
             element match {
               case TC1(i) if i < 0 => Invalid("ElemError1")
               case TC2(s) if s.length > 5 => Invalid("ElemError2")
@@ -201,40 +218,42 @@ class PropertyValidationTest extends UdashFrontendTest {
         }))
       })
 
-      p.isValid.value.get.get should be(Valid)
-
-      p.remove(TO1)
-      p.isValid.value.get.get should be(Invalid("Error"))
-      p.elemProperties.foreach(sp => sp.isValid.value.get.get should be(Valid))
-
-      p.append(TO1, TC1(1), TC2("asd"))
-      p.isValid.value.get.get should be(Valid)
-
-      p.elemProperties(2).set(TC1(-3))
-      p.isValid.value.get.get should be(Invalid("ElemError1"))
-
-      p.remove(TO1)
-      p.isValid.value.get.get should be(Invalid("Error", "ElemError1"))
-
-      p.remove(TC1(-3))
-      p.remove(TC2("asd"))
-      p.append(TO1)
-      p.isValid.value.get.get should be(Valid)
-
-      p.append(TC1(-21), TC2("blablablabla"))
-      p.isValid.value.get.get should be(Invalid("ElemError1", "ElemError2"))
-
-      p.remove(TO1)
-      p.isValid.value.get.get should be(Invalid("Error", "ElemError1", "ElemError2"))
-
-      p.replace(0, 3, TO1)
-      p.isValid.value.get.get should be(Valid)
-
-      p.set(Seq.empty)
-      p.isValid.value.get.get should be(Invalid("Error"))
-
-      p.clearValidators()
-      p.isValid.value.get.get should be(Valid)
+      for {
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.remove(TO1))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error"))
+          p.elemProperties.foreach(sp => sp.isValid.value.get.get should be(Valid))
+        }
+        _ <- Future(p.append(TO1, TC1(1), TC2("asd")))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Valid)
+        }
+        _ <- Future(p.elemProperties(2).set(TC1(-3)))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("ElemError1"))
+        }
+        _ <- Future(p.remove(TO1))
+        _ <- eventually {
+          p.isValid.value.get.get should be(Invalid("Error", "ElemError1"))
+        }
+        _ <- Future {
+          p.remove(TC1(-3))
+          p.remove(TC2("asd"))
+          p.append(TO1)
+        }
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.append(TC1(-21), TC2("blablablabla")))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("ElemError1", "ElemError2")))
+        _ <- Future(p.remove(TO1))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("Error", "ElemError1", "ElemError2")))
+        _ <- Future(p.replace(0, 3, TO1))
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.set(Seq.empty))
+        _ <- eventually(p.isValid.value.get.get should be(Invalid("Error")))
+        _ <- Future(p.clearValidators())
+        r <- eventually(p.isValid.value.get.get should be(Valid))
+      } yield r
     }
 
     "allow usage of custom validation error types" in {
@@ -257,27 +276,31 @@ class PropertyValidationTest extends UdashFrontendTest {
         }
       )
 
-      p.isValid.value.get.get should be(Valid)
-
-      p.set(-4)
-      (p.isValid.value.get.get match {
-        case Invalid(errors) =>
-          errors.forall {
-            case ValueIsTooSmall(-4, 0) => true
+      for {
+        _ <- eventually(p.isValid.value.get.get should be(Valid))
+        _ <- Future(p.set(-4))
+        _ <- eventually {
+          (p.isValid.value.get.get match {
+            case Invalid(errors) =>
+              errors.forall {
+                case ValueIsTooSmall(-4, 0) => true
+                case _ => false
+              }
             case _ => false
-          }
-        case _ => false
-      }) should be(true)
-
-      p.set(21)
-      (p.isValid.value.get.get match {
-        case Invalid(errors) =>
-          errors.forall {
-            case ValueIsTooBig(21, 10) => true
+          }) should be(true)
+        }
+        _ <- Future(p.set(21))
+        r <- eventually {
+          (p.isValid.value.get.get match {
+            case Invalid(errors) =>
+              errors.forall {
+                case ValueIsTooBig(21, 10) => true
+                case _ => false
+              }
             case _ => false
-          }
-        case _ => false
-      }) should be(true)
+          }) should be(true)
+        }
+      } yield r
     }
 
     "return valid result future" in {
@@ -290,27 +313,26 @@ class PropertyValidationTest extends UdashFrontendTest {
       })
       p.addValidator((_) => Valid)
 
-      p.isValid shouldNot be(null)
-
-      p.set("Test 2")
-      p.isValid shouldNot be(null)
-
-      CallbackSequencer.sequence { p.set("Test 3") }
-      p.isValid shouldNot be(null)
-
-      CallbackSequencer.sequence {
-        p.set("Test 4")
-        p.set("Test 5")
-        p.set("Test 6")
-      }
-      p.isValid shouldNot be(null)
-
-      p.set("Test 7")
-      p.set("Test 8")
-      p.set("Test 9")
-      p.isValid shouldNot be(null)
-
-      futures.forall(_.isCompleted) should be(true)
+      for {
+        _ <- eventually(p.isValid shouldNot be(null))
+        _ <- Future(p.set("Test 2"))
+        _ <- eventually(p.isValid shouldNot be(null))
+        _ <- Future(CallbackSequencer.sequence { p.set("Test 3") })
+        _ <- eventually(p.isValid shouldNot be(null))
+        _ <- Future(CallbackSequencer.sequence {
+          p.set("Test 4")
+          p.set("Test 5")
+          p.set("Test 6")
+        })
+        _ <- eventually(p.isValid shouldNot be(null))
+        _ <- Future {
+          p.set("Test 4")
+          p.set("Test 5")
+          p.set("Test 6")
+        }
+        _ <- eventually(p.isValid shouldNot be(null))
+        r <- eventually(futures.forall(_.isCompleted) should be(true))
+      } yield r
     }
 
     "provide property with validation result" in {
@@ -319,30 +341,28 @@ class PropertyValidationTest extends UdashFrontendTest {
 
       p.set("T")
       val v = p.valid
-      v.get shouldNot be(Valid)
 
-      p.set("Test")
-      v.get should be(Valid)
-
-      CallbackSequencer.sequence {
-        p.set("Test 4")
-        p.set("Test")
-        p.set("Te")
-      }
-      v.get shouldNot be(Valid)
-
-      CallbackSequencer.sequence {
-        p.set("Test 4")
-        p.set("T")
-        p.set("Test 6")
-      }
-      v.get should be(Valid)
-
-      p.set("T")
-      v.get shouldNot be(Valid)
-
-      p.clearValidators()
-      v.get should be(Valid)
+      for {
+        _ <- eventually(v.get shouldNot be(Valid))
+        _ <- Future(p.set("Test"))
+        _ <- eventually(v.get should be(Valid))
+        _ <- Future(CallbackSequencer.sequence {
+          p.set("Test 4")
+          p.set("Test")
+          p.set("Te")
+        })
+        _ <- eventually(v.get shouldNot be(Valid))
+        _ <- Future(CallbackSequencer.sequence {
+          p.set("Test 4")
+          p.set("T")
+          p.set("Test 6")
+        })
+        _ <- eventually(v.get should be(Valid))
+        _ <- Future(p.set("T"))
+        _ <- eventually(v.get shouldNot be(Valid))
+        _ <- Future(p.clearValidators())
+        r <- eventually(v.get should be(Valid))
+      } yield r
     }
   }
 }

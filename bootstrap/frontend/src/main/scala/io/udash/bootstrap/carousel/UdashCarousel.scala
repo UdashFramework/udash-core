@@ -6,13 +6,12 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
-import io.udash.bootstrap.utils.Icons
+import io.udash.bootstrap.utils.UdashIcons
 import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
-import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 import scala.scalajs.js
 import scala.scalajs.js.Dictionary
@@ -21,14 +20,14 @@ import scalatags.JsDom.all._
 
 final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlide], val componentId: ComponentId,
                                   showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
-                                 (implicit ec: ExecutionContext)
+
   extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
 
   import BootstrapStyles.Carousel._
   import BootstrapTags._
   import UdashCarousel._
-  import io.udash.wrappers.jquery._
   import io.udash.css.CssView._
+  import io.udash.wrappers.jquery._
 
   require(activeSlide >= 0, "Active slide index cannot be negative.")
 
@@ -77,11 +76,11 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         }
       ),
       a(BootstrapStyles.left, carouselControl, href := s"#$componentId", role := "button", dataSlide := "prev")(
-        span(Icons.Glyphicon.chevronLeft),
+        span(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.chevronLeft),
         span(`class` := "sr-only", "Previous")
       ),
       a(BootstrapStyles.right, carouselControl, href := s"#$componentId", role := "button", dataSlide := "next")(
-        span(Icons.Glyphicon.chevronRight),
+        span(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.chevronRight),
         span(`class` := "sr-only", "Next")
       )
     ).render
@@ -160,12 +159,11 @@ object UdashCarousel {
     * @param showIndicators   Show carousel slide indicators.
     * @param activeSlide      Initially active carousel slide.
     * @param animationOptions Carousel animation options.
-    * @param ec               ExecutionContext for carousel internal properties
     * @return `UdashCarousel` component
     */
   def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
             showIndicators: Boolean = true, activeSlide: Int = 0, animationOptions: AnimationOptions = AnimationOptions())
-           (implicit ec: ExecutionContext): UdashCarousel =
+           : UdashCarousel =
     new UdashCarousel(content, componentId, showIndicators, activeSlide, animationOptions)
 
   /**

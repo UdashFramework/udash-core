@@ -6,7 +6,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
 import org.scalajs.dom
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom.all._
 
 final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
@@ -31,7 +30,7 @@ object UdashButtonToolbar {
     * @param groups Rendered button groups belonging to the toolbar.
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
-  def apply(groups: dom.Element*)(implicit ec: ExecutionContext): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
+  def apply(groups: dom.Element*): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
     reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](groups), _.get)
 
   /**
@@ -42,7 +41,7 @@ object UdashButtonToolbar {
     * @param groups Rendered button groups belonging to the toolbar.
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
-  def apply(componentId: ComponentId, groups: dom.Element*)(implicit ec: ExecutionContext): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
+  def apply(componentId: ComponentId, groups: dom.Element*): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
     reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](groups), _.get, componentId)
 
 

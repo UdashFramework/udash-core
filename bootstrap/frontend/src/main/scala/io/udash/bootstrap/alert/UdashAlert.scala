@@ -7,7 +7,6 @@ import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Div
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -26,7 +25,7 @@ final class UdashAlert private[alert](alertStyle: AlertStyle, override val compo
 }
 
 final class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, override val componentId: ComponentId)
-                                                (content: Modifier*)(implicit ec: ExecutionContext)
+                                                (content: Modifier*)
   extends UdashAlertBase(alertStyle, componentId) {
 
   import io.udash.css.CssView._
@@ -55,49 +54,49 @@ final class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, overrid
 trait AlertCompanion[T <: UdashAlertBase] {
   import AlertStyle._
 
-  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*)(implicit ec: ExecutionContext): T
+  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*): T
 
   /** Creates an alert with `Success` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def success(content: Modifier*)(implicit ec: ExecutionContext): T =
+  def success(content: Modifier*): T =
     create(Success, UdashBootstrap.newId())(content: _*)
 
   /** Creates an alert with `Success` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def success(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
+  def success(componentId: ComponentId, content: Modifier*): T =
     create(Success, componentId)(content: _*)
 
   /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def info(content: Modifier*)(implicit ec: ExecutionContext): T =
+  def info(content: Modifier*): T =
     create(Info, UdashBootstrap.newId())(content: _*)
 
   /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def info(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
+  def info(componentId: ComponentId, content: Modifier*): T =
     create(Info, componentId)(content: _*)
 
   /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def warning(content: Modifier*)(implicit ec: ExecutionContext): T =
+  def warning(content: Modifier*): T =
     create(Warning, UdashBootstrap.newId())(content: _*)
 
   /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def warning(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
+  def warning(componentId: ComponentId, content: Modifier*): T =
     create(Warning, componentId)(content: _*)
 
   /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def danger(content: Modifier*)(implicit ec: ExecutionContext): T =
+  def danger(content: Modifier*): T =
     create(Danger, UdashBootstrap.newId())(content: _*)
 
   /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
-  def danger(componentId: ComponentId, content: Modifier*)(implicit ec: ExecutionContext): T =
+  def danger(componentId: ComponentId, content: Modifier*): T =
     create(Danger, componentId)(content: _*)
 }
 
 /** Standard alert component. */
 object UdashAlert extends AlertCompanion[UdashAlert] {
-  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*)(implicit ec: ExecutionContext): UdashAlert =
+  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*): UdashAlert =
     new UdashAlert(alertStyle, componentId)(content: _*)
 }
 
 /** Dismissible alert component. */
 object DismissibleUdashAlert extends AlertCompanion[DismissibleUdashAlert] {
-  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*)(implicit ec: ExecutionContext): DismissibleUdashAlert =
+  protected def create(alertStyle: AlertStyle, componentId: ComponentId)(content: Modifier*): DismissibleUdashAlert =
     new DismissibleUdashAlert(alertStyle, componentId)(content: _*)
 }

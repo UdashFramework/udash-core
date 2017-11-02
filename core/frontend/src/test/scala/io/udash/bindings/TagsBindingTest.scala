@@ -7,10 +7,10 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{ImmutableValue, seq}
 import io.udash.testing.UdashFrontendTest
-import org.scalajs.dom.Element
+import org.scalajs.dom.{Element, Node}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import io.udash.wrappers.jquery._
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
@@ -251,6 +251,41 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("Test")
       template2.textContent should be("")
     }
+
+    "use custom elements replace method" in {
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_.textContent = "OLD")
+        res
+      }
+      val p = Property[Boolean](true)
+      val element = h1("Test").render
+      val template = div(
+        span(),
+        showIf(p, customReplace(true))(element),
+        span()
+      ).render
+      val element2 = h1("Test").render
+      val template2 = div(
+        span(),
+        showIf(p, customReplace(false))(element2),
+        span()
+      ).render
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("")
+      element.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+
+      p.set(true)
+      template.textContent should be("OLD")
+      element.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+    }
   }
 
   "showIfElse" should {
@@ -355,6 +390,47 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set(true)
       template.textContent should be("Test")
       template2.textContent should be("")
+    }
+
+    "use custom elements replace method" in {
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_.textContent = "OLD")
+        res
+      }
+      val p = Property[Boolean](true)
+      val element = h1("Test").render
+      val elementElse = h1("Else").render
+      val template = div(
+        span(),
+        showIfElse(p, customReplace(true))(element, elementElse),
+        span()
+      ).render
+      val element2 = h1("Test").render
+      val elementElse2 = h1("Else").render
+      val template2 = div(
+        span(),
+        showIfElse(p, customReplace(false))(element2, elementElse2),
+        span()
+      ).render
+
+      template.textContent should be("Test")
+      template2.textContent should be("")
+
+      p.set(false)
+      template.textContent should be("Else")
+      element.textContent should be("OLD")
+      elementElse.textContent should be("Else")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+      elementElse2.textContent should be("Else")
+
+      p.set(true)
+      template.textContent should be("OLD")
+      element.textContent should be("OLD")
+      elementElse.textContent should be("OLD")
+      template2.textContent should be("")
+      element2.textContent should be("OLD")
+      elementElse2.textContent should be("OLD")
     }
   }
 
@@ -462,6 +538,58 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set("")
       template.childNodes.apply(0).nodeName should be("B")
       template.childNodes.apply(0).textContent should be("")
+    }
+
+    "handle empty case class based model properties" in {
+      case class Test(i: Int, subType: SubTest)
+      case class SubTest(i: Int)
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subProp(_.subType)
+      val template = div(
+        produce(p) { t =>
+          div(t.i, t.subType.i).render
+        },
+        produce(sub) { t =>
+          div(t.i).render
+        }
+      ).render
+
+      template.textContent should be("")
+
+      p.set(Test(5, SubTest(7)))
+      template.textContent should be("577")
+    }
+
+    "handle empty trait based model properties" in {
+      trait Test {
+        def i: Int
+        def subType: SubTest
+      }
+      trait SubTest {
+        def i: Int
+      }
+
+      val p = ModelProperty.empty[Test]
+      val sub = p.subProp(_.subType)
+      val template = div(
+        produce(p) { t =>
+          div(t.i, t.subType.i).render
+        },
+        produce(sub) { t =>
+          div(t.i).render
+        }
+      ).render
+
+      template.textContent should be("")
+
+      p.set(new Test {
+        override def i = 5
+        override def subType = new SubTest {
+          override def i = 7
+        }
+      })
+      template.textContent should be("577")
     }
 
     "allow custom null handling" in {
@@ -601,6 +729,39 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("Cb")
       externalCounter should be(3)
       internalCounter should be(4)
+    }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        res
+      }
+      val p = Property[Boolean](true)
+      val template = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(true), checkNull = false)((v, _) => div(v.toString).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(false), checkNull = false)((v, _) => div(v.toString).render),
+        span()
+      ).render
+
+      template.textContent should be("true")
+      template2.textContent should be("")
+      oldCounter should be(0)
+
+      p.set(false)
+      template.textContent should be("false")
+      template2.textContent should be("")
+      oldCounter should be(2)
+
+      p.set(true)
+      template.textContent should be("true")
+      template2.textContent should be("")
+      oldCounter should be(4)
     }
   }
 
@@ -811,13 +972,46 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       externalCounter should be(3)
       internalCounter should be(4)
     }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        res
+      }
+      val p = SeqProperty[String]("a", "b", "c")
+      val template = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(true))((v, _) => div(v.mkString(",")).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        produceWithNested(p, customElementsReplace = customReplace(false))((v, _) => div(v.mkString(",")).render),
+        span()
+      ).render
+
+      template.textContent should be("a,b,c")
+      template2.textContent should be("")
+      oldCounter should be(0)
+
+      p.set(Seq("x", "y"))
+      template.textContent should be("x,y")
+      template2.textContent should be("")
+      oldCounter should be(2)
+
+      p.append("z")
+      template.textContent should be("x,y,z")
+      template2.textContent should be("")
+      oldCounter should be(4)
+    }
   }
 
   def prod(p: seq.SeqProperty[Int, Property[Int]]): Binding = {
     produce(p,
       (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-      (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-        val el = jQ(elem:_*)
+      (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+        val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
         val insertBefore = el.children().at(patch.idx)
         if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
         else patch.added.foreach(p => el.append(span(p.get).render))
@@ -833,8 +1027,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         span(),
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-            val el = jQ(elem:_*)
+          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -880,8 +1074,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val template = div(
         produce(p,
           (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Element]) => {
-            val el = jQ(elem:_*)
+          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
+            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
             val insertBefore = el.children().at(patch.idx)
             if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
             else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
@@ -1662,6 +1856,48 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       counter should be(6)
       internalCounter should be(6)
     }
+
+    "use custom elements replace method" in {
+      var oldCounter = 0
+      var newCounter = 0
+      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+        oldEls.foreach(_ => oldCounter += 1)
+        newEls.foreach(_ => newCounter += 1)
+        res
+      }
+      def customInsert(res: Boolean) = (root: Node, before: Node, newEls: Seq[Node]) => {
+        newEls.foreach(_ => newCounter += 1)
+        res
+      }
+      val p = SeqProperty[String]("a", "b", "c")
+      val template = div(
+        span(),
+        repeat(p, customElementsReplace = customReplace(true), customElementsInsert = customInsert(true))(v => div(v.get).render),
+        span()
+      ).render
+      val template2 = div(
+        span(),
+        repeat(p, customElementsReplace = customReplace(false), customElementsInsert = customInsert(false))(v => div(v.get).render),
+        span()
+      ).render
+
+      template.textContent should be("abc")
+      template2.textContent should be("")
+      oldCounter should be(0)
+      newCounter should be(6)
+
+      p.set(Seq("x", "y"))
+      template.textContent should be("xy")
+      template2.textContent should be("")
+      oldCounter should be(6)
+      newCounter should be(10)
+
+      p.append("z")
+      template.textContent should be("xyz")
+      template2.textContent should be("")
+      oldCounter should be(6)
+      newCounter should be(12)
+    }
   }
 
   "repeatWithIndex" should {
@@ -1693,178 +1929,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.replace(1, 2, "a", "B")
       el.textContent should be("0x1a2B")
-    }
-  }
-
-  "bindValidation" should {
-    "render init view on validation start" in {
-      val p = Property[Int](5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = {
-          val result = Promise[ValidationResult]
-          result.future
-        }
-      })
-
-      val template = div(
-        valid(p)(
-          _ => b("done").render,
-          _ => i("Validating...").render,
-          _ => b("error").render
-        )
-      ).render
-
-      template.textContent should be("Validating...")
-    }
-
-    "render result" in {
-      val p = Property[Int](5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = Future.successful(Valid)
-      })
-
-      val template = div(
-        span(),
-        valid(p) {
-          case Valid => b("done").render
-          case Invalid(_) => b("invalid").render
-        },
-        span()
-      ).render
-
-      template.textContent should be("done")
-      template.childNodes(0).textContent should be("")
-      template.childNodes(1).textContent should be("done")
-      template.childNodes(2).textContent should be("")
-    }
-
-    "render error if Future failed" in {
-      val p = Property[Int](5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = Future.failed(new NullPointerException)
-      })
-
-      val template = div(
-        valid(p)(
-          _ => b("done").render,
-          _ => i("Validating...").render,
-          _ => b("error").render
-        )
-      ).render
-
-      template.textContent should be("error")
-    }
-
-    "not swap position" in {
-      val p = Property[Int](5)
-      val p2 = Property[Int](3)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] = Future.failed(new NullPointerException)
-      })
-
-      val template = div(
-        "1",
-        valid(p)(
-          _ => b("done").render,
-          _ => i("Validating...").render,
-          _ => b("error").render
-        ),
-        span("2"),
-        valid(p)(
-          _ => b("done").render,
-          _ => i("Validating...").render,
-          _ => b("Error").render
-        ),
-        div("3")
-      ).render
-
-      template.textContent should be("1error2Error3")
-
-      p.set(-8)
-      template.textContent should be("1error2Error3")
-
-      p2.set(2)
-      template.textContent should be("1error2Error3")
-
-      p.set(-5)
-      template.textContent should be("1error2Error3")
-    }
-
-    "stop updates after `kill` call" in {
-      val p = Property[Int](5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] =
-          Future.successful(Valid)
-      })
-
-      val binding = valid(p)(
-        _ => b("done", p.get).render
-      )
-      val template = div(binding).render
-
-      template.textContent should be("done5")
-
-      p.set(7)
-      template.textContent should be("done7")
-
-      binding.kill()
-      p.set(12)
-      template.textContent should be("done7")
-    }
-
-    "clean nested bindings" in {
-      val p = Property[Int](5)
-      p.addValidator(new Validator[Int] {
-        override def apply(element: Int)(implicit ec: ExecutionContext): Future[ValidationResult] =
-          Future.successful(Valid)
-      })
-
-      var nestedIdGen = 0
-      val nestedCalls = mutable.Set.empty[Int]
-
-      val binding = validWithNested(p)(
-        (_, nested) => {
-          val nestedId = nestedIdGen
-          nestedIdGen += 1
-          b("done", nested(produce(p) { v => nestedCalls += nestedId; span(v).render })).render
-        }
-      )
-      val template = div(binding).render
-
-      template.textContent should be("done5")
-      nestedCalls should contain(0)
-
-      nestedCalls.clear()
-      p.set(7)
-      template.textContent should be("done7")
-      nestedCalls should contain(1)
-
-      nestedCalls.clear()
-      p.set(12)
-      template.textContent should be("done12")
-      nestedCalls shouldNot contain(0)
-      nestedCalls should contain(2)
-
-      nestedCalls.clear()
-      p.set(7)
-      template.textContent should be("done7")
-      nestedCalls shouldNot contain(0)
-      nestedCalls shouldNot contain(1)
-      nestedCalls should contain(3)
-
-      nestedCalls.clear()
-      p.set(12)
-      template.textContent should be("done12")
-      nestedCalls shouldNot contain(0)
-      nestedCalls shouldNot contain(1)
-      nestedCalls shouldNot contain(2)
-      nestedCalls should contain(4)
-
-      binding.kill()
-      nestedCalls.clear()
-      p.set(15)
-      template.textContent should be("done12")
-      nestedCalls.isEmpty should be(true)
     }
   }
 

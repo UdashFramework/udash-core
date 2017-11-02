@@ -8,13 +8,24 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
   "RoutingEngine" should {
     "render valid views on url change" in {
       val rootView = new TestView
+
+      object RootViewFactory extends ViewFactory[RootState] {
+        var calls = 0
+        override def create() = {
+          calls += 1
+          (rootView, new EmptyPresenter[RootState])
+        }
+      }
+
       val objectView = new TestView
       val nextObjectView = new TestView
       val classView = new TestView
       val class2View = new TestView
       val errorView = new TestView
-      val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map(
-        RootState -> new StaticViewFactory[RootState.type](() => rootView) {},
+      val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map[TestState, ViewFactory[_ <: TestState]](
+        RootState(None) -> RootViewFactory,
+        RootState(Some(1)) -> RootViewFactory,
+        RootState(Some(2)) -> RootViewFactory,
         ObjectState -> new StaticViewFactory[ObjectState.type](() => objectView) {},
         NextObjectState -> new StaticViewFactory[NextObjectState.type](() => nextObjectView) {},
         ClassState("abc", 1) -> new StaticViewFactory[ClassState](() => classView) {},
@@ -74,6 +85,8 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd should be(objectView :: nextObjectView :: Nil)
 
+      RootViewFactory.calls should be(1)
+
       routingEngine.handleUrl(Url("/next"), fullReload = true)
 
       renderer.views.size should be(3)
@@ -82,6 +95,13 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectView)
       renderer.lastSubPathToLeave.size should be(0)
       renderer.lastPathToAdd should be(rootView :: objectView :: nextObjectView :: Nil)
+
+      RootViewFactory.calls should be(2)
+
+      routingEngine.handleUrl(Url("/root/1"))
+      RootViewFactory.calls should be(2)
+      routingEngine.handleUrl(Url("/root/2"))
+      RootViewFactory.calls should be(2)
     }
 
     "fire state change callbacks" in {
@@ -223,7 +243,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val class2View = new TestView
       val errorView = new TestView
       val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map(
-        RootState -> new StaticViewFactory[RootState.type](() => rootView),
+        RootState(None) -> new StaticViewFactory[RootState](() => rootView),
         ObjectState -> new ExceptionViewFactory[ObjectState.type](objectView),
         NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
         ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),

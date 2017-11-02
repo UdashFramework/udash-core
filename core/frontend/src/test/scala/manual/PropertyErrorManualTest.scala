@@ -4,8 +4,6 @@ import io.udash._
 import io.udash.properties.{ImmutableValue, ModelPart, ModelSeq, ModelValue}
 
 object PropertyErrorManualTest {
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   class ClassicClass(i: Int) {
     def more: Int = i + 57
   }

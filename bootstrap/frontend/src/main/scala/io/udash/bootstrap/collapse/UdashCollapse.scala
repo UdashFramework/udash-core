@@ -14,9 +14,9 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
                                   override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
-  import io.udash.css.CssView._
   import BootstrapTags._
   import UdashCollapse._
+  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 
   /** Toggle state of this collapse. */

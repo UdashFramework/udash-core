@@ -7,7 +7,6 @@ import io.udash.properties.single._
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
 
 private[properties]
 abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
@@ -16,9 +15,6 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
 
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
-
-  override implicit protected[properties] def executionContext: ExecutionContext =
-    origin.executionContext
 
   protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
 
@@ -47,7 +43,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
 
     val patch = if (transformed.size > current.size) {
-      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this)(executionContext))
+      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this))
       children.insertAll(commonBegin, added)
       Some(Patch(commonBegin, Seq(), added, false))
     } else if (transformed.size < current.size) {

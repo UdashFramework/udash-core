@@ -5,7 +5,6 @@ import java.{util => ju}
 import io.udash.properties.single.Property
 import org.scalajs.dom.{html, _}
 
-import scala.concurrent.ExecutionContext
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -20,7 +19,7 @@ object RadioButtons {
     * @param xs Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
-  def apply(property: Property[String], options: Seq[String], decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*)(implicit ec: ExecutionContext): JsDom.TypedTag[html.Element] = {
+  def apply(property: Property[String], options: Seq[String], decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*): JsDom.TypedTag[html.Element] = {
     val bind = prepareBind(property)
     val htmlInputs = prepareHtmlInputs(options, bind)(xs:_*)
     decorator(htmlInputs.zip(options))
@@ -35,7 +34,7 @@ object RadioButtons {
     })
   }
 
-  private def prepareBind(property: Property[String])(implicit ec: ExecutionContext): JsDom.Modifier = {
+  private def prepareBind(property: Property[String]): JsDom.Modifier = {
     def updateInput(t: html.Input) = {
       t.checked = property.get == t.value
     }

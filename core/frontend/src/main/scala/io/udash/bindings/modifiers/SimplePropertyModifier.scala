@@ -2,7 +2,6 @@ package io.udash.bindings.modifiers
 
 import io.udash._
 import io.udash.properties.single.ReadableProperty
-import org.scalajs.dom
 
 import scalatags.JsDom
 
@@ -11,7 +10,7 @@ class SimplePropertyModifier[T](property: ReadableProperty[T], checkNull: Boolea
   extends PropertyModifier[T](
     property,
     (t: T) => {
-      if (t != null) JsDom.StringFrag(t.toString).render.asInstanceOf[dom.Element]
+      if (t != null) JsDom.StringFrag(t.toString).render
       else emptyStringNode()
     },
     checkNull
