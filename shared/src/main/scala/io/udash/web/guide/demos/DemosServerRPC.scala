@@ -1,5 +1,6 @@
 package io.udash.web.guide.demos
 
+import com.avsystem.commons.rpc.RPCTypeClasses
 import io.udash.rpc._
 import io.udash.web.guide.demos.activity.CallServerRPC
 import io.udash.web.guide.demos.rpc._
@@ -17,3 +18,5 @@ trait DemosServerRPC {
 
   def call(): CallServerRPC
 }
+
+object DemosServerRPC extends RPCTypeClasses[DefaultServerUdashRPCFramework.type, DemosServerRPC]

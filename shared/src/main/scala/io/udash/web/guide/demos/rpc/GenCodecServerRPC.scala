@@ -1,7 +1,8 @@
 package io.udash.web.guide.demos.rpc
 
-import io.udash.rpc._
+import com.avsystem.commons.rpc.AllRPCTypeClasses
 import com.avsystem.commons.serialization.{GenCodec, HasGenCodec, Input, Output}
+import io.udash.rpc.{DefaultServerUdashRPCFramework, _}
 
 import scala.concurrent.Future
 
@@ -43,6 +44,11 @@ object GenCodecServerRPC {
       }
     }
   }
+
+  private val fullRPCMetadata = AllRPCTypeClasses.materialize[DefaultServerUdashRPCFramework.type, GenCodecServerRPC]
+  implicit val asRawRPC: DefaultServerUdashRPCFramework.AsRawRPC[GenCodecServerRPC] = fullRPCMetadata.asRawRPC
+  implicit val asRealRPC: DefaultServerUdashRPCFramework.AsRealRPC[GenCodecServerRPC] = fullRPCMetadata.asRealRPC
+  implicit val rpcMetadata: DefaultServerUdashRPCFramework.RPCMetadata[GenCodecServerRPC] = fullRPCMetadata.metadata
 }
 
 @RPC
