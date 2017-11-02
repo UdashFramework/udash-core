@@ -1,24 +1,27 @@
 package io.udash.web.guide.demos.rpc
 
 import io.udash.rpc._
-import com.avsystem.commons.serialization.{Input, Output}
+import com.avsystem.commons.serialization.{GenCodec, HasGenCodec, Input, Output}
 
 import scala.concurrent.Future
 
 object GenCodecServerRPC {
   case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
+  object DemoCaseClass extends HasGenCodec[DemoCaseClass]
+
+  sealed trait Fruit
+  object Fruit {
+    case object Apple extends Fruit
+    case object Orange extends Fruit
+    case object Banana extends Fruit
+
+    implicit val genCodec: GenCodec[Fruit] = GenCodec.materialize
+  }
 
   class DemoClass(val i: Int, val s: String) {
     var _v: Int = 5
   }
 
-  sealed trait Fruit
-  case object Apple extends Fruit
-  case object Orange extends Fruit
-  case object Banana extends Fruit
-
-
-  import com.avsystem.commons.serialization.GenCodec
   object DemoClass {
     implicit val DemoClassCodec = new GenCodec[DemoClass] {
       override def read(input: Input): DemoClass = {

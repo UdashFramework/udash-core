@@ -38,7 +38,7 @@ object UdashWebBuild {
 
   def prepareMappings(p: Project) = Def.task {
     copyStatics.value
-    ((target in Compile).value / (staticFilesDir in p).value).***.get map { file =>
+    ((target in Compile).value / (staticFilesDir in p).value).allPaths.get map { file =>
       file -> file.getAbsolutePath.stripPrefix((target in Compile).value.getAbsolutePath)
     }
   }

@@ -5,7 +5,7 @@ import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
-import org.scalajs.dom.Element
+import org.scalajs.dom.{Element, Node}
 
 import scala.util.Random
 import scalatags.JsDom
@@ -39,8 +39,8 @@ class ProduceDemoComponent extends Component {
         "Integers (patching): ",
         produce(integers,
           (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
-          (patch: Patch[Property[Int]], els: Seq[Element]) => {
-            val insertBefore = jQ(els:_*).children().at(patch.idx)
+          (patch: Patch[Property[Int]], els: Seq[Node]) => {
+            val insertBefore = jQ(els(patch.idx))
             patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
             patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
           }

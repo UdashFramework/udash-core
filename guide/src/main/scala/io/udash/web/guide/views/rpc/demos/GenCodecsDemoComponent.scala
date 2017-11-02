@@ -79,7 +79,7 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
           model.subProp(_.clsVar).set(response._v)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendSealedTrait(Seq(Apple, Orange, Banana)(Random.nextInt(3))) onComplete {
+      demoRpc.sendSealedTrait(Seq(Fruit.Apple, Fruit.Orange, Fruit.Banana)(Random.nextInt(3))) onComplete {
         case Success(response) => model.subProp(_.sealedTrait).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }

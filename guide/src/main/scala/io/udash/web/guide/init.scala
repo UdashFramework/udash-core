@@ -73,11 +73,11 @@ object Context {
   )
 }
 
-object Init extends JSApp {
+object Init {
   import Context._
 
   @JSExport
-  override def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     jQ((jThis: Element) => {
       val appRoot = jQ("#application").get(0).get
       applicationInstance.run(appRoot)

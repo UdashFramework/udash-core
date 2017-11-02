@@ -3,7 +3,7 @@ import UdashWebBuild._
 
 name := "udash-guide"
 
-version in ThisBuild := "0.6.0-SNAPSHOT"
+version in ThisBuild := "0.6.0"
 scalaVersion in ThisBuild := versionOfScala
 organization in ThisBuild := "io.udash"
 scalacOptions in ThisBuild ++= Seq(
@@ -15,7 +15,6 @@ scalacOptions in ThisBuild ++= Seq(
   "-language:dynamics",
   "-language:experimental.macros",
   "-Xfuture",
-  "-Xfatal-warnings",
   CrossVersion.partialVersion(scalaVersion.value).collect {
     // WORKAROUND https://github.com/scala/scala/pull/5402
     case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
@@ -59,7 +58,7 @@ lazy val backend = project.in(file("backend"))
       prepareMappings(homepage).value ++ prepareMappings(guide).value
     },
 
-    watchSources ++= (sourceDirectory in guide).value.***.get,
+    watchSources ++= (sourceDirectory in guide).value.allPaths.get,
 
     assemblyJarName in assembly := "udash-guide.jar",
     mainClass in assembly := Some("io.udash.web.Launcher"),
@@ -103,8 +102,14 @@ val commonFrontendSettings = Seq(
 
   scalaJSUseMainModuleInitializer in Test := false,
   scalaJSStage in Test := FastOptStage,
-  jsDependencies in Test += RuntimeDOM % Test,
-  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox()),
+  jsEnv in Test := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
+    import org.openqa.selenium.chrome.ChromeOptions
+    val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
+    val chromeOptions = new ChromeOptions()
+    chromeOptions.addArguments("--headless --disable-gpu")
+    chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
+    chrome
+  }),
 
   scalacOptions += {
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString

@@ -15,11 +15,11 @@ object Context {
   implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoriesRegistry)
 }
 
-object Init extends JSApp with StrictLogging {
+object Init extends StrictLogging {
   import Context._
 
   @JSExport
-  override def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     jQ((_: Element) => {
       val appRoot = jQ("#application").get(0)
       if (appRoot.isEmpty) {

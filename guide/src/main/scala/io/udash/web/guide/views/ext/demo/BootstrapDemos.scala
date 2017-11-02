@@ -66,15 +66,15 @@ object BootstrapDemos extends StrictLogging with CssView {
     div(GuideStyles.frame)(
       UdashButtonToolbar(
         UdashButtonGroup()(
-          UdashButton()(Icons.Glyphicon.alignLeft).render,
-          UdashButton()(Icons.Glyphicon.alignCenter).render,
-          UdashButton()(Icons.Glyphicon.alignRight).render,
-          UdashButton()(Icons.Glyphicon.alignJustify).render
+          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignLeft).render,
+          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignCenter).render,
+          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignRight).render,
+          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignJustify).render
         ).render,
         UdashButtonGroup()(
-          UdashButton()(Icons.FontAwesome.bitcoin).render,
-          UdashButton()(Icons.FontAwesome.euro).render,
-          UdashButton()(Icons.FontAwesome.dollar).render
+          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.bitcoin).render,
+          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.euro).render,
+          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.dollar).render
         ).render
       ).render
     ).render
@@ -230,7 +230,7 @@ object BootstrapDemos extends StrictLogging with CssView {
 
     val dropdown = UdashDropdown(items)(UdashDropdown.defaultItemFactory)("Dropdown ", BootstrapStyles.Button.btnPrimary)
     val dropup = UdashDropdown.dropup(items)(UdashDropdown.defaultItemFactory)("Dropup ")
-    val listener: dropdown.EventHandler = {
+    val listener: PartialFunction[UdashDropdown.DropdownEvent[DefaultDropdownItem, CastableProperty[DefaultDropdownItem]], Unit] = {
       case UdashDropdown.SelectionEvent(_, item) => clicks.append(item.toString)
       case ev: DropdownEvent[_, _] => logger.info(ev.toString)
     }
@@ -449,7 +449,7 @@ object BootstrapDemos extends StrictLogging with CssView {
     user.subProp(_.age).set(25)
     user.subProp(_.shirtSize).set(Medium)
     user.subProp(_.age).addValidator(new Validator[Int] {
-      override def apply(element: Int)(implicit ec: ExecutionContext) =
+      override def apply(element: Int): Future[ValidationResult] =
         Future {
           if (element < 0) Invalid("Age should be a non-negative integer!")
           else Valid
