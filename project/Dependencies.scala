@@ -31,6 +31,8 @@ object Dependencies {
   val bootstrapDatepickerVersion = "4.17.43"
   val momentJsVersion = "2.18.1"
 
+  val scalaJsBenchmarkVersion = "0.2.4"
+
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" %% "silencer-plugin" % silencerVersion
   ).map(compilerPlugin))
@@ -105,5 +107,9 @@ object Dependencies {
 
   val chartsFrontendDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
+  ))
+
+  val benchmarksFrontendDeps = Def.setting(Seq(
+    "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion
   ))
 }

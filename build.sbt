@@ -52,6 +52,14 @@ val commonJSSettings = Seq(
   }
 )
 
+val noPublishSettings = Seq(
+  publishArtifact := false,
+  publish := {},
+  publishLocal := {},
+  publishM2 := {},
+  doc := (target in doc).value,
+)
+
 lazy val udash = project.in(file("."))
   .aggregate(
     `core-macros`, `core-shared-JS`, `core-shared-JVM`, `core-frontend`,
@@ -62,7 +70,7 @@ lazy val udash = project.in(file("."))
     `css-macros`, `css-shared-JS`, `css-shared-JVM`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
-  .settings(publishArtifact := false)
+  .settings(noPublishSettings: _*)
 
 lazy val `core-macros` = project.in(file("core/macros"))
   .settings(commonSettings: _*)
@@ -229,4 +237,14 @@ lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlu
   .settings(commonJSSettings: _*)
   .settings(
     libraryDependencies ++= chartsFrontendDeps.value
+  )
+
+lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(noPublishSettings: _*)
+  .settings(
+    libraryDependencies ++= benchmarksFrontendDeps.value,
+    scalaJSUseMainModuleInitializer in Compile := true,
   )
