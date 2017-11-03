@@ -211,6 +211,9 @@ object UdashDatePicker {
         r1.restart()
         r2.restart()
       }
+
+      override def isActive(): Boolean =
+        r1.isActive() && r2.isActive()
     }
   }
 

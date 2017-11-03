@@ -26,7 +26,6 @@ object Property {
 
   private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-    private var value: ValidationResult = Valid
     private var initialized: Boolean = false
     private var p: Property[ValidationResult] = _
     private val listener = (_: A) => target.isValid onComplete {
@@ -37,7 +36,7 @@ object Property {
     def property: ReadableProperty[ValidationResult] = {
       if (!initialized) {
         initialized = true
-        p = Property[ValidationResult]
+        p = Property.empty[ValidationResult]
         listener(target.get)
         target.listen(listener)
       }

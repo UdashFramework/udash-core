@@ -9,23 +9,46 @@ import scala.concurrent.Future
 private[properties]
 class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
                                         transformer: A => B) extends ForwarderReadableProperty[B] {
-  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration =
-    origin.listen((a: A) => valueListener(transformer(a)), initUpdate)
+  protected var lastValue: A = _
+  protected var transformedValue: B = _
+  protected var originListenerRegistration: Registration = _
 
-  override def listenOnce(valueListener: (B) => Any): Registration =
-    origin.listenOnce((a: A) => valueListener(transformer(a)))
+  protected def originListener(originValue: A) : Unit = {
+    lastValue = originValue
+    transformedValue = transformer(originValue)
+    fireValueListeners()
+  }
 
-  override protected[properties] def fireValueListeners(): Unit =
-    origin.fireValueListeners()
+  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
+      originListenerRegistration = origin.listen(originListener)
+    }
+    super.listen(valueListener, initUpdate)
+  }
 
-  override def get: B =
-    transformer(origin.get)
+  override def listenOnce(valueListener: (B) => Any): Registration = {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
+      originListenerRegistration = origin.listen(originListener)
+    }
+    super.listenOnce(valueListener)
+  }
+
+  override def get: B = {
+    val originValue = origin.get
+    if (lastValue != originValue) {
+      lastValue = originValue
+      transformedValue = transformer(originValue)
+    }
+    transformedValue
+  }
 }
 
 /** Represents Property[A] transformed to Property[B]. */
 private[properties]
 class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
   extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
+
+  protected var originValidatorRegistration: Registration = _
 
   override def set(t: B, force: Boolean = false): Unit =
     origin.set(revert(t), force)
@@ -36,15 +59,32 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
   override def touch(): Unit =
     origin.touch()
 
-  override def addValidator(v: Validator[B]): Registration =
-    origin.addValidator(new Validator[A] {
-      override def apply(element: A): Future[ValidationResult] =
-        v(transformer(element))
-    })
+  override def addValidator(v: Validator[B]): Registration = {
+    if (originValidatorRegistration == null || !originValidatorRegistration.isActive()) {
+      originValidatorRegistration = origin.addValidator(new Validator[A] {
+        override def apply(element: A): Future[ValidationResult] = {
+          import Validator._
 
-  override def clearValidators(): Unit =
+          import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+          val transformedValue = transformer(element)
+          Future.sequence(
+            validators.map(_.apply(transformedValue)).toSeq
+          ).foldValidationResult
+        }
+      })
+    }
+    super.addValidator(v)
+  }
+
+  override def clearValidators(): Unit = {
+    originValidatorRegistration = null
+    super.clearValidators()
     origin.clearValidators()
+  }
 
-  override def clearListeners(): Unit =
+  override def clearListeners(): Unit = {
+    originListenerRegistration = null
+    super.clearListeners()
     origin.clearListeners()
+  }
 }
