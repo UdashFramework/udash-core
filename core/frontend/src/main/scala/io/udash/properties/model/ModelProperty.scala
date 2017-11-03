@@ -4,8 +4,8 @@ import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
 
-import scala.collection.mutable
 import scala.concurrent.Future
+import scala.scalajs.js
 
 object ModelProperty {
   /** Creates an empty ModelProperty[T]. */
@@ -23,7 +23,7 @@ object ModelProperty {
 
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
-  protected val properties: mutable.Map[String, Property[_]] = mutable.Map()
+  protected val properties: js.Dictionary[Property[_]] = js.Dictionary()
 
   /** Returns child ModelProperty[B]. */
   def roSubModel[B](f: A => B)(implicit ev: ModelPart[B]): ReadableModelProperty[B] =
@@ -41,10 +41,11 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import Validator._
+
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     if (validationResult == null) {
-      validationResult = Future.sequence(Seq(super.isValid) ++ properties.values.map(p => p.isValid)).foldValidationResult
+      validationResult = Future.sequence(super.isValid +: properties.values.map(p => p.isValid).toSeq).foldValidationResult
     }
     validationResult
   }
