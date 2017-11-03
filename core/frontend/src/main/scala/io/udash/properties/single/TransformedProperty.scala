@@ -19,17 +19,20 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
     fireValueListeners()
   }
 
-  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+  private def initOriginListener(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
+      listeners.clear()
       originListenerRegistration = origin.listen(originListener)
     }
+  }
+
+  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+    initOriginListener()
     super.listen(valueListener, initUpdate)
   }
 
   override def listenOnce(valueListener: (B) => Any): Registration = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
-      originListenerRegistration = origin.listen(originListener)
-    }
+    initOriginListener()
     super.listenOnce(valueListener)
   }
 
@@ -59,8 +62,9 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
   override def touch(): Unit =
     origin.touch()
 
-  override def addValidator(v: Validator[B]): Registration = {
+  private def initOriginValidator(): Unit = {
     if (originValidatorRegistration == null || !originValidatorRegistration.isActive()) {
+      super.clearValidators()
       originValidatorRegistration = origin.addValidator(new Validator[A] {
         override def apply(element: A): Future[ValidationResult] = {
           import Validator._
@@ -73,6 +77,10 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
         }
       })
     }
+  }
+
+  override def addValidator(v: Validator[B]): Registration = {
+    initOriginValidator()
     super.addValidator(v)
   }
 

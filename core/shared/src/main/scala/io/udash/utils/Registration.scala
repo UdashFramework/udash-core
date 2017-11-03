@@ -1,6 +1,7 @@
 package io.udash.utils
 
 import scala.collection.mutable
+import scala.scalajs.js
 
 /** Should be returned from every callback registration method in Udash. */
 trait Registration {
@@ -15,6 +16,12 @@ trait Registration {
 }
 
 private[udash] class SetRegistration[ElementType](s: mutable.Set[ElementType], el: ElementType) extends Registration {
+  override def cancel(): Unit = s.synchronized { s -= el }
+  override def restart(): Unit = s.synchronized { s += el }
+  override def isActive(): Boolean = s.synchronized { s.contains(el) }
+}
+
+private[udash] class JsArrayRegistration[ElementType](s: js.Array[ElementType], el: ElementType) extends Registration {
   override def cancel(): Unit = s.synchronized { s -= el }
   override def restart(): Unit = s.synchronized { s += el }
   override def isActive(): Boolean = s.synchronized { s.contains(el) }
