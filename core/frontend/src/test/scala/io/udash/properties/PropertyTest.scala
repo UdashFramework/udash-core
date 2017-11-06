@@ -691,6 +691,27 @@ class PropertyTest extends UdashFrontendTest {
       target.get should be(14)
       targetWithoutInit.get should be(28)
     }
+
+    "clear transformer listener" in {
+      val p = Property(6)
+      val t1 = p.transform(_ + 7)
+      val t2 = p.transform(_ + 8)
+
+      p.listenersCount() should be(0)
+      t1.listenersCount() should be(0)
+      t2.listenersCount() should be(0)
+
+      val r = t1.listen(_ => ())
+      t2.listenOnce(_ => ())
+
+      t1.listenersCount() should be(1)
+      t2.listenersCount() should be(1)
+
+      p.set(25)
+      r.cancel()
+
+      p.listenersCount() should be(0)
+    }
   }
 
   "ModelProperty" should {

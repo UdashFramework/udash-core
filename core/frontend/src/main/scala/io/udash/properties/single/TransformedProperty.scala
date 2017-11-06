@@ -1,7 +1,7 @@
 package io.udash.properties
 package single
 
-import io.udash.utils.Registration
+import io.udash.utils.{JsArrayRegistration, Registration}
 
 import scala.concurrent.Future
 
@@ -26,14 +26,38 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
     }
   }
 
+  private def killOriginListener(): Unit = {
+    if (originListenerRegistration != null && listeners.isEmpty) {
+      originListenerRegistration.cancel()
+      originListenerRegistration = null
+    }
+  }
+
+  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
+    override def restart(): Unit = {
+      initOriginListener()
+      reg.restart()
+    }
+
+    override def cancel(): Unit = {
+      reg.cancel()
+      killOriginListener()
+    }
+
+    override def isActive(): Boolean =
+      reg.isActive()
+  }
+
   override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
     initOriginListener()
-    super.listen(valueListener, initUpdate)
+    wrapListenerRegistration(super.listen(valueListener, initUpdate))
   }
 
   override def listenOnce(valueListener: (B) => Any): Registration = {
     initOriginListener()
-    super.listenOnce(valueListener)
+    val reg = wrapListenerRegistration(new JsArrayRegistration(listeners, valueListener))
+    oneTimeListeners += ((valueListener, () => reg.cancel()))
+    reg
   }
 
   override def get: B = {

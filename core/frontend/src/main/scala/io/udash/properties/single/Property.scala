@@ -51,6 +51,7 @@ object Property {
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
   protected[this] val listeners: js.Array[A => Any] = js.Array()
+  protected[this] val oneTimeListeners: js.Array[(A => Any, () => Any)] = js.Array()
 
   protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
   protected[this] val validators: js.Array[Validator[A]] = js.Array()
@@ -74,15 +75,14 @@ trait ReadableProperty[A] {
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
   def listenOnce(valueListener: A => Any): Registration = {
-    val wrapper: A => Any = new Function1[A, Any] {
-      override def apply(v: A): Any = {
-        listeners -= this
-        valueListener(v)
-      }
-    }
-    listeners += wrapper
-    new JsArrayRegistration(listeners, wrapper)
+    val reg = new JsArrayRegistration(listeners, valueListener)
+    oneTimeListeners += ((valueListener, () => reg.cancel()))
+    reg
   }
+
+  /** Returns listeners count. */
+  private[properties] def listenersCount(): Int =
+    listeners.length + oneTimeListeners.length
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   def isValid: Future[ValidationResult] = {
@@ -151,8 +151,14 @@ trait ReadableProperty[A] {
   protected[properties] def fireValueListeners(): Unit = {
     CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
-      val cpy = listeners.jsSlice()
-      cpy.foreach(_.apply(t))
+      val listenersCopy = listeners.jsSlice()
+      val oneTimeListenersCopy = oneTimeListeners.jsSlice()
+      oneTimeListeners.clear()
+      listenersCopy.foreach(_.apply(t))
+      oneTimeListenersCopy.foreach { case (callback, cancel) =>
+        callback(t)
+        cancel()
+      }
     })
   }
 
@@ -215,6 +221,7 @@ trait Property[A] extends ReadableProperty[A] {
   /** Removes all listeners from property. */
   def clearListeners(): Unit = {
     listeners.clear()
+    oneTimeListeners.clear()
   }
 
   /**
