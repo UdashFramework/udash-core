@@ -1,9 +1,10 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.{Registration, SetRegistration}
+import io.udash.utils.{JsArrayRegistration, Registration, SetRegistration}
 
 import scala.collection.mutable
+import scala.scalajs.js
 
 private[properties]
 class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
@@ -15,7 +16,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
   private var filteredProps: Seq[ElemType] = loadPropsFromOrigin()
 
-  private val structureListeners: mutable.Set[(Patch[ElemType]) => Any] = mutable.Set.empty
+  private val structureListeners: js.Array[(Patch[ElemType]) => Any] = js.Array()
 
   private def elementChanged(p: ElemType)(v: A): Unit = {
     val props = loadPropsFromOrigin()
@@ -63,8 +64,8 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
   })
 
   override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
-    structureListeners.add(structureListener)
-    new SetRegistration(structureListeners, structureListener)
+    structureListeners += structureListener
+    new JsArrayRegistration(structureListeners, structureListener)
   }
 
   override def elemProperties: Seq[ElemType] =

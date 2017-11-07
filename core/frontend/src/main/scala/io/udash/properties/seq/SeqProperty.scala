@@ -8,6 +8,7 @@ import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.scalajs.js
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
@@ -137,8 +138,8 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
 
-  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit = {
-    val cpy = structureListeners.toSet
+  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: js.Array[(Patch[ItemType]) => Any]): Unit = {
+    val cpy = structureListeners.jsSlice()
     CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
 }
