@@ -5,6 +5,7 @@ import io.udash.utils.{JsArrayRegistration, Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.scalajs.js
+import js.JSConverters._
 
 private[properties]
 class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
@@ -12,9 +13,9 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, ElemType] {
 
   private def loadPropsFromOrigin() =
-    origin.elemProperties.filter(el => matcher(el.get))
+    origin.elemProperties.filter(el => matcher(el.get)).toJSArray
 
-  private var filteredProps: Seq[ElemType] = loadPropsFromOrigin()
+  private val filteredProps: js.Array[ElemType] = loadPropsFromOrigin()
 
   private val structureListeners: js.Array[(Patch[ElemType]) => Any] = js.Array()
 
@@ -25,10 +26,10 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
     val patch = (oldIdx, newIdx) match {
       case (oi, -1) if oi != -1 =>
-        filteredProps = filteredProps.slice(0, oi) ++ filteredProps.slice(oi + 1, filteredProps.size)
+        filteredProps.splice(oi, 1)
         Patch[ElemType](oi, Seq(p), Seq.empty, filteredProps.isEmpty)
       case (-1, ni) if ni != -1 =>
-        filteredProps = (filteredProps.slice(0, ni) :+ p) ++ filteredProps.slice(ni, filteredProps.size)
+        filteredProps.splice(ni, 0, p)
         Patch[ElemType](ni, Seq.empty, Seq(p), filteredProps.isEmpty)
       case _ => null
     }
@@ -54,7 +55,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
       val callbackProps = props.map(_.get)
 
-      filteredProps = filteredProps.slice(0, idx) ++ added ++ filteredProps.slice(idx + removed.size, filteredProps.size)
+      filteredProps.splice(idx, removed.size, added: _*)
 
       val filteredPatch = Patch[ElemType](idx, removed, added, filteredProps.isEmpty)
 
