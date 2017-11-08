@@ -3,7 +3,7 @@ package io.udash.rest
 import java.nio.ByteBuffer
 
 import monix.execution.Scheduler.Implicits.global
-import fr.hmil.roshttp.{HttpRequest, Method, Protocol}
+import fr.hmil.roshttp.{HttpRequest, Method, Protocol => RProtocol}
 import fr.hmil.roshttp.body.BodyPart
 import io.udash.rest.internal.RESTConnector
 import io.udash.rest.internal.RESTConnector.HTTPMethod
@@ -12,13 +12,24 @@ import monix.reactive.Observable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
-/** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
-class DefaultRESTConnector(_protocol: String, val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
+sealed trait Protocol
+object Protocol {
+  case object Http extends Protocol
+  case object Https extends Protocol
 
-  private val protocol = _protocol match {
-    case "http:" | "http" => Protocol.HTTP
-    case "https:" | "https" => Protocol.HTTPS
-    case _ => throw new IllegalArgumentException(s"Invalid protocol: ${_protocol}")
+  def apply(s: String): Option[Protocol] = s match {
+    case "http:" | "http" => Some(Http)
+    case "https:" | "https" => Some(Https)
+    case _ => None
+  }
+}
+
+/** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
+class DefaultRESTConnector(protocol: Protocol, val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
+
+  private val rosHttpProtocol = protocol match {
+    case Protocol.Http => RProtocol.HTTP
+    case Protocol.Https => RProtocol.HTTPS
   }
 
   private class InternalBodyPart(override val content: Observable[ByteBuffer]) extends BodyPart {
@@ -27,7 +38,7 @@ class DefaultRESTConnector(_protocol: String, val host: String, val port: Int, v
 
   override def send(url: String, method: HTTPMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
     val request: HttpRequest = HttpRequest()
-      .withProtocol(protocol)
+      .withProtocol(rosHttpProtocol)
       .withHost(host)
       .withPort(port)
       .withPath(pathPrefix.stripSuffix("/") + url)
