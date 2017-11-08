@@ -143,7 +143,15 @@ trait ReadableProperty[A] {
     @inline def update(v: A) =
       target.set(transformer(v))
     if (initUpdate) update(get)
-    listen(update)
+    val listenerRegistration = listen(update)
+    new Registration {
+      override def cancel(): Unit = listenerRegistration.cancel()
+      override def isActive(): Boolean = listenerRegistration.isActive()
+      override def restart(): Unit = {
+        listenerRegistration.restart()
+        update(get)
+      }
+    }
   }
 
   protected[properties] def parent: ReadableProperty[_]

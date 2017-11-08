@@ -10,14 +10,12 @@ import js.JSConverters._
 private[properties]
 class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
                          (override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean)
-  extends ForwarderReadableSeqProperty[A, ElemType] {
+  extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
   private def loadPropsFromOrigin() =
     origin.elemProperties.filter(el => matcher(el.get)).toJSArray
 
   private val filteredProps: js.Array[ElemType] = loadPropsFromOrigin()
-
-  private val structureListeners: js.Array[(Patch[ElemType]) => Any] = js.Array()
 
   private def elementChanged(p: ElemType)(v: A): Unit = {
     val props = loadPropsFromOrigin()
