@@ -7,7 +7,16 @@ class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], Orig
                                     (override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B)
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] with ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
 
-  override protected def loadFromOrigin(): Seq[B] = origin.get.map(transformer)
+  private var lastValue: Seq[A] = _
+  private var transformedLastValue: Seq[B] = _
+
+  override protected def loadFromOrigin(): Seq[B] = {
+    if (origin.size != transformedElements.size || origin.get != lastValue) {
+      lastValue = origin.get
+      transformedLastValue = lastValue.map(transformer)
+    }
+    transformedLastValue
+  }
   override protected def elementsFromOrigin(): Seq[ElemType] = origin.elemProperties.map(transformElement)
   override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType] = {
     val transPatch = Patch[ElemType](
@@ -19,6 +28,12 @@ class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], Orig
 
     transformedElements.splice(patch.idx, patch.removed.length, transPatch.added: _*)
     transPatch
+  }
+
+  override protected def onListenerInit(): Unit = {
+    lastValue = Seq.empty
+    transformedLastValue = Seq.empty
+    super.onListenerInit()
   }
 
   protected def transformElement(el: OrigType): ElemType =
