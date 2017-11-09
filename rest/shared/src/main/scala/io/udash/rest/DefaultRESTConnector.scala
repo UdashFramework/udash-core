@@ -12,10 +12,17 @@ import monix.reactive.Observable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 
-sealed trait Protocol
+sealed trait Protocol {
+  val defaultPort: Int
+}
+
 object Protocol {
-  case object Http extends Protocol
-  case object Https extends Protocol
+  case object Http extends Protocol {
+    override val defaultPort: Int = 80
+  }
+  case object Https extends Protocol {
+    override val defaultPort: Int = 443
+  }
 
   def apply(s: String): Option[Protocol] = s.toLowerCase match {
     case "http:" | "http" => Some(Http)
