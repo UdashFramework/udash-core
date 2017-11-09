@@ -1,11 +1,11 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.{JsArrayRegistration, Registration, SetRegistration}
+import io.udash.utils.{JsArrayRegistration, Registration}
 
 import scala.collection.mutable
 import scala.scalajs.js
-import js.JSConverters._
+import scala.scalajs.js.JSConverters._
 
 private[properties]
 class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]

@@ -40,8 +40,9 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import Validator._
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
     if (validationResult == null) {
       validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
     }

@@ -4,9 +4,8 @@ import java.util.UUID
 
 import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.utils.{JsArrayRegistration, Registration, SetRegistration}
+import io.udash.utils.{JsArrayRegistration, Registration}
 
-import scala.collection.mutable
 import scala.scalajs.js
 
 class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
