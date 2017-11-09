@@ -17,7 +17,7 @@ object Protocol {
   case object Http extends Protocol
   case object Https extends Protocol
 
-  def apply(s: String): Option[Protocol] = s match {
+  def apply(s: String): Option[Protocol] = s.toLowerCase match {
     case "http:" | "http" => Some(Http)
     case "https:" | "https" => Some(Https)
     case _ => None
@@ -25,7 +25,7 @@ object Protocol {
 }
 
 /** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
-class DefaultRESTConnector(protocol: Protocol, val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
+class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
 
   private val rosHttpProtocol = protocol match {
     case Protocol.Http => RProtocol.HTTP
