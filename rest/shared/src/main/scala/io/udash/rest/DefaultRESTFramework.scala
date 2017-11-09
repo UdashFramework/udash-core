@@ -4,7 +4,7 @@ import com.avsystem.commons.serialization.GenCodec
 import io.udash.rpc.{AutoUdashRPCFramework, DefaultUdashSerialization}
 
 object DefaultRESTFramework extends UdashRESTFramework with AutoUdashRPCFramework with DefaultUdashSerialization {
-  private val bodyValuesCodec = GenCodec.Auto(GenCodec.create[Map[String, DefaultRESTFramework.RawValue]](
+  private val bodyValuesCodec = GenCodec.create[Map[String, DefaultRESTFramework.RawValue]](
     in => {
       val data = Map.newBuilder[String, DefaultRESTFramework.RawValue]
       val obj = in.readObject()
@@ -21,7 +21,7 @@ object DefaultRESTFramework extends UdashRESTFramework with AutoUdashRPCFramewor
       }
       obj.finish()
     }
-  ))
+  )
 
   override def bodyValuesWriter: DefaultRESTFramework.Writer[Map[String, DefaultRESTFramework.RawValue]] =
     bodyValuesCodec

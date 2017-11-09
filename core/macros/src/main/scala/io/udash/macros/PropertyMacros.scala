@@ -32,7 +32,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val PatchCls = tq"$Package.SeqProperty.Patch"
   val ArrayBufferCls = tq"_root_.scala.collection.mutable.ArrayBuffer"
   val MutableMap = q"_root_.scala.collection.mutable.Map"
-  val StringCls = tq"String"
 
   private lazy val OptionTpe = typeOf[Option[_]]
   private lazy val OptTpe = typeOf[Opt[_]]

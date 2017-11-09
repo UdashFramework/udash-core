@@ -1,10 +1,10 @@
 package io.udash.rest.macros
 
-import com.avsystem.commons.macros.rpc.RPCMacros
+import com.avsystem.commons.macros.rpc.RPCFrameworkMacros
 
 import scala.reflect.macros.blackbox
 
-class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
+class RESTMacros(override val c: blackbox.Context) extends RPCFrameworkMacros(c) {
 
   import c.universe._
 
@@ -69,11 +69,11 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     checkNameOverride(method.method.annotations,
       cls => s"@$cls annotation argument has to be non empty string, value on ${method.rpcName} in $restType is not.")
 
-  def checkParameterNameOverride(parameter:  Symbol, method: ProxyableMember, restType: Type) =
+  def checkParameterNameOverride(parameter: Symbol, method: ProxyableMember, restType: Type) =
     checkNameOverride(parameter.annotations,
       cls => s"@$cls annotation argument has to be non empty string, value on ${parameter.name} from ${method.rpcName} in $restType is not.")
 
-  def checkParameterTypeAnnotations(parameter:  Symbol, method: ProxyableMember, restType: Type) =
+  def checkParameterTypeAnnotations(parameter: Symbol, method: ProxyableMember, restType: Type) =
     if (countArgumentTypeAnnotation(parameter.annotations) > 1)
       abort(s"REST method argument has to be annotated with at most one argument type annotation, ${parameter.name} from ${method.rpcName} in $restType has not.")
 
@@ -124,8 +124,10 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
         paramsList.foreach(param => checkGetterParameter(param, getter, restType))
       )
 
-      if (!isServer) q"""implicitly[$ValidRESTCls[${getter.returnType}]]"""
-      else q"""implicitly[$ValidServerRESTCls[${getter.returnType}]]"""
+      if (!isServer)
+        q"""implicitly[$ValidRESTCls[${getter.returnType}]]"""
+      else
+        q"""implicitly[$ValidServerRESTCls[${getter.returnType}]]"""
     })
 
     val methodsImplicits = methods.map(method => {
@@ -147,7 +149,7 @@ class RESTMacros(override val c: blackbox.Context) extends RPCMacros(c) {
     })
 
     val cls = if (!isServer) ValidRESTCls else ValidServerRESTCls
-      q"""
+    q"""
       new $cls[$restType] {
         implicit def ${c.freshName(TermName("self"))}: $cls[$restType] = this
 
