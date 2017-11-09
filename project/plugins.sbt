@@ -1,7 +1,8 @@
 logLevel := Level.Warn
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.19")
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.2")
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
+// https://github.com/scala-js/scala-js/issues/3164 - include `scalajs-env-selenium` before `sbt-scalajs`
+libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "0.2.0"
 
-libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "0.1.3"
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.19")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.3")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.0")
