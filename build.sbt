@@ -29,7 +29,7 @@ jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
   import org.openqa.selenium.chrome.ChromeOptions
   val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
   val chromeOptions = new ChromeOptions()
-  chromeOptions.addArguments("--headless --disable-gpu")
+  chromeOptions.addArguments("--headless", "--disable-gpu")
   chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
   chrome
 })
@@ -121,10 +121,11 @@ lazy val `core-macros` = project.in(file("core/macros"))
 lazy val `core-shared` = crossProject.crossType(CrossType.Pure).in(file("core/shared"))
   .jsConfigure(_.dependsOn(`core-macros`))
   .jvmConfigure(_.dependsOn(`core-macros`))
-  .settings(commonSettings: _*).settings(
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= coreCrossDeps.value
   )
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
 
 lazy val `core-shared-JVM` = `core-shared`.jvm
 lazy val `core-shared-JS` = `core-shared`.js
@@ -150,7 +151,7 @@ lazy val `rpc-shared` = crossProject.crossType(CrossType.Full).in(file("rpc/shar
   .settings(
     libraryDependencies ++= rpcCrossTestDeps.value
   )
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
   .jvmSettings(
     libraryDependencies ++= rpcSharedJVMDeps.value
   )
@@ -161,8 +162,8 @@ lazy val `rpc-shared-JS` = `rpc-shared`.js
 lazy val `rpc-backend` = project.in(file("rpc/backend"))
   .dependsOn(`rpc-shared-JVM` % CompileAndTest)
   .settings(commonSettings: _*).settings(
-    libraryDependencies ++= rpcBackendDeps.value
-  )
+  libraryDependencies ++= rpcBackendDeps.value
+)
 
 lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)
   .dependsOn(`rpc-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
@@ -173,7 +174,8 @@ lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJS
   )
 
 lazy val `rest-macros` = project.in(file("rest/macros"))
-  .settings(commonSettings: _*).settings(
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
@@ -184,10 +186,11 @@ lazy val `rest-shared` = crossProject.crossType(CrossType.Pure).in(file("rest/sh
   .configureCross(_.dependsOn(`rpc-shared` % CompileAndTest))
   .jsConfigure(_.dependsOn(`rest-macros`))
   .jvmConfigure(_.dependsOn(`rest-macros`))
-  .settings(commonSettings: _*).settings(
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= restCrossDeps.value
   )
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
 
 lazy val `rest-shared-JVM` = `rest-shared`.jvm
 lazy val `rest-shared-JS` = `rest-shared`.js
@@ -202,7 +205,7 @@ lazy val `rest-backend` = project.in(file("rest/backend"))
 lazy val `i18n-shared` = crossProject.crossType(CrossType.Pure).in(file("i18n/shared"))
   .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
 
 lazy val `i18n-shared-JVM` = `i18n-shared`.jvm
 lazy val `i18n-shared-JS` = `i18n-shared`.js
@@ -220,7 +223,7 @@ lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
 lazy val `auth-shared` = crossProject.crossType(CrossType.Pure).in(file("auth/shared"))
   .configureCross(_.dependsOn(`core-shared`, `rpc-shared` % CompileAndTest))
   .settings(commonSettings: _*)
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
 
 lazy val `auth-shared-JVM` = `auth-shared`.jvm
 lazy val `auth-shared-JS` = `auth-shared`.js
@@ -242,7 +245,7 @@ lazy val `css-shared` = crossProject.crossType(CrossType.Pure).in(file("css/shar
   .jsConfigure(_.dependsOn(`css-macros`, `core-shared-JS` % Test))
   .jvmConfigure(_.dependsOn(`css-macros`, `core-shared-JVM` % Test))
   .settings(commonSettings: _*)
-  .jsSettings(commonJSSettings:_*)
+  .jsSettings(commonJSSettings: _*)
   .settings(libraryDependencies ++= cssMacroDeps.value)
 
 lazy val `css-shared-JVM` = `css-shared`.jvm

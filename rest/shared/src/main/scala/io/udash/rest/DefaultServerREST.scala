@@ -19,8 +19,8 @@ class DefaultServerREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : Default
 object DefaultServerREST {
   /** Creates [[io.udash.rest.DefaultServerREST]] with [[io.udash.rest.DefaultRESTConnector]] for provided REST interfaces. */
   def apply[ServerRPCType : DefaultRESTFramework.AsRealRPC : DefaultRESTFramework.RPCMetadata : DefaultRESTFramework.ValidREST]
-           (host: String, port: Int, pathPrefix: String = "")(implicit ec: ExecutionContext): ServerRPCType = {
-    val serverConnector = new DefaultRESTConnector(host, port, pathPrefix)
+           (protocol: Protocol, host: String, port: Int, pathPrefix: String = "")(implicit ec: ExecutionContext): ServerRPCType = {
+    val serverConnector = new DefaultRESTConnector(protocol, host, port, pathPrefix)
     val serverRPC: DefaultServerREST[ServerRPCType] = new DefaultServerREST[ServerRPCType](serverConnector)
     serverRPC.remoteRpc
   }

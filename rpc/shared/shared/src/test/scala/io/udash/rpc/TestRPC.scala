@@ -1,11 +1,14 @@
 package io.udash.rpc
 
+import com.avsystem.commons.serialization.HasGenCodec
 import com.github.ghik.silencer.silent
 import io.udash.rpc.utils.Logged
 
 import scala.concurrent.Future
 
 case class Record(i: Int, fuu: String)
+object Record extends HasGenCodec[Record]
+
 case class CustomRPCException(i: Int) extends Throwable
 
 trait RPCMethods {

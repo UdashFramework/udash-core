@@ -37,8 +37,8 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   context.addServlet(holder, s"${contextPrefix}*")
   server.setHandler(context)
 
-  val restServer = DefaultServerREST[TestServerRESTInterface]("127.0.0.1", port, contextPrefix)
-  val serverConnector = new DefaultRESTConnector("127.0.0.1", port, contextPrefix)
+  val restServer = DefaultServerREST[TestServerRESTInterface](Protocol.Http, "127.0.0.1", port, contextPrefix)
+  val serverConnector = new DefaultRESTConnector(Protocol.Http, "127.0.0.1", port, contextPrefix)
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)
@@ -82,7 +82,6 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       firesBuffer.clear()
       restServer.serviceTwo("token123", "en_GB").fireAndForget(321)
       eventually {
-        println(firesBuffer)
         firesBuffer.contains("two/token123/en_GB/fireAndForget/321") should be(true)
       }
     }
