@@ -82,7 +82,6 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       firesBuffer.clear()
       restServer.serviceTwo("token123", "en_GB").fireAndForget(321)
       eventually {
-        println(firesBuffer)
         firesBuffer.contains("two/token123/en_GB/fireAndForget/321") should be(true)
       }
     }

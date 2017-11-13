@@ -1,10 +1,12 @@
 package io.udash.rest
 
+import com.avsystem.commons.serialization.HasGenCodec
 import io.udash.rpc.RPCName
 
 import scala.concurrent.Future
 
 case class TestRESTRecord(id: Option[Int], s: String)
+object TestRESTRecord extends HasGenCodec[TestRESTRecord]
 
 @REST
 trait TestRESTInterface {
