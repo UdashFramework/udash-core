@@ -38,14 +38,14 @@ trait AutoUdashRPCFramework extends GenCodecSerializationFramework { this: RPCFr
 
 /** Base RPC framework for client RPC interface. This one does not allow RPC interfaces to contain methods with return type `Future[T]`. */
 trait ClientUdashRPCFramework extends UdashRPCFramework {
-  abstract class RawRPC extends GetterRawRPC with ProcedureRawRPC
-  abstract class FullRPCInfo[T] extends BaseFullRPCInfo[T] // for better ScalaJS DCE, MUST be separate from server framework
+  trait RawRPC extends GetterRawRPC with ProcedureRawRPC
+  trait FullRPCInfo[T] extends BaseFullRPCInfo[T] // for better ScalaJS DCE, MUST be separate from server framework
 }
 
 /** Base RPC framework for server RPC interface. This one allows RPC interfaces to contain methods with return type `Future[T]`. */
 trait ServerUdashRPCFramework extends UdashRPCFramework with FunctionRPCFramework {
-  abstract class RawRPC extends GetterRawRPC with FunctionRawRPC with ProcedureRawRPC
-  abstract class FullRPCInfo[T] extends BaseFullRPCInfo[T] // for better ScalaJS DCE, MUST be separate from client framework
+  trait RawRPC extends GetterRawRPC with FunctionRawRPC with ProcedureRawRPC
+  trait FullRPCInfo[T] extends BaseFullRPCInfo[T] // for better ScalaJS DCE, MUST be separate from client framework
 }
 
 /** Default Udash client application RPC framework. */
