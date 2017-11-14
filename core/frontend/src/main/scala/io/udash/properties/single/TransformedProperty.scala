@@ -1,7 +1,7 @@
 package io.udash.properties
 package single
 
-import io.udash.utils.Registration
+import io.udash.utils.{JsArrayRegistration, Registration}
 
 import scala.concurrent.Future
 
@@ -9,23 +9,73 @@ import scala.concurrent.Future
 private[properties]
 class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
                                         transformer: A => B) extends ForwarderReadableProperty[B] {
-  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration =
-    origin.listen((a: A) => valueListener(transformer(a)), initUpdate)
+  protected var lastValue: A = _
+  protected var transformedValue: B = _
+  protected var originListenerRegistration: Registration = _
 
-  override def listenOnce(valueListener: (B) => Any): Registration =
-    origin.listenOnce((a: A) => valueListener(transformer(a)))
+  protected def originListener(originValue: A) : Unit = {
+    lastValue = originValue
+    transformedValue = transformer(originValue)
+    fireValueListeners()
+  }
 
-  override protected[properties] def fireValueListeners(): Unit =
-    origin.fireValueListeners()
+  private def initOriginListener(): Unit = {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) {
+      listeners.clear()
+      originListenerRegistration = origin.listen(originListener)
+    }
+  }
 
-  override def get: B =
-    transformer(origin.get)
+  private def killOriginListener(): Unit = {
+    if (originListenerRegistration != null && listeners.isEmpty) {
+      originListenerRegistration.cancel()
+      originListenerRegistration = null
+    }
+  }
+
+  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
+    override def restart(): Unit = {
+      initOriginListener()
+      reg.restart()
+    }
+
+    override def cancel(): Unit = {
+      reg.cancel()
+      killOriginListener()
+    }
+
+    override def isActive: Boolean =
+      reg.isActive
+  }
+
+  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+    initOriginListener()
+    wrapListenerRegistration(super.listen(valueListener, initUpdate))
+  }
+
+  override def listenOnce(valueListener: (B) => Any): Registration = {
+    initOriginListener()
+    val reg = wrapListenerRegistration(new JsArrayRegistration(listeners, valueListener))
+    oneTimeListeners += ((valueListener, () => reg.cancel()))
+    reg
+  }
+
+  override def get: B = {
+    val originValue = origin.get
+    if (lastValue != originValue) {
+      lastValue = originValue
+      transformedValue = transformer(originValue)
+    }
+    transformedValue
+  }
 }
 
 /** Represents Property[A] transformed to Property[B]. */
 private[properties]
 class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
   extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
+
+  protected var originValidatorRegistration: Registration = _
 
   override def set(t: B, force: Boolean = false): Unit =
     origin.set(revert(t), force)
@@ -36,15 +86,37 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
   override def touch(): Unit =
     origin.touch()
 
-  override def addValidator(v: Validator[B]): Registration =
-    origin.addValidator(new Validator[A] {
-      override def apply(element: A): Future[ValidationResult] =
-        v(transformer(element))
-    })
+  private def initOriginValidator(): Unit = {
+    if (originValidatorRegistration == null || !originValidatorRegistration.isActive) {
+      super.clearValidators()
+      originValidatorRegistration = origin.addValidator(new Validator[A] {
+        override def apply(element: A): Future[ValidationResult] = {
+          import Validator._
 
-  override def clearValidators(): Unit =
+          import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+          val transformedValue = transformer(element)
+          Future.sequence(
+            validators.map(_.apply(transformedValue)).toSeq
+          ).foldValidationResult
+        }
+      })
+    }
+  }
+
+  override def addValidator(v: Validator[B]): Registration = {
+    initOriginValidator()
+    super.addValidator(v)
+  }
+
+  override def clearValidators(): Unit = {
+    originValidatorRegistration = null
+    super.clearValidators()
     origin.clearValidators()
+  }
 
-  override def clearListeners(): Unit =
+  override def clearListeners(): Unit = {
+    originListenerRegistration = null
+    super.clearListeners()
     origin.clearListeners()
+  }
 }

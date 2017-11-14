@@ -4,11 +4,11 @@ import java.util.UUID
 
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue, SeqProperty, SeqPropertyFromSingleValue}
-import io.udash.utils.{Registration, SetRegistration}
+import io.udash.utils.{JsArrayRegistration, Registration}
 
-import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.language.higherKinds
+import scala.scalajs.js
 import scala.util.{Failure, Success}
 
 object Property {
@@ -26,7 +26,6 @@ object Property {
 
   private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-    private var value: ValidationResult = Valid
     private var initialized: Boolean = false
     private var p: Property[ValidationResult] = _
     private val listener = (_: A) => target.isValid onComplete {
@@ -37,7 +36,7 @@ object Property {
     def property: ReadableProperty[ValidationResult] = {
       if (!initialized) {
         initialized = true
-        p = Property[ValidationResult]
+        p = Property.empty[ValidationResult]
         listener(target.get)
         target.listen(listener)
       }
@@ -51,10 +50,11 @@ object Property {
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
-  protected[this] val listeners: mutable.Set[A => Any] = mutable.Set()
+  protected[this] val listeners: js.Array[A => Any] = js.Array()
+  protected[this] val oneTimeListeners: js.Array[(A => Any, () => Any)] = js.Array()
 
   protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] val validators: mutable.Set[Validator[A]] = mutable.Set()
+  protected[this] val validators: js.Array[Validator[A]] = js.Array()
   protected[this] var validationResult: Future[ValidationResult] = _
 
   /** Unique property ID. */
@@ -70,20 +70,19 @@ trait ReadableProperty[A] {
   def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
     if (initUpdate) valueListener(this.get)
-    new SetRegistration(listeners, valueListener)
+    new JsArrayRegistration(listeners, valueListener)
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
   def listenOnce(valueListener: A => Any): Registration = {
-    val wrapper: A => Any = new Function1[A, Any] {
-      override def apply(v: A): Any = {
-        listeners -= this
-        valueListener(v)
-      }
-    }
-    listeners += wrapper
-    new SetRegistration(listeners, wrapper)
+    val reg = new JsArrayRegistration(listeners, valueListener)
+    oneTimeListeners += ((valueListener, () => reg.cancel()))
+    reg
   }
+
+  /** Returns listeners count. */
+  private[properties] def listenersCount(): Int =
+    listeners.length + oneTimeListeners.length
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   def isValid: Future[ValidationResult] = {
@@ -144,7 +143,15 @@ trait ReadableProperty[A] {
     @inline def update(v: A) =
       target.set(transformer(v))
     if (initUpdate) update(get)
-    listen(update)
+    val listenerRegistration = listen(update)
+    new Registration {
+      override def cancel(): Unit = listenerRegistration.cancel()
+      override def isActive: Boolean = listenerRegistration.isActive
+      override def restart(): Unit = {
+        listenerRegistration.restart()
+        update(get)
+      }
+    }
   }
 
   protected[properties] def parent: ReadableProperty[_]
@@ -152,8 +159,14 @@ trait ReadableProperty[A] {
   protected[properties] def fireValueListeners(): Unit = {
     CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
-      val cpy = listeners.toSet
-      cpy.foreach(_.apply(t))
+      val listenersCopy = listeners.jsSlice()
+      val oneTimeListenersCopy = oneTimeListeners.jsSlice()
+      oneTimeListeners.clear()
+      listenersCopy.foreach(_.apply(t))
+      oneTimeListenersCopy.foreach { case (callback, cancel) =>
+        callback(t)
+        cancel()
+      }
     })
   }
 
@@ -171,9 +184,10 @@ trait ReadableProperty[A] {
       CallbackSequencer.queue(s"${this.id.toString}:fireValidation", () => {
         import Validator._
         val currentValue = this.get
+        val cpy = validators.jsSlice()
         p.completeWith {
           Future.sequence(
-            validators.map(_ (currentValue)).toSeq
+            cpy.map(_ (currentValue)).toSeq
           ).foldValidationResult
         }
       })
@@ -198,7 +212,7 @@ trait Property[A] extends ReadableProperty[A] {
   def addValidator(v: Validator[A]): Registration = {
     validators += v
     validationResult = null
-    new SetRegistration(validators, v)
+    new JsArrayRegistration(validators, v)
   }
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */
@@ -215,6 +229,7 @@ trait Property[A] extends ReadableProperty[A] {
   /** Removes all listeners from property. */
   def clearListeners(): Unit = {
     listeners.clear()
+    oneTimeListeners.clear()
   }
 
   /**

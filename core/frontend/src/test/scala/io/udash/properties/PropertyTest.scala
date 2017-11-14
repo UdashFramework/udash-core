@@ -214,11 +214,29 @@ class PropertyTest extends UdashFrontendTest {
       cp.get should be(C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
-      values.size should be(8)
+      tp.clearListeners()
+      tp.set(Tuple2(TC1(-12), TC2("tp")))
+
+      tp.listen(listener)
+      cp.listen(listener)
+      tp.set(Tuple2(TC1(-13), TC2("tp")))
+
+      cp.clearListeners()
+      tp.set(Tuple2(TC1(-14), TC2("tp")))
+
+      tp.listen(listener)
+      cp.listen(listener)
+      tp.set(Tuple2(TC1(-15), TC2("tp")))
+
+      values.size should be(12)
       values should contain(C(12, "asd2"))
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
       values should contain(C(-5, "tp"))
+      values should contain(Tuple2(TC1(-13), TC2("tp")))
+      values should contain(C(-13, "tp"))
+      values should contain(Tuple2(TC1(-15), TC2("tp")))
+      values should contain(C(-15, "tp"))
 
       oneTimeValues.size should be(2)
       oneTimeValues should contain(C(12, "asd2"))
@@ -672,6 +690,27 @@ class PropertyTest extends UdashFrontendTest {
 
       target.get should be(14)
       targetWithoutInit.get should be(28)
+    }
+
+    "clear transformer listener" in {
+      val p = Property(6)
+      val t1 = p.transform(_ + 7)
+      val t2 = p.transform(_ + 8)
+
+      p.listenersCount() should be(0)
+      t1.listenersCount() should be(0)
+      t2.listenersCount() should be(0)
+
+      val r = t1.listen(_ => ())
+      t2.listenOnce(_ => ())
+
+      t1.listenersCount() should be(1)
+      t2.listenersCount() should be(1)
+
+      p.set(25)
+      r.cancel()
+
+      p.listenersCount() should be(0)
     }
   }
 

@@ -8,6 +8,7 @@ import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.scalajs.js
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
@@ -39,8 +40,9 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     import Validator._
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+
     if (validationResult == null) {
       validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
     }
@@ -137,8 +139,8 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
 
-  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: Iterable[(Patch[ItemType]) => Any]): Unit = {
-    val cpy = structureListeners.toSet
+  protected def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: js.Array[(Patch[ItemType]) => Any]): Unit = {
+    val cpy = structureListeners.jsSlice()
     CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
 }
