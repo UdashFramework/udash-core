@@ -20,7 +20,7 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
   }
 
   private def initOriginListener(): Unit = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
       originListenerRegistration = origin.listen(originListener)
     }
@@ -44,8 +44,8 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
       killOriginListener()
     }
 
-    override def isActive(): Boolean =
-      reg.isActive()
+    override def isActive: Boolean =
+      reg.isActive
   }
 
   override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
@@ -87,7 +87,7 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
     origin.touch()
 
   private def initOriginValidator(): Unit = {
-    if (originValidatorRegistration == null || !originValidatorRegistration.isActive()) {
+    if (originValidatorRegistration == null || !originValidatorRegistration.isActive) {
       super.clearValidators()
       originValidatorRegistration = origin.addValidator(new Validator[A] {
         override def apply(element: A): Future[ValidationResult] = {

@@ -146,7 +146,7 @@ trait ReadableProperty[A] {
     val listenerRegistration = listen(update)
     new Registration {
       override def cancel(): Unit = listenerRegistration.cancel()
-      override def isActive(): Boolean = listenerRegistration.isActive()
+      override def isActive: Boolean = listenerRegistration.isActive
       override def restart(): Unit = {
         listenerRegistration.restart()
         update(get)

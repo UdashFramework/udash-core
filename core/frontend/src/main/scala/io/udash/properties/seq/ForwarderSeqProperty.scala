@@ -21,12 +21,12 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   protected def onListenerInit(): Unit = {}
 
   protected def initOriginListeners(): Unit = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive()) {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
       onListenerInit()
       originListenerRegistration = origin.listen(originListener)
     }
-    if (originStructureListenerRegistration == null || !originStructureListenerRegistration.isActive()) {
+    if (originStructureListenerRegistration == null || !originStructureListenerRegistration.isActive) {
       structureListeners.clear()
       originStructureListenerRegistration = origin.listenStructure(originStructureListener)
     }
@@ -70,8 +70,8 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
       killOriginListeners()
     }
 
-    override def isActive(): Boolean =
-      reg.isActive()
+    override def isActive: Boolean =
+      reg.isActive
   }
 }
 
@@ -87,18 +87,18 @@ trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: 
   protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType]
 
   override def get: Seq[B] = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive()) loadFromOrigin()
-    else transformedElements.map(_.get).toSeq
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) loadFromOrigin()
+    else transformedElements.map(_.get)
   }
 
   override def elemProperties: Seq[ElemType] = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive()) elementsFromOrigin()
-    else transformedElements.toSeq
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) elementsFromOrigin()
+    else transformedElements
   }
 
   override protected def onListenerInit(): Unit = {
     val fromOrigin = elementsFromOrigin().toJSArray
-    if (transformedElements.map(_.id) != fromOrigin.map(_.id)) {
+    if (!(transformedElements.iterator.map(_.id) sameElements fromOrigin.iterator.map(_.id))) {
       fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements, fromOrigin, fromOrigin.isEmpty), structureListeners)
       fireValueListeners()
     } else if (transformedElements.map(_.get) != fromOrigin.map(_.get)) {

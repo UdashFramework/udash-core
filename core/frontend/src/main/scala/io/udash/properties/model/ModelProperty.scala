@@ -45,7 +45,9 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 
     import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     if (validationResult == null) {
-      validationResult = Future.sequence(super.isValid +: properties.values.map(p => p.isValid).toSeq).foldValidationResult
+      validationResult = Future.sequence(
+        (Iterator(super.isValid) ++ properties.values.iterator.map(p => p.isValid)).toSeq
+      ).foldValidationResult
     }
     validationResult
   }
