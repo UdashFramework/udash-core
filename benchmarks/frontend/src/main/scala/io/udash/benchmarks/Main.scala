@@ -11,7 +11,7 @@ object Main {
       ModelPropertyListeners.suite,
       TransformedSeqPropertyListeners.suite,
       FilteredSeqPropertyListeners.suite,
-      ReversedSeqPropertyListeners.suite,
+      ReversedSeqPropertyListeners.suite
     )
   }
 }

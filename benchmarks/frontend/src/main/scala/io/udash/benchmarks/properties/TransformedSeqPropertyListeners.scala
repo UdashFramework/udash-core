@@ -32,7 +32,7 @@ object TransformedSeqPropertyListeners extends BenchmarkUtils {
       val p = SeqProperty(Seq.tabulate(seqSize)(identity))
       val t = p.transform((v: Int) => slowInc(v), (v: Int) => slowDec(v))
       (p, t)
-    }),
+    })
   )
 
   private val benchmarks = generateGetSetListenBenchmarks[SeqProperty[Int], ReadableSeqProperty[Int]](properties)(

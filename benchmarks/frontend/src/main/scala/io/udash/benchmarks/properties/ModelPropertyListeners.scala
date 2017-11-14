@@ -32,7 +32,7 @@ object ModelPropertyListeners extends BenchmarkUtils {
       val p = ModelProperty(ModelItem.random)
       val t = p.transform((v: ModelItem) => v.copy(i = slowInc(v.i)), (v: ModelItem) => v.copy(i = slowDec(v.i)))
       (p, t)
-    }),
+    })
   )
 
   private val benchmarks = generateGetSetListenBenchmarks[ModelProperty[ModelItem], ReadableProperty[ModelItem]](properties)(

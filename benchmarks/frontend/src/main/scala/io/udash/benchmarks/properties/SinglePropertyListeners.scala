@@ -30,7 +30,7 @@ object SinglePropertyListeners extends BenchmarkUtils {
       val p = Property(0)
       val t = p.transform((v: Int) => slowInc(v), (v: Int) => slowDec(v))
       (p, t)
-    }),
+    })
   )
 
   private val benchmarks = generateGetSetListenBenchmarks[Property[Int], ReadableProperty[Int]](properties)(
