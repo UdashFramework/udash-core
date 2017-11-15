@@ -270,71 +270,85 @@ object UdashDatePicker {
     * @param viewDate            This will change the viewDate without changing or setting the selected date.
     * @param tooltips            This will change the tooltips over each icon to a custom string.
     */
-  case class DatePickerOptions(format: String,
-                               dayViewHeaderFormat: String = "MMMM YYYY",
-                               extraFormats: Seq[String] = Seq.empty,
-                               stepping: Int = 1,
-                               minDate: Option[ju.Date] = None,
-                               maxDate: Option[ju.Date] = None,
-                               useCurrent: Boolean = true,
-                               collapse: Boolean = true,
-                               locale: Option[String] = None,
-                               defaultDate: Option[ju.Date] = None,
-                               disabledDates: Seq[ju.Date] = Seq.empty,
-                               enabledDates: Seq[ju.Date] = Seq.empty,
-                               icons: DatePickerIcons = DatePickerIcons(),
-                               useStrict: Boolean = false,
-                               sideBySide: Boolean = false,
-                               daysOfWeekDisabled: Seq[DayOfWeek] = Seq.empty,
-                               calendarWeeks: Boolean = false,
-                               viewMode: ViewMode = ViewMode.Days,
-                               toolbarPlacement: Option[UdashDatePicker.Placement.VerticalPlacement] = None,
-                               showTodayButton: Boolean = false,
-                               showClear: Boolean = false,
-                               showClose: Boolean = false,
-                               widgetPositioning: Option[(UdashDatePicker.Placement.HorizontalPlacement, UdashDatePicker.Placement.VerticalPlacement)] = None,
-                               widgetParent: Option[String] = None,
-                               keepOpen: Boolean = false,
-                               inline: Boolean = false,
-                               keepInvalid: Boolean = false,
-                               ignoreReadonly: Boolean = false,
-                               allowInputToggle: Boolean = false,
-                               focusOnShow: Boolean = true,
-                               enabledHours: Seq[Int] = Seq.empty,
-                               disabledHours: Seq[Int] = Seq.empty,
-                               viewDate: Boolean = false,
-                               tooltips: DatePickerTooltips = DatePickerTooltips())
+  class DatePickerOptions(
+    val format: String,
+    val dayViewHeaderFormat: String = "MMMM YYYY",
+    val extraFormats: Seq[String] = Seq.empty,
+    val stepping: Int = 1,
+    val minDate: Option[ju.Date] = None,
+    val maxDate: Option[ju.Date] = None,
+    val useCurrent: Boolean = true,
+    val collapse: Boolean = true,
+    val locale: Option[String] = None,
+    val defaultDate: Option[ju.Date] = None,
+    val disabledDates: Seq[ju.Date] = Seq.empty,
+    val enabledDates: Seq[ju.Date] = Seq.empty,
+    val icons: DatePickerIcons = new DatePickerIcons(),
+    val useStrict: Boolean = false,
+    val sideBySide: Boolean = false,
+    val daysOfWeekDisabled: Seq[DayOfWeek] = Seq.empty,
+    val calendarWeeks: Boolean = false,
+    val viewMode: ViewMode = ViewMode.Days,
+    val toolbarPlacement: Option[UdashDatePicker.Placement.VerticalPlacement] = None,
+    val showTodayButton: Boolean = false,
+    val showClear: Boolean = false,
+    val showClose: Boolean = false,
+    val widgetPositioning: Option[(UdashDatePicker.Placement.HorizontalPlacement, UdashDatePicker.Placement.VerticalPlacement)] = None,
+    val widgetParent: Option[String] = None,
+    val keepOpen: Boolean = false,
+    val inline: Boolean = false,
+    val keepInvalid: Boolean = false,
+    val ignoreReadonly: Boolean = false,
+    val allowInputToggle: Boolean = false,
+    val focusOnShow: Boolean = true,
+    val enabledHours: Seq[Int] = Seq.empty,
+    val disabledHours: Seq[Int] = Seq.empty,
+    val viewDate: Boolean = false,
+    val tooltips: DatePickerTooltips = new DatePickerTooltips()
+  ) {
+    def copy(minDate: Option[ju.Date] = minDate, maxDate: Option[ju.Date] = maxDate): DatePickerOptions = {
+      new DatePickerOptions(
+        format, dayViewHeaderFormat, extraFormats, stepping, minDate, maxDate, useCurrent, collapse, locale,
+        defaultDate, disabledDates, enabledDates, icons, useStrict, sideBySide, daysOfWeekDisabled, calendarWeeks,
+        viewMode, toolbarPlacement, showTodayButton, showClear, showClose, widgetPositioning, widgetParent, keepOpen,
+        inline, keepInvalid, ignoreReadonly, allowInputToggle, focusOnShow, enabledHours, disabledHours, viewDate, tooltips
+      )
+    }
+  }
 
   object DatePickerOptions {
+    implicit val immutable: ImmutableValue[DatePickerOptions] = null
     implicit val propertyCreator: PropertyCreator[DatePickerOptions] = PropertyCreator.propertyCreator[DatePickerOptions]
   }
 
-  case class DatePickerIcons(time: Seq[CssStyle] = Seq.empty, date: Seq[CssStyle] = Seq.empty,
-                             up: Seq[CssStyle] = Seq.empty, down: Seq[CssStyle] = Seq.empty,
-                             previous: Seq[CssStyle] = Seq.empty, next: Seq[CssStyle] = Seq.empty,
-                             today: Seq[CssStyle] = Seq.empty, clear: Seq[CssStyle] = Seq.empty,
-                             close: Seq[CssStyle] = Seq.empty)
+  class DatePickerIcons(val time: Seq[CssStyle] = Seq.empty, val date: Seq[CssStyle] = Seq.empty,
+                        val up: Seq[CssStyle] = Seq.empty, val down: Seq[CssStyle] = Seq.empty,
+                        val previous: Seq[CssStyle] = Seq.empty, val next: Seq[CssStyle] = Seq.empty,
+                        val today: Seq[CssStyle] = Seq.empty, val clear: Seq[CssStyle] = Seq.empty,
+                        val close: Seq[CssStyle] = Seq.empty)
 
   object DatePickerIcons {
+    implicit val immutable: ImmutableValue[DatePickerIcons] = null
     implicit val propertyCreator: PropertyCreator[DatePickerIcons] = PropertyCreator.propertyCreator[DatePickerIcons]
   }
 
-  case class DatePickerTooltips(today: String = "Go to today",
-                                clear: String = "Clear selection",
-                                close: String = "Close the picker",
-                                selectMonth: String = "Select Month",
-                                prevMonth: String = "Previous Month",
-                                nextMonth: String = "Next Month",
-                                selectYear: String = "Select Year",
-                                prevYear: String = "Previous Year",
-                                nextYear: String = "Next Year",
-                                selectDecade: String = "Select Decade",
-                                prevDecade: String = "Previous Decade",
-                                nextDecade: String = "Next Decade",
-                                prevCentury: String = "Previous Century",
-                                nextCentury: String = "Next Century")
+  class DatePickerTooltips(val today: String = "Go to today",
+                           val clear: String = "Clear selection",
+                           val close: String = "Close the picker",
+                           val selectMonth: String = "Select Month",
+                           val prevMonth: String = "Previous Month",
+                           val nextMonth: String = "Next Month",
+                           val selectYear: String = "Select Year",
+                           val prevYear: String = "Previous Year",
+                           val nextYear: String = "Next Year",
+                           val selectDecade: String = "Select Decade",
+                           val prevDecade: String = "Previous Decade",
+                           val nextDecade: String = "Next Decade",
+                           val prevCentury: String = "Previous Century",
+                           val nextCentury: String = "Next Century")
 
   object DatePickerTooltips {
+    implicit val immutable: ImmutableValue[DatePickerTooltips] = null
     implicit val propertyCreator: PropertyCreator[DatePickerTooltips] = PropertyCreator.propertyCreator[DatePickerTooltips]
   }
 
