@@ -84,7 +84,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         span(`class` := "sr-only", "Next")
       )
     ).render
-    val jqCarousel = jQ(res).asCarousel()
+    val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
     jqCarousel.on("slide.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       _activeIndex.set(idx)
@@ -95,8 +95,8 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
       _activeIndex.set(idx)
       fire(SlideChangedEvent(this, idx, dir))
     })
-    jqCarousel.carousel(animationOptions)
-    if (!animationOptions.active) jqCarousel.pause()
+    jqCarousel.carousel(animationOptions.native)
+    if (!animationOptions.active) jqCarousel.carousel("pause")
     res
   }
 
@@ -108,31 +108,31 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
   /**
     * Turn on slide transition.
     */
-  def cycle(): Unit = jQSelector().cycle()
+  def cycle(): Unit = jQSelector().carousel("cycle")
 
   /**
     * Pause slide transition.
     */
-  def pause(): Unit = jQSelector().pause()
+  def pause(): Unit = jQSelector().carousel("pause")
 
   /**
     * Change active slide.
     *
     * @param slideNumber new active slide index
     */
-  def goTo(slideNumber: Int): Unit = jQSelector().goTo(slideNumber)
+  def goTo(slideNumber: Int): Unit = jQSelector().carousel(slideNumber)
 
   /**
     * Change active slide to the next one (index order).
     */
-  def nextSlide(): Unit = jQSelector().nextSlide()
+  def nextSlide(): Unit = jQSelector().carousel("next")
 
   /**
     * Change active slide to the previous one (index order).
     */
-  def previousSlide(): Unit = jQSelector().previousSlide()
+  def previousSlide(): Unit = jQSelector().carousel("prev")
 
-  private def jQSelector(): UdashCarouselJQuery = jQ(render).asCarousel()
+  private def jQSelector(): UdashCarouselJQuery = jQ(render).asInstanceOf[UdashCarouselJQuery]
 
   private def firstActive: Int = math.min(activeSlide, content.length - 1)
 
@@ -256,26 +256,6 @@ object UdashCarousel {
       options.keyboard = keyboard
       options
     }
-  }
-
-  private implicit class UdashCarouselJQueryExt(jQ: JQuery) {
-    def asCarousel(): UdashCarouselJQuery = jQ.asInstanceOf[UdashCarouselJQuery]
-  }
-
-  private implicit class UdashCarouselJQueryOps(jq: UdashCarouselJQuery) {
-
-    def carousel(animationOptions: AnimationOptions): Unit = jq.carousel(animationOptions.native)
-
-    def cycle(): Unit = jq.carousel("cycle")
-
-    def pause(): Unit = jq.carousel("pause")
-
-    def goTo(slideNumber: Int): Unit = jq.carousel(slideNumber)
-
-    def nextSlide(): Unit = jq.carousel("next")
-
-    def previousSlide(): Unit = jq.carousel("prev")
-
   }
 
   object AnimationOptions {

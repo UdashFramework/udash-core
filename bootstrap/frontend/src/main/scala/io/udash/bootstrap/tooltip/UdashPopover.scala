@@ -37,7 +37,7 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
 
 object UdashPopover extends TooltipUtils[UdashPopover] {
   override protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): UdashPopover = {
-    val tp: UdashPopoverJQuery = jQ(el).asPopover()
+    val tp: UdashPopoverJQuery = jQ(el).asInstanceOf[UdashPopoverJQuery]
     tp.popover(options)
     new UdashPopover(tp)
   }
@@ -57,10 +57,5 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
   @js.native
   private trait UdashPopoverJQuery extends JQuery {
     def popover(arg: js.Any): UdashPopoverJQuery = js.native
-  }
-
-  private implicit class JQueryPopoverExt(jQ: JQuery) {
-    def asPopover(): UdashPopoverJQuery =
-      jQ.asInstanceOf[UdashPopoverJQuery]
   }
 }

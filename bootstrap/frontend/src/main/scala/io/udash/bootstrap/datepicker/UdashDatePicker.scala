@@ -27,39 +27,42 @@ final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Dat
   import scalatags.JsDom.all._
 
   private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
-  private val jQInput = jQ(inp).asDatePicker()
+  private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
+
+  private def dpData(dp: UdashDatePickerJQuery): UdashDatePickerDataJQuery =
+    dp.data("DateTimePicker").get.asInstanceOf[UdashDatePickerDataJQuery]
 
   /** Shows date picker widget. */
   def show(): Unit =
-    jQInput.dpData().show()
+    dpData(jQInput).show()
 
   /** Hides date picker widget. */
   def hide(): Unit =
-    jQInput.dpData().hide()
+    dpData(jQInput).hide()
 
   /** Toggle date picker widget visibility. */
   def toggle(): Unit =
-    jQInput.dpData().toggle()
+    dpData(jQInput).toggle()
 
   /** Enables date input. */
   def enable(): Unit =
-    jQInput.dpData().enable()
+    dpData(jQInput).enable()
 
   /** Disables date input. */
   def disable(): Unit =
-    jQInput.dpData().disable()
+    dpData(jQInput).disable()
 
   val render: dom.Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
-    options.listen(opts => jQInput.dpData().options(optionsToJsDict(opts)))
+    options.listen(opts => dpData(jQInput).options(optionsToJsDict(opts)))
 
-    date.get.foreach(d => jQInput.dpData().date(dateToMoment(d)))
-    date.listen(op => op.foreach(d => jQInput.dpData().date(dateToMoment(d))))
+    date.get.foreach(d => dpData(jQInput).date(dateToMoment(d)))
+    date.listen(op => op.foreach(d => dpData(jQInput).date(dateToMoment(d))))
 
     jQInput.on("dp.change", (_: dom.Element, ev: JQueryEvent) => {
       val event = ev.asInstanceOf[DatePickerChangeJQEvent]
-      val dateOption = event.dateOption.map(momentToDate)
+      val dateOption = event.option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
       val oldDateOption = date.get
       dateOption match {
         case Some(d) =>
@@ -197,8 +200,9 @@ object UdashDatePicker {
     new UdashDatePicker(date, options, componentId)
 
   /** Creates date range selector from provided date pickers. */
-  def dateRange(from: UdashDatePicker, to: UdashDatePicker)(fromOptions: Property[UdashDatePicker.DatePickerOptions],
-                                                            toOptions: Property[UdashDatePicker.DatePickerOptions]): Registration = {
+  def dateRange(from: UdashDatePicker, to: UdashDatePicker)
+               (fromOptions: Property[UdashDatePicker.DatePickerOptions],
+                toOptions: Property[UdashDatePicker.DatePickerOptions]): Registration = {
     val r1 = from.date.streamTo(toOptions)(d => toOptions.get.copy(minDate = d))
     val r2 = to.date.streamTo(fromOptions)(d => fromOptions.get.copy(maxDate = d))
     new Registration {
@@ -222,7 +226,6 @@ object UdashDatePicker {
     link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.42/css/bootstrap-datetimepicker.min.css").render
 
   sealed trait DatePickerEvent extends ListenableEvent[UdashDatePicker]
-
   object DatePickerEvent {
     case class Show(source: UdashDatePicker) extends DatePickerEvent
     case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
@@ -397,30 +400,15 @@ object UdashDatePicker {
     def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
   }
 
-  private implicit class UdashDatePickerJQueryExt(self: UdashDatePickerJQuery) {
-    def dpData(): UdashDatePickerDataJQuery = self.data("DateTimePicker").get.asInstanceOf[UdashDatePickerDataJQuery]
-  }
-
   @js.native
   private trait UdashDatePickerDataJQuery extends JQuery {
     def options(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
-
     def date(formattedDate: MomentFormatWrapper | String): Unit = js.native
-
     def show(): Unit = js.native
-
     def hide(): Unit = js.native
-
     def toggle(): Unit = js.native
-
     def enable(): Unit = js.native
-
     def disable(): Unit = js.native
-  }
-
-  private implicit class JQueryDatePickerExt(private val jQ: JQuery) extends AnyVal {
-    def asDatePicker(): UdashDatePickerJQuery =
-      jQ.asInstanceOf[UdashDatePickerJQuery]
   }
 
   private def sanitizeDate(maybeDate: MomentFormatWrapper | Boolean): Option[MomentFormatWrapper] =
@@ -431,21 +419,10 @@ object UdashDatePicker {
     def date: MomentFormatWrapper | Boolean = js.native
   }
 
-  private implicit class DateJQEventOps(private val ev: DateJQEvent) extends AnyVal {
-    def dateOption: Option[MomentFormatWrapper] =
-      ev.option.flatMap(ev => sanitizeDate(ev.date))
-  }
-
   @js.native
   private trait DatePickerChangeJQEvent extends DateJQEvent {
     def oldDate: MomentFormatWrapper | Boolean = js.native
   }
-
-  private implicit class DatePickerChangeJqEventOps(private val ev: DatePickerChangeJQEvent) extends AnyVal {
-    def oldDateOption: Option[MomentFormatWrapper] =
-      ev.option.flatMap(ev => sanitizeDate(ev.oldDate))
-  }
-
 
   @js.native
   private trait DatePickerShowJQEvent extends JQueryEvent

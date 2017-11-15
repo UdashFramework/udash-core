@@ -28,7 +28,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
-    jQ(s"#$buttonId").asDropdown().dropdown("toggle")
+    jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
   private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
     jQ(elem).click(jQFire(SelectionEvent(this, items.get(id))))
@@ -152,10 +152,5 @@ object UdashDropdown {
   @js.native
   private trait UdashDropdownJQuery extends JQuery {
     def dropdown(arg: String): UdashDropdownJQuery = js.native
-  }
-
-  private implicit class JQueryDropdownExt(jQ: JQuery) {
-    def asDropdown(): UdashDropdownJQuery =
-      jQ.asInstanceOf[UdashDropdownJQuery]
   }
 }

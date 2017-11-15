@@ -3,8 +3,8 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.6.0-SNAPSHOT"
-scalaVersion in ThisBuild := versionOfScala
+version in ThisBuild := "0.6.0-starzu-11"
+scalaVersion in ThisBuild := "2.11.11"
 crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
 organization in ThisBuild := "io.udash"
 cancelable in Global := true

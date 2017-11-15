@@ -23,7 +23,7 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
 
 
   private def jQSelector(): UdashModalJQuery =
-    jQ(s"#$componentId").asModal()
+    jQ(s"#$componentId").asInstanceOf[UdashModalJQuery]
 
   /** Toggles modal visibility. */
   def toggle(): Unit = jQSelector().modal("toggle")
@@ -122,10 +122,5 @@ object UdashModal {
   @js.native
   private trait UdashModalJQuery extends JQuery {
     def modal(cmd: String): UdashModalJQuery = js.native
-  }
-
-  private implicit class UdashModalJQueryExt(jQ: JQuery) {
-    def asModal(): UdashModalJQuery =
-      jQ.asInstanceOf[UdashModalJQuery]
   }
 }

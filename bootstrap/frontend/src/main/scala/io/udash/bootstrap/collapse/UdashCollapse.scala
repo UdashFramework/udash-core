@@ -53,7 +53,7 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
   }
 
   private def jQSelector(): UdashCollapseJQuery =
-    jQ(s"#$componentId").asCollapse()
+    jQ(s"#$componentId").asInstanceOf[UdashCollapseJQuery]
 }
 
 object UdashCollapse {
@@ -86,10 +86,5 @@ object UdashCollapse {
   @js.native
   private trait UdashCollapseJQuery extends JQuery {
     def collapse(cmd: String): UdashCollapseJQuery = js.native
-  }
-
-  private implicit class UdashCollapseJQueryExt(jQ: JQuery) {
-    def asCollapse(): UdashCollapseJQuery =
-      jQ.asInstanceOf[UdashCollapseJQuery]
   }
 }
