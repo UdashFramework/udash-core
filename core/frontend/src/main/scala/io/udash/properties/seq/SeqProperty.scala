@@ -156,9 +156,10 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   def remove(idx: Int, amount: Int): Unit = replace(idx, amount)
 
   /** Removes all elements that match `predicate`. */
-  def remove(predicate: A => Boolean): Unit = get.zipWithIndex.filter { case (element, _) =>
-    predicate(element)
-  }.foreach(i => remove(i._2, 1))
+  def remove(predicate: A => Boolean): Unit = {
+    val toDelete = get.filter(predicate)
+    toDelete.foreach(remove)
+  }
 
   /** Removes first occurrence of `value`. */
   def remove(value: A): Unit = {
