@@ -155,6 +155,11 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   /** Removes `amount` elements starting from index `idx`. */
   def remove(idx: Int, amount: Int): Unit = replace(idx, amount)
 
+  /** Removes all elements that match `predicate`. */
+  def remove(predicate: A => Boolean): Unit = get.zipWithIndex.filter { case (element, _) =>
+    predicate(element)
+  }.foreach(i => remove(i._2, 1))
+
   /** Removes first occurrence of `value`. */
   def remove(value: A): Unit = {
     val idx: Int = elemProperties.map(p => p.get).indexOf(value)
