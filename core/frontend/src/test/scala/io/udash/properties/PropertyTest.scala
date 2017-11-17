@@ -1237,6 +1237,19 @@ class PropertyTest extends UdashFrontendTest {
       oneTimeValues.last should be(Seq(1, 2, 3))
     }
 
+    "remove all items that satisfy a predicate" in {
+      case class Thing(id: Int)
+      var values = Seq.empty[Thing]
+      val listener = (s: Seq[Thing]) => values = s
+      val p = SeqProperty[Thing](Thing(1), Thing(2), Thing(3), Thing(4), Thing(5))
+      p.listen(listener)
+
+      p.get.size should be(5)
+      p.remove(_.id < 5)
+      p.get should be(Seq(Thing(5)))
+      values should be(Seq(Thing(5)))
+    }
+
     "fire value listeners on every child change" in {
       val p = SeqProperty[Int]
 
