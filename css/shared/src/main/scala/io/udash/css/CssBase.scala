@@ -185,11 +185,11 @@ trait CssBase {
 object CssBase {
   class AnimationNameExt(private val n: Attrs.animationName.type) extends AnyVal {
     def apply(s: CssStyle): AV =
-      AV(n.attr, s.className)
+      AV(n.attr, s.classNames.mkString(" "))
   }
 
   class FontFamilyExt(private val n: Attrs.fontFamily.type) extends AnyVal {
     def apply(s: CssStyle): AV =
-      AV(n.attr, s.className)
+      AV(n.attr, s.classNames.mkString(" "))
   }
 }

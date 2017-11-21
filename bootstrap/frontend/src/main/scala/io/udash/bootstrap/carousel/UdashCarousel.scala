@@ -66,7 +66,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
 
 
     val counter = new Countdown(firstActive)
-    val res = div(id := componentId, carousel, slide)(
+    val res: Element = div(id := componentId, carousel, slide)(
       if (showIndicators) indicators() else {},
       div(carouselInner, role := "listbox")(
         repeat(content) { slide =>
