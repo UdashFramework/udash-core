@@ -27,6 +27,7 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
     selector.popover("destroy")
 
   import UdashPopover._
+
   selector.on("show.bs.popover", jQFire(TooltipShowEvent(this)))
   selector.on("shown.bs.popover", jQFire(TooltipShownEvent(this)))
   selector.on("hide.bs.popover", jQFire(TooltipHideEvent(this)))
@@ -43,11 +44,12 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
 
   override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
+    import io.udash.css.CssView._
     import scalatags.Text.all._
-    div(cls := BootstrapStyles.Popover.popover.className, role := "tooltip")(
-      div(cls := BootstrapStyles.arrow.className),
-      h3(cls := BootstrapStyles.Popover.popoverTitle.className),
-      div(cls := BootstrapStyles.Popover.popoverContent.className)
+    div(BootstrapStyles.Popover.popover, role := "tooltip")(
+      div(BootstrapStyles.arrow),
+      h3(BootstrapStyles.Popover.popoverTitle),
+      div(BootstrapStyles.Popover.popoverContent)
     ).render
   }
   override protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)

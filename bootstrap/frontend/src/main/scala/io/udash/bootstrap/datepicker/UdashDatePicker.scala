@@ -143,7 +143,7 @@ final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Dat
       ("clear", icons.clear),
       ("close", icons.close)
     ).filter(_._2.nonEmpty).foreach(item =>
-      dict.update(item._1, item._2.map(_.className).toJSArray)
+      dict.update(item._1, item._2.flatMap(_.classNames).distinct.toJSArray)
     )
     dict
   }
@@ -179,7 +179,7 @@ final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Dat
   }
 
   private def momentToDate(date: MomentFormatWrapper): ju.Date =
-    Try{
+    Try {
       date.valueOf() match {
         case t if t.isNaN || t.isInfinity => null
         case t => new ju.Date(t.toLong)
@@ -470,7 +470,6 @@ object UdashDatePicker {
   @js.native
   private trait MomentFormatWrapper extends js.Any {
     def format(dateFormat: String): String = js.native
-    
     def valueOf(): Double = js.native
   }
 

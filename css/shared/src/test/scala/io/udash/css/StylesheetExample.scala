@@ -3,6 +3,7 @@ package io.udash.css
 import scala.language.postfixOps
 
 object StylesheetExample extends CssBase {
+
   import dsl._
 
   unsafeRoot("body")(
@@ -66,6 +67,12 @@ object StylesheetExample extends CssBase {
     common, // Applying mixin
     margin(24 px, auto)
   )
+
+  val prefixedTest1: CssStyle =
+    CssPrefixedStyleName("pref", "suff1")
+
+  val prefixedTest2: CssStyle =
+    CssPrefixedStyleName("pref", "suff2")
 
   val indent: Int => CssStyle =
     (0 to 3).map { i =>

@@ -37,7 +37,7 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
   import scalatags.JsDom.all._
 
   /** Attributes which should be added to button showing this modal window.
-    * Example: `UdashButton()(collapse.toggleButtonAttrs(), "Toggle...")`*/
+    * Example: `UdashButton()(collapse.toggleButtonAttrs(), "Toggle...")` */
   def openButtonAttrs(): Seq[scalatags.generic.AttrPair[Element, String]] =
     Seq(
       dataToggle := "modal",
@@ -51,7 +51,7 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
       (footerFactory, BootstrapStyles.Modal.modalFooter)
     ).filter(_._1.nonEmpty).map { case (factory, styleName) =>
       val el = factory.get.apply()
-      el.classList.add(styleName.className)
+      styleName.classNames.foreach(el.classList.add)
       el
     }
 
@@ -113,7 +113,7 @@ object UdashModal {
     new UdashModal(modalSize, fade, labelId, backdrop, keyboard, autoInit, componentId)(headerFactory, bodyFactory, footerFactory)
 
   /** Attributes which should be added to button closing the modal window.
-    * Example: `UdashButton()(UdashModal.CloseButtonAttr, "Close...")`*/
+    * Example: `UdashButton()(UdashModal.CloseButtonAttr, "Close...")` */
   lazy val CloseButtonAttr: scalatags.generic.AttrPair[Element, String] = {
     import scalatags.JsDom.all._
     BootstrapTags.dataDismiss := "modal"
