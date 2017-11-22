@@ -11,7 +11,7 @@ class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], Orig
   private var transformedLastValue: Seq[B] = _
 
   override protected def loadFromOrigin(): Seq[B] = {
-    if (origin.size != transformedElements.size || origin.get != lastValue) {
+    if (origin.size != transformedElements.length || origin.get != lastValue) {
       lastValue = origin.get
       transformedLastValue = lastValue.map(transformer)
     }
