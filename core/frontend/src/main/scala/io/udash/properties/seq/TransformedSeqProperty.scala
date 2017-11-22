@@ -1,46 +1,50 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.{Property, ReadableProperty}
-import io.udash.utils.Registration
 
 private[properties]
-class TransformedReadableSeqProperty[A, B, +ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
+class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
                                     (override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B)
-  extends ForwarderReadableSeqProperty[B, ElemType] {
+  extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] with ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
+
+  private var lastValue: Seq[A] = _
+  private var transformedLastValue: Seq[B] = _
+
+  override protected def loadFromOrigin(): Seq[B] = {
+    if (origin.size != transformedElements.size || origin.get != lastValue) {
+      lastValue = origin.get
+      transformedLastValue = lastValue.map(transformer)
+    }
+    transformedLastValue
+  }
+  override protected def elementsFromOrigin(): Seq[ElemType] = origin.elemProperties.map(transformElement)
+  override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType] = {
+    val transPatch = Patch[ElemType](
+      patch.idx,
+      patch.removed.map(transformElement),
+      patch.added.map(transformElement),
+      patch.clearsProperty
+    )
+
+    transformedElements.splice(patch.idx, patch.removed.length, transPatch.added: _*)
+    transPatch
+  }
+
+  override protected def onListenerInit(): Unit = {
+    lastValue = Seq.empty
+    transformedLastValue = Seq.empty
+    super.onListenerInit()
+  }
 
   protected def transformElement(el: OrigType): ElemType =
     el.transform(transformer).asInstanceOf[ElemType]
-
-  override def get: Seq[B] =
-    origin.get.map(transformer)
-
-  override def elemProperties: Seq[ElemType] =
-    origin.elemProperties.map(p => transformElement(p))
-
-  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration =
-    origin.listenStructure(patch =>
-      structureListener(Patch[ElemType](
-        patch.idx,
-        patch.removed.map(p => transformElement(p)),
-        patch.added.map(p => transformElement(p)),
-        patch.clearsProperty
-      ))
-    )
-
-  override def listen(valueListener: (Seq[B]) => Any, initUpdate: Boolean = false): Registration =
-    origin.listen((seq: Seq[A]) => valueListener(seq.map(transformer)), initUpdate)
-
-  override def listenOnce(valueListener: (Seq[B]) => Any): Registration =
-    origin.listenOnce((seq: Seq[A]) => valueListener(seq.map(transformer)))
-
-  override protected[properties] def fireValueListeners(): Unit =
-    origin.fireValueListeners()
 }
 
 private[properties]
 class TransformedSeqProperty[A, B](override protected val origin: SeqProperty[A, Property[A]],
                                    transformer: A => B, revert: B => A)
-  extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer) with ForwarderSeqProperty[B, Property[B]] {
+  extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer)
+    with ForwarderSeqProperty[A, B, Property[B], Property[A]] {
 
   override protected def transformElement(el: Property[A]): Property[B] =
     el.transform(transformer, revert)

@@ -16,7 +16,7 @@ trait CssView {
 
   private class TextStyleModifier(s: CssStyle) extends scalatags.Text.all.Modifier {
     override def applyTo(t: Builder): Unit =
-      t.appendAttr("class", Builder.GenericAttrValueSource(" " + s.className))
+      t.appendAttr("class", Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", "")))
   }
 
   implicit def style2Mod(s: CssStyle): Modifier = new Modifier {
@@ -64,10 +64,20 @@ object CssView extends CssView {
 
   implicit class StyleOps(private val style: CssStyle) extends AnyVal {
     def addTo(element: dom.Element): Unit =
-      element.classList.add(style.className)
+      style.classNames.foreach(element.classList.add)
 
-    def removeFrom(element: dom.Element): Unit =
-      element.classList.remove(style.className)
+    def removeFrom(element: dom.Element): Unit = {
+      val cl = element.classList
+      cl.remove(style.className)
+      style.commonPrefixClass.foreach { prefixClass =>
+        def removePrefix(i: Int = 0): Boolean =
+          if (i >= cl.length) true
+          else !cl(i).startsWith(s"$prefixClass-") && removePrefix(i + 1)
+        if (removePrefix()) {
+          cl.remove(prefixClass)
+        }
+      }
+    }
 
     def styleIf(property: ReadableProperty[Boolean]): Modifier =
       property.reactiveApply(

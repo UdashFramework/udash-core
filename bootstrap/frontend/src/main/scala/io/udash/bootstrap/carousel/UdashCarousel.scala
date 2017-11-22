@@ -66,7 +66,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
 
 
     val counter = new Countdown(firstActive)
-    val res = div(id := componentId, carousel, slide)(
+    val res: Element = div(id := componentId, carousel, slide)(
       if (showIndicators) indicators() else {},
       div(carouselInner, role := "listbox")(
         repeat(content) { slide =>
@@ -76,11 +76,11 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         }
       ),
       a(BootstrapStyles.left, carouselControl, href := s"#$componentId", role := "button", dataSlide := "prev")(
-        span(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.chevronLeft),
+        span(UdashIcons.Glyphicon.chevronLeft),
         span(`class` := "sr-only", "Previous")
       ),
       a(BootstrapStyles.right, carouselControl, href := s"#$componentId", role := "button", dataSlide := "next")(
-        span(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.chevronRight),
+        span(UdashIcons.Glyphicon.chevronRight),
         span(`class` := "sr-only", "Next")
       )
     ).render

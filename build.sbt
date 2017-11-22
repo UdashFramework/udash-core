@@ -281,3 +281,13 @@ lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlu
   .settings(
     libraryDependencies ++= chartsFrontendDeps.value
   )
+
+lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend")).enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest)
+  .settings(commonSettings: _*)
+  .settings(commonJSSettings: _*)
+  .settings(noPublishSettings: _*)
+  .settings(
+    libraryDependencies ++= benchmarksFrontendDeps.value,
+    scalaJSUseMainModuleInitializer in Compile := true,
+  )

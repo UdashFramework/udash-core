@@ -27,19 +27,19 @@ object ImmutableValue {
   *
   * There are two valid model bases:
   * <ul>
-  *  <li>trait (not sealed trait) with following restrictions:<ul>
-  *    <li>it cannot contain vars</li>
-  *    <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
-  *    <li>all abstract vals and defs (without parameters) are considered as subproperties</li>
-  *    <li>all abstract vals and defs types have to be valid [[io.udash.properties.ModelValue]]</li>
-  *  </ul></li>
-  *  <li>case class with following restrictions:<ul>
-  *    <li>it cannot contain vars</li>
-  *    <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
-  *    <li>it cannot have more than one parameters list in primary constructor</li>
-  *    <li>all elements of primary constructor are considered as subproperties</li>
-  *    <li>all types of subproperties have to be valid [[io.udash.properties.ModelValue]]</li>
-  *  </ul></li>
+  * <li>trait (not sealed trait) with following restrictions:<ul>
+  * <li>it cannot contain vars</li>
+  * <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
+  * <li>all abstract vals and defs (without parameters) are considered as subproperties</li>
+  * <li>all abstract vals and defs types have to be valid [[io.udash.properties.ModelValue]]</li>
+  * </ul></li>
+  * <li>case class with following restrictions:<ul>
+  * <li>it cannot contain vars</li>
+  * <li>it can contain implemented vals and defs, but they are not considered as subproperties</li>
+  * <li>it cannot have more than one parameters list in primary constructor</li>
+  * <li>all elements of primary constructor are considered as subproperties</li>
+  * <li>all types of subproperties have to be valid [[io.udash.properties.ModelValue]]</li>
+  * </ul></li>
   * </ul>
   */
 trait ModelPart[T]

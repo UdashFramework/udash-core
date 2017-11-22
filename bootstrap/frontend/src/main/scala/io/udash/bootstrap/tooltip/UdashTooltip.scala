@@ -43,9 +43,10 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
   override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(TopPlacement)
   override protected val defaultTemplate: String = {
     import scalatags.Text.all._
-    div(cls := BootstrapStyles.Tooltip.tooltip.className, role := "tooltip")(
-      div(cls := BootstrapStyles.Tooltip.tooltipArrow.className),
-      div(cls := BootstrapStyles.Tooltip.tooltipInner.className)
+    import io.udash.css.CssView._
+    div(BootstrapStyles.Tooltip.tooltip, role := "tooltip")(
+      div(BootstrapStyles.Tooltip.tooltipArrow),
+      div(BootstrapStyles.Tooltip.tooltipInner)
     ).render
   }
   override protected val defaultTrigger: Seq[Trigger] = Seq(HoverTrigger, FocusTrigger)
