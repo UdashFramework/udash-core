@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package collapse
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
@@ -58,10 +59,10 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
 
 object UdashCollapse {
   sealed trait CollapseEvent extends ListenableEvent[UdashCollapse]
-  case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseShowEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
+  final case class CollapseShownEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
+  final case class CollapseHideEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
+  final case class CollapseHiddenEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
 
   object CollapseEvent {
     implicit val pc: PropertyCreator[CollapseEvent] = PropertyCreator.propertyCreator[CollapseEvent]

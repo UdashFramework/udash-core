@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package carousel
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
@@ -188,7 +189,8 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
+  final case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction)
+    extends AbstractCase with CarouselEvent
 
   /**
     * Event emitted by [[UdashCarousel]] on slide change transition finish.
@@ -197,7 +199,8 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
+  final case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction)
+    extends AbstractCase with CarouselEvent
 
   object CarouselEvent {
 

@@ -3,6 +3,7 @@ package io.udash.bootstrap.datepicker
 import java.{util => ju}
 
 import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
@@ -227,10 +228,10 @@ object UdashDatePicker {
 
   sealed trait DatePickerEvent extends ListenableEvent[UdashDatePicker]
   object DatePickerEvent {
-    case class Show(source: UdashDatePicker) extends DatePickerEvent
-    case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
-    case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends DatePickerEvent
-    case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
+    final case class Show(source: UdashDatePicker) extends AbstractCase with DatePickerEvent
+    final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends AbstractCase with DatePickerEvent
+    final case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends AbstractCase with DatePickerEvent
+    final case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends AbstractCase with DatePickerEvent
   }
 
   /**

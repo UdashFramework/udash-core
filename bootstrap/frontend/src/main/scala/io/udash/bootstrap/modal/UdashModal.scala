@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package modal
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
@@ -84,10 +85,10 @@ object UdashModal {
   val NoneBackdrop = new BackdropType("false")
 
   sealed trait ModalEvent extends ListenableEvent[UdashModal]
-  case class ModalShowEvent(source: UdashModal) extends ModalEvent
-  case class ModalShownEvent(source: UdashModal) extends ModalEvent
-  case class ModalHideEvent(source: UdashModal) extends ModalEvent
-  case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
+  final case class ModalShowEvent(source: UdashModal) extends AbstractCase with ModalEvent
+  final case class ModalShownEvent(source: UdashModal) extends AbstractCase with ModalEvent
+  final case class ModalHideEvent(source: UdashModal) extends AbstractCase with ModalEvent
+  final case class ModalHiddenEvent(source: UdashModal) extends AbstractCase with ModalEvent
 
   /**
     * Creates modal window. More: <a href="http://getbootstrap.com/javascript/#modals">Bootstrap Docs</a>.

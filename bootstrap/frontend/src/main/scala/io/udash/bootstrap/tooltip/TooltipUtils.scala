@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
+import com.avsystem.commons.misc.AbstractCase
 import org.scalajs.dom
 
 import scala.concurrent.duration.{Duration, DurationInt}
@@ -25,11 +26,11 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
   val ManualTrigger = new Trigger("manual")
 
   sealed trait TooltipEvent extends ListenableEvent[TooltipType]
-  case class TooltipShowEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipShownEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipHideEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipHiddenEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipInsertedEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipShowEvent(source: TooltipType) extends AbstractCase with TooltipEvent
+  final case class TooltipShownEvent(source: TooltipType) extends AbstractCase with TooltipEvent
+  final case class TooltipHideEvent(source: TooltipType) extends AbstractCase with TooltipEvent
+  final case class TooltipHiddenEvent(source: TooltipType) extends AbstractCase with TooltipEvent
+  final case class TooltipInsertedEvent(source: TooltipType) extends AbstractCase with TooltipEvent
 
   /**
     * Add tooltip/popover to provided element.

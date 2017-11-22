@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package dropdown
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
