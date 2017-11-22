@@ -1,5 +1,6 @@
 package io.udash.benchmarks
 
+import io.udash.benchmarks.css.CssStylesApply
 import io.udash.benchmarks.i18n.StaticTranslationBinding
 import io.udash.benchmarks.properties._
 import org.scalajs.dom.document
@@ -14,7 +15,9 @@ object Main {
       FilteredSeqPropertyListeners.suite,
       ReversedSeqPropertyListeners.suite,
 
-      StaticTranslationBinding.suite
+      StaticTranslationBinding.suite,
+
+      CssStylesApply.suite
     )
   }
 }

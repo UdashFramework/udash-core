@@ -3,8 +3,8 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.6.0-starzu-11"
-scalaVersion in ThisBuild := "2.11.11"
+version in ThisBuild := "0.6.0-SNAPSHOT"
+scalaVersion in ThisBuild := versionOfScala
 crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
 organization in ThisBuild := "io.udash"
 cancelable in Global := true
@@ -243,7 +243,7 @@ lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlu
   )
 
 lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-frontend`, `i18n-frontend`)
+  .dependsOn(`core-frontend`, `i18n-frontend`, `css-frontend`)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(noPublishSettings: _*)
