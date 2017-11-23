@@ -17,8 +17,8 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
 
-  protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
-  protected val children: js.Array[Property[B]] = js.Array[Property[B]]()
+  protected final val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
+  protected final val children: js.Array[Property[B]] = js.Array[Property[B]]()
 
   update(origin.get)
   origin.listen(update)

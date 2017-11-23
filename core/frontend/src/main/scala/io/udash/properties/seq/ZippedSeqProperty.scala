@@ -13,12 +13,12 @@ abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, Readable
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  protected val children = mutable.ListBuffer.empty[ReadableProperty[O]]
-  protected val structureListeners: mutable.Set[Patch[ReadableProperty[O]] => Any] = mutable.Set()
+  protected final val children = mutable.ListBuffer.empty[ReadableProperty[O]]
+  private val structureListeners: mutable.Set[Patch[ReadableProperty[O]] => Any] = mutable.Set()
 
   protected def update(fromIdx: Int): Unit
 
-  protected val originListener = (patch: Patch[ReadableProperty[_]]) => {
+  protected final val originListener: Patch[ReadableProperty[_]] => Unit = (patch: Patch[ReadableProperty[_]]) => {
     val idx = patch.idx
     val removed = children.slice(patch.idx, children.size)
     children.remove(idx, children.size - idx)
