@@ -39,7 +39,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
   private val registrations = mutable.HashMap.empty[ElemType, Registration]
 
   origin.elemProperties.foreach(p => registrations(p) = p.listen(elementChanged(p)))
-  origin.listenStructure(patch => {
+  origin.listenStructure { patch =>
     patch.removed.foreach(p => if (registrations.contains(p)) {
       registrations(p).cancel()
       registrations.remove(p)
@@ -49,9 +49,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
     val added = patch.added.filter(p => matcher(p.get))
     val removed = patch.removed.filter(p => matcher(p.get))
     if (added.nonEmpty || removed.nonEmpty) {
-      val props = loadPropsFromOrigin()
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
-      val callbackProps = props.map(_.get)
 
       filteredProps.splice(idx, removed.size, added: _*)
 
@@ -60,7 +58,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
       fireValueListeners()
       fireElementsListeners(filteredPatch, structureListeners)
     }
-  })
+  }
 
   override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
     structureListeners += structureListener
