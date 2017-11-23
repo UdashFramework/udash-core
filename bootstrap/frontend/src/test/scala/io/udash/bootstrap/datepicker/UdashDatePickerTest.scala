@@ -86,7 +86,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
     "not fail on null input value" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
+      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
@@ -106,7 +106,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
     "sync with property" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
+      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
