@@ -17,8 +17,6 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
   override protected[properties] def parent: ReadableProperty[_] = null
 
   protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
-
-  val pc = implicitly[PropertyCreator[B]]
   protected val children = mutable.ListBuffer.empty[Property[B]]
 
   update(origin.get)
@@ -43,7 +41,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
 
     val patch = if (transformed.size > current.size) {
-      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this))
+      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(implicitly[PropertyCreator[B]].newProperty(this))
       children.insertAll(commonBegin, added)
       Some(Patch(commonBegin, Seq(), added, false))
     } else if (transformed.size < current.size) {
