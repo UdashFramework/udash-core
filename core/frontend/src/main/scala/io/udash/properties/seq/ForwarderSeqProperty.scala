@@ -11,9 +11,8 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   protected def origin: ReadableSeqProperty[A, OrigType]
 
   protected var originListenerRegistration: Registration = _
-  protected var originStructureListenerRegistration: Registration = _
-
-  protected val structureListeners: js.Array[Patch[ElemType] => Any] = js.Array()
+  private var originStructureListenerRegistration: Registration = _
+  protected final val structureListeners: js.Array[Patch[ElemType] => Any] = js.Array()
 
   protected def originListener(originValue: Seq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}

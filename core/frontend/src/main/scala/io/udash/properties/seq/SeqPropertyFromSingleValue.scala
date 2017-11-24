@@ -7,6 +7,7 @@ import io.udash.properties.single._
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
+import scala.scalajs.js
 
 private[properties]
 abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
@@ -16,10 +17,8 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
 
-  protected val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
-
-  val pc = implicitly[PropertyCreator[B]]
-  protected val children = mutable.ListBuffer.empty[Property[B]]
+  protected final val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
+  protected final val children: js.Array[Property[B]] = js.Array[Property[B]]()
 
   update(origin.get)
   origin.listen(update)
@@ -43,12 +42,12 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
 
     val patch = if (transformed.size > current.size) {
-      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(pc.newProperty(this))
-      children.insertAll(commonBegin, added)
-      Some(Patch(commonBegin, Seq(), added, false))
+      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(implicitly[PropertyCreator[B]].newProperty(this))
+      children.splice(commonBegin, 0, added: _*)
+      Some(Patch(commonBegin, Seq(), added, clearsProperty = false))
     } else if (transformed.size < current.size) {
-      val removed = children.slice(commonBegin, commonBegin + current.size - transformed.size)
-      children.remove(commonBegin, current.size - transformed.size)
+      val removed = children.jsSlice(commonBegin, commonBegin + current.size - transformed.size)
+      children.splice(commonBegin, current.size - transformed.size)
       Some(Patch(commonBegin, removed, Seq(), transformed.isEmpty))
     } else None
 
