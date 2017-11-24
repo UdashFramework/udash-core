@@ -25,12 +25,12 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
   val FocusTrigger = new Trigger("focus")
   val ManualTrigger = new Trigger("manual")
 
-  sealed trait TooltipEvent extends ListenableEvent[TooltipType]
-  final case class TooltipShowEvent(source: TooltipType) extends AbstractCase with TooltipEvent
-  final case class TooltipShownEvent(source: TooltipType) extends AbstractCase with TooltipEvent
-  final case class TooltipHideEvent(source: TooltipType) extends AbstractCase with TooltipEvent
-  final case class TooltipHiddenEvent(source: TooltipType) extends AbstractCase with TooltipEvent
-  final case class TooltipInsertedEvent(source: TooltipType) extends AbstractCase with TooltipEvent
+  sealed trait TooltipEvent extends AbstractCase with ListenableEvent[TooltipType]
+  final case class TooltipShowEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipShownEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipHideEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipHiddenEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipInsertedEvent(source: TooltipType) extends TooltipEvent
 
   /**
     * Add tooltip/popover to provided element.

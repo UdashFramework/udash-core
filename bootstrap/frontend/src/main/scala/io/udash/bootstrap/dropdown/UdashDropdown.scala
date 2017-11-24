@@ -82,7 +82,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 }
 
 object UdashDropdown {
-  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](override val source: UdashDropdown[ItemType, ElemType]) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
+  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    override val source: UdashDropdown[ItemType, ElemType]
+  ) extends AbstractCase with ListenableEvent[UdashDropdown[ItemType, ElemType]]
   case class DropdownShowEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownShownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownHideEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)

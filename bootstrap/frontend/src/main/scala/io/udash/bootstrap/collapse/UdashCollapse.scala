@@ -58,11 +58,11 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
 }
 
 object UdashCollapse {
-  sealed trait CollapseEvent extends ListenableEvent[UdashCollapse]
-  final case class CollapseShowEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
-  final case class CollapseShownEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
-  final case class CollapseHideEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
-  final case class CollapseHiddenEvent(source: UdashCollapse) extends AbstractCase with CollapseEvent
+  sealed trait CollapseEvent extends AbstractCase with ListenableEvent[UdashCollapse]
+  final case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
 
   object CollapseEvent {
     implicit val pc: PropertyCreator[CollapseEvent] = PropertyCreator.propertyCreator[CollapseEvent]

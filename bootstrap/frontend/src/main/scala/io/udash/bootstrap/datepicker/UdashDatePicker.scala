@@ -226,12 +226,12 @@ object UdashDatePicker {
   def loadBootstrapDatePickerStyles(): dom.Element =
     link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.42/css/bootstrap-datetimepicker.min.css").render
 
-  sealed trait DatePickerEvent extends ListenableEvent[UdashDatePicker]
+  sealed trait DatePickerEvent extends AbstractCase with ListenableEvent[UdashDatePicker]
   object DatePickerEvent {
-    final case class Show(source: UdashDatePicker) extends AbstractCase with DatePickerEvent
-    final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends AbstractCase with DatePickerEvent
-    final case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends AbstractCase with DatePickerEvent
-    final case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends AbstractCase with DatePickerEvent
+    final case class Show(source: UdashDatePicker) extends DatePickerEvent
+    final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
+    final case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends DatePickerEvent
+    final case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
   }
 
   /**

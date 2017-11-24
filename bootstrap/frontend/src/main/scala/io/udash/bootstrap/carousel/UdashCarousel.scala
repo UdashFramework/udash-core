@@ -170,7 +170,7 @@ object UdashCarousel {
   /**
     * Event hierarchy for [[UdashCarousel]]-emitted events.
     */
-  sealed trait CarouselEvent extends ListenableEvent[UdashCarousel] {
+  sealed trait CarouselEvent extends AbstractCase with ListenableEvent[UdashCarousel] {
     /**
       * @return The index of the slide source transitioned to. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
       */
@@ -189,8 +189,7 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  final case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction)
-    extends AbstractCase with CarouselEvent
+  final case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
   /**
     * Event emitted by [[UdashCarousel]] on slide change transition finish.
@@ -199,8 +198,7 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  final case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction)
-    extends AbstractCase with CarouselEvent
+  final case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
   object CarouselEvent {
 

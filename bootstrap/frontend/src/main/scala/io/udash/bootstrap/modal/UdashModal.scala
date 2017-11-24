@@ -84,11 +84,11 @@ object UdashModal {
   val StaticBackdrop = new BackdropType("static")
   val NoneBackdrop = new BackdropType("false")
 
-  sealed trait ModalEvent extends ListenableEvent[UdashModal]
-  final case class ModalShowEvent(source: UdashModal) extends AbstractCase with ModalEvent
-  final case class ModalShownEvent(source: UdashModal) extends AbstractCase with ModalEvent
-  final case class ModalHideEvent(source: UdashModal) extends AbstractCase with ModalEvent
-  final case class ModalHiddenEvent(source: UdashModal) extends AbstractCase with ModalEvent
+  sealed trait ModalEvent extends AbstractCase with ListenableEvent[UdashModal]
+  final case class ModalShowEvent(source: UdashModal) extends ModalEvent
+  final case class ModalShownEvent(source: UdashModal) extends ModalEvent
+  final case class ModalHideEvent(source: UdashModal) extends ModalEvent
+  final case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
 
   /**
     * Creates modal window. More: <a href="http://getbootstrap.com/javascript/#modals">Bootstrap Docs</a>.
