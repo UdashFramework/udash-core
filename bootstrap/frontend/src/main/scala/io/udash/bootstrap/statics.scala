@@ -387,9 +387,9 @@ object BootstrapStyles {
     def caption = CssStyleName("caption")
     def thumbnail = CssStyleName("thumbnail")
 
-    @deprecated("Use `UdashIcons.FontAwesome.fa` instead.", "0.6.0")
+    @deprecated("Use `UdashIcons.FontAwesome` styles instead.", "0.6.0")
     def _fa = CssStyleName("fa")
-    @deprecated("Use `UdashIcons.Glyphicon.glyphicon` instead.", "0.6.0")
+    @deprecated("Use `UdashIcons.Glyphicon` styles instead.", "0.6.0")
     def _glyphicon = CssStyleName("glyphicon")
 
     @deprecated("Use `UdashIcons.FontAwesome` instead.", "0.6.0")
