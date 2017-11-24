@@ -132,7 +132,7 @@ object UdashPagination {
       a(aria.label := "Previous", bindHref(page))(span(aria.hidden := true)("«")).render
     case (page, UdashPagination.ButtonType.NextPage) =>
       a(aria.label := "Next", bindHref(page))(span(aria.hidden := true)("»")).render
-    case (page, UdashPagination.ButtonType.StandardPage) =>
+    case (page, _) => // default: UdashPagination.ButtonType.StandardPage
       a(bindHref(page))(bind(page.asModel.subProp(_.name))).render
   }
 
