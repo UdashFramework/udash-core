@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package carousel
 
-import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
@@ -205,16 +205,11 @@ object UdashCarousel {
     /**
       * Carousel animation direction.
       */
-    sealed trait Direction
-
-    object Direction {
-      case object Left extends Direction
-      case object Right extends Direction
-
-      /**
-        * Animation direction from carousel.js that neither left nor right.
-        */
-      case object Unknown extends Direction
+    final class Direction(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+    object Direction extends ValueEnumCompanion[Direction] {
+      final val Left, Right: Value = new Direction
+      /** Animation direction from carousel.js that neither left nor right. */
+      final val Unknown: Value = new Direction
     }
 
   }

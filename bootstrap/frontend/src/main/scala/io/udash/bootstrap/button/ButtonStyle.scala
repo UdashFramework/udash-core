@@ -3,7 +3,7 @@ package button
 
 import io.udash.css.CssStyle
 
-sealed class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Button.btn, style)
+final class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Button.btn, style)
 
 object ButtonStyle {
   import BootstrapStyles.Button._
