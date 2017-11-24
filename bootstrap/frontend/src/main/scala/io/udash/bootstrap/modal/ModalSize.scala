@@ -10,7 +10,7 @@ final class ModalSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeSty
 object ModalSize {
   import BootstrapStyles.Modal._
 
-  val Default = new ModalSize(None)
-  val Large = new ModalSize(modalLarge)
-  val Small = new ModalSize(modalSmall)
+  final val Default = new ModalSize(None)
+  final val Large = new ModalSize(modalLarge)
+  final val Small = new ModalSize(modalSmall)
 }

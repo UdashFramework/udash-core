@@ -8,9 +8,9 @@ final class AlertStyle(style: CssStyleName) extends ClassModifier(BootstrapStyle
 object AlertStyle {
   import BootstrapStyles.Alert._
 
-  val Success = new AlertStyle(alertSuccess)
-  val Info = new AlertStyle(alertInfo)
-  val Warning = new AlertStyle(alertWarning)
-  val Danger = new AlertStyle(alertDanger)
-  val Link = new AlertStyle(alertLink)
+  final val Success = new AlertStyle(alertSuccess)
+  final val Info = new AlertStyle(alertInfo)
+  final val Warning = new AlertStyle(alertWarning)
+  final val Danger = new AlertStyle(alertDanger)
+  final val Link = new AlertStyle(alertLink)
 }

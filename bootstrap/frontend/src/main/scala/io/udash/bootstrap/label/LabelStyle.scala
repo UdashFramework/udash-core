@@ -8,10 +8,10 @@ final class LabelStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.La
 object LabelStyle {
   import BootstrapStyles.Label._
 
-  val Default = new LabelStyle(labelDefault)
-  val Primary = new LabelStyle(labelPrimary)
-  val Success = new LabelStyle(labelSuccess)
-  val Info = new LabelStyle(labelInfo)
-  val Warning = new LabelStyle(labelWarning)
-  val Danger = new LabelStyle(labelDanger)
+  final val Default = new LabelStyle(labelDefault)
+  final val Primary = new LabelStyle(labelPrimary)
+  final val Success = new LabelStyle(labelSuccess)
+  final val Info = new LabelStyle(labelInfo)
+  final val Warning = new LabelStyle(labelWarning)
+  final val Danger = new LabelStyle(labelDanger)
 }

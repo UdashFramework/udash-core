@@ -310,7 +310,7 @@ object UdashDatePicker {
     val viewDate: Boolean = false,
     val tooltips: DatePickerTooltips = new DatePickerTooltips()
   ) {
-    def copy(minDate: Option[ju.Date] = minDate, maxDate: Option[ju.Date] = maxDate): DatePickerOptions = {
+    private[udash] def copy(minDate: Option[ju.Date] = minDate, maxDate: Option[ju.Date] = maxDate): DatePickerOptions = {
       new DatePickerOptions(
         format, dayViewHeaderFormat, extraFormats, stepping, minDate, maxDate, useCurrent, collapse, locale,
         defaultDate, disabledDates, enabledDates, icons, useStrict, sideBySide, daysOfWeekDisabled, calendarWeeks,

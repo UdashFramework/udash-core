@@ -8,12 +8,12 @@ sealed class ButtonStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.
 object ButtonStyle {
   import BootstrapStyles.Button._
 
-  val Default = new ButtonStyle(btnDefault)
-  val Primary = new ButtonStyle(btnPrimary)
-  val Success = new ButtonStyle(btnSuccess)
-  val Info = new ButtonStyle(btnInfo)
-  val Warning = new ButtonStyle(btnWarning)
-  val Danger = new ButtonStyle(btnDanger)
-  val Link = new ButtonStyle(btnLink)
+  final val Default = new ButtonStyle(btnDefault)
+  final val Primary = new ButtonStyle(btnPrimary)
+  final val Success = new ButtonStyle(btnSuccess)
+  final val Info = new ButtonStyle(btnInfo)
+  final val Warning = new ButtonStyle(btnWarning)
+  final val Danger = new ButtonStyle(btnDanger)
+  final val Link = new ButtonStyle(btnLink)
 }
 

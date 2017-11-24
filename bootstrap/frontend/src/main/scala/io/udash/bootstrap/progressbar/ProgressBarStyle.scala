@@ -12,10 +12,10 @@ final class ProgressBarStyle(style: Option[CssStyle])
 object ProgressBarStyle {
   import BootstrapStyles.ProgressBar._
 
-  val Default = new ProgressBarStyle(None)
-  val Striped = new ProgressBarStyle(progressBarStriped)
-  val Success = new ProgressBarStyle(progressBarSuccess)
-  val Info = new ProgressBarStyle(progressBarInfo)
-  val Warning = new ProgressBarStyle(progressBarWarning)
-  val Danger = new ProgressBarStyle(progressBarDanger)
+  final val Default = new ProgressBarStyle(None)
+  final val Striped = new ProgressBarStyle(progressBarStriped)
+  final val Success = new ProgressBarStyle(progressBarSuccess)
+  final val Info = new ProgressBarStyle(progressBarInfo)
+  final val Warning = new ProgressBarStyle(progressBarWarning)
+  final val Danger = new ProgressBarStyle(progressBarDanger)
 }
