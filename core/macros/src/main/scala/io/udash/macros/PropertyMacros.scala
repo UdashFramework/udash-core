@@ -17,6 +17,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   val RegistrationCls = tq"$Package.Registration"
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
+  val MacroPropertyCreatorCls = tq"$Package.MacroPropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
 
   val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
@@ -378,16 +379,15 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   private def generateValueProperty(tpe: Type): c.Tree = {
     q"""
-      new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()){}
+      new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID())
     """
   }
 
   private def generateSeqProperty(tpe: Type): c.Tree = {
     val elementTpe = tpe.typeArgs.head
-    q"""{
-       implicit val elemCreator = implicitly[$PropertyCreatorCls[$elementTpe]]
-       new $DirectSeqPropertyImplCls[$elementTpe](prt, $PropertyCreatorCompanion.newID())(elemCreator)
-      }"""
+    q"""
+      new $DirectSeqPropertyImplCls[$elementTpe](prt, $PropertyCreatorCompanion.newID())(implicitly[$PropertyCreatorCls[$elementTpe]])
+    """
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
@@ -403,55 +403,24 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             }
           }
 
-          def get: $tpe =
-            if (isEmpty) null.asInstanceOf[$tpe]
-            else $getCreator
+          protected def internalGet: $tpe =
+            $getCreator
 
-          def set(newValue: $tpe, force: Boolean = false): Unit = if (newValue != null) {
-            isEmpty = false
-            $CallbackSequencerCls.sequence {
-              ..${
-                members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).set(newValue.$name, force)"""
-                }
-              }
-            }
-          } else if (!isEmpty) {
-            $CallbackSequencerCls.sequence {
-              ..${
-                members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).set(null.asInstanceOf[$returnTpe])"""
-                }
-              }
-            }
-          }
-
-          def setInitValue(newValue: $tpe): Unit = if (newValue != null) {
-            isEmpty = false
+          protected def internalSet(newValue: $tpe, withCallbacks: Boolean, force: Boolean): Unit = {
             ..${
               members.map { case (name, returnTpe) =>
-                q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(newValue.$name)"""
-              }
-            }
-          } else if (!isEmpty) {
-            $CallbackSequencerCls.sequence {
-              ..${
-                members.map { case (name, returnTpe) =>
-                  q"""getSubProperty[$returnTpe](${name.toString}).setInitValue(null.asInstanceOf[$returnTpe])"""
-                }
-              }
-            }
-          }
-
-          def touch(): Unit = $CallbackSequencerCls.sequence {
-            ..${
-              members.map { case (name, returnTpe) =>
-                q"""getSubProperty[$returnTpe](${name.toString}).touch()"""
+                q"""
+                  setSubProp(
+                    getSubProperty[$returnTpe](${name.toString}),
+                    if (newValue != null) newValue.$name else null.asInstanceOf[$returnTpe],
+                    withCallbacks, force
+                  )
+                """
               }
             }
           }
         }
-      """
+       """
     }
 
     if (isCaseClass(tpe)) {
@@ -473,7 +442,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
       )
     } else {
       val members = traitBasedPropertyMembers(tpe).map(method => (method.asMethod.name, method.typeSignatureIn(tpe).resultType))
-
       impl(members.toMap,
         q"""
           new $tpe {
@@ -552,17 +520,18 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   private def generatePropertyCreator(tpe: Type, constructor: (Type) => c.Tree): c.Tree = {
-    val implicitSelfPc =
-      if (!c.inferImplicitValue(getType(tq"$PropertyCreatorCls[$tpe]"), withMacrosDisabled = true).isEmpty) q""
-      else q"implicit val ${c.freshName(TermName("self"))}: $PropertyCreatorCls[$tpe] = this"
-    q"""
-       new $PropertyCreatorCls[$tpe] {
-         $implicitSelfPc
-         def newProperty(prt: $ReadablePropertyCls[_]): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe] = {
-           ${constructor.apply(tpe)}
-         }
-       }
-    """
+    if (!c.inferImplicitValue(getType(tq"$PropertyCreatorCls[$tpe]"), withMacrosDisabled = true).isEmpty) {
+      q"new $MacroPropertyCreatorCls[$tpe]((prt: $ReadablePropertyCls[_]) => { ${constructor.apply(tpe)}.asInstanceOf[$CastablePropertyCls[$tpe]] })"
+    } else {
+      q"""
+        new $PropertyCreatorCls[$tpe] {
+          implicit val ${c.freshName(TermName("self"))}: $PropertyCreatorCls[$tpe] = this
+          def newProperty(prt: $ReadablePropertyCls[_]): $PropertyCls[$tpe] with $CastablePropertyCls[$tpe] = {
+            ${constructor.apply(tpe)}
+          }
+        }
+      """
+    }
   }
 
   def reifyPropertyCreator[T: c.WeakTypeTag]: c.Tree = {

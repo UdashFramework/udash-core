@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Exporting extends js.Object {
+trait Exporting extends js.Object {
 
   /**
     * <p>Experimental setting to allow HTML inside the chart (added through the <code>useHTML</code> options),
@@ -132,12 +132,12 @@ class Exporting extends js.Object {
 object Exporting {
   import scala.scalajs.js.JSConverters._
 
-  sealed class ExportType(val name: String)
+  final class ExportType(val name: String) extends AnyVal
   object ExportType {
-    case object PNG extends ExportType("image/png")
-    case object JPEG extends ExportType("image/jpeg")
-    case object PDF extends ExportType("application/pdf")
-    case object SVG extends ExportType("image/svg+xml")
+    val PNG = new ExportType("image/png")
+    val JPEG = new ExportType("image/jpeg")
+    val PDF = new ExportType("application/pdf")
+    val SVG = new ExportType("image/svg+xml")
   }
 
   /**

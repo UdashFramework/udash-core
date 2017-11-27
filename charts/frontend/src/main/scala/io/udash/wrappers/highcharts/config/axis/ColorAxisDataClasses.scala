@@ -8,7 +8,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class ColorAxisDataClasses extends js.Object {
+trait ColorAxisDataClasses extends js.Object {
 
   /**
     * The color of each data class. If not set, the color is pulled from the global or chart-specific <a href="#colors">colors</a> array.

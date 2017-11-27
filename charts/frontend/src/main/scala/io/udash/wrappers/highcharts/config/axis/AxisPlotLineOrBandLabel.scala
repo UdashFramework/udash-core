@@ -8,7 +8,7 @@ import io.udash.wrappers.highcharts.config.utils.{Align, VerticalAlign}
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class AxisPlotLineOrBandLabel extends js.Object {
+trait AxisPlotLineOrBandLabel extends js.Object {
 
   /**
     * Horizontal alignment of the label. Can be one of "left", "center" or "right".

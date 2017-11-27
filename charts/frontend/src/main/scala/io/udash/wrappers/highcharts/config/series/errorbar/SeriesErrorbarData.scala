@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesErrorbarData extends BaseXSeriesData[BaseSeriesDataLabels] {
+trait SeriesErrorbarData extends BaseXSeriesData[BaseSeriesDataLabels] {
   /**
     * The high or maximum value for each data point.
     */

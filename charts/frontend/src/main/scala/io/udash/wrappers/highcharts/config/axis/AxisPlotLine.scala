@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, |}
 
 @js.annotation.ScalaJSDefined
-class AxisPlotLine extends js.Object {
+trait AxisPlotLine extends js.Object {
 
   /**
     * A custom class name, in addition to the default <code>highcharts-plot-line</code>, to apply to each individual line.

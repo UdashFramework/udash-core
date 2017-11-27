@@ -13,7 +13,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class ChartEvents extends js.Object {
+trait ChartEvents extends js.Object {
 
   /**
     * Fires when a series is added to the chart after load time, using the <code>addSeries</code> method.

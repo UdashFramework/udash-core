@@ -2,19 +2,19 @@ package io.udash.wrappers.highcharts
 package config
 package utils
 
-sealed abstract class DashStyle(val name: String)
+sealed class DashStyle(val name: String)
 
 object DashStyle {
-  case object Solid extends DashStyle("Solid")
-  case object ShortDash extends DashStyle("ShortDash")
-  case object ShortDot extends DashStyle("ShortDot")
-  case object ShortDashDot extends DashStyle("ShortDashDot")
-  case object ShortDashDotDot extends DashStyle("ShortDashDotDot")
-  case object Dot extends DashStyle("Dot")
-  case object Dash extends DashStyle("Dash")
-  case object LongDash extends DashStyle("LongDash")
-  case object DashDot extends DashStyle("DashDot")
-  case object LongDashDot extends DashStyle("LongDashDot")
-  case object LongDashDotDot extends DashStyle("LongDashDotDot")
+  val Solid = new DashStyle("Solid")
+  val ShortDash = new DashStyle("ShortDash")
+  val ShortDot = new DashStyle("ShortDot")
+  val ShortDashDot = new DashStyle("ShortDashDot")
+  val ShortDashDotDot = new DashStyle("ShortDashDotDot")
+  val Dot = new DashStyle("Dot")
+  val Dash = new DashStyle("Dash")
+  val LongDash = new DashStyle("LongDash")
+  val DashDot = new DashStyle("DashDot")
+  val LongDashDot = new DashStyle("LongDashDot")
+  val LongDashDotDot = new DashStyle("LongDashDotDot")
   case class Custom(override val name: String) extends DashStyle(name)
 }

@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesWaterfall extends NonRangeBarSeries {
+trait SeriesWaterfall extends NonRangeBarSeries {
   override type Data = js.Array[SeriesWaterfallData | js.Array[Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "waterfall"
 
   /**
     * A name for the dash style to use for the line connecting the columns of the waterfall series. Possible values:
@@ -228,6 +227,7 @@ object SeriesWaterfall {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesWaterfall {
+      override val `type`: String = "waterfall"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

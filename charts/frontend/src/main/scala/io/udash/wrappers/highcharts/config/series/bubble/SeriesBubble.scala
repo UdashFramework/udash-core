@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesBubble extends FreePointsSeries {
+trait SeriesBubble extends FreePointsSeries {
   override type Data = js.Array[SeriesBubbleData | js.Array[String | Double]]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "bubble"
 
   /**
     * Whether to display negative sized bubbles. The threshold is given by the <a href="#plotOptions.bubble.zThreshold">zThreshold</a> option,
@@ -252,6 +251,7 @@ object SeriesBubble {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesBubble {
+      override val `type`: String = "bubble"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

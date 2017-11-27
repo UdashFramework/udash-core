@@ -8,7 +8,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
+trait ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
 
   /**
     * A class name that opens for styling the axis by CSS, especially in Highcharts styled mode. The class name is applied to group elements for the grid, axis elements and labels.
@@ -85,16 +85,16 @@ class ColorAxis extends BaseAxis[ColorAxis, ColorAxisEvents] {
 object ColorAxis {
   import scala.scalajs.js.JSConverters._
 
-  sealed class DataClassColor(val value: String)
+  final class DataClassColor(val value: String) extends AnyVal
   object DataClassColor {
-    case object Tween extends DataClassColor("tween")
-    case object Category extends DataClassColor("category")
+    val Tween = new DataClassColor("tween")
+    val Category = new DataClassColor("category")
   }
 
-  sealed class InterpolationType(val value: String)
+  final class InterpolationType(val value: String) extends AnyVal
   object InterpolationType {
-    case object Linear extends InterpolationType("linear")
-    case object Logarithmic extends InterpolationType("logarithmic")
+    val Linear = new InterpolationType("linear")
+    val Logarithmic = new InterpolationType("logarithmic")
   }
 
   /**

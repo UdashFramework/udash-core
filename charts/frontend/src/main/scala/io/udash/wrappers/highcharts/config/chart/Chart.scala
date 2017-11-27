@@ -10,7 +10,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class Chart extends js.Object {
+trait Chart extends js.Object {
 
   /**
     * <p>When using multiple axis, the ticks of two or more opposite axes will  automatically be aligned by adding
@@ -383,11 +383,11 @@ class Chart extends js.Object {
 object Chart {
   import scala.scalajs.js.JSConverters._
 
-  sealed class ZoomType(val value: String)
+  final class ZoomType(val value: String) extends AnyVal
   object ZoomType {
-    case object X extends ZoomType("x")
-    case object Y extends ZoomType("y")
-    case object XY extends ZoomType("xy")
+    val X = new ZoomType("x")
+    val Y = new ZoomType("y")
+    val XY = new ZoomType("xy")
   }
   /**
     * @param alignTicks          <p>When using multiple axis, the ticks of two or more opposite axes will  automatically be aligned by adding ticks to the axis or axes with the least ticks, as if <code>tickAmount</code> were specified.</p>. . <p>This can be prevented by setting <code>alignTicks</code> to false. If the grid lines look messy, it's a good idea to hide them for the secondary axis by setting <code>gridLineWidth</code> to 0.</p>

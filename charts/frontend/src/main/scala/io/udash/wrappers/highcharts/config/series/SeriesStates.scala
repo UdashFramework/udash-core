@@ -6,7 +6,7 @@ package series
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesStates[Hover <: SeriesStatesHover] extends js.Object {
+trait SeriesStates[Hover <: SeriesStatesHover] extends js.Object {
 
   /**
     * Options for the hovered series
@@ -15,10 +15,10 @@ class SeriesStates[Hover <: SeriesStatesHover] extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesAreaStates extends SeriesStates[SeriesAreaStatesHover]
+trait SeriesAreaStates extends SeriesStates[SeriesAreaStatesHover]
 
 @js.annotation.ScalaJSDefined
-class SeriesBarStates extends SeriesStates[SeriesBarStatesHover]
+trait SeriesBarStates extends SeriesStates[SeriesBarStatesHover]
 
 object SeriesAreaStates {
   import scala.scalajs.js.JSConverters._

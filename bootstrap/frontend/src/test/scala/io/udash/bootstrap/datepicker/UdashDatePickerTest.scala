@@ -17,7 +17,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
     "show/hide on method call and emit events" in {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](None)
-      val options = Property(UdashDatePicker.DatePickerOptions(
+      val options = Property(new UdashDatePicker.DatePickerOptions(
         format = "YYYY MM DD a",
         useCurrent = false
       ))
@@ -86,7 +86,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
     "not fail on null input value" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
@@ -106,7 +106,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 
     "sync with property" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
@@ -142,7 +142,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
     "emit error events" in {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val options = Property(UdashDatePicker.DatePickerOptions(
+      val options = Property(new UdashDatePicker.DatePickerOptions(
         format = "YYYY MM DD",
         minDate = Some(new ju.Date(1000000000)),
         maxDate = Some(new ju.Date(5000000000L))

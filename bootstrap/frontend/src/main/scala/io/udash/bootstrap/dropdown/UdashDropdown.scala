@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package dropdown
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
@@ -28,7 +29,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
-    jQ(s"#$buttonId").asDropdown().dropdown("toggle")
+    jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
   private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
     jQ(elem).click(jQFire(SelectionEvent(this, items.get(id))))
@@ -81,7 +82,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 }
 
 object UdashDropdown {
-  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](override val source: UdashDropdown[ItemType, ElemType]) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
+  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    override val source: UdashDropdown[ItemType, ElemType]
+  ) extends AbstractCase with ListenableEvent[UdashDropdown[ItemType, ElemType]]
   case class DropdownShowEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownShownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
   case class DropdownHideEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
@@ -152,10 +155,5 @@ object UdashDropdown {
   @js.native
   private trait UdashDropdownJQuery extends JQuery {
     def dropdown(arg: String): UdashDropdownJQuery = js.native
-  }
-
-  private implicit class JQueryDropdownExt(jQ: JQuery) {
-    def asDropdown(): UdashDropdownJQuery =
-      jQ.asInstanceOf[UdashDropdownJQuery]
   }
 }

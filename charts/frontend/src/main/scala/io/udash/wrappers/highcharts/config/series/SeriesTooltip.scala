@@ -10,7 +10,7 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 @js.annotation.ScalaJSDefined
-class SeriesTooltip extends js.Object {
+trait SeriesTooltip extends js.Object {
 
   /**
     * <p>For series on a datetime axes, the date format in the tooltip's header will by default be guessed based on the closest data points.

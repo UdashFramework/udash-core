@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesTreemap extends MapSeries {
+trait SeriesTreemap extends MapSeries {
   override type Data = js.Array[SeriesTreemapData | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "treemap"
 
   /**
     * When enabled the user can click on a point which is a parent and zoom in on its children.
@@ -77,18 +76,18 @@ class SeriesTreemap extends MapSeries {
 object SeriesTreemap {
   import scala.scalajs.js.JSConverters._
 
-  sealed class LayoutAlgorithm(val name: String)
+  final class LayoutAlgorithm(val name: String) extends AnyVal
   object LayoutAlgorithm {
-    case object SliceAndDice extends LayoutAlgorithm("sliceAndDice")
-    case object Stripes extends LayoutAlgorithm("stripes")
-    case object Squarified extends LayoutAlgorithm("squarified")
-    case object Strip extends LayoutAlgorithm("strip")
+    val SliceAndDice = new LayoutAlgorithm("sliceAndDice")
+    val Stripes = new LayoutAlgorithm("stripes")
+    val Squarified = new LayoutAlgorithm("squarified")
+    val Strip = new LayoutAlgorithm("strip")
   }
 
-  sealed class LayoutStartingDirection(val name: String)
+  final class LayoutStartingDirection(val name: String) extends AnyVal
   object LayoutStartingDirection {
-    case object Vertical extends LayoutStartingDirection("vertical")
-    case object Horizontal extends LayoutStartingDirection("horizontal")
+    val Vertical = new LayoutStartingDirection("vertical")
+    val Horizontal = new LayoutStartingDirection("horizontal")
   }
 
   /**
@@ -232,6 +231,7 @@ object SeriesTreemap {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesTreemap {
+      override val `type`: String = "treemap"
       override val allowDrillToNode = allowDrillToNodeOuter
       override val allowPointSelect = allowPointSelectOuter
       override val alternateStartingDirection = alternateStartingDirectionOuter

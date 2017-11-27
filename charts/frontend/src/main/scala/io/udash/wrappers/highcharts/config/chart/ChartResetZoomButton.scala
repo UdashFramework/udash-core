@@ -8,7 +8,7 @@ import io.udash.wrappers.highcharts.config.utils.Position
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class ChartResetZoomButton extends js.Object {
+trait ChartResetZoomButton extends js.Object {
   /**
     * The position of the button. This is an object that can hold the properties <code>align</code>,
     * <code>verticalAlign</code>, <code>x</code> and <code>y</code>.

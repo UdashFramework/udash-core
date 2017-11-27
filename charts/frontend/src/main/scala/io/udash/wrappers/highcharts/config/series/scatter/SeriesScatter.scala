@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesScatter extends FreePointsSeries {
+trait SeriesScatter extends FreePointsSeries {
   override type Data = js.Array[SeriesScatterData | js.Array[Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "scatter"
 
   /**
     * <p>When this is true, the series will not cause the Y axis to cross the zero plane (or <a href="#plotOptions.series.threshold">threshold</a> option) unless the data actually crosses the plane.</p>
@@ -161,6 +160,7 @@ object SeriesScatter {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesScatter {
+      override val `type`: String = "scatter"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

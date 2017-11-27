@@ -10,6 +10,7 @@ case class Record(i: Int, fuu: String)
 object Record extends HasGenCodec[Record]
 
 case class CustomRPCException(i: Int) extends Throwable
+object CustomRPCException extends HasGenCodec[CustomRPCException]
 
 trait RPCMethods {
   @silent

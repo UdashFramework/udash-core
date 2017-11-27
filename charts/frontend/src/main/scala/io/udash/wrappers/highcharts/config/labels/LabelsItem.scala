@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class LabelsItem extends js.Object {
+trait LabelsItem extends js.Object {
 
   /**
     * Inner HTML or text for the label.

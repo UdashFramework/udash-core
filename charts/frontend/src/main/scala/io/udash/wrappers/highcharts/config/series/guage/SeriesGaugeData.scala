@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesGaugeData extends BaseYSeriesData[SeriesDataLabels]
+trait SeriesGaugeData extends BaseYSeriesData[SeriesDataLabels]
 
 object SeriesGaugeData {
   import scala.scalajs.js.JSConverters._

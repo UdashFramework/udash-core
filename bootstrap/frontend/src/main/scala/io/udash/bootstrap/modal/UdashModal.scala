@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package modal
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
@@ -23,7 +24,7 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
 
 
   private def jQSelector(): UdashModalJQuery =
-    jQ(s"#$componentId").asModal()
+    jQ(s"#$componentId").asInstanceOf[UdashModalJQuery]
 
   /** Toggles modal visibility. */
   def toggle(): Unit = jQSelector().modal("toggle")
@@ -78,16 +79,16 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
 }
 
 object UdashModal {
-  sealed class BackdropType(val jsValue: String)
-  case object ActiveBackdrop extends BackdropType("true")
-  case object StaticBackdrop extends BackdropType("static")
-  case object NoneBackdrop extends BackdropType("false")
+  final class BackdropType(val jsValue: String)
+  val ActiveBackdrop = new BackdropType("true")
+  val StaticBackdrop = new BackdropType("static")
+  val NoneBackdrop = new BackdropType("false")
 
-  sealed trait ModalEvent extends ListenableEvent[UdashModal]
-  case class ModalShowEvent(source: UdashModal) extends ModalEvent
-  case class ModalShownEvent(source: UdashModal) extends ModalEvent
-  case class ModalHideEvent(source: UdashModal) extends ModalEvent
-  case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
+  sealed trait ModalEvent extends AbstractCase with ListenableEvent[UdashModal]
+  final case class ModalShowEvent(source: UdashModal) extends ModalEvent
+  final case class ModalShownEvent(source: UdashModal) extends ModalEvent
+  final case class ModalHideEvent(source: UdashModal) extends ModalEvent
+  final case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
 
   /**
     * Creates modal window. More: <a href="http://getbootstrap.com/javascript/#modals">Bootstrap Docs</a>.
@@ -122,10 +123,5 @@ object UdashModal {
   @js.native
   private trait UdashModalJQuery extends JQuery {
     def modal(cmd: String): UdashModalJQuery = js.native
-  }
-
-  private implicit class UdashModalJQueryExt(jQ: JQuery) {
-    def asModal(): UdashModalJQuery =
-      jQ.asInstanceOf[UdashModalJQuery]
   }
 }

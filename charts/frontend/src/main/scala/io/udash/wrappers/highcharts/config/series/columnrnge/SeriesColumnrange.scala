@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesColumnrange extends BarSeries {
+trait SeriesColumnrange extends BarSeries {
   override type Data = js.Array[SeriesColumnrangeData | js.Array[String | Double]]
   override type DataLabels = SeriesRangeDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "columnrange"
 
   /**
     * When the series contains less points than the crop threshold, all points are drawn,  event if the points fall outside the visible plot area at the current zoom. The advantage of drawing all points (including markers and columns), is that animation is performed on updates. On the other hand, when the series contains more points than the crop threshold, the series data is cropped to only contain points that fall within the plot area. The advantage of cropping away invisible points is to increase performance on large series.  .
@@ -200,6 +199,7 @@ object SeriesColumnrange {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesColumnrange {
+      override val `type`: String = "columnrange"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class SeriesStatesHover extends js.Object {
+trait SeriesStatesHover extends js.Object {
 
   /**
     * Enable separate styles for the hovered series to visualize that the user hovers either the series itself or the legend.			.
@@ -29,7 +29,7 @@ class SeriesStatesHover extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesAreaStatesHover extends SeriesStatesHover {
+trait SeriesAreaStatesHover extends SeriesStatesHover {
   /**
     * Pixel with of the graph line.
     *
@@ -52,7 +52,7 @@ class SeriesAreaStatesHover extends SeriesStatesHover {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesBarStatesHover extends SeriesStatesHover {
+trait SeriesBarStatesHover extends SeriesStatesHover {
   /**
     * A specific border color for the hovered point. Defaults to inherit the normal state border color.
     */

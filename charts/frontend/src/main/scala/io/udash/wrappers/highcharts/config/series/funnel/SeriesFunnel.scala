@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesFunnel extends PieLikeSeries {
+trait SeriesFunnel extends PieLikeSeries {
   override type Data = js.Array[SeriesFunnelData | Double]
   override type DataLabels = SeriesConnectorDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "funnel"
 
   /**
     * The height of the funnel or pyramid. If it is a number it defines the pixel height, if it is a percentage string it is the percentage of the plot area height.
@@ -173,6 +172,7 @@ object SeriesFunnel {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesFunnel {
+      override val `type`: String = "funnel"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

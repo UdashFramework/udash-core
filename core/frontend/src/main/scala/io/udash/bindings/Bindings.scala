@@ -34,6 +34,19 @@ trait Bindings {
     JsDom.StringFrag("").render
 
   /**
+    * Renders component with provided timeout.
+    * It's useful to render heavy components after displaying the main view.
+    */
+  def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = new Modifier[Element] {
+    import scalatags.JsDom.all.div
+    override def applyTo(t: Element): Unit = {
+      val el = div().render
+      t.appendChild(el)
+      window.setTimeout(() => t.replaceChildren(el, component), timeout)
+    }
+  }
+
+  /**
     * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
     * If property value is null, empty text node will be added.
     *

@@ -6,7 +6,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class Data extends js.Object {
+trait Data extends js.Object {
 
   /**
     * A two-dimensional array representing the input data on tabular form. This input can be used when the data is already parsed,

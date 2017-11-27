@@ -4,7 +4,7 @@ package io.udash.wrappers.highcharts.config.accessibility
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class AccessibilityKeyboardNavigation extends js.Object {
+trait AccessibilityKeyboardNavigation extends js.Object {
 
   /**
     * Enable keyboard navigation for the chart.

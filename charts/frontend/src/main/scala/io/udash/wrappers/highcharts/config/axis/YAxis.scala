@@ -10,7 +10,7 @@ import scala.scalajs.js.{ThisFunction, `|`}
 
 
 @js.annotation.ScalaJSDefined
-class YAxis extends Axis[YAxis, YAxisEvents] {
+trait YAxis extends Axis[YAxis, YAxisEvents] {
 
   /**
     * In a polar chart, this is the angle of the Y axis in degrees, where 0 is up and 90 is right.
@@ -74,10 +74,10 @@ class YAxis extends Axis[YAxis, YAxisEvents] {
 object YAxis {
   import scala.scalajs.js.JSConverters._
 
-  sealed class GridLineInterpolation(val name: String)
+  final class GridLineInterpolation(val name: String) extends AnyVal
   object GridLineInterpolation {
-    case object Circle extends GridLineInterpolation("circle")
-    case object Polygon extends GridLineInterpolation("polygon")
+    val Circle = new GridLineInterpolation("circle")
+    val Polygon = new GridLineInterpolation("polygon")
   }
 
   /**

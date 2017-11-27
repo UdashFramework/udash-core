@@ -2,10 +2,10 @@ package io.udash.wrappers.highcharts
 package config
 package utils
 
-sealed abstract class TickmarkPlacement(val name: String)
+sealed class TickmarkPlacement(val name: String)
 
 object TickmarkPlacement {
-  case object On extends TickmarkPlacement("on")
-  case object Between extends TickmarkPlacement("between")
+  val On = new TickmarkPlacement("on")
+  val Between = new TickmarkPlacement("between")
   case class Custom(override val name: String) extends TickmarkPlacement(name)
 }

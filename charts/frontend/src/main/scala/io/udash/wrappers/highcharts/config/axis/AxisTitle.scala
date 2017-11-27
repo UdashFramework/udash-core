@@ -8,7 +8,7 @@ import io.udash.wrappers.highcharts.config.utils.TitleAlign
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class AxisTitle extends js.Object {
+trait AxisTitle extends js.Object {
 
   /**
     * Alignment of the title relative to the axis values. Possible values are "low", "middle" or "high".

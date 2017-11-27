@@ -11,7 +11,7 @@ import scala.scalajs.js.annotation.ScalaJSDefined
 import scala.scalajs.js.{ThisFunction, `|`}
 
 @js.annotation.ScalaJSDefined
-class Tooltip extends js.Object {
+trait Tooltip extends js.Object {
 
   /**
     * Enable or disable animation of the tooltip. In slow legacy IE browsers the animation is disabled by default.

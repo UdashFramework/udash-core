@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Lang extends js.Object {
+trait Lang extends js.Object {
 
   /**
     * Exporting module menu. The tooltip title for the context menu holding print and export menu items.

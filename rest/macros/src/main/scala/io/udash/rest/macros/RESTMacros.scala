@@ -153,8 +153,8 @@ class RESTMacros(override val c: blackbox.Context) extends RPCFrameworkMacros(c)
       new $cls[$restType] {
         implicit def ${c.freshName(TermName("self"))}: $cls[$restType] = this
 
-        val subInterfaces = Seq(..$subinterfacesImplicits)
-        val methods = Seq(..$methodsImplicits)
+        def subInterfaces = Seq(..$subinterfacesImplicits)
+        def methods = Seq(..$methodsImplicits)
       }
       """
   }

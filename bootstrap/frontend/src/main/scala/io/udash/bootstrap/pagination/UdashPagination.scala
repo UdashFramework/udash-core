@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package pagination
 
+import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion}
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
@@ -43,16 +44,16 @@ final class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[
 
     tags2.nav(
       ul(id := componentId, BootstrapStyles.Pagination.pagination)(
-        arrow((idx, _) => idx <= 0, previous _, UdashPagination.PreviousPage),
+        arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage),
         repeat(pages)(page => {
           def currentIdx: Int = pages.elemProperties.indexOf(page)
           val pageIdx = Property[Int](currentIdx)
           pages.listen(_ => pageIdx.set(currentIdx))
           li(BootstrapStyles.active.styleIf(selectedPage.combine(pageIdx)(_ == _).combine(highlightActive)(_ && _)))(
-            itemFactory(page, UdashPagination.StandardPage)
+            itemFactory(page, UdashPagination.ButtonType.StandardPage)
           )(onclick :+= ((_: Event) => { changePage(pageIdx.get); false })).render
         }),
-        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.NextPage)
+        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.ButtonType.NextPage)
       )
     ).render
   }
@@ -86,8 +87,8 @@ final class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private
 
     tags2.nav(id := componentId)(
       ul(BootstrapStyles.Pagination.pager)(
-        arrow((idx, _) => idx <= 0, previous _, UdashPagination.PreviousPage, BootstrapStyles.previous),
-        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.NextPage, BootstrapStyles.next)
+        arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage, BootstrapStyles.previous),
+        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.ButtonType.NextPage, BootstrapStyles.next)
       )
     ).render
   }
@@ -110,10 +111,10 @@ final class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private
 object UdashPagination {
   import scalatags.JsDom.all._
 
-  sealed trait ButtonType
-  case object StandardPage extends ButtonType
-  case object PreviousPage extends ButtonType
-  case object NextPage extends ButtonType
+  final class ButtonType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object ButtonType extends ValueEnumCompanion[ButtonType] {
+    final val StandardPage, PreviousPage, NextPage: Value = new ButtonType
+  }
 
   /** Default pagination element model. */
   trait Page {
@@ -127,11 +128,11 @@ object UdashPagination {
 
   /** Creates link for default pagination element model. */
   val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
-    case (page, UdashPagination.PreviousPage) =>
+    case (page, UdashPagination.ButtonType.PreviousPage) =>
       a(aria.label := "Previous", bindHref(page))(span(aria.hidden := true)("«")).render
-    case (page, UdashPagination.NextPage) =>
+    case (page, UdashPagination.ButtonType.NextPage) =>
       a(aria.label := "Next", bindHref(page))(span(aria.hidden := true)("»")).render
-    case (page, UdashPagination.StandardPage) =>
+    case (page, _) => // default: UdashPagination.ButtonType.StandardPage
       a(bindHref(page))(bind(page.asModel.subProp(_.name))).render
   }
 

@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Labels extends js.Object {
+trait Labels extends js.Object {
 
   /**
     * A HTML label that can be positioned anywhere in the chart area.

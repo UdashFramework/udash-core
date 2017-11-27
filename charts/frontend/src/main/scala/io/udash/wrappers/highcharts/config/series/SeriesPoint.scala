@@ -6,7 +6,7 @@ package series
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesPoint extends js.Object {
+trait SeriesPoint extends js.Object {
   /** Events for each single point */
   val events: js.UndefOr[SeriesPointEvents] = js.undefined
 }

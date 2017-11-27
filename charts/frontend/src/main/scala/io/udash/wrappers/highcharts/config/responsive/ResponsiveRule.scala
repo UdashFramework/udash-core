@@ -6,7 +6,7 @@ import io.udash.wrappers.highcharts.config.HighchartsConfig
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class ResponsiveRule extends js.Object {
+trait ResponsiveRule extends js.Object {
   /**
     * <p>A full set of chart options to apply as overrides to the general chart options.
     * The chart options are applied when the given rule is active.</p>
