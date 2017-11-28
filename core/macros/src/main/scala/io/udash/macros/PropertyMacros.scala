@@ -90,18 +90,29 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   private def findPrimaryConstructor(tpe: Type): MethodSymbol =
     tpe.members.collectFirst {
-      case m: MethodSymbol if m.isPrimaryConstructor ⇒ m
+      case m: MethodSymbol if m.isPrimaryConstructor => m
     }.get
 
   //Checks, if tpe is case class which can be used as ModelProperty template
-  private def isModelCaseClass(tpe: Type): Boolean =
-    isCaseClass(tpe) && findPrimaryConstructor(tpe).paramLists.size == 1 &&
-      filterMembers(tpe)
-        .filter(m => !m.isPrivate && !(tpe <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
-        .forall { m =>
+  private def isModelClass(tpe: Type): Boolean = {
+    tpe.typeSymbol.isClass && !tpe.typeSymbol.isAbstract &&
+      findPrimaryConstructor(tpe).paramLists.size == 1 &&
+      findPrimaryConstructor(tpe).paramLists(0).nonEmpty &&
+      findPrimaryConstructor(tpe).isPublic && {
+        val t1 = filterMembers(tpe)
+        val t2 = t1.filter(m => !m.isPrivate && !(tpe <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
+        val t3 = t2.map { m =>
           if (m.isMethod && m.asMethod.isAccessor && m.asMethod.accessed.isTerm) m.asMethod.accessed.asTerm.isVal
           else m.isMethod || m.asTerm.isVal
         }
+        filterMembers(tpe)
+          .filter(m => !m.isPrivate && !(tpe <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
+          .forall { m =>
+            if (m.isMethod && m.asMethod.isAccessor && m.asMethod.accessed.isTerm) m.asMethod.accessed.asTerm.isVal
+            else m.isMethod || m.asTerm.isVal
+          }
+      }
+  }
 
   //Checks, if tpe is sealed and children are immutable
   //TODO: Implement this stuff - children checking
@@ -145,10 +156,10 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
       .filter(s => doesMeetTraitElementsRequirements(s, tpe)).toSeq
 
   //Returns filtered memebrs which can be treated as Properties in case class based ModelProperty
-  private def ccBasedPropertyMembers(tpe: Type): Seq[Symbol] =
+  private def classBasedPropertyMembers(tpe: Type): Seq[Symbol] =
     filterMembers(tpe)
       .filter(m => !m.isPrivate && !(tpe <:< typeOf[Tuple2[_, _]] && m.name.decodedName.toString == "swap"))
-      .filter(m => m.isMethod && m.asMethod.isCaseAccessor).toSeq
+      .filter(m => m.isMethod && (m.asMethod.isParamAccessor || m.asMethod.isCaseAccessor)).toSeq
 
   private def checkModel(tree: c.Tree): Boolean =
     c.typecheck(tree, silent = true) != EmptyTree
@@ -180,7 +191,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   def isValidSubproperty(tpe: Type, name: Name): Boolean =
-    traitBasedPropertyMembers(tpe).map(_.name).contains(name) || ccBasedPropertyMembers(tpe).map(_.name).contains(name)
+    traitBasedPropertyMembers(tpe).map(_.name).contains(name) || classBasedPropertyMembers(tpe).map(_.name).contains(name)
 
   def reifyImmutableValue[T: c.WeakTypeTag]: c.Tree = {
     val valueType = weakTypeOf[T]
@@ -261,7 +272,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val isNotSealedTrait = isClass && !valueType.typeSymbol.asClass.isSealed
     val isNotSeq = !(valueType <:< SeqTpe) && !(valueType <:< MutableSeqTpe)
 
-    lazy val isModelCC: Boolean = isModelCaseClass(valueType)
+    lazy val isValidModelClass: Boolean = isModelClass(valueType)
 
     val members = filterMembers(valueType)
     val unimplementableTraitMembers = members.collect {
@@ -275,8 +286,8 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     val propertyElementsToTypeCheck = if (isTrait && isNotSealedTrait && isNotSeq) {
       traitBasedPropertyPossibleMemebers(valueType)
-    } else if (isModelCC) {
-      ccBasedPropertyMembers(valueType)
+    } else if (isValidModelClass) {
+      classBasedPropertyMembers(valueType)
     } else Seq.empty
 
     if (isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait) {
@@ -290,7 +301,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
          }
          null
       """
-    } else if (isModelCC) {
+    } else if (isValidModelClass) {
         q"""
          implicit val ${TermName(c.freshName())}: $ModelPartCls[$valueType] = null
          ..${
@@ -302,7 +313,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
          null
        """
     } else {
-      val isCC = isCaseClass(valueType)
+      val isCC = !(isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait)
       c.abort(c.enclosingPosition,
         s"""
            |The type `$valueType` does not meet model part requirements. It must be (not sealed) trait or immutable case class.
@@ -329,9 +340,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
                   else "Visible only for traits."
                 }
            |* for case class:
-           |  * isCaseClass: $isCC
+           |  * isClass: ${valueType.typeSymbol.isClass}
+           |  * isNotAbstract: ${!valueType.typeSymbol.isAbstract}
            |  * hasOneParamsListInPrimaryConstructor: ${
                 isCC && findPrimaryConstructor(valueType).paramLists.size == 1
+              }
+           |  * primaryConstructorIsPublic: ${
+                isCC && findPrimaryConstructor(valueType).isPublic
               }
            |  * members: ${
                   if (isCC)
@@ -423,9 +438,9 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
        """
     }
 
-    if (isCaseClass(tpe)) {
+    if (isModelClass(tpe)) {
       val order = findPrimaryConstructor(tpe).paramLists.flatten.map(m => m.name.toTermName)
-      val members = ccBasedPropertyMembers(tpe)
+      val members = classBasedPropertyMembers(tpe)
         .map(m => m.asMethod.name -> m.typeSignatureIn(tpe).resultType).toMap
 
       impl(members,

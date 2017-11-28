@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.properties.{ImmutableValue, seq}
+import io.udash.properties.{ImmutableValue, PropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.{Element, Node}
 
@@ -49,6 +49,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "handle null value providing empty span element" in {
       class C(val i: Int) {
+        var t: Int = 7
         override def toString: String =
           s"C($i)"
       }

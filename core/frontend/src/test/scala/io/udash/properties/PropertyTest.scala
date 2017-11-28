@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
@@ -9,7 +10,15 @@ import scala.collection.mutable
 import scala.util.{Random, Try}
 
 class PropertyTest extends UdashFrontendTest {
-  case class C(i: Int, s: String)
+  class C(val i: Int, val s: String) extends AbstractCase {
+    var variable: Int = 7
+    override def productArity: Int = 2
+    override def productElement(n: Int): Any =
+      if (n == 0) i else s
+  }
+  object C {
+    implicit val immutable: ImmutableValue[C] = null
+  }
 
   trait TT {
     def i: Int
@@ -54,13 +63,13 @@ class PropertyTest extends UdashFrontendTest {
   implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
   implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
 
-  def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
+  def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), new C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
 
   "Property" should {
     "update value" in {
       val p = Property[Int](5)
       val tp = Property[T](TO1)
-      val cp = Property[C](C(1, "asd"))
+      val cp = Property[C](new C(1, "asd"))
 
       p.get should be(5)
       for (i <- Range(-200000, 200000, 666)) {
@@ -82,9 +91,9 @@ class PropertyTest extends UdashFrontendTest {
       tp.set(TO2, force = true)
       tp.get should be(TO2)
 
-      cp.get should be(C(1, "asd"))
-      cp.set(C(12, "asd2"))
-      cp.get should be(C(12, "asd2"))
+      cp.get should be(new C(1, "asd"))
+      cp.set(new C(12, "asd2"))
+      cp.get should be(new C(12, "asd2"))
     }
 
     "fire listeners on value change" in {
@@ -95,7 +104,7 @@ class PropertyTest extends UdashFrontendTest {
 
       val p = Property[Int](5)
       val tp = Property[T](TO1)
-      val cp = Property[C](C(1, "asd"))
+      val cp = Property[C](new C(1, "asd"))
 
       p.listen(listener)
       tp.listen(listener)
@@ -116,10 +125,10 @@ class PropertyTest extends UdashFrontendTest {
       tp.set(TC1(12))
       tp.set(TO2)
       tp.touch()
-      cp.set(C(12, "asd2"))
+      cp.set(new C(12, "asd2"))
       cp.touch()
-      cp.set(C(12, "asd2"), force = true)
-      cp.set(C(12, "asd3"), force = true)
+      cp.set(new C(12, "asd2"), force = true)
+      cp.set(new C(12, "asd3"), force = true)
 
       p.clearListeners()
       p.set(1)
@@ -134,15 +143,15 @@ class PropertyTest extends UdashFrontendTest {
       values(5) should be(TC1(12))
       values(6) should be(TO2)
       values(7) should be(TO2)
-      values(8) should be(C(12, "asd2"))
-      values(9) should be(C(12, "asd2"))
-      values(10) should be(C(12, "asd2"))
-      values(11) should be(C(12, "asd3"))
+      values(8) should be(new C(12, "asd2"))
+      values(9) should be(new C(12, "asd2"))
+      values(10) should be(new C(12, "asd2"))
+      values(11) should be(new C(12, "asd3"))
 
       oneTimeValues.size should be(3)
       oneTimeValues(0) should be(7)
       oneTimeValues(1) should be(TC1(12))
-      oneTimeValues(2) should be(C(12, "asd2"))
+      oneTimeValues(2) should be(new C(12, "asd2"))
     }
 
     "fire listener callback when registered with initUpdate flag" in {
@@ -151,7 +160,7 @@ class PropertyTest extends UdashFrontendTest {
 
       val p = Property[Int](5)
       val tp = Property[T](TO1)
-      val cp = Property[C](C(1, "asd"))
+      val cp = Property[C](new C(1, "asd"))
 
       p.listen(listener, initUpdate = true)
       tp.listen(listener, initUpdate = true)
@@ -159,15 +168,15 @@ class PropertyTest extends UdashFrontendTest {
 
       p.set(7)
       tp.set(TC1(12))
-      cp.set(C(12, "asd2"))
+      cp.set(new C(12, "asd2"))
 
       values.size should be(6)
       values(0) should be(5)
       values(1) should be(TO1)
-      values(2) should be(C(1, "asd"))
+      values(2) should be(new C(1, "asd"))
       values(3) should be(7)
       values(4) should be(TC1(12))
-      values(5) should be(C(12, "asd2"))
+      values(5) should be(new C(12, "asd2"))
     }
 
     "transform and synchronize value" in {
@@ -176,12 +185,12 @@ class PropertyTest extends UdashFrontendTest {
       val oneTimeValues = mutable.ArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
-      val cp = Property[C](C(1, "asd"))
+      val cp = Property[C](new C(1, "asd"))
       val tp = cp.transform[(T, T)](
         (c: C) => Tuple2(TC1(c.i), TC2(c.s)),
         (t: (T, T)) => t match {
-          case (TC1(i), TC2(s)) => C(i, s)
-          case _ => C(0, "")
+          case (TC1(i), TC2(s)) => new C(i, s)
+          case _ => new C(0, "")
         }
       )
 
@@ -191,27 +200,27 @@ class PropertyTest extends UdashFrontendTest {
       tp.listenOnce(oneTimeListener)
       cp.listenOnce(oneTimeListener)
 
-      cp.get should be(C(1, "asd"))
+      cp.get should be(new C(1, "asd"))
       tp.get should be(Tuple2(TC1(1), TC2("asd")))
 
-      cp.set(C(12, "asd2"))
-      cp.get should be(C(12, "asd2"))
+      cp.set(new C(12, "asd2"))
+      cp.get should be(new C(12, "asd2"))
       tp.get should be(Tuple2(TC1(12), TC2("asd2")))
 
       tp.set(Tuple2(TC1(-5), TC2("tp")))
-      cp.get should be(C(-5, "tp"))
+      cp.get should be(new C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
       tp.set(Tuple2(TC1(-5), TC2("tp")))
-      cp.get should be(C(-5, "tp"))
+      cp.get should be(new C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
       tp.touch()
-      cp.get should be(C(-5, "tp"))
+      cp.get should be(new C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
       tp.set(Tuple2(TC1(-5), TC2("tp")), force = true)
-      cp.get should be(C(-5, "tp"))
+      cp.get should be(new C(-5, "tp"))
       tp.get should be(Tuple2(TC1(-5), TC2("tp")))
 
       tp.clearListeners()
@@ -229,18 +238,68 @@ class PropertyTest extends UdashFrontendTest {
       tp.set(Tuple2(TC1(-15), TC2("tp")))
 
       values.size should be(12)
-      values should contain(C(12, "asd2"))
+      values should contain(new C(12, "asd2"))
       values should contain(Tuple2(TC1(12), TC2("asd2")))
       values should contain(Tuple2(TC1(-5), TC2("tp")))
-      values should contain(C(-5, "tp"))
+      values should contain(new C(-5, "tp"))
       values should contain(Tuple2(TC1(-13), TC2("tp")))
-      values should contain(C(-13, "tp"))
+      values should contain(new C(-13, "tp"))
       values should contain(Tuple2(TC1(-15), TC2("tp")))
-      values should contain(C(-15, "tp"))
+      values should contain(new C(-15, "tp"))
 
       oneTimeValues.size should be(2)
-      oneTimeValues should contain(C(12, "asd2"))
+      oneTimeValues should contain(new C(12, "asd2"))
       oneTimeValues should contain(Tuple2(TC1(12), TC2("asd2")))
+    }
+
+    "fire transform method when needed" in {
+      var counter = 0
+      val p = Property[Boolean](true)
+      val t = p.transform { v =>
+        counter += 1
+        !v
+      }
+
+      t.get should be(false)
+      counter should be(1)
+
+      p.set(false)
+      t.get should be(true)
+      counter should be(2)
+
+      p.set(false)
+      t.get should be(true)
+      counter should be(2)
+
+      p.set(true)
+      t.get should be(false)
+      counter should be(3)
+    }
+
+    "fire transform method when needed (2)" in {
+      var counter = 0
+      val pageProperty = Property(1)
+      val seenAllProperty = Property(false)
+
+      val totalPagesProperty = seenAllProperty.transform(all => {
+        counter += 1
+        if (all) Some(pageProperty.get) else None
+      })
+
+      val lastPageProperty = totalPagesProperty.combine(pageProperty)((total, page) =>
+        total.exists(_ <= page)
+      )
+
+      counter should be(1)
+
+      pageProperty.set(1)
+      counter should be(1)
+
+      pageProperty.set(2)
+      counter should be(1)
+
+      pageProperty.set(3)
+      counter should be(1)
     }
 
     "combine with other properties" in {
@@ -718,11 +777,11 @@ class PropertyTest extends UdashFrontendTest {
     "update value and provide access to subproperties" in {
       val p = ModelProperty[TT]
 
-      p.set(newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c')))
+      p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
       p.get.i should be(5)
       p.get.s should be(Some("s"))
-      p.get.t.c should be(C(123, "asd"))
+      p.get.t.c should be(new C(123, "asd"))
       p.get.t.s.size should be(3)
 
       p.subProp(_.i).set(42)
@@ -734,14 +793,14 @@ class PropertyTest extends UdashFrontendTest {
       p.subSeq(_.t.s).insert(0, 'f')
       p.get.t.s.size should be(5)
 
-      p.subProp(_.t.c).set(C(321, "dsa"))
-      p.get.t.c should be(C(321, "dsa"))
+      p.subProp(_.t.c).set(new C(321, "dsa"))
+      p.get.t.c should be(new C(321, "dsa"))
 
       p.touch()
       p.get.i should be(42)
       p.get.s should be(Some("s"))
       p.get.t.s.size should be(5)
-      p.get.t.c should be(C(321, "dsa"))
+      p.get.t.c should be(new C(321, "dsa"))
     }
 
     "fire listeners on value change" in {
@@ -757,8 +816,8 @@ class PropertyTest extends UdashFrontendTest {
       values.size should be(1)
       values.clear()
 
-      val init = newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c'))
-      p.setInitValue(newTT(123123, Some("s"), C(123, "asd"), Seq('a', 'b', 'c')))
+      val init = newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c'))
+      p.setInitValue(newTT(123123, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
       values.size should be(0)
       p.set(init)
       values.size should be(1)
@@ -774,7 +833,7 @@ class PropertyTest extends UdashFrontendTest {
       p.subSeq(_.t.s).insert(0, 'f')
       values.size should be(4)
 
-      p.subProp(_.t.c).set(C(321, "dsa"))
+      p.subProp(_.t.c).set(new C(321, "dsa"))
       values.size should be(5)
 
       CallbackSequencer.sequence {
@@ -825,13 +884,13 @@ class PropertyTest extends UdashFrontendTest {
       val p = ModelProperty[TT]
       val t = p.transform[Int](
         (p: TT) => p.i + p.t.c.i,
-        (x: Int) => newTT(x/2, None, C(x/2, ""), Seq.empty)
+        (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
       )
 
       p.listen(listener)
       t.listen(listener)
 
-      p.set(newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c')))
+      p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
       t.get should be(123+5)
 
       t.set(64)
@@ -859,7 +918,7 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "work with tuples" in {
-      val init = (123, "sth", true, C(42, "s"))
+      val init = (123, "sth", true, new C(42, "s"))
       val p = ModelProperty(init)
 
       var changeCount = 0
@@ -869,11 +928,9 @@ class PropertyTest extends UdashFrontendTest {
       p.subProp(_._1).set(333)
       p.subProp(_._2).set("sth2")
       p.subProp(_._3).set(false)
-      val fourth = p.subModel(_._4)
-      fourth.subProp(_.i).set(24)
-      fourth.subProp(_.s).set("s2")
-      p.get should be((333, "sth2", false, C(24, "s2")))
-      changeCount should be(5)
+      p.subProp(_._4).set(new C(24, "s2"))
+      p.get should be((333, "sth2", false, new C(24, "s2")))
+      changeCount should be(4)
     }
 
     "work with Tuple2" in {

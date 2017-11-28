@@ -3,12 +3,16 @@ package io.udash.properties
 import io.udash.testing.UdashFrontendTest
 
 class UtilsTest extends UdashFrontendTest {
+  class ClassWithVar(x: String) {
+    var s: String = "qwe"
+  }
+
   class ClassicClass(i: Int) {
     def more: Int = i + 57
   }
 
   case class CCA(r: CCB)
-  case class CCB(r: CCA, i: Int, b: String, c: ClassicClass)
+  case class CCB(r: CCA, i: Int, b: String, c: ClassicClass, d: ClassWithVar)
   case class ValidCCA(r: ValidCCB)
   case class ValidCCB(r: ValidCCA, i: Int, b: String, d: CCD)
   case class CCD(r: CCD)
@@ -22,7 +26,7 @@ class UtilsTest extends UdashFrontendTest {
   }
   case class C(d: D)
   trait D {
-    def errorField: ClassicClass
+    def errorField: ClassWithVar
   }
 
   trait ValidModelA {
@@ -88,8 +92,9 @@ class UtilsTest extends UdashFrontendTest {
       """ModelValue.isModelValue[ValidModelB]""".stripMargin should compile
       """ModelValue.isModelValue[ValidModelC]""".stripMargin should compile
       """ModelValue.isModelValue[ValidModelD]""".stripMargin should compile
+      """ModelValue.isModelValue[ClassicClass]""".stripMargin should compile
 
-      """ModelValue.isModelValue[ClassicClass]""".stripMargin shouldNot compile
+      """ModelValue.isModelValue[ClassWithVar]""".stripMargin shouldNot compile
       """ModelValue.isModelValue[CCA]""".stripMargin shouldNot compile
       """ModelValue.isModelValue[CCB]""".stripMargin shouldNot compile
       """ModelValue.isModelValue[A]""".stripMargin shouldNot compile
@@ -108,8 +113,9 @@ class UtilsTest extends UdashFrontendTest {
       """ModelPart.isModelPart[ValidModelB]""".stripMargin should compile
       """ModelPart.isModelPart[ValidModelC]""".stripMargin should compile
       """ModelPart.isModelPart[ValidModelD]""".stripMargin should compile
+      """ModelPart.isModelPart[ClassicClass]""".stripMargin should compile
 
-      """ModelPart.isModelPart[ClassicClass]""".stripMargin shouldNot compile
+      """ModelPart.isModelPart[ClassWithVar]""".stripMargin shouldNot compile
       """ModelPart.isModelPart[CCA]""".stripMargin shouldNot compile
       """ModelPart.isModelPart[CCB]""".stripMargin shouldNot compile
       """ModelPart.isModelPart[A]""".stripMargin shouldNot compile

@@ -288,6 +288,35 @@ class PropertyCreatorTest extends UdashFrontendTest {
         |}""".stripMargin should compile
     }
 
+    "create ModelProperty for simple classes" in {
+      """class A(val s: Seq[String], val i: A)
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin should compile
+
+      """class A(val s: Seq[String], val i: A) {
+        |  val test: Int = 5
+        |  def x: String = "qwe"
+        |}
+        |val p = Property[A].asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin should compile
+
+      """class A(val s: Seq[String], val i: A) {
+        |  val test: Int = 5
+        |  def x: String = "qwe"
+        |}
+        |val p = Property[A].asModel
+        |val test = p.subSeq(_.test)""".stripMargin shouldNot compile
+
+      """class A(val s: Seq[String], val i: A) {
+        |  val test: Int = 5
+        |  def x: String = "qwe"
+        |}
+        |val p = Property[A].asModel
+        |val test = p.subSeq(_.x)""".stripMargin shouldNot compile
+    }
+
     "create ModelProperty for tuples" in {
       """val p = ModelProperty(Tuple1("String"))""".stripMargin should compile
       """val p = ModelProperty(("String", 25))""".stripMargin should compile
