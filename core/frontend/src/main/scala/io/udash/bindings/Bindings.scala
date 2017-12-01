@@ -2,8 +2,7 @@ package io.udash.bindings
 
 import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
-import io.udash.bindings.modifiers.{Binding, _}
-import io.udash.properties.ImmutableValue
+import io.udash.bindings.modifiers._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
@@ -14,8 +13,6 @@ import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 trait Bindings {
-  implicit val allowFileTpe: ImmutableValue[File] = null
-
   val Checkbox      = io.udash.bindings.Checkbox
   val CheckButtons  = io.udash.bindings.CheckButtons
   val FileInput     = io.udash.bindings.FileInput

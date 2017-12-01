@@ -3,7 +3,7 @@ package button
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.properties.{ModelPart, PropertyCreator, seq}
+import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -39,13 +39,11 @@ object UdashButtonGroup {
     def text: String
     def checked: Boolean
   }
-  object CheckboxModel {
-    implicit val pc: PropertyCreator[CheckboxModel] = PropertyCreator.propertyCreator[CheckboxModel]
-    implicit val pcS: PropertyCreator[Seq[CheckboxModel]] = PropertyCreator.propertyCreator[Seq[CheckboxModel]]
-    implicit val pcO: PropertyCreator[Option[CheckboxModel]] = PropertyCreator.propertyCreator[Option[CheckboxModel]]
-  }
+  object CheckboxModel extends HasModelPropertyCreator[CheckboxModel]
+
   /** Default implementation of [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. */
   case class DefaultCheckboxModel(text: String, checked: Boolean) extends CheckboxModel
+  object DefaultCheckboxModel extends HasModelPropertyCreator[DefaultCheckboxModel]
 
   /** Button factory for [[io.udash.bootstrap.button.UdashButtonGroup.CheckboxModel]]. It creates group of toggle buttons. */
   val defaultCheckboxFactory = (el: CastableProperty[CheckboxModel]) => {
@@ -119,7 +117,7 @@ object UdashButtonGroup {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
     */
-  def radio[ItemType <: CheckboxModel : ModelPart, ElemType <: CastableProperty[ItemType]]
+  def radio[ItemType <: CheckboxModel : ModelPropertyCreator, ElemType <: CastableProperty[ItemType]]
            (items: seq.ReadableSeqProperty[ItemType, ElemType],
             size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())

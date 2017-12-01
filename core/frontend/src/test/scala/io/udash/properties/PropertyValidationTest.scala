@@ -10,32 +10,27 @@ import scala.concurrent.Future
 import scala.util.Random
 
 class PropertyValidationTest extends AsyncUdashFrontendTest {
-  case class C(i: Int, s: String) {
-    private var thisShouldBeStandardProperty: Int = 17
-  }
+  case class C(i: Int, s: String)
+  object C extends HasModelPropertyCreator[C]
 
   trait TT {
     def i: Int
     def s: Option[String]
     def t: ST
   }
+  object TT extends HasModelPropertyCreator[TT]
 
   trait ST {
     def c: C
     def s: Seq[Char]
   }
+  object ST extends HasModelPropertyCreator[ST]
 
   sealed trait T
   case object TO1 extends T
   case object TO2 extends T
   case class TC1(i: Int) extends T
   case class TC2(s: String) extends T
-
-  implicit val immutableC: ImmutableValue[C] = null
-  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
-  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
-  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
-  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
 
   def newTT(iv: Int, sv: Option[String], cv: C, ssv: Seq[Char]) = new TT {
     override def i: Int = iv

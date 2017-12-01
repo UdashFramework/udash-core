@@ -1,12 +1,10 @@
 package io.udash
 
 import io.udash.logging.CrossLogging
-import io.udash.properties.ImmutableValue
 import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
-import io.udash.utils.{CallbacksHandler, SetRegistration}
+import io.udash.utils.CallbacksHandler
 import org.scalajs.dom.Element
 
-import scala.collection.mutable
 import scala.reflect.ClassTag
 
 /**
@@ -16,7 +14,7 @@ import scala.reflect.ClassTag
   * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
   * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
   */
-class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue](
+class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider

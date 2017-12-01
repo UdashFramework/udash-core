@@ -16,9 +16,6 @@ class PropertyTest extends UdashFrontendTest {
     override def productElement(n: Int): Any =
       if (n == 0) i else s
   }
-  object C {
-    implicit val immutable: ImmutableValue[C] = null
-  }
 
   trait TT {
     def i: Int
@@ -31,6 +28,7 @@ class PropertyTest extends UdashFrontendTest {
       case _ => false
     }
   }
+  object TT extends HasModelPropertyCreator[TT]
 
   trait ST {
     def c: C
@@ -42,6 +40,7 @@ class PropertyTest extends UdashFrontendTest {
       case _ => false
     }
   }
+  object ST extends HasModelPropertyCreator[ST]
 
   sealed trait T
   case object TO1 extends T
@@ -57,11 +56,6 @@ class PropertyTest extends UdashFrontendTest {
       override def s: Seq[Char] = ssv
     }
   }
-
-  implicit val pcC: PropertyCreator[C] = PropertyCreator.propertyCreator[C]
-  implicit val pcTT: PropertyCreator[TT] = PropertyCreator.propertyCreator[TT]
-  implicit val pcST: PropertyCreator[ST] = PropertyCreator.propertyCreator[ST]
-  implicit val pcT: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
 
   def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), new C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
 
@@ -331,7 +325,7 @@ class PropertyTest extends UdashFrontendTest {
         def x: Double
         def y: Double
       }
-      object M {
+      object M extends HasModelPropertyCreator[M] {
         def apply(_x: Double, _y: Double): M =
           new M {
             override def x: Double = _x
@@ -775,7 +769,7 @@ class PropertyTest extends UdashFrontendTest {
 
   "ModelProperty" should {
     "update value and provide access to subproperties" in {
-      val p = ModelProperty[TT]
+      val p = ModelProperty.empty[TT]
 
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
@@ -908,6 +902,8 @@ class PropertyTest extends UdashFrontendTest {
 
     "work with simple case class" in {
       case class Simple(i: Int, s:  String)
+      implicit val propertyCreator: ModelPropertyCreator[Simple] = MacroModelPropertyCreator.materialize[Simple].pc
+
       val p = ModelProperty(Simple(1, "xxx"))
       p.get should be(Simple(1, "xxx"))
       val i = p.subProp(_.i)
@@ -948,7 +944,8 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "work with recursive case class" in {
-      case class Simple(i: Int, s:  Simple)
+      import ReqModels._
+
       val p = ModelProperty(Simple(1, null))
       p.get should be(Simple(1, null))
       val i = p.subProp(_.i)
@@ -961,36 +958,38 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "work with recursive trait" in {
-      trait T {
-        def t: T
-      }
-      val p = ModelProperty[T](new T { def t: T = null })
+      import ReqModels._
+
+      val p = ModelProperty[ReqT](new ReqT { def t: ReqT = null })
       p.get.t should be(null)
       val s = p.subModel(_.t)
-      s.set(new T { def t: T = null })
+      s.set(new ReqT { def t: ReqT = null })
       s.get.t should be(null)
       p.get.t shouldNot be(null)
     }
 
     "work with recursive case class containing Seq" in {
-      case class Simple(i: Seq[Simple], s:  Simple)
-      val p = ModelProperty(Simple(Seq[Simple](), null))
-      p.get should be(Simple(Seq(), null))
+      import ReqModels._
+
+      val p = ModelProperty(SimpleSeq(Seq[SimpleSeq](), null))
+      p.get should be(SimpleSeq(Seq(), null))
       val i = p.subSeq(_.i)
-      i.set(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))))
+      i.set(Seq(SimpleSeq(Seq(), SimpleSeq(Seq(SimpleSeq(Seq(), null)), null))))
       val s = p.subModel(_.s)
-      s.set(Simple(Seq(), Simple(Seq(), null)))
-      p.get should be(Simple(Seq(Simple(Seq(), Simple(Seq(Simple(Seq(), null)), null))), Simple(Seq(), Simple(Seq(), null))))
+      s.set(SimpleSeq(Seq(), SimpleSeq(Seq(), null)))
+      p.get should be(SimpleSeq(Seq(SimpleSeq(Seq(), SimpleSeq(Seq(SimpleSeq(Seq(), null)), null))), SimpleSeq(Seq(), SimpleSeq(Seq(), null))))
       s.subProp(_.i).get should be(Seq())
       s.subProp(_.s.i).get should be(Seq())
       i.elemProperties.isEmpty should be(false)
     }
 
     "not get partial value from child property" in {
-      case class TopModel(child: CCWithRequire)
       case class CCWithRequire(a: Int, b: Int) {
         require((a > 0 && b > 0) || (a < 0 && b < 0))
       }
+      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = MacroModelPropertyCreator.materialize[CCWithRequire].pc
+      case class TopModel(child: CCWithRequire)
+      implicit val propertyCreator: ModelPropertyCreator[TopModel] = MacroModelPropertyCreator.materialize[TopModel].pc
 
       val p = ModelProperty[TopModel](TopModel(CCWithRequire(1, 2)))
       val c = p.subModel(_.child)
@@ -1011,10 +1010,12 @@ class PropertyTest extends UdashFrontendTest {
         def x: Int
         def y: Int = 5
       }
+      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = MacroModelPropertyCreator.materialize[ModelWithImplDef].pc
       trait ModelWithImplVal {
         val x: Int
         val y: Int = 5
       }
+      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
 
       val p1 = ModelProperty[ModelWithImplDef]
       val p2 = ModelProperty[ModelWithImplVal]
@@ -1040,6 +1041,7 @@ class PropertyTest extends UdashFrontendTest {
         def withLabel: String =
           s"$userLabel $displayName"
       }
+      implicit val propertyCreator: ModelPropertyCreator[User] = MacroModelPropertyCreator.materialize[User].pc
 
       val p = ModelProperty[User](User("udash", Some("Udash Framework")))
       p.get.withLabel should be("User: Udash Framework")
@@ -1055,8 +1057,10 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "handle empty model property after subProp call" in {
-      case class Test(a: String, s: SubTest)
       case class SubTest(x: Int)
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
+      case class Test(a: String, s: SubTest)
+      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
       val p = ModelProperty.empty[Test]
       val sub = p.subModel(_.s)
@@ -1071,13 +1075,15 @@ class PropertyTest extends UdashFrontendTest {
     }
 
     "handle empty model property after subProp call (trait version)" in {
+      trait SubTest {
+        def x: Int
+      }
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
       trait Test {
         def a: String
         def s: SubTest
       }
-      trait SubTest {
-        def x: Int
-      }
+      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
       val p = ModelProperty.empty[Test]
       val sub = p.subModel(_.s)
@@ -2296,4 +2302,17 @@ class PropertyTest extends UdashFrontendTest {
       indexed.get should be(numbers.get.zipWithIndex)
     }
   }
+}
+
+private object ReqModels {
+  case class Simple(i: Int, s:  Simple)
+  object Simple extends HasModelPropertyCreator[Simple]
+
+  trait ReqT {
+    def t: ReqT
+  }
+  object ReqT extends HasModelPropertyCreator[ReqT]
+
+  case class SimpleSeq(i: Seq[SimpleSeq], s: SimpleSeq)
+  object SimpleSeq extends HasModelPropertyCreator[SimpleSeq]
 }

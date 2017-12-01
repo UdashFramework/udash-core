@@ -3,7 +3,7 @@ package io.udash.properties.seq
 import java.util.UUID
 
 import io.udash.properties.single.ReadableProperty
-import io.udash.properties.{CallbackSequencer, ModelValue, PropertyCreator}
+import io.udash.properties.{CallbackSequencer, PropertyCreator}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
@@ -48,7 +48,7 @@ abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, Readable
 }
 
 private[properties]
-class ZippedReadableSeqProperty[A, B, O : ModelValue]
+class ZippedReadableSeqProperty[A, B, O]
                                (s: ReadableSeqProperty[A, ReadableProperty[A]],
                                 p: ReadableSeqProperty[B, ReadableProperty[B]],
                                 combiner: (A, B) => O)
@@ -66,7 +66,7 @@ class ZippedReadableSeqProperty[A, B, O : ModelValue]
 }
 
 private[properties]
-class ZippedAllReadableSeqProperty[A, B, O : ModelValue]
+class ZippedAllReadableSeqProperty[A, B, O]
                                   (s: ReadableSeqProperty[A, ReadableProperty[A]],
                                    p: ReadableSeqProperty[B, ReadableProperty[B]],
                                    combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B])

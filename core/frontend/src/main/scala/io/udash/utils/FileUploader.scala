@@ -1,6 +1,7 @@
 package io.udash.utils
 
 import io.udash._
+import io.udash.properties.HasModelPropertyCreator
 import org.scalajs.dom._
 import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
@@ -72,4 +73,5 @@ object FileUploader {
     def bytesSent: Double
     def bytesTotal: Double
   }
+  object FileUploadModel extends HasModelPropertyCreator[FileUploadModel]
 }

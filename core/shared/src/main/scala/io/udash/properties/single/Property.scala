@@ -103,8 +103,8 @@ trait ReadableProperty[A] {
     * @tparam O Output property elements type.
     * @return Property[O] updated on any change in `this` or `property`.
     */
-  def combine[B, O : ModelValue](property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null)
-                                (combiner: (A, B) => O): ReadableProperty[O] = {
+  def combine[B, O](property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null)
+                   (combiner: (A, B) => O): ReadableProperty[O] = {
     val pc = implicitly[PropertyCreator[O]]
     val output = pc.newProperty(combinedParent)
 
@@ -134,7 +134,7 @@ trait ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
-  def transformToSeq[B : ModelValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  def transformToSeq[B](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   /** Streams value changes to the `target` property.
@@ -251,7 +251,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transformToSeq[B : ModelValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+  def transformToSeq[B](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
 }
 

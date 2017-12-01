@@ -1,9 +1,9 @@
 package io.udash.routing
 
 import io.udash._
-import io.udash.properties.{ImmutableValue, PropertyCreator}
+import io.udash.properties.PropertyCreator
+import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
-import io.udash.utils.{CallbacksHandler, SetRegistration}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -16,7 +16,7 @@ case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
   * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
   * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
   */
-class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableValue]
+class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag]
                    (routingRegistry: RoutingRegistry[HierarchyRoot],
                     viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
                     viewRenderer: ViewRenderer) {

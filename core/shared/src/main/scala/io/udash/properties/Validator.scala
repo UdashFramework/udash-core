@@ -6,21 +6,9 @@ import scala.concurrent.Future
 trait ValidationError {
   def message: String
 }
-object ValidationError {
-  implicit val propertyCreatorValidationError: PropertyCreator[ValidationError] = PropertyCreator.propertyCreator[ValidationError]
-  implicit val propertyCreatorSValidationError: PropertyCreator[Seq[ValidationError]] = PropertyCreator.propertyCreator[Seq[ValidationError]]
-  implicit val propertyCreatorOValidationError: PropertyCreator[Option[ValidationError]] = PropertyCreator.propertyCreator[Option[ValidationError]]
-}
-
 case class DefaultValidationError(override val message: String) extends ValidationError
 
 sealed trait ValidationResult
-object ValidationResult {
-  implicit val propertyCreatorValidationResult: PropertyCreator[ValidationResult] = PropertyCreator.propertyCreator[ValidationResult]
-  implicit val propertyCreatorSValidationResult: PropertyCreator[Seq[ValidationResult]] = PropertyCreator.propertyCreator[Seq[ValidationResult]]
-  implicit val propertyCreatorOValidationResult: PropertyCreator[Option[ValidationResult]] = PropertyCreator.propertyCreator[Option[ValidationResult]]
-}
-
 case object Valid extends ValidationResult
 case class Invalid[ErrorType <: ValidationError](errors: Seq[ErrorType]) extends ValidationResult
 object Invalid {

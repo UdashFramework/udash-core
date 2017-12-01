@@ -98,12 +98,6 @@ object UdashDropdown {
   case object DropdownDivider extends DefaultDropdownItem
   case class DropdownDisabled(link: DropdownLink) extends DefaultDropdownItem
 
-  object DefaultDropdownItem {
-    implicit val pc: PropertyCreator[DefaultDropdownItem] = PropertyCreator.propertyCreator[DefaultDropdownItem]
-    implicit val pcS: PropertyCreator[Seq[DefaultDropdownItem]] = PropertyCreator.propertyCreator[Seq[DefaultDropdownItem]]
-    implicit val pcO: PropertyCreator[Option[DefaultDropdownItem]] = PropertyCreator.propertyCreator[Option[DefaultDropdownItem]]
-  }
-
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(p: ReadableProperty[DefaultDropdownItem]): dom.Element = {
     import io.udash.css.CssView._

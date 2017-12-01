@@ -64,12 +64,6 @@ object UdashCollapse {
   final case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
   final case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
 
-  object CollapseEvent {
-    implicit val pc: PropertyCreator[CollapseEvent] = PropertyCreator.propertyCreator[CollapseEvent]
-    implicit val pcO: PropertyCreator[Option[CollapseEvent]] = PropertyCreator.propertyCreator[Option[CollapseEvent]]
-    implicit val pcS: PropertyCreator[Seq[CollapseEvent]] = PropertyCreator.propertyCreator[Seq[CollapseEvent]]
-  }
-
   /**
     * Creates collapsible component.
     * More: <a href="http://getbootstrap.com/javascript/#collapse">Bootstrap Docs</a>.

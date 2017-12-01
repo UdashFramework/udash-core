@@ -10,7 +10,7 @@ import scala.collection.mutable
 import scala.scalajs.js
 
 private[properties]
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
                                                      (origin: ReadableProperty[A], transformer: A => Seq[B])
   extends ReadableSeqProperty[B, ReadableProperty[B]] {
 
@@ -68,7 +68,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: ModelValue]
 }
 
 private[properties]
-class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadableProperty[A], transformer: A => Seq[B])
+class ReadableSeqPropertyFromSingleValue[A, B](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(structureListener: (Patch[ReadableProperty[B]]) => Any): Registration = {
@@ -78,7 +78,7 @@ class ReadableSeqPropertyFromSingleValue[A, B: ModelValue](origin: ReadablePrope
 }
 
 private[properties]
-class SeqPropertyFromSingleValue[A, B: ModelValue](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
+class SeqPropertyFromSingleValue[A, B](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
   extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer) with SeqProperty[B, Property[B]] {
 
   override def replace(idx: Int, amount: Int, values: B*): Unit = {

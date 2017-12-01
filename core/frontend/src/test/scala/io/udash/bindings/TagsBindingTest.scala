@@ -5,13 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.properties.{ImmutableValue, PropertyCreator, seq}
+import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
+import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Node}
 
 import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
-import io.udash.wrappers.jquery._
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
   import scalatags.JsDom.all._
@@ -53,7 +52,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         override def toString: String =
           s"C($i)"
       }
-      implicit val allowCTpe: ImmutableValue[C] = null
 
       val p = Property[C]
       val template = div(bind(p)).render
@@ -542,10 +540,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle empty case class based model properties" in {
-      case class Test(i: Int, subType: SubTest)
-      case class SubTest(i: Int)
+      object Model {
+        class Test(val i: Int, val subType: SubTest)
+        object Test extends HasModelPropertyCreator[Test]
 
-      val p = ModelProperty.empty[Test]
+        class SubTest(val i: Int)
+        object SubTest extends HasModelPropertyCreator[SubTest]
+      }
+
+      val p = ModelProperty.empty[Model.Test]
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -558,20 +561,25 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       template.textContent should be("")
 
-      p.set(Test(5, SubTest(7)))
+      p.set(new Model.Test(5, new Model.SubTest(7)))
       template.textContent should be("577")
     }
 
     "handle empty trait based model properties" in {
-      trait Test {
-        def i: Int
-        def subType: SubTest
-      }
-      trait SubTest {
-        def i: Int
+      object Model {
+        trait Test {
+          def i: Int
+          def subType: SubTest
+        }
+        object Test extends HasModelPropertyCreator[Test]
+
+        trait SubTest {
+          def i: Int
+        }
+        object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Test]
+      val p = ModelProperty.empty[Model.Test]
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -584,9 +592,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       template.textContent should be("")
 
-      p.set(new Test {
+      p.set(new Model.Test {
         override def i = 5
-        override def subType = new SubTest {
+        override def subType = new Model.SubTest {
           override def i = 7
         }
       })
@@ -1680,6 +1688,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         def name: String
         def completed: Boolean
       }
+      object TodoElement extends HasModelPropertyCreator[TodoElement]
 
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
