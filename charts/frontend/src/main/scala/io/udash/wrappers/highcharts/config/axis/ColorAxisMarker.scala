@@ -11,7 +11,7 @@ import scala.scalajs.js.`|`
   * @note JavaScript name: <code>colorAxis-marker</code>
   */
 @js.annotation.ScalaJSDefined
-class ColorAxisMarker extends js.Object {
+trait ColorAxisMarker extends js.Object {
 
   /**
     * Animation for the marker as it moves between values. Set to <code>false</code> to disable animation. Defaults to <code>{ duration: 50 }</code>.

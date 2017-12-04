@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class LegendTitle extends js.Object {
+trait LegendTitle extends js.Object {
 
   /**
     * Generic CSS styles for the legend title.

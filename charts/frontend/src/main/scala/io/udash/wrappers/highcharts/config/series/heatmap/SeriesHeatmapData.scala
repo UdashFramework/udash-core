@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesHeatmapData extends BaseTwoDimSeriesData[SeriesDataLabels] {
+trait SeriesHeatmapData extends BaseTwoDimSeriesData[SeriesDataLabels] {
   /**
     * The value of the point, resulting in a color controled by options as set in the <a href="#colorAxis">colorAxis</a> configuration.
     */

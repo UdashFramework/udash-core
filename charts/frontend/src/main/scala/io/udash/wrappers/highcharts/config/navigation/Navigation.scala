@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Navigation extends js.Object {
+trait Navigation extends js.Object {
 
   /**
     * A collection of options for buttons appearing in the exporting module.

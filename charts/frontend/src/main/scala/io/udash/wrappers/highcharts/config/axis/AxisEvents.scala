@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
 @js.annotation.ScalaJSDefined
-class BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
+trait BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
 
   /**
     * As opposed to the <code>setExtremes</code> event, this event fires after the final min and max values are computed
@@ -32,7 +32,7 @@ class BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class AxisEvents[AxisType <: BaseAxis[AxisType, _]] extends BaseAxisEvents[AxisType] {
+trait AxisEvents[AxisType <: BaseAxis[AxisType, _]] extends BaseAxisEvents[AxisType] {
 
   /**
     * An event fired after the breaks have rendered.
@@ -78,7 +78,7 @@ trait AxisEventsCompanion[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEv
     val pointInBreakOuter = pointInBreak.map(js.ThisFunction.fromFunction1[AxisType, Any])
     val setExtremesOuter = setExtremes.map(js.ThisFunction.fromFunction2[AxisType, AxisEvents.SetExtremesEvent, Any])
 
-    new AxisEvents {
+    new AxisEvents[AxisType] {
       override val afterBreaks = afterBreaksOuter
       override val afterSetExtremes = afterSetExtremesOuter
       override val pointBreak = pointBreakOuter
@@ -89,19 +89,19 @@ trait AxisEventsCompanion[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEv
 }
 
 @js.annotation.ScalaJSDefined
-class XAxisEvents extends AxisEvents[XAxis]
+trait XAxisEvents extends AxisEvents[XAxis]
 object XAxisEvents extends AxisEventsCompanion[XAxis, XAxisEvents]
 
 @js.annotation.ScalaJSDefined
-class YAxisEvents extends AxisEvents[YAxis]
+trait YAxisEvents extends AxisEvents[YAxis]
 object YAxisEvents extends AxisEventsCompanion[YAxis, YAxisEvents]
 
 @js.annotation.ScalaJSDefined
-class ZAxisEvents extends AxisEvents[ZAxis]
+trait ZAxisEvents extends AxisEvents[ZAxis]
 object ZAxisEvents extends AxisEventsCompanion[ZAxis, ZAxisEvents]
 
 @js.annotation.ScalaJSDefined
-class ColorAxisEvents extends BaseAxisEvents[ColorAxis]
+trait ColorAxisEvents extends BaseAxisEvents[ColorAxis]
 object ColorAxisEvents {
   import scala.scalajs.js.JSConverters._
 

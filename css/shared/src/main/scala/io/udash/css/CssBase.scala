@@ -139,7 +139,7 @@ trait CssBase {
   }
 
   private val elementsBuffer = mutable.ArrayBuffer.empty[CssStyle]
-  val dsl: Dsl = new Dsl(elementsBuffer)
+  lazy val dsl: Dsl = new Dsl(elementsBuffer)
 
   def render(implicit renderer: Renderer[String]): String = {
     elementsBuffer.iterator.map {

@@ -4,7 +4,7 @@ package io.udash.wrappers.highcharts.config.responsive
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class Responsive extends js.Object {
+trait Responsive extends js.Object {
 
   /**
     * A set of rules for responsive settings. The rules are executed from the top down.

@@ -7,7 +7,7 @@ import scala.scalajs.js.annotation.ScalaJSDefined
 
 
 @ScalaJSDefined
-class Position extends js.Object {
+trait Position extends js.Object {
   val align: js.UndefOr[String] = js.undefined
   val verticalAlign: js.UndefOr[String] = js.undefined
   val x: js.UndefOr[Double] = js.undefined

@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
 @js.annotation.ScalaJSDefined
-abstract class AxisPlotBand extends js.Object {
+trait AxisPlotBand extends js.Object {
   /**
     * Border color for the plot band. Also requires <code>borderWidth</code> to be set.
     */
@@ -73,10 +73,10 @@ abstract class AxisPlotBand extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class XAxisPlotBand extends AxisPlotBand
+trait XAxisPlotBand extends AxisPlotBand
 
 @js.annotation.ScalaJSDefined
-class YAxisPlotBand extends AxisPlotBand {
+trait YAxisPlotBand extends AxisPlotBand {
   /**
     * In a gauge chart, this option determines the inner radius of the plot band that stretches along the perimeter.
     * It can be given as a percentage string, like <code>"100%"</code>, or as a pixel number, like <code>100</code>.
@@ -106,7 +106,7 @@ class YAxisPlotBand extends AxisPlotBand {
 }
 
 @js.annotation.ScalaJSDefined
-class ZAxisPlotBand extends AxisPlotBand
+trait ZAxisPlotBand extends AxisPlotBand
 
 object XAxisPlotBand {
   import scala.scalajs.js.JSConverters._

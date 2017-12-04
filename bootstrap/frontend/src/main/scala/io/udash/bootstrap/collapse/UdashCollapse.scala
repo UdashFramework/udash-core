@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package collapse
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
@@ -53,15 +54,15 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
   }
 
   private def jQSelector(): UdashCollapseJQuery =
-    jQ(s"#$componentId").asCollapse()
+    jQ(s"#$componentId").asInstanceOf[UdashCollapseJQuery]
 }
 
 object UdashCollapse {
-  sealed trait CollapseEvent extends ListenableEvent[UdashCollapse]
-  case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
-  case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
+  sealed trait CollapseEvent extends AbstractCase with ListenableEvent[UdashCollapse]
+  final case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
 
   object CollapseEvent {
     implicit val pc: PropertyCreator[CollapseEvent] = PropertyCreator.propertyCreator[CollapseEvent]
@@ -86,10 +87,5 @@ object UdashCollapse {
   @js.native
   private trait UdashCollapseJQuery extends JQuery {
     def collapse(cmd: String): UdashCollapseJQuery = js.native
-  }
-
-  private implicit class UdashCollapseJQueryExt(jQ: JQuery) {
-    def asCollapse(): UdashCollapseJQuery =
-      jQ.asInstanceOf[UdashCollapseJQuery]
   }
 }

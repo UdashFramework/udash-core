@@ -8,7 +8,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Loading extends js.Object {
+trait Loading extends js.Object {
 
   /**
     * The duration in milliseconds of the fade out effect.

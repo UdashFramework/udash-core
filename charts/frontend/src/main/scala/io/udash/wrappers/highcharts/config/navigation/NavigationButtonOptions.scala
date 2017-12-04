@@ -10,7 +10,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class NavigationButtonOptions extends js.Object {
+trait NavigationButtonOptions extends js.Object {
 
   /**
     * Alignment for the buttons.

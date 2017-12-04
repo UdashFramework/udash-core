@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesBoxplot extends CandleLikeSeries {
+trait SeriesBoxplot extends CandleLikeSeries {
   override type Data = js.Array[SeriesBoxplotData | js.Array[String | Double]]
   override type DataLabels = BaseSeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "boxplot"
 
   /**
     * The fill color of the box.
@@ -230,6 +229,7 @@ object SeriesBoxplot {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesBoxplot {
+      override val `type`: String = "boxplot"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

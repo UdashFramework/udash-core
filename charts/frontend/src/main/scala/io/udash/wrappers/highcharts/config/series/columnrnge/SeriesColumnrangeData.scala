@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesColumnrangeData extends BaseXSeriesData[SeriesRangeDataLabels] {
+trait SeriesColumnrangeData extends BaseXSeriesData[SeriesRangeDataLabels] {
   /**
     * The high or maximum value for each data point.
     */

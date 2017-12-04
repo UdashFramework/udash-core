@@ -35,7 +35,7 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
 
 object UdashTooltip extends TooltipUtils[UdashTooltip] {
   override protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): UdashTooltip = {
-    val tp: UdashTooltipJQuery = jQ(el).asTooltip()
+    val tp: UdashTooltipJQuery = jQ(el).asInstanceOf[UdashTooltipJQuery]
     tp.tooltip(options)
     new UdashTooltip(tp)
   }
@@ -54,10 +54,5 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
   @js.native
   private trait UdashTooltipJQuery extends JQuery {
     def tooltip(arg: js.Any): UdashTooltipJQuery = js.native
-  }
-
-  private implicit class JQueryTooltipExt(jQ: JQuery) {
-    def asTooltip(): UdashTooltipJQuery =
-      jQ.asInstanceOf[UdashTooltipJQuery]
   }
 }

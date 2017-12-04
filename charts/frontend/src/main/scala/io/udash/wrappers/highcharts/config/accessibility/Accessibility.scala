@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class Accessibility extends js.Object {
+trait Accessibility extends js.Object {
 
   /**
     * Whether or not to add series descriptions to charts with a single series.

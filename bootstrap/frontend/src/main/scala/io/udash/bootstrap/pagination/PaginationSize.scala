@@ -3,7 +3,7 @@ package pagination
 
 import io.udash.css.CssStyle
 
-sealed abstract class PaginationSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq: _*) {
+final class PaginationSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq: _*) {
   def this(sizeStyle: CssStyle) =
     this(Some(sizeStyle))
 }
@@ -11,7 +11,7 @@ sealed abstract class PaginationSize(sizeStyle: Option[CssStyle]) extends ClassM
 object PaginationSize {
   import io.udash.bootstrap.BootstrapStyles.Pagination._
 
-  case object Default extends PaginationSize(None)
-  case object Large extends PaginationSize(paginationLg)
-  case object Small extends PaginationSize(paginationSm)
+  final val Default = new PaginationSize(None)
+  final val Large = new PaginationSize(paginationLg)
+  final val Small = new PaginationSize(paginationSm)
 }

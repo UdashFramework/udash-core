@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesBar extends StrictBarSeries {
+trait SeriesBar extends StrictBarSeries {
   override type Data = js.Array[SeriesBarData | js.Array[String | Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesBarStates
-  override val `type`: String = "bar"
 }
 
 object SeriesBar {
@@ -201,6 +200,7 @@ object SeriesBar {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesBar {
+      override val `type`: String = "bar"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

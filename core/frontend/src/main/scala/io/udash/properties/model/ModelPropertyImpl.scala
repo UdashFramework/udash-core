@@ -17,6 +17,9 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
   /** Creates all sub properties and puts them in `properties`. */
   protected def initialize(): Unit
 
+  protected def internalSet(value: A, withCallbacks: Boolean, force: Boolean): Unit
+  protected def internalGet: A
+
   override protected[properties] def valueChanged(): Unit = {
     isEmpty = false
     super.valueChanged()
@@ -29,4 +32,31 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     }
     properties(key).asInstanceOf[Property[T]]
   }
+
+  def touch(): Unit = CallbackSequencer.sequence {
+    properties.values.foreach(_.touch())
+  }
+
+  override def get: A =
+    if (isEmpty) null.asInstanceOf[A]
+    else internalGet
+
+  override def set(t: A, force: Boolean): Unit =
+    if (!isEmpty || t != null) {
+      if (t != null) isEmpty = false
+      CallbackSequencer.sequence {
+        internalSet(t, withCallbacks = true, force = force)
+      }
+    }
+
+  override def setInitValue(t: A): Unit =
+    if (!isEmpty || t != null) {
+      if (t != null) isEmpty = false
+      CallbackSequencer.sequence {
+        internalSet(t, withCallbacks = true, force = false)
+      }
+    }
+
+  protected def setSubProp[T](p: Property[T], v: T, withCallbacks: Boolean, force: Boolean): Unit =
+    if (withCallbacks) p.set(v, force) else p.setInitValue(v)
 }

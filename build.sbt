@@ -283,7 +283,7 @@ lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlu
   )
 
 lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-frontend` % CompileAndTest)
+  .dependsOn(`core-frontend`, `i18n-frontend`, `css-frontend`)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(noPublishSettings: _*)

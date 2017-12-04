@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package utils
 
-@deprecated("Use `UdashIcons` instead. Remember to add `UdashIcons.FontAwesome.fa` or `UdashIcons.Glyphicon.glyphicon` by yourself. ", "0.6.0")
+@deprecated("Use `UdashIcons` instead.", "0.6.0")
 object Icons {
   import io.udash.bootstrap.BootstrapStyles.Image.{fa, glyphicon}
 

@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package button
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
@@ -45,7 +46,8 @@ final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, bloc
 }
 
 object UdashButton {
-  case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent) extends ListenableEvent[UdashButton]
+  final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent)
+    extends AbstractCase with ListenableEvent[UdashButton]
 
   /**
     * Creates button component, more: <a href="http://getbootstrap.com/css/#buttons">Bootstrap Docs</a>.

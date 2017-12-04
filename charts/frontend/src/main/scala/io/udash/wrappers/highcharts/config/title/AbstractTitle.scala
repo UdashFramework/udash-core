@@ -5,7 +5,7 @@ package title
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-abstract class AbstractTitle extends js.Object {
+trait AbstractTitle extends js.Object {
 
   /**
     * The horizontal alignment of the title. Can be one of "left", "center" and "right".

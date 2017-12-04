@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package carousel
 
+import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
@@ -84,7 +85,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         span(`class` := "sr-only", "Next")
       )
     ).render
-    val jqCarousel = jQ(res).asCarousel()
+    val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
     jqCarousel.on("slide.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       _activeIndex.set(idx)
@@ -95,8 +96,8 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
       _activeIndex.set(idx)
       fire(SlideChangedEvent(this, idx, dir))
     })
-    jqCarousel.carousel(animationOptions)
-    if (!animationOptions.active) jqCarousel.pause()
+    jqCarousel.carousel(animationOptions.native)
+    if (!animationOptions.active) jqCarousel.carousel("pause")
     res
   }
 
@@ -108,31 +109,31 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
   /**
     * Turn on slide transition.
     */
-  def cycle(): Unit = jQSelector().cycle()
+  def cycle(): Unit = jQSelector().carousel("cycle")
 
   /**
     * Pause slide transition.
     */
-  def pause(): Unit = jQSelector().pause()
+  def pause(): Unit = jQSelector().carousel("pause")
 
   /**
     * Change active slide.
     *
     * @param slideNumber new active slide index
     */
-  def goTo(slideNumber: Int): Unit = jQSelector().goTo(slideNumber)
+  def goTo(slideNumber: Int): Unit = jQSelector().carousel(slideNumber)
 
   /**
     * Change active slide to the next one (index order).
     */
-  def nextSlide(): Unit = jQSelector().nextSlide()
+  def nextSlide(): Unit = jQSelector().carousel("next")
 
   /**
     * Change active slide to the previous one (index order).
     */
-  def previousSlide(): Unit = jQSelector().previousSlide()
+  def previousSlide(): Unit = jQSelector().carousel("prev")
 
-  private def jQSelector(): UdashCarouselJQuery = jQ(render).asCarousel()
+  private def jQSelector(): UdashCarouselJQuery = jQ(render).asInstanceOf[UdashCarouselJQuery]
 
   private def firstActive: Int = math.min(activeSlide, content.length - 1)
 
@@ -169,7 +170,7 @@ object UdashCarousel {
   /**
     * Event hierarchy for [[UdashCarousel]]-emitted events.
     */
-  sealed trait CarouselEvent extends ListenableEvent[UdashCarousel] {
+  sealed trait CarouselEvent extends AbstractCase with ListenableEvent[UdashCarousel] {
     /**
       * @return The index of the slide source transitioned to. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
       */
@@ -188,7 +189,7 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
+  final case class SlideChangeEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
   /**
     * Event emitted by [[UdashCarousel]] on slide change transition finish.
@@ -197,25 +198,18 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
+  final case class SlideChangedEvent(source: UdashCarousel, targetIndex: Int, direction: Direction) extends CarouselEvent
 
   object CarouselEvent {
 
     /**
       * Carousel animation direction.
       */
-    sealed trait Direction
-
-    object Direction {
-
-      case object Left extends Direction
-
-      case object Right extends Direction
-
-      /**
-        * Animation direction from carousel.js that neither left nor right.
-        */
-      case object Unknown extends Direction
+    final class Direction(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+    object Direction extends ValueEnumCompanion[Direction] {
+      final val Left, Right: Value = new Direction
+      /** Animation direction from carousel.js that neither left nor right. */
+      final val Unknown: Value = new Direction
     }
 
   }
@@ -260,34 +254,13 @@ object UdashCarousel {
     }
   }
 
-  private implicit class UdashCarouselJQueryExt(jQ: JQuery) {
-    def asCarousel(): UdashCarouselJQuery = jQ.asInstanceOf[UdashCarouselJQuery]
-  }
-
-  private implicit class UdashCarouselJQueryOps(jq: UdashCarouselJQuery) {
-
-    def carousel(animationOptions: AnimationOptions): Unit = jq.carousel(animationOptions.native)
-
-    def cycle(): Unit = jq.carousel("cycle")
-
-    def pause(): Unit = jq.carousel("pause")
-
-    def goTo(slideNumber: Int): Unit = jq.carousel(slideNumber)
-
-    def nextSlide(): Unit = jq.carousel("next")
-
-    def previousSlide(): Unit = jq.carousel("prev")
-
-  }
-
   object AnimationOptions {
-
-    sealed abstract class PauseOption(val raw: String)
+    final class PauseOption(val raw: String)
 
     object PauseOption {
       /** Pauses the cycling of the carousel on mouseenter and resumes the cycling of the carousel on mouseleave. */
-      case object Hover extends PauseOption("hover")
-      case object False extends PauseOption("false")
+      val Hover = new PauseOption("hover")
+      val False = new PauseOption("false")
     }
   }
 }

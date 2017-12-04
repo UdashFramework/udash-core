@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesAreasplinerange extends AreaLineSeries {
+trait SeriesAreasplinerange extends AreaLineSeries {
   override type Data = js.Array[SeriesAreasplinerangeData | js.Array[String | Double]]
   override type DataLabels = SeriesRangeDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "areasplinerange"
 }
 
 object SeriesAreasplinerange {
@@ -170,6 +169,7 @@ object SeriesAreasplinerange {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesAreasplinerange {
+      override val `type`: String = "areasplinerange"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class BaseSeriesMarkerHover extends js.Object {
+trait BaseSeriesMarkerHover extends js.Object {
 
   /**
     * Enable or disable the point marker.
@@ -34,7 +34,7 @@ class BaseSeriesMarkerHover extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesMarkerHover extends BaseSeriesMarkerHover {
+trait SeriesMarkerHover extends BaseSeriesMarkerHover {
 
   /**
     * The fill color of the marker in hover state.
@@ -65,7 +65,7 @@ class SeriesMarkerHover extends BaseSeriesMarkerHover {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesDataMarkerHover extends BaseSeriesMarkerHover {
+trait SeriesDataMarkerHover extends BaseSeriesMarkerHover {
   /**
     * Options for the halo appearing around the hovered point in line-type series as well as outside the hovered slice in pie charts.
     * By default the halo is filled by the current point or series color with an opacity of 0.25.

@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
+trait BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
 
   /**
     * Enable or disable the point marker. If <code>null</code>, the markers are hidden when the data is dense,
@@ -77,21 +77,21 @@ class BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
+trait SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
 
 @js.annotation.ScalaJSDefined
-class SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
+trait SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
 
 object SeriesMarker {
   import scala.scalajs.js.JSConverters._
 
-  sealed abstract class Symbol(val value: String)
+  sealed class Symbol(val value: String)
   object Symbol {
-    case object Circle extends Symbol("circle")
-    case object Square extends Symbol("square")
-    case object Diamond extends Symbol("diamond")
-    case object Triangle extends Symbol("triangle")
-    case object TriangleDown extends Symbol("triangle-down")
+    val Circle = new Symbol("circle")
+    val Square = new Symbol("square")
+    val Diamond = new Symbol("diamond")
+    val Triangle = new Symbol("triangle")
+    val TriangleDown = new Symbol("triangle-down")
     case class Url(url: String) extends Symbol(s"url($url)")
   }
 

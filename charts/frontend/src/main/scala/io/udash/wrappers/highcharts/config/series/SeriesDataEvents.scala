@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 @js.annotation.ScalaJSDefined
-class SeriesDataEvents extends js.Object {
+trait SeriesDataEvents extends js.Object {
 
   /**
     * Fires when a point is clicked. One parameter, <code>event</code>, is passed to the function.

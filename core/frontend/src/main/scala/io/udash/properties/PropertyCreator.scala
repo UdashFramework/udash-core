@@ -15,6 +15,11 @@ trait PropertyCreator[T] {
   }
 }
 
+class MacroPropertyCreator[T](creator: (ReadableProperty[_]) => CastableProperty[T]) extends PropertyCreator[T] {
+  def newProperty(prt: ReadableProperty[_]): CastableProperty[T] =
+    creator(prt)
+}
+
 object PropertyCreator {
   def propertyCreator[T]: PropertyCreator[T] =
     macro io.udash.macros.PropertyMacros.reifyPropertyCreator[T]

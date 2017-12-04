@@ -10,9 +10,8 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesGauge extends GaugeSeries {
+trait SeriesGauge extends GaugeSeries {
   override type Data = js.Array[SeriesGaugeData | Double]
-  val `type`: String = "gauge"
 
   /**
     * Options for the dial or arrow pointer of the gauge.
@@ -136,6 +135,7 @@ object SeriesGauge {
     val zIndexOuter = zIndex
 
     new SeriesGauge {
+      val `type`: String = "gauge"
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter
       override val color = colorOuter

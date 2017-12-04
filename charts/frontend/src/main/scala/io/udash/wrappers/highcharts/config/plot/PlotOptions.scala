@@ -28,7 +28,7 @@ import io.udash.wrappers.highcharts.config.series.waterfall.SeriesWaterfall
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class PlotOptions extends js.Object {
+trait PlotOptions extends js.Object {
   val area: js.UndefOr[SeriesArea] = js.undefined
   val arearange: js.UndefOr[SeriesArearange] = js.undefined
   val areaspline: js.UndefOr[SeriesAreaspline] = js.undefined

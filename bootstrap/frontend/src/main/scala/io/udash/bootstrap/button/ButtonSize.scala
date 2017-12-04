@@ -3,7 +3,7 @@ package button
 
 import io.udash.css.CssStyleName
 
-sealed abstract class ButtonSize(sizeStyle: Option[CssStyleName]) extends ClassModifier(sizeStyle.toSeq: _*) {
+final class ButtonSize(sizeStyle: Option[CssStyleName]) extends ClassModifier(sizeStyle.toSeq: _*) {
   def this(sizeStyle: CssStyleName) =
     this(Some(sizeStyle))
 }
@@ -11,8 +11,8 @@ sealed abstract class ButtonSize(sizeStyle: Option[CssStyleName]) extends ClassM
 object ButtonSize {
   import BootstrapStyles.Button._
 
-  case object Default extends ButtonSize(None)
-  case object Large extends ButtonSize(btnLg)
-  case object Small extends ButtonSize(btnSm)
-  case object ExtraSmall extends ButtonSize(btnXs)
+  final val Default = new ButtonSize(None)
+  final val Large = new ButtonSize(btnLg)
+  final val Small = new ButtonSize(btnSm)
+  final val ExtraSmall = new ButtonSize(btnXs)
 }

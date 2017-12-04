@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesPolygon extends FreePointsSeries {
+trait SeriesPolygon extends FreePointsSeries {
   override type Data = js.Array[SeriesPolygonData | js.Array[Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "polygon"
 }
 
 object SeriesPolygon {
@@ -143,6 +142,7 @@ object SeriesPolygon {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesPolygon {
+      override val `type`: String = "polygon"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

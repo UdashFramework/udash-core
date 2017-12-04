@@ -10,11 +10,10 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesLine extends StrictLineSeries {
+trait SeriesLine extends StrictLineSeries {
   override type Data = js.Array[SeriesLineData | js.Array[String | Double] | Double]
   override type DataLabels = SeriesDataLabels
   override type States = SeriesAreaStates
-  override val `type`: String = "line"
 
   /**
     * Whether to apply steps to the line. Possible values are <code>left</code>, <code>center</code> and <code>right</code>. Prior to 2.3.5, only <code>left</code> was supported.
@@ -177,6 +176,7 @@ object SeriesLine {
     val zonesOuter = zones.map(_.toJSArray)
 
     new SeriesLine {
+      override val `type`: String = "line"
       override val allowPointSelect = allowPointSelectOuter
       override val animation = animationOuter
       override val animationLimit = animationLimitOuter

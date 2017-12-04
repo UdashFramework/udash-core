@@ -10,7 +10,7 @@ import scala.scalajs.js.|
 
 
 @js.annotation.ScalaJSDefined
-class ChartOptions3dFrame extends js.Object {
+trait ChartOptions3dFrame extends js.Object {
   /**
     * Defines the back panel of the frame around 3D charts.
     */

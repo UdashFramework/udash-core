@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 @js.annotation.ScalaJSDefined
-class ResponsiveRuleCondition extends js.Object {
+trait ResponsiveRuleCondition extends js.Object {
   /**
     * A callback function to gain complete control on when the responsive rule applies. Return <code>true</code> if it applies.
     * This opens for checking against other metrics than the chart size, or example the document size or other elements.

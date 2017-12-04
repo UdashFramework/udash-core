@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class AxisBreak extends js.Object {
+trait AxisBreak extends js.Object {
 
   /**
     * A number indicating how much space should be left between the start and the end of the break.

@@ -2,11 +2,11 @@ package io.udash.wrappers.highcharts
 package config
 package utils
 
-sealed abstract class Stacking(val name: String)
+sealed class Stacking(val name: String)
 
 object Stacking {
-  case object Disabled extends Stacking(null)
-  case object Normal extends Stacking("normal")
-  case object Percent extends Stacking("percent")
+  val Disabled = new Stacking(null)
+  val Normal = new Stacking("normal")
+  val Percent = new Stacking("percent")
   case class Custom(override val name: String) extends Stacking(name)
 }

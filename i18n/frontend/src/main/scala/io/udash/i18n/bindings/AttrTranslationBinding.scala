@@ -16,10 +16,14 @@ class AttrTranslationBinding(translation: Future[Translated], attr: String)
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   override def applyTo(t: dom.Element): Unit =
-    translation onComplete {
-      case Success(text) =>
-        t.setAttribute(attr, text.string)
-      case Failure(ex) =>
-        logger.error(ex.getMessage)
+    if (translation.isCompleted && translation.value.get.isSuccess) {
+      t.setAttribute(attr, translation.value.get.get.string)
+    } else {
+      translation onComplete {
+        case Success(text) =>
+          t.setAttribute(attr, text.string)
+        case Failure(ex) =>
+          logger.error(ex.getMessage)
+      }
     }
 }

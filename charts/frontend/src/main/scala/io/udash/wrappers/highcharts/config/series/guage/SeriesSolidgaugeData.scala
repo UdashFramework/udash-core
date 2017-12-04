@@ -10,7 +10,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class SeriesSolidgaugeData extends SeriesGaugeData {
+trait SeriesSolidgaugeData extends SeriesGaugeData {
   /**
     * The inner radius of an individual point in a solid gauge. Can be given as a number (pixels) or percentage string.
     * @example <a href="http://jsfiddle.net/gh/get/jquery/3.1.1/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/solidgauge-radius/" target="_blank">Individual radius and innerRadius</a>

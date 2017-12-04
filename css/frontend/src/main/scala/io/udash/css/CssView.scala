@@ -1,42 +1,26 @@
 package io.udash.css
 
 import io.udash.ReadableProperty
+import io.udash.bindings.modifiers.EmptyModifier
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
+import scala.scalajs.js
 import scalatags.JsDom.all.Modifier
 import scalatags.text.Builder
+import js.JSConverters._
 
 /** Contains integration of CSS structures with Scalatags. */
 trait CssView {
-  implicit val pcCssStyle: PropertyCreator[CssStyle] = PropertyCreator.propertyCreator[CssStyle]
-  implicit val pcOCssStyle: PropertyCreator[Option[CssStyle]] = PropertyCreator.propertyCreator[Option[CssStyle]]
-  implicit val pcSCssStyle: PropertyCreator[Seq[CssStyle]] = PropertyCreator.propertyCreator[Seq[CssStyle]]
+  implicit def pcCssStyle: PropertyCreator[CssStyle] = CssView.cssStylePC
+  implicit def pcOCssStyle: PropertyCreator[Option[CssStyle]] = CssView.cssStylePCO
+  implicit def pcSCssStyle: PropertyCreator[Seq[CssStyle]] = CssView.cssStylePCS
 
-  private class TextStyleModifier(s: CssStyle) extends scalatags.Text.all.Modifier {
-    override def applyTo(t: Builder): Unit =
-      t.appendAttr("class", Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", "")))
-  }
-
-  implicit def style2Mod(s: CssStyle): Modifier = new Modifier {
-    override def applyTo(t: Element): Unit =
-      s.addTo(t)
-  }
-
-  implicit def styles2Mod(s: CssStyle*): Modifier = new Modifier {
-    override def applyTo(t: Element): Unit =
-      s.foreach(_.addTo(t))
-  }
-
-  implicit def style2TextMod(s: CssStyle): scalatags.Text.all.Modifier =
-    new TextStyleModifier(s)
-
-  implicit def styles2TextMod(s: CssStyle*): scalatags.Text.all.Modifier =
-    new scalatags.Text.all.Modifier {
-      override def applyTo(t: Builder): Unit =
-        s.foreach(s => new TextStyleModifier(s).applyTo(t))
-    }
+  implicit def style2Mod(s: CssStyle): Modifier = new CssView.StyleModifier(js.Array(s))
+  implicit def styles2Mod(s: CssStyle*): Modifier = new CssView.StyleModifier(s.toJSArray)
+  implicit def style2TextMod(s: CssStyle): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(js.Array(s))
+  implicit def styles2TextMod(s: CssStyle*): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(s.toJSArray)
 
   implicit def elementOps(element: dom.Element): CssView.ElementOps =
     new CssView.ElementOps(element)
@@ -46,13 +30,20 @@ trait CssView {
 }
 
 object CssView extends CssView {
-  private object NoopModifier extends Modifier {
-    override def applyTo(t: Element): Unit = ()
+  private val cssStylePC: PropertyCreator[CssStyle] = PropertyCreator.propertyCreator[CssStyle]
+  private val cssStylePCO: PropertyCreator[Option[CssStyle]] = PropertyCreator.propertyCreator[Option[CssStyle]]
+  private val cssStylePCS: PropertyCreator[Seq[CssStyle]] = PropertyCreator.propertyCreator[Seq[CssStyle]]
+
+  private class StyleModifier(styles: js.Array[CssStyle]) extends Modifier {
+    override def applyTo(t: Element): Unit =
+      styles.foreach(_.addTo(t))
   }
 
-  private class StyleModifier(s: CssStyle) extends Modifier {
-    override def applyTo(t: Element): Unit =
-      s.addTo(t)
+  private class TextStyleModifier(styles: js.Array[CssStyle]) extends scalatags.Text.all.Modifier {
+    override def applyTo(t: Builder): Unit =
+      styles.foreach { s =>
+        t.appendAttr("class", Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", "")))
+      }
   }
 
   implicit class ElementOps(private val element: dom.Element) extends AnyVal {
@@ -86,8 +77,10 @@ object CssView extends CssView {
           else removeFrom(elem)
       )
 
-    def styleIf(condition: Boolean): Modifier =
-      if (condition) new StyleModifier(style)
-      else NoopModifier
+    def styleIf(condition: Boolean): Modifier = {
+      import scalatags.JsDom.all.UnitFrag
+      if (condition) new StyleModifier(js.Array(style))
+      else new EmptyModifier[Element]
+    }
   }
 }

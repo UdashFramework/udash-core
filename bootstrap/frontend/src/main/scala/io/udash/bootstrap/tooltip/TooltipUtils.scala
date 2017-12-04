@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
+import com.avsystem.commons.misc.AbstractCase
 import org.scalajs.dom
 
 import scala.concurrent.duration.{Duration, DurationInt}
@@ -11,25 +12,25 @@ trait TooltipUtils[TooltipType <: Listenable[TooltipType, _]] {
   case class Delay(show: Duration, hide: Duration)
   case class Viewport(selector: String, padding: Int)
 
-  sealed abstract class Placement(val name: String)
-  case object AutoPlacement extends Placement("auto")
-  case object TopPlacement extends Placement("top")
-  case object BottomPlacement extends Placement("bottom")
-  case object LeftPlacement extends Placement("left")
-  case object RightPlacement extends Placement("right")
+  final class Placement(val name: String)
+  val AutoPlacement = new Placement("auto")
+  val TopPlacement = new Placement("top")
+  val BottomPlacement = new Placement("bottom")
+  val LeftPlacement = new Placement("left")
+  val RightPlacement = new Placement("right")
 
-  sealed abstract class Trigger(val name: String)
-  case object ClickTrigger extends Trigger("click")
-  case object HoverTrigger extends Trigger("hover")
-  case object FocusTrigger extends Trigger("focus")
-  case object ManualTrigger extends Trigger("manual")
+  final class Trigger(val name: String)
+  val ClickTrigger = new Trigger("click")
+  val HoverTrigger = new Trigger("hover")
+  val FocusTrigger = new Trigger("focus")
+  val ManualTrigger = new Trigger("manual")
 
-  sealed trait TooltipEvent extends ListenableEvent[TooltipType]
-  case class TooltipShowEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipShownEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipHideEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipHiddenEvent(source: TooltipType) extends TooltipEvent
-  case class TooltipInsertedEvent(source: TooltipType) extends TooltipEvent
+  sealed trait TooltipEvent extends AbstractCase with ListenableEvent[TooltipType]
+  final case class TooltipShowEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipShownEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipHideEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipHiddenEvent(source: TooltipType) extends TooltipEvent
+  final case class TooltipInsertedEvent(source: TooltipType) extends TooltipEvent
 
   /**
     * Add tooltip/popover to provided element.

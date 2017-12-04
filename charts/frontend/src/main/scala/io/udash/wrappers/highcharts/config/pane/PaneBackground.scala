@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-class PaneBackground extends js.Object {
+trait PaneBackground extends js.Object {
 
   /**
     * The background color or gradient for the pane.

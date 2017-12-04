@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 
 @js.annotation.ScalaJSDefined
-class SeriesAreaData extends BaseTwoDimMarkerSeriesData[SeriesDataLabels]
+trait SeriesAreaData extends BaseTwoDimMarkerSeriesData[SeriesDataLabels]
 
 object SeriesAreaData {
   import scala.scalajs.js.JSConverters._

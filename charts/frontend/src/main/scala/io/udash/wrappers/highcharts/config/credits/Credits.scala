@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 
 @js.annotation.ScalaJSDefined
-class Credits extends js.Object {
+trait Credits extends js.Object {
 
   /**
     * Whether to show the credits text.

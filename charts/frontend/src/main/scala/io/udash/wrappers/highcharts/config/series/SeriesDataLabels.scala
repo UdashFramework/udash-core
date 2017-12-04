@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
 @js.annotation.ScalaJSDefined
-class BaseSeriesDataLabels extends js.Object {
+trait BaseSeriesDataLabels extends js.Object {
   /**
     * The background color or gradient for the data label. Defaults to <code>undefined</code>.
     *
@@ -175,7 +175,7 @@ class BaseSeriesDataLabels extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesDataLabels extends BaseSeriesDataLabels {
+trait SeriesDataLabels extends BaseSeriesDataLabels {
   /**
     * The alignment of the data label compared to the point.  If <code>right</code>, the right side of the label should be touching the point.
     * For points with an extent, like columns, the alignments also dictates how to align it inside the box, as given with
@@ -209,7 +209,7 @@ class SeriesDataLabels extends BaseSeriesDataLabels {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesRangeDataLabels extends BaseSeriesDataLabels {
+trait SeriesRangeDataLabels extends BaseSeriesDataLabels {
   /**
     * The alignment of the data label compared to the point.  If <code>right</code>, the right side of the label
     * should be touching the point. For points with an extent, like columns, the alignments also dictates how to align it
@@ -257,7 +257,7 @@ class SeriesRangeDataLabels extends BaseSeriesDataLabels {
 }
 
 @js.annotation.ScalaJSDefined
-class SeriesConnectorDataLabels extends BaseSeriesDataLabels {
+trait SeriesConnectorDataLabels extends BaseSeriesDataLabels {
   /**
     * The color of the line connecting the data label to the pie slice. The default color is the same as the point's color.
     *

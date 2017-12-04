@@ -3,15 +3,15 @@ package label
 
 import io.udash.css.CssStyle
 
-sealed abstract class LabelStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Label.label, style)
+final class LabelStyle(style: CssStyle) extends ClassModifier(BootstrapStyles.Label.label, style)
 
 object LabelStyle {
   import BootstrapStyles.Label._
 
-  case object Default extends LabelStyle(labelDefault)
-  case object Primary extends LabelStyle(labelPrimary)
-  case object Success extends LabelStyle(labelSuccess)
-  case object Info extends LabelStyle(labelInfo)
-  case object Warning extends LabelStyle(labelWarning)
-  case object Danger extends LabelStyle(labelDanger)
+  final val Default = new LabelStyle(labelDefault)
+  final val Primary = new LabelStyle(labelPrimary)
+  final val Success = new LabelStyle(labelSuccess)
+  final val Info = new LabelStyle(labelInfo)
+  final val Warning = new LabelStyle(labelWarning)
+  final val Danger = new LabelStyle(labelDanger)
 }

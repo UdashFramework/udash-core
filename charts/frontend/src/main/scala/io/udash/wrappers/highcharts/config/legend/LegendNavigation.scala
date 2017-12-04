@@ -10,7 +10,7 @@ import scala.scalajs.js.`|`
 
 
 @js.annotation.ScalaJSDefined
-class LegendNavigation extends js.Object {
+trait LegendNavigation extends js.Object {
 
   /**
     * The color for the active up or down arrow in the legend page navigation.

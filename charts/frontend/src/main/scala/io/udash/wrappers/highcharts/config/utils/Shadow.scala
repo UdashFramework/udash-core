@@ -6,11 +6,11 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.|
 
-sealed abstract class Shadow(val value: Boolean | js.Object)
+sealed class Shadow(val value: Boolean | js.Object)
 
 object Shadow {
-  case object Enabled extends Shadow(true)
-  case object Disabled extends Shadow(false)
+  val Enabled = new Shadow(true)
+  val Disabled = new Shadow(false)
   case class Custom(color: js.UndefOr[Color] = js.undefined,
                     offsetX: js.UndefOr[Double] = js.undefined,
                     offsetY: js.UndefOr[Double] = js.undefined,

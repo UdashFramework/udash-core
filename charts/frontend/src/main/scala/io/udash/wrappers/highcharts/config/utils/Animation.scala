@@ -7,13 +7,13 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.|
 
-sealed abstract class Animation(val value: Boolean | js.Object)
+sealed class Animation(val value: Boolean | js.Object)
 
 object Animation {
   private var wrapperEasingFunNum = 0
 
-  case object Enabled extends Animation(true)
-  case object Disabled extends Animation(false)
+  val Enabled = new Animation(true)
+  val Disabled = new Animation(false)
   case class Custom(duration: js.UndefOr[FiniteDuration] = js.undefined,
                     easing: js.UndefOr[(Double) => Double] = js.undefined)
     extends Animation({

@@ -7,7 +7,7 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 @js.annotation.ScalaJSDefined
-abstract class Series extends js.Object {
+trait Series extends js.Object {
   type Data
   type DataLabels <: BaseSeriesDataLabels
   val `type`: String
@@ -248,7 +248,7 @@ abstract class Series extends js.Object {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class StandardSeries extends Series {
+trait StandardSeries extends Series {
   type States <: SeriesStates[_]
 
   /**
@@ -290,7 +290,7 @@ abstract class StandardSeries extends Series {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class XYSeries extends StandardSeries {
+trait XYSeries extends StandardSeries {
   /**
     * When using dual or multiple x axes, this number defines which xAxis the particular series is connected to.
     * It refers to either the <a href="#xAxis.id">axis id</a> or the index of the axis in the xAxis array, with 0 being the first.
@@ -307,7 +307,7 @@ abstract class XYSeries extends StandardSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class PointSeries extends XYSeries {
+trait PointSeries extends XYSeries {
   /**
     * <p>If no x values are given for the points in a series, pointInterval defines
     * the interval of the x values. For example, if a series contains one value
@@ -339,7 +339,7 @@ abstract class PointSeries extends XYSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class BoxSeries extends PointSeries {
+trait BoxSeries extends PointSeries {
   /**
     * When using automatic point colors pulled from the <code>options.colors</code>
     * collection, this option determines whether the chart should receive
@@ -449,7 +449,7 @@ abstract class BoxSeries extends PointSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class BarSeries extends BoxSeries {
+trait BarSeries extends BoxSeries {
   /**
     * The color of the border surrounding each column or bar.
     *
@@ -491,7 +491,7 @@ abstract class BarSeries extends BoxSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class NonRangeBarSeries extends BarSeries {
+trait NonRangeBarSeries extends BarSeries {
   /**
     * <p>When this is true, the series will not cause the Y axis to cross the zero plane
     * (or <a href="#plotOptions.series.threshold">threshold</a> option) unless the data actually crosses the plane.</p>
@@ -516,7 +516,7 @@ abstract class NonRangeBarSeries extends BarSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class StrictBarSeries extends NonRangeBarSeries {
+trait StrictBarSeries extends NonRangeBarSeries {
   /**
     * When the series contains less points than the crop threshold, all points are drawn,
     * event if the points fall outside the visible plot area at the current zoom. The advantage of drawing all points
@@ -557,7 +557,7 @@ abstract class StrictBarSeries extends NonRangeBarSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class LineSeries extends PointSeries {
+trait LineSeries extends PointSeries {
   /**
     * Polar charts only. Whether to connect the ends of a line series plot across the extremes.
     *
@@ -663,7 +663,7 @@ abstract class LineSeries extends PointSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class AreaLineSeries extends LineSeries {
+trait AreaLineSeries extends LineSeries {
   /**
     * Fill color or gradient for the area. When <code>null</code>, the series' <code>color</code>  is
     * used with the series' <code>fillOpacity</code>.
@@ -704,7 +704,7 @@ abstract class AreaLineSeries extends LineSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class StrictLineSeries extends LineSeries {
+trait StrictLineSeries extends LineSeries {
   val marker: js.UndefOr[SeriesMarker] = js.undefined
 
   /**
@@ -738,7 +738,7 @@ abstract class StrictLineSeries extends LineSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class FreePointsSeries extends PointSeries {
+trait FreePointsSeries extends PointSeries {
   /**
     * When the series contains less points than the crop threshold, all points are drawn,
     * even if the points fall outside the visible plot area at the current zoom.
@@ -799,7 +799,7 @@ abstract class FreePointsSeries extends PointSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class MapSeries extends XYSeries {
+trait MapSeries extends XYSeries {
   /**
     * The color of the border surrounding each column or bar.
     *
@@ -858,7 +858,7 @@ abstract class MapSeries extends XYSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class PieLikeSeries extends StandardSeries {
+trait PieLikeSeries extends StandardSeries {
   /**
     * The color of the border surrounding each slice. When <code>null</code>, the border takes the same color as the slice fill.
     * This can be used together with a <code>borderWidth</code> to fill drawing gaps created by antialiazing artefacts in borderless pies.
@@ -911,7 +911,7 @@ abstract class PieLikeSeries extends StandardSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class CandleLikeSeries extends BoxSeries {
+trait CandleLikeSeries extends BoxSeries {
   /**
     * The width of the line surrounding the box.
     * If any of <a href="#plotOptions.boxplot.stemWidth">stemWidth</a>, <a href="#plotOptions.boxplot.medianWidth">medianWidth</a>
@@ -985,7 +985,7 @@ abstract class CandleLikeSeries extends BoxSeries {
 }
 
 @js.annotation.ScalaJSDefined
-abstract class GaugeSeries extends Series {
+trait GaugeSeries extends Series {
   override type DataLabels = SeriesDataLabels
 
   /**

@@ -9,7 +9,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.annotation.ScalaJSDefined
-class SeriesZone extends js.Object {
+trait SeriesZone extends js.Object {
 
   /**
     * A custom class name for the zone.

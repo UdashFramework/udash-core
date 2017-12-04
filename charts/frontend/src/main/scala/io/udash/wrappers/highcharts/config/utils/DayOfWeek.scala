@@ -2,14 +2,14 @@ package io.udash.wrappers.highcharts
 package config
 package utils
 
-sealed abstract class DayOfWeek(val id: Int)
+final class DayOfWeek(val id: Int) extends AnyVal
 
 object DayOfWeek {
-  case object Sunday extends DayOfWeek(0)
-  case object Monday extends DayOfWeek(1)
-  case object Tuesday extends DayOfWeek(2)
-  case object Wednesday extends DayOfWeek(3)
-  case object Thursday extends DayOfWeek(4)
-  case object Friday extends DayOfWeek(5)
-  case object Saturday extends DayOfWeek(6)
+  val Sunday = new DayOfWeek(0)
+  val Monday = new DayOfWeek(1)
+  val Tuesday = new DayOfWeek(2)
+  val Wednesday = new DayOfWeek(3)
+  val Thursday = new DayOfWeek(4)
+  val Friday = new DayOfWeek(5)
+  val Saturday = new DayOfWeek(6)
 }
