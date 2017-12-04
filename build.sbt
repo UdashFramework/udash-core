@@ -4,35 +4,37 @@ import UdashBuild._
 
 name := "udash"
 
-version in ThisBuild := "0.6.0-M10"
-scalaVersion in ThisBuild := versionOfScala
-crossScalaVersions in ThisBuild := Seq("2.11.11", versionOfScala)
-organization in ThisBuild := "io.udash"
 cancelable in Global := true
-scalacOptions in ThisBuild ++= Seq(
-  "-feature",
-  "-deprecation",
-  "-unchecked",
-  "-language:implicitConversions",
-  "-language:existentials",
-  "-language:dynamics",
-  "-language:experimental.macros",
-  "-Xfuture",
-  "-Xfatal-warnings",
-  CrossVersion.partialVersion(scalaVersion.value).collect {
-    // WORKAROUND https://github.com/scala/scala/pull/5402
-    case (2, 12) => "-Xlint:-unused,_"
-  }.getOrElse("-Xlint:_")
-)
 
-jsTestEnv in ThisBuild := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
-  import org.openqa.selenium.chrome.ChromeOptions
-  val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
-  val chromeOptions = new ChromeOptions()
-  chromeOptions.addArguments("--headless", "--disable-gpu")
-  chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
-  chrome
-})
+inThisBuild(Seq(
+  version := "0.6.0-M10",
+  scalaVersion := versionOfScala,
+  crossScalaVersions := Seq("2.11.11", versionOfScala),
+  organization := "io.udash",
+  scalacOptions ++= Seq(
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-language:implicitConversions",
+    "-language:existentials",
+    "-language:dynamics",
+    "-language:experimental.macros",
+    "-Xfuture",
+    "-Xfatal-warnings",
+    CrossVersion.partialVersion(scalaVersion.value).collect {
+      // WORKAROUND https://github.com/scala/scala/pull/5402
+      case (2, 12) => "-Xlint:-unused,_"
+    }.getOrElse("-Xlint:_"),
+  ),
+  jsTestEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
+    import org.openqa.selenium.chrome.ChromeOptions
+    val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
+    val chromeOptions = new ChromeOptions()
+    chromeOptions.addArguments("--headless", "--disable-gpu")
+    chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
+    chrome
+  })
+))
 
 // Deployment configuration
 val deploymentConfiguration = Seq(

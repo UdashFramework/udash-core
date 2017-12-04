@@ -12,7 +12,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.3"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.24.1"
+  val avsCommonsVersion = "1.25.1"
 
   val atmosphereJSVersion = "2.3.4"
   val atmosphereVersion = "2.4.14"
@@ -39,7 +39,7 @@ object Dependencies {
 
   val commonDeps = Def.setting(Seq(
     "com.github.ghik" %% "silencer-lib" % silencerVersion,
-    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -74,7 +74,7 @@ object Dependencies {
   ))
 
   val restCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-shared" % avsCommonsVersion,
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
   ))
 
