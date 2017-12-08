@@ -1,9 +1,18 @@
 package io.udash.testing
 
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Millis, Span}
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
+import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
+import org.scalatest.{Assertion, Succeeded}
 
-trait AsyncUdashSharedTest extends AsyncWordSpec with Matchers with BeforeAndAfterAll with Eventually {
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
+import scala.concurrent.{ExecutionContext, Future}
+
+trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase with Eventually {
+  override implicit def executionContext: ExecutionContext = ExecutionContext.global
+
+  override def retrying(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
+    Future {
+      eventually(Timeout(patienceConfig.timeout), Interval(patienceConfig.interval))(code)
+      Succeeded
+    }
+  }
 }

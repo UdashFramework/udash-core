@@ -2,27 +2,25 @@ package io.udash.properties.seq
 
 import java.util.UUID
 
-import io.udash.properties.PropertyCreator
+import io.udash.properties.{CrossCollections, CrossRegistration, PropertyCreator}
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.utils.{JsArrayRegistration, Registration}
-
-import scala.scalajs.js
+import io.udash.utils.Registration
 
 class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
                               (implicit propertyCreator: PropertyCreator[A])
   extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
-  private val properties = js.Array[CastableProperty[A]]()
-  private val structureListeners: js.Array[Patch[CastableProperty[A]] => Any] = js.Array()
+  private val properties = CrossCollections.createArray[CastableProperty[A]]
+  private val structureListeners = CrossCollections.createArray[Patch[CastableProperty[A]] => Any]
 
   override def elemProperties: Seq[CastableProperty[A]] =
     properties
 
   override def replace(idx: Int, amount: Int, values: A*): Unit = {
-    val oldProperties = properties.jsSlice(idx, idx + amount)
+    val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
     val newProperties = if (values != null) values.map(value => propertyCreator.newProperty(value, this)) else Seq.empty
 
-    properties.splice(idx, amount, newProperties: _*)
+    CrossCollections.replace(properties, idx, amount, newProperties: _*)
 
     fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty), structureListeners)
     valueChanged()
@@ -46,7 +44,7 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
 
   override def listenStructure(l: (Patch[CastableProperty[A]]) => Any): Registration = {
     structureListeners += l
-    new JsArrayRegistration(structureListeners, l)
+    new CrossRegistration(structureListeners, l)
   }
 
   override def clearListeners(): Unit = {

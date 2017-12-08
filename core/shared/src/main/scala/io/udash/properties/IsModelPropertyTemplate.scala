@@ -1,8 +1,5 @@
 package io.udash.properties
 
-import io.udash.properties.single.DirectPropertyImpl
-
-import scala.annotation.implicitNotFound
 import scala.language.higherKinds
 
 /**
@@ -29,12 +26,3 @@ object IsModelPropertyTemplate {
     macro io.udash.macros.PropertyMacros.checkModelPropertyTemplate[T]
 }
 
-abstract class HasModelPropertyCreator[T](implicit mpc: MacroModelPropertyCreator[T]) {
-  /**
-    * Use this constructor and pass `ModelPropertyCreator.materialize` explicitly if you're getting the
-    * "super constructor cannot be passed a self reference unless parameter is declared by-name" error.
-    */
-  def this(creator: => ModelPropertyCreator[T]) = this()(MacroModelPropertyCreator(creator))
-
-  implicit val modelPropertyCreator: ModelPropertyCreator[T] = mpc.pc
-}

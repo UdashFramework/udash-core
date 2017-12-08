@@ -3,29 +3,28 @@ package io.udash.properties.seq
 import java.util.UUID
 
 import io.udash.properties.single.ReadableProperty
-import io.udash.properties.{CallbackSequencer, PropertyCreator}
+import io.udash.properties.{CallbackSequencer, CrossCollections, PropertyCreator}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.scalajs.js
 
 private[properties]
 abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, ReadableProperty[O]] {
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  protected final val children: js.Array[ReadableProperty[O]] = js.Array[ReadableProperty[O]]()
+  protected final val children = CrossCollections.createArray[ReadableProperty[O]]
   private val structureListeners: mutable.Set[Patch[ReadableProperty[O]] => Any] = mutable.Set()
 
   protected def update(fromIdx: Int): Unit
 
   protected final val originListener: Patch[ReadableProperty[_]] => Unit = (patch: Patch[ReadableProperty[_]]) => {
     val idx = patch.idx
-    val removed = children.jsSlice(patch.idx, children.length)
-    children.splice(idx, children.length - idx)
+    val removed = CrossCollections.slice(children, patch.idx, children.length)
+    CrossCollections.replace(children, idx, children.length - idx)
     update(idx)
-    val added = children.jsSlice(patch.idx)
-    if (added.length != 0 || removed.length != 0) {
+    val added = CrossCollections.slice(children, patch.idx, children.length)
+    if (added.nonEmpty || removed.nonEmpty) {
       val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
       CallbackSequencer.queue(
         s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
@@ -55,7 +54,7 @@ class ZippedReadableSeqProperty[A, B, O]
   extends ZippedSeqPropertyUtils[O] {
 
   protected final def appendChildren(toCombine: Seq[(ReadableProperty[A], ReadableProperty[B])]): Unit =
-    toCombine.foreach { case (x, y) => children.push(x.combine(y, this)(combiner)) }
+    toCombine.foreach { case (x, y) => children.+=(x.combine(y, this)(combiner)) }
 
   protected def update(fromIdx: Int): Unit =
     appendChildren(s.elemProperties.zip(p.elemProperties).drop(fromIdx))
@@ -81,7 +80,7 @@ class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadablePr
   extends ZippedSeqPropertyUtils[(A, Int)] {
 
   protected final def appendChildren(toCombine: Seq[(ReadableProperty[A], Int)]): Unit =
-    toCombine.foreach { case (x, y) => children.push(x.transform(v => (v, y))) }
+    toCombine.foreach { case (x, y) => children.+=(x.transform(v => (v, y))) }
 
   protected def update(fromIdx: Int): Unit =
     appendChildren(s.elemProperties.zipWithIndex.drop(fromIdx))

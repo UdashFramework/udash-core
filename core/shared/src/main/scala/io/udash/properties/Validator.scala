@@ -25,7 +25,7 @@ trait Validator[ArgumentType] {
 
 object Validator {
   class FunctionValidator[ArgumentType](f: (ArgumentType) => ValidationResult) extends Validator[ArgumentType] {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     override def apply(element: ArgumentType): Future[ValidationResult] =
       Future(f(element))
@@ -35,7 +35,7 @@ object Validator {
     new FunctionValidator(f)
 
   implicit class FutureOps[T](private val future: Future[T]) extends AnyVal {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import scala.concurrent.ExecutionContext.Implicits.global
     def foldValidationResult(implicit ev: T =:= Seq[ValidationResult]): Future[ValidationResult] = {
       @tailrec
       def reduce(acc: Seq[ValidationError], results: Seq[ValidationResult]): ValidationResult = results match {

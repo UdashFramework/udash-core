@@ -54,24 +54,24 @@ class TextAreaTest extends AsyncUdashFrontendTest {
 
       input.value = "ABCD"
       input.onpaste(null)
-      eventually {
+      retrying {
         p.get should be("ABCD")
       } flatMap { case _ =>
         input.value = "ABC"
         input.onchange(null)
-        eventually { p.get should be("ABC") }
+        retrying { p.get should be("ABC") }
       } flatMap { case _ =>
         input.value = "AB"
         input.oninput(null)
-        eventually { p.get should be("AB") }
+        retrying { p.get should be("AB") }
       } flatMap { case _ =>
         input.value = "A"
         input.onkeyup(null)
-        eventually { p.get should be("A") }
+        retrying { p.get should be("A") }
       }flatMap { case _ =>
         input.value = "123qweasd"
         input.onchange(null)
-        eventually { p.get should be("123qweasd") }
+        retrying { p.get should be("123qweasd") }
       }
     }
   }

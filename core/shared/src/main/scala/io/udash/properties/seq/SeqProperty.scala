@@ -8,7 +8,6 @@ import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 import scala.concurrent.Future
-import scala.scalajs.js
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
@@ -40,9 +39,8 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     import Validator._
-
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
     if (validationResult == null) {
       validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
@@ -74,14 +72,14 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
       override val id: UUID = PropertyCreator.newID()
       override protected[properties] val parent: ReadableProperty[_] = null
 
-      private val children = js.Array[ReadableProperty[O]]()
+      private val children = CrossCollections.createArray[ReadableProperty[O]]
       private val structureListeners = mutable.Set.empty[Patch[ReadableProperty[O]] => Any]
 
-      s.elemProperties.foreach(c => children.push(c.combine(p, this)(combiner)))
+      s.elemProperties.foreach(c => children.+=(c.combine(p, this)(combiner)))
       s.listenStructure(patch => {
         val added = patch.added.map(c => c.combine(p, this)(combiner))
-        val removed = children.jsSlice(patch.idx, patch.idx + patch.removed.size)
-        children.splice(patch.idx, patch.removed.size, added: _*)
+        val removed = CrossCollections.slice(children, patch.idx, patch.idx + patch.removed.size)
+        CrossCollections.replace(children, patch.idx, patch.removed.size, added: _*)
         val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
         CallbackSequencer.queue(
           s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
@@ -139,8 +137,10 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
 
-  protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](patch: Patch[ItemType], structureListeners: js.Array[(Patch[ItemType]) => Any]): Unit = {
-    val cpy = structureListeners.jsSlice()
+  protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
+    patch: Patch[ItemType], structureListeners: CrossCollections.Array[(Patch[ItemType]) => Any]
+  ): Unit = {
+    val cpy = CrossCollections.copyArray(structureListeners)
     CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
 }

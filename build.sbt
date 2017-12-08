@@ -39,11 +39,11 @@ val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
   libraryDependencies ++= commonDeps.value,
-  libraryDependencies ++= commonTestDeps.value
+  libraryDependencies ++= commonTestDeps.value,
+  parallelExecution in Test := false,
 )
 
 val commonJSSettings = Seq(
-  parallelExecution in Test := false,
   emitSourceMaps in Compile := true,
   scalaJSStage in Test := FastOptStage,
   jsEnv in Test := jsTestEnv.value,

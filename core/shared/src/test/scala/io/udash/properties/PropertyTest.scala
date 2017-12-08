@@ -4,12 +4,12 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashSharedTest
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
 
-class PropertyTest extends UdashFrontendTest {
+class PropertyTest extends UdashSharedTest {
   class C(val i: Int, val s: String) extends AbstractCase {
     var variable: Int = 7
     override def productArity: Int = 2

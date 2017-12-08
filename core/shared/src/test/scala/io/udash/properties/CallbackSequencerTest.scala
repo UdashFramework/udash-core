@@ -1,28 +1,28 @@
 package io.udash.properties
 
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashSharedTest
 
 import scala.collection.mutable
 import scala.util.Random
 
-class CallbackSequencerTest extends UdashFrontendTest {
+class CallbackSequencerTest extends UdashSharedTest {
   "CallbackSequencer" should {
     "fire listeners immediately without sequencing" in {
       val fires = mutable.ArrayBuffer[String]()
-      val l1 = () => fires += "l1"
-      val l2 = () => fires += "l2"
-      val l3 = () => fires += "l3"
+      val l1 = () => fires += "a"
+      val l2 = () => fires += "b"
+      val l3 = () => fires += "c"
 
       fires.size should be(0)
 
       CallbackSequencer.queue("1", l1)
-      fires should contain("l1")
+      fires should contain("a")
 
       CallbackSequencer.queue("2", l2)
-      fires should contain("l2")
+      fires should contain("b")
 
       CallbackSequencer.queue("3", l3)
-      fires should contain("l3")
+      fires should contain("c")
     }
 
     "fire listeners immediately without sequencing (queue id should not matter)" in {

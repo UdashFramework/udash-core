@@ -4,9 +4,7 @@ import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, CastableReadableProperty, Property, ReadableProperty}
 
-import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.scalajs.js
 
 object ModelProperty {
   /** Creates an empty ModelProperty[T]. */
@@ -24,7 +22,7 @@ object ModelProperty {
 
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
-  protected val properties: js.Dictionary[Property[_]] = js.Dictionary()
+  protected val properties = CrossCollections.createDictionary[Property[_]]
 
   /** Returns child ModelProperty[B]. */
   def roSubModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ReadableModelProperty[B] =
@@ -42,9 +40,9 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     import Validator._
 
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
     if (validationResult == null) {
       validationResult = Future.sequence(
         (Iterator(super.isValid) ++ properties.values.iterator.map(p => p.isValid)).toSeq

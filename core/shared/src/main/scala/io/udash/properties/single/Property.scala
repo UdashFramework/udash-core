@@ -4,12 +4,11 @@ import java.util.UUID
 
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue, SeqProperty, SeqPropertyFromSingleValue}
-import io.udash.utils.{JsArrayRegistration, Registration}
+import io.udash.utils.Registration
 
 import scala.concurrent.{Future, Promise}
-import scala.language.higherKinds
-import scala.scalajs.js
 import scala.util.{Failure, Success}
+import scala.language.higherKinds
 
 object Property {
   /** Creates an empty DirectProperty[T]. */
@@ -25,7 +24,7 @@ object Property {
     pc.newProperty(init, null)
 
   private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import scala.concurrent.ExecutionContext.Implicits.global
     private var initialized: Boolean = false
     private var p: Property[ValidationResult] = _
     private val listener = (_: A) => target.isValid onComplete {
@@ -50,11 +49,11 @@ object Property {
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
-  protected[this] val listeners: js.Array[A => Any] = js.Array()
-  protected[this] val oneTimeListeners: js.Array[(A => Any, () => Any)] = js.Array()
+  protected[this] val listeners: CrossCollections.Array[A => Any] = CrossCollections.createArray[A => Any]
+  protected[this] val oneTimeListeners: CrossCollections.Array[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
 
   protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] val validators: js.Array[Validator[A]] = js.Array()
+  protected[this] val validators: CrossCollections.Array[Validator[A]] = CrossCollections.createArray[Validator[A]]
   protected[this] var validationResult: Future[ValidationResult] = _
 
   /** Unique property ID. */
@@ -70,12 +69,12 @@ trait ReadableProperty[A] {
   def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
     if (initUpdate) valueListener(this.get)
-    new JsArrayRegistration(listeners, valueListener)
+    new CrossRegistration(listeners, valueListener)
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
   def listenOnce(valueListener: A => Any): Registration = {
-    val reg = new JsArrayRegistration(listeners, valueListener)
+    val reg = new CrossRegistration(listeners, valueListener)
     oneTimeListeners += ((valueListener, () => reg.cancel()))
     reg
   }
@@ -140,8 +139,7 @@ trait ReadableProperty[A] {
   /** Streams value changes to the `target` property.
     * It is not as strong relation as `transform`, because `target` can change value independently. */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {
-    @inline def update(v: A) =
-      target.set(transformer(v))
+    @inline def update(v: A): Unit = target.set(transformer(v))
     if (initUpdate) update(get)
     val listenerRegistration = listen(update)
     new Registration {
@@ -159,8 +157,8 @@ trait ReadableProperty[A] {
   protected[properties] def fireValueListeners(): Unit = {
     CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
-      val listenersCopy = listeners.jsSlice()
-      val oneTimeListenersCopy = oneTimeListeners.jsSlice()
+      val listenersCopy = CrossCollections.copyArray(listeners)
+      val oneTimeListenersCopy = CrossCollections.copyArray(oneTimeListeners)
       oneTimeListeners.clear()
       listenersCopy.foreach(_.apply(t))
       oneTimeListenersCopy.foreach { case (callback, cancel) =>
@@ -177,14 +175,14 @@ trait ReadableProperty[A] {
   }
 
   protected[properties] def validate(): Unit = {
-    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+    import scala.concurrent.ExecutionContext.Implicits.global
     if (validators.nonEmpty) {
       val p = Promise[ValidationResult]
       validationResult = p.future
       CallbackSequencer.queue(s"${this.id.toString}:fireValidation", () => {
         import Validator._
         val currentValue = this.get
-        val cpy = validators.jsSlice()
+        val cpy = CrossCollections.copyArray(validators)
         p.completeWith {
           Future.sequence(
             cpy.map(_ (currentValue)).toSeq
@@ -212,7 +210,7 @@ trait Property[A] extends ReadableProperty[A] {
   def addValidator(v: Validator[A]): Registration = {
     validators += v
     validationResult = null
-    new JsArrayRegistration(validators, v)
+    new CrossRegistration(validators, v)
   }
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */

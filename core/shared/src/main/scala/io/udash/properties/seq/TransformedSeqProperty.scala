@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
 
 private[properties]
@@ -26,7 +27,7 @@ class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], Orig
       patch.clearsProperty
     )
 
-    transformedElements.splice(patch.idx, patch.removed.length, transPatch.added: _*)
+    CrossCollections.replace(transformedElements, patch.idx, patch.removed.length, transPatch.added: _*)
     transPatch
   }
 

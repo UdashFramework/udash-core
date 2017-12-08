@@ -1,10 +1,10 @@
 package io.udash.properties
 
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashSharedTest
 
-class PropertyCreatorTest extends UdashFrontendTest {
+class PropertyCreatorTest extends UdashSharedTest {
   // DO NOT REMOVE THIS IMPORT!
-  import io.udash._
+  import io.udash.properties.Properties._
 
   "PropertyCreator" should {
     "create Property for basic types (and handle init value)" in {
@@ -15,10 +15,6 @@ class PropertyCreatorTest extends UdashFrontendTest {
       """val p = Property[String](2)""".stripMargin shouldNot typeCheck
 
       """val p = Property[Int](2)""".stripMargin should compile
-    }
-
-    "create Property dom.Element" in {
-      """val p = Property[org.scalajs.dom.Element]""".stripMargin should compile
     }
 
     "create Property for class (mutable and immutable)" in {

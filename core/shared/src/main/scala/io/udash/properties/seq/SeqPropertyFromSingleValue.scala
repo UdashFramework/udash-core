@@ -7,7 +7,6 @@ import io.udash.properties.single._
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
-import scala.scalajs.js
 
 private[properties]
 abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
@@ -18,7 +17,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
   override protected[properties] def parent: ReadableProperty[_] = null
 
   protected final val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
-  protected final val children: js.Array[Property[B]] = js.Array[Property[B]]()
+  protected final val children = CrossCollections.createArray[Property[B]]
 
   update(origin.get)
   origin.listen(update)
@@ -43,11 +42,11 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
 
     val patch = if (transformed.size > current.size) {
       val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(implicitly[PropertyCreator[B]].newProperty(this))
-      children.splice(commonBegin, 0, added: _*)
+      CrossCollections.replace(children, commonBegin, 0, added: _*)
       Some(Patch(commonBegin, Seq(), added, clearsProperty = false))
     } else if (transformed.size < current.size) {
-      val removed = children.jsSlice(commonBegin, commonBegin + current.size - transformed.size)
-      children.splice(commonBegin, current.size - transformed.size)
+      val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
+      CrossCollections.replace(children, commonBegin, current.size - transformed.size)
       Some(Patch(commonBegin, removed, Seq(), transformed.isEmpty))
     } else None
 

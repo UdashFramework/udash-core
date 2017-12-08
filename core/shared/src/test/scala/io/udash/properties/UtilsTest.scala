@@ -1,8 +1,8 @@
 package io.udash.properties
 
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashSharedTest
 
-class UtilsTest extends UdashFrontendTest {
+class UtilsTest extends UdashSharedTest {
   class ClassWithVar(x: String) {
     var s: String = "qwe"
   }

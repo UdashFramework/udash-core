@@ -58,10 +58,10 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
         }
-        r <- eventually {
+        r <- retrying {
           template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
         }
       } yield r
@@ -77,13 +77,13 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("placeholder")
         }
         _ <- Future {
           p.success(Translated("Udash"))
         }
-        r <- eventually {
+        r <- retrying {
           template.textContent should be("Udash")
         }
       } yield r
@@ -99,13 +99,13 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("")
         }
         _ <- Future {
           p.success(Translated("Udash"))
         }
-        r <- eventually {
+        r <- retrying {
           template.textContent should be("Udash")
         }
       } yield r
@@ -128,10 +128,10 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.getAttribute("translation") should be("Translation test")
         }
-        r <- eventually {
+        r <- retrying {
           template2.getAttribute("translation") should be("Translation test pl")
         }
       } yield r
@@ -166,7 +166,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
           template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
         }
@@ -174,7 +174,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
           en.set(Lang("pl"))
           pl.set(Lang("en"))
         }
-        r <- eventually {
+        r <- retrying {
           template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
           template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
         }
@@ -200,7 +200,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       }
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.getAttribute("translation") should be("Translation test")
           template2.getAttribute("translation") should be("Translation test pl")
         }
@@ -208,7 +208,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
           en.set(Lang("pl"))
           pl.set(Lang("en"))
         }
-        r <- eventually {
+        r <- retrying {
           template.getAttribute("translation") should be("Translation test pl")
           template2.getAttribute("translation") should be("Translation test")
         }
@@ -235,49 +235,49 @@ class BindingsTest extends AsyncUdashFrontendTest {
       ).render
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
         }
         _ <- Future {
           lang.set(pl)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test pl")
         }
         _ <- Future {
           lang.set(en)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 test")
         }
         _ <- Future {
           translations.append(pKey1)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
         }
         _ <- Future {
           lang.set(pl)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
         }
         _ <- Future {
           lang.set(en)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation testTranslation3 testTranslation testTranslation3 testTranslation test")
         }
         _ <- Future {
           translations.remove(1, 3)
         }
-        _ <- eventually {
+        _ <- retrying {
           el.textContent should be("Translation testTranslation test")
         }
         _ <- Future {
           lang.set(pl)
         }
-        r <- eventually {
+        r <- retrying {
           el.textContent should be("Translation test plTranslation test pl")
         }
       } yield r
@@ -288,7 +288,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       val p: Property[TranslationKey0] = Property[TranslationKey0]
       val key1 = TranslationKey.key1[String]("tr1")
       p.set(key1.reduce("test"))
-      eventually(p.get.apply().value.get.get.string should be("Translation test"))
+      retrying(p.get.apply().value.get.get.string should be("Translation test"))
     }
 
     "work with keys in property" in {
@@ -298,7 +298,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       p.set(key1)
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           (p.get match {
             case key: TranslationKey1[_] => true
             case _ => false
@@ -307,7 +307,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
         _ <- Future {
           p.set(key1.reduce("asd"))
         }
-        r <- eventually {
+        r <- retrying {
           (p.get match {
             case key: TranslationKey0 => key.apply().value.get.get.string
             case _ => "false"

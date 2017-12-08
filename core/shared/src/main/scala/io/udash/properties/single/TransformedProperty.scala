@@ -1,7 +1,7 @@
 package io.udash.properties
 package single
 
-import io.udash.utils.{JsArrayRegistration, Registration}
+import io.udash.utils.Registration
 
 import scala.concurrent.Future
 
@@ -55,7 +55,7 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
 
   override def listenOnce(valueListener: (B) => Any): Registration = {
     initOriginListener()
-    val reg = wrapListenerRegistration(new JsArrayRegistration(listeners, valueListener))
+    val reg = wrapListenerRegistration(new CrossRegistration(listeners, valueListener))
     oneTimeListeners += ((valueListener, () => reg.cancel()))
     reg
   }
@@ -91,9 +91,9 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
       super.clearValidators()
       originValidatorRegistration = origin.addValidator(new Validator[A] {
         override def apply(element: A): Future[ValidationResult] = {
+          import scala.concurrent.ExecutionContext.Implicits.global
           import Validator._
 
-          import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
           val transformedValue = transformer(element)
           Future.sequence(
             validators.map(_.apply(transformedValue)).toSeq

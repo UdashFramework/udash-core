@@ -41,43 +41,43 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       for {
         _ <- {
           picker.hide()
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((0, 0, 0)) // it was hidden already
           }
         }
         _ <- {
           picker.show()
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((1, 0, 0))
           }
         }
         _ <- {
           date.set(Some(new ju.Date(123123123)))
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((1, 0, 1))
           }
         }
         _ <- {
           picker.hide()
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((1, 1, 1))
           }
         }
         _ <- {
           picker.toggle()
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((2, 1, 1))
           }
         }
         _ <- {
           picker.toggle()
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((2, 2, 1))
           }
         }
         r <- {
           date.set(Some(new ju.Date(333123123123L)))
-          eventually {
+          retrying {
             (showCounter, hideCounter, changeCounter) should be((2, 2, 2))
           }
         }
@@ -124,7 +124,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       for {
         _ <- {
           pickerJQ.date("May 15th 2017, 10:59 am")
-          eventually {
+          retrying {
             // ignore time zone
             date.get.get.getTime > 1494763200000L should be(true)
             date.get.get.getTime < 1494936000000L should be(true)
@@ -132,7 +132,7 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         }
         r <- {
           pickerJQ.date(null)
-          eventually {
+          retrying {
             date.get should be(None)
           }
         }
@@ -165,37 +165,37 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
       for {
         _ <- {
           date.set(Some(new ju.Date(3000000000L)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((0, 1))
           }
         }
         _ <- {
           date.set(Some(new ju.Date(300000)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((1, 1))
           }
         }
         _ <- {
           date.set(Some(new ju.Date(2000000000L)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((1, 2))
           }
         }
         _ <- {
           date.set(Some(new ju.Date(8000000000L)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((2, 2))
           }
         }
         _ <- {
           date.set(Some(new ju.Date(3000000000L)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((2, 3))
           }
         }
         r <- {
           date.set(Some(new ju.Date(4000000000L)))
-          eventually {
+          retrying {
             (errorCounter, changeCounter) should be((2, 4))
           }
         }

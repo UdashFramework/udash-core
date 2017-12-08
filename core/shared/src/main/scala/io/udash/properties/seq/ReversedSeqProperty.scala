@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
 
 private[properties]
@@ -17,7 +18,7 @@ abstract class BaseReversedSeqProperty[A, ElemType <: ReadableProperty[A], Origi
       patch.clearsProperty
     )
 
-    transformedElements.splice(transPatch.idx, transPatch.removed.length, transPatch.added: _*)
+    CrossCollections.replace(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added: _*)
     transPatch
   }
 }

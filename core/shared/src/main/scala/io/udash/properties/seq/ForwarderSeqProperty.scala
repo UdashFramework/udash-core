@@ -1,9 +1,8 @@
 package io.udash.properties.seq
 
+import io.udash.properties.{CrossCollections, CrossRegistration}
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
-import io.udash.utils.{JsArrayRegistration, Registration}
-
-import scala.scalajs.js
+import io.udash.utils.Registration
 
 trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableProperty[Seq[B]] with ReadableSeqProperty[B, ElemType] {
@@ -12,7 +11,7 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
 
   protected var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
-  protected final val structureListeners: js.Array[Patch[ElemType] => Any] = js.Array()
+  protected final val structureListeners = CrossCollections.createArray[Patch[ElemType] => Any]
 
   protected def originListener(originValue: Seq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
@@ -45,7 +44,7 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
     initOriginListeners()
     structureListeners += structureListener
-    wrapListenerRegistration(new JsArrayRegistration(structureListeners, structureListener))
+    wrapListenerRegistration(new CrossRegistration(structureListeners, structureListener))
   }
 
   override def listen(valueListener: (Seq[B]) => Any, initUpdate: Boolean = false): Registration = {
@@ -77,9 +76,7 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
 trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
-  import js.JSConverters._
-
-  protected var transformedElements: js.Array[ElemType] = js.Array()
+  protected var transformedElements = CrossCollections.createArray[ElemType]
 
   protected def loadFromOrigin(): Seq[B]
   protected def elementsFromOrigin(): Seq[ElemType]
@@ -96,7 +93,7 @@ trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: 
   }
 
   override protected def onListenerInit(): Unit = {
-    val fromOrigin = elementsFromOrigin().toJSArray
+    val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin())
     if (!(transformedElements.iterator.map(_.id) sameElements fromOrigin.iterator.map(_.id))) {
       fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements, fromOrigin, fromOrigin.isEmpty), structureListeners)
       fireValueListeners()
@@ -112,7 +109,7 @@ trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: 
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
-    val cpy = structureListeners.jsSlice()
+    val cpy = CrossCollections.copyArray(structureListeners)
     cpy.foreach(_.apply(transPatch))
     fireValueListeners()
   }
