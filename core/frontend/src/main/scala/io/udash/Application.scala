@@ -56,7 +56,7 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
     routingFailureListeners.register(listener)
 
   protected def handleRoutingFailure(ex: Throwable): Unit = {
-    logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}")
+    logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}. Error: ${ex.getMessage}")
     routingFailureListeners.fire(ex)
   }
 
