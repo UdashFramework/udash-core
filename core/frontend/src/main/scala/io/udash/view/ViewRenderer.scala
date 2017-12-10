@@ -17,8 +17,8 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     parent match {
       case p: ContainerView =>
         p.renderChild(child)
-      case p: FinalView =>
-        throw new RuntimeException("Final view cannot render child view! Check your states hierarchy.")
+      case rest =>
+        throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
     }
 
   private def mergeViews(path: List[View]): Option[View] = {
