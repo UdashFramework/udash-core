@@ -40,6 +40,7 @@ package object udash extends io.udash.bindings.Bindings
 
   // Utils
   type Registration = io.udash.utils.Registration
+  @deprecated("Use `io.udash.logging.CrossLogging` instead.", "0.6.0")
   type StrictLogging = io.udash.utils.StrictLogging
   type FileUploader = io.udash.utils.FileUploader
   val  FileUploader = io.udash.utils.FileUploader

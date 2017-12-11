@@ -1,5 +1,6 @@
 package io.udash
 
+import io.udash.logging.CrossLogging
 import io.udash.properties.ImmutableValue
 import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
 import io.udash.utils.{CallbacksHandler, SetRegistration}
@@ -19,7 +20,7 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider
-) extends StrictLogging {
+) extends CrossLogging {
 
   private var rootElement: Element = _
   private val routingFailureListeners = new CallbacksHandler[Throwable]
@@ -56,7 +57,7 @@ class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : ImmutableV
     routingFailureListeners.register(listener)
 
   protected def handleRoutingFailure(ex: Throwable): Unit = {
-    logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}")
+    logger.error(s"Unhandled URL: ${urlChangeProvider.currentFragment}. Error: ${ex.getMessage}")
     routingFailureListeners.fire(ex)
   }
 
