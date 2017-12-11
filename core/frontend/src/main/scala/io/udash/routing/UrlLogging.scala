@@ -1,6 +1,7 @@
 package io.udash.routing
 
 import io.udash._
+import io.udash.logging.CrossLogging
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -8,7 +9,7 @@ import scala.util.Try
 /**
   * RoutingRegistry mixin simplifying logging app navigation.
   */
-trait UrlLogging[S <: GState[S]] extends StrictLogging { app: Application[S] =>
+trait UrlLogging[S <: GState[S]] extends CrossLogging { app: Application[S] =>
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   protected def log(url: String, referrer: Option[String]): Unit

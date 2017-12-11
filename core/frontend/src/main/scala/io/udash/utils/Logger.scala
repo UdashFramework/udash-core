@@ -5,6 +5,7 @@ import org.scalajs.dom.Console
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.global
 
+@deprecated("Use `io.udash.logging.CrossLogger` instead.", "0.6.0")
 trait Logger {
   def info(message: String, params: js.Any*): Unit
 
@@ -18,6 +19,7 @@ trait Logger {
 /**
   * Global JS logger.
   */
+@deprecated("Use `io.udash.logging.CrossLogger` instead.", "0.6.0")
 private object ConsoleLogger extends Logger {
   private val console: Console = global.console.asInstanceOf[Console]
 
@@ -33,6 +35,7 @@ private object ConsoleLogger extends Logger {
 /**
   * Provides `logger` reference to io.udash.utils.ConsoleLogger.
   */
+@deprecated("Use `io.udash.logging.CrossLogging` instead.", "0.6.0")
 trait StrictLogging {
   val logger: Logger = ConsoleLogger
 }

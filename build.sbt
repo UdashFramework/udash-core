@@ -88,6 +88,9 @@ lazy val `core-shared` = crossProject.crossType(CrossType.Pure).in(file("core/sh
     libraryDependencies ++= coreCrossDeps.value
   )
   .jsSettings(commonJSSettings: _*)
+  .jvmSettings(
+    libraryDependencies ++= coreCrossJVMDeps.value
+  )
 
 lazy val `core-shared-JVM` = `core-shared`.jvm
 lazy val `core-shared-JS` = `core-shared`.js

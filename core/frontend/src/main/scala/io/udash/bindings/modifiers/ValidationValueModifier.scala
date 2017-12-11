@@ -1,7 +1,7 @@
 package io.udash.bindings.modifiers
 
-import io.udash.StrictLogging
 import io.udash.bindings.Bindings._
+import io.udash.logging.CrossLogging
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
@@ -15,7 +15,7 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
                                  completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                                  errorBuilder: Option[(Throwable, Binding => Binding) => Seq[Node]],
                                  override val customElementsReplace: DOMManipulator.ReplaceMethod)
-  extends Binding with DOMManipulator with StrictLogging {
+  extends Binding with DOMManipulator with CrossLogging {
 
   def this(property: ReadableProperty[T], initBuilder: Option[Future[ValidationResult] => Seq[Node]],
            completeBuilder: ValidationResult => Seq[Node], errorBuilder: Option[Throwable => Seq[Node]]) = {
