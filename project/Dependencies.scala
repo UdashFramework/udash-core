@@ -50,6 +50,10 @@ object Dependencies {
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
+  val coreCrossJVMDeps = Def.setting(Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
+  ))
+
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
@@ -69,7 +73,6 @@ object Dependencies {
 
   val rpcBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
-    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 

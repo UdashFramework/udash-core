@@ -2,6 +2,7 @@ package io.udash.i18n.bindings
 
 import io.udash._
 import io.udash.i18n.{Lang, Translated, TranslationKey}
+import io.udash.logging.CrossLogging
 import org.scalajs.dom
 
 import scala.concurrent.Future
@@ -11,7 +12,7 @@ import scalatags.generic.Modifier
 private[i18n]
 class DynamicAttrTranslationBinding[Key <: TranslationKey](key: Key, translator: (Key) => Future[Translated], attr: String)
                                                           (implicit lang: ReadableProperty[Lang])
-  extends Modifier[dom.Element] with StrictLogging {
+  extends Modifier[dom.Element] with CrossLogging {
 
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 

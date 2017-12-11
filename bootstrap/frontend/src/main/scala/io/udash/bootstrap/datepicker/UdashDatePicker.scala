@@ -8,6 +8,7 @@ import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.css.CssStyle
+import io.udash.logging.CrossLogging
 import io.udash.properties.{ImmutableValue, PropertyCreator}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -20,7 +21,7 @@ import scala.util.Try
 final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Date]],
                                                 val options: ReadableProperty[UdashDatePicker.DatePickerOptions],
                                                 override val componentId: ComponentId)
-  extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with StrictLogging {
+  extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with CrossLogging {
 
   import UdashDatePicker._
   import io.udash.css.CssView._

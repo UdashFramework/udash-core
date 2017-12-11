@@ -1,7 +1,7 @@
 package io.udash.rpc.internals
 
 import com.avsystem.commons.serialization.Input
-import io.udash.utils.StrictLogging
+import io.udash.logging.CrossLogging
 import io.udash.rpc._
 import io.udash.rpc.serialization.ExceptionCodecRegistry
 import io.udash.wrappers.atmosphere.Transport.Transport
@@ -18,7 +18,7 @@ trait ServerConnector[RPCRequest] {
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
 abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String, val exceptionsRegistry: ExceptionCodecRegistry)
-  extends ServerConnector[RPCRequest] with StrictLogging {
+  extends ServerConnector[RPCRequest] with CrossLogging {
   protected val clientRpc: ExposesClientRPC[_]
 
   val remoteFramework: ServerUdashRPCFramework
