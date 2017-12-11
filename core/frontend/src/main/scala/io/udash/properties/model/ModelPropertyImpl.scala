@@ -53,7 +53,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     if (!isEmpty || t != null) {
       if (t != null) isEmpty = false
       CallbackSequencer.sequence {
-        internalSet(t, withCallbacks = true, force = false)
+        internalSet(t, withCallbacks = false, force = false)
       }
     }
 
