@@ -758,6 +758,8 @@ class PropertyTest extends UdashFrontendTest {
       values.clear()
 
       val init = newTT(5, Some("s"), C(123, "asd"), Seq('a', 'b', 'c'))
+      p.setInitValue(newTT(123123, Some("s"), C(123, "asd"), Seq('a', 'b', 'c')))
+      values.size should be(0)
       p.set(init)
       values.size should be(1)
 
