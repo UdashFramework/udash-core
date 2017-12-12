@@ -3,6 +3,7 @@ package io.udash.web.guide.views.rpc.demos
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.logging.CrossLogging
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.GenCodecServerRPC
@@ -27,7 +28,7 @@ trait GenCodecsDemoModel {
   def sealedTrait: Fruit
 }
 
-class GenCodecsDemoComponent extends Component with StrictLogging {
+class GenCodecsDemoComponent extends Component with CrossLogging {
   import Context._
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
 

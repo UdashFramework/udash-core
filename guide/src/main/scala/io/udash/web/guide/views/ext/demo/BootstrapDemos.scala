@@ -24,6 +24,7 @@ import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
 import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
 import io.udash.css.{CssBase, CssView}
+import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
@@ -39,7 +40,7 @@ import scala.language.postfixOps
 import scala.util.Random
 import scalatags.JsDom
 
-object BootstrapDemos extends StrictLogging with CssView {
+object BootstrapDemos extends CrossLogging with CssView {
 
   import io.udash.web.guide.Context._
   import org.scalajs.dom._
@@ -66,80 +67,81 @@ object BootstrapDemos extends StrictLogging with CssView {
     div(GuideStyles.frame)(
       UdashButtonToolbar(
         UdashButtonGroup()(
-          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignLeft).render,
-          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignCenter).render,
-          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignRight).render,
-          UdashButton()(UdashIcons.Glyphicon.glyphicon, UdashIcons.Glyphicon.alignJustify).render
+          UdashButton()(UdashIcons.Glyphicon.alignLeft).render,
+          UdashButton()(UdashIcons.Glyphicon.alignCenter).render,
+          UdashButton()(UdashIcons.Glyphicon.alignRight).render,
+          UdashButton()(UdashIcons.Glyphicon.alignJustify).render
         ).render,
         UdashButtonGroup()(
-          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.bitcoin).render,
-          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.euro).render,
-          UdashButton()(UdashIcons.FontAwesome.fa, UdashIcons.FontAwesome.dollar).render
+          UdashButton()(UdashIcons.FontAwesome.bitcoin).render,
+          UdashButton()(UdashIcons.FontAwesome.euro).render,
+          UdashButton()(UdashIcons.FontAwesome.dollar).render
         ).render
       ).render
     ).render
 
   def datePicker(): dom.Element = {
     import java.{util => ju}
-    val date = Property[Option[ju.Date]](Some(new ju.Date()))
-
-    val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
-      format = "MMMM Do YYYY, hh:mm a",
-      locale = Some("en_GB"),
-      showClear = true
-    ))
-
-    val disableWeekends = Property(false)
-    disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
-      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
-      case false => Seq.empty
-    }
-
-    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
-
-    val showButton = UdashButton()("Show")
-    val hideButton = UdashButton()("Hide")
-    val enableButton = UdashButton()("Enable")
-    val disableButton = UdashButton()("Disable")
-    showButton.listen { case _ => picker.show() }
-    hideButton.listen { case _ => picker.hide() }
-    enableButton.listen { case _ => picker.enable() }
-    disableButton.listen { case _ => picker.disable() }
-
-    val events = SeqProperty[String](Seq.empty)
-    picker.listen {
-      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
-      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
-      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
-    }
+    // TODO remove comment
+//    val date = Property[Option[ju.Date]](Some(new ju.Date()))
+//
+//    val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
+//      format = "MMMM Do YYYY, hh:mm a",
+//      locale = Some("en_GB"),
+//      showClear = true
+//    ))
+//
+//    val disableWeekends = Property(false)
+//    disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
+//      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
+//      case false => Seq.empty
+//    }
+//
+//    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+//
+//    val showButton = UdashButton()("Show")
+//    val hideButton = UdashButton()("Hide")
+//    val enableButton = UdashButton()("Enable")
+//    val disableButton = UdashButton()("Disable")
+//    showButton.listen { case _ => picker.show() }
+//    hideButton.listen { case _ => picker.hide() }
+//    enableButton.listen { case _ => picker.enable() }
+//    disableButton.listen { case _ => picker.disable() }
+//
+//    val events = SeqProperty[String](Seq.empty)
+//    picker.listen {
+//      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
+//      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
+//      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
+//    }
 
     div(GuideStyles.frame)(
-      UdashDatePicker.loadBootstrapDatePickerStyles(),
-      UdashInputGroup()(
-        UdashInputGroup.input(picker.render),
-        UdashInputGroup.addon(bind(date.transform(_.toString)))
-      ).render,
-      hr,
-      UdashForm(
-        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
-        UdashForm.group(
-          label("Locale"),
-          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
-        ),
-        UdashForm.checkbox()("Disable weekends")(disableWeekends),
-        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
-        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
-        UdashButtonGroup()(
-          showButton.render,
-          hideButton.render,
-          enableButton.render,
-          disableButton.render
-        ).render
-      ).render,
-      hr,
-      div(BootstrapStyles.Well.well)(
-        repeat(events)(ev => Seq(i(ev.get).render, br.render))
-      )
+//      UdashDatePicker.loadBootstrapDatePickerStyles(),
+//      UdashInputGroup()(
+//        UdashInputGroup.input(picker.render),
+//        UdashInputGroup.addon(bind(date.transform(_.toString)))
+//      ).render,
+//      hr,
+//      UdashForm(
+//        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
+//        UdashForm.group(
+//          label("Locale"),
+//          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
+//        ),
+//        UdashForm.checkbox()("Disable weekends")(disableWeekends),
+//        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
+//        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
+//        UdashButtonGroup()(
+//          showButton.render,
+//          hideButton.render,
+//          enableButton.render,
+//          disableButton.render
+//        ).render
+//      ).render,
+//      hr,
+//      div(BootstrapStyles.Well.well)(
+//        repeat(events)(ev => Seq(i(ev.get).render, br.render))
+//      )
     ).render
   }
 
@@ -150,12 +152,14 @@ object BootstrapDemos extends StrictLogging with CssView {
     val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
     val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
 
-    val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+    // TODO revert
+    val fromPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY",
       locale = Some("en_GB")
     ))
 
-    val toPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+    // TODO revert
+    val toPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
       format = "D MMMM YYYY",
       locale = Some("pl")
     ))

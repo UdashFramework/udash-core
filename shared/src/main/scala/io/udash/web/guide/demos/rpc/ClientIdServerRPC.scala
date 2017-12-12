@@ -1,6 +1,5 @@
 package io.udash.web.guide.demos.rpc
 
-import com.avsystem.commons.rpc.RPCTypeClasses
 import io.udash.rpc._
 import io.udash.rpc.utils.Logged
 
@@ -12,4 +11,4 @@ trait ClientIdServerRPC {
   def clientId(): Future[String]
 }
 
-object ClientIdServerRPC extends RPCTypeClasses[DefaultServerUdashRPCFramework.type, ClientIdServerRPC]
+object ClientIdServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[ClientIdServerRPC]

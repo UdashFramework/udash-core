@@ -1,6 +1,5 @@
 package io.udash.web.guide.demos.rpc
 
-import com.avsystem.commons.rpc.RPCTypeClasses
 import io.udash.rpc._
 import io.udash.rpc.utils.Logged
 
@@ -14,4 +13,4 @@ trait PingServerRPC {
   def fPing(id: Int): Future[Int]
 }
 
-object PingServerRPC extends RPCTypeClasses[DefaultServerUdashRPCFramework.type, PingServerRPC]
+object PingServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[PingServerRPC]
