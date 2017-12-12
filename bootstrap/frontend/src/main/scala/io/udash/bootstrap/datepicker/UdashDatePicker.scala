@@ -320,6 +320,8 @@ object UdashDatePicker {
     }
   }
 
+  object DatePickerOptions extends HasModelPropertyCreator[DatePickerOptions]
+
   class DatePickerIcons(val time: Seq[CssStyle] = Seq.empty, val date: Seq[CssStyle] = Seq.empty,
                         val up: Seq[CssStyle] = Seq.empty, val down: Seq[CssStyle] = Seq.empty,
                         val previous: Seq[CssStyle] = Seq.empty, val next: Seq[CssStyle] = Seq.empty,

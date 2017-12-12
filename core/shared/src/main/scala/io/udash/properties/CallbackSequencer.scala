@@ -7,7 +7,7 @@ import scala.collection.mutable
 /**
  * <b>Note: It can be used only in one-thread environment!</b>
   *
- * This sequencer is used in order to fire callback listeners ONCE during making many updates to [[Property]].
+ * This sequencer is used in order to fire callback listeners ONCE during making many updates to [[io.udash.properties.single.Property]].
  * Property implementation uses this CallbackSequencer in order to queue callbacks and invoke them after
  * running commit().
  * In code you should use sequence method to group operation over the Property.
@@ -17,16 +17,11 @@ object CallbackSequencer {
 
   private var starts: Int = 0
   private var queue: mutable.ArrayBuffer[(Id, () => Any)] = mutable.ArrayBuffer()
-  private var endCallbacks: mutable.ArrayBuffer[() => Any] = mutable.ArrayBuffer()
 
   private def start(): Unit =
     starts += 1
 
   private def end(): Unit = {
-    if (starts == 1) {
-      endCallbacks.foreach(c => c())
-      endCallbacks.clear()
-    }
     starts -= 1
   }
 
@@ -47,11 +42,6 @@ object CallbackSequencer {
   def queue(id: Id, fireListeners: () => Any): Unit = {
     if (starts == 0) fireListeners()
     else queue += Tuple2(id, fireListeners)
-  }
-
-  def finalCallback(finalListeners: () => Any): Unit = {
-    if (starts == 0) finalListeners()
-    else endCallbacks += finalListeners
   }
 
   def sequence(code: => Any): Unit = {
