@@ -238,41 +238,6 @@ trait Bindings {
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
-    * Use it to bind sequence property into DOM structure, given `initBuilder` will be used to generate DOM element at start.
-    * Then it listens to structure change and calls `elementsUpdater` to handle each structure change. <br/>
-    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties value changes, you should use
-    * another binding method inside `initBuilder` and `elementsUpdater`.
-    *
-    * @param property        Property to bind.
-    * @param initBuilder     Element builder which will be used to create initial HTML element.
-    * @param elementsUpdater Function used to update element basing on patch.
-    * @return Modifier for bounded property.
-    */
-  def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                           initBuilder: Seq[E] => Seq[Node],
-                                           elementsUpdater: (Patch[E], Seq[Node]) => Any): Binding =
-    new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
-
-  /**
-    * Use it to bind sequence property into DOM structure, given `initBuilder` will be used to generate DOM element at start.
-    * Then it listens to structure change and calls `elementsUpdater` to handle each structure change. <br/>
-    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties value changes,
-    * you should use another binding method inside `initBuilder` and `elementsUpdater`.<br/><br/>
-    *
-    * The builder and updater take nested bindings interceptor - it should be used if you want to create another binding inside
-    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-    *
-    * @param property        Property to bind.
-    * @param initBuilder     Element builder which will be used to create initial HTML element.
-    * @param elementsUpdater Function used to update element basing on patch.
-    * @return Modifier for bounded property.
-    */
-  def produceWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                     initBuilder: (Seq[E], Binding => Binding) => Seq[Node],
-                                                     elementsUpdater: (Patch[E], Seq[Node], Binding => Binding) => Any): Binding =
-    new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
-
-  /**
     * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
     * sequence and also removes those which were removed. You only need to provide builder which is used to
     * create HTML element for each sequence member. <br/>
