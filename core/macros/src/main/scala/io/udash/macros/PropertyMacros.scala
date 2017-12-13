@@ -320,12 +320,12 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
       case (select, term) :: tail if select.tpe <:< SeqTpe && !(select.tpe <:< MutableSeqTpe) =>
-        q"""$targetTree.getSubProperty[${select.tpe}](${term.decodedName.toString})
-           .asInstanceOf[$SeqPropertyCls[${select.tpe.typeArgs.head}, $PropertyCls[${select.tpe.typeArgs.head}] with $CastablePropertyCls[${select.tpe.typeArgs.head}]]]"""
-      case (select, term) :: tail if isModelPropertyTemplate(select.tpe) =>
-        genTree(tail, q"""$targetTree.getSubProperty[${select.tpe}](${term.decodedName.toString}).asInstanceOf[$ModelPropertyImplCls[${select.tpe}]]""")
+        q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString})
+           .asInstanceOf[$SeqPropertyCls[${select.tpe.typeArgs.head.widen}, $PropertyCls[${select.tpe.typeArgs.head.widen}] with $CastablePropertyCls[${select.tpe.typeArgs.head.widen}]]]"""
+      case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
+        genTree(tail, q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$ModelPropertyImplCls[${select.tpe.widen}]]""")
       case (select, term) :: tail =>
-        q"""$targetTree.getSubProperty[${select.tpe}](${term.decodedName.toString}).asInstanceOf[$PropertyCls[${select.tpe}]]"""
+        q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$PropertyCls[${select.tpe.widen}]]"""
       case Nil => targetTree
     }
 
