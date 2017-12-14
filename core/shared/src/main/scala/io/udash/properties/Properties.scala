@@ -4,6 +4,7 @@ trait Properties {
   val Property = single.Property
   val ModelProperty = model.ModelProperty
   val SeqProperty = seq.SeqProperty
+  type CallbackSequencer = io.udash.properties.CallbackSequencer
   val CallbackSequencer = io.udash.properties.CallbackSequencer
 
   type CastableReadableProperty[A] = single.CastableReadableProperty[A]

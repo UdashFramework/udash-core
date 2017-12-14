@@ -1386,7 +1386,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("123321")
 
       p.set(Seq(1, 2, 5))
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.remove(5)
         p.insert(1, 7)
         p.prepend(9)
@@ -1496,7 +1496,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       dom.textContent should be("135")
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         filter.set(EvensFilter)
         filter.set(OddsFilter)
         filter.set(EvensFilter)
@@ -1506,7 +1506,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       dom.textContent should be("246868")
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.set(Seq(1, 3, 5))
         filter.set(OddsFilter)
         numbers.append(6, 7, 8)
@@ -1516,7 +1516,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       filter.set(OddsFilter)
       numbers.set(Seq(1, 3, 5))
       dom.textContent should be("135")
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.elemProperties.foreach(p => p.set(p.get + 1))
       }
       dom.textContent should be("")

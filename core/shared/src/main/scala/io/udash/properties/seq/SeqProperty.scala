@@ -81,7 +81,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
         val removed = CrossCollections.slice(children, patch.idx, patch.idx + patch.removed.size)
         CrossCollections.replace(children, patch.idx, patch.removed.size, added: _*)
         val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
-        CallbackSequencer.queue(
+        CallbackSequencer().queue(
           s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
           () => structureListeners.foreach(_.apply(mappedPatch))
         )
@@ -141,7 +141,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     patch: Patch[ItemType], structureListeners: CrossCollections.Array[(Patch[ItemType]) => Any]
   ): Unit = {
     val cpy = CrossCollections.copyArray(structureListeners)
-    CallbackSequencer.queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
+    CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
 }
 

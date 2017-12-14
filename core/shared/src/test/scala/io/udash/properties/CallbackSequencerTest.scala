@@ -15,13 +15,13 @@ class CallbackSequencerTest extends UdashSharedTest {
 
       fires.size should be(0)
 
-      CallbackSequencer.queue("1", l1)
+      CallbackSequencer().queue("1", l1)
       fires should contain("a")
 
-      CallbackSequencer.queue("2", l2)
+      CallbackSequencer().queue("2", l2)
       fires should contain("b")
 
-      CallbackSequencer.queue("3", l3)
+      CallbackSequencer().queue("3", l3)
       fires should contain("c")
     }
 
@@ -33,13 +33,13 @@ class CallbackSequencerTest extends UdashSharedTest {
 
       fires.size should be(0)
 
-      CallbackSequencer.queue("1", l1)
+      CallbackSequencer().queue("1", l1)
       fires should contain("l1")
 
-      CallbackSequencer.queue("1", l2)
+      CallbackSequencer().queue("1", l2)
       fires should contain("l2")
 
-      CallbackSequencer.queue("1", l3)
+      CallbackSequencer().queue("1", l3)
       fires should contain("l3")
     }
 
@@ -49,16 +49,16 @@ class CallbackSequencerTest extends UdashSharedTest {
       val l2 = () => fires += "l2"
       val l3 = () => fires += "l3"
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         fires.size should be(0)
 
-        CallbackSequencer.queue("1", l1)
+        CallbackSequencer().queue("1", l1)
         fires shouldNot contain("l1")
 
-        CallbackSequencer.queue("2", l2)
+        CallbackSequencer().queue("2", l2)
         fires shouldNot contain("l2")
 
-        CallbackSequencer.queue("3", l3)
+        CallbackSequencer().queue("3", l3)
         fires shouldNot contain("l3")
       }
 
@@ -74,16 +74,16 @@ class CallbackSequencerTest extends UdashSharedTest {
       val l2 = () => fires += "l2"
       val l3 = () => fires += "l3"
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         fires.size should be(0)
 
-        CallbackSequencer.queue("1", l1)
+        CallbackSequencer().queue("1", l1)
         fires shouldNot contain("l1")
 
-        CallbackSequencer.queue("1", l2)
+        CallbackSequencer().queue("1", l2)
         fires shouldNot contain("l2")
 
-        CallbackSequencer.queue("1", l3)
+        CallbackSequencer().queue("1", l3)
         fires shouldNot contain("l3")
       }
 
@@ -101,8 +101,8 @@ class CallbackSequencerTest extends UdashSharedTest {
 
       listeners.size should be(count)
 
-      CallbackSequencer.sequence {
-        listeners.zipWithIndex.foreach { case (l, i) => CallbackSequencer.queue((i % 10).toString, l) }
+      CallbackSequencer().sequence {
+        listeners.zipWithIndex.foreach { case (l, i) => CallbackSequencer().queue((i % 10).toString, l) }
       }
 
       fires.size should be(10)

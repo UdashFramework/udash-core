@@ -155,7 +155,7 @@ trait ReadableProperty[A] {
   protected[properties] def parent: ReadableProperty[_]
 
   protected[properties] def fireValueListeners(): Unit = {
-    CallbackSequencer.queue(s"${this.id.toString}:fireValueListeners", () => {
+    CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
       val listenersCopy = CrossCollections.copyArray(listeners)
       val oneTimeListenersCopy = CrossCollections.copyArray(oneTimeListeners)
@@ -179,7 +179,7 @@ trait ReadableProperty[A] {
     if (validators.nonEmpty) {
       val p = Promise[ValidationResult]
       validationResult = p.future
-      CallbackSequencer.queue(s"${this.id.toString}:fireValidation", () => {
+      CallbackSequencer().queue(s"${this.id.toString}:fireValidation", () => {
         import Validator._
         val currentValue = this.get
         val cpy = CrossCollections.copyArray(validators)

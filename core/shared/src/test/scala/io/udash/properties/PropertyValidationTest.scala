@@ -71,7 +71,7 @@ class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedT
         r <- retrying(p.isValid.value.get.get should be(Valid))
       } yield r
     }
-/*
+
     "start on isValid call (only if needed)" in {
       val p = Property[Int](5)
       var fired = false
@@ -312,9 +312,9 @@ class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedT
         _ <- retrying(p.isValid shouldNot be(null))
         _ <- Future(p.set("Test 2"))
         _ <- retrying(p.isValid shouldNot be(null))
-        _ <- Future(CallbackSequencer.sequence { p.set("Test 3") })
+        _ <- Future(CallbackSequencer().sequence { p.set("Test 3") })
         _ <- retrying(p.isValid shouldNot be(null))
-        _ <- Future(CallbackSequencer.sequence {
+        _ <- Future(CallbackSequencer().sequence {
           p.set("Test 4")
           p.set("Test 5")
           p.set("Test 6")
@@ -341,13 +341,13 @@ class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedT
         _ <- retrying(v.get shouldNot be(Valid))
         _ <- Future(p.set("Test"))
         _ <- retrying(v.get should be(Valid))
-        _ <- Future(CallbackSequencer.sequence {
+        _ <- Future(CallbackSequencer().sequence {
           p.set("Test 4")
           p.set("Test")
           p.set("Te")
         })
         _ <- retrying(v.get shouldNot be(Valid))
-        _ <- Future(CallbackSequencer.sequence {
+        _ <- Future(CallbackSequencer().sequence {
           p.set("Test 4")
           p.set("T")
           p.set("Test 6")
@@ -359,6 +359,5 @@ class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedT
         r <- retrying(v.get should be(Valid))
       } yield r
     }
-    */
   }
 }

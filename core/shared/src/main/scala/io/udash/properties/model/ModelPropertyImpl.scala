@@ -33,7 +33,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     properties(key).asInstanceOf[Property[T]]
   }
 
-  def touch(): Unit = CallbackSequencer.sequence {
+  def touch(): Unit = CallbackSequencer().sequence {
     properties.values.foreach(_.touch())
   }
 
@@ -44,7 +44,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
   override def set(t: A, force: Boolean): Unit =
     if (!isEmpty || t != null) {
       if (t != null) isEmpty = false
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         internalSet(t, withCallbacks = true, force = force)
       }
     }
@@ -52,7 +52,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
   override def setInitValue(t: A): Unit =
     if (!isEmpty || t != null) {
       if (t != null) isEmpty = false
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         internalSet(t, withCallbacks = false, force = false)
       }
     }

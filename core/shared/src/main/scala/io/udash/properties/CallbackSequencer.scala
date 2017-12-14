@@ -1,7 +1,5 @@
 package io.udash.properties
 
-import io.udash.properties.single.Property
-
 import scala.collection.mutable
 
 /**
@@ -12,11 +10,11 @@ import scala.collection.mutable
  * running commit().
  * In code you should use sequence method to group operation over the Property.
  */
-object CallbackSequencer {
+class CallbackSequencer {
   type Id = String
 
   private var starts: Int = 0
-  private var queue: mutable.ArrayBuffer[(Id, () => Any)] = mutable.ArrayBuffer()
+  private var queue: CrossCollections.Array[(Id, () => Any)] = CrossCollections.createArray
 
   private def start(): Unit =
     starts += 1
@@ -52,5 +50,14 @@ object CallbackSequencer {
     } finally {
       end()
     }
+  }
+}
+
+object CallbackSequencer {
+  private val tl: ThreadLocal[CallbackSequencer] = new ThreadLocal[CallbackSequencer]
+
+  def apply(): CallbackSequencer = {
+    if (tl.get() == null) tl.set(new CallbackSequencer)
+    tl.get()
   }
 }

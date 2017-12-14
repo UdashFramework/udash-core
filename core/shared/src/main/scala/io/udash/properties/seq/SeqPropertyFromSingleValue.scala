@@ -23,7 +23,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
   origin.listen(update)
 
   private def structureChanged(patch: Patch[Property[B]]): Unit =
-    CallbackSequencer.queue(
+    CallbackSequencer().queue(
       s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
       () => structureListeners.foreach(_.apply(patch))
     )
@@ -50,7 +50,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
       Some(Patch(commonBegin, removed, Seq(), transformed.isEmpty))
     } else None
 
-    CallbackSequencer.sequence {
+    CallbackSequencer().sequence {
       transformed.zip(children)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }

@@ -26,7 +26,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val ModelPropertyCls = tq"$Package.model.ModelProperty"
   val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
   val CastablePropertyCls = tq"$Package.single.CastableProperty"
-  val CallbackSequencerCls = q"$Package.CallbackSequencer"
 
   val PatchCls = tq"$Package.SeqProperty.Patch"
 

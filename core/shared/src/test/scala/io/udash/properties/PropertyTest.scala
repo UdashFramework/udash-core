@@ -830,7 +830,7 @@ class PropertyTest extends UdashSharedTest {
       p.subProp(_.t.c).set(new C(321, "dsa"))
       values.size should be(5)
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.subSeq(_.t.s).insert(0, 'g')
         p.subSeq(_.t.s).insert(0, 'h')
         p.subSeq(_.t.s).insert(0, 'i')
@@ -1604,7 +1604,7 @@ class PropertyTest extends UdashSharedTest {
       states.clear()
       patches.clear()
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.elemProperties.foreach(el => el.set(el.get + 1))
         p.elemProperties.foreach(el => el.set(el.get - 1))
         p.elemProperties.foreach(el => el.set(el.get + 1))
@@ -1677,7 +1677,7 @@ class PropertyTest extends UdashSharedTest {
       states.clear()
       patches.clear()
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.append(2)
         p.append(4)
         p.append(6)
@@ -1778,7 +1778,7 @@ class PropertyTest extends UdashSharedTest {
       c.get should be(Seq(2, 4, 6, 8))
 
       lastPatch = null
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.set(1)
       }
       c.get should be(Seq(1, 2, 3, 4))
@@ -1787,7 +1787,7 @@ class PropertyTest extends UdashSharedTest {
       listenCalls should contain(Seq(1, 2, 3, 4))
 
       listenCalls.clear()
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.set(2)
       }
       listenCalls.size should be(1)
@@ -2085,7 +2085,7 @@ class PropertyTest extends UdashSharedTest {
       patches.last.added.size should be(1)
       patches.last.removed.size should be(1)
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.remove(1)
         numbers.remove(2)
       }
@@ -2229,7 +2229,7 @@ class PropertyTest extends UdashSharedTest {
       patches.last.added.size should be(1)
       patches.last.removed.size should be(2)
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.remove(1)
         numbers.remove(2)
       }
@@ -2288,7 +2288,7 @@ class PropertyTest extends UdashSharedTest {
       patches.last.added.size should be(6)
       patches.last.removed.size should be(7)
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.remove(1)
         numbers.remove(3)
       }

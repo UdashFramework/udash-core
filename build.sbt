@@ -40,7 +40,6 @@ val commonSettings = Seq(
   libraryDependencies ++= compilerPlugins.value,
   libraryDependencies ++= commonDeps.value,
   libraryDependencies ++= commonTestDeps.value,
-  parallelExecution in Test := false,
 )
 
 val commonJSSettings = Seq(
@@ -51,7 +50,8 @@ val commonJSSettings = Seq(
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
-  }
+  },
+  parallelExecution in Test := false,
 )
 
 val noPublishSettings = Seq(
