@@ -3,23 +3,25 @@ package io.udash.auth
 import io.udash.Application
 import io.udash.core._
 import io.udash.testing.AsyncUdashFrontendTest
-import io.udash.utils.Bidirectional
 
 
 class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with AuthFrontendTestUtils {
-  import PermissionCombinator.AllowAll
+
   import AuthApplication.ApplicationAuthExt
+  import PermissionCombinator.AllowAll
 
   class TestVF(p: Presenter[TestStates]) extends ViewFactory[TestStates] {
     override def create(): (View, Presenter[TestStates]) =
       (new FinalView {
+
         import scalatags.JsDom.all._
+
         override def getTemplate: Modifier = div().render
       }, p)
   }
 
-  val rr = new RoutingRegistry[TestStates] {
-    val (url2State, state2Url) = Bidirectional[String, TestStates] {
+  val rr: RoutingRegistry[TestStates] = new RoutingRegistry[TestStates] {
+    val (url2State, state2Url) = bidirectional {
       case "" => SomeState
       case "/s2" => SecondState
       case "/s3" => ThirdState
@@ -47,13 +49,13 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
       val app = new Application[TestStates](rr, vfr).withDefaultRoutingFailureListener(ThirdState)
       app.run(root)
       for {
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(SecondState)
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(SomeState)
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(ThirdState)
-        r <- eventually { app.currentState should be(ThirdState) }
+        r <- eventually(app.currentState should be(ThirdState))
       } yield r
     }
 
@@ -72,13 +74,13 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
       val app = new Application[TestStates](rr, vfr).withDefaultRoutingFailureListener(ThirdState)
       app.run(root)
       for {
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(SecondState)
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(SomeState)
-        _ <- eventually { app.currentState should be(ThirdState) }
+        _ <- eventually(app.currentState should be(ThirdState))
         _ = app.goTo(ThirdState)
-        r <- eventually { app.currentState should be(ThirdState) }
+        r <- eventually(app.currentState should be(ThirdState))
       } yield r
     }
   }

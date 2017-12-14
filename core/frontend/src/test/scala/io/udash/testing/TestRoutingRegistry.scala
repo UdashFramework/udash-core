@@ -3,9 +3,10 @@ package io.udash.testing
 import io.udash._
 
 import scala.collection.mutable
+import scala.util.matching.Regex
 
 class TestRoutingRegistry extends RoutingRegistry[TestState] {
-  val classStatePattern = "/(\\w+)/(\\d+)".r
+  val classStatePattern: Regex = "/(\\w+)/(\\d+)".r
 
   var urlsHistory: mutable.ArrayBuffer[Url] = mutable.ArrayBuffer.empty
   var statesHistory: mutable.ArrayBuffer[TestState] = mutable.ArrayBuffer.empty
@@ -14,7 +15,7 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
     urlsHistory.append(url)
     url.value match {
       case "/" => ObjectState
-      case "/root" /:/ v => RootState(Some(v.toInt))
+      case "/root" / v => RootState(Some(v.toInt))
       case "/exception" => ThrowExceptionState
       case "/next" => NextObjectState
       case classStatePattern(arg: String, arg2: String) => ClassState(arg, Integer.parseInt(arg2))
