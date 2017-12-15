@@ -21,7 +21,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag]
                     viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
                     viewRenderer: ViewRenderer) {
 
-  private val currentStateProp = Property[HierarchyRoot](implicitly[PropertyCreator[HierarchyRoot]])
+  private val currentStateProp = Property.empty[HierarchyRoot]
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 

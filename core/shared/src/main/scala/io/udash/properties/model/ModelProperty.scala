@@ -7,11 +7,13 @@ import io.udash.properties.single.{CastableProperty, CastableReadableProperty, P
 import scala.concurrent.Future
 
 object ModelProperty {
-  /** Creates an empty ModelProperty[T]. */
+  /** Creates an empty ModelProperty[T].
+    * It's not recommended to use this method. Use `apply` with initial value if possible. */
   def empty[T : ModelPropertyCreator]: ModelProperty[T] =
     Property.empty(implicitly[ModelPropertyCreator[T]]).asModel
 
   /** Creates an empty ModelProperty[T]. */
+  @deprecated("Use `ModelProperty.empty` instead.", "0.6.0")
   def apply[T : ModelPropertyCreator]: ModelProperty[T] =
     empty
 

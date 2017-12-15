@@ -53,7 +53,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           s"C($i)"
       }
 
-      val p = Property[C]
+      val p = Property.empty[C]
       val template = div(bind(p)).render
       val template2 = div(bind(p)).render
 
@@ -1403,8 +1403,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property[NumbersFilter]
-      val numbers = seq.SeqProperty[Int]
+      val filter = Property.empty[NumbersFilter]
+      val numbers = seq.SeqProperty.empty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1482,8 +1482,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property[NumbersFilter]
-      val numbers = seq.SeqProperty[Int]
+      val filter = Property.empty[NumbersFilter]
+      val numbers = seq.SeqProperty.empty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1537,8 +1537,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
 
-      val filter = Property[TodosFilter]
-      val todos = seq.SeqProperty[TodoElement]
+      val filter = Property.empty[TodosFilter]
+      val todos = seq.SeqProperty.empty[TodoElement]
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]

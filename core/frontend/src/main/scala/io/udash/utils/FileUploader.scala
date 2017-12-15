@@ -20,7 +20,9 @@ class FileUploader(url: Url) {
   /** Uploads provided `files` in a field named `fieldName`. */
   def upload(fieldName: String, files: Seq[File],
              extraData: Map[js.Any, js.Any] = Map.empty): ReadableModelProperty[FileUploadModel] = {
-    val p = ModelProperty[FileUploadModel]
+    val p = ModelProperty[FileUploadModel](
+      new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0)
+    )
     val data = new FormData()
 
     extraData.foreach { case (key, value) => data.append(key, value) }
@@ -51,7 +53,6 @@ class FileUploader(url: Url) {
     xhr.open(method = "POST", url = url.value)
     xhr.send(data)
 
-    p.subProp(_.state).set(FileUploadState.InProgress)
     p
   }
 }
@@ -67,11 +68,11 @@ object FileUploader {
     case object Cancelled extends Done
   }
 
-  trait FileUploadModel {
-    def files: Seq[File]
-    def state: FileUploadState
-    def bytesSent: Double
-    def bytesTotal: Double
-  }
+  class FileUploadModel(
+    val files: Seq[File],
+    val state: FileUploadState,
+    val bytesSent: Double,
+    val bytesTotal: Double
+  )
   object FileUploadModel extends HasModelPropertyCreator[FileUploadModel]
 }

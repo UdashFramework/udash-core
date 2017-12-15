@@ -803,7 +803,7 @@ class PropertyTest extends UdashSharedTest {
       val oneTimeValues = mutable.ArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
-      val p = ModelProperty[TT]
+      val p = ModelProperty.empty[TT]
       p.listen(listener, initUpdate = true)
       p.listenOnce(oneTimeListener)
 
@@ -875,7 +875,7 @@ class PropertyTest extends UdashSharedTest {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
-      val p = ModelProperty[TT]
+      val p = ModelProperty.empty[TT]
       val t = p.transform[Int](
         (p: TT) => p.i + p.t.c.i,
         (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
@@ -1017,8 +1017,8 @@ class PropertyTest extends UdashSharedTest {
       }
       implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
 
-      val p1 = ModelProperty[ModelWithImplDef]
-      val p2 = ModelProperty[ModelWithImplVal]
+      val p1 = ModelProperty.empty[ModelWithImplDef]
+      val p2 = ModelProperty.empty[ModelWithImplVal]
 
       p1.subProp(_.x).set(12)
       p1.subProp(_.x).get should be(12)
@@ -1303,7 +1303,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "fire value listeners on every child change" in {
-      val p = SeqProperty[Int]
+      val p = SeqProperty.empty[Int]
 
       val values = mutable.ArrayBuffer[Seq[Int]]()
       val listener = (s: Seq[Int]) => values += s
@@ -1332,7 +1332,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "fire structure listeners on structure change" in {
-      val p = SeqProperty[Int]
+      val p = SeqProperty.empty[Int]
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
@@ -1394,7 +1394,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "not fire structure listeners on child change" in {
-      val p = SeqProperty[Int]
+      val p = SeqProperty.empty[Int]
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s

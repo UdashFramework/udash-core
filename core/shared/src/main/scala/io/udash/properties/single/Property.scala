@@ -11,15 +11,17 @@ import scala.util.{Failure, Success}
 import scala.language.higherKinds
 
 object Property {
-  /** Creates an empty DirectProperty[T]. */
+  /** Creates an empty `DirectProperty[T]`.
+    * It's not recommended to use this method. Use `apply` with initial value if possible. */
   def empty[T](implicit pc: PropertyCreator[T]): CastableProperty[T] =
     pc.newProperty(null)
 
-  /** Creates an empty DirectProperty[T]. */
+  /** Creates an empty `DirectProperty[T]`. */
+  @deprecated("Use `Property.empty` instead.", "0.6.0")
   def apply[T: PropertyCreator]: CastableProperty[T] =
     empty
 
-  /** Creates DirectProperty[T] with initial value. */
+  /** Creates `DirectProperty[T]` with initial value. */
   def apply[T](init: T)(implicit pc: PropertyCreator[T]): CastableProperty[T] =
     pc.newProperty(init, null)
 

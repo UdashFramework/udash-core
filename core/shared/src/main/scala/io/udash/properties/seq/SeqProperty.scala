@@ -15,6 +15,7 @@ object SeqProperty {
     Property.empty[Seq[T]].asSeq[T]
 
   /** Creates an empty DirectSeqProperty[T]. */
+  @deprecated("Use `SeqProperty.empty` instead.", "0.6.0")
   def apply[T](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     empty
 

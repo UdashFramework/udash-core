@@ -285,7 +285,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
     "work with reduced keys in property" in {
       implicit val en = Lang("en")
-      val p: Property[TranslationKey0] = Property[TranslationKey0]
+      val p: Property[TranslationKey0] = Property.empty[TranslationKey0]
       val key1 = TranslationKey.key1[String]("tr1")
       p.set(key1.reduce("test"))
       retrying(p.get.apply().value.get.get.string should be("Translation test"))
@@ -293,7 +293,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
     "work with keys in property" in {
       implicit val en = Lang("en")
-      val p: Property[TranslationKey] = Property[TranslationKey]
+      val p: Property[TranslationKey] = Property.empty[TranslationKey]
       val key1 = TranslationKey.key1[String]("tr1")
       p.set(key1)
 
