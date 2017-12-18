@@ -14,7 +14,7 @@ class CallbackSequencer {
   type Id = String
 
   private var starts: Int = 0
-  private var queue: CrossCollections.Array[(Id, () => Any)] = CrossCollections.createArray
+  private var queue: mutable.Buffer[(Id, () => Any)] = CrossCollections.createArray
 
   private def start(): Unit =
     starts += 1

@@ -139,7 +139,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     elemProperties.nonEmpty
 
   protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
-    patch: Patch[ItemType], structureListeners: CrossCollections.Array[(Patch[ItemType]) => Any]
+    patch: Patch[ItemType], structureListeners: mutable.Buffer[(Patch[ItemType]) => Any]
   ): Unit = {
     val cpy = CrossCollections.copyArray(structureListeners)
     CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))

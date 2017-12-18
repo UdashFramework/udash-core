@@ -6,6 +6,7 @@ import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue, SeqProperty, SeqPropertyFromSingleValue}
 import io.udash.utils.Registration
 
+import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 import scala.language.higherKinds
@@ -51,11 +52,11 @@ object Property {
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
-  protected[this] val listeners: CrossCollections.Array[A => Any] = CrossCollections.createArray[A => Any]
-  protected[this] val oneTimeListeners: CrossCollections.Array[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
+  protected[this] val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
+  protected[this] val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
 
   protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] val validators: CrossCollections.Array[Validator[A]] = CrossCollections.createArray[Validator[A]]
+  protected[this] val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
   protected[this] var validationResult: Future[ValidationResult] = _
 
   /** Unique property ID. */

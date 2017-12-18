@@ -11,10 +11,10 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
                          (override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean)
   extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  private def loadPropsFromOrigin(): CrossCollections.Array[ElemType] =
+  private def loadPropsFromOrigin(): mutable.Buffer[ElemType] =
     CrossCollections.toCrossArray(origin.elemProperties.filter(el => matcher(el.get)))
 
-  private val filteredProps: CrossCollections.Array[ElemType] = loadPropsFromOrigin()
+  private val filteredProps: mutable.Buffer[ElemType] = loadPropsFromOrigin()
 
   private def elementChanged(p: ElemType)(v: A): Unit = {
     val props = loadPropsFromOrigin()
