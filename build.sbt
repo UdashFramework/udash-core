@@ -266,15 +266,25 @@ lazy val `css-macros` = project.in(file("css/macros"))
     libraryDependencies ++= cssMacroDeps.value
   )
 
-lazy val `css-shared` = crossProject.crossType(CrossType.Pure).in(file("css/shared"))
-  .jsConfigure(_.dependsOn(`css-macros`, `core-shared-JS` % Test))
-  .jvmConfigure(_.dependsOn(`css-macros`, `core-shared-JVM` % Test))
-  .settings(commonSettings: _*)
-  .jsSettings(commonJSSettings: _*)
-  .settings(libraryDependencies ++= cssMacroDeps.value)
+lazy val `css-shared-JVM` = project.in(file("css/shared"))
+  .dependsOn(`css-macros`, `core-shared-JVM` % CompileAndTest)
+  .settings(
+    commonSettings,
+    sourceDirsSettings(_ / ".jvm"),
+    libraryDependencies ++= cssMacroDeps.value,
+  )
 
-lazy val `css-shared-JVM` = `css-shared`.jvm
-lazy val `css-shared-JS` = `css-shared`.js
+lazy val `css-shared-JS` = project.in(`css-shared-JVM`.base / ".js")
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(`css-macros`, `core-shared-JS` % CompileAndTest)
+  .configure(p => if (forIdeaImport) p.dependsOn(`css-shared-JVM`) else p)
+  .settings(
+    commonSettings,
+    commonJSSettings,
+    name := (name in `auth-shared-JVM`).value,
+    sourceDirsSettings(_.getParentFile),
+    libraryDependencies ++= cssMacroDeps.value,
+  )
 
 lazy val `css-backend` = project.in(file("css/backend"))
   .dependsOn(`css-shared-JVM` % CompileAndTest, `core-shared-JVM` % TestAll)
