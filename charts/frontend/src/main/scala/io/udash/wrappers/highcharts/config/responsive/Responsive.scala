@@ -3,7 +3,6 @@ package io.udash.wrappers.highcharts.config.responsive
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait Responsive extends js.Object {
 
   /**

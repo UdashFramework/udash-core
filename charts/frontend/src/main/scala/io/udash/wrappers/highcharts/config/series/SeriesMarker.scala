@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
 
   /**
@@ -76,10 +75,8 @@ trait BaseSeriesMarker[States <: BaseSeriesMarkerStates[_]] extends js.Object {
   val width: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
 
-@js.annotation.ScalaJSDefined
 trait SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
 
 object SeriesMarker {

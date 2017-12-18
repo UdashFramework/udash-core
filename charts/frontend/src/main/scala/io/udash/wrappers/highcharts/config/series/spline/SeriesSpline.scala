@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesSpline extends StrictLineSeries {
   override type Data = js.Array[SeriesSplineData | js.Array[String | Double] | Double]
   override type DataLabels = SeriesDataLabels

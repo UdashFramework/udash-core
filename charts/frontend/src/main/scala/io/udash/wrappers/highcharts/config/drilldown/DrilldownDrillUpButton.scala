@@ -7,7 +7,6 @@ import io.udash.wrappers.highcharts.config.utils.Position
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait DrilldownDrillUpButton extends js.Object {
 
   /**

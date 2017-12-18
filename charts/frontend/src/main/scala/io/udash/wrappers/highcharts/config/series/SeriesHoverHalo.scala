@@ -5,7 +5,6 @@ package series
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesHoverHalo extends js.Object {
   /**
     * A collection of SVG attributes to override the appearance of the halo,

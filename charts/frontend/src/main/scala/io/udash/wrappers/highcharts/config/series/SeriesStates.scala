@@ -5,7 +5,6 @@ package series
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesStates[Hover <: SeriesStatesHover] extends js.Object {
 
   /**
@@ -14,10 +13,8 @@ trait SeriesStates[Hover <: SeriesStatesHover] extends js.Object {
   val hover: js.UndefOr[Hover] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesAreaStates extends SeriesStates[SeriesAreaStatesHover]
 
-@js.annotation.ScalaJSDefined
 trait SeriesBarStates extends SeriesStates[SeriesBarStatesHover]
 
 object SeriesAreaStates {

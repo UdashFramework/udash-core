@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.{Animation, Color, Shadow}
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesPyramid extends PieLikeSeries {
   override type Data = js.Array[SeriesPyramidData | Double]
   override type DataLabels = SeriesConnectorDataLabels

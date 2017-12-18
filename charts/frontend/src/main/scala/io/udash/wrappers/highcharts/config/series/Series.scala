@@ -6,7 +6,6 @@ package series
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait Series extends js.Object {
   type Data
   type DataLabels <: BaseSeriesDataLabels
@@ -247,7 +246,6 @@ trait Series extends js.Object {
   val zIndex: js.UndefOr[Int] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait StandardSeries extends Series {
   type States <: SeriesStates[_]
 
@@ -289,7 +287,6 @@ trait StandardSeries extends Series {
   val zones: js.UndefOr[js.Array[SeriesZone]] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait XYSeries extends StandardSeries {
   /**
     * When using dual or multiple x axes, this number defines which xAxis the particular series is connected to.
@@ -306,7 +303,6 @@ trait XYSeries extends StandardSeries {
   val yAxis: js.UndefOr[Int | String] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait PointSeries extends XYSeries {
   /**
     * <p>If no x values are given for the points in a series, pointInterval defines
@@ -338,7 +334,6 @@ trait PointSeries extends XYSeries {
   val pointStart: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BoxSeries extends PointSeries {
   /**
     * When using automatic point colors pulled from the <code>options.colors</code>
@@ -448,7 +443,6 @@ trait BoxSeries extends PointSeries {
   val pointWidth: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BarSeries extends BoxSeries {
   /**
     * The color of the border surrounding each column or bar.
@@ -490,7 +484,6 @@ trait BarSeries extends BoxSeries {
   val minPointLength: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait NonRangeBarSeries extends BarSeries {
   /**
     * <p>When this is true, the series will not cause the Y axis to cross the zero plane
@@ -515,7 +508,6 @@ trait NonRangeBarSeries extends BarSeries {
   val threshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait StrictBarSeries extends NonRangeBarSeries {
   /**
     * When the series contains less points than the crop threshold, all points are drawn,
@@ -556,7 +548,6 @@ trait StrictBarSeries extends NonRangeBarSeries {
   val turboThreshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait LineSeries extends PointSeries {
   /**
     * Polar charts only. Whether to connect the ends of a line series plot across the extremes.
@@ -662,7 +653,6 @@ trait LineSeries extends PointSeries {
   val turboThreshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait AreaLineSeries extends LineSeries {
   /**
     * Fill color or gradient for the area. When <code>null</code>, the series' <code>color</code>  is
@@ -703,7 +693,6 @@ trait AreaLineSeries extends LineSeries {
   val trackByArea: js.UndefOr[Boolean] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait StrictLineSeries extends LineSeries {
   val marker: js.UndefOr[SeriesMarker] = js.undefined
 
@@ -737,7 +726,6 @@ trait StrictLineSeries extends LineSeries {
   val threshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait FreePointsSeries extends PointSeries {
   /**
     * When the series contains less points than the crop threshold, all points are drawn,
@@ -798,7 +786,6 @@ trait FreePointsSeries extends PointSeries {
   val turboThreshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait MapSeries extends XYSeries {
   /**
     * The color of the border surrounding each column or bar.
@@ -857,7 +844,6 @@ trait MapSeries extends XYSeries {
   val turboThreshold: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait PieLikeSeries extends StandardSeries {
   /**
     * The color of the border surrounding each slice. When <code>null</code>, the border takes the same color as the slice fill.
@@ -910,7 +896,6 @@ trait PieLikeSeries extends StandardSeries {
   val slicedOffset: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait CandleLikeSeries extends BoxSeries {
   /**
     * The width of the line surrounding the box.
@@ -984,7 +969,6 @@ trait CandleLikeSeries extends BoxSeries {
   val whiskerWidth: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait GaugeSeries extends Series {
   override type DataLabels = SeriesDataLabels
 

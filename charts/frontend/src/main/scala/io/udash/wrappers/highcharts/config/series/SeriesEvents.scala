@@ -8,7 +8,6 @@ import io.udash.wrappers.jquery.JQueryEvent
 import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
-@js.annotation.ScalaJSDefined
 trait SeriesEvents extends js.Object {
 
   /**

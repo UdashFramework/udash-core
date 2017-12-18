@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesColumnrange extends BarSeries {
   override type Data = js.Array[SeriesColumnrangeData | js.Array[String | Double]]
   override type DataLabels = SeriesRangeDataLabels

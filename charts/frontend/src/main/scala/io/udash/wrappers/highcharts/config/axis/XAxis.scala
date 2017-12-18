@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
-@js.annotation.ScalaJSDefined
 trait XAxis extends Axis[XAxis, XAxisEvents] {
   /**
     * Applies only when the axis type is category. When nameToX is true, points are placed on the X axis according to their names.

@@ -6,7 +6,6 @@ package chart
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait ChartOptions3d extends js.Object {
 
   /**

@@ -9,7 +9,6 @@ import io.udash.wrappers.jquery._
 import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
-@js.annotation.ScalaJSDefined
 trait SeriesPointEvents extends js.Object {
 
   /**

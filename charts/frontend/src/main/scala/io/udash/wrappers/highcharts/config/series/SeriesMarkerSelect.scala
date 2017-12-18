@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait SeriesMarkerSelect extends js.Object {
   /**
     * Enable or disable visible feedback for selection.

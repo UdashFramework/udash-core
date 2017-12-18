@@ -6,7 +6,6 @@ package legend
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait LegendTitle extends js.Object {
 
   /**
