@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesBoxplotData extends BaseTwoDimSeriesData[BaseSeriesDataLabels] {
   /**
     * The <code>high</code> value for each data point, signifying the highest value in the sample set. The top whisker is drawn here.

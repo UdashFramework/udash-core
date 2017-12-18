@@ -9,7 +9,6 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 
-@js.annotation.ScalaJSDefined
 trait ChartOptions3dFrame extends js.Object {
   /**
     * Defines the back panel of the frame around 3D charts.
@@ -30,8 +29,7 @@ trait ChartOptions3dFrame extends js.Object {
 object ChartOptions3dFrame {
   import scala.scalajs.js.JSConverters._
 
-  @js.annotation.ScalaJSDefined
-  class ChartOptions3dFrameData extends js.Object {
+    class ChartOptions3dFrameData extends js.Object {
     /** The color of the panel. */
     val color: js.UndefOr[String | js.Object] = js.undefined
 

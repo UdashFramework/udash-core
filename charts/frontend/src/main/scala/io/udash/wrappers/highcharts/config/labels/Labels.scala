@@ -6,7 +6,6 @@ package labels
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Labels extends js.Object {
 
   /**

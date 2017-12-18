@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Position
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Credits extends js.Object {
 
   /**

@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
-@js.annotation.ScalaJSDefined
 trait AxisPlotBand extends js.Object {
   /**
     * Border color for the plot band. Also requires <code>borderWidth</code> to be set.
@@ -72,10 +71,8 @@ trait AxisPlotBand extends js.Object {
   val zIndex: js.UndefOr[Int] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait XAxisPlotBand extends AxisPlotBand
 
-@js.annotation.ScalaJSDefined
 trait YAxisPlotBand extends AxisPlotBand {
   /**
     * In a gauge chart, this option determines the inner radius of the plot band that stretches along the perimeter.
@@ -105,7 +102,6 @@ trait YAxisPlotBand extends AxisPlotBand {
   val thickness: js.UndefOr[Double | String] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait ZAxisPlotBand extends AxisPlotBand
 
 object XAxisPlotBand {

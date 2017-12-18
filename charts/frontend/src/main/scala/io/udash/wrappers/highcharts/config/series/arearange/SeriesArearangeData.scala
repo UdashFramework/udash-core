@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesArearangeData extends BaseXSeriesData[SeriesRangeDataLabels] {
   /**
     * The high or maximum value for each data point.

@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.DateTimeLabelFormats
 import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
-@js.annotation.ScalaJSDefined
 trait SeriesTooltip extends js.Object {
 
   /**

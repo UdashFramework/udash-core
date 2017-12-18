@@ -6,7 +6,6 @@ package series
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait BaseSeriesData[DataLabels <: BaseSeriesDataLabels] extends js.Object {
 
   /**
@@ -71,7 +70,6 @@ trait BaseSeriesData[DataLabels <: BaseSeriesDataLabels] extends js.Object {
   val selected: js.UndefOr[Boolean] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BaseXSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The x value of the point.
@@ -79,7 +77,6 @@ trait BaseXSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData
   val x: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BaseYSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The y value of the point.
@@ -87,7 +84,6 @@ trait BaseYSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData
   val y: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BaseTwoDimSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSeriesData[DataLabels] {
   /**
     * The x value of the point.
@@ -100,7 +96,6 @@ trait BaseTwoDimSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseSerie
   val y: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait BaseTwoDimMarkerSeriesData[DataLabels <: BaseSeriesDataLabels] extends BaseTwoDimSeriesData[DataLabels] {
   val marker: js.UndefOr[SeriesDataMarker] = js.undefined
 }

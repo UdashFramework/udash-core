@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.{Color, DashStyle}
 import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, |}
 
-@js.annotation.ScalaJSDefined
 trait AxisPlotLine extends js.Object {
 
   /**

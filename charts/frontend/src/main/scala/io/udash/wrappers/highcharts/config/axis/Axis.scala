@@ -5,7 +5,6 @@ package axis
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait BaseAxis[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEventsType <: BaseAxisEvents[AxisType]] extends js.Object {
   /**
     * Whether to force the axis to end on a tick. Use this option with the <a href="#colorAxis.maxPadding">maxPadding</a> option to control the axis end.
@@ -238,7 +237,6 @@ trait BaseAxis[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEventsType <:
   val `type`: js.UndefOr[String] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait Axis[AxisType <: Axis[AxisType, AxisEventsType], AxisEventsType <: AxisEvents[AxisType]] extends BaseAxis[AxisType, AxisEventsType] {
   /**
     * Whether to allow decimals in this axis' ticks. When counting integers, like persons or hits on a web page,

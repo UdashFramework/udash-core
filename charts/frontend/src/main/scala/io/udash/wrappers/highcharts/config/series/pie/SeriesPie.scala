@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.{Animation, Color, Shadow}
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesPie extends PieLikeSeries {
   override type Data = js.Array[SeriesPieData | Double]
   override type DataLabels = SeriesConnectorDataLabels

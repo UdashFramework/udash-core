@@ -39,7 +39,7 @@ val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   libraryDependencies ++= compilerPlugins.value,
   libraryDependencies ++= commonDeps.value,
-  libraryDependencies ++= commonTestDeps.value
+  libraryDependencies ++= commonTestDeps.value,
 )
 
 val commonJSSettings = Seq(
@@ -51,7 +51,8 @@ val commonJSSettings = Seq(
     val localDir = (baseDirectory in ThisBuild).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
-  }
+  },
+  scalacOptions += "-P:scalajs:sjsDefinedByDefault",
 )
 
 val noPublishSettings = Seq(

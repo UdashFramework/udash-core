@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesPolygonData extends BaseTwoDimMarkerSeriesData[SeriesDataLabels]
 
 object SeriesPolygonData {

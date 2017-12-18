@@ -6,7 +6,6 @@ import io.udash.wrappers.highcharts.api
 import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
-@js.annotation.ScalaJSDefined
 trait ResponsiveRuleCondition extends js.Object {
   /**
     * A callback function to gain complete control on when the responsive rule applies. Return <code>true</code> if it applies.

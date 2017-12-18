@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait SeriesStatesHover extends js.Object {
 
   /**
@@ -28,7 +27,6 @@ trait SeriesStatesHover extends js.Object {
   val halo: js.UndefOr[SeriesHoverHalo] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesAreaStatesHover extends SeriesStatesHover {
   /**
     * Pixel with of the graph line.
@@ -51,7 +49,6 @@ trait SeriesAreaStatesHover extends SeriesStatesHover {
   val marker: js.UndefOr[SeriesMarker] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesBarStatesHover extends SeriesStatesHover {
   /**
     * A specific border color for the hovered point. Defaults to inherit the normal state border color.

@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesAreaspline extends AreaLineSeries {
   override type Data = js.Array[SeriesAreasplineData | js.Array[String | Double] | Double]
   override type DataLabels = SeriesDataLabels

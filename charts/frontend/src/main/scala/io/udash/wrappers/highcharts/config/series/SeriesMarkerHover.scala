@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait BaseSeriesMarkerHover extends js.Object {
 
   /**
@@ -33,7 +32,6 @@ trait BaseSeriesMarkerHover extends js.Object {
   val lineWidthPlus: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesMarkerHover extends BaseSeriesMarkerHover {
 
   /**
@@ -64,7 +62,6 @@ trait SeriesMarkerHover extends BaseSeriesMarkerHover {
   val radiusPlus: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesDataMarkerHover extends BaseSeriesMarkerHover {
   /**
     * Options for the halo appearing around the hovered point in line-type series as well as outside the hovered slice in pie charts.
