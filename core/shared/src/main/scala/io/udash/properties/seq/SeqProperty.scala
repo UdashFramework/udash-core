@@ -11,20 +11,20 @@ import scala.concurrent.Future
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
-  def empty[T](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def empty[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.empty[Seq[T]].asSeq[T]
 
   /** Creates an empty DirectSeqProperty[T]. */
   @deprecated("Use `SeqProperty.empty` instead.", "0.6.0")
-  def apply[T](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     empty
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T : PropertyCreator](item: T, more: T*)(implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T : PropertyCreator](init: Seq[T])(implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property[Seq[T]](init).asSeq[T]
 }
 
@@ -66,7 +66,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     new FilteredSeqProperty[A, ElemType](this, matcher)
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
-  def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
+  def combine[B, O : PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
     class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B])
       extends ReadableSeqProperty[O, ReadableProperty[O]] {
 
@@ -108,12 +108,12 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   }
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
-  def zip[B, O](property: ReadableSeqProperty[B, ReadableProperty[B]])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+  def zip[B, O : PropertyCreator](property: ReadableSeqProperty[B, ReadableProperty[B]])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
     new ZippedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
     * Uses `defaultA` and `defaultB` to fill smaller sequence. */
-  def zipAll[B, O](property: ReadableSeqProperty[B, ReadableProperty[B]])
+  def zipAll[B, O : PropertyCreator](property: ReadableSeqProperty[B, ReadableProperty[B]])
                   (combiner: (A, B) => O,
                    defaultA: ReadableProperty[A],
                    defaultB: ReadableProperty[B]): ReadableSeqProperty[O, ReadableProperty[O]] =

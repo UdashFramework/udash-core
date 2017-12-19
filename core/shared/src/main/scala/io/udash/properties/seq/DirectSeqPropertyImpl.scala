@@ -6,8 +6,7 @@ import io.udash.properties.{CrossCollections, CrossRegistration, PropertyCreator
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
 import io.udash.utils.Registration
 
-class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
-                              (implicit propertyCreator: PropertyCreator[A])
+class DirectSeqPropertyImpl[A : PropertyCreator](val parent: ReadableProperty[_], override val id: UUID)
   extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
@@ -18,7 +17,7 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
 
   override def replace(idx: Int, amount: Int, values: A*): Unit = {
     val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
-    val newProperties = if (values != null) values.map(value => propertyCreator.newProperty(value, this)) else Seq.empty
+    val newProperties = if (values != null) values.map(value => implicitly[PropertyCreator[A]].newProperty(value, this)) else Seq.empty
 
     CrossCollections.replace(properties, idx, amount, newProperties: _*)
 
@@ -32,7 +31,7 @@ class DirectSeqPropertyImpl[A](val parent: ReadableProperty[_], override val id:
     }
 
   override def setInitValue(t: Seq[A]): Unit = {
-    val newProperties = t.map(value => propertyCreator.newProperty(value, this))
+    val newProperties = t.map(value => implicitly[PropertyCreator[A]].newProperty(value, this))
     properties.insertAll(0, newProperties)
   }
 

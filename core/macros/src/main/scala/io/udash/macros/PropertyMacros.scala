@@ -86,7 +86,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val isClass: Boolean = tpe.typeSymbol.isClass
     val isTrait = isClass && tpe.typeSymbol.asClass.isTrait
     val isNotSealedTrait = isClass && !tpe.typeSymbol.asClass.isSealed
-    val isNotSeq = !(tpe <:< SeqTpe) && !(tpe <:< MutableSeqTpe)
+    val isNotSeq = !(tpe <:< SeqTpe)
 
     val members = filterMembers(tpe)
     val unimplementableTraitMembers = members.collect {
@@ -344,12 +344,25 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   def reifyMacroModelPropertyCreator[A: c.WeakTypeTag](ev: c.Tree): c.Tree = {
-    val tpe = weakTypeOf[A]
     q"""
       new $MacroModelPropertyCreatorCls(
         ${reifyModelPropertyCreator[A](ev)}
       )
     """
+  }
+
+  def reifyPropertyCreator[A: c.WeakTypeTag]: c.Tree = {
+    val tpe = weakTypeOf[A].dealias
+
+    if (!tpe.typeSymbol.isClass) {
+      c.abort(c.enclosingPosition, "You cannot create Property based on generic type.")
+    } else if (tpe.typeConstructor =:= SeqTpe.typeConstructor) {
+      q"new $PropertyCreatorCls[$tpe](prt => new $DirectSeqPropertyImplCls[${tpe.typeArgs.head}](prt, $PropertyCreatorCompanion.newID()))"
+    } else {
+      val mpc = c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$tpe]]", silent = true)
+      if (mpc != EmptyTree) mpc
+      else q"new $PropertyCreatorCls[$tpe](prt => new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()))"
+    }
   }
 
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {

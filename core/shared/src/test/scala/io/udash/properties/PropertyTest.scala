@@ -3,18 +3,20 @@ package io.udash.properties
 import com.avsystem.commons.misc.AbstractCase
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
-import io.udash.properties.single.{Property, ReadableProperty}
+import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.testing.UdashSharedTest
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
 
 class PropertyTest extends UdashSharedTest {
-  class C(val i: Int, val s: String) extends AbstractCase {
+  class C(val i: Int, val s: String) {
     var variable: Int = 7
-    override def productArity: Int = 2
-    override def productElement(n: Int): Any =
-      if (n == 0) i else s
+    override def equals(obj: Any): Boolean = obj match {
+      case self if self.asInstanceOf[AnyRef] eq this.asInstanceOf[AnyRef] => true
+      case c: C => c.i == this.i && c.s == this.s
+      case _ => false
+    }
   }
 
   trait TT {
@@ -1032,15 +1034,15 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "handle case class with implemented defs and vals" in {
-      trait Utils {
-        val userLabel: String = "User:"
-      }
-      case class User(login: String, name: Option[String]) extends Utils {
-        val displayName: String = name.getOrElse(login)
+trait Utils {
+  val userLabel: String = "User:"
+}
+case class User(login: String, name: Option[String]) extends Utils {
+  val displayName: String = name.getOrElse(login)
 
-        def withLabel: String =
-          s"$userLabel $displayName"
-      }
+  def withLabel: String =
+    s"$userLabel $displayName"
+}
       implicit val propertyCreator: ModelPropertyCreator[User] = MacroModelPropertyCreator.materialize[User].pc
 
       val p = ModelProperty[User](User("udash", Some("Udash Framework")))
@@ -1096,6 +1098,29 @@ class PropertyTest extends UdashSharedTest {
       p.get.a should be(null)
       p.get.s.x should be(7)
       sub.get.x should be(7)
+    }
+
+    "handle generic types" in {
+      case class Bla[Type](x: Int, s: String, t: Type)
+      object Bla {
+        implicit def pc[Type : PropertyCreator]: ModelPropertyCreator[Bla[Type]] =
+          ModelPropertyCreator.materialize[Bla[Type]]
+      }
+
+      def create[A : PropertyCreator, B : PropertyCreator, D : PropertyCreator](a: A, b: B, d: D): SeqProperty[(A, B, D), CastableProperty[(A, B, D)]] =
+        SeqProperty(Seq.tabulate(10)(_ => (a, b, d)))
+
+      val s = create(Bla(5, "asd2", Bla(7, "qwe", 1)), 8, "asd")
+      s.elemProperties.foreach { v =>
+        val p = v.asModel
+        p.subProp(_._1.x).get should be(5)
+        p.subProp(_._1.s).get should be("asd2")
+        p.subProp(_._1.t.x).get should be(7)
+        p.subProp(_._1.t.s).get should be("qwe")
+        p.subProp(_._1.t.t).get should be(1)
+        p.subProp(_._2).get should be(8)
+        p.subProp(_._3).get should be("asd")
+      }
     }
   }
 

@@ -781,5 +781,21 @@ class PropertyCreatorTest extends UdashSharedTest {
         |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator.propertyCreator[Seq[T]]
         |}""".stripMargin should compile
     }
+
+    "not create property for generic type" in {
+      """def create[Type : PropertyCreator](v: Type): CastableProperty[Type] = Property(v)
+        |
+        |case class Test(a: Int, b: String)
+        |object Test extends HasModelPropertyCreator[Test]
+        |
+        |create(Test(5, "asd")).asModel.subProp(_.a).get should be(5)""".stripMargin shouldNot compile
+
+      """def create[Type : PropertyCreator](v: Type): SeqProperty[Type, CastableProperty[Type]] = SeqProperty(Seq(v))
+        |
+        |case class Test(a: Int, b: String)
+        |object Test extends HasModelPropertyCreator[Test]
+        |
+        |create(Test(5, "asd")).elemProperties(0).asModel.subProp(_.a).get should be(5)""".stripMargin shouldNot compile
+    }
   }
 }

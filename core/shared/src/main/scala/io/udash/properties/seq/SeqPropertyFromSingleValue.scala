@@ -9,8 +9,7 @@ import io.udash.utils.{Registration, SetRegistration}
 import scala.collection.mutable
 
 private[properties]
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
-                                                     (origin: ReadableProperty[A], transformer: A => Seq[B])
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends ReadableSeqProperty[B, ReadableProperty[B]] {
 
   override val id: UUID = PropertyCreator.newID()
@@ -67,7 +66,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B]
 }
 
 private[properties]
-class ReadableSeqPropertyFromSingleValue[A, B](origin: ReadableProperty[A], transformer: A => Seq[B])
+class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(structureListener: (Patch[ReadableProperty[B]]) => Any): Registration = {
@@ -77,7 +76,7 @@ class ReadableSeqPropertyFromSingleValue[A, B](origin: ReadableProperty[A], tran
 }
 
 private[properties]
-class SeqPropertyFromSingleValue[A, B](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
+class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
   extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer) with SeqProperty[B, Property[B]] {
 
   override def replace(idx: Int, amount: Int, values: B*): Unit = {

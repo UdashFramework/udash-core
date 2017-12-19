@@ -38,9 +38,11 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
   def roSubSeq[B](f: A => Seq[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
 
-  /** ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
+  /**
+    * ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
     *
-    * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
+    * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed.
+    */
   override def isValid: Future[ValidationResult] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     import Validator._
