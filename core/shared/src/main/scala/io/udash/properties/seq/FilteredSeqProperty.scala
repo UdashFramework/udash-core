@@ -1,6 +1,6 @@
 package io.udash.properties.seq
 
-import io.udash.properties.{CrossCollections, CrossRegistration}
+import io.udash.properties.{CrossCollections, MutableBufferRegistration}
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
 
@@ -61,7 +61,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
   override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
     structureListeners += structureListener
-    new CrossRegistration(structureListeners, structureListener)
+    new MutableBufferRegistration(structureListeners, structureListener)
   }
 
   override def elemProperties: Seq[ElemType] =

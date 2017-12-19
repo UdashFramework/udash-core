@@ -1,6 +1,6 @@
 package io.udash.properties.seq
 
-import io.udash.properties.{CrossCollections, CrossRegistration}
+import io.udash.properties.{CrossCollections, MutableBufferRegistration}
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
 import io.udash.utils.Registration
 
@@ -44,7 +44,7 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
     initOriginListeners()
     structureListeners += structureListener
-    wrapListenerRegistration(new CrossRegistration(structureListeners, structureListener))
+    wrapListenerRegistration(new MutableBufferRegistration(structureListeners, structureListener))
   }
 
   override def listen(valueListener: (Seq[B]) => Any, initUpdate: Boolean = false): Registration = {

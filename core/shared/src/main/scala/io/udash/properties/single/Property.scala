@@ -72,12 +72,12 @@ trait ReadableProperty[A] {
   def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
     if (initUpdate) valueListener(this.get)
-    new CrossRegistration(listeners, valueListener)
+    new MutableBufferRegistration(listeners, valueListener)
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
   def listenOnce(valueListener: A => Any): Registration = {
-    val reg = new CrossRegistration(listeners, valueListener)
+    val reg = new MutableBufferRegistration(listeners, valueListener)
     oneTimeListeners += ((valueListener, () => reg.cancel()))
     reg
   }
@@ -213,7 +213,7 @@ trait Property[A] extends ReadableProperty[A] {
   def addValidator(v: Validator[A]): Registration = {
     validators += v
     validationResult = null
-    new CrossRegistration(validators, v)
+    new MutableBufferRegistration(validators, v)
   }
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */

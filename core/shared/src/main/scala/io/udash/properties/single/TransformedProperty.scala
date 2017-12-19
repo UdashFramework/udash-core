@@ -55,7 +55,7 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
 
   override def listenOnce(valueListener: (B) => Any): Registration = {
     initOriginListener()
-    val reg = wrapListenerRegistration(new CrossRegistration(listeners, valueListener))
+    val reg = wrapListenerRegistration(new MutableBufferRegistration(listeners, valueListener))
     oneTimeListeners += ((valueListener, () => reg.cancel()))
     reg
   }
