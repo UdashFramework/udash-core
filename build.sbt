@@ -53,6 +53,7 @@ val commonJSSettings = Seq(
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
   parallelExecution in Test := false,
+  scalacOptions += "-P:scalajs:sjsDefinedByDefault",
 )
 
 val noPublishSettings = Seq(

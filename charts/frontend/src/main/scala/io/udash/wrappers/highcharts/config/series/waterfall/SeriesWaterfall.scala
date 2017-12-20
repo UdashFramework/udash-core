@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesWaterfall extends NonRangeBarSeries {
   override type Data = js.Array[SeriesWaterfallData | js.Array[Double] | Double]
   override type DataLabels = SeriesDataLabels

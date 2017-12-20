@@ -23,7 +23,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait HighchartsConfig extends js.Object {
   /**
     * <p>Options for configuring accessibility for the chart.

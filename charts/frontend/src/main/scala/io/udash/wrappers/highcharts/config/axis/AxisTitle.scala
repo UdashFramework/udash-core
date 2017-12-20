@@ -7,7 +7,6 @@ import io.udash.wrappers.highcharts.config.utils.TitleAlign
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait AxisTitle extends js.Object {
 
   /**

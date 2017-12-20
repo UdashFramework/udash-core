@@ -9,7 +9,6 @@ import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
 
-@js.annotation.ScalaJSDefined
 trait YAxis extends Axis[YAxis, YAxisEvents] {
 
   /**

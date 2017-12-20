@@ -5,7 +5,6 @@ package global
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait Global extends js.Object {
 
   /**

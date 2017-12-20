@@ -7,7 +7,6 @@ import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Loading extends js.Object {
 
   /**

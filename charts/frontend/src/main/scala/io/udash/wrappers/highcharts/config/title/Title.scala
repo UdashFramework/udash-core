@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.{Align, VerticalAlign}
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Title extends AbstractTitle {
   /**
     * The margin between the title and the plot area, or if a subtitle is present, the margin between the subtitle and the plot area.

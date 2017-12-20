@@ -10,7 +10,6 @@ import scala.scalajs.js.`|`
 /**
   * @note JavaScript name: <code>colorAxis-marker</code>
   */
-@js.annotation.ScalaJSDefined
 trait ColorAxisMarker extends js.Object {
 
   /**

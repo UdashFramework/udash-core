@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.{Animation, Color}
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesGauge extends GaugeSeries {
   override type Data = js.Array[SeriesGaugeData | Double]
 

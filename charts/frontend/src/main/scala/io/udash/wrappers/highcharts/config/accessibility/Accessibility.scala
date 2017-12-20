@@ -6,7 +6,6 @@ import io.udash.wrappers.highcharts.api
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait Accessibility extends js.Object {
 
   /**

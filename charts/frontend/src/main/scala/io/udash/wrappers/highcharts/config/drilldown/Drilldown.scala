@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.Animation
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait Drilldown extends js.Object {
 
   /**

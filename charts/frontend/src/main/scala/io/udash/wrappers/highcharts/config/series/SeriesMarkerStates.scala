@@ -5,17 +5,14 @@ package series
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait BaseSeriesMarkerStates[Hover <: BaseSeriesMarkerHover] extends js.Object {
   val hover: js.UndefOr[Hover] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesMarkerStates extends BaseSeriesMarkerStates[SeriesMarkerHover] {
   val select: js.UndefOr[SeriesMarkerSelect] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesDataMarkerStates extends BaseSeriesMarkerStates[SeriesDataMarkerHover]
 
 object SeriesMarkerStates {

@@ -6,7 +6,6 @@ package exporting
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait ExportingButtons extends js.Object {
 
   /**
