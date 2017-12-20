@@ -29,11 +29,11 @@ scala:
   - 2.12.4
 
 env:
-  - TEST_PACKAGE="core-macros/test core-shared-JVM/test core-shared-JS/test core-frontend/test"
-  - TEST_PACKAGE="rpc-shared-JVM/test rpc-shared-JS/test rpc-backend/test rpc-frontend/test"
-  - TEST_PACKAGE="rest-macros/test rest-shared-JVM/test rest-shared-JS/test rest-backend/test"
-  - TEST_PACKAGE="i18n-shared-JVM/test i18n-shared-JS/test i18n-backend/test i18n-frontend/test"
+  - TEST_PACKAGE="core-macros/test core-shared/test core-shared-JS/test core-frontend/test"
+  - TEST_PACKAGE="rpc-shared/test rpc-shared-JS/test rpc-backend/test rpc-frontend/test"
+  - TEST_PACKAGE="rest-macros/test rest-shared/test rest-shared-JS/test rest-backend/test"
+  - TEST_PACKAGE="i18n-shared/test i18n-shared-JS/test i18n-backend/test i18n-frontend/test"
   - TEST_PACKAGE=bootstrap/test
   - TEST_PACKAGE=charts/test
-  - TEST_PACKAGE="css-macros/test css-shared-JVM/test css-shared-JS/test css-backend/test css-frontend/test"
+  - TEST_PACKAGE="css-macros/test css-shared/test css-shared-JS/test css-backend/test css-frontend/test"
   - TEST_PACKAGE="benchmarks-frontend/compile"

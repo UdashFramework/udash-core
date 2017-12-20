@@ -1034,15 +1034,15 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "handle case class with implemented defs and vals" in {
-trait Utils {
-  val userLabel: String = "User:"
-}
-case class User(login: String, name: Option[String]) extends Utils {
-  val displayName: String = name.getOrElse(login)
+      trait Utils {
+        val userLabel: String = "User:"
+      }
+      case class User(login: String, name: Option[String]) extends Utils {
+        val displayName: String = name.getOrElse(login)
 
-  def withLabel: String =
-    s"$userLabel $displayName"
-}
+        def withLabel: String =
+          s"$userLabel $displayName"
+      }
       implicit val propertyCreator: ModelPropertyCreator[User] = MacroModelPropertyCreator.materialize[User].pc
 
       val p = ModelProperty[User](User("udash", Some("Udash Framework")))
@@ -1101,16 +1101,18 @@ case class User(login: String, name: Option[String]) extends Utils {
     }
 
     "handle generic types" in {
-      case class Bla[Type](x: Int, s: String, t: Type)
-      object Bla {
-        implicit def pc[Type : PropertyCreator]: ModelPropertyCreator[Bla[Type]] =
-          ModelPropertyCreator.materialize[Bla[Type]]
+      object Outer {
+        case class Bla[Type](x: Int, s: String, t: Type)
+        object Bla {
+          implicit def pc[Type: PropertyCreator]: ModelPropertyCreator[Bla[Type]] =
+            ModelPropertyCreator.materialize[Bla[Type]]
+        }
       }
 
       def create[A : PropertyCreator, B : PropertyCreator, D : PropertyCreator](a: A, b: B, d: D): SeqProperty[(A, B, D), CastableProperty[(A, B, D)]] =
         SeqProperty(Seq.tabulate(10)(_ => (a, b, d)))
 
-      val s = create(Bla(5, "asd2", Bla(7, "qwe", 1)), 8, "asd")
+      val s = create(Outer.Bla(5, "asd2", Outer.Bla(7, "qwe", 1)), 8, "asd")
       s.elemProperties.foreach { v =>
         val p = v.asModel
         p.subProp(_._1.x).get should be(5)
