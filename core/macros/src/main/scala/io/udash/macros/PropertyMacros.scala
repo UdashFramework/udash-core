@@ -14,6 +14,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   val RegistrationCls = tq"$Package.Registration"
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
+  val SinglePropertyCreatorCls = tq"$Package.SinglePropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
   val ModelPropertyCreatorCls = tq"$Package.ModelPropertyCreator"
   val MacroModelPropertyCreatorCls = tq"$Package.MacroModelPropertyCreator"
@@ -283,7 +284,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     }
   }
 
-  def reifySubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree =
+  def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree =
     reifySubProperty[A, B](f)
 
   def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B]): c.Tree = {
@@ -334,7 +335,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyModelPropertyCreator[A: c.WeakTypeTag](ev: c.Tree): c.Tree = {
     val tpe = weakTypeOf[A]
     q"""{
-      new $ModelPropertyCreatorCls[$tpe](null) {
+      new $ModelPropertyCreatorCls[$tpe] {
         override def newProperty(prt: $ReadablePropertyCls[_]): $CastablePropertyCls[$tpe] = {
           implicit val ${TermName(c.freshName())}: $ModelPropertyCreatorCls[$tpe] = this
           ${generateModelProperty(tpe)}
@@ -354,15 +355,8 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyPropertyCreator[A: c.WeakTypeTag]: c.Tree = {
     val tpe = weakTypeOf[A].dealias
 
-    if (!tpe.typeSymbol.isClass) {
-      c.abort(c.enclosingPosition, "You cannot create Property based on generic type.")
-    } else if (tpe.typeConstructor =:= SeqTpe.typeConstructor) {
-      q"new $PropertyCreatorCls[$tpe](prt => new $DirectSeqPropertyImplCls[${tpe.typeArgs.head}](prt, $PropertyCreatorCompanion.newID()))"
-    } else {
-      val mpc = c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$tpe]]", silent = true)
-      if (mpc != EmptyTree) mpc
-      else q"new $PropertyCreatorCls[$tpe](prt => new $DirectPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()))"
-    }
+    if (!tpe.typeSymbol.isClass) c.abort(c.enclosingPosition, "You cannot create Property based on generic type.")
+    else q"new $SinglePropertyCreatorCls[$tpe]"
   }
 
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {

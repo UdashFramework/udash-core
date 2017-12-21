@@ -7,9 +7,8 @@ import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, Readabl
 
 import scala.annotation.implicitNotFound
 
-class PropertyCreator[T](creator: (ReadableProperty[_]) => CastableProperty[T]) {
-  def newProperty(prt: ReadableProperty[_]): CastableProperty[T] =
-    creator(prt)
+trait PropertyCreator[T] {
+  def newProperty(prt: ReadableProperty[_]): CastableProperty[T]
 
   def newProperty(value: T, prt: ReadableProperty[_]): CastableProperty[T] = {
     val prop = newProperty(prt)
@@ -19,18 +18,33 @@ class PropertyCreator[T](creator: (ReadableProperty[_]) => CastableProperty[T]) 
 }
 
 object PropertyCreator {
-  @deprecated("Use `materialize` instead.", "0.6.0")
-  def propertyCreator[T]: PropertyCreator[T] =
-    macro io.udash.macros.PropertyMacros.reifyPropertyCreator[T]
-
-  implicit def materialize[T]: PropertyCreator[T] =
-    macro io.udash.macros.PropertyMacros.reifyPropertyCreator[T]
+  def propertyCreator[T : PropertyCreator]: PropertyCreator[T] =
+    implicitly[PropertyCreator[T]]
 
   def newID(): UUID = UUID.randomUUID()
+
+  implicit def materializeSeq[T](implicit ev: PropertyCreator[T]): SeqPropertyCreator[T] =
+    new SeqPropertyCreator[T]
+
+  implicit def findModel[T](implicit ev: ModelPropertyCreator[T]): ModelPropertyCreator[T] =
+    ev
+
+  implicit def materializeSingle[T]: PropertyCreator[T] =
+    macro io.udash.macros.PropertyMacros.reifyPropertyCreator[T]
+}
+
+class SinglePropertyCreator[T] extends PropertyCreator[T] {
+  def newProperty(prt: ReadableProperty[_]): CastableProperty[T] =
+    new DirectPropertyImpl[T](prt, PropertyCreator.newID())
+}
+
+class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
+  def newProperty(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
+    new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
-class ModelPropertyCreator[T](creator: (ReadableProperty[_]) => CastableProperty[T]) extends PropertyCreator[T](creator)
+abstract class ModelPropertyCreator[T] extends PropertyCreator[T]
 object ModelPropertyCreator {
   def materialize[T](implicit ev: IsModelPropertyTemplate[T]): ModelPropertyCreator[T] =
     macro io.udash.macros.PropertyMacros.reifyModelPropertyCreator[T]

@@ -28,15 +28,15 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 
   /** Returns child ModelProperty[B]. */
   def roSubModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ReadableModelProperty[B] =
-    macro io.udash.macros.PropertyMacros.reifySubModel[A, B]
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectProperty[B]. */
-  def roSubProp[B](f: A => B): ReadableProperty[B] =
-    macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
+  def roSubProp[B](f: A => B)(implicit ev: PropertyCreator[B]): ReadableProperty[B] =
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def roSubSeq[B](f: A => Seq[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
-    macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
+  def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /**
     * ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
@@ -60,14 +60,14 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 trait ModelProperty[A] extends ReadableModelProperty[A] with Property[A] {
   /** Returns child ModelProperty[B]. */
   def subModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ModelProperty[B] =
-    macro io.udash.macros.PropertyMacros.reifySubModel[A, B]
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectProperty[B]. */
-  def subProp[B](f: A => B): Property[B] =
-    macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
+  def subProp[B](f: A => B)(implicit ev: PropertyCreator[B]): Property[B] =
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def subSeq[B](f: A => Seq[B]): SeqProperty[B, CastableProperty[B]] =
-    macro io.udash.macros.PropertyMacros.reifySubProperty[A, B]
+  def subSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): SeqProperty[B, CastableProperty[B]] =
+    macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 }
 
