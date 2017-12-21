@@ -18,6 +18,7 @@ trait PropertyCreator[T] {
 }
 
 object PropertyCreator extends PropertyCreatorImplicits {
+  /** Marker trait for macro-materialized ModelProperty instances. Serves to prioritize macro-generated instance over other implicits. */
   trait MacroGeneratedPropertyCreator
 
   def propertyCreator[T: PropertyCreator]: PropertyCreator[T] =

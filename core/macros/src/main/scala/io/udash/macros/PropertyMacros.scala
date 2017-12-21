@@ -352,7 +352,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyPropertyCreator[A: c.WeakTypeTag]: c.Tree = {
     val tpe = weakTypeOf[A].dealias
 
-    if (!tpe.typeSymbol.isClass) c.abort(c.enclosingPosition, "You cannot create Property based on generic type.")
+    if (!tpe.typeSymbol.isClass) c.abort(c.enclosingPosition, s"Implicit PropertyCreator[$tpe] not found.")
     else q"new $SinglePropertyCreatorCls[$tpe]"
   }
 

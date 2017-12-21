@@ -131,4 +131,12 @@ object PropertyErrorManualTest {
 //    val p = ModelProperty.empty[PathTestA]
 //    p.subProp(_.b.a.test2.a.b.a.s)
 //  }
+
+  /**
+    * Implicit PropertyCreator[Element] not found.
+    */
+//  object PropertyForGenericType {
+//    def create[Element](v: Element): Property[Element] = Property(v)
+//    create(72)
+//  }
 }
