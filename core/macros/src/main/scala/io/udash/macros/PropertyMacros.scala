@@ -223,10 +223,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
               members.map {
                 case (name, returnTpe) =>
-                  if (tpe == returnTpe || hasModelPropertyCreator(returnTpe))
-                    q"""properties(${name.toString}) = implicitly[$ModelPropertyCreatorCls[$returnTpe]].newProperty(this)"""
-                  else
-                    q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)"""
+                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)"""
               }
             }
           }
@@ -319,7 +316,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val parts = parsePath(modelPath)
 
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
-      case (select, term) :: tail if select.tpe <:< SeqTpe && !(select.tpe <:< MutableSeqTpe) =>
+      case (select, term) :: tail if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
         q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString})
            .asInstanceOf[$SeqPropertyCls[${select.tpe.typeArgs.head.widen}, $PropertyCls[${select.tpe.typeArgs.head.widen}] with $CastablePropertyCls[${select.tpe.typeArgs.head.widen}]]]"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
@@ -335,9 +332,9 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyModelPropertyCreator[A: c.WeakTypeTag](ev: c.Tree): c.Tree = {
     val tpe = weakTypeOf[A]
     q"""{
-      new $ModelPropertyCreatorCls[$tpe] {
+      new $ModelPropertyCreatorCls[$tpe] with $PropertyCreatorCompanion.MacroGeneratedPropertyCreator {
         override def newProperty(prt: $ReadablePropertyCls[_]): $CastablePropertyCls[$tpe] = {
-          implicit val ${TermName(c.freshName())}: $ModelPropertyCreatorCls[$tpe] = this
+          implicit val ${TermName(c.freshName())}: $ModelPropertyCreatorCls[$tpe] with $PropertyCreatorCompanion.MacroGeneratedPropertyCreator = this
           ${generateModelProperty(tpe)}
         }
       }
