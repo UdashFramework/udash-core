@@ -281,9 +281,3 @@ case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId
     )
   ).render
 }
-
-object UdashCarouselSlide {
-  implicit val pc: PropertyCreator[UdashCarouselSlide] = PropertyCreator.propertyCreator[UdashCarouselSlide]
-  implicit val pcS: PropertyCreator[Seq[UdashCarouselSlide]] = PropertyCreator.propertyCreator[Seq[UdashCarouselSlide]]
-  implicit val pcO: PropertyCreator[Option[UdashCarouselSlide]] = PropertyCreator.propertyCreator[Option[UdashCarouselSlide]]
-}

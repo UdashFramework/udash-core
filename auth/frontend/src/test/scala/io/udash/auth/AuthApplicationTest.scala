@@ -49,13 +49,13 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
       val app = new Application[TestStates](rr, vfr).withDefaultRoutingFailureListener(ThirdState)
       app.run(root)
       for {
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(SecondState)
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(SomeState)
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(ThirdState)
-        r <- eventually(app.currentState should be(ThirdState))
+        r <- retrying { app.currentState should be(ThirdState) }
       } yield r
     }
 
@@ -74,13 +74,13 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
       val app = new Application[TestStates](rr, vfr).withDefaultRoutingFailureListener(ThirdState)
       app.run(root)
       for {
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(SecondState)
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(SomeState)
-        _ <- eventually(app.currentState should be(ThirdState))
+        _ <- retrying { app.currentState should be(ThirdState) }
         _ = app.goTo(ThirdState)
-        r <- eventually(app.currentState should be(ThirdState))
+        r <- retrying { app.currentState should be(ThirdState) }
       } yield r
     }
   }

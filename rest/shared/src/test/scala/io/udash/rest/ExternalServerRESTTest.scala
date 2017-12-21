@@ -45,7 +45,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
       connector.response = rest.framework.write(r3)
       for {
-        _ <- eventually {
+        _ <- retrying {
           responses += restServer.serviceOne().create(r).map(_ should be(r3))
           connector.url should be("/serviceOne/create")
           connector.method should be(RESTConnector.POST)
@@ -55,7 +55,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         }
 
         _ <- Future { connector.response = rest.framework.write(r2) }
-        _ <- eventually {
+        _ <- retrying {
           responses += restServer.serviceOne().update(r2.id.get)(r2).map(_ should be(r2))
           connector.url should be(s"/serviceOne/update/${r2.id.get}")
           connector.method should be(RESTConnector.PUT)
@@ -65,7 +65,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         }
 
         _ <- Future { connector.response = rest.framework.write(r3) }
-        _ <- eventually {
+        _ <- retrying {
           responses += restServer.serviceOne().modify(r2.id.get)("test", 5).map(_ should be(r3))
           connector.url should be(s"/serviceOne/change/${r2.id.get}")
           connector.method should be(RESTConnector.PATCH)
@@ -75,7 +75,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         }
 
         _ <- Future { connector.response = rest.framework.write(r) }
-        r <- eventually {
+        r <- retrying {
           responses += restServer.serviceOne().delete(r2.id.get).map(_ should be(r))
           connector.url should be(s"/serviceOne/remove/${r2.id.get}")
           connector.method should be(RESTConnector.DELETE)
@@ -89,7 +89,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle deep interfaces" in {
       restServer.serviceOne().deeper().load(r2.id.get)
-      eventually {
+      retrying {
         connector.url should be(s"/serviceOne/deeper/load/${r2.id.get}")
         connector.method should be(RESTConnector.GET)
         connector.queryArguments should be(Map.empty)
@@ -99,7 +99,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle methods with skipped REST name" in {
       restServer.serviceSkip().deeper().load(r2.id.get)
-      eventually {
+      retrying {
         connector.url should be(s"/deeper/load/${r2.id.get}")
         connector.method should be(RESTConnector.GET)
         connector.queryArguments should be(Map.empty)
@@ -111,7 +111,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       val s = Seq(r, r2, r3)
       connector.response = rest.framework.write(s)
       val resp = restServer.serviceOne().load()
-      eventually {
+      retrying {
         connector.url should be(s"/serviceOne/load")
         connector.method should be(RESTConnector.GET)
         connector.queryArguments should be(Map.empty)
@@ -123,7 +123,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle query arguments" in {
       restServer.serviceOne().load(r3.id.get, "trashValue", "thrashValue 123")
-      eventually {
+      retrying {
         connector.url should be(s"/serviceOne/load/${r3.id.get}")
         connector.method should be(RESTConnector.GET)
         connector.queryArguments("trash") should be("trashValue")
@@ -135,7 +135,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle header arguments" in {
       restServer.serviceTwo("token_123", "pl").create(r)
-      eventually {
+      retrying {
         connector.url should be("/serviceTwo/create")
         connector.method should be(RESTConnector.POST)
         connector.queryArguments should be(Map.empty)
@@ -147,7 +147,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle overrided method name" in {
       restServer.serviceThree("abc").create(r)
-      eventually {
+      retrying {
         connector.url should be("/service_three/abc/create")
         connector.method should be(RESTConnector.POST)
         connector.queryArguments should be(Map.empty)
@@ -159,7 +159,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     "handle broken HTTP response" in {
       connector.response = rest.framework.write(r2)
       val resp = restServer.serviceOne().load()
-      eventually {
+      retrying {
         connector.url should be(s"/serviceOne/load")
         connector.method should be(RESTConnector.GET)
         connector.queryArguments should be(Map.empty)
@@ -172,7 +172,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     "handle RPC fires" in {
       restServer.serviceOne().fireAndForget(123)
       for {
-        _ <- eventually {
+        _ <- retrying {
           connector.url should be(s"/serviceOne/fireAndForget")
           connector.method should be(RESTConnector.POST)
           connector.queryArguments should be(Map.empty)
@@ -180,7 +180,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
           connector.body should be("123")
         }
         _ <- Future { restServer.serviceTwo("token_123", "pl").deeper().fire(123) }
-        r <- eventually {
+        r <- retrying {
           connector.url should be(s"/serviceTwo/deeper/fire/123")
           connector.method should be(RESTConnector.GET)
           connector.queryArguments should be(Map.empty)

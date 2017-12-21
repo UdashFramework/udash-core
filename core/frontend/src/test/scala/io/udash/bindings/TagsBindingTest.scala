@@ -5,13 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.properties.{ImmutableValue, seq}
+import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
+import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Node}
 
 import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
-import io.udash.wrappers.jquery._
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
   import scalatags.JsDom.all._
@@ -49,12 +48,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "handle null value providing empty span element" in {
       class C(val i: Int) {
+        var t: Int = 7
         override def toString: String =
           s"C($i)"
       }
-      implicit val allowCTpe: ImmutableValue[C] = null
 
-      val p = Property[C]
+      val p = Property.empty[C]
       val template = div(bind(p)).render
       val template2 = div(bind(p)).render
 
@@ -541,10 +540,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "handle empty case class based model properties" in {
-      case class Test(i: Int, subType: SubTest)
-      case class SubTest(i: Int)
+      object Model {
+        class Test(val i: Int, val subType: SubTest)
+        object Test extends HasModelPropertyCreator[Test]
 
-      val p = ModelProperty.empty[Test]
+        class SubTest(val i: Int)
+        object SubTest extends HasModelPropertyCreator[SubTest]
+      }
+
+      val p = ModelProperty.empty[Model.Test]
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -557,20 +561,25 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       template.textContent should be("")
 
-      p.set(Test(5, SubTest(7)))
+      p.set(new Model.Test(5, new Model.SubTest(7)))
       template.textContent should be("577")
     }
 
     "handle empty trait based model properties" in {
-      trait Test {
-        def i: Int
-        def subType: SubTest
-      }
-      trait SubTest {
-        def i: Int
+      object Model {
+        trait Test {
+          def i: Int
+          def subType: SubTest
+        }
+        object Test extends HasModelPropertyCreator[Test]
+
+        trait SubTest {
+          def i: Int
+        }
+        object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Test]
+      val p = ModelProperty.empty[Model.Test]
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -583,9 +592,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       template.textContent should be("")
 
-      p.set(new Test {
+      p.set(new Model.Test {
         override def i = 5
-        override def subType = new SubTest {
+        override def subType = new Model.SubTest {
           override def i = 7
         }
       })
@@ -1007,162 +1016,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
   }
 
-  def prod(p: seq.SeqProperty[Int, Property[Int]]): Binding = {
-    produce(p,
-      (seq: Seq[Property[Int]]) => div(seq.map(p => span(p.get)): _*).render,
-      (patch: Patch[Property[Int]], elem: Seq[Node]) => {
-        val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
-        val insertBefore = el.children().at(patch.idx)
-        if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(p.get).render).insertBefore(insertBefore))
-        else patch.added.foreach(p => el.append(span(p.get).render))
-        patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
-      }
-    )
-  }
-
-  "Patching produce for SeqProperty" should {
-    "init and update content of DOM element" in {
-      val p = seq.SeqProperty[Int](1, 2, 3)
-      val template = div(
-        span(),
-        produce(p,
-          (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
-            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
-            val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
-            else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
-            patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
-          }
-        ),
-        span()
-      ).render
-
-      template.childNodes(0).textContent should be("")
-      val firstNode = template.childNodes(1)
-      firstNode.nodeName should be("DIV")
-      firstNode.childNodes.length should be(3)
-      template.childNodes(2).textContent should be("")
-
-      p.set(Seq(2,4,6,8,10))
-      template.childNodes(0).textContent should be("")
-      val secondNode = template.childNodes(1)
-      firstNode.hashCode() should be(secondNode.hashCode())
-      secondNode.nodeName should be("DIV")
-      secondNode.childNodes.length should be(5)
-      template.childNodes(2).textContent should be("")
-
-      p.prepend(1,3,5,7,9)
-      template.childNodes(0).textContent should be("")
-      val thirdNode = template.childNodes(1)
-      secondNode.hashCode() should be(thirdNode.hashCode())
-      thirdNode.nodeName should be("DIV")
-      thirdNode.childNodes.length should be(10)
-      template.childNodes(2).textContent should be("")
-
-      p.set(Seq())
-      template.childNodes(0).textContent should be("")
-      val fourthNode = template.childNodes(1)
-      thirdNode.hashCode() should be(fourthNode.hashCode())
-      fourthNode.nodeName should be("DIV")
-      fourthNode.childNodes.length should be(0)
-      template.childNodes(2).textContent should be("")
-    }
-
-    "handle null value providing empty Seq to callback" in {
-      val p = seq.SeqProperty[Int](1, 2, 3)
-      val template = div(
-        produce(p,
-          (seq: Seq[Property[Int]]) => div(seq.map(p => span(s"${p.get} ")): _*).render,
-          (patch: Patch[Property[Int]], elem: Seq[Node]) => {
-            val el = jQ(elem.asInstanceOf[Seq[Element]]:_*)
-            val insertBefore = el.children().at(patch.idx)
-            if (el.children().length > patch.idx) patch.added.foreach(p => jQ(span(s"${p.get} ").render).insertBefore(insertBefore))
-            else patch.added.foreach(p => el.append(span(s"${p.get} ").render))
-            patch.removed.foreach(p => el.children().at(patch.idx + patch.added.size).remove())
-          }
-        )
-      ).render
-
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(3)
-
-      p.set(null)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(0)
-
-      p.set(Seq(2,4,6,8,10))
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(5)
-
-      p.set(null)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(0)
-
-      p.prepend(1,3,5,7,9)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(5)
-
-      p.append(2,4,6,8,10)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(10)
-
-      p.set(null)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(0)
-
-      p.set(Seq())
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(0)
-
-      p.set(null)
-      template.childNodes(0).nodeName should be("DIV")
-      template.childNodes(0).childNodes.length should be(0)
-    }
-
-    "not swap position" in {
-      val p = seq.SeqProperty[Int](1, 2, 3)
-      val p2 = seq.SeqProperty[Int](3, 2, 1)
-      val template = div(
-        "A",
-        prod(p),
-        span("B"),
-        prod(p2),
-        div("C")
-      ).render
-
-      template.textContent should be("A123B321C")
-
-      p.set(Seq(4, 3))
-      template.textContent should be("A43B321C")
-
-      p2.set(Seq(3))
-      template.textContent should be("A43B3C")
-
-      p.set(null)
-      template.textContent should be("AB3C")
-
-      p.set(Seq(1, 2, 5))
-      template.textContent should be("A125B3C")
-    }
-
-    "stop updates after `kill` call" in {
-      val p = SeqProperty[Int](1,2,3,4,5)
-      val binding = prod(p)
-      val template = div(binding).render
-
-      template.textContent should be("12345")
-
-      p.append(7)
-      template.textContent should be("123457")
-
-      binding.kill()
-
-      p.remove(2)
-      template.textContent should be("123457")
-    }
-  }
-
   "repeat" should {
     "update content of DOM element" in {
       val p = seq.SeqProperty[Int](1, 2, 3)
@@ -1533,7 +1386,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("123321")
 
       p.set(Seq(1, 2, 5))
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         p.remove(5)
         p.insert(1, 7)
         p.prepend(9)
@@ -1550,8 +1403,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property[NumbersFilter]
-      val numbers = seq.SeqProperty[Int]
+      val filter = Property.empty[NumbersFilter]
+      val numbers = seq.SeqProperty.empty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1629,8 +1482,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property[NumbersFilter]
-      val numbers = seq.SeqProperty[Int]
+      val filter = Property.empty[NumbersFilter]
+      val numbers = seq.SeqProperty.empty[Int]
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1643,7 +1496,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       dom.textContent should be("135")
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         filter.set(EvensFilter)
         filter.set(OddsFilter)
         filter.set(EvensFilter)
@@ -1653,7 +1506,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       dom.textContent should be("246868")
 
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.set(Seq(1, 3, 5))
         filter.set(OddsFilter)
         numbers.append(6, 7, 8)
@@ -1663,7 +1516,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       filter.set(OddsFilter)
       numbers.set(Seq(1, 3, 5))
       dom.textContent should be("135")
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         numbers.elemProperties.foreach(p => p.set(p.get + 1))
       }
       dom.textContent should be("")
@@ -1679,12 +1532,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         def name: String
         def completed: Boolean
       }
+      object TodoElement extends HasModelPropertyCreator[TodoElement]
 
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
 
-      val filter = Property[TodosFilter]
-      val todos = seq.SeqProperty[TodoElement]
+      val filter = Property.empty[TodosFilter]
+      val todos = seq.SeqProperty.empty[TodoElement]
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]

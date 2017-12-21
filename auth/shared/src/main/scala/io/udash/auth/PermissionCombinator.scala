@@ -1,7 +1,5 @@
 package io.udash.auth
 
-import io.udash.properties.ImmutableValue
-
 trait PermissionCombinator extends Any {
   /** Should return `true` if provided user context passes this combinator test.
     * It should not check `isAuthenticated` flag of user context. */
@@ -55,7 +53,5 @@ object PermissionCombinator {
     override def toString: String =
       permissions.map(_.toString).mkString("(", " || ", ")")
   }
-
-  implicit val immutableValueEvidence: ImmutableValue[PermissionCombinator] = null
 }
 

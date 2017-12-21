@@ -10,10 +10,6 @@ import scalatags.generic.Modifier
 package object i18n {
   type LangProperty = Property[Lang]
 
-  implicit val propertyCreatorTranslationKey0: PropertyCreator[TranslationKey0] = PropertyCreator.propertyCreator[TranslationKey0]
-  implicit val propertyCreatorSTranslationKey0: PropertyCreator[Seq[TranslationKey0]] = PropertyCreator.propertyCreator[Seq[TranslationKey0]]
-  implicit val propertyCreatorOTranslationKey0: PropertyCreator[Option[TranslationKey0]] = PropertyCreator.propertyCreator[Option[TranslationKey0]]
-
   implicit def langFromProperty(implicit property: LangProperty): Lang =
     property.get
 

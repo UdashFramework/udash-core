@@ -9,7 +9,7 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
-import io.udash.properties.{ImmutableValue, PropertyCreator}
+import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
@@ -193,7 +193,6 @@ final class UdashDatePicker private[datepicker](val date: Property[Option[ju.Dat
 }
 
 object UdashDatePicker {
-  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   /** Creates date picker component. */
@@ -321,21 +320,13 @@ object UdashDatePicker {
     }
   }
 
-  object DatePickerOptions {
-    implicit val immutable: ImmutableValue[DatePickerOptions] = null
-    implicit val propertyCreator: PropertyCreator[DatePickerOptions] = PropertyCreator.propertyCreator[DatePickerOptions]
-  }
+  object DatePickerOptions extends HasModelPropertyCreator[DatePickerOptions]
 
   class DatePickerIcons(val time: Seq[CssStyle] = Seq.empty, val date: Seq[CssStyle] = Seq.empty,
                         val up: Seq[CssStyle] = Seq.empty, val down: Seq[CssStyle] = Seq.empty,
                         val previous: Seq[CssStyle] = Seq.empty, val next: Seq[CssStyle] = Seq.empty,
                         val today: Seq[CssStyle] = Seq.empty, val clear: Seq[CssStyle] = Seq.empty,
                         val close: Seq[CssStyle] = Seq.empty)
-
-  object DatePickerIcons {
-    implicit val immutable: ImmutableValue[DatePickerIcons] = null
-    implicit val propertyCreator: PropertyCreator[DatePickerIcons] = PropertyCreator.propertyCreator[DatePickerIcons]
-  }
 
   class DatePickerTooltips(val today: String = "Go to today",
                            val clear: String = "Clear selection",
@@ -352,11 +343,6 @@ object UdashDatePicker {
                            val prevCentury: String = "Previous Century",
                            val nextCentury: String = "Next Century")
 
-  object DatePickerTooltips {
-    implicit val immutable: ImmutableValue[DatePickerTooltips] = null
-    implicit val propertyCreator: PropertyCreator[DatePickerTooltips] = PropertyCreator.propertyCreator[DatePickerTooltips]
-  }
-
   final class DayOfWeek(val id: Int)
   object DayOfWeek {
     val Sunday = new DayOfWeek(0)
@@ -366,9 +352,6 @@ object UdashDatePicker {
     val Thursday = new DayOfWeek(4)
     val Friday = new DayOfWeek(5)
     val Saturday = new DayOfWeek(6)
-
-    implicit val immutable: ImmutableValue[DayOfWeek] = null // TODO remove
-    implicit val propertyCreator: PropertyCreator[DayOfWeek] = PropertyCreator.propertyCreator[DayOfWeek]
   }
 
   final class ViewMode(val id: String)
@@ -377,9 +360,6 @@ object UdashDatePicker {
     val Months = new ViewMode("months")
     val Years = new ViewMode("years")
     val Decades = new ViewMode("decades")
-
-    implicit val immutable: ImmutableValue[ViewMode] = null // TODO remove
-    implicit val propertyCreator: PropertyCreator[ViewMode] = PropertyCreator.propertyCreator[ViewMode]
   }
 
   sealed class Placement(val name: String)

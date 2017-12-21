@@ -24,7 +24,7 @@ class QueuedNodeModifierTest extends AsyncUdashFrontendTest with Bindings { bind
       template.childNodes(1).textContent should be("")
       template.childNodes(2).textContent should be("end")
 
-      eventually {
+      retrying {
         template.childNodes(0).textContent should be("start")
         template.childNodes(1).textContent should be("heavy thing")
         template.childNodes(2).textContent should be("end")
@@ -46,7 +46,7 @@ class QueuedNodeModifierTest extends AsyncUdashFrontendTest with Bindings { bind
       template.childNodes(2).textContent should be("end")
 
       var emptyTests = 0
-      eventually {
+      retrying {
         if (template.childNodes(1).textContent.isEmpty) emptyTests += 1
         template.childNodes(0).textContent should be("start")
         template.childNodes(1).textContent should be("heavy thing 2")

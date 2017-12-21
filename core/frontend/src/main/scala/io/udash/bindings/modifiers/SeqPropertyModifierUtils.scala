@@ -106,9 +106,7 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with
     }
 
   override def applyTo(root: Element): Unit = {
-    CallbackSequencer.finalCallback(() => {
-      propertyListeners += property.listenStructure(handlePatch(root))
-    })
+    propertyListeners += property.listenStructure(handlePatch(root))
 
     property.elemProperties.foreach { element =>
       val els = build(element)

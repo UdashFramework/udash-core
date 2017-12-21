@@ -50,16 +50,16 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1")
-        _ <- eventually(t1.string should be("Translation"))
+        _ <- retrying(t1.string should be("Translation"))
         t2 <- translator.translate("tr2")
-        _ <- eventually(t2.string should be("Translation2"))
+        _ <- retrying(t2.string should be("Translation2"))
         t3 <- translator.translate("tr3")
-        _ <- eventually(t3.string should be("Translation3"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(0))
+        _ <- retrying(t3.string should be("Translation3"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(0))
         t4 <- translator.translate("trMissing")
-        _ <- eventually(t4.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(1))
+        _ <- retrying(t4.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(1))
       } yield r
     }
 
@@ -76,18 +76,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t1.string should be("Translation 123.3"))
+        _ <- retrying(t1.string should be("Translation 123.3"))
         t2 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t2.string should be("Translation2 true test"))
+        _ <- retrying(t2.string should be("Translation2 true test"))
         t3 <- translator.translate("tr3", 8)
-        _ <- eventually(t3.string should be("Translation3 8"))
+        _ <- retrying(t3.string should be("Translation3 8"))
         t4 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t4.string should be("Translation4 true 1 2"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(0))
+        _ <- retrying(t4.string should be("Translation4 true 1 2"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(0))
         t5 <- translator.translate("trMissing")
-        _ <- eventually(t5.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(1))
+        _ <- retrying(t5.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(1))
       } yield r
     }
 
@@ -104,17 +104,17 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t1.string should be("Translation 123.3"))
+        _ <- retrying(t1.string should be("Translation 123.3"))
         t2 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t2.string should be("Translation2 true test"))
+        _ <- retrying(t2.string should be("Translation2 true test"))
         t3 <- translator.translate("tr3", 8)
-        _ <- eventually(t3.string should be("Translation3 8"))
+        _ <- retrying(t3.string should be("Translation3 8"))
         t4 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t4.string should be("Translation4 true 1 2"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(0))
+        _ <- retrying(t4.string should be("Translation4 true 1 2"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(0))
         t5 <- translator.translate("trMissing")
-        _ <- eventually(t5.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
+        _ <- retrying(t5.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
 
         _ <- Future {
           rpc.updateTranslations(BundleHash("hash4"), Map(
@@ -126,18 +126,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         }
 
         t6 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t6.string should be("Translation 123.3 reloaded"))
+        _ <- retrying(t6.string should be("Translation 123.3 reloaded"))
         t7 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t7.string should be("Translation2 true test reloaded"))
+        _ <- retrying(t7.string should be("Translation2 true test reloaded"))
         t8 <- translator.translate("tr3", 8)
-        _ <- eventually(t8.string should be("Translation3 8 reloaded"))
+        _ <- retrying(t8.string should be("Translation3 8 reloaded"))
         t9 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t9.string should be("Translation4 true 1 2 reloaded"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
+        _ <- retrying(t9.string should be("Translation4 true 1 2 reloaded"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
         t10 <- translator.translate("trMissing")
-        _ <- eventually(t10.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(2))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(10))
+        _ <- retrying(t10.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(2))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(10))
       } yield r
     }
 
@@ -154,17 +154,17 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t1.string should be("Translation 123.3"))
+        _ <- retrying(t1.string should be("Translation 123.3"))
         t2 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t2.string should be("Translation2 true test"))
+        _ <- retrying(t2.string should be("Translation2 true test"))
         t3 <- translator.translate("tr3", 8)
-        _ <- eventually(t3.string should be("Translation3 8"))
+        _ <- retrying(t3.string should be("Translation3 8"))
         t4 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t4.string should be("Translation4 true 1 2"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(0))
+        _ <- retrying(t4.string should be("Translation4 true 1 2"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(0))
         t5 <- translator.translate("trMissing")
-        _ <- eventually(t5.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
+        _ <- retrying(t5.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
 
         _ <- Future {
           rpc.updateTranslations(BundleHash("hash4"), Map(
@@ -176,18 +176,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         }
 
         t6 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t6.string should be("Translation 123.3"))
+        _ <- retrying(t6.string should be("Translation 123.3"))
         t7 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t7.string should be("Translation2 true test"))
+        _ <- retrying(t7.string should be("Translation2 true test"))
         t8 <- translator.translate("tr3", 8)
-        _ <- eventually(t8.string should be("Translation3 8"))
+        _ <- retrying(t8.string should be("Translation3 8"))
         t9 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t9.string should be("Translation4 true 1 2"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
+        _ <- retrying(t9.string should be("Translation4 true 1 2"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
         t10 <- translator.translate("trMissing")
-        _ <- eventually(t10.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(2))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(1))
+        _ <- retrying(t10.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(2))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(1))
       } yield r
     }
 
@@ -204,18 +204,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t1.string should be("Translation 123.3 remote"))
+        _ <- retrying(t1.string should be("Translation 123.3 remote"))
         t2 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t2.string should be("Translation2 true test remote"))
+        _ <- retrying(t2.string should be("Translation2 true test remote"))
         t3 <- translator.translate("tr3", 8)
-        _ <- eventually(t3.string should be("Translation3 8 remote"))
+        _ <- retrying(t3.string should be("Translation3 8 remote"))
         t4 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t4.string should be("Translation4 true 1 2 remote"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(4))
+        _ <- retrying(t4.string should be("Translation4 true 1 2 remote"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(4))
         t5 <- translator.translate("trMissing")
-        _ <- eventually(t5.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(5))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(0))
+        _ <- retrying(t5.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(5))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(0))
       } yield r
     }
 
@@ -232,31 +232,31 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
       for {
         t1 <- translator.translate("tr1", 123.3)
-        _ <- eventually(t1.string should be("Translation 123.3"))
+        _ <- retrying(t1.string should be("Translation 123.3"))
         t2 <- translator.translate("tr2", "test", true)
-        _ <- eventually(t2.string should be("Translation2 true test"))
+        _ <- retrying(t2.string should be("Translation2 true test"))
         t3 <- translator.translate("tr3", 8)
-        _ <- eventually(t3.string should be("Translation3 8"))
+        _ <- retrying(t3.string should be("Translation3 8"))
         t4 <- translator.translate("tr4", "test", true, 1, 2)
-        _ <- eventually(t4.string should be("Translation4 true 1 2"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(0))
+        _ <- retrying(t4.string should be("Translation4 true 1 2"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(0))
         t5 <- translator.translate("trMissing")
-        _ <- eventually(t5.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(1))
+        _ <- retrying(t5.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
 
         t6 <- translator.translate("tr1", 123.3)(Lang("pl"))
-        _ <- eventually(t6.string should be("Translation 123.3 remotepl"))
+        _ <- retrying(t6.string should be("Translation 123.3 remotepl"))
         t7 <- translator.translate("tr2", "test", true)(Lang("pl"))
-        _ <- eventually(t7.string should be("Translation2 true test remotepl"))
+        _ <- retrying(t7.string should be("Translation2 true test remotepl"))
         t8 <- translator.translate("tr3", 8)(Lang("pl"))
-        _ <- eventually(t8.string should be("Translation3 8 remotepl"))
+        _ <- retrying(t8.string should be("Translation3 8 remotepl"))
         t9 <- translator.translate("tr4", "test", true, 1, 2)(Lang("pl"))
-        _ <- eventually(t9.string should be("Translation4 true 1 2 remotepl"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(5))
+        _ <- retrying(t9.string should be("Translation4 true 1 2 remotepl"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(5))
         t10 <- translator.translate("trMissing")(Lang("pl"))
-        _ <- eventually(t10.string should be("ERROR"))
-        _ <- eventually(rpc.loadTemplateForLangCalls should be(6))
-        r <- eventually(rpc.loadTranslationsForLangCalls should be(2))
+        _ <- retrying(t10.string should be("ERROR"))
+        _ <- retrying(rpc.loadTemplateForLangCalls should be(6))
+        r <- retrying(rpc.loadTranslationsForLangCalls should be(2))
       } yield r
     }
   }
