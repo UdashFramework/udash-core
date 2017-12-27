@@ -35,7 +35,7 @@ case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.
   import io.udash.web.guide.Context._
 
   override def create(): (View, Presenter[UserActivityExtState.type]) = {
-    val model = SeqProperty[Call]
+    val model = SeqProperty.empty[Call]
     val presenter = new UserActivityExtPresenter(model)
     (new UserActivityExtView(model, presenter), presenter)
   }

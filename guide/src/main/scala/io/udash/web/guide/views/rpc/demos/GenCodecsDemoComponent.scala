@@ -27,6 +27,7 @@ trait GenCodecsDemoModel {
   def clsVar: Int
   def sealedTrait: Fruit
 }
+object GenCodecsDemoModel extends HasModelPropertyCreator[GenCodecsDemoModel]
 
 class GenCodecsDemoComponent extends Component with CrossLogging {
   import Context._
@@ -36,7 +37,7 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
 
   object GenCodecsDemoViewFactory {
     def apply(): Modifier = {
-      val GenCodecs = ModelProperty[GenCodecsDemoModel]
+      val GenCodecs = ModelProperty.empty[GenCodecsDemoModel]
       val presenter = new GenCodecsDemoPresenter(GenCodecs)
       new GenCodecsDemoView(GenCodecs, presenter).render
     }

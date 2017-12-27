@@ -15,7 +15,7 @@ case object IndexViewFactory extends ViewFactory[IndexState] {
   import Context._
 
   override def create(): (View, Presenter[IndexState]) = {
-    val url = Property[String]
+    val url = Property.empty[String]
     (new IndexView(url), new IndexPresenter(url))
   }
 }

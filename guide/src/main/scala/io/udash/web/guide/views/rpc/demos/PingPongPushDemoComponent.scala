@@ -14,6 +14,7 @@ import scalatags.JsDom.all._
 trait PingPongPushDemoModel {
   def pingId: Int
 }
+object PingPongPushDemoModel extends HasModelPropertyCreator[PingPongPushDemoModel]
 
 class PingPongPushDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -22,7 +23,7 @@ class PingPongPushDemoComponent extends Component {
 
   object PingPongPushDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty[PingPongPushDemoModel]
+      val clientId = ModelProperty.empty[PingPongPushDemoModel]
       clientId.subProp(_.pingId).set(0)
 
       val presenter = new PingPongPushDemoPresenter(clientId)

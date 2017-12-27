@@ -118,7 +118,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
         |
         |  override def create(): (View, Presenter[SubscribeState.type]) = {
-        |    val model = ModelProperty[SubscribeModel]
+        |    val model = ModelProperty.empty[SubscribeModel]
         |    val presenter = new NewsletterSubscribePresenter(model)
         |    val view = new NewsletterSubscribeView(model, presenter)
         |

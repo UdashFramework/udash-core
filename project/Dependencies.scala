@@ -4,9 +4,9 @@ import sbt._
 object Dependencies {
 
   val versionOfScala = "2.12.4"
-  val jettyVersion = "9.4.7.v20170914"
+  val jettyVersion = "9.4.8.v20171121"
 
-  val udashVersion = "0.6.0-M13"
+  val udashVersion = "0.6.0-LRC"
   val udashJQueryVersion = "1.1.0"
   val highchartsVarsion = "5.0.10"
 
@@ -17,7 +17,7 @@ object Dependencies {
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.8.RELEASE"
 
-  val seleniumVersion = "2.53.1"
+  val seleniumVersion = "3.8.1"
   val scalatestVersion = "3.0.3"
 
   val crossDeps = Def.setting(Seq(

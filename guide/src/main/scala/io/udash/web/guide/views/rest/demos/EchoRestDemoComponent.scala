@@ -19,7 +19,7 @@ class EchoRestDemoComponent extends Component {
 
   object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responseProperty = Property[String]
+      val responseProperty = Property.empty[String]
       val presenter = new SimpleRestDemoPresenter(responseProperty)
       new SimpleRestDemoView(responseProperty, presenter).render
     }

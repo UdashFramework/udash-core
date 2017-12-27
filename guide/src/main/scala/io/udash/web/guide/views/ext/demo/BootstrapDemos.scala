@@ -82,66 +82,65 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def datePicker(): dom.Element = {
     import java.{util => ju}
-    // TODO remove comment
-//    val date = Property[Option[ju.Date]](Some(new ju.Date()))
-//
-//    val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
-//      format = "MMMM Do YYYY, hh:mm a",
-//      locale = Some("en_GB"),
-//      showClear = true
-//    ))
-//
-//    val disableWeekends = Property(false)
-//    disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
-//      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
-//      case false => Seq.empty
-//    }
-//
-//    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
-//
-//    val showButton = UdashButton()("Show")
-//    val hideButton = UdashButton()("Hide")
-//    val enableButton = UdashButton()("Enable")
-//    val disableButton = UdashButton()("Disable")
-//    showButton.listen { case _ => picker.show() }
-//    hideButton.listen { case _ => picker.hide() }
-//    enableButton.listen { case _ => picker.enable() }
-//    disableButton.listen { case _ => picker.disable() }
-//
-//    val events = SeqProperty[String](Seq.empty)
-//    picker.listen {
-//      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
-//      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
-//      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
-//    }
+    val date = Property[Option[ju.Date]](Some(new ju.Date()))
+
+    val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
+      format = "MMMM Do YYYY, hh:mm a",
+      locale = Some("en_GB"),
+      showClear = true
+    ))
+
+    val disableWeekends = Property(false)
+    disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
+      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
+      case false => Seq.empty
+    }
+
+    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+
+    val showButton = UdashButton()("Show")
+    val hideButton = UdashButton()("Hide")
+    val enableButton = UdashButton()("Enable")
+    val disableButton = UdashButton()("Disable")
+    showButton.listen { case _ => picker.show() }
+    hideButton.listen { case _ => picker.hide() }
+    enableButton.listen { case _ => picker.enable() }
+    disableButton.listen { case _ => picker.disable() }
+
+    val events = SeqProperty[String](Seq.empty)
+    picker.listen {
+      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
+      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
+      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
+    }
 
     div(GuideStyles.frame)(
-//      UdashDatePicker.loadBootstrapDatePickerStyles(),
-//      UdashInputGroup()(
-//        UdashInputGroup.input(picker.render),
-//        UdashInputGroup.addon(bind(date.transform(_.toString)))
-//      ).render,
-//      hr,
-//      UdashForm(
-//        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
-//        UdashForm.group(
-//          label("Locale"),
-//          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
-//        ),
-//        UdashForm.checkbox()("Disable weekends")(disableWeekends),
-//        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
-//        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
-//        UdashButtonGroup()(
-//          showButton.render,
-//          hideButton.render,
-//          enableButton.render,
-//          disableButton.render
-//        ).render
-//      ).render,
-//      hr,
-//      div(BootstrapStyles.Well.well)(
-//        repeat(events)(ev => Seq(i(ev.get).render, br.render))
-//      )
+      UdashDatePicker.loadBootstrapDatePickerStyles(),
+      UdashInputGroup()(
+        UdashInputGroup.input(picker.render),
+        UdashInputGroup.addon(bind(date.transform(_.toString)))
+      ).render,
+      hr,
+      UdashForm(
+        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
+        UdashForm.group(
+          label("Locale"),
+          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
+        ),
+        UdashForm.checkbox()("Disable weekends")(disableWeekends),
+        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
+        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
+        UdashButtonGroup()(
+          showButton.render,
+          hideButton.render,
+          enableButton.render,
+          disableButton.render
+        ).render
+      ).render,
+      hr,
+      div(BootstrapStyles.Well.well)(
+        repeat(events)(ev => Seq(i(ev.get).render, br.render))
+      )
     ).render
   }
 
@@ -404,7 +403,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inputGroups(): dom.Element = {
-    val vanityUrl = Property[String]
+    val vanityUrl = Property.empty[String]
     val buttonDisabled = Property(true)
     vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
     val button = UdashButton()("Clear")
@@ -447,8 +446,9 @@ object BootstrapDemos extends CrossLogging with CssView {
       def age: Int
       def shirtSize: ShirtSize
     }
+    object UserModel extends HasModelPropertyCreator[UserModel]
 
-    val user = ModelProperty[UserModel]
+    val user = ModelProperty.empty[UserModel]
     user.subProp(_.name).set("")
     user.subProp(_.age).set(25)
     user.subProp(_.shirtSize).set(Medium)
@@ -480,8 +480,8 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inlineForm(): dom.Element = {
-    val search = Property[String]
-    val something = Property[String]
+    val search = Property.empty[String]
+    val something = Property.empty[String]
     div(GuideStyles.frame)(
       UdashForm.inline(
         UdashForm.group(
@@ -505,9 +505,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       def title: String
       def content: String
     }
-    object Panel {
-      implicit val pc: PropertyCreator[Panel] = PropertyCreator.propertyCreator[Panel]
-    }
+    object Panel extends HasModelPropertyCreator[Panel]
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
     val panels = SeqProperty[Panel](
@@ -537,6 +535,8 @@ object BootstrapDemos extends CrossLogging with CssView {
       def title: String
       def content: String
     }
+    object Panel extends HasModelPropertyCreator[Panel]
+
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
     val panels = SeqProperty[Panel](
@@ -758,7 +758,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleModal(): dom.Element = {
-    val events = SeqProperty[UdashModal.ModalEvent]
+    val events = SeqProperty.empty[UdashModal.ModalEvent]
     val header = () => div(
       "Modal events",
       UdashButton()(UdashModal.CloseButtonAttr, BootstrapStyles.close, "×").render
@@ -890,7 +890,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleCollapse(): dom.Element = {
-    val events = SeqProperty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
       div(BootstrapStyles.Well.well)(
         ul(repeat(events)(event => li(event.get.toString).render))
@@ -914,7 +914,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def accordionCollapse(): dom.Element = {
-    val events = SeqProperty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
     val news = SeqProperty[String](
       "Title 1", "Title 2", "Title 3"
     )

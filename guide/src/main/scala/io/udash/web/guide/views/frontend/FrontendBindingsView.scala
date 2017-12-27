@@ -58,27 +58,14 @@ class FrontendBindingsView extends FinalView with CssView {
         |  "Integers: ",
         |  produce(integers)((seq: Seq[Int]) =>
         |    seq.map(p => span(s"$p, ").render)
-        |  ), br,
-        |  "Integers (patching): ",
-        |  produce(integers,
-        |    (seq: Seq[Property[Int]]) =>
-        |      seq.map(p => span(id := p.hashCode())(s"${p.get}, ").render),
-        |    (patch: Patch[Property[Int]], el: Seq[Element]) => {
-        |      val insertBefore = jQ(el:_*).children().at(patch.idx)
-        |      patch.added.foreach(p =>
-        |        jQ(span(id := p.hashCode())(s"${p.get}, ").render)
-        |          .insertBefore(insertBefore)
-        |      )
-        |      patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
-        |    }
         |  )
         |)""".stripMargin
     )(GuideStyles),
     new ProduceDemoComponent,
     p(
-      "The above example presents three variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
-      " method, but you can provide a custom DOM element builder. Notice that the first version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
-      "redraws the whole sequence every time - it is ok when the sequence is small. The second version updates only changed ",
+      "The above example presents two variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
+      " method, but you can provide a custom DOM element builder. Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
+      "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"), " method updates only changed ",
       "elements of the sequence. To make it easier to notice, every added element is highlighted."
     ),
     h3("repeat"),
@@ -91,7 +78,7 @@ class FrontendBindingsView extends FinalView with CssView {
         |).render""".stripMargin
     )(GuideStyles),
     new RepeatDemoComponent,
-    p("This method is similar to the patching version of produce, but it takes care about replacing elements internally."),
+    p("This method takes care about replacing elements of the sequence internally."),
     h3("showIf"),
     p(
       "This binding method takes two arguments: ", i("Property[Boolean]"), " and ", i("Seq[dom.Element]"), ". ",

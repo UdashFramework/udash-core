@@ -15,6 +15,7 @@ import scalatags.JsDom.all._
 trait ClientIdDemoModel {
   def clientId: String
 }
+object ClientIdDemoModel extends HasModelPropertyCreator[ClientIdDemoModel]
 
 class ClientIdDemoComponent extends Component {
   import Context._
@@ -22,7 +23,7 @@ class ClientIdDemoComponent extends Component {
 
   object ClientIdDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty[ClientIdDemoModel]
+      val clientId = ModelProperty.empty[ClientIdDemoModel]
       clientId.subProp(_.clientId).set("???")
 
       val presenter = new ClientIdDemoPresenter(clientId)

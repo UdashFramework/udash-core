@@ -16,6 +16,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
+object IntroFormDemoModel extends HasModelPropertyCreator[IntroFormDemoModel]
 
 class IntroFormDemoComponent extends Component {
   override def getTemplate: Modifier = new IntroFormDemoViewFactory().create()._1.getTemplate

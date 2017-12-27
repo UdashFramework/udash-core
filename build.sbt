@@ -158,7 +158,8 @@ lazy val homepage = project.in(file("homepage")).enablePlugins(ScalaJSPlugin)
 
 lazy val selenium = project.in(file("selenium"))
   .dependsOn(backend)
-  .settings(commonSettings: _*).settings(
+  .settings(commonSettings: _*)
+  .settings(
     libraryDependencies ++= seleniumDeps.value,
     libraryDependencies ++= testDeps.value,
 

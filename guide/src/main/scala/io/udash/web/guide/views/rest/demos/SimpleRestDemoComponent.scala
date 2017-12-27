@@ -22,10 +22,11 @@ class SimpleRestDemoComponent extends Component {
     def int: Int
     def cls: RestExampleClass
   }
+  object ExampleModel extends HasModelPropertyCreator[ExampleModel]
 
   object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responsesModel = ModelProperty[ExampleModel]
+      val responsesModel = ModelProperty.empty[ExampleModel]
 
       val presenter = new SimpleRestDemoPresenter(responsesModel)
       new SimpleRestDemoView(responsesModel, presenter).render

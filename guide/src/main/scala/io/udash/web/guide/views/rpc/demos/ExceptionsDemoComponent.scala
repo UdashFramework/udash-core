@@ -21,6 +21,7 @@ case class ExceptionsDemoModel(
   translatableException: TranslationKey0,
   unknownException: String
 )
+object ExceptionsDemoModel extends HasModelPropertyCreator[ExceptionsDemoModel]
 
 class ExceptionsDemoComponent extends Component {
   import Context._
@@ -28,7 +29,7 @@ class ExceptionsDemoComponent extends Component {
 
   object ExceptionsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty[ExceptionsDemoModel]
+      val model = ModelProperty.empty[ExceptionsDemoModel]
       val presenter = new ExceptionsDemoPresenter(model)
       new ExceptionsDemoView(model, presenter).render
     }

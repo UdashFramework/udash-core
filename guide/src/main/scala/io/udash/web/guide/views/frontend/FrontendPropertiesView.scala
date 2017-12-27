@@ -24,7 +24,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "convenient value change listening and validation. Take a look at the example below:"
     ),
     CodeBlock(
-      """val username = Property[String]
+      """val username = Property.empty[String]
         |
         |// Register value change listener
         |username.listen((name: String) =>
@@ -74,14 +74,14 @@ class FrontendPropertiesView extends FinalView with CssView {
     ),
     CodeBlock(
       """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
-        |val numbers = ModelProperty[NumbersInRange]
+        |val numbers = ModelProperty.empty[NumbersInRange]
         |number.subProp(_.minimum).set(3)
         |
         |trait Person {
         |  def name: String
         |  def birthYear: Int
         |}
-        |val person = ModelProperty[Person]
+        |val person = ModelProperty.empty[Person]
         |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
     p(
@@ -123,7 +123,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |
         |case class Comment(author: User, content: String, responses: Seq[Comment])
         |
-        |val comment = ModelProperty[Comment]
+        |val comment = ModelProperty.empty[Comment]
         |comment.subProp(_.author.name).set("John") //set author name
         |// print responses
         |val responses = comment.subSeq(_.responses)
@@ -158,7 +158,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |    }
         |}
         |
-        |val comment = ModelProperty[Comment]
+        |val comment = ModelProperty.empty[Comment]
         |val name = comment.subProp(_.author.name)
         |name.addValidator(UserNameValidator)
         |name.set("A")
@@ -172,7 +172,7 @@ class FrontendPropertiesView extends FinalView with CssView {
     )(GuideStyles),
     p("You can also pass an anonymous function to the ", i("addValidator"), " method:"),
     CodeBlock(
-      """val comment = ModelProperty[Comment]
+      """val comment = ModelProperty.empty[Comment]
         |val name = comment.subProp(_.author.name)
         |name.addValidator((name: String) =>
         |  if (name.length >= 3) Valid
@@ -191,7 +191,7 @@ class FrontendPropertiesView extends FinalView with CssView {
     h3("Property value change listeners"),
     p("Similarly to validation, value changes are considered in the context of properties hierarchy. For example:"),
     CodeBlock(
-      """val comment = ModelProperty[Comment]
+      """val comment = ModelProperty.empty[Comment]
         |comment.subProp(_.author.name).listen(_ => println("A"))
         |comment.subModel(_.author).listen(_ => println("B"))
         |comment.listen(_ => println("C"))
@@ -205,7 +205,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "in this property, yet it will not fire on change inside children of a property. For example:"
     ),
     CodeBlock(
-      """val ints = SeqProperty[Int]
+      """val ints = SeqProperty.empty[Int]
         |ints.listen(_ => println("listen"))
         |ints.listenStructure(_ => println("listenStructure"))
         |
@@ -222,7 +222,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |  def name: String
         |}
         |
-        |val user = ModelProperty[User]""".stripMargin
+        |val user = ModelProperty.empty[User]""".stripMargin
     )(GuideStyles),
     p("Now, if you want to obtain the user id property as Int, you can use the ", i("transform"), " method:"),
     CodeBlock(

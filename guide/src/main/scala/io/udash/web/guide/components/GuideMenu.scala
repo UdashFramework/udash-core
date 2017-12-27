@@ -133,7 +133,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 object GuideMenu {
   import Context._
 
-  private val property = Property[String]
+  private val property = Property.empty[String]
 
   def apply(): GuideMenu = {
     new GuideMenu(Context.mainMenuEntries, property)

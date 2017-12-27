@@ -1,7 +1,6 @@
 package io.udash.web.homepage
 
 import io.udash._
-import io.udash.utils.Bidirectional
 
 class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
   def matchUrl(url: Url): RoutingState =
@@ -10,8 +9,8 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
   def matchState(state: RoutingState): Url =
     Url(state2Url.apply(state))
 
-  private val (url2State, state2Url) = Bidirectional[String, RoutingState] {
+  private val (url2State, state2Url) = bidirectional {
     case "" => IndexState(None)
-    case "/demo" /:/ s => IndexState(Some(s))
+    case "/demo" / s => IndexState(Some(s))
   }
 }

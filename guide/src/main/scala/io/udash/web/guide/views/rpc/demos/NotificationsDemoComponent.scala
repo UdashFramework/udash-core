@@ -16,6 +16,7 @@ trait NotificationsDemoModel {
   def registered: Boolean
   def lastMessage: String
 }
+object NotificationsDemoModel extends HasModelPropertyCreator[NotificationsDemoModel]
 
 class NotificationsDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -24,7 +25,7 @@ class NotificationsDemoComponent extends Component {
 
   object NotificationsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty[NotificationsDemoModel]
+      val model = ModelProperty.empty[NotificationsDemoModel]
       model.subProp(_.registered).set(false)
       model.subProp(_.lastMessage).set("-")
 

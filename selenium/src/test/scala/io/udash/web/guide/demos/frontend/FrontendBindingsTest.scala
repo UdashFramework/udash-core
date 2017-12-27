@@ -55,8 +55,6 @@ class FrontendBindingsTest extends SeleniumTest {
       def checkIntegers() = {
         eventually {
           val std = collectIntegers(produce.findElement(new ById("produce-demo-integers")))
-          val patching = collectIntegers(produce.findElement(new ById("produce-demo-integers-patching")))
-          std should be(patching)
           prevIntegers shouldNot be(std)
           prevIntegers = std
         }
