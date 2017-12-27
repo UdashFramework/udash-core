@@ -8,7 +8,6 @@ import io.udash.wrappers.jquery.JQueryEvent
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
-@js.annotation.ScalaJSDefined
 trait BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
 
   /**
@@ -31,7 +30,6 @@ trait BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
   val setExtremes: js.UndefOr[js.ThisFunction1[AxisType, AxisEvents.SetExtremesEvent, Any]] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait AxisEvents[AxisType <: BaseAxis[AxisType, _]] extends BaseAxisEvents[AxisType] {
 
   /**
@@ -88,19 +86,15 @@ trait AxisEventsCompanion[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEv
   }
 }
 
-@js.annotation.ScalaJSDefined
 trait XAxisEvents extends AxisEvents[XAxis]
 object XAxisEvents extends AxisEventsCompanion[XAxis, XAxisEvents]
 
-@js.annotation.ScalaJSDefined
 trait YAxisEvents extends AxisEvents[YAxis]
 object YAxisEvents extends AxisEventsCompanion[YAxis, YAxisEvents]
 
-@js.annotation.ScalaJSDefined
 trait ZAxisEvents extends AxisEvents[ZAxis]
 object ZAxisEvents extends AxisEventsCompanion[ZAxis, ZAxisEvents]
 
-@js.annotation.ScalaJSDefined
 trait ColorAxisEvents extends BaseAxisEvents[ColorAxis]
 object ColorAxisEvents {
   import scala.scalajs.js.JSConverters._

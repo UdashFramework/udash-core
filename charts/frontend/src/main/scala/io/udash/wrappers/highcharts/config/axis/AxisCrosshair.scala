@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.{Color, DashStyle}
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-@js.annotation.ScalaJSDefined
 trait AxisCrosshair extends js.Object {
 
   /**

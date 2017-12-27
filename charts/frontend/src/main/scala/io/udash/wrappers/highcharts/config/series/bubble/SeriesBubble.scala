@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils._
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesBubble extends FreePointsSeries {
   override type Data = js.Array[SeriesBubbleData | js.Array[String | Double]]
   override type DataLabels = SeriesDataLabels

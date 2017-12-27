@@ -1,7 +1,6 @@
 package io.udash.i18n
 
 import com.avsystem.commons.serialization.{GenCodec, Input, Output}
-import io.udash.properties.ImmutableValue
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -141,18 +140,6 @@ object TranslationKey {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
       Future.successful(Translated(key))
   }
-
-  implicit val immutableKey0: ImmutableValue[TranslationKey0] = null
-  implicit def immutableKey1[T]: ImmutableValue[TranslationKey1[T]] = null
-  implicit def immutableKey2[T1, T2]: ImmutableValue[TranslationKey2[T1, T2]] = null
-  implicit def immutableKey3[T1, T2, T3]: ImmutableValue[TranslationKey3[T1, T2, T3]] = null
-  implicit def immutableKey4[T1, T2, T3, T4]: ImmutableValue[TranslationKey4[T1, T2, T3, T4]] = null
-  implicit def immutableKey5[T1, T2, T3, T4, T5]: ImmutableValue[TranslationKey5[T1, T2, T3, T4, T5]] = null
-  implicit def immutableKey6[T1, T2, T3, T4, T5, T6]: ImmutableValue[TranslationKey6[T1, T2, T3, T4, T5, T6]] = null
-  implicit def immutableKey7[T1, T2, T3, T4, T5, T6, T7]: ImmutableValue[TranslationKey7[T1, T2, T3, T4, T5, T6, T7]] = null
-  implicit def immutableKey8[T1, T2, T3, T4, T5, T6, T7, T8]: ImmutableValue[TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8]] = null
-  implicit def immutableKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9]: ImmutableValue[TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9]] = null
-  implicit def immutableKeyX: ImmutableValue[TranslationKeyX] = null
 }
 
 object TranslationKey0 {

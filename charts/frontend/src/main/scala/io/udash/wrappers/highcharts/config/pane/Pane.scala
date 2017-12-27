@@ -6,7 +6,6 @@ package pane
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait Pane extends js.Object {
 
   /**

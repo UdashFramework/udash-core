@@ -6,7 +6,6 @@ package navigation
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Navigation extends js.Object {
 
   /**

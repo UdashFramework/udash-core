@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait SeriesBubbleData extends BaseTwoDimSeriesData[SeriesDataLabels] {
   /**
     * The size value for each bubble. The bubbles' diameters are computed based on the <code>z</code>,

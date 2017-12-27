@@ -27,7 +27,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
         )
       ).render
 
-      eventually(template.textContent should be("Validating..."))
+      retrying(template.textContent should be("Validating..."))
     }
 
     "render result" in {
@@ -46,10 +46,10 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
       ).render
 
       for {
-        _ <- eventually(template.textContent should be("done"))
-        _ <- eventually(template.childNodes(0).textContent should be(""))
-        _ <- eventually(template.childNodes(1).textContent should be("done"))
-        r <- eventually(template.childNodes(2).textContent should be(""))
+        _ <- retrying(template.textContent should be("done"))
+        _ <- retrying(template.childNodes(0).textContent should be(""))
+        _ <- retrying(template.childNodes(1).textContent should be("done"))
+        r <- retrying(template.childNodes(2).textContent should be(""))
       } yield r
     }
 
@@ -67,7 +67,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
         )
       ).render
 
-      eventually(template.textContent should be("error"))
+      retrying(template.textContent should be("error"))
     }
 
     "not swap position" in {
@@ -94,13 +94,13 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
       ).render
 
       for {
-        _ <- eventually(template.textContent should be("1error2Error3"))
+        _ <- retrying(template.textContent should be("1error2Error3"))
         _ <- Future(p.set(-8))
-        _ <- eventually(template.textContent should be("1error2Error3"))
+        _ <- retrying(template.textContent should be("1error2Error3"))
         _ <- Future(p.set(2))
-        _ <- eventually(template.textContent should be("1error2Error3"))
+        _ <- retrying(template.textContent should be("1error2Error3"))
         _ <- Future(p.set(-5))
-        r <- eventually(template.textContent should be("1error2Error3"))
+        r <- retrying(template.textContent should be("1error2Error3"))
       } yield r
     }
 
@@ -117,12 +117,12 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
       val template = div(binding).render
 
       for {
-        _ <- eventually(template.textContent should be("done5"))
+        _ <- retrying(template.textContent should be("done5"))
         _ <- Future(p.set(7))
-        _ <- eventually(template.textContent should be("done7"))
+        _ <- retrying(template.textContent should be("done7"))
         _ <- Future(binding.kill())
         _ <- Future(p.set(12))
-        r <- eventually(template.textContent should be("done7"))
+        r <- retrying(template.textContent should be("done7"))
       } yield r
     }
 
@@ -147,7 +147,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
       val template = div(binding).render
 
       for {
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("done5")
           nestedCalls should contain(0)
         }
@@ -155,7 +155,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
           nestedCalls.clear()
           p.set(7)
         }
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("done7")
           nestedCalls should contain(1)
         }
@@ -163,7 +163,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
           nestedCalls.clear()
           p.set(12)
         }
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("done12")
           nestedCalls shouldNot contain(0)
           nestedCalls should contain(2)
@@ -172,7 +172,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
           nestedCalls.clear()
           p.set(7)
         }
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("done7")
           nestedCalls shouldNot contain(0)
           nestedCalls shouldNot contain(1)
@@ -182,7 +182,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
           nestedCalls.clear()
           p.set(12)
         }
-        _ <- eventually {
+        _ <- retrying {
           template.textContent should be("done12")
           nestedCalls shouldNot contain(0)
           nestedCalls shouldNot contain(1)
@@ -194,7 +194,7 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
           nestedCalls.clear()
           p.set(15)
         }
-        r <- eventually {
+        r <- retrying {
           template.textContent should be("done12")
           nestedCalls.isEmpty should be(true)
         }

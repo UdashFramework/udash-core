@@ -5,7 +5,7 @@ import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
-import io.udash.properties.{ModelValue, seq}
+import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event
 
@@ -29,7 +29,7 @@ sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType
   def previous(): Unit = changePage(selectedPage.get - 1)
 }
 
-final class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[PageType]] private
+final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]] private
                            (size: PaginationSize, showArrows: ReadableProperty[Boolean],
                             highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
                            (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
@@ -73,7 +73,7 @@ final class UdashPagination[PageType : ModelValue, ElemType <: ReadableProperty[
   }
 }
 
-final class UdashPager[PageType, ElemType <: ReadableProperty[PageType]] private[pagination]
+final class UdashPager[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]] private[pagination]
                       (aligned: Boolean, override val componentId: ComponentId)
                       (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                       (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
@@ -121,19 +121,22 @@ object UdashPagination {
     def name: String
     def url: Url
   }
-  case class DefaultPage(override val name: String, override val url: Url) extends Page
+  object Page extends HasModelPropertyCreator[Page]
 
-  private def bindHref(page: CastableProperty[Page]) =
-    href.bind(page.asModel.subProp(_.url.value))
+  case class DefaultPage(override val name: String, override val url: Url) extends Page
+  object DefaultPage extends HasModelPropertyCreator[DefaultPage]
+
+  private def bindHref(page: ModelProperty[Page]) =
+    href.bind(page.subProp(_.url.value))
 
   /** Creates link for default pagination element model. */
   val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
     case (page, UdashPagination.ButtonType.PreviousPage) =>
-      a(aria.label := "Previous", bindHref(page))(span(aria.hidden := true)("«")).render
+      a(aria.label := "Previous", bindHref(page.asModel))(span(aria.hidden := true)("«")).render
     case (page, UdashPagination.ButtonType.NextPage) =>
-      a(aria.label := "Next", bindHref(page))(span(aria.hidden := true)("»")).render
+      a(aria.label := "Next", bindHref(page.asModel))(span(aria.hidden := true)("»")).render
     case (page, _) => // default: UdashPagination.ButtonType.StandardPage
-      a(bindHref(page))(bind(page.asModel.subProp(_.name))).render
+      a(bindHref(page.asModel))(bind(page.asModel.subProp(_.name))).render
   }
 
   /**
@@ -150,7 +153,7 @@ object UdashPagination {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def apply[PageType : ModelValue, ElemType <: ReadableProperty[PageType]]
+  def apply[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]]
            (size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
             highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
@@ -169,7 +172,7 @@ object UdashPagination {
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def pager[PageType, ElemType <: ReadableProperty[PageType]]
+  def pager[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]]
            (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element): UdashPager[PageType, ElemType] =

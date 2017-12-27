@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.{Animation, Color, Shadow}
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesTreemap extends MapSeries {
   override type Data = js.Array[SeriesTreemapData | Double]
   override type DataLabels = SeriesDataLabels

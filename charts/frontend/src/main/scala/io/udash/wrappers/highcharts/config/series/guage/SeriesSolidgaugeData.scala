@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.Color
 import scala.scalajs.js
 import scala.scalajs.js.`|`
 
-@js.annotation.ScalaJSDefined
 trait SeriesSolidgaugeData extends SeriesGaugeData {
   /**
     * The inner radius of an individual point in a solid gauge. Can be given as a number (pixels) or percentage string.

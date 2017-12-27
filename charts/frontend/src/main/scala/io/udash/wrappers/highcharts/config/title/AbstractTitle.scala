@@ -4,7 +4,6 @@ package title
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait AbstractTitle extends js.Object {
 
   /**

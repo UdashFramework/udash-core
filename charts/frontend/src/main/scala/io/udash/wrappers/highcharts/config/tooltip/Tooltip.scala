@@ -7,10 +7,8 @@ import io.udash.wrappers.highcharts.api.{Point, Series}
 import io.udash.wrappers.highcharts.config.utils.{Color, DateTimeLabelFormats}
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 import scala.scalajs.js.{ThisFunction, `|`}
 
-@js.annotation.ScalaJSDefined
 trait Tooltip extends js.Object {
 
   /**
@@ -288,7 +286,6 @@ object Tooltip {
     val y: js.Any = js.native
   }
 
-  @ScalaJSDefined
   class Coords(val x: Int, val y: Int) extends js.Object
 
   /**

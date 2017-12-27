@@ -108,7 +108,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
 
       val resp = rpc.doStuff(true)
       connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
-      eventually {
+      retrying {
         resp.isCompleted should be(true)
         resp.value.get.failed.get.isInstanceOf[UsesServerRPC.CallTimeout] should be(true)
       }
@@ -137,7 +137,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
 
       val resp = rpc.doStuff(true)
       connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
-      eventually {
+      retrying {
         resp.isCompleted should be(true)
         resp.value.get.failed.get.isInstanceOf[UsesServerRPC.CallTimeout] should be(true)
         firstCalled should be(true)

@@ -3,7 +3,6 @@ package io.udash.wrappers.highcharts.config.accessibility
 
 import scala.scalajs.js
 
-@js.annotation.ScalaJSDefined
 trait AccessibilityKeyboardNavigation extends js.Object {
 
   /**

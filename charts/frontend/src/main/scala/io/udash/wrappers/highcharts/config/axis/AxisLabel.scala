@@ -9,7 +9,6 @@ import io.udash.wrappers.highcharts.config.utils.Align
 import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
-@js.annotation.ScalaJSDefined
 trait AxisLabel[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
   /**
     * What part of the string the given position is anchored to. Can be one of <code>"left"</code>,
@@ -227,7 +226,6 @@ trait AxisLabelCompanion[AxisType <: BaseAxis[AxisType, _], AxisLabelsType <: Ax
   }
 }
 
-@js.annotation.ScalaJSDefined
 trait XAxisLabel extends AxisLabel[XAxis]
 object XAxisLabel extends AxisLabelCompanion[XAxis, XAxisLabel] {
   /**
@@ -276,7 +274,6 @@ object XAxisLabel extends AxisLabelCompanion[XAxis, XAxisLabel] {
     )
 }
 
-@js.annotation.ScalaJSDefined
 trait YAxisLabel extends AxisLabel[YAxis]
 object YAxisLabel extends AxisLabelCompanion[YAxis, YAxisLabel] {
   /**
@@ -318,7 +315,6 @@ object YAxisLabel extends AxisLabelCompanion[YAxis, YAxisLabel] {
 
 }
 
-@js.annotation.ScalaJSDefined
 trait ZAxisLabel extends AxisLabel[ZAxis]
 object ZAxisLabel extends AxisLabelCompanion[ZAxis, ZAxisLabel] {
   /**
@@ -367,7 +363,6 @@ object ZAxisLabel extends AxisLabelCompanion[ZAxis, ZAxisLabel] {
     )
 }
 
-@js.annotation.ScalaJSDefined
 trait ColorAxisLabel extends AxisLabel[ColorAxis]
 object ColorAxisLabel extends AxisLabelCompanion[ColorAxis, ColorAxisLabel] {
   /**

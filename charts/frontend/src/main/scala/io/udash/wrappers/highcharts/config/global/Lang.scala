@@ -6,7 +6,6 @@ package global
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait Lang extends js.Object {
 
   /**

@@ -3,10 +3,7 @@ package config
 package utils
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 
-
-@ScalaJSDefined
 trait Position extends js.Object {
   val align: js.UndefOr[String] = js.undefined
   val verticalAlign: js.UndefOr[String] = js.undefined

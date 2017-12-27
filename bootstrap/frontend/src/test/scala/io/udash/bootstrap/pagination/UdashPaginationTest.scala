@@ -1,11 +1,9 @@
 package io.udash.bootstrap.pagination
 
 import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
-import org.scalajs.dom.html.Button
 
 class UdashPaginationTest extends UdashFrontendTest {
   import org.scalajs.dom._

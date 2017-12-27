@@ -9,7 +9,6 @@ import scala.scalajs.js
 import scala.scalajs.js.`|`
 
 
-@js.annotation.ScalaJSDefined
 trait LegendNavigation extends js.Object {
 
   /**

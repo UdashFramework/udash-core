@@ -13,10 +13,6 @@ import js.JSConverters._
 
 /** Contains integration of CSS structures with Scalatags. */
 trait CssView {
-  implicit def pcCssStyle: PropertyCreator[CssStyle] = CssView.cssStylePC
-  implicit def pcOCssStyle: PropertyCreator[Option[CssStyle]] = CssView.cssStylePCO
-  implicit def pcSCssStyle: PropertyCreator[Seq[CssStyle]] = CssView.cssStylePCS
-
   implicit def style2Mod(s: CssStyle): Modifier = new CssView.StyleModifier(js.Array(s))
   implicit def styles2Mod(s: CssStyle*): Modifier = new CssView.StyleModifier(s.toJSArray)
   implicit def style2TextMod(s: CssStyle): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(js.Array(s))
@@ -30,10 +26,6 @@ trait CssView {
 }
 
 object CssView extends CssView {
-  private val cssStylePC: PropertyCreator[CssStyle] = PropertyCreator.propertyCreator[CssStyle]
-  private val cssStylePCO: PropertyCreator[Option[CssStyle]] = PropertyCreator.propertyCreator[Option[CssStyle]]
-  private val cssStylePCS: PropertyCreator[Seq[CssStyle]] = PropertyCreator.propertyCreator[Seq[CssStyle]]
-
   private class StyleModifier(styles: js.Array[CssStyle]) extends Modifier {
     override def applyTo(t: Element): Unit =
       styles.foreach(_.addTo(t))

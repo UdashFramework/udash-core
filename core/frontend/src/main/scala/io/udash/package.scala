@@ -39,6 +39,7 @@ package object udash extends io.udash.bindings.Bindings
   type ViewFactoryRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]
 
   // Utils
+  type HasModelPropertyCreator[T] = io.udash.properties.HasModelPropertyCreator[T]
   type Registration = io.udash.utils.Registration
   @deprecated("Use `io.udash.logging.CrossLogging` instead.", "0.6.0")
   type StrictLogging = io.udash.utils.StrictLogging

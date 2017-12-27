@@ -8,9 +8,10 @@ import scala.util.Random
 
 trait BenchmarkUtils {
   case class ModelItem(i: Int, s: String, sub: Option[ModelItem])
-  object ModelItem {
-    def random: ModelItem = ModelItem(Random.nextInt(100), Random.nextString(5), Some(ModelItem(Random.nextInt(100), Random.nextString(5), None)))
-    implicit val pc: PropertyCreator[ModelItem] = PropertyCreator.propertyCreator
+  object ModelItem extends HasModelPropertyCreator[ModelItem] {
+    def random: ModelItem = ModelItem(
+      Random.nextInt(100), Random.nextString(5), Some(ModelItem(Random.nextInt(100), Random.nextString(5), None))
+    )
   }
 
   def slowInc(v: Int): Int = {

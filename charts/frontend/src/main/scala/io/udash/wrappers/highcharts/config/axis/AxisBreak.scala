@@ -6,7 +6,6 @@ package axis
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait AxisBreak extends js.Object {
 
   /**

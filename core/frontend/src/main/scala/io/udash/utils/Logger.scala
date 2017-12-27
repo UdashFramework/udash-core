@@ -23,13 +23,17 @@ trait Logger {
 private object ConsoleLogger extends Logger {
   private val console: Console = global.console.asInstanceOf[Console]
 
-  def info(message: String, params: js.Any*): Unit = console.info(message, params:_*)
+  def info(message: String, params: js.Any*): Unit =
+    console.info(message, params:_*)
 
-  def warn(message: String, params: js.Any*): Unit = console.warn(message, params:_*)
+  def warn(message: String, params: js.Any*): Unit =
+    console.warn(message, params:_*)
 
-  def error(message: String, params: js.Any*): Unit = console.error(message, params:_*)
+  def error(message: String, params: js.Any*): Unit =
+    console.error(message, params:_*)
 
-  def log(message: String, params: js.Any*): Unit = console.log(message, params:_*)
+  def log(message: String, params: js.Any*): Unit =
+    console.log(message, params:_*)
 }
 
 /**

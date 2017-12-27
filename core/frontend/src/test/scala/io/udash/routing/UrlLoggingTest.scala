@@ -23,7 +23,7 @@ class UrlLoggingTest extends AsyncUdashFrontendTest with TestRouting {
       val urls = Seq("/", "/next", "/abc/1", "/next")
       val expected = (urls.head, Some("")) :: urls.sliding(2).map { case Seq(prev, current) => (current, Some(prev)) }.toList
       urls.foreach(str => app.goTo(routing.matchUrl(Url(str))))
-      eventually(urlWithRef.toList shouldBe expected)
+      retrying(urlWithRef.toList shouldBe expected)
     }
   }
 }

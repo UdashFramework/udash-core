@@ -10,13 +10,10 @@ import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js.Date
 import scala.util.{Failure, Success}
 
-trait AsyncUdashSharedTest extends AsyncWordSpec with Matchers with BeforeAndAfterAll with PatienceConfiguration {
-  case class EventuallyTimeout() extends Exception
-
+trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
   override implicit def executionContext: ExecutionContext = JSExecutionContext.queue
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
-  def eventually(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
+  override def retrying(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
     val start = Date.now()
     val p = Promise[Assertion]
     var lastEx: Option[Throwable] = None
@@ -32,7 +29,7 @@ trait AsyncUdashSharedTest extends AsyncWordSpec with Matchers with BeforeAndAft
               startTest()
           }
         } else {
-          p.complete(Failure(lastEx.getOrElse(EventuallyTimeout())))
+          p.complete(Failure(lastEx.getOrElse(RetryingTimeout())))
         }
       }, patienceConfig.interval.toMillis)
     }

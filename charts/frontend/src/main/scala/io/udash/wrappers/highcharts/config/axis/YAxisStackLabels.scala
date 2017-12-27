@@ -9,7 +9,6 @@ import scala.scalajs.js
 import scala.scalajs.js.ThisFunction
 
 
-@js.annotation.ScalaJSDefined
 trait YAxisStackLabels extends js.Object {
 
   /**

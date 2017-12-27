@@ -12,7 +12,6 @@ import org.scalajs.dom.Event
 import scala.scalajs.js
 
 
-@js.annotation.ScalaJSDefined
 trait ChartEvents extends js.Object {
 
   /**

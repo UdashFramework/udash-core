@@ -57,9 +57,9 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       jQ("body").append(carousel.render)
       carousel.activeIndex.get shouldBe 1
       carousel.goTo(5)
-      eventually(carousel.activeIndex.get shouldBe 5)
-      eventually(activeIdx(sl.get) shouldBe 5)
-      eventually(activeIndicatorIdx(carousel) shouldBe 5)
+      retrying(carousel.activeIndex.get shouldBe 5)
+      retrying(activeIdx(sl.get) shouldBe 5)
+      retrying(activeIndicatorIdx(carousel) shouldBe 5)
     }
 
     "move to next slide" in {
@@ -68,9 +68,9 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       jQ("body").append(carousel.render)
       carousel.activeIndex.get shouldBe 1
       carousel.nextSlide()
-      eventually(carousel.activeIndex.get shouldBe 2)
-      eventually(activeIdx(sl.get) shouldBe 2)
-      eventually(activeIndicatorIdx(carousel) shouldBe 2)
+      retrying(carousel.activeIndex.get shouldBe 2)
+      retrying(activeIdx(sl.get) shouldBe 2)
+      retrying(activeIndicatorIdx(carousel) shouldBe 2)
     }
 
     "move to previous slide" in {
@@ -79,9 +79,9 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       jQ("body").append(carousel.render)
       carousel.activeIndex.get shouldBe 1
       carousel.previousSlide()
-      eventually(carousel.activeIndex.get shouldBe 0)
-      eventually(activeIdx(sl.get) shouldBe 0)
-      eventually(activeIndicatorIdx(carousel) shouldBe 0)
+      retrying(carousel.activeIndex.get shouldBe 0)
+      retrying(activeIdx(sl.get) shouldBe 0)
+      retrying(activeIndicatorIdx(carousel) shouldBe 0)
     }
 
     "emit slide change events" in {
@@ -95,9 +95,9 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
         case ev: SlideChangedEvent => changedEvent = ev
       }
       carousel.goTo(5)
-      eventually(changeEvent shouldBe SlideChangeEvent(carousel, 5, CarouselEvent.Direction.Left))
-      eventually(changedEvent shouldBe SlideChangedEvent(carousel, 5, CarouselEvent.Direction.Left))
-      eventually(carousel.activeIndex.get shouldBe 5)
+      retrying(changeEvent shouldBe SlideChangeEvent(carousel, 5, CarouselEvent.Direction.Left))
+      retrying(changedEvent shouldBe SlideChangedEvent(carousel, 5, CarouselEvent.Direction.Left))
+      retrying(carousel.activeIndex.get shouldBe 5)
     }
 
     "maintain activeIndex property in proper state when prepending" in {
@@ -106,7 +106,7 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       jQ("body").append(carousel.render)
       carousel.activeIndex.get shouldBe 3
       sl.prepend(newSlide())
-      eventually(carousel.activeIndex.get shouldBe 4)
+      retrying(carousel.activeIndex.get shouldBe 4)
     }
 
   }

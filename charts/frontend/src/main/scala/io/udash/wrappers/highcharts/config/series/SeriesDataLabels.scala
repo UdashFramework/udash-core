@@ -8,7 +8,6 @@ import io.udash.wrappers.highcharts.config.utils.{Align, Color, Shadow, Vertical
 import scala.scalajs.js
 import scala.scalajs.js.{ThisFunction, `|`}
 
-@js.annotation.ScalaJSDefined
 trait BaseSeriesDataLabels extends js.Object {
   /**
     * The background color or gradient for the data label. Defaults to <code>undefined</code>.
@@ -174,7 +173,6 @@ trait BaseSeriesDataLabels extends js.Object {
   val zIndex: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesDataLabels extends BaseSeriesDataLabels {
   /**
     * The alignment of the data label compared to the point.  If <code>right</code>, the right side of the label should be touching the point.
@@ -208,7 +206,6 @@ trait SeriesDataLabels extends BaseSeriesDataLabels {
   val y: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesRangeDataLabels extends BaseSeriesDataLabels {
   /**
     * The alignment of the data label compared to the point.  If <code>right</code>, the right side of the label
@@ -256,7 +253,6 @@ trait SeriesRangeDataLabels extends BaseSeriesDataLabels {
   val yLow: js.UndefOr[Double] = js.undefined
 }
 
-@js.annotation.ScalaJSDefined
 trait SeriesConnectorDataLabels extends BaseSeriesDataLabels {
   /**
     * The color of the line connecting the data label to the pie slice. The default color is the same as the point's color.

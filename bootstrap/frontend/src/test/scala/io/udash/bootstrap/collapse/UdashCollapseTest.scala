@@ -38,27 +38,27 @@ class UdashCollapseTest extends AsyncUdashFrontendTest {
       }
 
       collapse.hide()
-      eventually {
+      retrying {
         checkState() should be((false, false))
         (showCounter, shownCounter, hideCounter, hiddenCounter) should be((0, 0, 0, 0)) // it was hidden already
       } flatMap { case _ =>
         collapse.show()
-        eventually {
+        retrying {
           checkState() should be((true, false))
           (showCounter, shownCounter, hideCounter, hiddenCounter) should be((1, 1, 0, 0))
         } flatMap { case _ =>
           collapse.hide()
-          eventually {
+          retrying {
             checkState() should be((false, false))
             (showCounter, shownCounter, hideCounter, hiddenCounter) should be((1, 1, 1, 1))
           } flatMap { case _ =>
             collapse.toggle()
-            eventually {
+            retrying {
               checkState() should be((true, false))
               (showCounter, shownCounter, hideCounter, hiddenCounter) should be((2, 2, 1, 1))
             } flatMap { case _ =>
               collapse.toggle()
-              eventually {
+              retrying {
                 checkState() should be((false, false))
                 (showCounter, shownCounter, hideCounter, hiddenCounter) should be((2, 2, 2, 2))
               }
@@ -96,22 +96,22 @@ class UdashCollapseTest extends AsyncUdashFrontendTest {
       }
 
       button.click()
-      eventually {
+      retrying {
         checkState() should be((true, false))
         (showCounter, shownCounter, hideCounter, hiddenCounter) should be((1, 1, 0, 0))
       } flatMap { case _ =>
         button.click()
-        eventually {
+        retrying {
           checkState() should be((false, false))
           (showCounter, shownCounter, hideCounter, hiddenCounter) should be((1, 1, 1, 1))
         } flatMap { case _ =>
           button.click()
-          eventually {
+          retrying {
             checkState() should be((true, false))
             (showCounter, shownCounter, hideCounter, hiddenCounter) should be((2, 2, 1, 1))
           } flatMap { case _ =>
             button.click()
-            eventually {
+            retrying {
               checkState() should be((false, false))
               (showCounter, shownCounter, hideCounter, hiddenCounter) should be((2, 2, 2, 2))
             }

@@ -27,7 +27,7 @@ object FileInput {
 
     inp.onchange = (ev: Event) => {
       ev.preventDefault()
-      CallbackSequencer.sequence {
+      CallbackSequencer().sequence {
         selectedFiles.clear()
         for (i <- 0 until inp.files.length) {
           val file: File = inp.files(i)

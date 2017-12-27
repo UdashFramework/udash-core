@@ -1,10 +1,6 @@
 package io.udash.auth
 
-import io.udash.{Application, GState, RoutingRegistry, UrlChangeProvider, ViewFactoryRegistry}
-import io.udash.properties.ImmutableValue
-import io.udash.routing.WindowUrlChangeProvider
-
-import scala.reflect.ClassTag
+import io.udash._
 
 object AuthApplication {
   implicit class ApplicationAuthExt[HierarchyRoot <: GState[HierarchyRoot]](val application: Application[HierarchyRoot]) extends AnyVal {

@@ -2,8 +2,7 @@ package io.udash.bindings
 
 import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
-import io.udash.bindings.modifiers.{Binding, _}
-import io.udash.properties.ImmutableValue
+import io.udash.bindings.modifiers._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
@@ -14,8 +13,6 @@ import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 trait Bindings {
-  implicit val allowFileTpe: ImmutableValue[File] = null
-
   val Checkbox      = io.udash.bindings.Checkbox
   val CheckButtons  = io.udash.bindings.CheckButtons
   val FileInput     = io.udash.bindings.FileInput
@@ -239,41 +236,6 @@ trait Bindings {
                            customElementsReplace: DOMManipulator.ReplaceMethod)
                           (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
-
-  /**
-    * Use it to bind sequence property into DOM structure, given `initBuilder` will be used to generate DOM element at start.
-    * Then it listens to structure change and calls `elementsUpdater` to handle each structure change. <br/>
-    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties value changes, you should use
-    * another binding method inside `initBuilder` and `elementsUpdater`.
-    *
-    * @param property        Property to bind.
-    * @param initBuilder     Element builder which will be used to create initial HTML element.
-    * @param elementsUpdater Function used to update element basing on patch.
-    * @return Modifier for bounded property.
-    */
-  def produce[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                           initBuilder: Seq[E] => Seq[Node],
-                                           elementsUpdater: (Patch[E], Seq[Node]) => Any): Binding =
-    new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
-
-  /**
-    * Use it to bind sequence property into DOM structure, given `initBuilder` will be used to generate DOM element at start.
-    * Then it listens to structure change and calls `elementsUpdater` to handle each structure change. <br/>
-    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties value changes,
-    * you should use another binding method inside `initBuilder` and `elementsUpdater`.<br/><br/>
-    *
-    * The builder and updater take nested bindings interceptor - it should be used if you want to create another binding inside
-    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-    *
-    * @param property        Property to bind.
-    * @param initBuilder     Element builder which will be used to create initial HTML element.
-    * @param elementsUpdater Function used to update element basing on patch.
-    * @return Modifier for bounded property.
-    */
-  def produceWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
-                                                     initBuilder: (Seq[E], Binding => Binding) => Seq[Node],
-                                                     elementsUpdater: (Patch[E], Seq[Node], Binding => Binding) => Any): Binding =
-    new SeqAsValuePatchingModifier[T, E](property, initBuilder, elementsUpdater)
 
   /**
     * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
