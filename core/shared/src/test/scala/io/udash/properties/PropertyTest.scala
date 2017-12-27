@@ -767,6 +767,16 @@ class PropertyTest extends UdashSharedTest {
 
       p.listenersCount() should be(0)
     }
+
+    "fire transform on empty property" in {
+      val p = Property.empty[String]
+      val t = p.transform(_ == null)
+
+      t.get should be(true)
+
+      p.set("asd")
+      t.get should be(false)
+    }
   }
 
   "ModelProperty" should {

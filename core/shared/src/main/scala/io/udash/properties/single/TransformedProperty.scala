@@ -9,12 +9,12 @@ import scala.concurrent.Future
 private[properties]
 class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
                                         transformer: A => B) extends ForwarderReadableProperty[B] {
-  protected var lastValue: A = _
+  protected var lastValue: Option[A] = None
   protected var transformedValue: B = _
   protected var originListenerRegistration: Registration = _
 
   protected def originListener(originValue: A) : Unit = {
-    lastValue = originValue
+    lastValue = Some(originValue)
     transformedValue = transformer(originValue)
     fireValueListeners()
   }
@@ -62,8 +62,8 @@ class TransformedReadableProperty[A, B](override protected val origin: ReadableP
 
   override def get: B = {
     val originValue = origin.get
-    if (lastValue != originValue) {
-      lastValue = originValue
+    if (lastValue.isEmpty || lastValue.get != originValue) {
+      lastValue = Some(originValue)
       transformedValue = transformer(originValue)
     }
     transformedValue
