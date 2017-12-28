@@ -44,8 +44,18 @@ class CssFileRendererTest extends UdashSharedTest {
           |    width: 30px;
           |  }
           |
-          |  20.0% {
+          |  25.0% {
           |    height: 150px;
+          |    width: 30px;
+          |  }
+          |
+          |  50.0% {
+          |    height: 150px;
+          |    width: 30px;
+          |  }
+          |
+          |  75.0% {
+          |    height: 100px;
           |    width: 30px;
           |  }
           |
@@ -70,9 +80,27 @@ class CssFileRendererTest extends UdashSharedTest {
           |  cursor: zoom-in;
           |}
           |
+          |@media not handheld and (orientation:landscape) and (max-width:840px) {
+          |  .io-udash-css-StylesheetExample-test1 {
+          |    width: 600px;
+          |  }
+          |}
+          |
+          |@media not handheld and (orientation:landscape) and (max-width:740px) {
+          |  .io-udash-css-StylesheetExample-test1 {
+          |    width: 500px;
+          |  }
+          |}
+          |
           |@media not handheld and (orientation:landscape) and (max-width:640px) {
           |  .io-udash-css-StylesheetExample-test1 {
           |    width: 400px;
+          |  }
+          |}
+          |
+          |@media not handheld and (orientation:landscape) and (max-width:540px) {
+          |  .io-udash-css-StylesheetExample-test1 {
+          |    width: 300px;
           |  }
           |}
           |

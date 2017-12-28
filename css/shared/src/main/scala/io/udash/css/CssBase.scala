@@ -1,10 +1,11 @@
 package io.udash.css
 
+import scala.collection.immutable.ListMap
 import scala.collection.mutable
-import scalacss.internal.Dsl.StyleS
-import scalacss.internal.DslBase.ToStyle
-import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, Dsl, DslBase, Env, FontFace, Keyframes, Macros, Percentage, Renderer, StyleA}
 import scala.language.implicitConversions
+import scalacss.internal.Css.styleA
+import scalacss.internal.DslBase.ToStyle
+import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, Keyframes, Macros, Percentage, Renderer, StyleA}
 
 /**
   * Base trait for all stylesheets.
@@ -152,17 +153,21 @@ trait CssBase {
           ))(Env.empty)
         )
       case CssKeyframes(className, steps) =>
+        val kfs = Keyframes(
+          new ClassName(className),
+          steps.map { case (p, impl) =>
+            (Percentage(p): scalacss.internal.KeyframeSelector, StyleA(
+              new ClassName(className),
+              Vector.empty,
+              impl
+            ))
+          }
+        )
         renderer.apply(Vector(
-          Css.keyframes(Keyframes(
-            new ClassName(className),
-            steps.toSeq.map { case (p, impl) =>
-              (Percentage(p): scalacss.internal.KeyframeSelector, StyleA(
-                new ClassName(className),
-                Vector.empty,
-                impl
-              ))
-            }
-          ))(Env.empty)
+          CssEntry.Keyframes(
+            kfs.name,
+            ListMap(kfs.frames.map(s => (s._1, styleA(s._2)(Env.empty))):_*)
+          )
         ))
       case CssFontFace(className, font) =>
         renderer.apply(Vector(
