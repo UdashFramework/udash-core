@@ -21,7 +21,7 @@ object Footer {
           p(styles.footerMore)("See more"),
           ul(
             li(styles.navItem)(
-              a(href := ExternalUrls.udashDemos, target := "_blank", GlobalStyles.underlineLink)("Github demo")
+              a(href := ExternalUrls.udashDemos, target := "_blank", GlobalStyles.underlineLink)("Demos on GitHub")
             ),
             // TODO: unccoment
             /*li(UdashGuideStyles.linkWrapper)(

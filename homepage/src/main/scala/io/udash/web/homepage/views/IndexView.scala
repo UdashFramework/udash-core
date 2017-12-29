@@ -106,8 +106,8 @@ private[views] object IndexView {
         ),
 
         li(HomepageStyles.moreListItem)(
-          h2(HomepageStyles.moreListHead)("Routing"),
-          p(HomepageStyles.moreListDescription)("Udash serves a frontend routing mechanism. Just define matching from URL to view.")
+          h2(HomepageStyles.moreListHead)("CSS"),
+          p(HomepageStyles.moreListDescription)("Type-safe CSS definition in you Scala code with minimal JavaScript size footprint and server-side rendering.")
         ),
         li(HomepageStyles.moreListItem)(
           h2(HomepageStyles.moreListHead)("i18n"),

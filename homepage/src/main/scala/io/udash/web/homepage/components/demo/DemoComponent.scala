@@ -18,7 +18,26 @@ import scalatags.generic.Attr
 
 class DemoComponent(url: Property[String]) extends Component {
 
-  url.listen(onUrlChange)
+  private val fiddleContainer = div(DemoStyles.demoFiddle).render
+  private val jqFiddleContainer = jQ(fiddleContainer)
+
+  private val template = div(DemoStyles.demoComponent)(
+    Image("laptop.png", "", DemoStyles.laptopImage),
+    div(DemoStyles.demoBody)(
+      ul(DemoStyles.demoTabs)(
+        DemoComponent.demoEntries.map(entry =>
+          li(DemoStyles.demoTabsItem)(
+            a(DemoStyles.demoTabsLink, href := entry.url)(
+              entry.name
+            )
+          )
+        )
+      ),
+      fiddleContainer
+    )
+  ).render
+
+  url.listen(onUrlChange, initUpdate = true)
 
   private def onUrlChange(update: String) = {
     val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
@@ -37,25 +56,6 @@ class DemoComponent(url: Property[String]) extends Component {
             .animate(Map[String, Any]("opacity" -> 1), 200)
         })
   }
-
-  private val fiddleContainer = div(DemoStyles.demoFiddle).render
-  private lazy val jqFiddleContainer = jQ(fiddleContainer)
-
-  private lazy val template = div(DemoStyles.demoComponent)(
-    Image("laptop.png", "", DemoStyles.laptopImage),
-    div(DemoStyles.demoBody)(
-      ul(DemoStyles.demoTabs)(
-        DemoComponent.demoEntries.map(entry =>
-          li(DemoStyles.demoTabsItem)(
-            a(DemoStyles.demoTabsLink, href := entry.url)(
-              entry.name
-            )
-          )
-        )
-      ),
-      fiddleContainer
-    )
-  ).render
 
   override def getTemplate: Modifier = template
 }

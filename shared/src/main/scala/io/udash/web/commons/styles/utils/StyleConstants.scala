@@ -42,7 +42,7 @@ object StyleConstants extends CssBase {
     val TabletLandscapeMax = Sizes.BodyWidth - 1
     val TabletLandscapeMin = 768
     val TabletMax = TabletLandscapeMin - 1
-    val TableMin = 481
-    val PhoneMax = TableMin - 1
+    val TabletMin = 481
+    val PhoneMax = TabletMin - 1
   }
 }
