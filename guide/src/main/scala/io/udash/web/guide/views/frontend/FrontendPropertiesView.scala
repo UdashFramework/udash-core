@@ -46,6 +46,7 @@ class FrontendPropertiesView extends FinalView with CssView {
     p("That was the simple example. Now it is time for something more complex:"),
     CodeBlock(
       """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange]
         |
         |val numbers = ModelProperty(
         |  NumbersInRange(0, 42, Seq.empty)
@@ -60,70 +61,96 @@ class FrontendPropertiesView extends FinalView with CssView {
       "As you can see, you can create a Property based on case class or Seq. This will be discussed later. "
     ),
     h3("Types of Properties"),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "property.png", "Properties in the Udash", GuideStyles.imgBig, GuideStyles.frame),
-    p("This might look quite complicated, but understanding the structure is not so hard. Let's go through it step by step."),
     p(
-      i("ReadableProperty"), " is the simplest version of the data model representation. You have seen its whole API ",
-      "except of the ", i("transform"), " method - this one will be described later. You can create a property ",
-      "with any immutable type as a parameter. ", i("Property"), " extends ", i("ReadableProperty"), " API with value changing ",
-      "methods. Remember: there is no guarantee that the ", i("get"), " method called twice will return the same object."
+      i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value, ",
+      "check validation result or register a listener. ", i("Property"), " extends ", i("ReadableProperty"),
+      " API with value changing methods. You can create ", i("Property"), " containing any type you want. ",
+      "Remember: there is no guarantee that the ", i("get"), " method called twice will return the same object."
     ),
     p(
-      i("ModelProperty"), " contains other properties. The structure of the property can be described with a trait or an immutable case class. ",
-      "When you create it, you can access any child property with ", i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), " methods."
+      i("(Readable)ModelProperty"), " contains other properties. The structure of the property can be described with a trait, ",
+      "a class or a case class. In case of traits all abstract vals and defs (without parameters) are considered as subproperties. ",
+      "In case of classes all elements of the primary constructor are considered as subproperties. ",
     ),
+    p(
+      "If you want to use your type as a model template you have to create ", i("ModelPropertyCreator"), " for this type. ",
+      "You can do it by creating companion object extending ", i("HasModelPropertyCreator"),
+      " or explicitly using ", i("ModelPropertyCreator.materialize"), " method in the companion object of your type. ",
+      "You can access any subproperty with ", i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), " methods."
+    ),
+    p("Take a look at these two equivalent examples of model creation:"),
     CodeBlock(
-      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
-        |val numbers = ModelProperty.empty[NumbersInRange]
-        |number.subProp(_.minimum).set(3)
+      """import io.udash._
         |
         |trait Person {
         |  def name: String
         |  def birthYear: Int
+        |  def friends: Seq[Person] // it'll be SeqProperty
         |}
+        |object Person extends HasModelPropertyCreator[Person]
+        |
         |val person = ModelProperty.empty[Person]
         |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
-    p(
-      "If ", i("CastableProperty"), " is based on a trait or case class like NumbersInRange above, you can call an ", i("asModel"), " method ",
-      "to cast it to ", i("ModelProperty"), ". Do not worry, this cast cannot fail at runtime, because it is checked ",
-      "at compile time. ", i("ModelProperty"), " provides methods extracting a part of a model as ", i("Property"), " ",
-      i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), ". Usage is validated at compile time like the ",
-      i("asModel"), " method."
-    ),
     CodeBlock(
-      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
-        |val base: CastableProperty[NumbersInRange] = ???
-        |val numbers: ModelProperty[NumbersInRange] = base.asModel
-        |//val error = base.asSeq""".stripMargin
+      """import io.udash._
+        |
+        |case class Person(
+        |  name: String
+        |  birthYear: Int
+        |  friends: Seq[Person] // it'll be SeqProperty
+        |)
+        |object Person {
+        |  implicit val modelPropertyCreator: ModelPropertyCreator[Person] =
+        |   ModelPropertyCreator.materialize[Person]
+        |}
+        |
+        |val person = ModelProperty(Person("John", 1987, Seq.empty))
+        |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
     p(
-      i("SeqProperty"), " represents a sequence of properties.In addition to basic collection operations, it provides a lot of interesting methods like:"
-    ),
-    ul(GuideStyles.defaultList)(
-      li(i("elemProperties"), " - gives access to mutable properties representing elements of the sequence"),
-      li(i("listenStructure"), " - registers callback which will be called in case any element is added or removed from this property"),
-      li(i("insert"), " - adds provided elements into sequence"),
-      li(i("filter"), " - creates ", i("ReadableSeqProperty"), " containing matching elements, which will be synchronised with the original property"),
-      li(i("reversed"), " - creates ", i("SeqProperty"), " containing elements in reversed order, it will be synchronised with the original property"),
-      li(i("zip/zipAll"), " - creates ", i("SeqProperty"), " containing zipped elements from ptovided sequences, it will be synchronised with the both original properties"),
-      li(i("zipWithIndex"), " - creates ", i("SeqProperty"), " containing elements zipped their indexes")
+      i("SeqProperty"), " represents a sequence of properties. It supports partial updates of the value with methods like: ",
+      i("append"), ", ", i("replace"), " or ", i("remove"), ". Method ", i("listenStructure"),
+      " registers callback which will be called in case any element is added or removed from this property. ",
+      "You can also access a sequence of properties contained in the ", i("SeqProperty"), " with ",
+      i("elemProperties"), " method."
     ),
     p(
-      i("SeqProperty"), " always contains ", i("Property"), " elements, but when you call the ",
-      i("filter"), " method, it returns ", i("ReadableSeqProperty"), " which contains ", i("ReadableProperty"), " elements."
+      "Elements of ", i("SeqProperty"), " can be any of properties type. This is expressed with ", i("CastableProperty"),
+      " type, which can be casted to Model or SeqProperty with compile-time checked methods: ", i("asModel"), " and ",
+      i("asSeq"), ". Take a look at the following example: "
     ),
+    CodeBlock(
+      """import io.udash._
+        |
+        |val people = SeqProperty[Person](Seq(Person("John", 1987, Seq.empty)))
+        |people.foreach { p =>
+        |  // it works because there is a ModelPropertyCreator for Person
+        |  val person = p.asModel
+        |  person.subProp(_.name).get
+        |}""".stripMargin
+    )(GuideStyles),
+    p(
+      "The standard import of Udash utils provides ", i("SeqProperty"), " alias with a single generic type describing type of ",
+      "data contained in the elements. It assumes that in ", i("SeqProperty"), " elements type is ",
+      i("CastableProperty"), " and ", i("ReadableCastableProperty"), " for ", i("ReadableSeqProperty"), ". You can import ",
+      i("io.udash.seq.SeqProperty"), " and provide the second generic argument to specify element type."
+    ),
+
     h3("Properties hierarchy"),
     p("In more complex models we can look at properties as a hierarchy. For example:"),
     CodeBlock(
-      """trait User {
-        |  def id: Int
-        |  def name: String
-        |}
+      """import io.udash._
+        |
+        |class User(val id: Int, val name: String)
+        |object User extends HasModelPropertyCreator[User]
         |
         |case class Comment(author: User, content: String, responses: Seq[Comment])
+        |object Comment extends HasModelPropertyCreator[Comment]
         |
-        |val comment = ModelProperty.empty[Comment]
+        |val comment = ModelProperty(
+        |  Comment(new User(1, "Udash"), "Hello, World!", Seq.empty)
+        |)
         |comment.subProp(_.author.name).set("John") //set author name
         |// print responses
         |val responses = comment.subSeq(_.responses)
@@ -137,11 +164,46 @@ class FrontendPropertiesView extends FinalView with CssView {
       "We can say that the ", i("comment"), " property is a parent of ", i("author"), ", ", i("content"), " and ", i("responses"), " properties, ",
       "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), " "
     ),
-    h3("Properties validation"),
-    p("The Property provides two means of data model validation: "),
+    h3("Property value change listeners"),
+    p("On any property you can register a value change listener. The value change listeners are aware of the properties hierarchy. "),
     ul(GuideStyles.defaultList)(
-      li(i("addValidator"), " - adds a new validator to a property"),
-      li(i("isValid"), " - returns Future containing the validation result")
+      li(i("Property"), " - fires the listeners when you change its value."),
+      li(i("ModelProperty"), " - fires the listeners when you change a value of any subproperty."),
+      li(i("SeqProperty"), " - fires the listeners when you change a value of any element or the structure of the sequence.")
+    ),
+    p("Take a look at the following example:"),
+    CodeBlock(
+      """import io.udash._
+        |
+        |val comment = ModelProperty(
+        |  Comment(new User(1, "Udash"), "Hello, World!", Seq.empty)
+        |)
+        |comment.subProp(_.author.name).listen(_ => println("A"))
+        |comment.subModel(_.author).listen(_ => println("B"))
+        |comment.listen(_ => println("C"))
+        |comment.subProp(_.content).listen(_ => println("D"))
+        |comment.subProp(_.author.name).set("Name")    // prints A, B and C
+        |comment.subProp(_.content).set("Content")     // prints D and C""".stripMargin
+    )(GuideStyles),
+    p("As you may notice, when you change a nested property, all its ancestors will be treated as changed."),
+    p(
+      "SeqProperty has the ", i("listenStructure"), " method which allows you to listen on adding or removing elements ",
+      "in this property, yet it will not fire on change inside children of a property. For example:"
+    ),
+    CodeBlock(
+      """val ints = SeqProperty.empty[Int]
+        |ints.listen(_ => println("listen"))
+        |ints.listenStructure(_ => println("listenStructure"))
+        |
+        |ints.insert(0, Seq(1, 2, 3))           // fires both listeners
+        |ints.elemProperties.head.set(5)        // prints only "listen"""".stripMargin
+    )(GuideStyles),
+    h3("Properties validation"),
+    p("The Property provides three methods related to data model validation: "),
+    ul(GuideStyles.defaultList)(
+      li(i("addValidator"), " - adds a new validator to a property,"),
+      li(i("isValid"), " - returns Future containing the validation result,"),
+      li(i("valid"), " - returns property containing the validation result, which automatically updates after the original property revalidation."),
     ),
     p(
       "You can remove validator by calling ", i(".cancel()"), " on ", i("Registration"), " object returned by the ",
@@ -150,15 +212,16 @@ class FrontendPropertiesView extends FinalView with CssView {
     p("Every validator must extend ", i("Validator[T]"), ", where T is a data model type. For example:"),
     CodeBlock(
       """object UserNameValidator extends Validator[String] {
-        |  def apply(name: String)
-        |           (implicit ec: ExecutionContext): Future[ValidationResult] =
+        |  def apply(name: String): Future[ValidationResult] =
         |    Future {
         |      if (name.length >= 3) Valid
         |      else Invalid(Seq("User name must contain at least 3 characters!"))
         |    }
         |}
         |
-        |val comment = ModelProperty.empty[Comment]
+        |val comment = ModelProperty(
+        |  Comment(new User(1, ""), "", Seq.empty)
+        |)
         |val name = comment.subProp(_.author.name)
         |name.addValidator(UserNameValidator)
         |name.set("A")
@@ -172,7 +235,9 @@ class FrontendPropertiesView extends FinalView with CssView {
     )(GuideStyles),
     p("You can also pass an anonymous function to the ", i("addValidator"), " method:"),
     CodeBlock(
-      """val comment = ModelProperty.empty[Comment]
+      """val comment = ModelProperty(
+        |  Comment(new User(1, ""), "", Seq.empty)
+        |)
         |val name = comment.subProp(_.author.name)
         |name.addValidator((name: String) =>
         |  if (name.length >= 3) Valid
@@ -188,41 +253,19 @@ class FrontendPropertiesView extends FinalView with CssView {
       li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid")
     ),
     p("On value change all parent properties are automatically revalidated."),
-    h3("Property value change listeners"),
-    p("Similarly to validation, value changes are considered in the context of properties hierarchy. For example:"),
-    CodeBlock(
-      """val comment = ModelProperty.empty[Comment]
-        |comment.subProp(_.author.name).listen(_ => println("A"))
-        |comment.subModel(_.author).listen(_ => println("B"))
-        |comment.listen(_ => println("C"))
-        |comment.subProp(_.content).listen(_ => println("D"))
-        |comment.subProp(_.author.name).set("Name")    // prints A, B and C
-        |comment.subProp(_.content).set("Content")     // prints C and D""".stripMargin
-    )(GuideStyles),
-    p("As you may notice, when you change a nested property, all its ancestors will be treated as changed."),
-    p(
-      "SeqProperty has the ", i("listenStructure"), " method which allows you to listen on adding or removing elements ",
-      "in this property, yet it will not fire on change inside children of a property. For example:"
-    ),
-    CodeBlock(
-      """val ints = SeqProperty.empty[Int]
-        |ints.listen(_ => println("listen"))
-        |ints.listenStructure(_ => println("listenStructure"))
-        |
-        |ints.insert(0, Seq(1, 2, 3))           // fires both listeners
-        |ints.elemProperties.head.set(5)        // prints only "listen"""".stripMargin
-    )(GuideStyles),
+
+
     h3("Properties transformation"),
     p("You can also change the type of a property. Let's assume the User model looks like below:"),
     CodeBlock(
       """case class UserId(asInt: Int)
         |
-        |trait User {
-        |  def id: UserId
-        |  def name: String
-        |}
+        |class User(val id: UserId, val name: String)
+        |object User extends HasModelPropertyCreator[User]
         |
-        |val user = ModelProperty.empty[User]""".stripMargin
+        |val user = ModelProperty(
+        |  new User(UserId(0), "test")
+        |)""".stripMargin
     )(GuideStyles),
     p("Now, if you want to obtain the user id property as Int, you can use the ", i("transform"), " method:"),
     CodeBlock(
@@ -231,8 +274,9 @@ class FrontendPropertiesView extends FinalView with CssView {
         |val name: ReadableProperty[String] = user.transform(_.name)""".stripMargin
     )(GuideStyles),
     p(
-      "Remember that ", i("userId"), " is not a new property. All operations will be synchronized between the both ",
-      "original and new property. "
+      "Remember that ", i("userId"), " is not an independent property. All operations will be synchronized between the both ",
+      "original and new property. You do not need to pass the second argument to the ", i("transform"), " method, then ",
+      "you will receive ", i("ReadableProperty"), " as a result."
     ),
     p(
       "It is possible to transform ", i("SeqProperty[A]"), " to ", i("SeqProperty[B]"), " and ",

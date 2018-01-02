@@ -35,9 +35,9 @@ class FrontendFilesView extends FinalView {
         |  FileInput("files", acceptMultipleFiles, selectedFiles)(),
         |  h4("Selected files"),
         |  ul(GuideStyles.defaultList)(
-        |    repeat(selectedFiles)(file => {
+        |    repeat(selectedFiles) { file =>
         |      li(file.get.name).render
-        |    })
+        |    }
         |  )
         |)""".stripMargin
     )(GuideStyles),

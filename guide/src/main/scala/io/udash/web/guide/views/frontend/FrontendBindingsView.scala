@@ -31,7 +31,7 @@ class FrontendBindingsView extends FinalView with CssView {
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
       li(i("produce"), " - similar to ", i("bind"), ", but takes a builder method which is called on every change of the property - its result is inserted into DOM."),
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
-      li(i("showIf"), " - shows and hides elements depending on provided property value."),
+      li(i("showIf/showIfElse"), " - shows and hides elements depending on provided property value."),
       li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
       li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
@@ -64,9 +64,7 @@ class FrontendBindingsView extends FinalView with CssView {
     new ProduceDemoComponent,
     p(
       "The above example presents two variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
-      " method, but you can provide a custom DOM element builder. Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
-      "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"), " method updates only changed ",
-      "elements of the sequence. To make it easier to notice, every added element is highlighted."
+      " method, but you can provide a custom DOM element builder. "
     ),
     h3("repeat"),
     CodeBlock(
@@ -78,7 +76,10 @@ class FrontendBindingsView extends FinalView with CssView {
         |).render""".stripMargin
     )(GuideStyles),
     new RepeatDemoComponent,
-    p("This method takes care about replacing elements of the sequence internally."),
+    p("Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
+      "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"),
+      " method updates only changed elements of the sequence. To make it easier to notice, every added element is highlighted. "
+    ),
     h3("showIf"),
     p(
       "This binding method takes two arguments: ", i("Property[Boolean]"), " and ", i("Seq[dom.Element]"), ". ",

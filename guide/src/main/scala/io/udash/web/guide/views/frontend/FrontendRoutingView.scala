@@ -72,7 +72,9 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       "For example:"
     ),
     CodeBlock(
-      """sealed abstract class RoutingState(
+      """import io.udash._
+        |
+        |sealed abstract class RoutingState(
         |  val parentState: Option[ContainerRoutingState]
         |) extends State[RoutingState]
         |
@@ -91,29 +93,36 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     )(GuideStyles),
     p(i("RoutingRegistry"), " is used to create a new application state on an URL change. For example:"),
     CodeBlock(
-      """class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
+      """import io.udash._
+        |
+        |class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
         |  def matchUrl(url: Url): RoutingState =
-        |    url2State.applyOrElse(url.value.stripSuffix("/"), (x: String) => ErrorState)
+        |    url2State.applyOrElse(
+        |      url.value.stripSuffix("/"),
+        |      (x: String) => ErrorState
+        |    )
         |
         |  def matchState(state: RoutingState): Url =
         |    Url(state2Url.apply(state))
         |
-        |  private val (url2State, state2Url) = Bidirectional[String, RoutingState] {
+        |  private val (url2State, state2Url) = bidirectional {
         |    case "/users" => Dashboard
         |    case "/users/search" => UsersListState(None)
-        |    case "/users/search" /:/ query => UsersListState(Some(query))
-        |    case "/users/details" /:/ username => UserDetailsState(username)
+        |    case "/users/search" / query => UsersListState(Some(query))
+        |    case "/users/details" / username => UserDetailsState(username)
         |  }
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "You can pass URL parts into the application state, just use the ", i("/:/"), " operator like in the example above. ",
-      "For ", i("UsersListState"), " it is possible to keep some ",
-      "search query in the URL. You can update the URL on every input change and every time the new state will be created."
+      "You can pass URL parts into the application state, just use the ", i("/"), " operator like in the example above. ",
+      "For ", i("UsersListState"), " it is possible to keep some search query in the URL. ",
+      "You can update the application state with ", i("goTo"), " method from the ", i("Application"), " interface ",
+      "and the URL will be automatically updated. A user can copy and paste the URL to a new window, then you can access ",
+      "current search query in the ", i("handleState"), " method of the presenter."
     ),
     h3("ViewFactory & ViewFactoryRegistry"),
     p(
-      "When the state changes, the application needs to resolve matching ", i("ViewFactory"), " ",
+      "When the state changes, the application needs to resolve matching ", i("ViewFactory"), ". ",
       "The way this matching is implemented is crucial, because if it returns a different ", i("ViewFactory"), ", ",
       "new presenter and view will be created and rendered. If the matching returns equal (value, not reference comparison) ",
       i("ViewFactory"), ", then the previously created presenter will be informed about the state changed through calling the ", i("handleState"), " method."
@@ -122,8 +131,11 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       """class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
         |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
         |    state match {
+        |      // let's assume that these ViewFactory objects exist somewhere
         |      case Dashboard => DashboardViewFactory
         |      case UsersListState(query) => UsersListViewFactory
+        |      // let's assume that UserDetailsViewFactory
+        |      // is a case class with one String argument
         |      case UserDetailsState(username) => UserDetailsViewFactory(username)
         |    }
         |}""".stripMargin

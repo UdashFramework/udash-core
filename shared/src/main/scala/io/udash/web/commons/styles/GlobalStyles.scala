@@ -1,6 +1,6 @@
 package io.udash.web.commons.styles
 
-import io.udash.css.CssBase
+import io.udash.css._
 import io.udash.web.commons.styles.utils._
 
 import scala.concurrent.duration.DurationInt

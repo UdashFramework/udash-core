@@ -19,7 +19,7 @@ class FrontendMVPView extends FinalView with CssView {
 
   override def getTemplate: Modifier = div(
     h2("Model, View, Presenter & ViewFactory"),
-    p("A single page in Udash app is based on four elements:"),
+    p("A single page in Udash application is based on four elements:"),
     ul(GuideStyles.defaultList)(
       li(
         "Model - based on the ", a(href := FrontendPropertiesState.url)("Properties"), " mechanism, ",
@@ -30,12 +30,12 @@ class FrontendMVPView extends FinalView with CssView {
         "with a method getting a child view to render."
       ),
       li(
-        "Presenter - extends ", i("Presenter"), ", it should contain a business logic of the connected view. It also handles ",
+        "Presenter - extends ", i("Presenter"), ", it should contain a business logic of the related view. It also handles ",
         "application state changes."
       ),
       li(
         "ViewFactory - extends ", i("ViewFactory"), ", it was discussed in detail ",
-        a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewFactory is responsible for creating a View and a Presenter. "
+        a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewFactory is responsible for creating a view and a presenter. "
       )
     ),
     ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.imgBig, GuideStyles.frame),
@@ -51,7 +51,10 @@ class FrontendMVPView extends FinalView with CssView {
       "which is used as Model in Udash-based applications. All you have to do is:"
     ),
     CodeBlock(
-      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+      """import io.udash._
+        |
+        |case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange]
         |
         |val numbers: ModelProperty[NumbersInRange] = ModelProperty(
         |  NumbersInRange(0, 42, Seq.empty)
@@ -65,12 +68,14 @@ class FrontendMVPView extends FinalView with CssView {
     h3("Presenter"),
     p(
       "The Presenter should contain all business logic of a view: user interaction callbacks and server communication. ",
-      "It should not call any methods of a View class. The View and the Presenter should communicate via Model properties. ",
+      "It should not call any methods of a View class. The presenter should pass data to the view via Model properties. ",
       "When implementing a presenter, you should remember, that the ", i("handleState"), " method does not have to be called only on ",
       "view initialization. For example:"
     ),
     CodeBlock(
-      """class ExamplePresenter(model: Property[Int]) extends Presenter[SomeState] {
+      """import io.udash._
+        |
+        |class ExamplePresenter(model: Property[Int]) extends Presenter[SomeState] {
         |  override def handleState(state: SomeState) =
         |    model.set(state.initValue)
         |
@@ -88,13 +93,11 @@ class FrontendMVPView extends FinalView with CssView {
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
     CodeBlock(
-      """class ExampleView(model: Property[Int], presenter: ExamplePresenter)
-        |  extends View {
-        |  import io.udash.guide.Context._
+      """import io.udash._
+        |import scalatags.JsDom.all._
         |
-        |  import JsDom.all._
-        |
-        |  private val child = div().render
+        |class ExampleView(model: Property[Int], presenter: ExamplePresenter)
+        |  extends ContainerView {
         |
         |  override def getTemplate: Modifier = div(
         |    h1("Example view"),
@@ -102,18 +105,12 @@ class FrontendMVPView extends FinalView with CssView {
         |    h3("Model bind example"),
         |    div(
         |      button(onclick :+= (ev => presenter.decButtonClick(), true))("-"),
-        |      button(onclick :+= (ev => presenter.incButtonClick(), true))("-"),
+        |      button(onclick :+= (ev => presenter.incButtonClick(), true))("+"),
         |      bind(model)
         |    ),
         |    h3("Below you can find my child view!"),
-        |    child
+        |    childViewContainer // child view container provided by ContainerView
         |  )
-        |
-        |  override def renderChild(childView: View): Unit = {
-        |    import io.udash.wrappers.jquery.jQ
-        |    jQ(child).children().remove()
-        |    view.getTemplate.applyTo(child)
-        |  }
         |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),

@@ -37,7 +37,9 @@ class FrontendTemplatesView extends FinalView with CssView {
     ),
     p("For example, this piece of code:"),
     CodeBlock(
-      """html(
+      """import scalatags.JsDom.all._
+        |
+        |html(
         |  head(
         |    meta(charset := "UTF-8"),
         |    meta(name := "viewport", content := "width=device-width, initial-scala=1"),
@@ -110,11 +112,12 @@ class FrontendTemplatesView extends FinalView with CssView {
     ),
     p("Look at a simple button example:"),
     CodeBlock(
-      """object ExampleStyles extends CssBase {
-        |  import scala.language.postfixOps
+      """import io.udash.css._
+        |
+        |object ExampleStyles extends CssBase {
         |  import dsl._
         |
-        |  val btn = style(
+        |  val btn: CssStyle = style(
         |    display.inlineBlock,
         |    padding(6 px, 12 px),
         |    fontSize(14 px),
@@ -130,7 +133,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |    userSelect := "none"
         |  )
         |
-        |  val btnDefault = style(
+        |  val btnDefault: CssStyle = style(
         |    color(c"#000000"),
         |    backgroundColor(c"#FFFFFF"),
         |    borderColor(c"#CCCCCC"),
@@ -143,7 +146,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |    )
         |  )
         |
-        |  val btnSuccess = style(
+        |  val btnSuccess: CssStyle = style(
         |    color(c"#FFFFFF"),
         |    backgroundColor(c"#5CB85C"),
         |    borderColor(c"#4CAE4C"),
@@ -156,11 +159,12 @@ class FrontendTemplatesView extends FinalView with CssView {
         |  )
         |}""".stripMargin
     )(GuideStyles),
-    p("Using Scalatags:"),
+    p("Using with Scalatags:"),
     CodeBlock(
       """div(
         |  a(
-        |    ExampleStyles.btn, ExampleStyles.btnDefault, id := "example-button",
+        |    ExampleStyles.btn, ExampleStyles.btnDefault,
+        |    id := "example-button",
         |    onclick := { () =>
         |      jQ("#example-button")
         |        .toggleClass(ExampleStyles.btnSuccess.className)
@@ -177,18 +181,19 @@ class FrontendTemplatesView extends FinalView with CssView {
     h3("Nested styles"),
     p("If you need styles nesting, you can use unsafeChild():"),
     CodeBlock(
-      """object ExampleStyles extends CssBase {
-        |  import scala.language.postfixOps
+      """import io.udash.css._
+        |
+        |object ExampleStyles extends CssBase {
         |  import dsl._
         |
-        |  val innerOff = style(
+        |  val innerOff: CssStyle = style(
         |    padding(6 px, 12 px),
         |    borderBottomWidth(1 px),
         |    borderBottomStyle.solid,
         |    borderBottomColor(c"#CCCCCC")
         |  )
         |
-        |  val innerOn = style(
+        |  val innerOn: CssStyle = style(
         |    padding(6 px, 12 px),
         |    color(c"#FFFFFF"),
         |    backgroundColor(c"#5CB85C"),
@@ -197,7 +202,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |    borderTopColor(c"#4CAE4C")
         |  )
         |
-        |  val swither = style(
+        |  val swither: CssStyle = style(
         |    display.inlineBlock,
         |    borderWidth(1 px),
         |    borderStyle.solid,
@@ -231,7 +236,9 @@ class FrontendTemplatesView extends FinalView with CssView {
     )(GuideStyles),
     CodeBlock(
       """a(
-        |  ExampleStyles.swither, id := "example-switcher", data("state") := "off",
+        |  ExampleStyles.swither,
+        |  id := "example-switcher",
+        |  data("state") := "off",
         |  onclick := { () =>
         |    val jqSwitcher = jQ("#example-switcher")
         |
@@ -258,8 +265,9 @@ class FrontendTemplatesView extends FinalView with CssView {
     h3("Keyframe animation"),
     p("You can use DSL methods for keyframe animations."),
     CodeBlock(
-      """object ExampleKeyframes extends CssBase {
-        |  import scala.language.postfixOps
+      """import io.udash.css._
+        |
+        |object ExampleKeyframes extends CssBase {
         |  import dsl._
         |
         |  val colorPulse = keyframes(
@@ -289,23 +297,27 @@ class FrontendTemplatesView extends FinalView with CssView {
     h3("Mixins"),
     p("If you need some mixins, you can define methods which return a CssStyle typed object:"),
     CodeBlock(
-      """object ExampleMixins extends CssBase {
+      """import io.udash.css._
+        |
+        |object ExampleMixins extends CssBase {
         |  import dsl._
         |
         |  def animation(name: String, duration: FiniteDuration,
         |                iterationCount: AV = animationIterationCount.infinite,
-        |                easing: AV = animationTimingFunction.easeInOut): CssStyle = style(
-        |    animationName := name,
-        |    iterationCount,
-        |    animationDuration(duration),
-        |    easing
-        |  )
+        |                easing: AV = animationTimingFunction.easeInOut): CssStyle =
+        |    mixin(
+        |      animationName := name,
+        |      iterationCount,
+        |      animationDuration(duration),
+        |      easing
+        |    )
         |}""".stripMargin
     )(GuideStyles),
     p("Using keyframes and animation mixins, you can create a button with a simple animation when you hover over it, for example:"),
     CodeBlock(
-      """object ExampleStyles extends CssBase {
-        |  import scala.language.postfixOps
+      """import io.udash.css._
+        |
+        |object ExampleStyles extends CssBase {
         |  import dsl._
         |
         |  val btnAnimated = style(
@@ -329,10 +341,11 @@ class FrontendTemplatesView extends FinalView with CssView {
     h3("Media queries"),
     p("It is also possible to create styles for responsive designs:"),
     CodeBlock(
-      """object ExampleStyles extends CssBase {
-        |  import scala.language.postfixOps
+      """import io.udash.css._
+        |
+        |object ExampleStyles extends CssBase {
         |  import dsl._
-
+        |
         |  val mediaContainer = style(
         |    position.relative,
         |    fontSize(28 px),
