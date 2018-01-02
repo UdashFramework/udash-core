@@ -14,7 +14,7 @@ class ContentView extends ViewContainer {
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
-  protected val child = div(GuideStyles.contentWrapper).render
+  protected val child = main(GuideStyles.contentWrapper).render
 
   private val content = main(GuideStyles.main)(
     div(GlobalStyles.body)(

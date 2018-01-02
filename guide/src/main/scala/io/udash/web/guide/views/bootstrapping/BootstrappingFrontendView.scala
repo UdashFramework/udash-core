@@ -36,21 +36,25 @@ class BootstrappingFrontendView extends FinalView with CssView {
       "A Udash application is based on states. The application state determines the created ViewFactories structure and is determined ",
       "by a URL. The application states structure is your decision, Udash requires only that all states must extend ",
       i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
-      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express place of the state in hierarchy. ",
+      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express place of the state in the hierarchy. ",
       "For example:"
     ),
     CodeBlock(
-      """sealed abstract class RoutingState(
+      """import io.udash._
+        |
+        |sealed abstract class RoutingState(
         |  val parentState: Option[ContainerRoutingState]
-        |) extends State[RoutingState]
+        |)  extends State {
+        |  override type HierarchyRoot = RoutingState
+        |}
         |
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState[RoutingState]
+        |) extends RoutingState(parentState) with ContainerState
         |
         |sealed abstract class FinalRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with FinalState[RoutingState]
+        |) extends RoutingState(parentState) with FinalState
         |
         |case object RootState extends ContainerRoutingState(None)
         |case object LandingPageState extends FinalRoutingState(Some(RootState))
@@ -66,7 +70,9 @@ class BootstrappingFrontendView extends FinalView with CssView {
     ),
     p("Take a look at example ", i("RoutingRegistry"), " implementation:"),
     CodeBlock(
-      """class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
+      """import io.udash._
+        |
+        |class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
         |  def matchUrl(url: Url): RoutingState =
         |    url2State.applyOrElse(
         |      url.value.stripSuffix("/"),
@@ -76,7 +82,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |  def matchState(state: RoutingState): Url =
         |    Url(state2Url.apply(state))
         |
-        |  private val (url2State, state2Url) = Bidirectional[String, RoutingState] {
+        |  private val (url2State, state2Url) = bidirectional {
         |    case "/" => LandingPageState
         |    case "/newsletter" => SubscribeState
         |    case "/newsletter/unsubscribe" => UnsubscribeState
@@ -92,33 +98,42 @@ class BootstrappingFrontendView extends FinalView with CssView {
     p(
       "ViewFactory creates a pair of View and Presenter. ", i("ViewFactoryRegistry"), " is responsible " +
       "for matching a current application state to ViewFactory. Below you can find an example implementation of ",
-      i("ViewFactoryRegistry"), ""
+      i("ViewFactoryRegistry"), "."
     ),
-    CodeBlock("""class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
-                |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
-                |    state match {
-                |      case RootState => RootViewFactory
-                |      case LandingPageState => LandingPageViewFactory
-                |      case NewsletterState => NewsletterViewFactory
-                |      case SubscribeState => NewsletterSubscribeViewFactory
-                |      case UnsubscribeState => NewsletterUnsubscribeViewFactory
-                |      case _ => ErrorViewFactory
-                |    }
-                |}""".stripMargin
-    )(GuideStyles),
-    p("Each ViewFactory is expected to initialize a View and a Presenter. At this point you can create the shared model for them."),
     CodeBlock(
-      """trait SubscribeModel {
-        |  def email: String
-        |}
+      """io.udash._
+        |
+        |class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
+        |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
+        |    state match {
+        |      case RootState => RootViewFactory
+        |      case LandingPageState => LandingPageViewFactory
+        |      case NewsletterState => NewsletterViewFactory
+        |      case SubscribeState => NewsletterSubscribeViewFactory
+        |      case UnsubscribeState => NewsletterUnsubscribeViewFactory
+        |      case _ => ErrorViewFactory
+        |    }
+        |}""".stripMargin
+    )(GuideStyles),
+    p(
+      "Each ViewFactory is expected to initialize a View and a Presenter. At this point you can ",
+      "create the shared model for them. Take a look at following view implementation."
+    ),
+    CodeBlock(
+      """import io.udash._
+        |import org.scalajs.dom.Event
+        |import scala.concurrent.Future
+        |
+        |class SubscribeModel(val email: String)
+        |// HasModelPropertyCreator indicates that
+        |// you can create ModelProperty for SubscribeModel
+        |object SubscribeModel extends HasModelPropertyCreator[SubscribeModel]
         |
         |case object NewsletterSubscribeViewFactory
         |  extends ViewFactory[SubscribeState.type] {
         |
-        |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
-        |
         |  override def create(): (View, Presenter[SubscribeState.type]) = {
-        |    val model = ModelProperty.empty[SubscribeModel]
+        |    val model = ModelProperty(new SubscribeModel(""))
         |    val presenter = new NewsletterSubscribePresenter(model)
         |    val view = new NewsletterSubscribeView(model, presenter)
         |
@@ -129,28 +144,25 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel])
         |  extends Presenter[SubscribeState.type] {
         |
-        |  import scalajs.concurrent.JSExecutionContext.Implicits.queue
-        |
         |  /** Called before view starts rendering. */
         |  override def handleState(state: SubscribeState.type): Unit = {
-        |    // Clear email
-        |    model.subProp(_.email).set("")
+        |    model.subProp(_.email).set("") // Clear email
         |  }
         |
-        |  def subscribe(): Future[Boolean] = Future {
-        |    // Send RPC request to server
-        |  }
+        |  // Send RPC request to server
+        |  def subscribe(): Future[Boolean] = ???
         |}
         |
-        |class NewsletterSubscribeView(model: ModelProperty[SubscribeModel],
-        |                              presenter: NewsletterSubscribePresenter)
-        |  extends FinalView {
+        |class NewsletterSubscribeView(
+        |  model: ModelProperty[SubscribeModel],
+        |  presenter: NewsletterSubscribePresenter
+        |) extends FinalView {
         |  import scalatags.JsDom.all._
         |
         |  /** Renders view HTML code */
         |  override def getTemplate: Modifier = div(
         |    // automatic two way binding with html input
-        |    TextInput(model.subProp(_.email)),
+        |    TextInput.debounced(model.subProp(_.email)),
         |    // :+= operator allows to add more than one callback for one event
         |    button(onclick :+= ((_: Event) => {
         |      presenter.subscribe()
@@ -163,11 +175,11 @@ class BootstrappingFrontendView extends FinalView with CssView {
       "The above example shows simple View, Presenter and ViewFactory implementations. ",
       ul(GuideStyles.defaultList)(
         li(
-          i("SubscribeModel"), " is a model trait which is used to create shared ", i("ModelProperty"), " ",
+          i("SubscribeModel"), " is a model trait which is used to create shared ", i("ModelProperty"), ". ",
           a(href := FrontendPropertiesState.url)("Properties in Udash"), " are described in other part of this guide. "
         ),
         li(
-          i("NewsletterSubscribeViewFactory"), " creates a model, view, presenter and connects them together "
+          i("NewsletterSubscribeViewFactory"), " creates a model, view, presenter and connects them together."
         ),
         li(
           i("NewsletterSubscribePresenter"), " initializes an email in the model and exposes the ", i("subscribe"), " method. "
@@ -179,58 +191,62 @@ class BootstrappingFrontendView extends FinalView with CssView {
         li("View ignores child views, because it is the final view.")
       )
     ),
-    p("If the view does not need a presenter, you can use ", i("StaticViewFactory"), ""),
+    p("If the view does not need a presenter, you can use ", i("StaticViewFactory"), "."),
     CodeBlock(
-      """case object NewsletterViewFactory
+      """import io.udash._
+        |
+        |case object NewsletterViewFactory
         |  extends StaticViewFactory[NewsletterState.type](() => new NewsletterView)
         |
-        |class NewsletterView extends View {
-        |  import Context._
-        |  import JsDom.all._
+        |class NewsletterView extends ContainerView {
+        |  import scalatags.JsDom.all._
         |
-        |  private val child = div().render // Placeholder for child view
-        |
+        |  // ContainerView contains default implementation of child view rendering
+        |  // It puts child view into `childViewContainer`
         |  override def getTemplate: Modifier = div(
         |    h1("Newsletter"),
         |    p("Subscribe for news..."),
-        |    child
+        |    childViewContainer
         |  )
-        |
-        |  /** Puts child view inside itself using jQuery. */
-        |  override def renderChild(view: View): Unit = {
-        |    import io.udash.wrappers.jquery.jQ
-        |    jQ(child).children().remove()
-        |    view.getTemplate.applyTo(child)
-        |  }
         |}""".stripMargin
     )(GuideStyles),
+    p("Now you should implement the rest of ", i("ViewFactories"), " from ", i("StatesToViewFactoryDef"), " class."),
     h3("Udash Application"),
     p(
       "Everything is ready to create ", i("Application"), ". It can be done in some object, " +
       "which will be useful to handle server RPC connector later. "
     ),
     CodeBlock(
-      """object Context {
-        |  import scalajs.concurrent.JSExecutionContext
+      """import io.udash._
         |
-        |  private implicit val executionContext = JSExecutionContext.Implicits.queue
-        |  private lazy val routingRegistry = new RoutingRegistryDef
-        |  private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
+        |object Context {
+        |  private val routingRegistry = new RoutingRegistryDef
+        |  private val viewFactoryRegistry = new StatesToViewFactoryDef
         |
-        |  implicit val applicationInstance = new Application[RoutingState](
-        |    routingRegistry, viewFactoryRegistry, RootState
+        |  val applicationInstance = new Application[RoutingState](
+        |    routingRegistry, viewFactoryRegistry
         |  )
         |}""".stripMargin
     )(GuideStyles),
     p("ScalaJS needs the main function that will initialize the whole application. For example: "),
     CodeBlock(
-      """object Init extends JSApp {
+      """import io.udash.wrappers.jquery._
+        |import io.udash.logging.CrossLogging
+        |import org.scalajs.dom.Element
+        |
+        |import scala.scalajs.js.annotation.JSExport
+        |
+        |object JSLauncher extends CrossLogging {
         |  @JSExport
-        |  override def main(): Unit = {
-        |    jQ(document).ready((jThis: Element) => {
+        |  def main(args: Array[String]): Unit = {
+        |    jQ((jThis: Element) => {
         |      // Select #application element from index.html as root of whole app
-        |      val appRoot = jQ("#application").get(0).get
-        |      Context.applicationInstance.run(appRoot)
+        |      val appRoot = jQ("#application").get(0)
+        |      if (appRoot.isEmpty) {
+        |        logger.error("Application root element not found! Check your index.html file!")
+        |      } else {
+        |        Context.applicationInstance.run(appRoot.get)
+        |      }
         |    })
         |  }
         |}""".stripMargin
@@ -246,24 +262,35 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p("Now, in the Context object, create ", i("DefaultServerRPC"), ":"),
-    CodeBlock("""val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService)""".stripMargin)(GuideStyles),
+    CodeBlock(
+      """import io.udash.rpc._
+        |
+        |val serverRpc: MainServerRPC = DefaultServerRPC[MainClientRPC, MainServerRPC](
+        |  new RPCService
+        |  // You can also provide custom ExceptionCodecRegistry
+        |  // and  RPC failure interceptors.
+        |  //exceptionsRegistry = ???
+        |  //rpcFailureInterceptors = ???
+        |)""".stripMargin
+    )(GuideStyles),
     p("You can use serverRpc like that:"),
-    CodeBlock("""serverRpc.hello("World") onComplete {
-                |  case Success(r) => println(r)
-                |  case Failure(ex) => println(ex)
-                |}""".stripMargin
+    CodeBlock(
+      """serverRpc.hello("World") onComplete {
+        |  case Success(r) => println(r)
+        |  case Failure(ex) => println(ex)
+        |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(
       "Now all parts of the Udash application are ready. You can find a complete demo application in ",
-      a(href := BootstrappingGeneratorsState.url)("Udash generators"), ""
+      a(href := BootstrappingGeneratorsState.url)("Udash generators"), "."
     ),
 
     p(
       "You can also learn more about ",
       a(href := FrontendIntroState.url)("Frontend application development"),
       " or ",
-      a(href := RpcIntroState.url)("RPC in Udash"), ""
+      a(href := RpcIntroState.url)("RPC in Udash"), "."
     )
   )
 }

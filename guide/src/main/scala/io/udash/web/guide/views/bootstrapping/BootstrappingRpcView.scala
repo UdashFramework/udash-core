@@ -19,7 +19,7 @@ class BootstrappingRpcView extends FinalView with CssView {
     h2("Bootstrapping RPC interfaces"),
     p(
       "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
-      " module, define two traits annotated with ", i("com.avsystem.commons.rpc.RPC"), ": "
+      " module, define two traits annotated with ", i("io.udash.rpc.RPC"), ": "
     ),
     ul(GuideStyles.defaultList)(
       li("MainClientRPC - contains methods which can be called by a server on a client application"),
@@ -32,13 +32,13 @@ class BootstrappingRpcView extends FinalView with CssView {
     ),
     h3("RPC vs Client RPC"),
     p(
-      "An ", i("com.avsystem.commons.rpc.RPC"), " is an annotation marking all RPC interfaces. A RPC interface is a trait or class " +
+      "An ", i("io.udash.rpc.RPC"), " is an annotation marking all RPC interfaces. A RPC interface is a trait or class " +
       "whose abstract methods will be interpreted as remote methods by the RPC framework. Remote methods must be defined " +
       "according to following rules:"
     ),
     ul(GuideStyles.defaultList)(
-      li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable")),
-      li("Return type must be either Unit or Future[T] where T is a type serializable or another RPC interface"),
+      li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable"), "."),
+      li("Return type must be either Unit, another RPC interface or Future[T] where type T is serializable."),
       li("Method must not have type parameters.")
     ),
     p(
@@ -52,6 +52,13 @@ class BootstrappingRpcView extends FinalView with CssView {
       "Notice that both a standard RPC and a Client RPC are annotated with ", i("@RPC"), ". Client RPC can be used in every place where a RPC is expected, ",
       "but you can not put a standard RPC where a Client RPC is expected."
     ),
+    p(
+      "The RPC system uses some macro-generated code. To keep the JavaScript code as small as possible ",
+      "and make compilation faster, for each RPC interface create companion object extending ",
+      i("RPCCompanion"), " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
+      "and serialization methods. Usually you will probably use ", i("DefaultClientUdashRPCFramework"),
+      " and ", i("DefaultServerUdashRPCFramework"), "."
+    ),
     h4("Examples"),
     p("Example of RPC interfaces:"),
     CodeBlock(
@@ -60,15 +67,20 @@ class BootstrappingRpcView extends FinalView with CssView {
         |@RPC
         |trait MainClientRPC {
         |  def pong(id: Int): Unit
-        |}""".stripMargin)(GuideStyles),
+        |}
+        |
+        |object MainClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[MainClientRPC]""".stripMargin)(GuideStyles),
     CodeBlock(
       """import io.udash.rpc._
+        |import scala.concurrent.Future
         |
         |@RPC
         |trait MainServerRPC {
         |  def ping(id: Int): Unit
         |  def hello(name: String): Future[String]
-        |}""".stripMargin)(GuideStyles),
+        |}
+        |
+        |object MainServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[MainServerRPC]""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),

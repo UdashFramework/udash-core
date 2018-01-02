@@ -21,7 +21,7 @@ class BootstrappingIntroView extends FinalView with CssView {
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_basic.png", "Basic modules structure.", GuideStyles.floatRight, GuideStyles.imgSmall, GuideStyles.imgIntro),
     ul(GuideStyles.defaultList)(
       li(
-        "shared - contains ", a(href := RpcIntroState.url)("RPC"), " interfaces, shared model and logic (e.g model validation). ",
+        "shared - contains ", a(href := RpcIntroState.url)("RPC"), " interfaces, shared model and logic (e.g. model validation). ",
         "It is cross-compiled into JavaScript and JVM bytecode, so you can use it in the frontend and backend code. ",
         "It is useful when you want to use data models both in frontend and backend. Udash uses this module to share RPC interfaces."
       ),
@@ -30,8 +30,8 @@ class BootstrappingIntroView extends FinalView with CssView {
         "It is compiled only to bytecode. You can write your backend logic like database access, services layer etc. there."
       ),
       li(
-        "frontend - contains frontend application code. It is compiled only to JS and packed into three files: ",
-        i("frontend-deps.js"), ", ", i("frontend-impl.js"), " and ", i("frontend-init.js"), ""
+        "frontend - contains frontend application code. It is compiled only to JS and packed into two files: ",
+        i("frontend-deps.js"), " and ", i("frontend-impl.js"), "."
       )
     ),
     p(

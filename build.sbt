@@ -3,27 +3,29 @@ import UdashWebBuild._
 
 name := "udash-guide"
 
-version in ThisBuild := "0.6.0"
-scalaVersion in ThisBuild := versionOfScala
-organization in ThisBuild := "io.udash"
-scalacOptions in ThisBuild ++= Seq(
-  "-feature",
-  "-deprecation",
-  "-unchecked",
-  "-language:implicitConversions",
-  "-language:existentials",
-  "-language:dynamics",
-  "-language:experimental.macros",
-  "-Xfuture",
-  CrossVersion.partialVersion(scalaVersion.value).collect {
-    // WORKAROUND https://github.com/scala/scala/pull/5402
-    case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
-  }.getOrElse("-Xlint:_,-missing-interpolator,-adapted-args")
-)
+inThisBuild(Seq(
+  version := "0.6.0-SNAPSHOT",
+  scalaVersion := versionOfScala,
+  organization := "io.udash",
+  scalacOptions ++= Seq(
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-language:implicitConversions",
+    "-language:existentials",
+    "-language:dynamics",
+    "-language:experimental.macros",
+    "-Xfuture",
+    "-Xfatal-warnings",
+    CrossVersion.partialVersion(scalaVersion.value).collect {
+      // WORKAROUND https://github.com/scala/scala/pull/5402
+      case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
+    }.getOrElse("-Xlint:_,-missing-interpolator,-adapted-args")
+  )
+))
 
 val commonSettings = Seq(
-  moduleName := "udash-guide-" + moduleName.value,
-  (publishArtifact in packageDoc) := false
+  moduleName := "udash-guide-" + moduleName.value
 )
 
 lazy val udashGuide = project.in(file("."))
@@ -34,8 +36,10 @@ lazy val udashGuide = project.in(file("."))
     mainClass in Compile := Some("io.udash.web.Launcher")
   )
 
-lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
-  .settings(commonSettings: _*).settings(
+lazy val shared = crossProject
+  .crossType(CrossType.Pure).in(file("shared"))
+  .settings(commonSettings)
+  .settings(
     libraryDependencies ++= crossDeps.value
   )
 
@@ -44,7 +48,8 @@ lazy val sharedJS = shared.js
 
 lazy val backend = project.in(file("backend"))
   .dependsOn(sharedJVM)
-  .settings(commonSettings: _*).settings(
+  .settings(commonSettings)
+  .settings(
     libraryDependencies ++= backendDeps.value,
 
     (compile in Compile) := (compile in Compile).dependsOn(copyStatics).value,

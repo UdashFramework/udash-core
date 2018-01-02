@@ -3,7 +3,7 @@ package io.udash.web.server
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
-import io.udash.web.guide.demos.rest.{EchoServerREST, MainServerREST, RestExampleClass, SimpleServerREST}
+import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.web.guide.rest.ExposedRestInterfaces
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.web.guide.{GuideExceptions, MainServerRPC}
@@ -13,8 +13,6 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
-
-import scala.concurrent.Future
 
 class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String) {
   import io.udash.web.Implicits._
