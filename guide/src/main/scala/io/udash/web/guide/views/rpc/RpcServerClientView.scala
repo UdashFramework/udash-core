@@ -34,8 +34,12 @@ class RpcServerClientView extends FinalView with CssView {
       "As you might remember from the ", a(href := RpcClientServerState.url)("Client ➔ server communication"),
       " chapter, in frontend code we can create the server connection in the following way:"),
     CodeBlock(
-      """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
+      """import io.udash.rpc._
+        |
+        |val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
+        |  // you can also pass here a server URL, an exceptions registry or
+        |  // RPC failure interceptors (global handlers of exceptions thrown by server)
         |)""".stripMargin
     )(GuideStyles),
     p("The ", i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. For example:"),
@@ -51,16 +55,13 @@ class RpcServerClientView extends FinalView with CssView {
       "creating a wrapper around the ", i("DefaultClientRPC"), " class can be useful."
     ),
     CodeBlock(
-      """object ClientRPC {
+      """import io.udash.rpc._
+        |
+        |object ClientRPC {
         |  def apply(target: ClientRPCTarget)
         |           (implicit ec: ExecutionContext): MainClientRPC =
         |    new DefaultClientRPC[MainClientRPC](target).get
         |}""".stripMargin
-    )(GuideStyles),
-    p("Now you can call a client method in the following way:"),
-    CodeBlock(
-      """val clientRpc = ClientRPC(clientId) // RPC for this client can be reused
-        |clientRpc.methodFromMainClientRPC()""".stripMargin
     )(GuideStyles),
     h3("Broadcasting messages"),
     p("With the above ", i("ClientRPC"), " wrapper, it is easy to broadcast the method call to all active connections:"),
@@ -68,23 +69,34 @@ class RpcServerClientView extends FinalView with CssView {
     h3("Message to concrete client"),
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
     CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(GuideStyles),
+    p(
+      "You can find out how to obtain ", i("ClientId"), " in the ",
+      a(href := RpcClientServerState.url)("Client ➔ Server"), " chapter."
+    ),
     h2("Notifications example"),
     ForceBootstrap(new NotificationsDemoComponent),
     p("The code of the example above:"),
     CodeBlock(
       """import io.udash.rpc._
         |
-        |/** Interfaces from the shared module */
         |@RPC
         |trait NotificationsClientRPC {
         |  def notify(msg: String): Unit
         |}
         |
+        |// generate RPC metadata for DefaultClientUdashRPCFramework
+        |object NotificationsClientRPC
+        |  extends DefaultClientUdashRPCFramework.RPCCompanion[NotificationsClientRPC]
+        |
         |@RPC
         |trait NotificationsServerRPC {
         |  def register(): Future[Unit]
         |  def unregister(): Future[Unit]
-        |}""".stripMargin
+        |}
+        |
+        |// generate RPC metadata for DefaultServerUdashRPCFramework
+        |object NotificationsServerRPC
+        |  extends DefaultServerUdashRPCFramework.RPCCompanion[NotificationsServerRPC]""".stripMargin
     )(GuideStyles),
     CodeBlock (
       """/** Client implementation */
@@ -116,8 +128,6 @@ class RpcServerClientView extends FinalView with CssView {
         |class NotificationsServer(implicit clientId: ClientId)
         |  extends NotificationsServerRPC {
         |
-        |  import Implicits.backendExecutionContext
-        |
         |  override def register(): Future[Unit] =
         |    Future.successful(NotificationsService.register)
         |
@@ -144,6 +154,7 @@ class RpcServerClientView extends FinalView with CssView {
         |        val msg = jt.LocalDateTime.now().toString
         |        clients.synchronized {
         |          clients.foreach(clientId => {
+        |            // notification push
         |            ClientRPC(clientId).notificationsDemo().notify(msg)
         |          })
         |        }

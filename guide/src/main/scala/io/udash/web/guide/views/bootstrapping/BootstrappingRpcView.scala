@@ -57,7 +57,7 @@ class BootstrappingRpcView extends FinalView with CssView {
       "and make compilation faster, for each RPC interface create companion object extending ",
       i("RPCCompanion"), " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
       "and serialization methods. Usually you will probably use ", i("DefaultClientUdashRPCFramework"),
-      " and ", i("DefaultServerUdashRPCFramework"), "."
+      " for the client interfaces and ", i("DefaultServerUdashRPCFramework"), " for the server API."
     ),
     h4("Examples"),
     p("Example of RPC interfaces:"),

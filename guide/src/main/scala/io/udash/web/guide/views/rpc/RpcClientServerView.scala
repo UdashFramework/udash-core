@@ -33,12 +33,20 @@ class RpcClientServerView extends FinalView with CssView {
     CodeBlock(
       """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
+        |  // you can also pass here a server URL, an exceptions registry or
+        |  // RPC failure interceptors (global handlers of exceptions thrown by server)
         |)""".stripMargin
     )(GuideStyles),
     p(
-      i("MainClientRPC"), " and ", i("MainServerRPC"), " are root the RPC interfaces of the application. ",
+      i("MainClientRPC"), " and ", i("MainServerRPC"), " are the root RPC interfaces of the application. ",
       i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. Ignore it for now, this topic will be covered in the ",
       a(href := RpcServerClientState.url)("Server ➔ Client communication"), " chapter."
+    ),
+    p(
+      i("DefaultServerRPC"), " is a convenient method for client-server connection creation, assuming that you want to ",
+      "use a default RPC framework: ", i("DefaultServerUdashRPCFramework"), " and ", i("DefaultClientUdashRPCFramework"), ". ",
+      "These frameworks use ", i("GenCodec"), " as serialization mechanism, so you have to define it for every type used ",
+      "your RPC interfaces. ", i("GenCodec"), " is already defined for the basic types like Int, String, collections, etc."
     ),
     p("Now you can use ", i("serverRpc"), " to make RPC calls from the client to the server application."),
     CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
@@ -77,27 +85,40 @@ class RpcClientServerView extends FinalView with CssView {
     )(GuideStyles),
     p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), ""),
     CodeBlock(
-      """class BasicAtmosphereServiceConfig[ServerRPCType]
-        |  (localRpc: ExposesServerRPC[ServerRPCType])
-        |  extends AtmosphereServiceConfig[ServerRPCType] {
+      """import io.udash.rpc._
+        |
+        |class BasicAtmosphereServiceConfig[ServerRPCType](
+        |  localRpc: ExposesServerRPC[ServerRPCType]
+        |) extends AtmosphereServiceConfig[ServerRPCType] {
         |
         |  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
         |    localRpc
         |
         |  override def initRpc(resource: AtmosphereResource): Unit = {}
-        |
         |  override def filters: Seq[(AtmosphereResource) => Try[Any]] = List()
-        |
         |  override def onClose(resource: AtmosphereResource): Unit = {}
         |}""".stripMargin
     )(GuideStyles),
+    p(
+      i("ExposesServerRPC"), " is a wrapper for your RPC interface implementation. It defines the RPC framework ",
+      "used by your application. The default implementation (", i("DefaultExposesServerRPC"), ") uses ",
+      i("DefaultServerUdashRPCFramework"), " to expose your interface."
+    ),
     p("Now you can use it in the following way:"),
     CodeBlock(
-      """val config = new BasicAtmosphereServiceConfig(
+      """import io.udash.rpc._
+        |
+        |val config = new BasicAtmosphereServiceConfig(
         |  new DefaultExposesServerRPC[MainServerRPC](MainRpcEndpoint)
         |)
-        |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
+        |val framework = new DefaultAtmosphereFramework(config)
+        |// register this servlet in your servlets container
+        |new RpcServlet(framework) """.stripMargin
     )(GuideStyles),
+    p(
+      i("DefaultAtmosphereFramework"), " is a wrapper for the ", i("AtmosphereFramework"), " class with some ",
+      "default configuration. It is responsible for the WebSocket communication with the client application. "
+    ),
     p("This is a very simple example of backend implementation. Unfortunately, it is only sufficient for very small and simple applications."),
     h3("Client-aware implementation"),
     p(
@@ -105,7 +126,10 @@ class RpcClientServerView extends FinalView with CssView {
       a(href := RpcServerClientState.url)("server ➔ client communication"), " for a specific client. "
     ),
     CodeBlock(
-      """class MainRpcEndpoint(implicit val clientId: ClientId) extends MainServerRpc {
+      """import io.udash.rpc._
+        |
+        |class MainRpcEndpoint(implicit val clientId: ClientId)
+        |  extends MainServerRpc {
         |  /** Methods implementation... */
         |}""".stripMargin
     )(GuideStyles),
@@ -144,12 +168,16 @@ class RpcClientServerView extends FinalView with CssView {
       "connection and stores it in the session attribute. Usage is as simple as earlier:"
     ),
     CodeBlock(
-      """val config = new DefaultAtmosphereServiceConfig(
+      """import io.udash.rpc._
+        |
+        |val config = new DefaultAtmosphereServiceConfig(
         |  new DefaultExposesServerRPC[MainServerRPC](
         |    clientId => MainRpcEndpoint()(clientId)
         |  )
         |)
-        |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
+        |val framework = new DefaultAtmosphereFramework(config)
+        |// register this servlet in your servlets container
+        |new RpcServlet(framework) """.stripMargin
     )(GuideStyles),
     h4("Example"),
     p("Click the below button to get your ", i("ClientId"), ":"),
@@ -162,11 +190,14 @@ class RpcClientServerView extends FinalView with CssView {
       "the service layer. "
     ),
     CodeBlock(
-      """class MainRpcEndpoint
-        |  (primeService: PrimeService)(implicit val clientId: ClientId)
-        |  extends MainServerRpc {
+      """import io.udash.rpc._
+        |import scala.collection.mutable
         |
-        |  def isPrime(n: BigInt): Future[Boolean] = {
+        |class MainRpcEndpoint(
+        |  primeService: PrimeService
+        |)(implicit val clientId: ClientId) extends MainServerRpc {
+        |
+        |  def isPrime(n: Long): Future[Boolean] = {
         |    /* Here you can handle for example server ➔ client
         |       calls with clientId or authorization.
         |       You can also pass clientId to service method, if it needs it. */
@@ -175,7 +206,7 @@ class RpcClientServerView extends FinalView with CssView {
         |}
         |
         |class PrimeService {
-        |  private val responses = mutable.Map[BigInt, Boolean]()
+        |  private val responses = mutable.Map[Long, Boolean]()
         |
         |  /** Heavy init for integers up to 2^25 */
         |  for (i <- 1 to Math.pow(2, 25).toInt) {
@@ -184,7 +215,7 @@ class RpcClientServerView extends FinalView with CssView {
         |    r
         |  }
         |
-        |  def isPrime(n: BigInt): Future[Boolean] = {
+        |  def isPrime(n: Long): Future[Boolean] = {
         |    if (responses.contains(n)) Future.successful(responses(n))
         |    else Future {
         |      val r = checkIfPrime(n)
@@ -193,7 +224,7 @@ class RpcClientServerView extends FinalView with CssView {
         |    }
         |  }
         |
-        |  private def checkIfPrime(n: BigInt): Boolean = ???
+        |  private def checkIfPrime(n: Long): Boolean = ???
         |}""".stripMargin
     )(GuideStyles),
     p("In such implementation you can create a single service instance and a lightweight endpoint per client connection in the following way:"),
@@ -201,45 +232,93 @@ class RpcClientServerView extends FinalView with CssView {
       """val service = new PrimeService
         |val config = new DefaultAtmosphereServiceConfig(
         |  new DefaultExposesServerRPC[MainServerRPC](
-        |    clientId => MainRpcEndpoint(service)(clientId)
+        |    clientId => new MainRpcEndpoint(service)(clientId)
         |  )
         |)
-        |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
+        |val framework = new DefaultAtmosphereFramework(config)
+        |// register this servlet in your servlets container
+        |new RpcServlet(framework)""".stripMargin
     )(GuideStyles),
     h3("User-aware implementation"),
     p("More complex services might need the ", i("UserContext"), " of the method call. Look at one of possible ways to provide it:"),
     ul(GuideStyles.defaultList)(
-      li(i("AtmosphereServiceConfig"), " will resolve the ", i("UserContext"), " based on a HttpServlet request and create the RPC endpoint with it"),
-      li("The RPC endpoint will authorize method access"),
-      li("The service will do the job")
+      li(i("MainServerRpc"), " will expose two subinterfaces: ", i("PrimeRPC"), " and ", i("AuthRPC"), "."),
+      li(i("AuthRPC"), " will resolve the ", i("UserToken"), " based on a username and a password."),
+      li(i("MainServerRpc"), " will resolve the ", i("UserContext"), " based on a ", i("UserToken"), "."),
+      li("The RPC endpoint will authorize method access for the provided user."),
+      li("The service will do the job.")
     ),
-    p("This time let's start from the endpoint and service implementation."),
+    p("Let's declare ", i("UserContext"), " and ", i("UserToken"), " first."),
     CodeBlock(
       """trait UserContext {
         |  def id: UserId
         |  def hasPermission(id: PermissionId): Boolean
         |}
         |
-        |class MainRpcEndpoint
-        |  (primeService: PrimeService)
-        |  (implicit val clientId: ClientId, val user: UserContext)
+        |case class UserToken(id: String)
+        |// UserToken has to be serializable
+        |object UserToken extends HasGenCodec[UserToken]""".stripMargin
+    )(GuideStyles),
+    p("Now we need our interfaces hierarchy:"),
+    CodeBlock(
+      """trait MainServerRpc {
+        |  def auth: AuthRPC
+        |  def primes(token: UserToken): PrimeRPC
+        |}
+        |
+        |trait AuthRPC {
+        |  def login(username: String, password: String): Future[UserToken]
+        |}
+        |
+        |trait PrimeRPC {
+        |  def isPrime(n: Long): Future[Boolean]
+        |}
+        |
+        |// RPCCompanions skipped""".stripMargin
+    )(GuideStyles),
+    p("Take a look at the endpoints and services implementation."),
+    CodeBlock(
+      """class MainRpcEndpoint(primeService: PrimeService, authService: AuthService)
         |  extends MainServerRpc {
         |
-        |  val primeServicePermission: PermissionId = ???
+        |  def auth: AuthRPC = new AuthEndpoint(authService)
+        |  def primes(token: UserToken): PrimeRPC = {
+        |    authService.loadContext(token).map { ctx =>
+        |      new PrimeEndpoint(primeService, ctx)
+        |    }.getOrElse(throw new InvalidTokenException)
+        |  }
+        |}
         |
-        |  def isPrime(n: BigInt): Future[Boolean] = {
-        |    if (!user.hasPermission(primeServicePermission)) Future.failure(/** An unauthorized exception */)
-        |    else primeService.isPrime(n)
+        |class AuthEndpoint(authService: AuthService) extends AuthRPC {
+        |  def login(username: String, password: String): Future[UserToken] =
+        |    authService.login(username, password)
+        |}
+        |
+        |class AuthService {
+        |  def login(username: String, password: String): Future[UserToken] = ???
+        |  def loadContext(token: UserToken): Future[UserContext] = ???
+        |}
+        |
+        |class PrimeEndpoint(primeService: PrimeService, ctx: UserContext)
+        |  extends PrimeRPC {
+        |  private val primeServicePermission: PermissionId = ???
+        |
+        |  def isPrime(n: Long): Future[Boolean] = {
+        |    if (!ctx.hasPermission(primeServicePermission)) {
+        |      Future.failure(new UnauthorizedException)
+        |    } else primeService.isPrime(n)
         |  }
         |}
         |
         |class PrimeService {
         |  private val quotaService: QuotaService = ???
-        |  private val responses = mutable.Map[BigInt, Boolean]()
+        |  private val responses = mutable.Map[Long, Boolean]()
         |
-        |  def isPrime(n: BigInt)(implicit val user: UserContext): Future[Boolean] = {
-        |    if (quotaService.isExceeded(user.id)) Future.failure(/** Quota exception */)
-        |    else if (responses.contains(n)) Future.successful(responses(n))
+        |  def isPrime(n: Long)(implicit val user: UserContext): Future[Boolean] = {
+        |    if (quotaService.isExceeded(user.id))
+        |      Future.failure(new QuotaException)
+        |    else if (responses.contains(n))
+        |      Future.successful(responses(n))
         |    else Future {
         |      val r = checkIfPrime(n)
         |      responses.synchronized { responses(n) = r }
@@ -247,83 +326,30 @@ class RpcClientServerView extends FinalView with CssView {
         |    }
         |  }
         |
-        |  private def checkIfPrime(n: BigInt): Boolean = ???
+        |  private def checkIfPrime(n: Long): Boolean = ???
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "The above example is similar to the previous one. Now ", i("MainRpcEndpoint"), " receives ", i("UserContext"),
-      " and checks if the user has permission required to call the service method. The ", i("isPrime"), " method from the ",
-      i("PrimeService"), " takes ", i("UserContext"), " and passes the user ID to ", i("QuotaService"), " for a quota check. ",
-      "As you can see, the endpoints are well suited to authorizing GUI users. The services are not aware of GUI permissions and ",
-      "can be easily reused in other application endpoints like REST API."
-    ),
-    p("Now it is time to prepare ", i("AtmosphereServiceConfig"), ":"),
-    CodeBlock(
-      """class AuthAtmosphereServiceConfig[ServerRPCType](
-        |    localRpc: (ClientId, UserContext) => DefaultExposesServerRPC[ServerRPCType],
-        |    auth: AuthService
-        |  ) extends AtmosphereServiceConfig[ServerRPCType] {
-        |
-        |  private val RPCName = "RPC"
-        |  private val UserContextName = "UserContext"
-        |  private val connections = new DefaultAtmosphereResourceSessionFactory
-        |
-        |  override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] =
-        |    connections.getSession(resource).getAttribute(RPCName)
-        |      .asInstanceOf[ExposesServerRPC[ServerRPCType]]
-        |
-        |  override def initRpc(resource: AtmosphereResource): Unit = synchronized {
-        |    val session = connections.getSession(resource)
-        |    val userContext = resolveUserContext(resource)
-        |
-        |    if (session.getAttribute(RPCName) == null) {
-        |      val rpc = localRpc(ClientId(resource.uuid()), userContext)
-        |      session.setAttribute(RPCName, rpc)
-        |    }
-        |  }
-        |
-        |  /** Ignore all unauthenticated calls */
-        |  override def filters: Seq[(AtmosphereResource) => Try[Any]] =
-        |    List(authenticationFilter)
-        |
-        |  override def onClose(resource: AtmosphereResource): Unit = {}
-        |
-        |  private def authenticationFilter(resource: AtmosphereResource): Try[Unit] = {
-        |    val session = connections.getSession(resource)
-        |    session.getAttribute(UserContextName) match {
-        |      case context: UserContext if context != null => Success(())
-        |      case _ => Failure(())
-        |    }
-        |  }
-        |
-        |  private def resolveUserContext(resource: AtmosphereResource): UserContext = {
-        |    val session = connections.getSession(resource)
-        |    session.getAttribute(UserContextName) match {
-        |      case context: UserContext if context != null => context
-        |      case _ =>
-        |        val context = auth.authenticateRequest(resource)
-        |        session.setAttribute(UserContextName, context)
-        |        context
-        |    }
-        |  }
-        |}""".stripMargin
-    )(GuideStyles),
-    p(
-      "This time the ", i("AtmosphereServiceConfig"), " is expected to authenticate calls before passing them to the RPC endpoints. ",
-      "The ", i("UserContext"), " is cached per connection, just like the RPC endpoints in the previous examples. The ", i("resolveUserContext"), " method ",
-      "uses the ", i("AuthService"), " which somehow creates ", i("UserContext"), " basing on a resource. Notice that there is one ",
-      i("filter"), " method which ignores all unauthenticated calls."
+      "The interfaces hierarchy is a convinient way to handle authentication. ", i("MainRpcEndpoint"), " exposes two subinterfaces. ",
+      "The first one provides a method authenticating the user. The second takes users token and verifies it. ",
+      "It is not possible to access ", i("PrimeService"), " without valid ", i("UserToken"), ".",
+      i("UserContext"), " checks if the user has permission required to call the service method. The ",
+      i("isPrime"), " method from the ", i("PrimeService"), " takes ", i("UserContext"), " and passes the user ID to ", i("QuotaService"),
+      " for a quota check. As you can see, the endpoints are well suited to authorizing GUI users. ",
+      "The services are not aware of GUI permissions and can be easily reused in other application endpoints like REST API."
     ),
     p("Now it is ready to use in the following way:"),
     CodeBlock(
-      """val service = new PrimeService
+      """val primes = new PrimeService
         |val auth = new AuthService
         |val config = new DefaultAtmosphereServiceConfig(
         |  new DefaultExposesServerRPC[MainServerRPC](
-        |    (clientId, user) => MainRpcEndpoint(service)(clientId, user)
-        |  ), auth
+        |    _ => new MainRpcEndpoint(primes, auth)
+        |  )
         |)
-        |val framework = new DefaultAtmosphereFramework(config)""".stripMargin
+        |val framework = new DefaultAtmosphereFramework(config)
+        |// register this servlet in your servlets container
+        |new RpcServlet(framework)""".stripMargin
     )(GuideStyles),
     h2("Exceptions handling"),
     p(
@@ -332,8 +358,9 @@ class RpcClientServerView extends FinalView with CssView {
       "possible to serialize the original exception with assigned ", i("GenCodec"), ". "
     ),
     p(
-      "First of all you have to create an instance of ", i("ExceptionCodecRegistry"), " in cross-compiled module and register ",
-      "codecs of your exceptions. You can use a default implementation named ", i("DefaultExceptionCodecRegistry"), "."
+      "First of all you have to create an instance of ", i("ExceptionCodecRegistry"), " in a cross-compiled module and register ",
+      "codecs of your exceptions. You can also use a default implementation named ", i("DefaultExceptionCodecRegistry"),
+      " - it provides serialization of basic exceptions like ", i("NullPointerException"), "."
     ),
     CodeBlock(
       """import io.udash.rpc.serialization.ExceptionCodecRegistry
@@ -350,8 +377,9 @@ class RpcClientServerView extends FinalView with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "Then you have to provide the registry to server connector in the frontend application and to the atmosphere service ",
-      "on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
+      "Then you have to provide the registry to server connector (usually: ", i("DefaultServerRPC"),
+      ") in the frontend application and to the atmosphere service (usually: ", i("DefaultAtmosphereFramework"),
+      ") on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
       "the following demo: "
     ),
     ForceBootstrap(new ExceptionsDemoComponent().getTemplate),
