@@ -4,6 +4,7 @@ import com.avsystem.commons.serialization.Input
 import io.udash.logging.CrossLogging
 import io.udash.rpc._
 import io.udash.rpc.serialization.ExceptionCodecRegistry
+import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
 import org.scalajs.dom
@@ -17,8 +18,11 @@ trait ServerConnector[RPCRequest] {
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: String, val exceptionsRegistry: ExceptionCodecRegistry)
-  extends ServerConnector[RPCRequest] with CrossLogging {
+abstract class AtmosphereServerConnector[RPCRequest](
+  private val serverUrl: String,
+  val exceptionsRegistry: ExceptionCodecRegistry
+) extends ServerConnector[RPCRequest] with CrossLogging {
+
   protected val clientRpc: ExposesClientRPC[_]
 
   val remoteFramework: ServerUdashRPCFramework
@@ -30,10 +34,12 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
   def handleRpcFire(fire: localFramework.RPCFire): Any
 
   private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
-  private var isReady = false
+  private var isReady: ConnectionStatus = ConnectionStatus.Closed
   private val websocketSupport: Boolean = scala.scalajs.js.Dynamic.global.WebSocket != null
 
   private var onReconnectTimeoutHandler = 0
+
+  protected val connectionStatusCallbacks = new CallbacksHandler[ConnectionStatus]
 
   private val socket: AtmosphereRequest = {
     val reconnectInterval = 1000
@@ -41,22 +47,22 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
       if (websocketSupport)
         createRequestObject(
           Transport.WEBSOCKET, reconnectInterval,
-          onOpen = (res: AtmosphereResponse) => ready(true),
-          onReopen = (res: AtmosphereResponse) => ready(true),
+          onOpen = (res: AtmosphereResponse) => ready(ConnectionStatus.Open),
+          onReopen = (res: AtmosphereResponse) => ready(ConnectionStatus.Open),
           onReconnect = (req: AtmosphereRequest, res: AtmosphereResponse) => {
             if (onReconnectTimeoutHandler != 0) dom.window.clearTimeout(onReconnectTimeoutHandler)
-            ready(false)
+            ready(ConnectionStatus.Closed)
             onReconnectTimeoutHandler = dom.window.setTimeout(() => {
-              ready(true)
+              ready(ConnectionStatus.Open)
               onReconnectTimeoutHandler = 0
             }, reconnectInterval * 2)
           },
-          onError = (res: AtmosphereResponse) => ready(false),
-          onClose = (res: AtmosphereResponse) => ready(false),
-          onClientTimeout = (res: AtmosphereResponse) => ready(false)
+          onError = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed),
+          onClose = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed),
+          onClientTimeout = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed)
         )
       else {
-        isReady = true
+        isReady = ConnectionStatus.Open
         createRequestObject(Transport.SSE, reconnectInterval)
       }
     }
@@ -65,7 +71,7 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
 
   override def sendRPCRequest(request: RPCRequest): Unit = {
     val msg = requestToString(request)
-    if (isReady) socket.push(msg)
+    if (isReady == ConnectionStatus.Open) socket.push(msg)
     else waitingRequests += request
   }
 
@@ -95,15 +101,25 @@ abstract class AtmosphereServerConnector[RPCRequest](private val serverUrl: Stri
     }
   }
 
-  private def ready(isReady: Boolean) = {
+  /** Current status of connection to server. */
+  def connectionStatus: ConnectionStatus =
+    isReady
+
+  /** Registers callback which will be called when connection status changed. */
+  def onConnectionStatusChange(callback: connectionStatusCallbacks.CallbackType): Registration =
+    connectionStatusCallbacks.register(callback)
+
+  private def ready(isReady: ConnectionStatus): Unit = {
     this.isReady = isReady
-    if (isReady) {
+    if (isReady == ConnectionStatus.Open) {
       val queue = new mutable.ArrayBuffer[RPCRequest]()
       waitingRequests.copyToBuffer(queue)
       waitingRequests.clear()
 
       queue foreach { req => sendRPCRequest(req) }
     }
+
+    connectionStatusCallbacks.fire(isReady)
   }
 
   private def createRequestObject(transport: Transport, reconnectInterval: Int,
