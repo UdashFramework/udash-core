@@ -14,13 +14,13 @@ import scala.util.Try
 class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: (ClientId) => ExposesServerRPC[ServerRPCType])
   extends AtmosphereServiceConfig[ServerRPCType] with LazyLogging {
 
-  protected val RPCName = "RPC"
+  protected final val RPCName = "RPC"
 
   private val _connections = new DefaultAtmosphereResourceSessionFactory
   protected def connections: AtmosphereResourceSessionFactory = _connections
 
-  protected val newConnectionCallbacks = new CallbacksHandler[ClientId]
-  protected val closedConnectionCallbacks = new CallbacksHandler[ClientId]
+  protected final val newConnectionCallbacks = new CallbacksHandler[ClientId]
+  protected final val closedConnectionCallbacks = new CallbacksHandler[ClientId]
 
   override def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType] = connections.synchronized {
     if (connections.getSession(resource).getAttribute(RPCName) == null) initRpc(resource)
