@@ -118,10 +118,7 @@ class BootstrappingSBTView extends FinalView with CssView {
           |    "-language:dynamics",
           |    "-Xfuture",
           |    "-Xfatal-warnings",
-          |    CrossVersion.partialVersion(scalaVersion.value).collect {
-          |      // WORKAROUND https://github.com/scala/scala/pull/5402
-          |      case (2, 12) => "-Xlint:-unused,-missing-interpolator,-adapted-args,_"
-          |    }.getOrElse("-Xlint:_,-missing-interpolator,-adapted-args"),
+          |    "-Xlint:_,-missing-interpolator,-adapted-args",
           |  ),
           |))""".stripMargin
         )(GuideStyles),
@@ -158,9 +155,9 @@ class BootstrappingSBTView extends FinalView with CssView {
           |
           |// Reusable settings for modules compiled to JS
           |val commonJSSettings = Seq(
-          |  emitSourceMaps in Compile := true,
+          |  Compile / emitSourceMaps := true,
           |  // enables scalajs-env-selenium plugin
-          |  jsEnv in Test := new SeleniumJSEnv(browserCapabilities),
+          |  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
           |)""".stripMargin
       )(GuideStyles),
       p(
@@ -174,7 +171,7 @@ class BootstrappingSBTView extends FinalView with CssView {
           |  .dependsOn(backend)
           |  .settings(
           |    publishArtifact := false,
-          |    mainClass in Compile := Some("io.app.backend.Launcher")
+          |    Compile / mainClass := Some("io.app.backend.Launcher")
           |  )""".stripMargin
       )(GuideStyles),
       p("Next, you need to create the shared module."),
@@ -219,7 +216,7 @@ class BootstrappingSBTView extends FinalView with CssView {
           |    jsDependencies ++= Dependencies.frontendJSDeps.value, // native JS dependencies
           |
           |    // Make this module executable in JS
-          |    mainClass in Compile := Some("io.app.frontend.JSLauncher"),
+          |    Compile / mainClass := Some("io.app.frontend.JSLauncher"),
           |    scalaJSUseMainModuleInitializer := true,
           |
           |    // Implementation of custom tasks defined above
@@ -235,25 +232,25 @@ class BootstrappingSBTView extends FinalView with CssView {
           |    },
           |    compileStatics := {},
           |    compileStatics := compileStatics.dependsOn(
-          |      fastOptJS in Compile, copyAssets in Compile
+          |      Compile / fastOptJS, Compile / copyAssets
           |    ).value,
           |    compileAndOptimizeStatics := {},
           |    compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-          |      fullOptJS in Compile, copyAssets in Compile
+          |      Compile / fullOptJS, Compile / copyAssets
           |    ).value,
           |
           |    // Target files for Scala.js plugin
-          |    artifactPath in(Compile, fastOptJS) :=
-          |      (target in(Compile, fastOptJS)).value /
+          |    Compile / fastOptJS / artifactPath :=
+          |      (Compile / fastOptJS / target).value /
           |        "UdashStatics" / "WebContent" / "scripts" / "frontend.js",
-          |    artifactPath in(Compile, fullOptJS) :=
-          |      (target in(Compile, fullOptJS)).value /
+          |    Compile / fullOptJS / artifactPath :=
+          |      (Compile / fullOptJS / target).value /
           |        "UdashStatics" / "WebContent" / "scripts" / "frontend.js",
-          |    artifactPath in(Compile, packageJSDependencies) :=
-          |      (target in(Compile, packageJSDependencies)).value /
+          |    Compile / packageJSDependencies / artifactPath :=
+          |      (Compile / packageJSDependencies / target).value /
           |        "UdashStatics" / "WebContent" / "scripts" / "frontend-deps.js",
-          |    artifactPath in(Compile, packageMinifiedJSDependencies) :=
-          |      (target in(Compile, packageMinifiedJSDependencies)).value /
+          |    Compile / packageMinifiedJSDependencies / artifactPath :=
+          |      (Compile / packageMinifiedJSDependencies / target).value /
           |        "UdashStatics" / "WebContent" / "scripts" / "frontend-deps.js"
           |
           |  )""".stripMargin
@@ -268,7 +265,7 @@ class BootstrappingSBTView extends FinalView with CssView {
           |  .settings(commonSettings)
           |  .settings(
           |    libraryDependencies ++= Dependencies.backendDeps.value,
-          |    mainClass in Compile := Some("io.app.backend.Launcher"),
+          |    Compile / mainClass := Some("io.app.backend.Launcher"),
           |  )""".stripMargin
       )(GuideStyles),
       h3("Static files"),
