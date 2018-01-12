@@ -383,6 +383,79 @@ class FrontendTemplatesView extends FinalView with CssView {
       div(ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop)( "Reduce the browser width" ),
       div(ExampleStyles.mediaContainer, ExampleStyles.mediaTablet)( "Increase the browser width" )
     ),
+    h3("Rendering"),
+    p(
+      "The JavaScript version of this cross-compiled code contains only the class names of CSS rules. ",
+      "This chapter describes the CSS rendering process."
+    ),
+    p("First of all you have to create ", i("CssRenderer"), " class:"),
+    CodeBlock(
+      """import io.udash.css._
+        |import scalacss.internal.{Renderer, StringRenderer}
+        |
+        |/** Renderer of styles based on UdashCSS. */
+        |class CssRenderer(path: String, renderPretty: Boolean) {
+        |  private val renderer: Renderer[String] =
+        |    if (renderPretty) StringRenderer.defaultPretty
+        |    else StringRenderer.formatTiny
+        |
+        |  def render(): Unit = {
+        |    new CssFileRenderer(
+        |      path,
+        |      Seq(
+        |        // you have to put here all your CssBase classes
+        |        ExampleStyles
+        |      ),
+        |      // it allows you to include all styles with the single
+        |      createMain = true
+        |    ).render()(renderer)
+        |  }
+        |}
+        |
+        |object CssRenderer {
+        |  // we want to make it runnable without
+        |  // starting the whole application
+        |  def main(args: Array[String]): Unit = {
+        |    require(args.length == 2)
+        |    new CssRenderer(
+        |      args(0), java.lang.Boolean.parseBoolean(args(1))
+        |    ).render()
+        |  }
+        |}""".stripMargin
+    )(GuideStyles),
+    p("Now you can configure a new SBT task to generate CSS files: "),
+    CodeBlock(
+      """val cssDir = settingKey[File]("Target for `compileCss` task.")
+        |val compileCss = taskKey[Unit]("Compiles CSS files.")
+        |
+        |// inside your frontend module
+        |// lazy val frontend = project.in(file("frontend"))
+        |//   .settings(
+        |  cssDir := {
+        |    (Compile / fastOptJS / target).value /
+        |      "UdashStatics" / "WebContent" / "styles"
+        |  },
+        |  compileCss := Def.taskDyn {
+        |    val dir = (Compile / cssDir).value
+        |    val path = dir.absolutePath
+        |    println(s"Generating CSS files in `$path`...")
+        |    dir.mkdirs()
+        |    // make sure you have configured the valid `CssRenderer` path
+        |    // we assume that `CssRenderer` exists in the `backend` module
+        |    (backend / Compile / runMain)
+        |      .toTask(s" io.app.backend.css.CssRenderer $path false")
+        |  }.value,
+        |
+        |// you can also add `compileCss` as dependecy to
+        |// the `compileStatics` and `compileAndOptimizeStatics` tasks""".stripMargin
+    )(GuideStyles),
+    p(
+      "With above configuration you can call ", i("sbt frontend/compileCss"), " to render your styles. ",
+      "Now you only have to include them in your ", i("index.html"), " file."
+    ),
+    CodeBlock(
+      """<link href="styles/main.css" rel="stylesheet" />""".stripMargin
+    )(GuideStyles),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendPropertiesState.url)("Properties"),
