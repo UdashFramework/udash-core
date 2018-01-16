@@ -6,6 +6,7 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._
+import org.scalajs.dom.raw.Event
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
@@ -59,11 +60,12 @@ object UdashForm {
     * More: <a href="http://getbootstrap.com/css/#forms">Bootstrap Docs</a>.
     *
     * @param componentId Id of the root DOM node.
+    * @param onSubmit Callback executed when a form is submitted
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def apply(componentId: ComponentId, content: Modifier*): UdashForm =
-    new UdashForm(None, componentId)(content)
+  def apply(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+    new UdashForm(None, componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /**
     * Creates inline form with provided content. <br/>
@@ -82,11 +84,12 @@ object UdashForm {
     * More: <a href="http://getbootstrap.com/css/#forms-inline">Bootstrap Docs</a>.
     *
     * @param componentId Id of the root DOM node.
+    * @param onSubmit Callback executed when a form is submitted
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def inline(componentId: ComponentId, content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formInline), componentId)(content)
+  def inline(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formInline), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /**
     * Creates horizontal form with provided content. <br/>
@@ -105,11 +108,12 @@ object UdashForm {
     * More: <a href="http://getbootstrap.com/css/#forms-horizontal">Bootstrap Docs</a>.
     *
     * @param componentId Id of the root DOM node.
+    * @param onSubmit Callback executed when a form is submitted
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def horizontal(componentId: ComponentId, content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), componentId)(content)
+  def horizontal(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
     * Example: `UdashForm(UdashForm.group(...)).render` */
