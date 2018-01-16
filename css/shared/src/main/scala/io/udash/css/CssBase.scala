@@ -5,7 +5,7 @@ import scala.collection.mutable
 import scala.language.implicitConversions
 import scalacss.internal.Css.styleA
 import scalacss.internal.DslBase.ToStyle
-import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, Keyframes, Macros, Percentage, Renderer, StyleA}
+import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
 
 /**
   * Base trait for all stylesheets.
@@ -156,7 +156,7 @@ trait CssBase {
         val kfs = Keyframes(
           new ClassName(className),
           steps.map { case (p, impl) =>
-            (Percentage(p): scalacss.internal.KeyframeSelector, StyleA(
+            (Percentage(p): KeyframeSelector, StyleA(
               new ClassName(className),
               Vector.empty,
               impl
@@ -166,7 +166,9 @@ trait CssBase {
         renderer.apply(Vector(
           CssEntry.Keyframes(
             kfs.name,
-            ListMap(kfs.frames.map(s => (s._1, styleA(s._2)(Env.empty))):_*)
+            kfs.frames.map { case (selector, style) =>
+              (selector, styleA(style)(Env.empty)): (KeyframeSelector, StyleStream)
+            }(collection.breakOut): ListMap[KeyframeSelector, StyleStream]
           )
         ))
       case CssFontFace(className, font) =>
