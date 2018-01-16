@@ -8,7 +8,7 @@ import scala.language.postfixOps
 import scala.scalajs.js
 
 final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
-  extends Listenable[UdashTooltip, UdashTooltip.TooltipEvent] {
+  extends Tooltip[UdashTooltip.TooltipEvent, UdashTooltip] {
   /** Shows the tooltip. */
   def show(): Unit =
     selector.tooltip("show")
@@ -25,12 +25,15 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
   def destroy(): Unit =
     selector.tooltip("destroy")
 
+  private[tooltip] def reloadContent(): Unit =
+    selector.tooltip("setContent")
+
   import UdashTooltip._
-  selector.on("show.bs.tooltip", jQFire(TooltipShowEvent(this)))
-  selector.on("shown.bs.tooltip", jQFire(TooltipShownEvent(this)))
-  selector.on("hide.bs.tooltip", jQFire(TooltipHideEvent(this)))
-  selector.on("hidden.bs.tooltip", jQFire(TooltipHiddenEvent(this)))
-  selector.on("inserted.bs.tooltip", jQFire(TooltipInsertedEvent(this)))
+  selector.on("show.bs.tooltip", jQFire(TooltipEvent.ShowEvent(this)))
+  selector.on("shown.bs.tooltip", jQFire(TooltipEvent.ShownEvent(this)))
+  selector.on("hide.bs.tooltip", jQFire(TooltipEvent.HideEvent(this)))
+  selector.on("hidden.bs.tooltip", jQFire(TooltipEvent.HiddenEvent(this)))
+  selector.on("inserted.bs.tooltip", jQFire(TooltipEvent.InsertedEvent(this)))
 }
 
 object UdashTooltip extends TooltipUtils[UdashTooltip] {
@@ -40,7 +43,7 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
     new UdashTooltip(tp)
   }
 
-  override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(TopPlacement)
+  override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(TopPlacement)
   override protected val defaultTemplate: String = {
     import scalatags.Text.all._
     import io.udash.css.CssView._

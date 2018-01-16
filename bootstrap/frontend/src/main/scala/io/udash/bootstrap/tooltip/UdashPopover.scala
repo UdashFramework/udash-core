@@ -8,7 +8,7 @@ import scala.language.postfixOps
 import scala.scalajs.js
 
 final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
-  extends Listenable[UdashPopover, UdashPopover.TooltipEvent] {
+  extends Tooltip[UdashPopover.TooltipEvent, UdashPopover] {
 
   /** Shows popover. */
   def show(): Unit =
@@ -26,13 +26,15 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
   def destroy(): Unit =
     selector.popover("destroy")
 
-  import UdashPopover._
+  private[tooltip] def reloadContent(): Unit =
+    selector.popover("setContent")
 
-  selector.on("show.bs.popover", jQFire(TooltipShowEvent(this)))
-  selector.on("shown.bs.popover", jQFire(TooltipShownEvent(this)))
-  selector.on("hide.bs.popover", jQFire(TooltipHideEvent(this)))
-  selector.on("hidden.bs.popover", jQFire(TooltipHiddenEvent(this)))
-  selector.on("inserted.bs.popover", jQFire(TooltipInsertedEvent(this)))
+  import UdashPopover._
+  selector.on("show.bs.popover", jQFire(TooltipEvent.ShowEvent(this)))
+  selector.on("shown.bs.popover", jQFire(TooltipEvent.ShownEvent(this)))
+  selector.on("hide.bs.popover", jQFire(TooltipEvent.HideEvent(this)))
+  selector.on("hidden.bs.popover", jQFire(TooltipEvent.HiddenEvent(this)))
+  selector.on("inserted.bs.popover", jQFire(TooltipEvent.InsertedEvent(this)))
 }
 
 object UdashPopover extends TooltipUtils[UdashPopover] {
@@ -42,7 +44,7 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
     new UdashPopover(tp)
   }
 
-  override protected val defaultPlacement: (dom.Element, dom.Element) => Seq[Placement] = (_, _) => Seq(RightPlacement)
+  override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
     import scalatags.Text.all._
