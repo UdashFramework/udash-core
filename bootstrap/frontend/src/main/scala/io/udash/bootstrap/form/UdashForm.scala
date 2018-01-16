@@ -156,8 +156,9 @@ object UdashForm {
     inputGroup(inputId, validation)(labelContent)(FileInput(name, acceptMultipleFiles, selectedFiles)((id := inputId) +: input))
 
   /** Creates checkbox. */
-  def checkbox(validation: Option[Modifier] = None)(labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =
-    div(BootstrapStyles.Form.checkbox)(
+  def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = UdashBootstrap.newId())
+              (labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =
+    div(BootstrapStyles.Form.checkbox, id := inputId.id)(
       label(
         Checkbox(property, input).render
       )(labelContent),
@@ -168,12 +169,12 @@ object UdashForm {
     (input: dom.html.Input, id: String) => label(checkboxStyle)(input, id).render
 
   /** Creates checkboxes for provided elements. `selected` property contains values from selected checkboxes. */
-  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox)
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, inputId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(
       selected, options,
-      items => div(BootstrapStyles.Form.formGroup)(
+      items => div(BootstrapStyles.Form.formGroup, id := inputId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
@@ -181,12 +182,12 @@ object UdashForm {
     )
 
   /** Creates checkboxes for provided `options`. `selected` property has the value of selected radio button. */
-  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio)
+  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, inputId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(
       selected, options,
-      items => div(BootstrapStyles.Form.formGroup)(
+      items => div(BootstrapStyles.Form.formGroup, id := inputId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
@@ -194,12 +195,16 @@ object UdashForm {
     )
 
   /** Creates selection input for provided `options`. `selected` property has the value of selected item. */
-  def select(selected: Property[String], options: Seq[String], label: String => Modifier = Select.defaultLabel): Modifier =
-    Select(selected, options, label)(BootstrapStyles.Form.formControl)
+  def select(selected: Property[String], options: Seq[String],
+             label: String => Modifier = Select.defaultLabel,
+             inputId: ComponentId = UdashBootstrap.newId()): Modifier =
+    Select(selected, options, label)(BootstrapStyles.Form.formControl, id := inputId.id)
 
   /** Creates multiple selection input for provided `options`. `selected` property contains values of selected items. */
-  def multiselect(selected: SeqProperty[String], options: Seq[String], label: String => Modifier = Select.defaultLabel): Modifier =
-    Select(selected, options, label)(BootstrapStyles.Form.formControl)
+  def multiselect(selected: SeqProperty[String], options: Seq[String],
+                  label: String => Modifier = Select.defaultLabel,
+                  inputId: ComponentId = UdashBootstrap.newId()): Modifier =
+    Select(selected, options, label)(BootstrapStyles.Form.formControl, id := inputId.id)
 
   /** Creates static control element. */
   def staticControl(content: Modifier*): Modifier =
