@@ -20,7 +20,8 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
   /** Toggles tooltip visibility. */
   def toggle(): Unit
 
-  /** Destroys the tooltip. */
+  /** Hides and destroys an element's popover.
+    * Check <a href="https://getbootstrap.com/docs/3.3/javascript/#popovers-methods">Bootstrap Docs</a> from more details. */
   def destroy(): Unit
 
   private[tooltip] def reloadContent(): Unit
@@ -45,11 +46,11 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
 
   sealed trait TooltipEvent extends AbstractCase with ListenableEvent[TooltipType]
   object TooltipEvent {
-    case class ShowEvent(source: TooltipType) extends TooltipEvent
-    case class ShownEvent(source: TooltipType) extends TooltipEvent
-    case class HideEvent(source: TooltipType) extends TooltipEvent
-    case class HiddenEvent(source: TooltipType) extends TooltipEvent
-    case class InsertedEvent(source: TooltipType) extends TooltipEvent
+    final case class ShowEvent(source: TooltipType) extends TooltipEvent
+    final case class ShownEvent(source: TooltipType) extends TooltipEvent
+    final case class HideEvent(source: TooltipType) extends TooltipEvent
+    final case class HiddenEvent(source: TooltipType) extends TooltipEvent
+    final case class InsertedEvent(source: TooltipType) extends TooltipEvent
   }
 
   /**
