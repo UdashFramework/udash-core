@@ -64,7 +64,7 @@ object UdashForm {
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def apply(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+  def apply(onSubmit: Event => Any)(componentId: ComponentId, content: Modifier*): UdashForm =
     new UdashForm(None, componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /**
@@ -88,7 +88,7 @@ object UdashForm {
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def inline(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+  def inline(onSubmit: Event => Any)(componentId: ComponentId, content: Modifier*): UdashForm =
     new UdashForm(Some(BootstrapStyles.Form.formInline), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /**
@@ -112,7 +112,7 @@ object UdashForm {
     * @param content Form content
     * @return `UdashForm` component, call render to create DOM element.
     */
-  def horizontal(componentId: ComponentId, onSubmit: Event => Any, content: Modifier*): UdashForm =
+  def horizontal(onSubmit: Event => Any)(componentId: ComponentId, content: Modifier*): UdashForm =
     new UdashForm(Some(BootstrapStyles.Form.formHorizontal), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
@@ -134,37 +134,101 @@ object UdashForm {
       validation
     )
 
-  /** Creates text input group. */
-  def textInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-               (property: Property[String], input: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(TextInput.debounced(property, id := inputId, input).render)
+  /**
+    * Creates text input group.
+    *
+    * @param inputId        Id of the input DOM element.
+    * @param validation     Modifier applied to the created form group.
+    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent   The content of a label. If empty, the `label` won't be created.
+    * @param property       Property which will be synchronised with the input content.
+    * @param inputModifiers Modifiers applied directly to the `input` element.
+    */
+  def textInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+               (labelContent: Modifier*)
+               (property: Property[String], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(TextInput.debounced(property, id := inputId, inputModifiers).render)
 
-  /** Creates password input group. */
-  def passwordInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-                   (property: Property[String], input: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(PasswordInput.debounced(property, id := inputId, input).render)
+  /**
+    * Creates password input group.
+    *
+    * @param inputId        Id of the input DOM element.
+    * @param validation     Modifier applied to the created form group.
+    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent   The content of a label. If empty, the `label` won't be created.
+    * @param property       Property which will be synchronised with the input content.
+    * @param inputModifiers Modifiers applied directly to the `input` element.
+    */
+  def passwordInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+                   (labelContent: Modifier*)
+                   (property: Property[String], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(PasswordInput.debounced(property, id := inputId, inputModifiers).render)
 
-  /** Creates number input group. */
-  def numberInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-                 (property: Property[String], input: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, input).render)
+  /**
+    * Creates number input group.
+    *
+    * @param inputId        Id of the input DOM element.
+    * @param validation     Modifier applied to the created form group.
+    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent   The content of a label. If empty, the `label` won't be created.
+    * @param property       Property which will be synchronised with the input content.
+    * @param inputModifiers Modifiers applied directly to the `input` element.
+    */
+  def numberInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+                 (labelContent: Modifier*)
+                 (property: Property[String], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, inputModifiers).render)
 
-  /** Creates text area input group. */
-  def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-              (property: Property[String], input: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, input).render)
+  /**
+    * Creates text area input group.
+    *
+    * @param inputId        Id of the input DOM element.
+    * @param validation     Modifier applied to the created form group.
+    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent   The content of a label. If empty, the `label` won't be created.
+    * @param property       Property which will be synchronised with the input content.
+    * @param inputModifiers Modifiers applied directly to the `input` element.
+    */
+  def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+              (labelContent: Modifier*)
+              (property: Property[String], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, inputModifiers).render)
 
-  /** Creates file input input group. */
-  def fileInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)(labelContent: Modifier*)
-               (name: String, acceptMultipleFiles: ReadableProperty[Boolean], selectedFiles: SeqProperty[File], input: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(FileInput(name, acceptMultipleFiles, selectedFiles)((id := inputId) +: input))
+  /**
+    * Creates file input group.
+    *
+    * @param inputId             Id of the input DOM element.
+    * @param validation          Modifier applied to the created form group.
+    *                            Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent        The content of a label. If empty, the `label` won't be created.
+    * @param name                Name of the input. This value will be assigned to the `name` attribute of the input.
+    * @param acceptMultipleFiles If true, input will accept multiple files.
+    * @param selectedFiles       Property which will be synchronised with the input content.
+    * @param inputModifiers      Modifiers applied directly to the `input` element.
+    */
+  def fileInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+               (labelContent: Modifier*)
+               (name: String, acceptMultipleFiles: ReadableProperty[Boolean],
+                selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(
+      FileInput(name, acceptMultipleFiles, selectedFiles)(id := inputId, inputModifiers)
+    )
 
-  /** Creates checkbox. */
+  /**
+    * Creates checkbox.
+    *
+    * @param inputId        Id of the input DOM element.
+    * @param validation     Modifier applied to the created form group.
+    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent   The content of a label. If empty, the `label` won't be created.
+    * @param property       Property which will be synchronised with the input content.
+    * @param inputModifiers Modifiers applied directly to the `input` element.
+    */
   def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = UdashBootstrap.newId())
-              (labelContent: Modifier*)(property: Property[Boolean], input: Modifier*): Modifier =
-    div(BootstrapStyles.Form.checkbox, id := inputId.id)(
+              (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
+    div(BootstrapStyles.Form.checkbox)(
       label(
-        Checkbox(property, input).render
+        Checkbox(property, id := inputId, inputModifiers).render
       )(labelContent),
       validation
     )
@@ -172,39 +236,73 @@ object UdashForm {
   private def defaultDecorator(checkboxStyle: CssStyle) =
     (input: dom.html.Input, id: String) => label(checkboxStyle)(input, id).render
 
-  /** Creates checkboxes for provided elements. `selected` property contains values from selected checkboxes. */
-  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, inputId: ComponentId = UdashBootstrap.newId())
+  /**
+    * Creates checkboxes for provided options.
+    *
+    * @param checkboxStyle  Style applied to each checkbox by the default decorator.
+    * @param groupId        Id of created form group.
+    * @param selected       Property which will be synchronised with the selected elements.
+    * @param options        List of possible values. Each options has one checkbox.
+    * @param decorator      This methods allows you to customize DOM structure around each checkbox.
+    *                       By default it creates a `label` around input with option value as its content.
+    */
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(
       selected, options,
-      items => div(BootstrapStyles.Form.formGroup, id := inputId.id)(
+      items => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
       )
     )
 
-  /** Creates checkboxes for provided `options`. `selected` property has the value of selected radio button. */
-  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, inputId: ComponentId = UdashBootstrap.newId())
+  /**
+    * Creates radio buttons for provided options.
+    *
+    * @param radioStyle Style applied to each radio button by the default decorator.
+    * @param groupId    Id of created form group.
+    * @param selected   Property which will be synchronised with the selected elements.
+    * @param options    List of possible values. Each options has one checkbox.
+    * @param decorator  This methods allows you to customize DOM structure around each checkbox.
+    *                   By default it creates a `label` around input with option value as its content.
+    */
+  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, groupId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(
       selected, options,
-      items => div(BootstrapStyles.Form.formGroup, id := inputId.id)(
+      items => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
       )
     )
 
-  /** Creates selection input for provided `options`. `selected` property has the value of selected item. */
+  /**
+    * Creates selection input for provided `options`.
+    *
+    * @param selected Property which will be synchronised with the selected element.
+    * @param options  List of possible values. Each options has one checkbox.
+    * @param label    This methods allows you to customize label of each option.
+    *                 By default it creates a `label` around input with option value as its content.
+    * @param inputId  Id of the select DOM element.
+    */
   def select(selected: Property[String], options: Seq[String],
              label: String => Modifier = Select.defaultLabel,
              inputId: ComponentId = UdashBootstrap.newId()): Modifier =
     Select(selected, options, label)(BootstrapStyles.Form.formControl, id := inputId.id)
 
-  /** Creates multiple selection input for provided `options`. `selected` property contains values of selected items. */
+  /**
+    * Creates multiple selection input for provided `options`.
+    *
+    * @param selected Property which will be synchronised with the selected elements.
+    * @param options  List of possible values. Each options has one checkbox.
+    * @param label    This methods allows you to customize label of each option.
+    *                 By default it creates a `label` around input with option value as its content.
+    * @param inputId  Id of the select DOM element.
+    */
   def multiselect(selected: SeqProperty[String], options: Seq[String],
                   label: String => Modifier = Select.defaultLabel,
                   inputId: ComponentId = UdashBootstrap.newId()): Modifier =
@@ -214,8 +312,8 @@ object UdashForm {
   def staticControl(content: Modifier*): Modifier =
     p(BootstrapStyles.Form.formControlStatic)(content)
 
-  /** Wrapper for disabled elements.
-    *
+  /**
+    * Wrapper for disabled elements.
     * @param disabled Property indicating if elements are disabled. You can change it anytime.
     */
   def disabled(disabled: ReadableProperty[Boolean] = Property(true))(content: Modifier*): Modifier =
