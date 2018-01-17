@@ -55,7 +55,7 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
           val tmp = new $KeyframesCls($name,
             Seq(..$impl).map { case (p, s) =>
               (p, $Dsl.style(s:_*)($Compose.trust))
-            }.toMap
+            }
           )
           ${c.prefix}.elementsBuffer += tmp
           tmp

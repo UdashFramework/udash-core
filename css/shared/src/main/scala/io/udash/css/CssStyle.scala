@@ -15,5 +15,5 @@ case class CssPrefixedStyleName(prefixClass: String, actualClassSuffix: String) 
   override val commonPrefixClass: Option[String] = Some(prefixClass)
 }
 case class CssStyleImpl(className: String, impl: StyleS) extends CssStyle
-case class CssKeyframes(className: String, steps: Map[Double, StyleS]) extends CssStyle
+case class CssKeyframes(className: String, steps: Seq[(Double, StyleS)]) extends CssStyle
 case class CssFontFace(className: String, font: FontFace[Option[String]]) extends CssStyle
