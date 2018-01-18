@@ -21,7 +21,7 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
   def toggle(): Unit
 
   /** Hides and destroys an element's popover.
-    * Check <a href="https://getbootstrap.com/docs/3.3/javascript/#popovers-methods">Bootstrap Docs</a> from more details. */
+    * Check <a href="https://getbootstrap.com/docs/3.3/javascript/#popovers-methods">Bootstrap Docs</a> for more details. */
   def destroy(): Unit
 
   private[tooltip] def reloadContent(): Unit
