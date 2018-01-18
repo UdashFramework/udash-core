@@ -6,6 +6,40 @@ object UdashIcons {
   object FontAwesome {
     def fa(suffix: String): CssStyle = CssPrefixedStyleName("fa", suffix)
 
+    object Modifiers {
+      def lg: CssStyle = fa("lg")
+      def x2: CssStyle = fa("2x")
+      def x3: CssStyle = fa("3x")
+      def x4: CssStyle = fa("4x")
+      def x5: CssStyle = fa("5x")
+
+      def fixedWidth: CssStyle = fa("fw")
+      def fw: CssStyle = fa("fw")
+
+      def ul: CssStyle = fa("ul")
+      def li: CssStyle = fa("li")
+
+      def border: CssStyle = fa("border")
+      def pullLeft: CssStyle = fa("pull-left")
+      def pullRight: CssStyle = fa("pull-right")
+
+      def spin: CssStyle = fa("spin")
+      def pulse: CssStyle = fa("pulse")
+
+      def rotate90: CssStyle = fa("rotate-90")
+      def rotate180: CssStyle = fa("rotate-180")
+      def rotate270: CssStyle = fa("rotate-270")
+
+      def flipHorizontal: CssStyle = fa("flip-horizontal")
+      def flipVertical: CssStyle = fa("flip-vertical")
+
+      def stack: CssStyle = fa("stack")
+      def stack1x: CssStyle = fa("stack-1x")
+      def stack2x: CssStyle = fa("stack-2x")
+
+      def inverse: CssStyle = fa("inverse")
+    }
+
     def `500px`: CssStyle = fa("500px")
     def adjust: CssStyle = fa("adjust")
     def adn: CssStyle = fa("adn")

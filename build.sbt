@@ -342,7 +342,7 @@ lazy val `css-frontend` = project.in(file("css/frontend")).enablePlugins(ScalaJS
 
 lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-frontend` % CompileAndTest, `css-frontend` % CompileAndTest)
+  .dependsOn(`core-frontend` % CompileAndTest, `css-frontend` % CompileAndTest, `i18n-frontend` % CompileAndTest)
   .settings(commonSettings: _*)
   .settings(commonJSSettings: _*)
   .settings(

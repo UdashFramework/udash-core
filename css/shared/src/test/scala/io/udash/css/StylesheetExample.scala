@@ -28,7 +28,9 @@ object StylesheetExample extends CssBase {
 
   val animation = keyframes(
     0d -> kf1,
-    20d -> kf2,
+    25d -> kf2,
+    50d -> kf2,
+    75d -> kf1,
     100d -> keyframe(
       height(200 px),
       width(60 px))
@@ -44,8 +46,17 @@ object StylesheetExample extends CssBase {
       cursor.zoomIn
     ),
 
+    media.not.handheld.landscape.maxWidth(840 px)(
+      width(600 px)
+    ),
+    media.not.handheld.landscape.maxWidth(740 px)(
+      width(500 px)
+    ),
     media.not.handheld.landscape.maxWidth(640 px)(
       width(400 px)
+    ),
+    media.not.handheld.landscape.maxWidth(540 px)(
+      width(300 px)
     )
   )
 
