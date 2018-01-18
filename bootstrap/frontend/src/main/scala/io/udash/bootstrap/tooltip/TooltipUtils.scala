@@ -44,15 +44,6 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
   val FocusTrigger = new Trigger("focus")
   val ManualTrigger = new Trigger("manual")
 
-  sealed trait TooltipEvent extends AbstractCase with ListenableEvent[TooltipType]
-  object TooltipEvent {
-    final case class ShowEvent(source: TooltipType) extends TooltipEvent
-    final case class ShownEvent(source: TooltipType) extends TooltipEvent
-    final case class HideEvent(source: TooltipType) extends TooltipEvent
-    final case class HiddenEvent(source: TooltipType) extends TooltipEvent
-    final case class InsertedEvent(source: TooltipType) extends TooltipEvent
-  }
-
   /**
     * Add tooltip/popover to provided element.
     * More: <a href="http://getbootstrap.com/javascript/#tooltips">Bootstrap Docs (Tooltip)</a>.
@@ -148,7 +139,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     }
 
     updateContent()
-    tp.listen { case _: this.TooltipEvent.ShowEvent => updateContent() }
+    tp.listen { case _: TooltipEvent.ShowEvent[TooltipType] => updateContent() }
     tp
   }
 

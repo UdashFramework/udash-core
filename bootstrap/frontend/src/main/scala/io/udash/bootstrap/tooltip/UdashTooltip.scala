@@ -8,7 +8,7 @@ import scala.language.postfixOps
 import scala.scalajs.js
 
 final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
-  extends Tooltip[UdashTooltip.TooltipEvent, UdashTooltip] {
+  extends Tooltip[TooltipEvent[UdashTooltip], UdashTooltip] {
   /** Shows the tooltip. */
   def show(): Unit =
     selector.tooltip("show")
@@ -29,7 +29,6 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.tooltip("setContent")
 
-  import UdashTooltip._
   selector.on("show.bs.tooltip", jQFire(TooltipEvent.ShowEvent(this)))
   selector.on("shown.bs.tooltip", jQFire(TooltipEvent.ShownEvent(this)))
   selector.on("hide.bs.tooltip", jQFire(TooltipEvent.HideEvent(this)))
