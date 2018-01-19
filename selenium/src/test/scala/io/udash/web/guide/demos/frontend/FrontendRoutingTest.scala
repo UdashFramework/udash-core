@@ -35,6 +35,7 @@ class FrontendRoutingTest extends SeleniumTest {
       input.sendKeys("It should not disappear... Selenium")
 
       apple.click()
+      Thread.sleep(500) // wait for scroll
       eventually {
         driver.getCurrentUrl should endWith("/frontend/routing/apple")
         link.getText should be("/frontend/routing/apple")
