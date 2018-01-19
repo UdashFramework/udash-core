@@ -220,7 +220,12 @@ lazy val selenium = project.in(file("selenium"))
     libraryDependencies ++= Dependencies.seleniumDeps.value,
     libraryDependencies ++= Dependencies.testDeps.value,
 
-    parallelExecution := false
+    parallelExecution := false,
+
+    Compile / compile := (Compile / compile).dependsOn(
+      homepage / Compile / compileStatics,
+      guide / Compile / compileStatics,
+    ).value
   )
 
 lazy val packager = project
