@@ -1,19 +1,29 @@
+sudo: required
+dist: trusty
+
 language: scala
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  # Instal google-chrome
+  - export CHROME_BIN=/usr/bin/google-chrome
+  - sudo apt-get update
+  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
+  # Install Selenium chromedriver
+  - wget http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d selenium-bin
+  - export PATH=$PWD/selenium-bin:$PATH
 
 jdk:
   - oraclejdk8
 
 scala:
   - 2.11.11
-  - 2.12.2
-
-before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
-
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
+  - 2.12.4
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION compile
