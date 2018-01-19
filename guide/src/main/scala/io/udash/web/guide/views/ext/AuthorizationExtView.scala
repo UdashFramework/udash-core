@@ -3,11 +3,8 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, FrontendTranslationsDemo, RemoteTranslationsDemo}
 
 import scalatags.JsDom
 
@@ -16,6 +13,7 @@ case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationE
 
 class AuthorizationExtView extends FinalView with CssView {
   import Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(

@@ -8,7 +8,6 @@ import org.scalajs.dom
 import scalatags.JsDom
 
 class BindAttributeDemoComponent extends Component {
-  import io.udash.web.guide.Context._
   import JsDom.all._
 
   val visible: Property[Boolean] = Property[Boolean](true)

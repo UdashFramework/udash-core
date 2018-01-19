@@ -9,9 +9,8 @@ import io.udash.web.guide.rpc.RPCService
 import io.udash.web.guide.views.ext.demo.UrlLoggingDemo
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
-import org.scalajs.dom.{Element, document}
+import org.scalajs.dom.Element
 
-import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
 object Context {

@@ -4,7 +4,6 @@ import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.views.Image
-import org.scalajs.dom.raw.Element
 
 import scalatags.JsDom.all._
 

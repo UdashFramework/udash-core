@@ -10,8 +10,9 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 object RemoteTranslationsDemo {
-  import scalatags.JsDom.all._
   import io.udash.css.CssView._
+
+  import scalatags.JsDom.all._
 
   def apply(): dom.Element = {
     import io.udash.web.guide.Context._

@@ -14,6 +14,7 @@ case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() =
 
 class I18NExtView extends FinalView {
   import Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(

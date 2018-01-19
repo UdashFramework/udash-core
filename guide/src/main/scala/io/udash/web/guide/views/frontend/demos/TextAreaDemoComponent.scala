@@ -8,8 +8,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 
 class TextAreaDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val text: Property[String] = Property("")

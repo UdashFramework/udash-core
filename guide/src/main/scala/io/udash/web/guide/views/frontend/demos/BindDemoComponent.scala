@@ -8,8 +8,6 @@ import org.scalajs.dom
 import scalatags.JsDom
 
 class BindDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator

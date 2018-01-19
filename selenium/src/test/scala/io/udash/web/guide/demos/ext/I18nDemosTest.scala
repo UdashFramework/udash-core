@@ -12,9 +12,9 @@ class I18nDemosTest extends SeleniumTest {
 
     "contain demo elements" in {
       eventually {
-        val frontend = driver.findElementById("frontend-translations-demo")
-        val remote = driver.findElementById("rpc-translations-demo")
-        val dynamicRemote = driver.findElementById("dynamic-rpc-translations-demo")
+        driver.findElementById("frontend-translations-demo")
+        driver.findElementById("rpc-translations-demo")
+        driver.findElementById("dynamic-rpc-translations-demo")
       }
     }
 

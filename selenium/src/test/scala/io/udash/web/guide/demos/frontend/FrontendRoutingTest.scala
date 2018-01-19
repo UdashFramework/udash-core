@@ -10,10 +10,10 @@ class FrontendRoutingTest extends SeleniumTest {
       driver.get(server.createUrl(url))
       eventually {
         val link = driver.findElementById("url-demo-link")
-        val apple = driver.findElementById("url-demo-link-apple")
-        val orange = driver.findElementById("url-demo-link-orange")
-        val chocolate = driver.findElementById("url-demo-link-chocolate")
-        val pizza = driver.findElementById("url-demo-link-pizza")
+        driver.findElementById("url-demo-link-apple")
+        driver.findElementById("url-demo-link-orange")
+        driver.findElementById("url-demo-link-chocolate")
+        driver.findElementById("url-demo-link-pizza")
 
         link.getText should be("/frontend/routing")
       }

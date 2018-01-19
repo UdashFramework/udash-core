@@ -4,7 +4,6 @@ import io.udash._
 import io.udash.web.commons.components.Footer
 import io.udash.web.guide.RootState
 import io.udash.web.guide.components.Header
-import io.udash.web.guide.styles.GuideDefaultStyles
 
 object RootViewFactory extends StaticViewFactory[RootState.type](() => new RootView)
 
@@ -12,7 +11,6 @@ class RootView extends ViewContainer {
   import scalatags.JsDom.all._
 
   protected val child = div().render
-  private val defaultStyles = GuideDefaultStyles
 
   private val content = div(
     Header.getTemplate,

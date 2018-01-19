@@ -3,12 +3,12 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.logging.CrossLogging
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
-import io.udash.web.guide._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
@@ -31,8 +31,6 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
 
 
 case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.type] {
-
-  import io.udash.web.guide.Context._
 
   override def create(): (View, Presenter[UserActivityExtState.type]) = {
     val model = SeqProperty.empty[Call]

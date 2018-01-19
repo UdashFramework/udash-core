@@ -3,16 +3,12 @@ package io.udash.web.guide.views.frontend.demos
 import io.udash._
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
 import org.scalajs.dom
-import org.scalajs.dom.{Element, Node}
 
 import scala.util.Random
 import scalatags.JsDom
 
 class ProduceDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator

@@ -13,8 +13,10 @@ import io.udash.web.homepage.styles.partials.{HomepageStyles, ButtonsStyle => Ho
 
 import scalacss.internal.{Renderer, StringRenderer}
 
-object CssRenderer {
-  implicit val renderer: Renderer[String] = StringRenderer.defaultPretty
+class CssRenderer(renderPretty: Boolean) {
+  private val renderer: Renderer[String] =
+    if (renderPretty) StringRenderer.defaultPretty
+    else StringRenderer.formatTiny
 
   def renderHomepage(path: String): Unit = {
     new CssFileRenderer(path,
@@ -29,7 +31,7 @@ object CssRenderer {
         HomeHeaderStyles,
         HomepageStyles
       ), createMain = true
-    ).render()
+    ).render()(renderer)
   }
 
   def renderGuide(path: String): Unit = {
@@ -47,6 +49,20 @@ object CssRenderer {
         ExampleKeyframes,
         ExampleStyles
       ), createMain = true
-    ).render()
+    ).render()(renderer)
+  }
+}
+
+object HomepageCssRenderer {
+  def main(args: Array[String]): Unit = {
+    require(args.length == 2, " Expected two arguments: target path and pretty print flag")
+    new CssRenderer(java.lang.Boolean.parseBoolean(args(1))).renderHomepage(args(0))
+  }
+}
+
+object GuideCssRenderer {
+  def main(args: Array[String]): Unit = {
+    require(args.length == 2, " Expected two arguments: target path and pretty print flag")
+    new CssRenderer(java.lang.Boolean.parseBoolean(args(1))).renderGuide(args(0))
   }
 }

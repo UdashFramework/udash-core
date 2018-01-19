@@ -9,8 +9,6 @@ import scala.util.Random
 import scalatags.JsDom
 
 class RepeatDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)

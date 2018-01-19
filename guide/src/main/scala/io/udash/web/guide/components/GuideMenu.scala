@@ -22,6 +22,7 @@ case class MenuLink(override val name: String, state: RoutingState) extends Menu
 
 class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
   import io.udash.css.CssView._
+
   import scalatags.JsDom.all._
 
   private val ClickEvent = "click"
@@ -131,7 +132,6 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 }
 
 object GuideMenu {
-  import Context._
 
   private val property = Property.empty[String]
 

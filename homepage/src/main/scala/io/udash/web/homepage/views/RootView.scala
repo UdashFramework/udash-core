@@ -6,7 +6,6 @@ import io.udash.web.commons.components.Footer
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.homepage.RootState
 import io.udash.web.homepage.components.Header
-import org.scalajs.dom.Element
 
 import scala.scalajs.js
 import scalatags.JsDom.tags2._

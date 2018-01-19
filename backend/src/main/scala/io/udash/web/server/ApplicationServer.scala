@@ -7,7 +7,6 @@ import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.web.guide.rest.ExposedRestInterfaces
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.web.guide.{GuideExceptions, MainServerRPC}
-import io.udash.web.styles.CssRenderer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -19,8 +18,6 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   private val server = new Server(port)
 
   def start(): Unit = {
-    CssRenderer.renderHomepage(s"${homepageResourceBase.stripSuffix("/")}/styles")
-    CssRenderer.renderGuide(s"${guideResourceBase.stripSuffix("/")}/styles")
     server.start()
   }
 

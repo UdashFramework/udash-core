@@ -7,7 +7,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 
 class FileInputDemoComponent extends Component {
-  import io.udash.web.guide.Context._
   import org.scalajs.dom.File
 
   import JsDom.all._

@@ -23,19 +23,17 @@ import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
 import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
-import io.udash.css.{CssBase, CssView}
+import io.udash.css.CssView
 import io.udash.logging.CrossLogging
-import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.styles.utils.GuideStyleUtils
 import io.udash.web.guide.{BootstrapExtState, Context, IntroState}
 import org.scalajs.dom
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 import scalatags.JsDom
@@ -818,14 +816,14 @@ object BootstrapDemos extends CrossLogging with CssView {
   def tooltips(): dom.Element = {
     import scala.concurrent.duration.DurationInt
     val label1 = UdashLabel(UdashBootstrap.newId(), "Tooltip on hover with delay", GlobalStyles.smallMargin).render
-    val label1Tooltip = UdashTooltip(
+    UdashTooltip(
       trigger = Seq(UdashTooltip.HoverTrigger),
       delay = UdashTooltip.Delay(500 millis, 250 millis),
       title = (_) => "Tooltip..."
     )(label1)
 
     val label2 = UdashLabel(UdashBootstrap.newId(), "Tooltip on click", GlobalStyles.smallMargin).render
-    val label2Tooltip = UdashTooltip(
+    UdashTooltip(
       trigger = Seq(UdashTooltip.ClickTrigger),
       delay = UdashTooltip.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashTooltip.BottomPlacement),
@@ -850,7 +848,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   def popovers(): dom.Element = {
     import scala.concurrent.duration.DurationInt
     val label1 = UdashLabel(UdashBootstrap.newId(), "Popover on hover with delay", GlobalStyles.smallMargin).render
-    val label1Tooltip = UdashPopover(
+    UdashPopover(
       trigger = Seq(UdashPopover.HoverTrigger),
       delay = UdashPopover.Delay(500 millis, 250 millis),
       title = (_) => "Popover...",
@@ -858,7 +856,7 @@ object BootstrapDemos extends CrossLogging with CssView {
     )(label1)
 
     val label2 = UdashLabel(UdashBootstrap.newId(), "Popover on click", GlobalStyles.smallMargin).render
-    val label2Tooltip = UdashPopover(
+    UdashPopover(
       trigger = Seq(UdashPopover.ClickTrigger),
       delay = UdashPopover.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashPopover.BottomPlacement),

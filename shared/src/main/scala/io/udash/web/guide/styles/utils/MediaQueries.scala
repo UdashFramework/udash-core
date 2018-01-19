@@ -1,6 +1,6 @@
 package io.udash.web.guide.styles.utils
 
-import io.udash.css.{CssBase, CssStyle}
+import io.udash.css.CssBase
 import io.udash.web.commons.styles.utils.StyleConstants
 
 import scala.language.postfixOps

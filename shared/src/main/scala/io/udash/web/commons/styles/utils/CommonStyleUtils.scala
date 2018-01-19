@@ -73,7 +73,7 @@ object CommonStyleUtils extends CssBase {
     boxShadow := s"${if (inset) "inset " else ""}${x}px ${y}px ${blur}px ${spread}px ${hexToRGBA(color, opacity)}"
   )
 
-  private def hexToRGBA(color: Color, opacity: Double = 1): String = {
+  private def hexToRGBA(color: Color, opacity: Double): String = {
     val cNumber = Integer.parseInt(color.value.replace("#", ""), 16)
     val r = (cNumber.toInt >> 16) & 0xFF
     val g = (cNumber.toInt >>  8) & 0xFF

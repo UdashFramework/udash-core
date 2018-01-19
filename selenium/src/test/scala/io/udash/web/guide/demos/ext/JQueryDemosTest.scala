@@ -2,7 +2,6 @@ package io.udash.web.guide.demos.ext
 
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
-import org.openqa.selenium.WebElement
 
 class JQueryDemosTest extends SeleniumTest {
   val url = "/#/ext/jquery"
@@ -12,8 +11,8 @@ class JQueryDemosTest extends SeleniumTest {
 
     "contain demo elements" in {
       eventually {
-        val events = driver.findElementById("jquery-events-demo")
-        val callbacks = driver.findElementById("jquery-callbacks-demo")
+        driver.findElementById("jquery-events-demo")
+        driver.findElementById("jquery-callbacks-demo")
       }
     }
 

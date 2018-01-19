@@ -2,7 +2,6 @@ package io.udash.web.commons.styles.utils
 
 import io.udash.css.CssBase
 
-import scala.language.postfixOps
 import scalacss.internal.AV
 
 object UdashFonts extends CssBase {

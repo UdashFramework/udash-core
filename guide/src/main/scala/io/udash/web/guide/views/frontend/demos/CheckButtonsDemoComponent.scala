@@ -10,8 +10,6 @@ import org.scalajs.dom.html.Input
 import scalatags.JsDom
 
 class CheckButtonsDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   sealed trait Fruit

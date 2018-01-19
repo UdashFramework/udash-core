@@ -3,17 +3,14 @@ package io.udash.web.guide.views.ext.demo
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 import org.scalajs.dom.Event
 
-import scala.language.postfixOps
-
 object JQueryEventsDemo {
-  import Context._
   import io.udash.css.CssView._
+
   import scalatags.JsDom.all._
 
   val onCallback = (_: dom.Element, _: JQueryEvent) =>

@@ -10,8 +10,6 @@ import org.scalajs.dom.html.{Select => _}
 import scalatags.JsDom
 
 class SelectDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   sealed trait Fruit

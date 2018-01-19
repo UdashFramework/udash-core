@@ -1,7 +1,6 @@
 package io.udash.web.commons.components
 
 import io.udash.web.commons.styles.components.CodeBlockStyles
-import org.scalajs.dom.Element
 
 import scalatags.JsDom.all._
 

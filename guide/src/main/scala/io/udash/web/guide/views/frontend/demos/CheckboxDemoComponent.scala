@@ -9,8 +9,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 
 class CheckboxDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val propA: Property[Boolean] = Property(true)

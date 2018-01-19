@@ -12,6 +12,7 @@ object ContentViewFactory extends StaticViewFactory[ContentState.type](() => new
 
 class ContentView extends ViewContainer {
   import io.udash.css.CssView._
+
   import scalatags.JsDom.all._
 
   protected val child = main(GuideStyles.contentWrapper).render

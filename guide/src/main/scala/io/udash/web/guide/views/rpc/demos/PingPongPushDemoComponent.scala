@@ -17,7 +17,6 @@ trait PingPongPushDemoModel {
 object PingPongPushDemoModel extends HasModelPropertyCreator[PingPongPushDemoModel]
 
 class PingPongPushDemoComponent extends Component {
-  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = PingPongPushDemoViewFactory()
 

@@ -9,8 +9,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 
 class MultiSelectDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   sealed trait Fruit

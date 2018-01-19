@@ -3,9 +3,8 @@ package io.udash.web.homepage
 import io.udash._
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
-import org.scalajs.dom.{Element, document}
+import org.scalajs.dom.Element
 
-import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
 object Context {

@@ -3,7 +3,6 @@ package io.udash.web.guide.views.frontend.demos
 import java.{lang => jl}
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup

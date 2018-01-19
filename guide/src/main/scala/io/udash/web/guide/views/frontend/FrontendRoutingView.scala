@@ -16,7 +16,6 @@ import scala.scalajs.js
 import scalatags.JsDom
 
 case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState] {
-  import Context._
   override def create(): (View, Presenter[FrontendRoutingState]) = {
     val url = Property.empty[String]
     (new FrontendRoutingView(url), new FrontendRoutingPresenter(url))

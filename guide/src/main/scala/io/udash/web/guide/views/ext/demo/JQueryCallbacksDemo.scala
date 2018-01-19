@@ -5,7 +5,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
-import scala.language.postfixOps
 import scala.scalajs.js
 
 object JQueryCallbacksDemo {

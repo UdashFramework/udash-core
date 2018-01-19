@@ -3,7 +3,6 @@ package io.udash.web.guide.styles.demo
 import io.udash.css.{CssBase, CssStyle}
 
 object ExampleKeyframes extends CssBase {
-  import scala.language.postfixOps
   import dsl._
 
   val colorPulse: CssStyle = keyframes(

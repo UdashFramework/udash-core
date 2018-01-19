@@ -2,7 +2,6 @@ package io.udash.web.guide.views
 
 import io.udash._
 import io.udash.wrappers.jquery.EasingFunction
-import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.scalajs.js
