@@ -78,7 +78,7 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     height(96 px),
     marginRight(25 px),
     backgroundImage := "url(../assets/images/udash_logo_l.png)",
-    backgroundRepeat := "no-repeat",
+    backgroundRepeat.noRepeat,
     backgroundSize := "100%",
 
     MediaQueries.tabletPortrait(
