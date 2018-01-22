@@ -41,7 +41,7 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/ext/charts" => ChartsExtState
     case "/ext/jquery" => JQueryExtState
     case "/ext/activity" => UserActivityExtState
-    case "/faq" => FAQState
+    case "/faq" => FaqState
     case "/license" => LicenseState
   }
 }

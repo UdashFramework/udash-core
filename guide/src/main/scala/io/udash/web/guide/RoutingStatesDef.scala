@@ -17,7 +17,7 @@ case object ErrorState extends FinalRoutingState(Some(RootState))
 
 case object IntroState extends FinalRoutingState(Some(ContentState))
 
-case object FAQState extends FinalRoutingState(Some(ContentState))
+case object FaqState extends FinalRoutingState(Some(ContentState))
 
 case object LicenseState extends FinalRoutingState(Some(ContentState))
 

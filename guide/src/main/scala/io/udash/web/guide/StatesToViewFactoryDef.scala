@@ -54,7 +54,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case JQueryExtState => JQueryExtViewFactory
       case UserActivityExtState => UserActivityExtViewFactory
 
-      case FAQState => FAQViewFactory
+      case FaqState => FaqViewFactory
       case LicenseState => LicenseViewFactory
 
       case _ => ErrorViewFactory

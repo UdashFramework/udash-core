@@ -3,9 +3,9 @@ package io.udash.web.guide.views
 import io.udash._
 import io.udash.web.guide.RootState
 
-object FAQViewFactory extends StaticViewFactory[RootState.type](() => new FAQView)
+object FaqViewFactory extends StaticViewFactory[RootState.type](() => new FaqView)
 
-class FAQView extends FinalView {
+class FaqView extends FinalView {
   import scalatags.JsDom.all._
 
   private val content = div(
