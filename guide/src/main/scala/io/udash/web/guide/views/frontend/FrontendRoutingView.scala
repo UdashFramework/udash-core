@@ -66,8 +66,8 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       "A Udash application is based on states. The application state describes the created ViewFactories structure and is determined ",
       "by a URL. The URL is resolved to a ", i("RoutingState"), " on every change. The application states structure is your decision, ",
       "Udash requires only that all states must extend ", i("State"),
-      ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
-      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express place of the state in hierarchy. ",
+      ". States tend to form a nested hierarchy. ",
+      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express the place of a state in the hierarchy. ",
       "For example:"
     ),
     CodeBlock(
@@ -115,9 +115,9 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     p(
       "You can pass URL parts into the application state, just use the ", i("/"), " operator like in the example above. ",
       "For ", i("UsersListState"), " it is possible to keep some search query in the URL. ",
-      "You can update the application state with ", i("goTo"), " method from the ", i("Application"), " interface ",
-      "and the URL will be automatically updated. A user can copy and paste the URL to a new window, then you can access ",
-      "current search query in the ", i("handleState"), " method of the presenter."
+      "You can update the application state with the ", i("goTo"), " method from the ", i("Application"), " interface ",
+      "and the URL will be automatically updated. A user can copy and paste the URL to a new window and you can access ",
+      "the current search query in the ", i("handleState"), " method of the presenter."
     ),
     h3("ViewFactory & ViewFactoryRegistry"),
     p(
@@ -184,11 +184,11 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     ),
     h3("Handling routing errors"),
     p(
-      "In some cases (for example authorization) it is useful to throw an exception in routing registry or presenter's ",
-      i("handleState"), " method. These exceptions are handled by ", i("Application"), " in which you can register ",
+      "In some cases (for example authorization) it is useful to throw an exception in the routing registry or presenter's ",
+      i("handleState"), " method. These exceptions are handled by the ", i("Application"), " which allows you to register ",
       "a routing failure callback with the ", i("onRoutingFailure"), " method."
     ),
-    p("Take a look at routing failure handler from authorization utilities: "),
+    p("Take a look at routing a failure handler from authorization utilities: "),
     CodeBlock(
       """application.onRoutingFailure {
         |  case _: UnauthorizedException | _: UnauthenticatedException
