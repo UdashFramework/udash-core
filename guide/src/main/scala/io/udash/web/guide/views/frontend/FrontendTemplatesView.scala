@@ -22,7 +22,7 @@ class FrontendTemplatesView extends FinalView with CssView {
   override def getTemplate: Modifier = div(
     h2("Scalatags & UdashCSS"),
     p(
-      "Using ", a(href := References.ScalatagsHomepage)("Scalatags"), " and ", i("UdashCSS"), " ",
+      "Using ", a(href := References.ScalatagsHomepage)("ScalaTags"), " and ", i("UdashCSS"), " ",
       "is the recommended way of creating and styling view templates. This part of the guide presents the most interesting parts ",
       "of these libraries. For more details refer to projects documentation."
     ),
@@ -38,7 +38,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |html(
         |  head(
         |    meta(charset := "UTF-8"),
-        |    meta(name := "viewport", content := "width=device-width, initial-scala=1"),
+        |    meta(name := "viewport", content := "width=device-width, initial-scale=1"),
         |    script(src := "scripts/fastopt.js")
         |  ),
         |  body(
@@ -61,7 +61,7 @@ class FrontendTemplatesView extends FinalView with CssView {
       """<html>
         |  <head>
         |    <meta charset="UTF-8">
-        |    <meta name="viewport" content="width=device-width, initial-scala=1">
+        |    <meta name="viewport" content="width=device-width, initial-scale=1">
         |    <script src="scripts/fastopt.js"></script>
         |  </head>
         |  <body>
@@ -91,19 +91,19 @@ class FrontendTemplatesView extends FinalView with CssView {
       "of Scala and your stylesheets can be generated dynamically (that is, you can change property values at runtime)."
     ),
     p(
-      "Unfortunately ScalaCSS generate a lot of JavaScript code and significantly reduces application start-up performance. ",
+      "Unfortunately ScalaCSS generates a lot of JavaScript code and significantly reduces application start-up performance. ",
       "Udash provides tools for server-side CSS rendering with type-safe class references. It allows to keep benefits of ScalaCSS DSL ",
-      "and decrease JS size and initialization time. (Example: Udash Homepage reduced from ", i("766kB"), " to ", i("314kB"), ".)"
+      "and decrease JS size and initialization time. For reference, the Udash Homepage JS size decreased from ", i("766kB"), " to ", i("314kB"), ".)"
     ),
     p(
       "Udash CSS tooling tries to keep migration from ScalaCSS as easy as possible. It also reuses a huge part of ScalaCSS DSL. ",
       "Here is a list of all major differences: ",
       ul(GuideStyles.defaultList)(
-        li(b("Styles in shared module"), " - you have to create your stylesheets in cross-compiled module in order to render them in JVM and refer to them in JS."),
+        li(b("Styles in shared module"), " - you have to create your stylesheets in the cross-compiled module in order to render them on the JVM and refer to them in JS."),
         li(b(i("CssBase"), " instead of ", i("StyleSheet.Inline")), " - it provides ", i("import dsl._"), " like ScalaCSS, but with minor internal differences."),
         li(b(i("CssStyle"), " instead of ", i("StyleS")), "/", i("StylaA"), " - all your style fields use this type."),
         li(b("Names in JavaScript, definition in JVM"), " - all your styles are not compiled into JS, it contains only class names."),
-        li(b("Render in JVM"), " - you can use ", i("CssFileRenderer"), " or ", i("CssStringRenderer"), " to render your stylesheets and provide them to GUI.")
+        li(b("Render in JVM"), " - you can use ", i("CssFileRenderer"), " or ", i("CssStringRenderer"), " to render your stylesheets and provide them to the frontend app.")
       )
     ),
     p("Look at a simple button example:"),
@@ -419,7 +419,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |  }
         |}""".stripMargin
     )(GuideStyles),
-    p("Now you can configure a new SBT task to generate CSS files: "),
+    p("Now you can configure a new SBT task to generate the CSS files: "),
     CodeBlock(
       """val cssDir = settingKey[File]("Target for `compileCss` task.")
         |val compileCss = taskKey[Unit]("Compiles CSS files.")
@@ -442,12 +442,12 @@ class FrontendTemplatesView extends FinalView with CssView {
         |      .toTask(s" io.app.backend.css.CssRenderer $path false")
         |  }.value,
         |
-        |// you can also add `compileCss` as dependecy to
+        |// you can also add `compileCss` as a dependency to
         |// the `compileStatics` and `compileAndOptimizeStatics` tasks""".stripMargin
     )(GuideStyles),
     p(
       "With above configuration you can call ", i("sbt frontend/compileCss"), " to render your styles. ",
-      "Now you only have to include them in your ", i("index.html"), " file."
+      "Now you just need to include them in the ", i("index.html"), " file."
     ),
     CodeBlock(
       """<link href="styles/main.css" rel="stylesheet" />""".stripMargin
