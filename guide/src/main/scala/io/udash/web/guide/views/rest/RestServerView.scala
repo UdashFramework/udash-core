@@ -19,17 +19,17 @@ class RestServerView extends FinalView with CssView {
   override def getTemplate: Modifier = div(
     h2("Exposing REST interface"),
     p(
-      "In order to reuse RPC interfaces in HTTP communication or to create REST-like API ",
-      "you can expose Udash REST interface as HTTP endpoint. "
+      "In order to reuse RPC interfaces in HTTP communication or to create a REST-like API ",
+      "you can expose an Udash REST interface as a HTTP endpoint. "
     ),
     p(
       "Notice: Udash support for exposing REST-like interfaces was not designed for production REST APIs. ",
       "The goal is to reuse RPC interfaces in communication without websockets or exposing them as internal API, which ",
       "should be consumed with Udash REST client. It might be useful in black-box testing of application, ",
-      "but if you want to expose real REST API you should use dedicated tool like ",
+      "but if you want to expose real REST API you should use a dedicated tool like ",
       a(href := References.AkkaHttpHomepage)("Akka HTTP"), "."
     ),
-    p("First of all, you have to implement your interfaces. Take a look at this simple example from the guide: "),
+    p("First of all, you need to implement your interfaces. Take a look at this simple example from the guide: "),
     CodeBlock(
       """class ExposedRestInterfaces extends MainServerREST {
         |  override def simple(): SimpleServerREST = new SimpleServerREST {
@@ -52,7 +52,7 @@ class RestServerView extends FinalView with CssView {
         |  }
         |}""".stripMargin
     )(GuideStyles),
-    p("Now create a servlet to expose your implementation:"),
+    p("Now create a servlet to expose the implementation:"),
     CodeBlock(
       """import io.udash.rest.server._
         |val restImpl = new ExposedRestInterfaces
