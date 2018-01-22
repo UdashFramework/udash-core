@@ -33,8 +33,8 @@ class RpcClientServerView extends FinalView with CssView {
     CodeBlock(
       """val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
-        |  // you can also pass here a server URL, an exceptions registry or
-        |  // RPC failure interceptors (global handlers of exceptions thrown by server)
+        |  // you can also pass a server URL, an exceptions registry or
+        |  // RPC failure interceptors (global handlers of exceptions thrown by server) here
         |)""".stripMargin
     )(GuideStyles),
     p(
@@ -44,9 +44,9 @@ class RpcClientServerView extends FinalView with CssView {
     ),
     p(
       i("DefaultServerRPC"), " is a convenient method for client-server connection creation, assuming that you want to ",
-      "use a default RPC framework: ", i("DefaultServerUdashRPCFramework"), " and ", i("DefaultClientUdashRPCFramework"), ". ",
-      "These frameworks use ", i("GenCodec"), " as serialization mechanism, so you have to define it for every type used ",
-      "your RPC interfaces. ", i("GenCodec"), " is already defined for the basic types like Int, String, collections, etc."
+      "use the default RPC framework: ", i("DefaultServerUdashRPCFramework"), " and ", i("DefaultClientUdashRPCFramework"), ". ",
+      "These frameworks use ", i("GenCodec"), " for serialization, so you have to define it for every type used ",
+      "in your RPC interfaces. ", i("GenCodec"), " is already defined for basic types like Int, String, collections, etc."
     ),
     p("Now you can use ", i("serverRpc"), " to make RPC calls from the client to the server application."),
     CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
@@ -330,12 +330,12 @@ class RpcClientServerView extends FinalView with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "The interfaces hierarchy is a convinient way to handle authentication. ", i("MainRpcEndpoint"), " exposes two subinterfaces. ",
-      "The first one provides a method authenticating the user. The second takes users token and verifies it. ",
-      "It is not possible to access ", i("PrimeService"), " without valid ", i("UserToken"), ".",
+      "The interfaces hierarchy is a convenient way to handle authentication. ", i("MainRpcEndpoint"), " exposes two subinterfaces. ",
+      "The first one provides a method for user authentication. The second one verifies the client token. ",
+      "It is not possible to access the ", i("PrimeService"), " without a valid ", i("UserToken"), ". The ",
       i("UserContext"), " checks if the user has permission required to call the service method. The ",
-      i("isPrime"), " method from the ", i("PrimeService"), " takes ", i("UserContext"), " and passes the user ID to ", i("QuotaService"),
-      " for a quota check. As you can see, the endpoints are well suited to authorizing GUI users. ",
+      i("isPrime"), " method from the ", i("PrimeService"), " takes a ", i("UserContext"), " and passes the user ID to the ", i("QuotaService"),
+      " for a quota check. As you can see, the endpoints are well suited for authorizing GUI users. ",
       "The services are not aware of GUI permissions and can be easily reused in other application endpoints like REST API."
     ),
     p("Now it is ready to use in the following way:"),
@@ -358,9 +358,9 @@ class RpcClientServerView extends FinalView with CssView {
       "possible to serialize the original exception with assigned ", i("GenCodec"), ". "
     ),
     p(
-      "First of all you have to create an instance of ", i("ExceptionCodecRegistry"), " in a cross-compiled module and register ",
-      "codecs of your exceptions. You can also use a default implementation named ", i("DefaultExceptionCodecRegistry"),
-      " - it provides serialization of basic exceptions like ", i("NullPointerException"), "."
+      "First of all you have to create an instance of the ", i("ExceptionCodecRegistry"), " in the cross-compiled module and register ",
+      "the codecs for your exceptions. You can also use a default implementation named ", i("DefaultExceptionCodecRegistry"),
+      " - it performs serialization of basic exceptions like ", i("NullPointerException"), "."
     ),
     CodeBlock(
       """import io.udash.rpc.serialization.ExceptionCodecRegistry
@@ -377,16 +377,16 @@ class RpcClientServerView extends FinalView with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "Then you have to provide the registry to server connector (usually: ", i("DefaultServerRPC"),
-      ") in the frontend application and to the atmosphere service (usually: ", i("DefaultAtmosphereFramework"),
+      "Then you have to pass the registry to the server connector (usually: ", i("DefaultServerRPC"),
+      ") in the frontend application and to the Atmosphere service (usually: ", i("DefaultAtmosphereFramework"),
       ") on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
       "the following demo: "
     ),
     ForceBootstrap(new ExceptionsDemoComponent().getTemplate),
     p(
       "In some cases you may want to handle exceptions globally. ", i("DefaultServerRPC"), " constructor takes ",
-      i("rpcFailureInterceptors"), " argument, every passed callback will be executed on every RPC call failure. ",
-      "You can also register callback in ", i("DefaultServerRPC"), " instance with ",
+      i("rpcFailureInterceptors"), " argument and every passed callback will be executed on all RPC call failures. ",
+      "You can also register a callback in the ", i("DefaultServerRPC"), " instance with ",
       i("registerCallFailureCallback"), "."
     ),
     h2("What's next?"),
