@@ -153,10 +153,10 @@ class FrontendBindingsView extends FinalView with CssView {
     p(
       "When you change ", i("p"), " value, the builder creates a new element with a new binding inside, but unfortunately ",
       "the old one is still working. There is no way to kill or reuse the old binding, so it will be working as long ",
-      "as you keep ", i("p2"), " reference."
+      "as you keep the ", i("p2"), " reference."
     ),
     p(
-      "Every binding creating DOM elements has version supporting nested bindings. For example: ",
+      "Every binding creating DOM elements has a version supporting nested bindings. For example: ",
       i("produceWithNested"), " and ", i("repeatWithNested"), ". These bindings provide not only the property value, ",
       "but also the interceptor which prepares the nested binding to be removed when it's no longer needed."
     ),
@@ -169,7 +169,7 @@ class FrontendBindingsView extends FinalView with CssView {
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about properties bindings to HTML form."
+      "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about binding properties to HTML forms."
     )
   )
 }
