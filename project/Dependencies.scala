@@ -8,7 +8,7 @@ object Dependencies {
 
   val udashVersion = "0.6.0-RC2"
   val udashJQueryVersion = "1.1.0"
-  val highchartsVarsion = "5.0.10"
+  val highchartsVersion = "5.0.10"
 
   val scalaLoggingVersion = "3.7.2"
   val logbackVersion = "1.2.3"
@@ -38,22 +38,24 @@ object Dependencies {
     "io.udash" %%% "udash-css-frontend" % udashVersion
   ))
 
-  val frontendJSDeps = Def.setting(Seq(
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts.src.js"
-      minified s"$highchartsVarsion/highcharts.js" dependsOn "jquery.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-3d.src.js"
-      minified s"$highchartsVarsion/highcharts-3d.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-more.src.js"
-      minified s"$highchartsVarsion/highcharts-more.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/exporting.src.js"
-      minified s"$highchartsVarsion/modules/exporting.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/drilldown.src.js"
-      minified s"$highchartsVarsion/modules/drilldown.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/heatmap.src.js"
-      minified s"$highchartsVarsion/modules/heatmap.js" dependsOn s"$highchartsVarsion/highcharts.src.js"
+  val frontendJsDeps = Def.setting(Seq(
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
+      minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
+      minified s"$highchartsVersion/highcharts-3d.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-more.src.js"
+      minified s"$highchartsVersion/highcharts-more.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/exporting.src.js"
+      minified s"$highchartsVersion/modules/exporting.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/drilldown.src.js"
+      minified s"$highchartsVersion/modules/drilldown.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/heatmap.src.js"
+      minified s"$highchartsVersion/modules/heatmap.js" dependsOn s"$highchartsVersion/highcharts.src.js"
   ))
 
-  val homepageJSDeps = Def.setting(Seq(
+  val guideJsDeps = Def.setting(Seq.empty[org.scalajs.sbtplugin.JSModuleID])
+
+  val homepageJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     ProvidedJS / "jquery.mCustomScrollbar.concat.min.js"
   ))
 

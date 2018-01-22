@@ -1,5 +1,6 @@
 package io.udash.web.server
 
+import io.udash.rest.server.{DefaultExposesREST, DefaultRestServlet}
 import io.udash.rpc._
 import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
@@ -50,16 +51,12 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   }
   guide.addServlet(atmosphereHolder, "/atm/*")
 
-  private val restHolder = {
-    import io.udash.rest.server._
-    val restImpl = new ExposedRestInterfaces
-    val holder = new ServletHolder(new DefaultRestServlet(new DefaultExposesREST[MainServerREST](restImpl)))
-    holder.setAsyncSupported(true)
-    holder
-  }
+  private val restHolder = new ServletHolder(
+    new DefaultRestServlet(new DefaultExposesREST[MainServerREST](new ExposedRestInterfaces)))
+  restHolder.setAsyncSupported(true)
   guide.addServlet(restHolder, "/rest/*")
 
-  val contexts = new ContextHandlerCollection
+  private val contexts = new ContextHandlerCollection
   contexts.setHandlers(Array(homepage, guide))
   server.setHandler(contexts)
 
