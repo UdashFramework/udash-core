@@ -38,8 +38,8 @@ class RpcServerClientView extends FinalView with CssView {
         |
         |val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](
         |  new FrontendRPCService
-        |  // you can also pass here a server URL, an exceptions registry or
-        |  // RPC failure interceptors (global handlers of exceptions thrown by server)
+        |  // you can also pass a server URL, an exceptions registry or
+        |  // RPC failure interceptors (global handlers of exceptions thrown by server) here
         |)""".stripMargin
     )(GuideStyles),
     p("The ", i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. For example:"),

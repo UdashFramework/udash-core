@@ -25,7 +25,7 @@ class ErrorView extends FinalView with CssView {
         p(HomepageStyles.errorHead)(
           span(GlobalStyles.red)("Oops! 404"), br(),
           span(
-            "The link doesn't work. Or maybe it never has? You can still ",
+            "The link doesn't work. Or maybe it never did? You can still ",
             a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
           ), br(),
           span("... or go "), a(GlobalStyles.red, href := IndexState(None).url)("home"), span(".")
