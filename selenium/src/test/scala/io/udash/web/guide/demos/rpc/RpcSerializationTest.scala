@@ -1,9 +1,6 @@
 package io.udash.web.guide.demos.rpc
 
-import java.util.concurrent.TimeUnit
-
 import io.udash.web.SeleniumTest
-import org.openqa.selenium.WebElement
 
 class RpcSerializationTest extends SeleniumTest {
   val rpcFrontendUrl = "/#/rpc/serialization"
@@ -37,6 +34,4 @@ class RpcSerializationTest extends SeleniumTest {
       }
     }
   }
-
-  private def responseElement: WebElement = driver.findElementById("notifications-demo-response")
 }

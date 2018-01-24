@@ -7,3 +7,5 @@ import io.udash.web.guide.demos.DemosClientRPC
 trait MainClientRPC {
   def demos(): DemosClientRPC
 }
+
+object MainClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[MainClientRPC]

@@ -3,15 +3,14 @@ package io.udash.web.guide.views.frontend
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos._
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
-case object FrontendFilesViewPresenter extends DefaultViewPresenterFactory[FrontendFilesState.type](() => new FrontendFilesView)
+case object FrontendFilesViewFactory extends StaticViewFactory[FrontendFilesState.type](() => new FrontendFilesView)
 
 class FrontendFilesView extends FinalView {
   import io.udash.web.guide.Context._
@@ -35,15 +34,15 @@ class FrontendFilesView extends FinalView {
         |div(
         |  FileInput("files", acceptMultipleFiles, selectedFiles)(),
         |  h4("Selected files"),
-        |  ul(GuideStyles.get.defaultList)(
-        |    repeat(selectedFiles)(file => {
+        |  ul(GuideStyles.defaultList)(
+        |    repeat(selectedFiles) { file =>
         |      li(file.get.name).render
-        |    })
+        |    }
         |  )
         |)""".stripMargin
     )(GuideStyles),
     p("Take a look at the following live demo:"),
-    new FileInputDemoComponent().getTemplate,
+    ForceBootstrap(new FileInputDemoComponent().getTemplate),
     p(i("FileUploader"), " is a class taking the server URL as a constructor argument and containing two methods:"),
     CodeBlock(
       """def upload(input: html.Input): ReadableModelProperty[FileUploadModel]

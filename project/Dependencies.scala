@@ -3,33 +3,29 @@ import sbt._
 
 object Dependencies {
 
-  val versionOfScala = "2.12.2"
-  val jettyVersion = "9.3.11.v20160721"
+  val versionOfScala = "2.12.4"
+  val jettyVersion = "9.4.8.v20171121"
 
-  val udashVersion = "0.5.0"
-  val udashJQueryVersion = "1.0.1"
-  val highchartsVarsion = "5.0.10"
+  val udashVersion = "0.6.0-RC2"
+  val udashJQueryVersion = "1.1.0"
+  val highchartsVersion = "5.0.10"
 
-  val scalaCssVersion = "0.5.3"
-
-  val scalaLoggingVersion = "3.5.0"
+  val scalaLoggingVersion = "3.7.2"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.20.3"
+  val avsystemCommonsVersion = "1.25.5"
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.8.RELEASE"
-  val akkaVersion = "2.4.17"
-  val akkaHttpVersion = "10.0.5"
-  val akkaHttpCorsVersion = "0.2.1"
 
-  val seleniumVersion = "2.53.1"
-  val scalatestVersion = "3.0.1"
+  val seleniumVersion = "3.8.1"
+  val scalatestVersion = "3.0.3"
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core-shared" % udashVersion,
     "io.udash" %%% "udash-rest-shared" % udashVersion,
     "io.udash" %%% "udash-rpc-shared" % udashVersion,
-    "io.udash" %%% "udash-i18n-shared" % udashVersion
+    "io.udash" %%% "udash-i18n-shared" % udashVersion,
+    "io.udash" %%% "udash-css-shared" % udashVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
@@ -39,26 +35,35 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
-    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
-    "com.github.japgolly.scalacss" %%% "ext-scalatags" % scalaCssVersion
+    "io.udash" %%% "udash-css-frontend" % udashVersion
   ))
 
-  val frontendJSDeps = Def.setting(Seq(
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts.src.js" minified s"$highchartsVarsion/highcharts.js" dependsOn "jquery.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-3d.src.js" minified s"$highchartsVarsion/highcharts-3d.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/highcharts-more.src.js" minified s"$highchartsVarsion/highcharts-more.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/exporting.src.js" minified s"$highchartsVarsion/modules/exporting.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/drilldown.src.js" minified s"$highchartsVarsion/modules/drilldown.js" dependsOn s"$highchartsVarsion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVarsion / s"$highchartsVarsion/modules/heatmap.src.js" minified s"$highchartsVarsion/modules/heatmap.js" dependsOn s"$highchartsVarsion/highcharts.src.js"
+  val frontendJsDeps = Def.setting(Seq(
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
+      minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
+      minified s"$highchartsVersion/highcharts-3d.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-more.src.js"
+      minified s"$highchartsVersion/highcharts-more.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/exporting.src.js"
+      minified s"$highchartsVersion/modules/exporting.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/drilldown.src.js"
+      minified s"$highchartsVersion/modules/drilldown.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/heatmap.src.js"
+      minified s"$highchartsVersion/modules/heatmap.js" dependsOn s"$highchartsVersion/highcharts.src.js"
   ))
 
-  val homepageJSDeps = Def.setting(Seq(
+  val guideJsDeps = Def.setting(Seq.empty[org.scalajs.sbtplugin.JSModuleID])
+
+  val homepageJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     ProvidedJS / "jquery.mCustomScrollbar.concat.min.js"
   ))
 
   val backendDeps = Def.setting(Seq(
     "io.udash" %% "udash-rpc-backend" % udashVersion,
+    "io.udash" %% "udash-rest-backend" % udashVersion,
     "io.udash" %% "udash-i18n-backend" % udashVersion,
+    "io.udash" %% "udash-css-backend" % udashVersion,
 
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
@@ -68,11 +73,7 @@ object Dependencies {
 
     "com.typesafe" % "config" % typesafeConfigVersion,
     "org.springframework" % "spring-beans" % springVersion,
-    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
-
-    "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-    "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-    "ch.megard" %% "akka-http-cors" % akkaHttpCorsVersion
+    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(

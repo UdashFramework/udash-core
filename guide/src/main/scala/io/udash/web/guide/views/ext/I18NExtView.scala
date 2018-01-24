@@ -1,19 +1,21 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
 import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, FrontendTranslationsDemo, RemoteTranslationsDemo}
-import org.scalajs.dom
 
 import scalatags.JsDom
 
-case object I18NExtViewPresenter extends DefaultViewPresenterFactory[I18NExtState.type](() => new I18NExtView)
+case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() => new I18NExtView)
 
 
-class I18NExtView extends FinalView {
+class I18NExtView extends FinalView with CssView {
+  import Context._
+
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -24,7 +26,7 @@ class I18NExtView extends FinalView {
       "and allows locale changes in frontend application without refreshing. "
     ),
     h2("Translation keys"),
-    p("If you want to use Udash translations support, you should define ", i("TranslationKeys"), " "),
+    p("If you want to use Udash translations support, you should define ", i("TranslationKeys"), "."),
     CodeBlock(
       s"""import io.udash.i18n._
          |
@@ -66,7 +68,7 @@ class I18NExtView extends FinalView {
     )(GuideStyles),
     p(
       "This code requires a ", i("TranslationProvider"), " instance to compile. The Udash i18n plugin provides two ",
-      i("TranslationProviders"), ": ", i("LocalTranslationProvider"), " and ", i("RemoteTranslationProvider"), ""
+      i("TranslationProviders"), ": ", i("LocalTranslationProvider"), " and ", i("RemoteTranslationProvider"), "."
     ),
     h3("LocalTranslationProvider"),
     p(
@@ -96,7 +98,6 @@ class I18NExtView extends FinalView {
          |
          |object FrontendTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -137,7 +138,7 @@ class I18NExtView extends FinalView {
       "Take a look at the example below. As you can see in the code sample, it uses ",
       i("translated"), " method to bind translation into DOM hierarchy. "
     ),
-    FrontendTranslationsDemo(),
+    ForceBootstrap(FrontendTranslationsDemo()),
     h3("RemoteTranslationProvider"),
     p(
       "If your application is using the Udash RPC system, you can provide translations from the server side application. ",
@@ -194,7 +195,6 @@ class I18NExtView extends FinalView {
          |
          |object RemoteTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -235,7 +235,7 @@ class I18NExtView extends FinalView {
          |}""".stripMargin
     )(GuideStyles),
     p("Take a look at the example below."),
-    RemoteTranslationsDemo(),
+    ForceBootstrap(RemoteTranslationsDemo()),
     h2("Translations binding"),
     p(
       "All translations are resolved asynchronously, so they cannot be statically added into DOM hierarchy. The Udash i18n plugin ",
@@ -245,7 +245,7 @@ class I18NExtView extends FinalView {
     p(
       "Static binding takes ", i("Future[Translated]"),
       " as an argument and when it completes it puts translated string into DOM hierarchy.",
-      ul(
+      ul(GuideStyles.defaultList)(
         li(i("translated"), " - binds translated string in the DOM element."),
         li(i("translatedAttr"), " - binds translated string in the DOM element attribute.")
       )
@@ -254,7 +254,7 @@ class I18NExtView extends FinalView {
     p(
       "Dynamic binding is able to update translation after a change of ", i("LangProperty"), ". These methods take ",
       "the following arguments: a translation key, a translator which applies arguments to translation and the lang property.",
-      ul(
+      ul(GuideStyles.defaultList)(
         li(i("translatedDynamic"), " - binds translated string in the DOM element and updates it when the application language changes."),
         li(i("translatedAttrDynamic"), " - binds translated string in the DOM element attribute and updates it when the application language changes.")
       ),
@@ -265,7 +265,6 @@ class I18NExtView extends FinalView {
          |
          |object RemoteTranslationsDemo {
          |  import scalatags.JsDom.all._
-         |  import scalacss.ScalatagsCss._
          |
          |  def apply(): dom.Element = {
          |    import io.udash.guide.Context._
@@ -308,6 +307,11 @@ class I18NExtView extends FinalView {
          |}""".stripMargin
     )(GuideStyles),
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
-    DynamicRemoteTranslationsDemo()
+    ForceBootstrap(DynamicRemoteTranslationsDemo()),
+    h2("What's next?"),
+    p(
+      "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
+      a(href := AuthorizationExtState.url)("Authorization utilities"), "."
+    )
   )
 }

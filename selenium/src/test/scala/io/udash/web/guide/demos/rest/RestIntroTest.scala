@@ -2,7 +2,6 @@ package io.udash.web.guide.demos.rest
 
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ById, ByTagName}
-import org.openqa.selenium.WebElement
 
 class RestIntroTest extends SeleniumTest {
   val rpcIntroUrl = "/#/rest"

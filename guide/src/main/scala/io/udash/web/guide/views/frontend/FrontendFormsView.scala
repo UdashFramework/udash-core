@@ -1,18 +1,18 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
-import org.scalajs.dom
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
-case object FrontendFormsViewPresenter extends DefaultViewPresenterFactory[FrontendFormsState.type](() => new FrontendFormsView)
+case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
-class FrontendFormsView extends FinalView {
+class FrontendFormsView extends FinalView with CssView {
   import io.udash.web.guide.Context._
 
   import JsDom.all._
@@ -24,15 +24,15 @@ class FrontendFormsView extends FinalView {
       "In this part of the guide you will learn means of binding properties to form elements."
     ),
     p("Let's briefly introduce all bindable form elements:"),
-    ul(GuideStyles.get.defaultList)(
-      li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), ""),
-      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), ""),
-      li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), ""),
-      li(i("PasswordInput"), " - password input bound to ", i("Property[String]"), ""),
-      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[String]"), ""),
-      li(i("Select"), " - a select element bound to ", i("Property[String]"), ""),
-      li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), ""),
-      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), "")
+    ul(GuideStyles.defaultList)(
+      li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), "."),
+      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), "."),
+      li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), "."),
+      li(i("PasswordInput"), " - password input bound to ", i("Property[String]"), "."),
+      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[String]"), "."),
+      li(i("Select"), " - a select element bound to ", i("Property[String]"), "."),
+      li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
+      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), ".")
     ),
     h3("TextInput & NumberInput & PasswordInput"),
     p(
@@ -65,7 +65,7 @@ class FrontendFormsView extends FinalView {
         |  )
         |)""".stripMargin
     )(GuideStyles),
-    new TextInputDemoComponent,
+    ForceBootstrap(new TextInputDemoComponent),
     h3("TextArea"),
     p("Below you can find a similar example, this time with text areas."),
     CodeBlock(
@@ -77,7 +77,7 @@ class FrontendFormsView extends FinalView {
         |  TextArea(text)
         |)""".stripMargin
     )(GuideStyles),
-    new TextAreaDemoComponent,
+    ForceBootstrap(new TextAreaDemoComponent),
     h3("Checkbox"),
     p(
       "Below you can find the example of creating a single checkbox. Notice that the third property contains String, so it uses ",
@@ -98,7 +98,7 @@ class FrontendFormsView extends FinalView {
         |  Checkbox(propCAsBoolean), " C -> ", bind(propC)
         |)""".stripMargin
     )(GuideStyles),
-    new CheckboxDemoComponent,
+    ForceBootstrap(new CheckboxDemoComponent),
     h3("CheckButtons"),
     p(
       "The below example shows how to create a sequence of checkboxes for a provided sequence of possible values and bind them ",
@@ -131,7 +131,7 @@ class FrontendFormsView extends FinalView {
         |  )
         |)""".stripMargin
     )(GuideStyles),
-    new CheckButtonsDemoComponent,
+    ForceBootstrap(new CheckButtonsDemoComponent),
     h3("RadioButtons"),
     p(
       "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ", i("Property"), ", ",
@@ -162,7 +162,7 @@ class FrontendFormsView extends FinalView {
         |  )
         |)""".stripMargin
     )(GuideStyles),
-    new RadioButtonsDemoComponent,
+    ForceBootstrap(new RadioButtonsDemoComponent),
     h3("Select"),
     p("The HTML select element might be used in two ways: with or without multi selection. Below you can find examples of both usages."),
     CodeBlock(
@@ -187,7 +187,7 @@ class FrontendFormsView extends FinalView {
         |  )()
         |)""".stripMargin
     )(GuideStyles),
-    new SelectDemoComponent,
+    ForceBootstrap(new SelectDemoComponent),
     h4("Select with multiple selected values"),
     p("Notice that the only difference is the type of the used property."),
     CodeBlock(
@@ -212,7 +212,7 @@ class FrontendFormsView extends FinalView {
         |  )()
         |)""".stripMargin
     )(GuideStyles),
-    new MultiSelectDemoComponent,
+    ForceBootstrap(new MultiSelectDemoComponent),
     h2("What's next?"),
     p(
       "Now you know everything you need to start frontend development using Udash. ",

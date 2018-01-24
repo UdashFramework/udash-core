@@ -1,34 +1,31 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.demos.rpc.NotificationsClient
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 trait NotificationsDemoModel {
   def registered: Boolean
   def lastMessage: String
 }
+object NotificationsDemoModel extends HasModelPropertyCreator[NotificationsDemoModel]
 
 class NotificationsDemoComponent extends Component {
   import io.udash.web.guide.Context._
 
-  override def getTemplate: Modifier = NotificationsDemoViewPresenter()
+  override def getTemplate: Modifier = NotificationsDemoViewFactory()
 
-  object NotificationsDemoViewPresenter {
+  object NotificationsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty[NotificationsDemoModel]
+      val model = ModelProperty.empty[NotificationsDemoModel]
       model.subProp(_.registered).set(false)
       model.subProp(_.lastMessage).set("-")
 
@@ -67,7 +64,6 @@ class NotificationsDemoComponent extends Component {
 
   class NotificationsDemoView(model: ModelProperty[NotificationsDemoModel], presenter: NotificationsDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val registerButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -77,11 +73,11 @@ class NotificationsDemoComponent extends Component {
     ))
 
     registerButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           span(id := "notifications-demo-response")(

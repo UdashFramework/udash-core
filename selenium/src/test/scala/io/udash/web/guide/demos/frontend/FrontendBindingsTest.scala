@@ -1,7 +1,7 @@
 package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
-import org.openqa.selenium.By.{ByCssSelector, ById, ByTagName}
+import org.openqa.selenium.By.{ByCssSelector, ById}
 import org.openqa.selenium.WebElement
 
 import scala.collection.JavaConverters._
@@ -14,10 +14,10 @@ class FrontendBindingsTest extends SeleniumTest {
 
     "contain demo elements" in {
       eventually {
-        val bind = driver.findElementById("bind-demo")
-        val produce = driver.findElementById("produce-demo")
-        val repeat = driver.findElementById("repeat-demo")
-        val validation = driver.findElementById("validation-demo")
+        driver.findElementById("bind-demo")
+        driver.findElementById("produce-demo")
+        driver.findElementById("repeat-demo")
+        driver.findElementById("validation-demo")
       }
     }
 
@@ -55,8 +55,6 @@ class FrontendBindingsTest extends SeleniumTest {
       def checkIntegers() = {
         eventually {
           val std = collectIntegers(produce.findElement(new ById("produce-demo-integers")))
-          val patching = collectIntegers(produce.findElement(new ById("produce-demo-integers-patching")))
-          std should be(patching)
           prevIntegers shouldNot be(std)
           prevIntegers = std
         }

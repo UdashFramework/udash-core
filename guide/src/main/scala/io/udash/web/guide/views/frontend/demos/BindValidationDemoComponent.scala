@@ -1,19 +1,14 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
-import org.scalajs.dom.Element
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
-import io.udash.web.commons.views.Component
 
 class BindValidationDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
 
   val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
@@ -33,7 +28,7 @@ class BindValidationDemoComponent extends Component {
     integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount).toSeq: _*)
   }, 2000)
 
-  override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.get.frame)(
+  override def getTemplate: Modifier = div(id := "validation-demo", GuideStyles.frame)(
     "Integers: ",
     span(
       id := "validation-demo-integers",

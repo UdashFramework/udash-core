@@ -2,20 +2,16 @@ package io.udash.web.guide.views.ext.demo.charts
 
 import java.{util => ju}
 
-import com.github.ghik.silencer.silent
 import io.udash.wrappers.highcharts.config.HighchartsConfig
 import io.udash.wrappers.highcharts.config.axis._
 import io.udash.wrappers.highcharts.config.chart.Chart
 import io.udash.wrappers.highcharts.config.chart.Chart.ZoomType
 import io.udash.wrappers.highcharts.config.credits.Credits
 import io.udash.wrappers.highcharts.config.legend.Legend
-import io.udash.wrappers.highcharts.config.plot.PlotOptions
+import io.udash.wrappers.highcharts.config.series.SeriesTooltip
 import io.udash.wrappers.highcharts.config.series.heatmap.{SeriesHeatmap, SeriesHeatmapData}
-import io.udash.wrappers.highcharts.config.series.scatter.{SeriesScatter, SeriesScatterData}
-import io.udash.wrappers.highcharts.config.series.{SeriesMarker, SeriesTooltip}
 import io.udash.wrappers.highcharts.config.title.Title
 import io.udash.wrappers.highcharts.config.utils.{Align, Color, Layout}
-
 
 import scala.util.Random
 

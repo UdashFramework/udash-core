@@ -4,29 +4,29 @@ import io.udash._
 import io.udash.routing.UrlLogging
 import io.udash.rpc._
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
-import io.udash.web.guide.rpc.RPCService
 import io.udash.web.guide.demos.rest.MainServerREST
+import io.udash.web.guide.rpc.RPCService
 import io.udash.web.guide.views.ext.demo.UrlLoggingDemo
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
-import org.scalajs.dom.{Element, document}
+import org.scalajs.dom.Element
 
-import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import scala.util.Try
 
 object Context {
   implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
   private lazy val routingRegistry = new RoutingRegistryDef
-  private lazy val viewPresenterRegistry = new StatesToViewPresenterDef
+  private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
 
-  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewPresenterRegistry, RootState) with UrlLogging[RoutingState] {
+  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoryRegistry) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit = UrlLoggingDemo.log(url, referrer)
   }
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
-  val restServer = DefaultServerREST[MainServerREST](dom.window.location.hostname, 8081, "/")
+  val restServer = DefaultServerREST[MainServerREST](
+    Protocol.Http, dom.window.location.hostname, Option(dom.window.location.port).map(_.toInt).getOrElse(80), "/rest/"
+  )
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
@@ -41,8 +41,8 @@ object Context {
     MenuContainer("Frontend", Seq(
       MenuLink("Introduction", FrontendIntroState),
       MenuLink("Routing", FrontendRoutingState(None)),
-      MenuLink("Model, View, Presenter & ViewPresenter", FrontendMVPState),
-      MenuLink("Scalatags & ScalaCSS", FrontendTemplatesState),
+      MenuLink("Model, View, Presenter & ViewFactory", FrontendMVPState),
+      MenuLink("Scalatags & UdashCSS", FrontendTemplatesState),
       MenuLink("Properties", FrontendPropertiesState),
       MenuLink("Template Data Binding", FrontendBindingsState),
       MenuLink("Two-way Forms Binding", FrontendFormsState),
@@ -58,10 +58,12 @@ object Context {
     MenuContainer("REST", Seq(
       MenuLink("Introduction", RestIntroState),
       MenuLink("Interfaces", RestInterfacesState),
-      MenuLink("Client ➔ Server", RestClientServerState)
+      MenuLink("Client ➔ Server", RestClientServerState),
+      MenuLink("Server", RestServerState)
     )),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
+      MenuLink("Authorization", AuthorizationExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
       MenuLink("Charts", ChartsExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
@@ -72,12 +74,12 @@ object Context {
   )
 }
 
-object Init extends JSApp {
+object Init {
   import Context._
 
   @JSExport
-  override def main(): Unit = {
-    jQ(document).ready((jThis: Element) => {
+  def main(args: Array[String]): Unit = {
+    jQ((jThis: Element) => {
       val appRoot = jQ("#application").get(0).get
       applicationInstance.run(appRoot)
 

@@ -14,13 +14,13 @@ class FrontendFormsTest extends SeleniumTest {
 
     "contain demo elements" in {
       eventually {
-        val checkbox = driver.findElementById("checkbox-demo")
-        val checkButtons = driver.findElementById("check-buttons-demo")
-        val multiSelect = driver.findElementById("multi-select-demo")
-        val radioButtons = driver.findElementById("radio-buttons-demo")
-        val select = driver.findElementById("select-demo")
-        val textArea = driver.findElementById("text-area-demo")
-        val inputs = driver.findElementById("inputs-demo")
+        driver.findElementById("checkbox-demo")
+        driver.findElementById("check-buttons-demo")
+        driver.findElementById("multi-select-demo")
+        driver.findElementById("radio-buttons-demo")
+        driver.findElementById("select-demo")
+        driver.findElementById("text-area-demo")
+        driver.findElementById("inputs-demo")
       }
     }
 

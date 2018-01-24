@@ -3,7 +3,6 @@ package io.udash.web.guide.demos.rpc
 import java.util.concurrent.TimeUnit
 
 import io.udash.web.SeleniumTest
-import org.openqa.selenium.By.ByTagName
 import org.openqa.selenium.WebElement
 
 class RpcFrontendTest extends SeleniumTest {

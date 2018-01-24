@@ -1,20 +1,15 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash._
-import io.udash.wrappers.jquery._
+import io.udash.web.commons.views.Component
+import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
-import org.scalajs.dom.Element
 
 import scala.util.Random
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
-import io.udash.web.commons.views.Component
 
 class ProduceDemoComponent extends Component {
-  import io.udash.web.guide.Context._
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
   val name: Property[String] = Property[String](names.next())
@@ -31,19 +26,14 @@ class ProduceDemoComponent extends Component {
   }, 2000)
 
   override def getTemplate: Modifier = {
-    div(id := "produce-demo", GuideStyles.get.frame)(
+    div(id := "produce-demo", GuideStyles.frame)(
       p(
         "Name: ",
         produce(name)(value => b(id := "produce-demo-name")(value).render), br,
         "Integers: ",
-        produce(integers)((seq: Seq[Int]) => span(id := "produce-demo-integers")(seq.map(p => span(GuideStyles.get.highlightRed)(s"$p, ")): _*).render), br,
-        "Integers (patching): ",
-        produce(integers,
-          (seq: Seq[Property[Int]]) => span(id := "produce-demo-integers-patching")(seq.map(p => span(GuideStyles.get.highlightRed)(id := p.hashCode())(s"${p.get}, ")): _*).render,
-          (patch: Patch[Property[Int]], els: Seq[Element]) => {
-            val insertBefore = jQ(els:_*).children().at(patch.idx)
-            patch.added.foreach(p => jQ(span(id := p.hashCode(), GuideStyles.get.highlightRed)(s"${p.get}, ").render).insertBefore(insertBefore))
-            patch.removed.foreach(p => jQ(s"#${p.hashCode()}").remove())
+        span(id := "produce-demo-integers")(
+          produce(integers) { (seq: Seq[Int]) =>
+            seq.map(p => span(GuideStyles.highlightRed)(s"$p, ").render)
           }
         )
       )

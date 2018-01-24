@@ -12,21 +12,22 @@ import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
 import org.scalajs.dom.raw.Element
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
+  import io.udash.css.CssView._
+
   override val buttonStyles: HeaderButtonsStyles = HeaderStyles
   override val navStyles: HeaderNavStyles = HeaderStyles
 
   private val window = jQ(DomWindow)
   window.on("scroll", onScroll)
 
-  private lazy val btnMobileMenu = a(href := "#", MobileMenuStyles.get.btnMobile, HeaderStyles.get.btnMobile)(
-    div(MobileMenuStyles.get.btnMobileLines)(
-      span(MobileMenuStyles.get.btnMobileLineTop),
-      span(MobileMenuStyles.get.btnMobileLineMiddle),
-      span(MobileMenuStyles.get.btnMobileLineBottom)
+  private lazy val btnMobileMenu = a(href := "#", MobileMenuStyles.btnMobile, HeaderStyles.btnMobile)(
+    div(MobileMenuStyles.btnMobileLines)(
+      span(MobileMenuStyles.btnMobileLineTop),
+      span(MobileMenuStyles.btnMobileLineMiddle),
+      span(MobileMenuStyles.btnMobileLineBottom)
     )
   ).render
 
@@ -36,11 +37,11 @@ object Header extends HeaderButtons with HeaderNav {
     NavItem(ExternalUrls.license, "License")
   )
 
-  private lazy val template = header(HeaderStyles.get.header)(
-    div(GlobalStyles.get.body, GlobalStyles.get.clearfix)(
-      div(HeaderStyles.get.headerLeft)(
+  private lazy val template = header(HeaderStyles.header)(
+    div(GlobalStyles.body, GlobalStyles.clearfix)(
+      div(HeaderStyles.headerLeft)(
         btnMobileMenu,
-        a(HeaderStyles.get.headerLogo, href := IndexState(None).url)(),
+        a(HeaderStyles.headerLogo, href := IndexState(None).url)(),
         navElement
       ),
       buttons
@@ -61,7 +62,7 @@ object Header extends HeaderButtons with HeaderNav {
 
     val pin = jQ(template).attr(pinnedAttr).getOrElse("false").toBoolean
     val scrollTop = jQ(DomWindow).scrollTop()
-    val introHeight = jQ(s".${HomepageStyles.get.sectionIntro.htmlClass}").height()
+    val introHeight = jQ(s".${HomepageStyles.sectionIntro.className}").height()
 
     if (scrollTop >= introHeight && !pin) {
       jQ(template).attr(pinnedAttr, "true")

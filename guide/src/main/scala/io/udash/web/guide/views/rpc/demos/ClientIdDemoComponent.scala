@@ -1,32 +1,29 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 trait ClientIdDemoModel {
   def clientId: String
 }
+object ClientIdDemoModel extends HasModelPropertyCreator[ClientIdDemoModel]
 
 class ClientIdDemoComponent extends Component {
   import Context._
-  override def getTemplate: Modifier = ClientIdDemoViewPresenter()
+  override def getTemplate: Modifier = ClientIdDemoViewFactory()
 
-  object ClientIdDemoViewPresenter {
+  object ClientIdDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty[ClientIdDemoModel]
+      val clientId = ModelProperty.empty[ClientIdDemoModel]
       clientId.subProp(_.clientId).set("???")
 
       val presenter = new ClientIdDemoPresenter(clientId)
@@ -45,7 +42,6 @@ class ClientIdDemoComponent extends Component {
 
   class ClientIdDemoView(model: ModelProperty[ClientIdDemoModel], presenter: ClientIdDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val loadIdButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -53,12 +49,12 @@ class ClientIdDemoComponent extends Component {
     )("Load client id")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         btn.disabled.set(true)
         presenter.onButtonClick()
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           "Your client id: ",

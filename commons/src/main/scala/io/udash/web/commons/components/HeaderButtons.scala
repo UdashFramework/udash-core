@@ -4,10 +4,11 @@ import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.components.HeaderButtonsStyles
 import io.udash.web.commons.views.{SVG, Size}
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
 trait HeaderButtons {
+  import io.udash.css.CssView._
+
   val buttonStyles: HeaderButtonsStyles
 
   def buttons = {

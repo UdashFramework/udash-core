@@ -8,3 +8,5 @@ trait DemosClientRPC {
   def pingDemo(): PingClientRPC
   def notificationsDemo(): NotificationsClientRPC
 }
+
+object DemosClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[DemosClientRPC]

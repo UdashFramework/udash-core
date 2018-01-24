@@ -4,22 +4,22 @@ import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.{References, Versions}
 import io.udash.web.guide.views.ext.demo.charts._
+import io.udash.web.guide.views.{References, Versions}
 import io.udash.wrappers.highcharts.config.HighchartsConfig
 import org.scalajs.dom.Element
 
 import scalatags.JsDom
 
-case object ChartsExtViewPresenter extends DefaultViewPresenterFactory[ChartsExtState.type](() => new ChartsExtView)
+case object ChartsExtViewFactory extends StaticViewFactory[ChartsExtState.type](() => new ChartsExtView)
 
 
 class ChartsExtView extends FinalView {
-  import JsDom.all._
   import Context._
-  import io.udash.wrappers.highcharts._
   import io.udash.wrappers.highcharts.HighchartsUtils._
   import io.udash.wrappers.jquery._
+
+  import JsDom.all._
 
   val charts: Seq[(String, HighchartsConfig)] = Seq(
     ("Basic line", BasicLine.config),

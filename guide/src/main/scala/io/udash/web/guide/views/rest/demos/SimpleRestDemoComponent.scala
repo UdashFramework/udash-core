@@ -1,36 +1,32 @@
 package io.udash.web.guide.views.rest.demos
 
-import io.udash.web.guide.Context
 import io.udash._
-import io.udash.web.guide.demos.rest.RestExampleClass
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.web.commons.views.Component
+import io.udash.web.guide.Context
+import io.udash.web.guide.demos.rest.RestExampleClass
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 class SimpleRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewFactory()
 
   trait ExampleModel {
     def string: String
     def int: Int
     def cls: RestExampleClass
   }
+  object ExampleModel extends HasModelPropertyCreator[ExampleModel]
 
-  object SimpleRestDemoViewPresenter {
+  object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responsesModel = ModelProperty[ExampleModel]
+      val responsesModel = ModelProperty.empty[ExampleModel]
 
       val presenter = new SimpleRestDemoPresenter(responsesModel)
       new SimpleRestDemoView(responsesModel, presenter).render
@@ -71,8 +67,6 @@ class SimpleRestDemoComponent extends Component {
 
   class SimpleRestDemoView(model: ModelProperty[ExampleModel], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
-    import scalacss.ProdDefaults._
-    import scalacss.ScalatagsCss._
 
     val loadStringButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -88,13 +82,13 @@ class SimpleRestDemoComponent extends Component {
     )("Get class")
 
     loadStringButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendStringRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendStringRequest(btn)
     }
     loadIntButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendIntRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendIntRequest(btn)
     }
     loadClassButton.listen {
-      case UdashButton.ButtonClickEvent(btn) => presenter.sendClassRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendClassRequest(btn)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(

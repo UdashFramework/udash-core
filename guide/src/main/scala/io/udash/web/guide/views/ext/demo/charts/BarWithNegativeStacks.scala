@@ -9,7 +9,7 @@ import io.udash.wrappers.highcharts.config.title.Title
 import io.udash.wrappers.highcharts.config.tooltip.Tooltip
 import io.udash.wrappers.highcharts.config.utils.Stacking
 
-import scalajs.js.`|`
+import scala.scalajs.js.`|`
 
 object BarWithNegativeStacks {
   val categories = Seq(

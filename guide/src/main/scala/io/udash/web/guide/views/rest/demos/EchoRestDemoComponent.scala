@@ -1,29 +1,25 @@
 package io.udash.web.guide.views.rest.demos
 
 import io.udash._
-import io.udash.web.guide.Context
-import io.udash.web.guide.demos.rest.RestExampleClass
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.web.commons.views.Component
+import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 class EchoRestDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = SimpleRestDemoViewPresenter()
+  override def getTemplate: Modifier = SimpleRestDemoViewFactory()
 
-  object SimpleRestDemoViewPresenter {
+  object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responseProperty = Property[String]
+      val responseProperty = Property.empty[String]
       val presenter = new SimpleRestDemoPresenter(responseProperty)
       new SimpleRestDemoView(responseProperty, presenter).render
     }
@@ -65,7 +61,6 @@ class EchoRestDemoComponent extends Component {
 
   class SimpleRestDemoView(response: Property[String], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val content = Property("a b !@#$%^&*()_+")
 
@@ -87,19 +82,19 @@ class EchoRestDemoComponent extends Component {
     )("Body")
 
     queryButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithQueryRequest(content.get)
     }
     headerButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithHeaderRequest(content.get)
     }
     urlButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithURLRequest(content.get)
     }
     bodyButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.sendWithBodyRequest(content.get)
     }
 

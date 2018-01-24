@@ -1,18 +1,19 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
+import io.udash.logging.CrossLogging
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide._
+import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
-import io.udash.web.guide.{Context, UserActivityExtState}
-import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 
-class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserActivityExtState.type] with StrictLogging {
+class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserActivityExtState.type] with CrossLogging {
 
   import io.udash.web.guide.Context._
 
@@ -29,18 +30,17 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
 }
 
 
-case object UserActivityExtViewPresenter extends ViewPresenter[UserActivityExtState.type] {
-
-  import io.udash.web.guide.Context._
+case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.type] {
 
   override def create(): (View, Presenter[UserActivityExtState.type]) = {
-    val model = SeqProperty[Call]
+    val model = SeqProperty.empty[Call]
     val presenter = new UserActivityExtPresenter(model)
     (new UserActivityExtView(model, presenter), presenter)
   }
 }
 
 class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
+  import Context._
 
   import JsDom.all._
 
@@ -61,7 +61,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     p("You can see this mechanism in action here in the guide. We've already provided the implementation: "),
     CodeBlock(
       s"""val application = new Application[RoutingState](
-          |  routingRegistry, viewPresenterRegistry, RootState
+          |  routingRegistry, viewFactoryRegistry, RootState
           |) with UrlLogging[RoutingState] {
           |  override protected def log(url: String, referrer: Option[String]): Unit =
           |    UrlLoggingDemo.log(url, referrer)
@@ -80,10 +80,10 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
           |}""".stripMargin
     )(GuideStyles),
     p("to see it in action just enable logging below, switch to another chapter and come back here."), br,
-    UrlLoggingDemo(),
+    ForceBootstrap(UrlLoggingDemo()),
     h2("RPC call logging"),
     p("Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
-      "CallLogging into your ExposesServerRPC, e.g.: "),
+      i("CallLogging"), " into your ", i("ExposesServerRPC"), ", e.g.: "),
     CodeBlock(
       """new DefaultExposesServerRPC[MainServerRPC](
         |  new ExposedRpcInterfaces(clientId)
@@ -104,7 +104,14 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |  @Logged
         |  def fPing(id: Int): Future[Int]
         |}""".stripMargin)(GuideStyles),
-    new PingPongCallDemoComponent,
-    RpcLoggingDemo(model, () => presenter.reload())
+    ForceBootstrap(
+      new PingPongCallDemoComponent,
+      RpcLoggingDemo(model, () => presenter.reload())
+    ),
+    h2("What's next?"),
+    p(
+      "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
+      a(href := AuthorizationExtState.url)("Authorization utilities"), "."
+    )
   )
 }

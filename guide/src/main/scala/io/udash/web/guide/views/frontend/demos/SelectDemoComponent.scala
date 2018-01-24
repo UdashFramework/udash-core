@@ -1,20 +1,16 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
+import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.Element
-import org.scalajs.dom.html.{Select => _, _}
+import org.scalajs.dom.html.{Select => _}
 
 import scalatags.JsDom
-import io.udash.web.commons.views.Component
 
 class SelectDemoComponent extends Component {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   sealed trait Fruit
   case object Apple extends Fruit
@@ -31,7 +27,7 @@ class SelectDemoComponent extends Component {
     }
   )
 
-  override def getTemplate: Modifier = div(id := "select-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+  override def getTemplate: Modifier = div(id := "select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
         div(

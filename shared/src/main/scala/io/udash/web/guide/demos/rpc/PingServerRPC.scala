@@ -12,3 +12,5 @@ trait PingServerRPC {
   @Logged
   def fPing(id: Int): Future[Int]
 }
+
+object PingServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[PingServerRPC]

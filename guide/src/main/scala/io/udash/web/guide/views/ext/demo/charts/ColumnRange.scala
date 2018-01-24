@@ -1,13 +1,11 @@
 package io.udash.web.guide.views.ext.demo.charts
 
 import io.udash.wrappers.highcharts.config.HighchartsConfig
-import io.udash.wrappers.highcharts.config.axis.{Axis, AxisTitle, XAxis, YAxis}
+import io.udash.wrappers.highcharts.config.axis.{AxisTitle, XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.chart.Chart
 import io.udash.wrappers.highcharts.config.credits.Credits
-import io.udash.wrappers.highcharts.config.drilldown.Drilldown
 import io.udash.wrappers.highcharts.config.legend.Legend
 import io.udash.wrappers.highcharts.config.plot.PlotOptions
-import io.udash.wrappers.highcharts.config.series.column.{SeriesColumn, SeriesColumnData}
 import io.udash.wrappers.highcharts.config.series.columnrnge.{SeriesColumnrange, SeriesColumnrangeData}
 import io.udash.wrappers.highcharts.config.series.{SeriesDataLabels, SeriesRangeDataLabels}
 import io.udash.wrappers.highcharts.config.title.{Subtitle, Title}

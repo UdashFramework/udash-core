@@ -17,7 +17,9 @@ object References {
   val SbtScalaJsPluginHomepage = "http://www.scala-js.org/doc/sbt-plugin.html"
   val ScalaCssHomepage = "https://github.com/japgolly/scalacss"
   val ScalaJsHomepage = "http://www.scala-js.org/"
+  val ScalaJsEnvSeleniumHomepage = "https://github.com/scala-js/scala-js-env-selenium"
   val ScalaHomepage = "http://www.scala-lang.org/"
   val ScalatagsHomepage = "https://github.com/lihaoyi/scalatags"
   val UpickleHomepage = "https://github.com/lihaoyi/upickle-pprint"
+  val AkkaHttpHomepage = "http://doc.akka.io/docs/akka-http/current/scala/http/"
 }

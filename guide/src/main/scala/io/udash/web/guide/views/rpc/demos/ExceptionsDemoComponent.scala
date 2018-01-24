@@ -21,14 +21,15 @@ case class ExceptionsDemoModel(
   translatableException: TranslationKey0,
   unknownException: String
 )
+object ExceptionsDemoModel extends HasModelPropertyCreator[ExceptionsDemoModel]
 
 class ExceptionsDemoComponent extends Component {
   import Context._
-  override def getTemplate: Modifier = ExceptionsDemoViewPresenter()
+  override def getTemplate: Modifier = ExceptionsDemoViewFactory()
 
-  object ExceptionsDemoViewPresenter {
+  object ExceptionsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty[ExceptionsDemoModel]
+      val model = ModelProperty.empty[ExceptionsDemoModel]
       val presenter = new ExceptionsDemoPresenter(model)
       new ExceptionsDemoView(model, presenter).render
     }
@@ -71,7 +72,6 @@ class ExceptionsDemoComponent extends Component {
 
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
@@ -92,24 +92,24 @@ class ExceptionsDemoComponent extends Component {
     )("Call unknown exception!")
 
     exceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         btn.disabled.set(true)
         presenter.exceptionCall()
     }
 
     translatableExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         btn.disabled.set(true)
         presenter.translatableExceptionCall()
     }
 
     unknownExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         btn.disabled.set(true)
         presenter.unknownExceptionCall()
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.addon(
           "Result: ",

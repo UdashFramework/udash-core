@@ -6,16 +6,15 @@ import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.views.Image
 import io.udash.web.guide.styles.partials.HeaderStyles
-import org.scalajs.dom.raw.Element
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-object Header extends HeaderButtons with HeaderNav{
-  private lazy val template = header(HeaderStyles.get.header)(
+object Header extends HeaderButtons with HeaderNav {
+  import io.udash.css.CssView._
+  private lazy val template = header(HeaderStyles.header)(
     div(GlobalStyles.body, GlobalStyles.clearfix)(
-      div(HeaderStyles.get.headerLeft)(
-        a(HeaderStyles.get.headerLogo, href := ExternalUrls.homepage)(
+      div(HeaderStyles.headerLeft)(
+        a(HeaderStyles.headerLogo, href := ExternalUrls.homepage)(
           Image("udash_logo_m.png", "Udash Framework", GlobalStyles.block)
         )/*,
         navigation(Seq(

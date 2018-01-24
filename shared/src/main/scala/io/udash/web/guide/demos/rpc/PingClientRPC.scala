@@ -6,3 +6,5 @@ import io.udash.rpc._
 trait PingClientRPC {
   def pong(id: Int): Unit
 }
+
+object PingClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[PingClientRPC]

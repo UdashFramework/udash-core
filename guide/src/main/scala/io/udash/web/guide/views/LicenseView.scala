@@ -5,7 +5,7 @@ import io.udash.web.guide._
 
 import scalatags.JsDom.all._
 
-object LicenseViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new LicenseView)
+object LicenseViewFactory extends StaticViewFactory[RootState.type](() => new LicenseView)
 
 class LicenseView extends FinalView {
   private val content = div(

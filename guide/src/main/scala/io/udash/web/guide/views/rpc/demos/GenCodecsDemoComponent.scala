@@ -1,20 +1,17 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
-import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.logging.CrossLogging
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.GenCodecServerRPC
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom._
 
 import scala.util.{Failure, Random, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 trait GenCodecsDemoModel {
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
@@ -30,16 +27,17 @@ trait GenCodecsDemoModel {
   def clsVar: Int
   def sealedTrait: Fruit
 }
+object GenCodecsDemoModel extends HasModelPropertyCreator[GenCodecsDemoModel]
 
-class GenCodecsDemoComponent extends Component with StrictLogging {
+class GenCodecsDemoComponent extends Component with CrossLogging {
   import Context._
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
 
-  override def getTemplate: Modifier = GenCodecsDemoViewPresenter()
+  override def getTemplate: Modifier = GenCodecsDemoViewFactory()
 
-  object GenCodecsDemoViewPresenter {
+  object GenCodecsDemoViewFactory {
     def apply(): Modifier = {
-      val GenCodecs = ModelProperty[GenCodecsDemoModel]
+      val GenCodecs = ModelProperty.empty[GenCodecsDemoModel]
       val presenter = new GenCodecsDemoPresenter(GenCodecs)
       new GenCodecsDemoView(GenCodecs, presenter).render
     }
@@ -83,7 +81,7 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
           model.subProp(_.clsVar).set(response._v)
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendSealedTrait(Seq(Apple, Orange, Banana)(Random.nextInt(3))) onComplete {
+      demoRpc.sendSealedTrait(Seq(Fruit.Apple, Fruit.Orange, Fruit.Banana)(Random.nextInt(3))) onComplete {
         case Success(response) => model.subProp(_.sealedTrait).set(response)
         case Failure(ex) => logger.error(ex.getMessage)
       }
@@ -92,7 +90,6 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
 
   class GenCodecsDemoView(model: ModelProperty[GenCodecsDemoModel], presenter: GenCodecsDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val loadIdButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -100,11 +97,11 @@ class GenCodecsDemoComponent extends Component with StrictLogging {
     )("Send request")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       loadIdButton.render,
       h3("Results:"),
       p(

@@ -12,3 +12,5 @@ trait NotificationsServerRPC {
   @Logged
   def unregister(): Future[Unit]
 }
+
+object NotificationsServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[NotificationsServerRPC]

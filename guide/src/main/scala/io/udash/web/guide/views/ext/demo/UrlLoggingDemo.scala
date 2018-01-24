@@ -10,9 +10,7 @@ import scala.collection.mutable.ListBuffer
 import scalatags.JsDom.all._
 
 object UrlLoggingDemo {
-
-  import scalacss.ScalatagsCss._
-  import io.udash.web.guide.Context._
+  import io.udash.css.CssView._
 
   val enabled = Property(false)
   val history = SeqProperty[(String, Option[String])](ListBuffer.empty)

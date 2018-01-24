@@ -3,8 +3,6 @@ package io.udash.web.guide.views.ext.demo
 import java.util.concurrent.TimeUnit
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
 import io.udash.bootstrap.alert.{DismissibleUdashAlert, UdashAlert}
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
@@ -24,28 +22,28 @@ import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
-import io.udash.properties.PropertyCreator
+import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
+import io.udash.css.CssView
+import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.styles.utils.StyleUtils
 import io.udash.web.guide.{BootstrapExtState, Context, IntroState}
 import org.scalajs.dom
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 import scalatags.JsDom
 
-object BootstrapDemos extends StrictLogging {
+object BootstrapDemos extends CrossLogging with CssView {
 
   import io.udash.web.guide.Context._
   import org.scalajs.dom._
 
   import JsDom.all._
-  import scalacss.ScalatagsCss._
 
   def statics(): dom.Element =
     div(BootstrapStyles.row, GuideStyles.frame)(
@@ -67,15 +65,15 @@ object BootstrapDemos extends StrictLogging {
     div(GuideStyles.frame)(
       UdashButtonToolbar(
         UdashButtonGroup()(
-          UdashButton()(Icons.Glyphicon.alignLeft).render,
-          UdashButton()(Icons.Glyphicon.alignCenter).render,
-          UdashButton()(Icons.Glyphicon.alignRight).render,
-          UdashButton()(Icons.Glyphicon.alignJustify).render
+          UdashButton()(UdashIcons.Glyphicon.alignLeft).render,
+          UdashButton()(UdashIcons.Glyphicon.alignCenter).render,
+          UdashButton()(UdashIcons.Glyphicon.alignRight).render,
+          UdashButton()(UdashIcons.Glyphicon.alignJustify).render
         ).render,
         UdashButtonGroup()(
-          UdashButton()(Icons.FontAwesome.bitcoin).render,
-          UdashButton()(Icons.FontAwesome.euro).render,
-          UdashButton()(Icons.FontAwesome.dollar).render
+          UdashButton()(UdashIcons.FontAwesome.bitcoin).render,
+          UdashButton()(UdashIcons.FontAwesome.euro).render,
+          UdashButton()(UdashIcons.FontAwesome.dollar).render
         ).render
       ).render
     ).render
@@ -84,7 +82,7 @@ object BootstrapDemos extends StrictLogging {
     import java.{util => ju}
     val date = Property[Option[ju.Date]](Some(new ju.Date()))
 
-    val pickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+    val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY, hh:mm a",
       locale = Some("en_GB"),
       showClear = true
@@ -151,12 +149,14 @@ object BootstrapDemos extends StrictLogging {
     val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
     val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
 
-    val fromPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+    // TODO revert
+    val fromPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY",
       locale = Some("en_GB")
     ))
 
-    val toPickerOptions = ModelProperty(UdashDatePicker.DatePickerOptions(
+    // TODO revert
+    val toPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
       format = "D MMMM YYYY",
       locale = Some("pl")
     ))
@@ -231,7 +231,7 @@ object BootstrapDemos extends StrictLogging {
 
     val dropdown = UdashDropdown(items)(UdashDropdown.defaultItemFactory)("Dropdown ", BootstrapStyles.Button.btnPrimary)
     val dropup = UdashDropdown.dropup(items)(UdashDropdown.defaultItemFactory)("Dropup ")
-    val listener: dropdown.EventHandler = {
+    val listener: PartialFunction[UdashDropdown.DropdownEvent[DefaultDropdownItem, CastableProperty[DefaultDropdownItem]], Unit] = {
       case UdashDropdown.SelectionEvent(_, item) => clicks.append(item.toString)
       case ev: DropdownEvent[_, _] => logger.info(ev.toString)
     }
@@ -270,16 +270,14 @@ object BootstrapDemos extends StrictLogging {
     })
 
     val push = UdashButton(size = ButtonSize.Large, block = true)("Push the button!")
-    push.listen {
-      case _ =>
-        clicks.set(Seq.empty)
-        buttons.foreach(button => {
-          val random = Random.nextBoolean()
-          button.disabled.set(random)
-        })
+    push.listen { case _ =>
+      clicks.set(Seq.empty)
+      buttons.foreach { button =>
+        button.disabled.set(Random.nextBoolean())
+      }
     }
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       push.render,
       div(GlobalStyles.centerBlock)(
         buttons.map(b => b.render)
@@ -304,7 +302,7 @@ object BootstrapDemos extends StrictLogging {
       "Link" -> UdashButton.toggle(ButtonStyle.Link)("Link", GlobalStyles.smallMargin)
     )
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(GlobalStyles.centerBlock)(
         buttons.values.map(_.render).toSeq
       ),
@@ -318,7 +316,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def staticButtonsGroup(): dom.Element = {
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonGroup(vertical = true)(
         UdashButton(buttonStyle = ButtonStyle.Primary)("Button 1").render,
         UdashButton()("Button 2").render,
@@ -329,7 +327,7 @@ object BootstrapDemos extends StrictLogging {
 
   def buttonToolbar(): dom.Element = {
     val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonToolbar.reactive(groups, (p: CastableProperty[Seq[Int]]) => {
         val range = p.asSeq[Int]
         UdashButtonGroup.reactive(range, size = ButtonSize.Large)(element =>
@@ -346,7 +344,7 @@ object BootstrapDemos extends StrictLogging {
       DefaultCheckboxModel("Checkbox 2", false),
       DefaultCheckboxModel("Checkbox 3", false)
     )
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonGroup.checkboxes(options).render,
       h4("Is active: "),
       div(BootstrapStyles.Well.well)(
@@ -367,7 +365,7 @@ object BootstrapDemos extends StrictLogging {
       DefaultCheckboxModel("Radio 2", false),
       DefaultCheckboxModel("Radio 3", false)
     )
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonGroup.radio(options, justified = true).render,
       h4("Is active: "),
       div(BootstrapStyles.Well.well)(
@@ -390,7 +388,7 @@ object BootstrapDemos extends StrictLogging {
       UdashDropdown.DropdownHeader("End"),
       UdashDropdown.DropdownLink("Intro", Url("#"))
     )
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonToolbar(
         UdashButtonGroup()(
           UdashButton()("Button").render,
@@ -403,12 +401,12 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def inputGroups(): dom.Element = {
-    val vanityUrl = Property[String]
+    val vanityUrl = Property.empty[String]
     val buttonDisabled = Property(true)
     vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
     val button = UdashButton()("Clear")
     button.listen { case _ => vanityUrl.set("") }
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       label("Your URL"),
       UdashInputGroup(InputGroupSize.Large)(
         UdashInputGroup.addon("https://example.com/users/", bind(vanityUrl)),
@@ -446,20 +444,21 @@ object BootstrapDemos extends StrictLogging {
       def age: Int
       def shirtSize: ShirtSize
     }
+    object UserModel extends HasModelPropertyCreator[UserModel]
 
-    val user = ModelProperty[UserModel]
+    val user = ModelProperty.empty[UserModel]
     user.subProp(_.name).set("")
     user.subProp(_.age).set(25)
     user.subProp(_.shirtSize).set(Medium)
     user.subProp(_.age).addValidator(new Validator[Int] {
-      override def apply(element: Int)(implicit ec: ExecutionContext) =
+      override def apply(element: Int): Future[ValidationResult] =
         Future {
           if (element < 0) Invalid("Age should be a non-negative integer!")
           else Valid
         }
     })
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashForm(
         UdashForm.textInput()("User name")(user.subProp(_.name)),
         UdashForm.numberInput(
@@ -479,9 +478,9 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def inlineForm(): dom.Element = {
-    val search = Property[String]
-    val something = Property[String]
-    div(StyleUtils.center, GuideStyles.frame)(
+    val search = Property.empty[String]
+    val something = Property.empty[String]
+    div(GuideStyles.frame)(
       UdashForm.inline(
         UdashForm.group(
           UdashInputGroup()(
@@ -504,9 +503,7 @@ object BootstrapDemos extends StrictLogging {
       def title: String
       def content: String
     }
-    object Panel {
-      implicit val pc: PropertyCreator[Panel] = PropertyCreator.propertyCreator[Panel]
-    }
+    object Panel extends HasModelPropertyCreator[Panel]
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
     val panels = SeqProperty[Panel](
@@ -517,7 +514,7 @@ object BootstrapDemos extends StrictLogging {
     )
     val selected = Property[Panel](panels.elemProperties.head.get)
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashNav.tabs(justified = true)(panels)(
         elemFactory = (panel) => a(
           href := "",
@@ -536,6 +533,8 @@ object BootstrapDemos extends StrictLogging {
       def title: String
       def content: String
     }
+    object Panel extends HasModelPropertyCreator[Panel]
+
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
     val panels = SeqProperty[Panel](
@@ -545,7 +544,7 @@ object BootstrapDemos extends StrictLogging {
       DefaultPanel("Title 4", "Content of panel 4...")
     )
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashNavbar(
         div(BootstrapStyles.Navigation.navbarBrand)("Udash").render,
         UdashNav.navbar(panels)(
@@ -564,7 +563,7 @@ object BootstrapDemos extends StrictLogging {
       a(href := l.state.url)(span(l.name)).render
 
     val panels = SeqProperty[MenuEntry](mainMenuEntries.slice(0, 4))
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashNavbar.inverted(
         div(BootstrapStyles.Navigation.navbarBrand)("Udash").render,
         UdashNav.navbar(panels)(
@@ -601,7 +600,7 @@ object BootstrapDemos extends StrictLogging {
       defaultPageFactory,
       (item) => pages.get.last == item
     )
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       breadcrumbs.render
     ).render
   }
@@ -623,7 +622,7 @@ object BootstrapDemos extends StrictLogging {
       showArrows = showArrows, highlightActive = highlightActive
     )(pages, selected)(defaultPageFactory)
     val pager = UdashPagination.pager()(pages, selected)(defaultPageFactory)
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(
         UdashButtonGroup()(
           toggleArrows.render,
@@ -639,7 +638,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def labels(): dom.Element = {
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(
         UdashLabel(UdashBootstrap.newId(), "Default", GlobalStyles.smallMargin).render,
         UdashLabel.primary(UdashBootstrap.newId(), "Primary", GlobalStyles.smallMargin).render,
@@ -654,7 +653,7 @@ object BootstrapDemos extends StrictLogging {
   def badges(): dom.Element = {
     val counter = Property(0)
     window.setInterval(() => counter.set(counter.get + 1), 3000)
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(
         UdashButton(buttonStyle = ButtonStyle.Primary, size = ButtonSize.Large)("Button ", UdashBadge(counter).render).render
       )
@@ -686,7 +685,7 @@ object BootstrapDemos extends StrictLogging {
       block = true
     )("Create dismissible alert")
     create.listen { case _ => alerts.appendChild(randomDismissible()) }
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       create.render,
       alerts,
       h4("Dismissed: "),
@@ -699,7 +698,6 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def listGroup(): dom.Element = {
-    import io.udash.bootstrap.BootstrapImplicits._
     val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
     val listGroup = UdashListGroup(news)((news) =>
       li(
@@ -719,14 +717,14 @@ object BootstrapDemos extends StrictLogging {
     }, 2000)
     window.setTimeout(() => window.clearInterval(appendHandler), 20000)
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
         listGroup.render
     ).render
   }
 
   def panels(): dom.Element = {
     val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashPanel(PanelStyle.Success)(
         UdashPanel.heading("Panel heading"),
         UdashPanel.body("Some default panel content here. Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam id dolor id nibh ultricies vehicula ut id elit."),
@@ -739,7 +737,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def responsiveEmbed(): dom.Element = {
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(BootstrapStyles.EmbedResponsive.embed, BootstrapStyles.EmbedResponsive.embed16by9, GlobalStyles.smallMargin)(
         iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
       ),
@@ -750,7 +748,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def wells(): dom.Element = {
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellSm)("Small well..."),
       div(BootstrapStyles.Well.well)("Standard well..."),
       div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellLg)("Large well...")
@@ -758,7 +756,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def simpleModal(): dom.Element = {
-    val events = SeqProperty[UdashModal.ModalEvent]
+    val events = SeqProperty.empty[UdashModal.ModalEvent]
     val header = () => div(
       "Modal events",
       UdashButton()(UdashModal.CloseButtonAttr, BootstrapStyles.close, "×").render
@@ -786,7 +784,7 @@ object BootstrapDemos extends StrictLogging {
       modal.show()
       window.setTimeout(() => modal.hide(), 2000)
     }
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       modal.render,
       UdashButtonGroup()(
         openModalButton.render,
@@ -799,7 +797,7 @@ object BootstrapDemos extends StrictLogging {
     val showPercentage = Property(true)
     val animate = Property(true)
     val value = Property(50)
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       div(
         UdashButtonGroup()(
           UdashButton.toggle(active = showPercentage)("Show percentage").render,
@@ -818,14 +816,14 @@ object BootstrapDemos extends StrictLogging {
   def tooltips(): dom.Element = {
     import scala.concurrent.duration.DurationInt
     val label1 = UdashLabel(UdashBootstrap.newId(), "Tooltip on hover with delay", GlobalStyles.smallMargin).render
-    val label1Tooltip = UdashTooltip(
+    UdashTooltip(
       trigger = Seq(UdashTooltip.HoverTrigger),
       delay = UdashTooltip.Delay(500 millis, 250 millis),
       title = (_) => "Tooltip..."
     )(label1)
 
     val label2 = UdashLabel(UdashBootstrap.newId(), "Tooltip on click", GlobalStyles.smallMargin).render
-    val label2Tooltip = UdashTooltip(
+    UdashTooltip(
       trigger = Seq(UdashTooltip.ClickTrigger),
       delay = UdashTooltip.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashTooltip.BottomPlacement),
@@ -842,7 +840,7 @@ object BootstrapDemos extends StrictLogging {
     val button = UdashButton()("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       label1, label2, label3, button.render
     ).render
   }
@@ -850,7 +848,7 @@ object BootstrapDemos extends StrictLogging {
   def popovers(): dom.Element = {
     import scala.concurrent.duration.DurationInt
     val label1 = UdashLabel(UdashBootstrap.newId(), "Popover on hover with delay", GlobalStyles.smallMargin).render
-    val label1Tooltip = UdashPopover(
+    UdashPopover(
       trigger = Seq(UdashPopover.HoverTrigger),
       delay = UdashPopover.Delay(500 millis, 250 millis),
       title = (_) => "Popover...",
@@ -858,7 +856,7 @@ object BootstrapDemos extends StrictLogging {
     )(label1)
 
     val label2 = UdashLabel(UdashBootstrap.newId(), "Popover on click", GlobalStyles.smallMargin).render
-    val label2Tooltip = UdashPopover(
+    UdashPopover(
       trigger = Seq(UdashPopover.ClickTrigger),
       delay = UdashPopover.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashPopover.BottomPlacement),
@@ -884,13 +882,13 @@ object BootstrapDemos extends StrictLogging {
     val button = UdashButton()("Toggle popover")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       label1, label2, label3, button.render
     ).render
   }
 
   def simpleCollapse(): dom.Element = {
-    val events = SeqProperty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
       div(BootstrapStyles.Well.well)(
         ul(repeat(events)(event => li(event.get.toString).render))
@@ -904,7 +902,7 @@ object BootstrapDemos extends StrictLogging {
       collapse.show()
       window.setTimeout(() => collapse.hide(), 2000)
     }
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
       UdashButtonGroup(justified = true)(
         toggleButton.render,
         openAndCloseButton.render
@@ -914,7 +912,7 @@ object BootstrapDemos extends StrictLogging {
   }
 
   def accordionCollapse(): dom.Element = {
-    val events = SeqProperty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
     val news = SeqProperty[String](
       "Title 1", "Title 2", "Title 3"
     )
@@ -934,7 +932,7 @@ object BootstrapDemos extends StrictLogging {
     }).filter(_.isDefined)
       .foreach(_.get.listen { case ev => events.append(ev) })
 
-    div(StyleUtils.center, GuideStyles.frame)(
+    div(GuideStyles.frame)(
         accordionElement
     ).render
   }
@@ -961,7 +959,7 @@ object BootstrapDemos extends StrictLogging {
     prependButton.listen { case _ => slides.prepend(newSlide()) }
     appendButton.listen { case _ => slides.append(newSlide()) }
     active.listen(b => if (b) carousel.cycle() else carousel.pause())
-    div(StyleUtils.center)(
+    div(
       div(GuideStyles.frame)(
         UdashButtonToolbar(
           UdashButton.toggle(active = active)("Run animation").render,
@@ -977,7 +975,7 @@ object BootstrapDemos extends StrictLogging {
       ),
       div(
         carousel.render
-      ).render
+      )
     ).render
   }
 

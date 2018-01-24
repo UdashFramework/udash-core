@@ -1,19 +1,17 @@
 package io.udash.web.guide.views.rpc
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.{Context, _}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.References
-import org.scalajs.dom
+import io.udash.web.guide.{Context, _}
 
 import scalatags.JsDom
-import scalacss.ScalatagsCss._
 
 
-case object RpcInterfacesViewPresenter extends DefaultViewPresenterFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
+case object RpcInterfacesViewFactory extends StaticViewFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
-class RpcInterfacesView extends FinalView {
+class RpcInterfacesView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -24,15 +22,15 @@ class RpcInterfacesView extends FinalView {
       "Interfaces are the most important part of the Udash RPC system. Thanks to the cross compilation, they make client-server " +
       "communication easy to develop and maintain. You can find two types of RPC interfaces in Udash: "
     ),
-    ul(GuideStyles.get.defaultList)(
-      li(i("RPC"), " - the RPC interface exposed by the server-side"),
-      li(i("Client RPC"), " - the RPC interface exposed by the client-side")
+    ul(GuideStyles.defaultList)(
+      li(i("RPC"), " - the RPC interface exposed by the server-side."),
+      li(i("Client RPC"), " - the RPC interface exposed by the client-side.")
     ),
     p("Methods exposed by the RPC interface can be divided into three groups:"),
-    ul(GuideStyles.get.defaultList)(
-      li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)"),
-      li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient"),
-      li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network")
+    ul(GuideStyles.defaultList)(
+      li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)."),
+      li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient."),
+      li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network.")
     ),
     p(
       "Both call and fire methods are asynchronous. Call will complete a returned Future when response is received. Fire is a ",
@@ -44,6 +42,8 @@ class RpcInterfacesView extends FinalView {
       """import io.udash.rpc._
         |
         |case class Record(i: Int, fuu: String)
+        |// create GenCodec for the default RPC serialization method
+        |object Record extends HasGenCodec[Record]
         |
         |@RPC
         |trait ServerRPC {
@@ -56,11 +56,19 @@ class RpcInterfacesView extends FinalView {
         |  def innerRpc(name: String): InnerRPC
         |}
         |
+        |// generate RPC metadata for DefaultServerUdashRPCFramework
+        |object ServerRPC
+        |  extends DefaultServerUdashRPCFramework.RPCCompanion[ServerRPC]
+        |
         |@RPC
         |trait InnerRPC {
         |  def innerFire(): Unit
         |  def innerCall(arg: Int): Future[String]
-        |}""".stripMargin
+        |}
+        |
+        |// generate RPC metadata for DefaultServerUdashRPCFramework
+        |object InnerRPC
+        |  extends DefaultServerUdashRPCFramework.RPCCompanion[InnerRPC]""".stripMargin
     )(GuideStyles),
     p(
       "Inside ", i("ServerRPC"), " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
@@ -76,7 +84,8 @@ class RpcInterfacesView extends FinalView {
         |    case Failure(ex) => println(ex)
         |  }
         |
-        |  // innerRpc gets argument which can be passed to the InnerRPC implementation
+        |  // innerRpc gets argument which can be passed
+        |  // to the InnerRPC implementation
         |  rpc.innerRpc("some string argument").innerFire()
         |
         |  // this line does not send anything over network
@@ -97,6 +106,8 @@ class RpcInterfacesView extends FinalView {
       """import io.udash.rpc._
         |
         |case class Record(i: Int, fuu: String)
+        |// create GenCodec for the default RPC serialization method
+        |object Record extends HasGenCodec[Record]
         |
         |@RPC
         |trait ClientRPC {
@@ -108,10 +119,18 @@ class RpcInterfacesView extends FinalView {
         |  def innerRpc(name: String): ClientInnerRPC
         |}
         |
+        |// generate RPC metadata for DefaultClientUdashRPCFramework
+        |object ClientRPC
+        |  extends DefaultClientUdashRPCFramework.RPCCompanion[ClientRPC]
+        |
         |@RPC
         |trait ClientInnerRPC {
         |  def innerFire(): Unit
-        |}""".stripMargin
+        |}
+        |
+        |// generate RPC metadata for DefaultClientUdashRPCFramework
+        |object ClientInnerRPC
+        |  extends DefaultClientUdashRPCFramework.RPCCompanion[ClientInnerRPC]""".stripMargin
     )(GuideStyles),
     p(
       "Notice that ", i("ClientInnerRPC"), " is also a client RPC interface. It is impossible to return a standard RPC ",
@@ -150,7 +169,9 @@ class RpcInterfacesView extends FinalView {
         |trait NewsletterSubscriptionRPC {
         |  def subscribe(): Unit
         |  def unsubscribe(reason: String): Unit
-        |}""".stripMargin
+        |}
+        |
+        |// RPCCompanions skipped""".stripMargin
     )(GuideStyles),
     p(
       "Thanks to such interface arrangement, you have only one entry point to RPC communication. Do not worry that your hierarchy " +
@@ -158,7 +179,8 @@ class RpcInterfacesView extends FinalView {
     ),
     CodeBlock(
       """def doSomething(rpc: MainServerRPC) = {
-        |  val subscriptions: NewsletterSubscriptionRPC = rpc.newsletter().subscriptions()
+        |  val subscriptions: NewsletterSubscriptionRPC =
+        |    rpc.newsletter().subscriptions()
         |  // operations using NewsletterSubscriptionRPC...
         |}""".stripMargin
     )(GuideStyles),

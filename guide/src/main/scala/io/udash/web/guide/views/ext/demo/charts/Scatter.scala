@@ -1,23 +1,19 @@
 package io.udash.web.guide.views.ext.demo.charts
 
-import scala.scalajs.js.|
-import scala.util.Random
 import io.udash.wrappers.highcharts.config.HighchartsConfig
-import io.udash.wrappers.highcharts.config.axis.{AxisPlotLine, AxisTitle, XAxis, YAxis}
+import io.udash.wrappers.highcharts.config.axis.{AxisTitle, XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.chart.Chart
 import io.udash.wrappers.highcharts.config.chart.Chart.ZoomType
 import io.udash.wrappers.highcharts.config.credits.Credits
 import io.udash.wrappers.highcharts.config.legend.Legend
 import io.udash.wrappers.highcharts.config.plot.PlotOptions
 import io.udash.wrappers.highcharts.config.series.SeriesMarker
-import io.udash.wrappers.highcharts.config.series.line.SeriesLine
-import io.udash.wrappers.highcharts.config.series.pie.{SeriesPie, SeriesPieData}
 import io.udash.wrappers.highcharts.config.series.scatter.{SeriesScatter, SeriesScatterData}
-import io.udash.wrappers.highcharts.config.title.{Subtitle, Title}
-import io.udash.wrappers.highcharts.config.tooltip.Tooltip
-import io.udash.wrappers.highcharts.config.utils.{Align, Color, Layout, VerticalAlign}
+import io.udash.wrappers.highcharts.config.title.Title
+import io.udash.wrappers.highcharts.config.utils.{Color, Layout}
 
-import scala.scalajs.js
+import scala.scalajs.js.|
+import scala.util.Random
 
 object Scatter {
   val config = HighchartsConfig(

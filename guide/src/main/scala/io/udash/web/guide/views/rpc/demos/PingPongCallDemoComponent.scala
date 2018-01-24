@@ -1,33 +1,29 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
-import io.udash.web.commons.styles.attributes.Attributes
+import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom
-import org.scalajs.dom._
 
 import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import io.udash.web.commons.views.Component
 
 trait PingPongCallDemoModel {
   def pingId: Int
 }
+object PingPongCallDemoModel extends HasModelPropertyCreator[PingPongCallDemoModel]
 
 class PingPongCallDemoComponent extends Component {
   import Context._
 
-  override def getTemplate: Modifier = PingPongCallDemoViewPresenter()
+  override def getTemplate: Modifier = PingPongCallDemoViewFactory()
 
-  object PingPongCallDemoViewPresenter {
+  object PingPongCallDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty[PingPongCallDemoModel]
+      val clientId = ModelProperty.empty[PingPongCallDemoModel]
       clientId.subProp(_.pingId).set(0)
 
       val presenter = new PingPongCallDemoPresenter(clientId)
@@ -50,7 +46,6 @@ class PingPongCallDemoComponent extends Component {
 
   class PingPongCallDemoView(model: ModelProperty[PingPongCallDemoModel], presenter: PingPongCallDemoPresenter) {
     import JsDom.all._
-    import scalacss.ScalatagsCss._
 
     val pingButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
@@ -58,11 +53,11 @@ class PingPongCallDemoComponent extends Component {
     )("Ping(", bind(model.subProp(_.pingId)), ")")
 
     pingButton.listen {
-      case UdashButton.ButtonClickEvent(btn) =>
+      case UdashButton.ButtonClickEvent(btn, _) =>
         presenter.onButtonClick(btn)
     }
 
-    def render: Modifier = span(GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       pingButton.render
     )
   }

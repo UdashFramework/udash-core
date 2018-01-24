@@ -1,18 +1,17 @@
 package io.udash.web.guide.views
 
 import io.udash._
-import io.udash.web.commons.views.{ClickableImageFactory, ImageFactory, ImageFactoryPrefixSet}
+import io.udash.css.CssView
+import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
+import io.udash.web.guide.Context._
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.Context._
-import org.scalajs.dom.Element
 
-import scalacss.ScalatagsCss._
 import scalatags.JsDom.all._
 
-object IntroViewPresenter extends DefaultViewPresenterFactory[RootState.type](() => new IntroView)
+object IntroViewFactory extends StaticViewFactory[RootState.type](() => new IntroView)
 
-class IntroView extends FinalView {
+class IntroView extends FinalView with CssView {
   private val content = div(
     h1("Udash Developer's Guide"),
     p(
@@ -20,7 +19,7 @@ class IntroView extends FinalView {
       "The quick start guide below will introduce you to Udash basics."
     ),
     h2("Quick start guide"),
-    ClickableImageFactory(ImageFactoryPrefixSet.Intro, "generator.png", "Generator example", GuideStyles.get.floatRight, GuideStyles.get.imgMedium, GuideStyles.get.imgIntro),
+    ClickableImageFactory(ImageFactoryPrefixSet.Intro, "generator.png", "Generator example", GuideStyles.floatRight, GuideStyles.imgMedium, GuideStyles.imgIntro),
     p(
       "A good starting point is a generation of a project base with the Udash project generator. You can download it from ",
       a(href := References.UdashGeneratorDownload)("here"), ". ",
@@ -29,7 +28,7 @@ class IntroView extends FinalView {
     ),
     p(
       "Follow the below steps:",
-      ol(GuideStyles.get.stepsList)(
+      ol(GuideStyles.stepsList)(
         li("Download the generator zip package and unzip it."),
         li("Run it using the ", i("run.sh"), " or ", i("run.bat"), " script."),
         li("Provide required data and start the project generation."),
@@ -53,21 +52,21 @@ class IntroView extends FinalView {
     ),
     p(
       "If you want to add a new view, then you need to: ",
-      ol(GuideStyles.get.stepsList)(
-        li("Add a new state in ", b("states.scala"), ""),
-        li("Add route pointing to this state in ", b("RoutingRegistryDef.scala"), ""),
-        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewPresenter"), " in the ", b("views/YourView.scala"), ""),
-        li("Add mapping from the new state to your ViewPresenter in ", b("StatesToViewPresenterDef.scala"), "")
+      ol(GuideStyles.stepsList)(
+        li("Add a new state in ", b("states.scala"), "."),
+        li("Add route pointing to this state in ", b("RoutingRegistryDef.scala"), "."),
+        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewFactory"), " in the ", b("views/YourView.scala"), "."),
+        li("Add mapping from the new state to your ViewFactory in ", b("StatesToViewFactoryDef.scala"), ".")
       )
     ),
-    p("If you selected the ScalaCSS demo in the generator settings, you can modify those styles in ", b("styles/DemoStyles.scala"), ""),
+    p("If you selected the ScalaCSS demo in the generator settings, you can modify those styles in ", b("styles/DemoStyles.scala"), "."),
     h3("RPC communication"),
     p(
       "Files related to the RPC system are placed in three modules:",
-      ul(GuideStyles.get.defaultList)(
+      ul(GuideStyles.defaultList)(
         li(b("shared"), " - contains RPC interfaces for both the client and the server, it may also contain a data models passed through RPC."),
-        li(b("frontend"), " - contains the client RPC interface implementation in ", b("rpc/ExposedRpcInterfaces.scala"), ""),
-        li(b("backend"), " - contains the server RPC interface implementation in ", b("rpc/RPCService.scala"), "")
+        li(b("frontend"), " - contains the client RPC interface implementation in ", b("rpc/ExposedRpcInterfaces.scala"), "."),
+        li(b("backend"), " - contains the server RPC interface implementation in ", b("rpc/RPCService.scala"), ".")
       )
     ),
     p(

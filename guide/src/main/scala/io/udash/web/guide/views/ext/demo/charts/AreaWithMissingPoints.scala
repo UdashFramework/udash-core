@@ -5,7 +5,7 @@ import io.udash.wrappers.highcharts.config.axis.XAxis
 import io.udash.wrappers.highcharts.config.chart.Chart
 import io.udash.wrappers.highcharts.config.credits.Credits
 import io.udash.wrappers.highcharts.config.plot.PlotOptions
-import io.udash.wrappers.highcharts.config.series.area.{SeriesArea, SeriesAreaData}
+import io.udash.wrappers.highcharts.config.series.area.SeriesArea
 import io.udash.wrappers.highcharts.config.title.{Subtitle, Title}
 import io.udash.wrappers.highcharts.config.utils.{Align, Spacing, VerticalAlign}
 

@@ -2,10 +2,11 @@ package io.udash.web.guide.views
 
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.Element
+
+import scalatags.JsDom.Modifier
 
 package object rest {
-  def simpleExample(): Element =
+  def simpleExample(): Modifier =
     CodeBlock(
       """import io.udash.rest._
         |

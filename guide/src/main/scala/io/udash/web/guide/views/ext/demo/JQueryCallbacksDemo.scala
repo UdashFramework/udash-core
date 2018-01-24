@@ -5,11 +5,10 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
-import scala.language.postfixOps
 import scala.scalajs.js
 
 object JQueryCallbacksDemo {
-  import scalacss.ScalatagsCss._
+  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
@@ -31,7 +30,7 @@ object JQueryCallbacksDemo {
   })
 
   def apply(): dom.Element = {
-    div(id := "jquery-callbacks-demo", GuideStyles.get.frame, GuideStyles.get.useBootstrap)(
+    div(id := "jquery-callbacks-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       "Plus:",
       ul(id := "plus"),
       "Minus:",

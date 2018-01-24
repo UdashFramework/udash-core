@@ -1,6 +1,6 @@
 package io.udash.web.guide.demos.activity
 
-import com.avsystem.commons.rpc.RPC
+import io.udash.rpc._
 
 import scala.concurrent.Future
 
@@ -8,3 +8,5 @@ import scala.concurrent.Future
 trait CallServerRPC {
   def calls: Future[Seq[Call]]
 }
+
+object CallServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[CallServerRPC]

@@ -2,8 +2,6 @@ package io.udash.web.guide.views.ext.demo.charts
 
 import java.util.Date
 
-import scala.util.Random
-
 import io.udash.wrappers.highcharts.config.HighchartsConfig
 import io.udash.wrappers.highcharts.config.axis.{Axis, AxisTitle, XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.chart.Chart
@@ -15,6 +13,8 @@ import io.udash.wrappers.highcharts.config.series.area.SeriesArea
 import io.udash.wrappers.highcharts.config.series.{SeriesAreaStates, SeriesAreaStatesHover, SeriesMarker}
 import io.udash.wrappers.highcharts.config.title.{Subtitle, Title}
 import io.udash.wrappers.highcharts.config.utils.{Color, PointIntervalUnit}
+
+import scala.util.Random
 
 object ZoomableTimeSeries {
   val config = HighchartsConfig(

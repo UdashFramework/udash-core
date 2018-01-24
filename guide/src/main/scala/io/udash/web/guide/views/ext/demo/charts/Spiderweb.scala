@@ -1,18 +1,16 @@
 package io.udash.web.guide.views.ext.demo.charts
 
-import scala.scalajs.js.|
-
 import io.udash.wrappers.highcharts.config.HighchartsConfig
-import io.udash.wrappers.highcharts.config.axis.{AxisPlotLine, AxisTitle, XAxis, YAxis}
+import io.udash.wrappers.highcharts.config.axis.{XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.chart.Chart
 import io.udash.wrappers.highcharts.config.credits.Credits
 import io.udash.wrappers.highcharts.config.pane.Pane
-import io.udash.wrappers.highcharts.config.plot.PlotOptions
-import io.udash.wrappers.highcharts.config.series.SeriesDataLabels
 import io.udash.wrappers.highcharts.config.series.line.{SeriesLine, SeriesLineData}
-import io.udash.wrappers.highcharts.config.title.{Subtitle, Title}
+import io.udash.wrappers.highcharts.config.title.Title
 import io.udash.wrappers.highcharts.config.tooltip.Tooltip
-import io.udash.wrappers.highcharts.config.utils.{Color, PointPlacement, TickmarkPlacement}
+import io.udash.wrappers.highcharts.config.utils.{PointPlacement, TickmarkPlacement}
+
+import scala.scalajs.js.|
 
 object Spiderweb {
   val config = HighchartsConfig(
