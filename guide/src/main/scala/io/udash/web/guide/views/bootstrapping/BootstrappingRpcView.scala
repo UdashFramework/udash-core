@@ -22,7 +22,7 @@ class BootstrappingRpcView extends FinalView with CssView {
       " module, define two traits annotated with ", i("io.udash.rpc.RPC"), ": "
     ),
     ul(GuideStyles.defaultList)(
-      li("MainClientRPC - contains methods which can be called by a server on a client application"),
+      li("MainClientRPC - contains methods which can be called by a server on a client application."),
       li("MainServerRPC - contains methods which can be called by a client on a server.")
     ),
     p(
@@ -84,7 +84,7 @@ class BootstrappingRpcView extends FinalView with CssView {
     h2("What's next?"),
     p(
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),
-      " of the application. You can also read more about ", a(href := RpcIntroState.url)("RPC in Udash"), ""
+      " of the application. You can also read more about ", a(href := RpcIntroState.url)("RPC in Udash"), "."
     )
   )
 }

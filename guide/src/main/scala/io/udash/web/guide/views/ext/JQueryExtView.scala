@@ -107,7 +107,7 @@ class JQueryExtView extends FinalView {
     ForceBootstrap(JQueryCallbacksDemo()),
     h2("What's next?"),
     p(
-      "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), " ",
+      "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), ". ",
       "It also contains an example application which presents more ways of working with this wrapper."
     )
   )

@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
+import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
@@ -12,7 +13,7 @@ import scalatags.JsDom
 case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() => new I18NExtView)
 
 
-class I18NExtView extends FinalView {
+class I18NExtView extends FinalView with CssView {
   import Context._
 
   import JsDom.all._
@@ -25,7 +26,7 @@ class I18NExtView extends FinalView {
       "and allows locale changes in frontend application without refreshing. "
     ),
     h2("Translation keys"),
-    p("If you want to use Udash translations support, you should define ", i("TranslationKeys"), " "),
+    p("If you want to use Udash translations support, you should define ", i("TranslationKeys"), "."),
     CodeBlock(
       s"""import io.udash.i18n._
          |
@@ -67,7 +68,7 @@ class I18NExtView extends FinalView {
     )(GuideStyles),
     p(
       "This code requires a ", i("TranslationProvider"), " instance to compile. The Udash i18n plugin provides two ",
-      i("TranslationProviders"), ": ", i("LocalTranslationProvider"), " and ", i("RemoteTranslationProvider"), ""
+      i("TranslationProviders"), ": ", i("LocalTranslationProvider"), " and ", i("RemoteTranslationProvider"), "."
     ),
     h3("LocalTranslationProvider"),
     p(
@@ -244,7 +245,7 @@ class I18NExtView extends FinalView {
     p(
       "Static binding takes ", i("Future[Translated]"),
       " as an argument and when it completes it puts translated string into DOM hierarchy.",
-      ul(
+      ul(GuideStyles.defaultList)(
         li(i("translated"), " - binds translated string in the DOM element."),
         li(i("translatedAttr"), " - binds translated string in the DOM element attribute.")
       )
@@ -253,7 +254,7 @@ class I18NExtView extends FinalView {
     p(
       "Dynamic binding is able to update translation after a change of ", i("LangProperty"), ". These methods take ",
       "the following arguments: a translation key, a translator which applies arguments to translation and the lang property.",
-      ul(
+      ul(GuideStyles.defaultList)(
         li(i("translatedDynamic"), " - binds translated string in the DOM element and updates it when the application language changes."),
         li(i("translatedAttrDynamic"), " - binds translated string in the DOM element attribute and updates it when the application language changes.")
       ),

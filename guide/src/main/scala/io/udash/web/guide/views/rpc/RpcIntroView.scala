@@ -31,9 +31,9 @@ class RpcIntroView extends FinalView with CssView {
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
     ul(GuideStyles.defaultList)(
-      li("RPC interfaces with typed arguments and returned value"),
-      li("Data models which can be used in RPC communication"),
-      li("Model validators which can be used both in frontend and backend")
+      li("RPC interfaces with typed arguments and returned value."),
+      li("Data models which can be used in RPC communication."),
+      li("Model validators which can be used both in frontend and backend.")
     ),
     p(
       "Udash RPC also provides a server for client communication that works out of the box. You only have to create the RPC interface " +

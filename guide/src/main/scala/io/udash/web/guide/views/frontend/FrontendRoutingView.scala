@@ -40,8 +40,8 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       "provides a convenient routing engine. To use it, create:"
     ),
     ul(GuideStyles.defaultList)(
-      li(i("RoutingRegistry"), " - mapping from a URL to ", i("RoutingState")),
-      li(i("ViewFactoryRegistry"), " - mapping from ", i("RoutingState"), " to ", i("ViewFactory"))
+      li(i("RoutingRegistry"), " - mapping from a URL to ", i("RoutingState"), "."),
+      li(i("ViewFactoryRegistry"), " - mapping from ", i("RoutingState"), " to ", i("ViewFactory"), ".")
     ),
     h3("URL"),
     p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),

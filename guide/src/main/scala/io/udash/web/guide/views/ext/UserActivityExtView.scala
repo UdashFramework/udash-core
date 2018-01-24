@@ -83,7 +83,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     ForceBootstrap(UrlLoggingDemo()),
     h2("RPC call logging"),
     p("Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
-      "CallLogging into your ExposesServerRPC, e.g.: "),
+      i("CallLogging"), " into your ", i("ExposesServerRPC"), ", e.g.: "),
     CodeBlock(
       """new DefaultExposesServerRPC[MainServerRPC](
         |  new ExposedRpcInterfaces(clientId)

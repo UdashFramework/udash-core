@@ -49,7 +49,7 @@ class FrontendIntroView extends FinalView with CssView {
         a(href := References.ScalatagsHomepage)("Scalatags"), " and ", a(href := References.ScalaCssHomepage)("ScalaCSS"),
         " usage as HTML and CSS replacement."
       ),
-      li("The properties bindings for ", a(href := References.ScalatagsHomepage)("Scalatags"), "")
+      li("The properties bindings for ", a(href := References.ScalatagsHomepage)("Scalatags"), ".")
     ),
     p("All these features will make your life as a frontend developer pleasant."),
     p("To start development import Udash classes as follows:"),

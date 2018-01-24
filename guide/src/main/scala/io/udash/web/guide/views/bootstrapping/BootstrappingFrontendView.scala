@@ -22,14 +22,14 @@ class BootstrappingFrontendView extends FinalView with CssView {
     h2("Frontend application structure"),
     p("The frontend application consists of:"),
     ul(GuideStyles.defaultList)(
-      li("Routing system - bidirectional mapping between URLs and states"),
+      li("Routing system - bidirectional mapping between URLs and states."),
       li(
-        span("ViewFactories - a logical pairing between a view and a presenter"),
+        span("ViewFactories - a logical pairing between a view and a presenter:"),
         ul(GuideStyles.innerList)(
-          li("Mapping from states to ViewFactories"),
-          li("Views & Presenters")
+          li("Mapping from states to ViewFactories,"),
+          li("Views & Presenters.")
       )),
-      li("Client RPC")
+      li("Client RPC.")
     ),
     h3("States"),
     p(

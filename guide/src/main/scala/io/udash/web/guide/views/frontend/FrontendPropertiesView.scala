@@ -162,7 +162,7 @@ class FrontendPropertiesView extends FinalView with CssView {
     ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.imgBig, GuideStyles.frame),
     p(
       "We can say that the ", i("comment"), " property is a parent of ", i("author"), ", ", i("content"), " and ", i("responses"), " properties, ",
-      "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), " "
+      "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), "."
     ),
     h3("Property value change listeners"),
     p("On any property you can register a value change listener. The value change listeners are aware of the properties hierarchy. "),
@@ -248,15 +248,15 @@ class FrontendPropertiesView extends FinalView with CssView {
     )(GuideStyles),
     p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
     ul(GuideStyles.defaultList)(
-      li(i("Property"), " - every added validator accepts a value"),
-      li(i("ModelProperty"), " - every added validator accepts the value and all subproperties are valid"),
-      li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid")
+      li(i("Property"), " - every added validator accepts a value,"),
+      li(i("ModelProperty"), " - every added validator accepts the value and all subproperties are valid,"),
+      li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid.")
     ),
     p("On value change all parent properties are automatically revalidated."),
 
 
     h3("Properties transformation"),
-    p("You can also change the type of a property. Let's assume the User model looks like below:"),
+    p("You can also change the type of a property. Let's assume the ", i("User"), " model looks like below:"),
     CodeBlock(
       """case class UserId(asInt: Int)
         |

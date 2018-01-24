@@ -36,9 +36,9 @@ class RestIntroView extends FinalView with CssView {
     ForceBootstrap(new SimpleRestDemoComponent),
     p("The Developer's Guide server publishes a REST API with the following methods:"),
     ul(GuideStyles.defaultList)(
-      li("GET /simple/string"),
-      li("GET /simple/int"),
-      li("GET /simple/class")
+      li("GET /simple/string,"),
+      li("GET /simple/int,"),
+      li("GET /simple/class.")
     ),
     p("This API is wrapped by an interface:"),
     simpleExample(),

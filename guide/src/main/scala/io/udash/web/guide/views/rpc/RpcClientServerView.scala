@@ -55,15 +55,16 @@ class RpcClientServerView extends FinalView with CssView {
     ul(GuideStyles.defaultList)(
       li(
         "Basic implementation - the easiest way which is useful when your service layer does not need to know anything ",
-        "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), ") "
+        "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), "). "
       ),
       li(
         "Client-aware implementation - the most common implementation for services without authentication, the service layer ",
-        "has access to the ", i("ClientId"), " and can use it in ", a(href := RpcServerClientState.url)("server ➔ client communication")
+        "has access to the ", i("ClientId"), " and can use it in ",
+        a(href := RpcServerClientState.url)("server ➔ client communication"), "."
       ),
       li(
         "User-aware implementation - the most common implementation for services with authentication, the service layer ",
-        "has access to ", i("ClientId"), " and ", i("UserContext")
+        "has access to ", i("ClientId"), " and ", i("UserContext"), "."
       )
     ),
     p("Things to consider when implementing the backend RPC interface:"),

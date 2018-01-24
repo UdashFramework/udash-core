@@ -93,7 +93,7 @@ class FrontendTemplatesView extends FinalView with CssView {
     p(
       "Unfortunately ScalaCSS generates a lot of JavaScript code and significantly reduces application start-up performance. ",
       "Udash provides tools for server-side CSS rendering with type-safe class references. It allows to keep benefits of ScalaCSS DSL ",
-      "and decrease JS size and initialization time. For reference, the Udash Homepage JS size decreased from ", i("766kB"), " to ", i("314kB"), ".)"
+      "and decrease JS size and initialization time. For reference, the Udash Homepage JS size decreased from ", i("766kB"), " to ", i("314kB"), "."
     ),
     p(
       "Udash CSS tooling tries to keep migration from ScalaCSS as easy as possible. It also reuses a huge part of ScalaCSS DSL. ",

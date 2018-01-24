@@ -33,7 +33,7 @@ class RestClientServerView extends FinalView with CssView {
     p(
       "First of all, it requires a root REST interface as a generic attribute. ",
       i("DefaultServerREST"), " takes three arguments in the constructor: hostname, port and URL prefix. ",
-      "It uses them to create a full URL for HTTP requests as follows: ", i("<hostname>:<port><url_prefix><method_mapping>")
+      "It uses them to create a full URL for HTTP requests as follows: ", i("<hostname>:<port><url_prefix><method_mapping>"), "."
     ),
     p("The following demo uses a REST interface to call the echo server API: "),
     CodeBlock(

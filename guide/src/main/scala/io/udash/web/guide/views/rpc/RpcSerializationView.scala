@@ -98,7 +98,7 @@ class RpcSerializationView extends FinalView with CssView {
         |demoRpc.sendClass(new DemoClass(Random.nextInt(), Random.nextString(5)))
         |demoRpc.sendSealedTrait(Seq(Fruit.Apple, Fruit.Orange, Fruit.Banana)(Random.nextInt(3)))""".stripMargin
     )(GuideStyles),
-    p("Compilation of this code rises an error: No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoClass")),
+    p("Compilation of this code rises an error: No ", i("GenCodec"), " found for ", i("GenCodecServerRPC.DemoClass"), "."),
     p(
       "If ", i("GenCodec"), " cannot be materialized automatically, you have to write it by yourself. ",
       "Method ", i("write"), " gets two arguments. ", i("Output"), " allows you to write the basic Scala types and data structures, ",
@@ -140,7 +140,7 @@ class RpcSerializationView extends FinalView with CssView {
     h3("Custom serialization"),
     p(
       "It is possible to change the serialization from JSON to anything else. Instead of using ",
-      i("DefaultUdashRPCFramework"), " you can implement your custom ", i("UdashRPCFramework"), " "
+      i("DefaultUdashRPCFramework"), " you can implement your custom ", i("UdashRPCFramework"), "."
     ),
     CodeBlock(
       """object CustomUdashRPCFramework extends UdashRPCFramework {
