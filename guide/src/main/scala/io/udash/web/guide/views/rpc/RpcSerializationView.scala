@@ -157,7 +157,7 @@ class RpcSerializationView extends FinalView with CssView {
         li(b("RawValue"), " - ", i("GenCodec"), " needs to be converted to this type and then this type needs to be converted into the string. Usually it is some kind of AST."),
         li(b("inputSerialization"), " - method which converts ", i("RawValue"), " into the ", i("Input"), " object."),
         li(b("outputSerialization"), " - method which returns the ", i("Output"), " object which creates a ", i("RawValue"), " as the result."),
-        li(b("stringToRaw"), " - converts a string into the ", i("RawValue"), ""),
+        li(b("stringToRaw"), " - converts a string into the ", i("RawValue"), "."),
         li(b("rawToString"), " - converts a ", i("RawValue"), " into the string.")
       )
     ),

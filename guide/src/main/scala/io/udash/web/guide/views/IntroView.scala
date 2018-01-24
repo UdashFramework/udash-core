@@ -53,20 +53,20 @@ class IntroView extends FinalView with CssView {
     p(
       "If you want to add a new view, then you need to: ",
       ol(GuideStyles.stepsList)(
-        li("Add a new state in ", b("states.scala"), ""),
-        li("Add route pointing to this state in ", b("RoutingRegistryDef.scala"), ""),
-        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewFactory"), " in the ", b("views/YourView.scala"), ""),
-        li("Add mapping from the new state to your ViewFactory in ", b("StatesToViewFactoryDef.scala"), "")
+        li("Add a new state in ", b("states.scala"), "."),
+        li("Add route pointing to this state in ", b("RoutingRegistryDef.scala"), "."),
+        li("Create ", a(href := FrontendMVPState.url)("Model, View, Presenter and  ViewFactory"), " in the ", b("views/YourView.scala"), "."),
+        li("Add mapping from the new state to your ViewFactory in ", b("StatesToViewFactoryDef.scala"), ".")
       )
     ),
-    p("If you selected the ScalaCSS demo in the generator settings, you can modify those styles in ", b("styles/DemoStyles.scala"), ""),
+    p("If you selected the ScalaCSS demo in the generator settings, you can modify those styles in ", b("styles/DemoStyles.scala"), "."),
     h3("RPC communication"),
     p(
       "Files related to the RPC system are placed in three modules:",
       ul(GuideStyles.defaultList)(
         li(b("shared"), " - contains RPC interfaces for both the client and the server, it may also contain a data models passed through RPC."),
-        li(b("frontend"), " - contains the client RPC interface implementation in ", b("rpc/ExposedRpcInterfaces.scala"), ""),
-        li(b("backend"), " - contains the server RPC interface implementation in ", b("rpc/RPCService.scala"), "")
+        li(b("frontend"), " - contains the client RPC interface implementation in ", b("rpc/ExposedRpcInterfaces.scala"), "."),
+        li(b("backend"), " - contains the server RPC interface implementation in ", b("rpc/RPCService.scala"), ".")
       )
     ),
     p(

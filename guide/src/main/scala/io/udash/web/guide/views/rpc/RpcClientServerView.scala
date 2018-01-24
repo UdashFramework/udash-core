@@ -83,7 +83,7 @@ class RpcClientServerView extends FinalView with CssView {
         |  /** Methods implementation... */
         |}""".stripMargin
     )(GuideStyles),
-    p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), ""),
+    p("The RPC interface implementation is very simple. Let's prepare an ", i("AtmosphereServiceConfig"), "."),
     CodeBlock(
       """import io.udash.rpc._
         |

@@ -25,14 +25,14 @@ class FrontendFormsView extends FinalView with CssView {
     ),
     p("Let's briefly introduce all bindable form elements:"),
     ul(GuideStyles.defaultList)(
-      li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), ""),
-      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), ""),
-      li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), ""),
-      li(i("PasswordInput"), " - password input bound to ", i("Property[String]"), ""),
-      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[String]"), ""),
-      li(i("Select"), " - a select element bound to ", i("Property[String]"), ""),
-      li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), ""),
-      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), "")
+      li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), "."),
+      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), "."),
+      li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), "."),
+      li(i("PasswordInput"), " - password input bound to ", i("Property[String]"), "."),
+      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[String]"), "."),
+      li(i("Select"), " - a select element bound to ", i("Property[String]"), "."),
+      li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
+      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), ".")
     ),
     h3("TextInput & NumberInput & PasswordInput"),
     p(
