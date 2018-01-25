@@ -282,8 +282,8 @@ class BootstrappingFrontendView extends FinalView with CssView {
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Now all parts of the Udash application are ready. You can find a complete demo application in ",
-      a(href := BootstrappingGeneratorsState.url)("Udash generators"), "."
+      "Now all parts of the Udash application are ready. You can find a complete demo application in the",
+      a(href := IntroState.url)("Udash applications generator"), "."
     ),
 
     p(

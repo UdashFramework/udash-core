@@ -22,7 +22,6 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case BootstrappingRpcState => BootstrappingRpcViewFactory
       case BootstrappingFrontendState => BootstrappingFrontendViewFactory
       case BootstrappingBackendState => BootstrappingBackendViewFactory
-      case BootstrappingGeneratorsState => BootstrappingGeneratorsViewFactory
 
       case FrontendState => FrontendViewFactory
       case FrontendIntroState => FrontendIntroViewFactory

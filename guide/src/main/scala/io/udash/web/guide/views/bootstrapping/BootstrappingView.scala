@@ -19,8 +19,8 @@ class BootstrappingView extends ViewContainer {
     h1("Application bootstrapping"),
     p("In this part of the guide you will read about bootstrapping an Udash application from scratch."),
     p(
-      i("This is an advanced topic, if you want to start development as soon as possible, start with ",
-      a(href := BootstrappingGeneratorsState.url)("Udash generators"), ".")
+      i("This is an advanced topic, if you want to start development as soon as possible, start with the ",
+      a(href := IntroState.url)("Udash applications generator"), ".")
     ),
     child
   )

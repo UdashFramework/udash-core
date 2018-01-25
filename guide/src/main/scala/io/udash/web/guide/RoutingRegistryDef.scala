@@ -16,7 +16,6 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/bootstrapping/rpc" => BootstrappingRpcState
     case "/bootstrapping/backend" => BootstrappingBackendState
     case "/bootstrapping/frontend" => BootstrappingFrontendState
-    case "/bootstrapping/generators" => BootstrappingGeneratorsState
     case "/frontend" => FrontendIntroState
     case "/frontend/routing" => FrontendRoutingState(None)
     case "/frontend/routing" / s => FrontendRoutingState(Some(s))
