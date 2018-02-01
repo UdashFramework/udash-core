@@ -5,7 +5,6 @@ import io.udash.properties.single.Property
 import org.scalajs.dom.{html, _}
 
 import scala.concurrent.duration.{Duration, DurationInt}
-import scala.language.postfixOps
 import scalatags.JsDom
 import scalatags.JsDom.all._
 

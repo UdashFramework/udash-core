@@ -105,7 +105,6 @@ trait YAxisPlotBand extends AxisPlotBand {
 trait ZAxisPlotBand extends AxisPlotBand
 
 object XAxisPlotBand {
-  import scala.scalajs.js.JSConverters._
   /**
     * @param borderColor Border color for the plot band. Also requires <code>borderWidth</code> to be set.
     * @param borderWidth Border width for the plot band.  Also requires <code>borderColor</code> to be set.
@@ -166,7 +165,6 @@ object XAxisPlotBand {
 }
 
 object YAxisPlotBand {
-  import scala.scalajs.js.JSConverters._
   /**
     * @param borderColor Border color for the plot band. Also requires <code>borderWidth</code> to be set.
     * @param borderWidth Border width for the plot band.  Also requires <code>borderColor</code> to be set.
@@ -239,7 +237,6 @@ object YAxisPlotBand {
 }
 
 object ZAxisPlotBand {
-  import scala.scalajs.js.JSConverters._
   /**
     * @param borderColor Border color for the plot band. Also requires <code>borderWidth</code> to be set.
     * @param borderWidth Border width for the plot band.  Also requires <code>borderColor</code> to be set.

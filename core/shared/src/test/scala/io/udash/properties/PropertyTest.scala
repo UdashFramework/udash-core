@@ -1,6 +1,5 @@
 package io.udash.properties
 
-import com.avsystem.commons.misc.AbstractCase
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
@@ -296,6 +295,13 @@ class PropertyTest extends UdashSharedTest {
 
       pageProperty.set(3)
       counter should be(1)
+
+      totalPagesProperty.get should be(None)
+
+      seenAllProperty.set(true)
+      counter should be(2)
+      totalPagesProperty.get should be(Some(3))
+      lastPageProperty.get should be(true)
     }
 
     "combine with other properties" in {
@@ -534,7 +540,7 @@ class PropertyTest extends UdashSharedTest {
 
       s.elemProperties.foreach {
         case p: Property[Int] => p.set(20)
-        case p: ReadableProperty[Int] => //ignore
+        case _: ReadableProperty[Int] => //ignore
       }
 
       s.get should be(Seq(1,2,3,4,5))
@@ -1562,8 +1568,8 @@ class PropertyTest extends UdashSharedTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      var states = mutable.ArrayBuffer.empty[Seq[Int]]
-      var patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
+      val states = mutable.ArrayBuffer.empty[Seq[Int]]
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
 
       f.listen(v => states += v)
       f.listenStructure(p => patches += p)
@@ -1806,7 +1812,7 @@ class PropertyTest extends UdashSharedTest {
 
       val c = s.combine(p)(_ * _)
 
-      var listenCalls = mutable.ListBuffer[Seq[Int]]()
+      val listenCalls = mutable.ListBuffer[Seq[Int]]()
       c.listen(v => listenCalls += v)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null

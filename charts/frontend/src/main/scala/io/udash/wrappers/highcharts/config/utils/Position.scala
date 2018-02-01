@@ -12,7 +12,6 @@ trait Position extends js.Object {
 }
 
 object Position {
-  import scala.scalajs.js.JSConverters._
 
   def apply(align: js.UndefOr[Align] = js.undefined,
             verticalAlign: js.UndefOr[VerticalAlign] = js.undefined,

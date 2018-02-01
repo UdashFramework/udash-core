@@ -37,7 +37,6 @@ trait ColorAxisDataClasses extends js.Object {
 }
 
 object ColorAxisDataClasses {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param color The color of each data class. If not set, the color is pulled from the global or chart-specific <a href="#colors">colors</a> array.

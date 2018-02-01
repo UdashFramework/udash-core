@@ -57,7 +57,6 @@ trait Credits extends js.Object {
 }
 
 object Credits {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled  Whether to show the credits text.

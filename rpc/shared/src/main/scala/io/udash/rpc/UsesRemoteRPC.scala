@@ -1,8 +1,5 @@
 package io.udash.rpc
 
-import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
-
 /**
  * Base trait for anything that uses remote RPC interface.
  */

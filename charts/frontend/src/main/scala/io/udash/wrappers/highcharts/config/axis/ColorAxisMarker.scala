@@ -24,7 +24,6 @@ trait ColorAxisMarker extends js.Object {
 }
 
 object ColorAxisMarker {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param animation Animation for the marker as it moves between values. Set to <code>false</code> to disable animation. Defaults to <code>{ duration: 50 }</code>.

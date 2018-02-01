@@ -47,7 +47,6 @@ trait PaneBackground extends js.Object {
 }
 
 object PaneBackground {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param backgroundColor The background color or gradient for the pane.

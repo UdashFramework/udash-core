@@ -27,7 +27,6 @@ trait ChartOptions3dFrame extends js.Object {
 }
 
 object ChartOptions3dFrame {
-  import scala.scalajs.js.JSConverters._
 
     class ChartOptions3dFrameData extends js.Object {
     /** The color of the panel. */

@@ -36,7 +36,6 @@ trait ResponsiveRuleCondition extends js.Object {
 }
 
 object ResponsiveRuleCondition {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param callback A callback function to gain complete control on when the responsive rule applies. Return <code>true</code> if it applies. This opens for checking against other metrics than the chart size, or example the document size or other elements.

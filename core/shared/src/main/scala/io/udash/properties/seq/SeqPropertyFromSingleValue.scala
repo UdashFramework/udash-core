@@ -34,7 +34,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](or
     def commonIdx(s1: Iterator[B], s2: Iterator[B]): Int =
       math.max(0,
         s1.zipAll(s2, null, null).zipWithIndex
-          .indexWhere { case (((x, y), idx)) => x != y })
+          .indexWhere { case (((x, y), _)) => x != y })
 
     val commonBegin = commonIdx(transformed.iterator, current.iterator)
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)

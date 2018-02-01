@@ -1556,7 +1556,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       patches.size should be(0)
       patches.clear()
 
-      var repeats = mutable.ArrayBuffer[AtomicInteger]()
+      val repeats = mutable.ArrayBuffer[AtomicInteger]()
 
       val dom = div(
         produce(filter)(f => {

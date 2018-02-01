@@ -22,7 +22,6 @@ trait SeriesPieData extends BaseYSeriesData[SeriesConnectorDataLabels] {
 }
 
 object SeriesPieData {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param color       Individual color for the point. By default the color is pulled from the global <code>colors</code> array.

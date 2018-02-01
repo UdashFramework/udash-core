@@ -3,7 +3,6 @@ package io.udash.rpc
 import com.avsystem.commons.serialization.{GenCodec, Input, InputType, Output}
 import io.udash.testing.UdashSharedTest
 
-import scala.language.higherKinds
 import scala.util.Random
 
 class SerializationIntegrationTestBase extends UdashSharedTest with Utils {

@@ -2,7 +2,6 @@ package io.udash.bindings.modifiers
 
 import com.avsystem.commons.SharedExtensions._
 import io.udash.bindings.Bindings._
-import io.udash.properties._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._

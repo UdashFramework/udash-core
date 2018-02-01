@@ -1,7 +1,5 @@
 package io.udash.auth
 
-import scala.language.implicitConversions
-
 /**
   * Base class for permissions used with PermissionControl. Permissions are compared by ID.
   */

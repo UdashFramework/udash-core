@@ -1,9 +1,6 @@
 package io.udash.i18n
 
-import com.github.ghik.silencer.silent
 import io.udash.testing.UdashFrontendTest
-
-import scala.language.postfixOps
 
 class LocalTranslationProviderTest extends UdashFrontendTest {
   import Utils._

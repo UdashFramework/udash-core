@@ -67,7 +67,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
   "AtmosphereService" should {
     "init BroadcastManager" in {
       BroadcastManager.synchronized {
-        val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (_, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (atm, atmConfig) = createConfigs(Seq.empty, null, broadcasterFactory, metaBroadcaster)
 
         BroadcastManager.init(null, null)

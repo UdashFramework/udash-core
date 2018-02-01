@@ -69,7 +69,6 @@ trait SeriesBarStatesHover extends SeriesStatesHover {
 }
 
 object SeriesAreaStatesHover {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled       Enable separate styles for the hovered series to visualize that the user hovers either the series itself or the legend.			.
@@ -96,7 +95,6 @@ object SeriesAreaStatesHover {
 }
 
 object SeriesBarStatesHover {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled       Enable separate styles for the hovered series to visualize that the user hovers either the series itself or the legend.			.

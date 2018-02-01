@@ -32,7 +32,6 @@ trait NoData extends js.Object {
 }
 
 object NoData {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param attr An object of additional SVG attributes for the no-data label.

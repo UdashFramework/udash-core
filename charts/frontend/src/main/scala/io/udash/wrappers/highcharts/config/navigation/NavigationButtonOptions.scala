@@ -111,7 +111,6 @@ trait NavigationButtonOptions extends js.Object {
 }
 
 object NavigationButtonOptions {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align             Alignment for the buttons.

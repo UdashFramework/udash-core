@@ -165,7 +165,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
         connector.body should be(null)
-        resp.value.get should matchPattern { case Failure(ex: GenCodec.ReadFailure) => }
+        resp.value.get should matchPattern { case Failure(_: GenCodec.ReadFailure) => }
       }
     }
 

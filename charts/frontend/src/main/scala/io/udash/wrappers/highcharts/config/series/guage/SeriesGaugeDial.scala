@@ -60,7 +60,6 @@ trait SeriesGaugeDial extends js.Object {
 }
 
 object SeriesGaugeDial {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param backgroundColor The background or fill color of the gauge's dial. 

@@ -20,7 +20,6 @@ trait LegendTitle extends js.Object {
 }
 
 object LegendTitle {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param style Generic CSS styles for the legend title.

@@ -13,8 +13,6 @@ import org.atmosphere.cpr._
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
-import scala.languageFeature.postfixOps
 import scala.util.{Failure, Success, Try}
 
 trait AtmosphereServiceConfig[ServerRPCType] {
@@ -185,9 +183,9 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
             None
         }
       case Failure(ex) => request match {
-        case call: RPCCall =>
+        case _: RPCCall =>
           Some(Future.failed(ex))
-        case fire: RPCFire =>
+        case _: RPCFire =>
           None
       }
     }

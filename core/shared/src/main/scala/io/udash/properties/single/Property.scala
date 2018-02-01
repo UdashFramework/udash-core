@@ -9,7 +9,6 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
-import scala.language.higherKinds
 
 object Property {
   /** Creates an empty `DirectProperty[T]`.

@@ -1,6 +1,5 @@
 package io.udash.css
 
-import scala.language.postfixOps
 
 object StylesheetExample extends CssBase {
 

@@ -9,7 +9,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
-import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
@@ -405,15 +404,6 @@ object UdashDatePicker {
   private trait DatePickerChangeJQEvent extends DateJQEvent {
     def oldDate: MomentFormatWrapper | Boolean = js.native
   }
-
-  @js.native
-  private trait DatePickerShowJQEvent extends JQueryEvent
-
-  @js.native
-  private trait DatePickerHideJQEvent extends DateJQEvent
-
-  @js.native
-  private trait DatePickerErrorJQEvent extends DateJQEvent
 
   private def moment(locale: String, time: js.Any, format: String): MomentFormatWrapper =
     js.Dynamic.global.moment(time, format, locale).asInstanceOf[MomentFormatWrapper]

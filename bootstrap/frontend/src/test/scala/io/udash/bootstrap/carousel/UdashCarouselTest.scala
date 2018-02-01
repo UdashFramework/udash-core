@@ -7,7 +7,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 
-import scala.language.postfixOps
 import scala.util.Random
 import scalatags.JsDom.all._
 

@@ -54,7 +54,6 @@ trait PlotOptions extends js.Object {
 }
 
 object PlotOptions {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param areaRange       The area range is a cartesian series type with higher and lower Y values along an X axis. Requires <code>highcharts-more.js</code>.
