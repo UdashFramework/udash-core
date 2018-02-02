@@ -49,7 +49,7 @@ class IntroView extends FinalView with CssView {
       "In every module you can find tests based on ScalaTest and ScalaMock. ",
       "The frontend and shared modules use ", i("scalajs-env-selenium"),
       " in order to run the tests compiled to JavaScript in a web browser. ",
-      "The SBT configuration embraces ", i("SBT Native Packager"), " to provide easy deployment process. "
+      "The SBT configuration employs ", i("SBT Native Packager"), " to provide easy deployment process. "
     ),
     h2("What's next?"),
     p(
