@@ -34,8 +34,6 @@ case object BootstrappingBackendState extends FinalRoutingState(Some(Bootstrappi
 
 case object BootstrappingFrontendState extends FinalRoutingState(Some(BootstrappingState))
 
-case object BootstrappingGeneratorsState extends FinalRoutingState(Some(ContentState))
-
 /** Frontend chapters */
 case object FrontendState extends ContainerRoutingState(Some(ContentState))
 

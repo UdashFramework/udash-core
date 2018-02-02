@@ -149,14 +149,12 @@ object BootstrapDemos extends CrossLogging with CssView {
     val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
     val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
 
-    // TODO revert
-    val fromPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
+    val fromPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
       format = "MMMM Do YYYY",
       locale = Some("en_GB")
     ))
 
-    // TODO revert
-    val toPickerOptions = Property(new UdashDatePicker.DatePickerOptions(
+    val toPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
       format = "D MMMM YYYY",
       locale = Some("pl")
     ))
