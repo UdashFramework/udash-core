@@ -12,6 +12,7 @@ import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js.annotation.JSExport
+import scala.util.Try
 
 object Context {
   implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -24,8 +25,9 @@ object Context {
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
+  private val (restProtocol, restPort) = if (dom.window.location.protocol == "https:") (Protocol.Https, 443) else (Protocol.Http, 80)
   val restServer = DefaultServerREST[MainServerREST](
-    Protocol.Http, dom.window.location.hostname, Option(dom.window.location.port).map(_.toInt).getOrElse(80), "/rest/"
+    restProtocol, dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(restPort), "/rest/"
   )
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
