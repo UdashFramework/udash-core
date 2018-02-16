@@ -29,6 +29,10 @@ class IntroView extends FinalView with CssView {
       "The generated sources contain comprehensive READMEs, these provide guidance around the code ",
       "and links to the useful sources of knowledge about development with Udash. "
     ),
+    p(
+      "To compile and start the generated project type the following command inside the generated directory: ",
+      i("sbt compileStatics run"), ". "
+    ),
     h3("What's inside?"),
     p(
       "The generator creates a simple chat application, which presents the most important features of the Udash framework. ",
