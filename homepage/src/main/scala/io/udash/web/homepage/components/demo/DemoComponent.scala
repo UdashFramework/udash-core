@@ -69,11 +69,10 @@ object DemoComponent {
     ).render
 
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("z8zY6cP/0")),
-    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("OZe6XBJ/2")),
-    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("Yiz0JO2/0")),
-    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("ll4AVYz/0")),
-    DemoEntry("Components", IndexState(Option("components")).url, fiddle("13Wn0gZ/0"))
+    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("13Wn0gZ/1")),
+    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("OZe6XBJ/3")),
+    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("Yiz0JO2/1")),
+    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("ll4AVYz/1")),
   )
 }
 
