@@ -54,7 +54,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |
         |val s: SeqProperty[Int] = numbers.subSeq(_.numbers)
         |s.set(Seq(3,7,20,32))
-        |s.replace(idx = 1, amount = 2, values = Seq(8,9,10))
+        |s.replace(idx = 1, amount = 2, values = Seq(8,9,10):_*)
         |""".stripMargin
     )(GuideStyles),
     p(
