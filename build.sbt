@@ -6,7 +6,7 @@ name := "udash"
 cancelable in Global := true
 
 inThisBuild(Seq(
-  version := "0.7.0-SNAPSHOT",
+  version := "0.7.0-M1",
   scalaVersion := versionOfScala,
   crossScalaVersions := Seq("2.11.11", versionOfScala),
   organization := "io.udash",
