@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
@@ -1821,6 +1820,24 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       ).render
       textArea.getAttribute("id") shouldBe "idValue"
       p.set("idValue2")
+      textArea.getAttribute("id") shouldBe "idValue2"
+      p.set(null)
+      textArea.hasAttribute("disabled") shouldBe false
+      p.set("idValue3")
+      textArea.getAttribute("id") shouldBe "idValue3"
+    }
+    "allow reactive attribute bind with condition" in {
+      val p = Property("idValue")
+      val c = Property(true)
+      val textArea = TextArea.debounced(Property(""),
+        id.bindIf(p, c)
+      ).render
+      textArea.getAttribute("id") shouldBe "idValue"
+      c.set(false)
+      textArea.getAttribute("id") shouldBe null
+      p.set("idValue2")
+      textArea.getAttribute("id") shouldBe null
+      c.set(true)
       textArea.getAttribute("id") shouldBe "idValue2"
       p.set(null)
       textArea.hasAttribute("disabled") shouldBe false
