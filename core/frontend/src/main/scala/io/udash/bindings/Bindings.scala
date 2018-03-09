@@ -3,7 +3,7 @@ package io.udash.bindings
 import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
 import io.udash.bindings.modifiers._
-import io.udash.properties.seq.{Patch, ReadableSeqProperty}
+import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
 
@@ -447,6 +447,16 @@ object Bindings extends Bindings {
       property.reactiveApply {
         case (elem, null) => removeFrom(elem)
         case (elem, v) => applyTo(elem, v)
+      }
+
+    /**
+      * Synchronises attribute value with property content by adding it when property is not null and
+      * condition property is 'true' and removing otherwise.
+      */
+    def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Modifier[Element] =
+      property.combine(conditionProperty)((_, _)).reactiveApply {
+        case (elem, (null, _) | (_, false)) => removeFrom(elem)
+        case (elem, (v, true)) => applyTo(elem, v)
       }
   }
 
