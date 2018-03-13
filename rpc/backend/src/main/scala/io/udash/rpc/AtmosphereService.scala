@@ -14,8 +14,8 @@ import org.atmosphere.cpr._
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
 import scala.languageFeature.postfixOps
+import scala.util.{Failure, Success, Try}
 
 trait AtmosphereServiceConfig[ServerRPCType] {
   /**
@@ -73,7 +73,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def onWebsocketRequest(resource: AtmosphereResource) = {
+  private def onWebsocketRequest(resource: AtmosphereResource): Unit = {
     resource.suspend()
     val uuid: String = resource.uuid()
     BroadcastManager.registerResource(resource, uuid)
@@ -89,12 +89,12 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def onSSERequest(resource: AtmosphereResource) = {
+  private def onSSERequest(resource: AtmosphereResource): Unit = {
     resource.suspend(sseSuspendTime.toMillis)
     BroadcastManager.registerResource(resource, resource.uuid())
   }
 
-  private def onPollingRequest(resource: AtmosphereResource) = {
+  private def onPollingRequest(resource: AtmosphereResource): Unit = {
     try {
       resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
@@ -123,18 +123,18 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
         case (call: RPCCall, Some(response)) =>
           response onComplete {
             case Success(r) =>
-              onCall(rawToString(write[RPCResponse](RPCResponseSuccess(r, call.callId))))
+              onCall(write[RPCResponse](RPCResponseSuccess(r, call.callId)))
             case Failure(ex) =>
               logger.error("RPC request handling failed", ex)
               val exceptionName = exceptionsRegistry.name(ex)
-              onCall(rawToString(write[RPCResponse](
+              onCall(write[RPCResponse](
                 if (exceptionsRegistry.contains(exceptionName)) {
                   RPCResponseException(exceptionName, ex, call.callId)
                 } else {
                   val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
                   RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
                 }
-              )))
+              ))
           }
         case (_, _) => onFire()
       }
@@ -145,7 +145,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     val resource = event.getResource
     val response = resource.getResponse
 
-    def writeMsg() = response.getWriter.write(event.getMessage.toString)
+    def writeMsg(): Unit = response.getWriter.write(event.getMessage.toString)
 
     if (event.isCancelled || event.isClosedByApplication || event.isClosedByClient) {
       config.onClose(event.getResource)
@@ -195,8 +195,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
   private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
     import rpc.localFramework._
-    val raw: RawValue = stringToRaw(input)
-    read[RPCRequest](raw)
+    read[RPCRequest](input)
   }
 
   private def readInput(inputStream: ServletInputStream): String = {

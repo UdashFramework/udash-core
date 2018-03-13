@@ -78,16 +78,14 @@ abstract class AtmosphereServerConnector[RPCRequest](
   private def handleMessage(msg: String) = {
     try {
       import remoteFramework.RPCResponseCodec
-      val rawMsg = remoteFramework.stringToRaw(msg)
-      val rawMsgInput: Input = remoteFramework.inputSerialization(rawMsg)
+      val rawMsgInput: Input = remoteFramework.inputSerialization(msg)
       val response = RPCResponseCodec(exceptionsRegistry).read(rawMsgInput)
       handleResponse(response)
     } catch {
       case _: Exception =>
         try {
           import localFramework.RPCRequestCodec
-          val rawMsg = localFramework.stringToRaw(msg)
-          val rawMsgInput: Input = localFramework.inputSerialization(rawMsg)
+          val rawMsgInput: Input = localFramework.inputSerialization(msg)
           RPCRequestCodec.read(rawMsgInput) match {
             case fire: localFramework.RPCFire =>
               handleRpcFire(fire)
@@ -158,11 +156,11 @@ class DefaultAtmosphereServerConnector(override protected val clientRpc: Default
                                        override val exceptionsRegistry: ExceptionCodecRegistry)
   extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl, exceptionsRegistry) {
 
-  override val remoteFramework = DefaultServerUdashRPCFramework
-  override val localFramework = DefaultClientUdashRPCFramework
+  override val remoteFramework: DefaultServerUdashRPCFramework.type = DefaultServerUdashRPCFramework
+  override val localFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework
 
   override def requestToString(request: remoteFramework.RPCRequest): String =
-    remoteFramework.rawToString(remoteFramework.write(request))
+    remoteFramework.write(request)
 
   override def handleResponse(response: remoteFramework.RPCResponse): Any =
     responseHandler(response)

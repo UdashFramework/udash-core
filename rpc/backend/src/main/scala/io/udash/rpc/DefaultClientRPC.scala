@@ -20,9 +20,9 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
     val msg: RawValue = write[RPCRequest](RPCFire(invocation, getterChain))
     target match {
       case AllClients =>
-        BroadcastManager.broadcast(rawToString(msg))
+        BroadcastManager.broadcast(msg)
       case ClientId(clientId) =>
-        BroadcastManager.sendToClient(clientId, rawToString(msg))
+        BroadcastManager.sendToClient(clientId, msg)
     }
   }
 
@@ -32,7 +32,7 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
 /** Default implementation of [[io.udash.rpc.ClientRPC]] for server to client communication. */
 class DefaultClientRPC[ClientRPCType : DefaultClientUdashRPCFramework.AsRealRPC]
                       (target: ClientRPCTarget)(implicit ec: ExecutionContext) extends ClientRPC[ClientRPCType](target) {
-  override val localFramework = DefaultServerUdashRPCFramework
-  override val remoteFramework = DefaultClientUdashRPCFramework
+  override val localFramework: DefaultServerUdashRPCFramework.type = DefaultServerUdashRPCFramework
+  override val remoteFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework
   protected val remoteRpcAsReal: DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType] = implicitly[DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType]]
 }

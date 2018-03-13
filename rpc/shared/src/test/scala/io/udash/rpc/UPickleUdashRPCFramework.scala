@@ -5,30 +5,20 @@ import com.avsystem.commons.serialization._
 import upickle.Js
 
 import scala.collection.mutable.ListBuffer
+import scala.util.Try
 
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
-  override type RawValue = Js.Value
 
-  def inputSerialization(value: Js.Value): Input =
-    new JsObjectInput(value)
+  override def inputSerialization(value: String): Input = {
+    Try(upickle.json.read(value))
+      .map(new JsObjectInput(_))
+      .recover { case ex => throw new ReadFailure("Parse error!", ex) }.get
+  }
 
-  def outputSerialization(valueConsumer: Js.Value => Unit): Output =
-    new JsObjectOutput(valueConsumer)
+  override def outputSerialization(valueConsumer: String => Unit): Output = {
+    new JsObjectOutput(v => valueConsumer(upickle.json.write(v)))
+  }
 
-  def stringToRaw(string: String): RawValue =
-    try {
-      upickle.json.read(string)
-    }
-    catch {
-      case ex: upickle.Invalid => throw new ReadFailure("Parse error!", ex)
-    }
-
-  def rawToString(raw: Js.Value): String =
-    upickle.json.write(raw)
-
-  /**
-    * Created by grzesiul on 2016-02-03.
-    */
   class JsObjectInput(value: Js.Value) extends Input {
     def inputType = value match {
       case Js.Null => InputType.Null
@@ -109,9 +99,6 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
   class JsObjectFieldInput(val fieldName: String, value: Js.Value) extends JsObjectInput(value) with FieldInput
 
-  /**
-    * Created by grzesiul on 2016-02-02.
-    */
   class JsObjectOutput(val consumer: Js.Value => Unit) extends Output {
     var result: Js.Value = _
     private val setResultThenConsume: Js.Value => Unit = consumer.compose(value => {
@@ -148,81 +135,6 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
       def writeField(key: String) = new JsObjectOutput(v => builder += ((key, v)))
 
       def finish() = setResultThenConsume(Js.Obj(builder.result(): _*))
-    }
-  }
-
-  val RawValueCodec: GenCodec[RawValue] = new GenCodec[Js.Value] {
-    override def read(input: Input): Js.Value = {
-      val obj = input.readObject()
-      val fields = obj.iterator(i => i).toMap
-      val tpe = fields("type").readString()
-      val item = fields("item")
-      tpe match {
-        case "Bool" =>
-          if (item.readBoolean()) Js.True
-          else Js.False
-        case "Num" =>
-          Js.Num(item.readDouble())
-        case "String" =>
-          Js.Str(item.readString())
-        case "Obj" =>
-          val subfields = item.readList()
-          val it = subfields.iterator(i => i).map(el => {
-            val i = el.readObject()
-            val objFields = i.iterator(i => i).toMap
-            (objFields("key").readString(), read(objFields("item")))
-          })
-          Js.Obj(it.toSeq: _*)
-        case "Arr" =>
-          val els = item.readList()
-          val it = els.iterator(i => i).map(el => read(el))
-          Js.Arr(it.toSeq: _*)
-        case "Null" =>
-          item.readNull()
-          Js.Null
-      }
-    }
-
-    override def write(output: Output, value: Js.Value): Unit = {
-      val obj = output.writeObject()
-      val tpe = obj.writeField("type")
-      val item = obj.writeField("item")
-      value match {
-        case Js.True =>
-          tpe.writeString("Bool")
-          item.writeBoolean(true)
-        case Js.False =>
-          tpe.writeString("Bool")
-          item.writeBoolean(false)
-        case Js.Num(v) =>
-          tpe.writeString("Num")
-          item.writeDouble(v)
-        case Js.Str(v) =>
-          tpe.writeString("String")
-          item.writeString(v)
-        case v: Js.Obj =>
-          tpe.writeString("Obj")
-          val fields = item.writeList()
-          v.value.foreach {
-            case (key, subfield) =>
-              val i = fields.writeElement().writeObject()
-              i.writeField("key").writeString(key)
-              write(i.writeField("item"), subfield)
-              i.finish()
-          }
-          fields.finish()
-        case v: Js.Arr =>
-          tpe.writeString("Arr")
-          val fields = item.writeList()
-          v.value.foreach(subfield => {
-            write(fields.writeElement(), subfield)
-          })
-          fields.finish()
-        case Js.Null | null =>
-          tpe.writeString("Null")
-          item.writeNull()
-      }
-      obj.finish()
     }
   }
 }
