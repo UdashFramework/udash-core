@@ -1,9 +1,8 @@
 package io.udash.benchmarks.properties
 
+import io.udash._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
-
-import io.udash._
 
 object SinglePropertyListeners extends BenchmarkUtils {
   private val properties: Seq[(String, () => (Property[Int], ReadableProperty[Int]))] = Seq(
