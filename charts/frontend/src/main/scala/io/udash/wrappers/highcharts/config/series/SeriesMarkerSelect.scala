@@ -47,7 +47,6 @@ trait SeriesMarkerSelect extends js.Object {
 }
 
 object SeriesMarkerSelect {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled   Enable or disable visible feedback for selection.

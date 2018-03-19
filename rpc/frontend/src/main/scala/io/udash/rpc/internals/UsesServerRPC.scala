@@ -1,14 +1,12 @@
 package io.udash.rpc.internals
 
-import io.udash.rpc._
-import io.udash.utils.{CallbacksHandler, Registration, SetRegistration}
-import org.scalajs.dom
 import com.avsystem.commons.SharedExtensions._
+import io.udash.rpc._
+import io.udash.utils.{CallbacksHandler, Registration}
+import org.scalajs.dom
 
-import scala.collection.mutable
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Future, Promise}
-import scala.language.postfixOps
 import scala.scalajs.js
 import scala.scalajs.js.Dictionary
 
@@ -56,20 +54,21 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     exceptionCallbacks.fire(ex)
 
   def handleResponse(response: RPCResponse): Unit = {
-    pendingCalls.remove(response.callId).foreach { case (request, promise) =>
-      response match {
-        case RPCResponseSuccess(r, _) =>
-          promise.success(r)
-        case RPCResponseException(_, exception, _) =>
-          handleException(exception)
-          promise.failure(exception)
-        case RPCResponseFailure(cause, error, _) =>
-          val exception = RPCFailure(cause, error)
-          handleException(exception)
-          promise.failure(exception)
+    pendingCalls.remove(response.callId)
+      .foreach { case (_, promise) =>
+        response match {
+          case RPCResponseSuccess(r, _) =>
+            promise.success(r)
+          case RPCResponseException(_, exception, _) =>
+            handleException(exception)
+            promise.failure(exception)
+          case RPCResponseFailure(cause, error, _) =>
+            val exception = RPCFailure(cause, error)
+            handleException(exception)
+            promise.failure(exception)
+        }
       }
     }
-  }
 
   override protected[rpc] def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
     sendRPCRequest(RPCFire(invocation, getterChain))

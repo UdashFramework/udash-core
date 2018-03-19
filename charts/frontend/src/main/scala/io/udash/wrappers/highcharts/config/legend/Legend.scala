@@ -281,7 +281,6 @@ trait Legend extends js.Object {
 }
 
 object Legend {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align            <p>The horizontal alignment of the legend box within the chart area. Valid values are <code>left</code>, <code>center</code> and <code>right</code>.</p>. . <p>In the case that the legend is aligned in a corner position, the <code>layout</code> option will determine whether to place it above/below or on the side of the plot area.</p>

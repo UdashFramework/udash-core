@@ -4,9 +4,6 @@ package single
 import io.udash.properties.model.{ModelProperty, ReadableModelProperty}
 import io.udash.properties.seq.{ReadableSeqProperty, SeqProperty}
 
-import scala.annotation.implicitNotFound
-
-
 /** Property which can be casted. <br/>
   * <b>NOTE:</b> Those casts are checked in compilation time: "it compiles" == "it works".
   */

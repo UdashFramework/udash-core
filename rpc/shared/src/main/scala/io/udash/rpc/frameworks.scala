@@ -3,8 +3,6 @@ package io.udash.rpc
 import com.avsystem.commons.rpc.{FunctionRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
 
-import scala.language.postfixOps
-
 trait GenCodecSerializationFramework { this: RPCFramework =>
   type Writer[T] = GenCodec[T]
   type Reader[T] = GenCodec[T]

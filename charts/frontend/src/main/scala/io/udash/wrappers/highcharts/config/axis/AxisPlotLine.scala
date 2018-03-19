@@ -66,7 +66,6 @@ trait AxisPlotLine extends js.Object {
 }
 
 object AxisPlotLine {
-  import scala.scalajs.js.JSConverters._
 
   case class EventHandlers()
 

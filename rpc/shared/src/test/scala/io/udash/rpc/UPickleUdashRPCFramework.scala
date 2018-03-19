@@ -10,10 +10,10 @@ import scala.util.Try
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
   override def inputSerialization(value: String): Input = {
-    Try(upickle.json.read(value))
+      Try(upickle.json.read(value))
       .map(new JsObjectInput(_))
-      .recover { case ex => throw new ReadFailure("Parse error!", ex) }.get
-  }
+      .recover {case ex => throw new ReadFailure("Parse error!", ex)}.get
+    }
 
   override def outputSerialization(valueConsumer: String => Unit): Output = {
     new JsObjectOutput(v => valueConsumer(upickle.json.write(v)))

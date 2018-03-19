@@ -15,7 +15,6 @@ trait ExportingButtons extends js.Object {
 }
 
 object ExportingButtons {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param contextButton Options for the export button.

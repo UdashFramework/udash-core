@@ -4,7 +4,6 @@ import io.udash._
 import io.udash.css.CssView
 import io.udash.testing.UdashFrontendTest
 
-import scala.language.postfixOps
 
 class UdashIconsTest extends UdashFrontendTest with CssView {
 

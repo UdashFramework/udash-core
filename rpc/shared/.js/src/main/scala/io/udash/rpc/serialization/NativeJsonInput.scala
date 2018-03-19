@@ -4,6 +4,7 @@ import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 
 import scala.scalajs.js
+import scala.util.Try
 
 class NativeJsonInput(value: Any) extends Input { self =>
   private def read[T](expected: String)(matcher: PartialFunction[Any, T]): T =
@@ -39,13 +40,7 @@ class NativeJsonInput(value: Any) extends Input { self =>
   override def readLong(): Long = {
     def parseLong(): Option[Long] = {
       value match {
-        case s: String =>
-          try {
-            Some(s.toLong)
-          }
-          catch {
-            case ex: NumberFormatException => None
-          }
+        case s: String => Try(s.toLong).toOption
         case i: Int => Some(i)
         case d: Double if d == d.toLong => Some(d.toLong)
         case _ => None

@@ -5,8 +5,6 @@ import io.udash.testing.UdashSharedTest
 import scala.collection.mutable
 
 class CallbacksHandlerTest extends UdashSharedTest {
-  import FilteringUtils._
-
   "CallbacksHandler" should {
     "fire all callbacks and swallow exceptions" in {
       val orderCheck = mutable.ArrayBuffer.empty[Int]
@@ -41,7 +39,7 @@ class CallbacksHandlerTest extends UdashSharedTest {
 
       val orderCheck = mutable.ArrayBuffer.empty[Int]
       def callback(idx: Int): PartialFunction[Int, Any] = {
-        case v: Int =>
+        case _: Int =>
           orderCheck += idx
           handler.register(callback(idx + 1))
       }

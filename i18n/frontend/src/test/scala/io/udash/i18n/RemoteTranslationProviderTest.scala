@@ -1,17 +1,13 @@
 package io.udash.i18n
 
-import com.github.ghik.silencer.silent
-import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
+import io.udash.testing.AsyncUdashFrontendTest
 import org.scalajs.dom.ext.LocalStorage
 import org.scalatest.BeforeAndAfter
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
 
 class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAndAfter {
-  import Utils._
-
   implicit val lang = Lang("en")
 
   class RemoteTranslationRPCMock extends RemoteTranslationRPC {

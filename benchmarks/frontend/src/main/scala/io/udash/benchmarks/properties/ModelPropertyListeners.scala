@@ -1,11 +1,8 @@
 package io.udash.benchmarks.properties
 
 import io.udash._
-import io.udash.properties.PropertyCreator
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
-
-import scala.util.Random
 
 object ModelPropertyListeners extends BenchmarkUtils {
   private val properties: Seq[(String, () => (ModelProperty[ModelItem], ReadableProperty[ModelItem]))] = Seq(

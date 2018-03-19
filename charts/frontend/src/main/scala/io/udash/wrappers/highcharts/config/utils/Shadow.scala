@@ -3,7 +3,6 @@ package config
 package utils
 
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.|
 
 sealed class Shadow(val value: Boolean | js.Object)

@@ -1,6 +1,6 @@
 package io.udash.logging
 
-import com.typesafe.scalalogging.{Logger, StrictLogging}
+import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
 class UdashLogger extends CrossLogger {

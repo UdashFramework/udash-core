@@ -5,7 +5,6 @@ import io.udash.css.CssStyleName
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom
 
-import scala.language.postfixOps
 
 class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
   import io.udash.css.CssView._

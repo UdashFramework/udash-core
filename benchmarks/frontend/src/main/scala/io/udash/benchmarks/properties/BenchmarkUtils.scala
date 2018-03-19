@@ -1,7 +1,6 @@
 package io.udash.benchmarks.properties
 
 import io.udash._
-import io.udash.properties.PropertyCreator
 import japgolly.scalajs.benchmark.Benchmark
 
 import scala.util.Random

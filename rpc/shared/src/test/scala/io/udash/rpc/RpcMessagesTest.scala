@@ -5,7 +5,6 @@ import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
 import io.udash.testing.UdashSharedTest
 
-import scala.language.higherKinds
 import scala.util.Random
 
 private case class CustomException(error: String, counter: Int) extends Throwable

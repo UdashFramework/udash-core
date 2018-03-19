@@ -12,7 +12,6 @@ import scala.scalajs.js
 trait SeriesAreasplinerangeData extends SeriesArearangeData
 
 object SeriesAreasplinerangeData {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param color      Individual color for the point. By default the color is pulled from the global <code>colors</code> array.

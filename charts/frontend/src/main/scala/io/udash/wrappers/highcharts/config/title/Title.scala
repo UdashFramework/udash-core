@@ -19,7 +19,6 @@ trait Title extends AbstractTitle {
 }
 
 object Title {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align         The horizontal alignment of the title. Can be one of "left", "center" and "right".

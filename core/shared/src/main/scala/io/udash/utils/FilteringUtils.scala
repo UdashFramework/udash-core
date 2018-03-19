@@ -21,7 +21,7 @@ object FilteringUtils {
     @tailrec
     def _findDiffSuffix(newPath: List[T], previousPath: List[T], subPath: List[T]): List[T] = (newPath, previousPath) match {
       case (head1 :: tail1, head2 :: tail2) if subPath == Nil && head1 == head2 => _findDiffSuffix(tail1, tail2, subPath)
-      case (head1 :: tail1, head2 :: tail2) => _findDiffSuffix(tail1, tail2, subPath :+ head1)
+      case (head1 :: tail1, _ :: tail2) => _findDiffSuffix(tail1, tail2, subPath :+ head1)
       case (head1 :: tail1, Nil) => _findDiffSuffix(tail1, Nil, subPath :+ head1)
       case _ => subPath
     }

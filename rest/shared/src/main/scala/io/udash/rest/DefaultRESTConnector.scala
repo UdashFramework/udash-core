@@ -10,7 +10,6 @@ import io.udash.rest.internal.RESTConnector.HTTPMethod
 import monix.reactive.Observable
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.implicitConversions
 
 sealed trait Protocol {
   val defaultPort: Int

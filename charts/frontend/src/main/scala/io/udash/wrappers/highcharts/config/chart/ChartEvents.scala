@@ -134,8 +134,6 @@ trait ChartEvents extends js.Object {
 object ChartEvents {
   import io.udash.wrappers.jquery._
 
-  import scala.scalajs.js.JSConverters._
-
   @js.native
   trait AddSeriesEvent extends JQueryEvent {
     def options: SeriesConfig = js.native

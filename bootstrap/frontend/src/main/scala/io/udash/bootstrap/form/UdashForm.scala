@@ -38,7 +38,7 @@ object UdashForm {
           hasSuccess.addTo(el)
         case Success(Invalid(_)) =>
           hasError.addTo(el)
-        case Failure(ex) =>
+        case Failure(_) =>
           hasWarning.addTo(el)
       }
     })

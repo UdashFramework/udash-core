@@ -6,10 +6,6 @@ import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
 class UdashPaginationTest extends UdashFrontendTest {
-  import org.scalajs.dom._
-
-  import scalatags.JsDom.all._
-
   "UdashPagination component" should {
     import UdashPagination._
 

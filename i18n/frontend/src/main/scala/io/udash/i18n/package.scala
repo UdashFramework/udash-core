@@ -1,7 +1,6 @@
 package io.udash
 
 import io.udash.i18n.bindings.{AttrTranslationBinding, DynamicAttrTranslationBinding, DynamicTranslationBinding, TranslationBinding}
-import io.udash.properties.PropertyCreator
 import org.scalajs.dom
 
 import scala.concurrent.Future

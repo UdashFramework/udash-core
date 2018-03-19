@@ -1,7 +1,6 @@
 package io.udash.bootstrap.button
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 

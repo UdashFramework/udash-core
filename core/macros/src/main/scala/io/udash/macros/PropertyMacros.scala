@@ -1,9 +1,7 @@
 package io.udash.macros
 
 import com.avsystem.commons.macros.AbstractMacroCommons
-import com.avsystem.commons.misc.Opt
 
-import scala.collection.mutable
 import scala.reflect.macros.blackbox
 
 class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
@@ -50,16 +48,8 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     symbol.isAbstract && symbol.isMethod && !symbol.asMethod.isAccessor
 
   //Checks, if symbol is abstract field
-  private def isAbstractField(symbol: Symbol): Boolean =
-    isAbstractVal(symbol) || isAbstractVar(symbol)
-
-  //Checks, if symbol is abstract field
   private def isAbstractVal(symbol: Symbol): Boolean =
     symbol.isAbstract && symbol.isTerm && symbol.asTerm.isVal
-
-  //Checks, if symbol is abstract field
-  private def isAbstractVar(symbol: Symbol): Boolean =
-    symbol.isAbstract && symbol.isTerm && symbol.asTerm.isVar
 
   //Checks, if symbol is method and takes any parameters
   private def takesParameters(symbol: Symbol): Boolean =
@@ -75,9 +65,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   private def filterMembers(valueType: Type) =
     valueType.members
       .filterNot(member => member.isSynthetic || isFromTopLevelType(member) || member.isConstructor || member.isType)
-
-  private def isModelPropertyTemplate(valueType: Type): Boolean =
-    c.typecheck(q"implicitly[$IsModelPropertyTemplateCls[$valueType]]", silent = true) != EmptyTree
 
   private def hasModelPropertyCreator(valueType: Type): Boolean =
     c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$valueType]]", silent = true) != EmptyTree
@@ -101,14 +88,14 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   //Checks, if method or value can be treated as Property in trait based ModelProperty
-  private def doesMeetTraitModelElementRequirements(s: Symbol, signatureType: Type): Boolean =
+  private def doesMeetTraitModelElementRequirements(s: Symbol): Boolean =
     (isAbstractMethod(s) && !takesParameters(s)) || isAbstractVal(s) ||
       (s.isAbstract && s.isMethod && s.asMethod.isAccessor && s.asMethod.accessed == NoSymbol) // val in trait in scala 2.11
 
   //Returns filtered members which can be treated as Properties in trait based ModelProperty
   private def traitBasedPropertyMembers(tpe: Type): Seq[Symbol] =
     filterMembers(tpe).filter(!_.isPrivate)
-      .filter(s => doesMeetTraitModelElementRequirements(s, tpe)).toSeq
+      .filter(doesMeetTraitModelElementRequirements).toSeq
 
   //Returns filtered members which can be treated as Properties in case class based ModelProperty
   private def classBasedPropertyMembers(tpe: Type): Seq[Symbol] =
@@ -131,7 +118,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   private def getModelPath(tree: Tree) = tree match {
-    case f@Function(_, path) => path
+    case Function(_, path) => path
     case _ => c.abort(tree.pos, "Only inline lambdas supported. Please use `subProp(_.path.to.element)`.")
   }
 
@@ -281,19 +268,20 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     }
   }
 
-  def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree =
+  def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
     reifySubProperty[A, B](f)
+  }
 
   def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B]): c.Tree = {
     val model = c.prefix
     val modelPath = getModelPath(f.tree)
 
     def checkIfIsValidPath(tree: Tree): Boolean = tree match {
-      case s@Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
+      case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
         true
-      case s@Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
+      case Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
         checkIfIsValidPath(next)
-      case s@Select(next, t) =>
+      case Select(next, t) =>
         c.abort(c.enclosingPosition,
           s"""
              |The path must consist of ModelProperties and only leaf can be a Property, ModelProperty or SeqProperty.
@@ -316,12 +304,12 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val parts = parsePath(modelPath)
 
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
-      case (select, term) :: tail if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
+      case (select, term) :: _ if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
         q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString})
            .asInstanceOf[$SeqPropertyCls[${select.tpe.typeArgs.head.widen}, $PropertyCls[${select.tpe.typeArgs.head.widen}] with $CastablePropertyCls[${select.tpe.typeArgs.head.widen}]]]"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
         genTree(tail, q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$ModelPropertyImplCls[${select.tpe.widen}]]""")
-      case (select, term) :: tail =>
+      case (select, term) :: _ =>
         q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$PropertyCls[${select.tpe.widen}]]"""
       case Nil => targetTree
     }

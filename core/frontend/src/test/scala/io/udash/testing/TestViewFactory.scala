@@ -1,7 +1,6 @@
 package io.udash.testing
 
 import io.udash._
-import org.scalajs.dom._
 
 class TestViewFactory[T <: TestState] extends ViewFactory[T] {
   val view = new TestView

@@ -4,8 +4,6 @@ import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework}
 import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.ExceptionCodecRegistry
 
-import scala.language.postfixOps
-
 /** Base for all RPC frameworks in Udash. */
 trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
   override type RawValue = String
@@ -134,18 +132,6 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
             val wrapper = obj.nextField().assertField("exception").readObject()
             val exceptionName = wrapper.nextField().assertField("type").readString()
             val exception = exceptionsRegistry.get[Throwable](exceptionName).read(wrapper.nextField().assertField("data"))
-//            val stack = wrapper.nextField().assertField("stacktrace")
-//            if (stack.inputType == InputType.List) {
-//              val stackData = stack.readList().iterator { input =>
-//                val element = input.readObject()
-//                val fileName = element.nextField().assertField("fileName").readString()
-//                val className = element.nextField().assertField("className").readString()
-//                val methodName = element.nextField().assertField("methodName").readString()
-//                val line = element.nextField().assertField("line").readInt()
-//                new StackTraceElement(className, methodName, fileName, line)
-//              }
-//              exception.setStackTrace(stackData.toArray)
-//            } else stack.readNull()
             val callId = obj.nextField().assertField("callId").readString()
             RPCResponseException(exceptionName, exception, callId)
         }

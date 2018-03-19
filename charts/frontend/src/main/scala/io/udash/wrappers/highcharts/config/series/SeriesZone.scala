@@ -39,7 +39,6 @@ trait SeriesZone extends js.Object {
 }
 
 object SeriesZone {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param className A custom class name for the zone.

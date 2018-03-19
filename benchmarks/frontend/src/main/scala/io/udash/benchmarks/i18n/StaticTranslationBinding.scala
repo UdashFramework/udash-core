@@ -1,13 +1,11 @@
 package io.udash.benchmarks.i18n
 
-import io.udash._
 import io.udash.i18n._
-
-import scalatags.JsDom.all._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
 
 import scala.concurrent.Future
+import scalatags.JsDom.all._
 
 object StaticTranslationBinding {
 

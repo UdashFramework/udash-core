@@ -75,7 +75,6 @@ trait SeriesDataMarkerHover extends BaseSeriesMarkerHover {
 }
 
 object SeriesMarkerHover {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled       Enable or disable the point marker.
@@ -114,7 +113,6 @@ object SeriesMarkerHover {
 }
 
 object SeriesDataMarkerHover {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled       Enable or disable the point marker.

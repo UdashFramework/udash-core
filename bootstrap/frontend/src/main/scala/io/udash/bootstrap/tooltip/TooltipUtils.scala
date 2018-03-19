@@ -1,13 +1,11 @@
 package io.udash.bootstrap
 package tooltip
 
-import com.avsystem.commons.misc.AbstractCase
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import org.scalajs.dom
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationInt}
-import scala.language.postfixOps
 import scala.scalajs.js
 
 trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventType, ThisType]] extends Listenable[ThisType, EventType] {

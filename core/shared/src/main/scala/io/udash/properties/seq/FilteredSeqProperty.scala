@@ -16,7 +16,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
   private val filteredProps: mutable.Buffer[ElemType] = loadPropsFromOrigin()
 
-  private def elementChanged(p: ElemType)(v: A): Unit = {
+  private def elementChanged(p: ElemType): Unit = {
     val props = loadPropsFromOrigin()
     val oldIdx = filteredProps.indexOf(p)
     val newIdx = props.indexOf(p)
@@ -37,13 +37,13 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
 
   private val registrations = mutable.HashMap.empty[ElemType, Registration]
 
-  origin.elemProperties.foreach(p => registrations(p) = p.listen(elementChanged(p)))
+  origin.elemProperties.foreach(p => registrations(p) = p.listen(_ => elementChanged(p)))
   origin.listenStructure { patch =>
     patch.removed.foreach(p => if (registrations.contains(p)) {
       registrations(p).cancel()
       registrations.remove(p)
     })
-    patch.added.foreach(p => registrations(p) = p.listen(elementChanged(p)))
+    patch.added.foreach(p => registrations(p) = p.listen(_ => elementChanged(p)))
 
     val added = patch.added.filter(p => matcher(p.get))
     val removed = patch.removed.filter(p => matcher(p.get))

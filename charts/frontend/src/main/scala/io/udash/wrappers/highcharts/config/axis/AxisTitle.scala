@@ -68,7 +68,6 @@ trait AxisTitle extends js.Object {
 }
 
 object AxisTitle {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align Alignment of the title relative to the axis values. Possible values.  are "low", "middle" or "high".

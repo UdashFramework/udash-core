@@ -4,7 +4,6 @@ import io.udash.properties.single.Property
 import org.scalajs.dom._
 
 import scala.concurrent.duration.Duration
-import scala.language.postfixOps
 import scalatags.JsDom
 
 /** Template of binding for text inputs. */

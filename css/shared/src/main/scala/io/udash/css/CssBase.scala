@@ -2,7 +2,6 @@ package io.udash.css
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
-import scala.language.implicitConversions
 import scalacss.internal.Css.styleA
 import scalacss.internal.DslBase.ToStyle
 import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}

@@ -21,7 +21,7 @@ object CheckButtons {
   def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String],
             decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*): JsDom.TypedTag[html.Element] = {
     val htmlInputs = prepareHtmlInputs(options)(xs:_*)
-    val bind = prepareBind(property, htmlInputs)
+    val bind = prepareBind(property)
     htmlInputs.foreach(bind.applyTo)
     decorator(htmlInputs.zip(options))
   }
@@ -29,8 +29,8 @@ object CheckButtons {
   private def prepareHtmlInputs(options: Seq[String])(xs: Modifier*) =
     options.map(opt => input(tpe := "checkbox", value := opt)(xs:_*).render)
 
-  private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]], htmlInputs: Seq[html.Input]): JsDom.Modifier = {
-    def updateInput(t: html.Input) = {
+  private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]]): JsDom.Modifier = {
+    def updateInput(t: html.Input): Unit = {
       val selection = property.get
       t.checked = selection.contains(t.value)
     }

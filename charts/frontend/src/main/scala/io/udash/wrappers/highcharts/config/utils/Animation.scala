@@ -4,7 +4,6 @@ package utils
 
 import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.|
 
 sealed class Animation(val value: Boolean | js.Object)

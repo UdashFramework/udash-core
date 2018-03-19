@@ -79,7 +79,6 @@ trait SeriesEvents extends js.Object {
 }
 
 object SeriesEvents {
-  import scala.scalajs.js.JSConverters._
 
   @js.native
   trait CheckboxClickEvent extends JQueryEvent {

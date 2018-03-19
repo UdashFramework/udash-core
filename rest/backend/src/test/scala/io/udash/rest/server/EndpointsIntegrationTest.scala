@@ -3,7 +3,7 @@ package io.udash.rest.server
 import javax.servlet.http.HttpServletRequest
 
 import fr.hmil.roshttp.exceptions.HttpException
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse}
+import fr.hmil.roshttp.response.SimpleHttpResponse
 import io.udash.rest._
 import io.udash.rest.internal.RESTConnector
 import io.udash.testing.UdashSharedTest
@@ -17,7 +17,6 @@ import org.scalatest.concurrent.Eventually
 import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.language.postfixOps
 
 class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global

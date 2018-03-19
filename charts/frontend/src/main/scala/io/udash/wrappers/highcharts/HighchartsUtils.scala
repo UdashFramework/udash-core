@@ -4,7 +4,6 @@ import io.udash.wrappers.highcharts.config._
 import io.udash.wrappers.highcharts.config.global.{Global, Lang}
 import io.udash.wrappers.jquery._
 
-import scala.language.implicitConversions
 import scala.scalajs.js
 import scala.scalajs.js.Object
 
