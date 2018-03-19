@@ -80,7 +80,6 @@ trait SeriesMarker extends BaseSeriesMarker[SeriesMarkerStates]
 trait SeriesDataMarker extends BaseSeriesMarker[SeriesDataMarkerStates]
 
 object SeriesMarker {
-  import scala.scalajs.js.JSConverters._
 
   sealed class Symbol(val value: String)
   object Symbol {
@@ -136,7 +135,6 @@ object SeriesMarker {
 }
 
 object SeriesDataMarker {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled   Enable or disable the point marker. If <code>null</code>, the markers are hidden when the data is dense, and shown for more widespread data points.

@@ -1,6 +1,5 @@
 package io.udash.auth
 
-import io.udash._
 import io.udash.testing.UdashFrontendTest
 
 class AuthPresenterTest extends UdashFrontendTest with AuthTestUtils with AuthFrontendTestUtils {

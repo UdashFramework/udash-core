@@ -6,7 +6,6 @@ import io.udash.testing.AsyncUdashFrontendTest
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
-import scala.language.postfixOps
 import scala.util.Failure
 
 class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
@@ -36,7 +35,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
     }
 
     "handle responses from server" in {
-      val (connectorMock, serverRPC) = createServerRpc()
+      val (_, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
@@ -60,7 +59,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
     }
 
     "handle fail responses from server" in {
-      val (connectorMock, serverRPC) = createServerRpc()
+      val (_, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
@@ -83,7 +82,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       case class Ex(i: Int) extends Throwable
       val exName = Ex.getClass.getName
 
-      val (connectorMock, serverRPC) = createServerRpc()
+      val (_, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
@@ -119,17 +118,17 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val rpc = serverRPC.remoteRpc
 
       var firstCalled = false
-      serverRPC.onCallFailure { case ex =>
+      serverRPC.onCallFailure { case _ =>
         firstCalled = true
       }
 
       var secondCalled = false
-      val registration = serverRPC.onCallFailure { case ex =>
+      val registration = serverRPC.onCallFailure { case _ =>
         secondCalled = true
       }
 
       var thirdCalled = false
-      serverRPC.onCallFailure { case ex =>
+      serverRPC.onCallFailure { case _ =>
         thirdCalled = true
       }
 

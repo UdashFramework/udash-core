@@ -16,7 +16,6 @@ trait SeriesMarkerStates extends BaseSeriesMarkerStates[SeriesMarkerHover] {
 trait SeriesDataMarkerStates extends BaseSeriesMarkerStates[SeriesDataMarkerHover]
 
 object SeriesMarkerStates {
-  import scala.scalajs.js.JSConverters._
 
   def apply(hover: js.UndefOr[SeriesMarkerHover] = js.undefined, select: js.UndefOr[SeriesMarkerSelect] = js.undefined): SeriesMarkerStates = {
     val hoverOuter = hover
@@ -29,7 +28,6 @@ object SeriesMarkerStates {
 }
 
 object SeriesDataMarkerStates {
-  import scala.scalajs.js.JSConverters._
 
   def apply(hover: js.UndefOr[SeriesDataMarkerHover] = js.undefined): SeriesDataMarkerStates = {
     val hoverOuter = hover

@@ -7,12 +7,9 @@ trait RESTConverters {
 
   // for ServerREST
 
-  def rawToHeaderArgument(raw: framework.RawValue): String =
-    stripQuotes(framework.rawToString(raw))
-  def rawToQueryArgument(raw: framework.RawValue): String =
-    stripQuotes(framework.rawToString(raw))
-  def rawToURLPart(raw: framework.RawValue): String =
-    URLEncoder.encode(stripQuotes(framework.rawToString(raw)))
+  def rawToHeaderArgument(raw: framework.RawValue): String = stripQuotes(raw)
+  def rawToQueryArgument(raw: framework.RawValue): String = stripQuotes(raw)
+  def rawToURLPart(raw: framework.RawValue): String = URLEncoder.encode(stripQuotes(raw))
 
   private def stripQuotes(s: String): String =
     s.stripPrefix("\"").stripSuffix("\"")
@@ -25,6 +22,6 @@ trait RESTConverters {
     rawArg(URLEncoder.decode(raw), isStringArg)
 
   private def rawArg(raw: String, isStringArg: Boolean): framework.RawValue =
-    if (isStringArg) framework.stringToRaw(s""""$raw"""")
-    else framework.stringToRaw(raw)
+    if (isStringArg) s""""$raw""""
+    else raw
 }

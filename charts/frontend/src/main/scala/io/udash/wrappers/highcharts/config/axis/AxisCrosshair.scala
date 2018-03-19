@@ -47,7 +47,6 @@ trait AxisCrosshair extends js.Object {
 }
 
 object AxisCrosshair {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param className A class name for the crosshair, especially as a hook for styling.

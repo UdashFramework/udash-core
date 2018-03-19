@@ -12,7 +12,7 @@ object JawnFacade extends SimpleFacade[JValue] {
   override def jnum(s: String): JNum =
     try { JInt(s.toInt) }
     catch {
-      case ex: NumberFormatException =>
+      case _: NumberFormatException =>
         JDouble(s.toDouble)
     }
 

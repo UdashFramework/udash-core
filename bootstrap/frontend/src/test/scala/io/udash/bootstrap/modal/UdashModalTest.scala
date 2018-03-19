@@ -1,11 +1,7 @@
 package io.udash.bootstrap.modal
 
-import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
-import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
+import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
-import org.scalajs.dom.html.Button
 
 import scalatags.JsDom.all._
 

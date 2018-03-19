@@ -4,8 +4,6 @@ import io.udash.rpc.DefaultServerUdashRPCFramework
 import io.udash.testing.UdashSharedTest
 
 import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
 
 class TranslationKeyTest extends UdashSharedTest {
   import Utils._

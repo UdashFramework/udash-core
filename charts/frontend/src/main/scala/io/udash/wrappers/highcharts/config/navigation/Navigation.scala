@@ -52,7 +52,6 @@ trait Navigation extends js.Object {
 }
 
 object Navigation {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param buttonOptions      A collection of options for buttons appearing in the exporting module.

@@ -159,7 +159,6 @@ trait Chart extends js.Object {
 }
 
 object Chart {
-  import scala.scalajs.js.JSConverters._
 
   implicit class ChartExt(val chart: Chart) extends AnyVal {
     /**

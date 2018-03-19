@@ -1,7 +1,7 @@
 package manual
 
 import io.udash._
-import io.udash.properties.{HasModelPropertyCreator, IsModelPropertyTemplate, ModelPropertyCreator}
+import io.udash.properties.HasModelPropertyCreator
 
 object PropertyErrorManualTest {
   class ClassicClass(i: Int) {

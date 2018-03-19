@@ -2,8 +2,6 @@ package io.udash.css
 
 import io.udash.testing.UdashSharedTest
 
-import scala.io.Source
-
 class CssStringRendererTest extends UdashSharedTest {
   val stylesheets = Seq(StylesheetExample, SecondStylesheetExample)
   val testDir = "target/CssFileRendererTest"

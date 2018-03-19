@@ -129,7 +129,6 @@ trait Exporting extends js.Object {
 }
 
 object Exporting {
-  import scala.scalajs.js.JSConverters._
 
   final class ExportType(val name: String) extends AnyVal
   object ExportType {

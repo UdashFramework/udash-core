@@ -45,7 +45,6 @@ trait Loading extends js.Object {
 }
 
 object Loading {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param hideDuration The duration in milliseconds of the fade out effect.

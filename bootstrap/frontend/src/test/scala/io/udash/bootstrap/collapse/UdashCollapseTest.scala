@@ -1,10 +1,8 @@
 package io.udash.bootstrap.collapse
 
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.button.UdashButton
-import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
+import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
-import org.scalajs.dom.Element
 
 import scalatags.JsDom.all._
 

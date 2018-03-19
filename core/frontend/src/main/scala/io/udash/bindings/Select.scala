@@ -37,7 +37,7 @@ object Select {
         val element = t.asInstanceOf[html.Select]
 
         refreshSelectedItems()
-        val r = property.listen(_ => refreshSelectedItems())
+        property.listen(_ => refreshSelectedItems())
         element.onchange = (event: Event) => {
           property.set(htmlOptions.find(o => o.selected).get.value)
         }

@@ -1,7 +1,7 @@
 package io.udash.rpc
 
 import io.udash.testing.UdashRpcBackendTest
-import org.atmosphere.cpr.{AtmosphereResource, AtmosphereResourceSession, AtmosphereResourceSessionFactory, DefaultAtmosphereResourceSession}
+import org.atmosphere.cpr.AtmosphereResource
 
 class DefaultAtmosphereServiceConfigTest extends UdashRpcBackendTest {
 

@@ -2,8 +2,6 @@ package io.udash.testing
 
 import org.scalajs.dom
 import org.scalatest._
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.time.{Millis, Span}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext

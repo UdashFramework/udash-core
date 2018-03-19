@@ -1,7 +1,7 @@
 package io.udash.bindings
 
 import io.udash._
-import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
+import io.udash.testing.AsyncUdashFrontendTest
 
 class TextAreaTest extends AsyncUdashFrontendTest {
   "TextArea" should {

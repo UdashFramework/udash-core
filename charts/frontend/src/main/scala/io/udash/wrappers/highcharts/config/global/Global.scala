@@ -65,7 +65,6 @@ trait Global extends js.Object {
 }
 
 object Global {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param date                 A custom <code>Date</code> class for advanced date handling. For example, <a href="https://github.com/tahajahangir/jdate">JDate</a> can be hooked in to handle Jalali dates.

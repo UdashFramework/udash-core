@@ -23,7 +23,7 @@ trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
       .get(call.invocation.rpcName)
       .filter(_.annotations.exists(_.isInstanceOf[Logged]))
       .foreach(methodMetadata =>
-        log(classMetadata.name, methodMetadata.methodName, call.invocation.argLists.flatMap(_.map(localFramework.rawToString)))
+        log(classMetadata.name, methodMetadata.methodName, call.invocation.argLists.flatten)
       )
     super.handleRpcCall(call)
   }

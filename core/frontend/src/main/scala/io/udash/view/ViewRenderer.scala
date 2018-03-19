@@ -1,6 +1,6 @@
 package io.udash.view
 
-import io.udash.core.{ContainerView, FinalView, View}
+import io.udash.core.{ContainerView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
@@ -37,7 +37,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     }
   }
 
-  private def replaceCurrentViews(path: List[View]) = {
+  private def replaceCurrentViews(path: List[View]): Unit = {
     val rootView = mergeViews(path)
 
     views.clear()

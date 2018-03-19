@@ -11,7 +11,6 @@ trait SeriesPoint extends js.Object {
 }
 
 object SeriesPoint {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param events Events for each single point

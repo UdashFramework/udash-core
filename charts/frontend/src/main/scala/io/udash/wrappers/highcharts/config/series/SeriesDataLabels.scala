@@ -308,7 +308,6 @@ trait SeriesConnectorDataLabels extends BaseSeriesDataLabels {
 
 
 object SeriesDataLabels {
-  import scala.scalajs.js.JSConverters._
 
   @js.native
   trait FormatterData extends js.Object {
@@ -429,7 +428,6 @@ object SeriesDataLabels {
 }
 
 object SeriesRangeDataLabels {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align           The alignment of the data label compared to the point.  If <code>right</code>, the right side of the label should be touching the point. For points with an extent, like columns, the alignments also dictates how to align it inside the box, as given with the <a href="#plotOptions.column.dataLabels.inside">inside</a> option. Can be one of "left", "center" or "right".
@@ -548,7 +546,6 @@ object SeriesRangeDataLabels {
 }
 
 object SeriesConnectorDataLabels {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param backgroundColor  The background color or gradient for the data label. Defaults to <code>undefined</code>.
