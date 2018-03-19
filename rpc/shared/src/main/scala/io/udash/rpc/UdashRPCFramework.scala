@@ -8,6 +8,7 @@ import scala.language.postfixOps
 
 /** Base for all RPC frameworks in Udash. */
 trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
+  override type RawValue = String
   type RawRPC <: GetterRawRPC with ProcedureRawRPC
 
   class ParamTypeMetadata[+T]
@@ -16,16 +17,7 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   class ResultTypeMetadata[+T]
   implicit object ResultTypeMetadata extends ResultTypeMetadata[Nothing]
 
-  val RawValueCodec: GenCodec[RawValue]
-
-  private implicit def rawCodec: GenCodec[RawValue] =
-    RawValueCodec
-
-  /** Converts `String` into `RawValue`. It is used to read data from network. */
-  def stringToRaw(string: String): RawValue
-
-  /** Converts `RawValue` into `String`. It is used to write data to network. */
-  def rawToString(raw: RawValue): String
+  val RawValueCodec: GenCodec[RawValue] = implicitly
 
   sealed trait RPCRequest {
     def invocation: RawInvocation
@@ -176,19 +168,6 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
             val exceptionField = obj.writeField("exception").writeObject()
             exceptionField.writeField("type").writeString(name)
             exceptionsRegistry.get(name).write(exceptionField.writeField("data"), exception)
-//            val stack = exceptionField.writeField("stacktrace")
-//            if (exception.getStackTrace != null) {
-//              val stackList = stack.writeList()
-//              exception.getStackTrace.foreach { element =>
-//                val field = stackList.writeElement().writeObject()
-//                field.writeField("fileName").writeString(element.getFileName)
-//                field.writeField("className").writeString(element.getClassName)
-//                field.writeField("methodName").writeString(element.getMethodName)
-//                field.writeField("line").writeInt(element.getLineNumber)
-//                field.finish()
-//              }
-//              stackList.finish()
-//            } else stack.writeNull()
             exceptionField.finish()
             obj.writeField("callId").writeString(callId)
         }

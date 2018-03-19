@@ -19,8 +19,8 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
           else DeepNestedTestCC(ncc(), null)
 
         val test: DeepNestedTestCC = dncc()
-        val serialized = writer.rawToString(writer.write(test))
-        val deserialized = reader.read[DeepNestedTestCC](reader.stringToRaw(serialized))
+        val serialized = writer.write(test)
+        val deserialized = reader.read[DeepNestedTestCC](serialized)
 
         deserialized should be(test)
       }
@@ -51,8 +51,8 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
       )
 
       testOpts.foreach(opt => {
-        val serialized = writer.rawToString(writer.write(opt))
-        val deserialized = reader.read[Option[Long]](reader.stringToRaw(serialized))
+        val serialized = writer.write(opt)
+        val deserialized = reader.read[Option[Long]](serialized)
         deserialized should be(opt)
       })
     }

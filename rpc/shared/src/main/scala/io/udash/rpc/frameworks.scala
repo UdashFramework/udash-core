@@ -26,16 +26,6 @@ trait GenCodecSerializationFramework { this: RPCFramework =>
   def outputSerialization(valueConsumer: RawValue => Unit): Output
 }
 
-/** Mixin for RPC framework with automatic `GenCodec` to `String` serialization. */
-trait AutoUdashRPCFramework extends GenCodecSerializationFramework { this: RPCFramework =>
-  type RawValue = String
-
-  val RawValueCodec = implicitly[GenCodec[String]]
-
-  def stringToRaw(string: String): RawValue = string
-  def rawToString(raw: RawValue): String = raw
-}
-
 /** Base RPC framework for client RPC interface. This one does not allow RPC interfaces to contain methods with return type `Future[T]`. */
 trait ClientUdashRPCFramework extends UdashRPCFramework {
   trait RawRPC extends GetterRawRPC with ProcedureRawRPC
@@ -49,6 +39,6 @@ trait ServerUdashRPCFramework extends UdashRPCFramework with FunctionRPCFramewor
 }
 
 /** Default Udash client application RPC framework. */
-object DefaultClientUdashRPCFramework extends AutoUdashRPCFramework with ClientUdashRPCFramework with DefaultUdashSerialization
+object DefaultClientUdashRPCFramework extends ClientUdashRPCFramework with DefaultUdashSerialization
 /** Default Udash server application RPC framework. */
-object DefaultServerUdashRPCFramework extends AutoUdashRPCFramework with ServerUdashRPCFramework with DefaultUdashSerialization
+object DefaultServerUdashRPCFramework extends ServerUdashRPCFramework with DefaultUdashSerialization

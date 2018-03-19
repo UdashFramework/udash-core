@@ -4,9 +4,7 @@ import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.rest._
 import io.udash.rpc.serialization.URLEncoder
 
-import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashRESTFramework#ValidREST]
                        (implicit val ec: ExecutionContext) {
@@ -18,7 +16,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
     */
-  lazy val remoteRpc = remoteRpcAsReal.asReal(new RawRemoteRPC(Nil))
+  lazy val remoteRpc: ServerRPCType = remoteRpcAsReal.asReal(new RawRemoteRPC(Nil))
 
   /**
     * This allows for generation of proxy which translates RPC calls into raw calls that
@@ -73,7 +71,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
             case Some(_: URLPart) =>
               urlBuilder += rawToURLPart(value)
             case Some(_: Body) =>
-              body = rawToString(value)
+              body = value
             case Some(_: BodyValue) =>
               bodyArgsBuilder += (paramName -> value)
             case Some(_: Query) | None => // Query is a default argument type
@@ -87,7 +85,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       val rpcMethodName: String = inv.rpcName
       val methodMetadata = metadata.signatures(rpcMethodName)
       val methodAnnotations = methodMetadata.annotations.filter(_.isInstanceOf[RESTMethod])
-      if (methodAnnotations.size > 1) throw new RuntimeException(s"Too many method type annotations! ($methodAnnotations)")
+      if (methodAnnotations.lengthCompare(1) > 0) throw new RuntimeException(s"Too many method type annotations! ($methodAnnotations)")
       methodAnnotations.headOption match {
         case Some(_: GET) => RESTConnector.GET
         case Some(_: POST) => RESTConnector.POST
@@ -110,7 +108,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
     val bodyArgs = bodyArgsBuilder.result()
     if (body != null && bodyArgs.nonEmpty) throw new IllegalStateException("@Body and @BodyValue annotations used at the same time!")
     else if (body == null && bodyArgs.nonEmpty) {
-      body = rawToString(framework.write(bodyArgs)(framework.bodyValuesWriter))
+      body = framework.write(bodyArgs)(framework.bodyValuesWriter)
     }
 
     connector.send(
@@ -119,7 +117,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body
-    ).map(stringToRaw)
+    )
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
