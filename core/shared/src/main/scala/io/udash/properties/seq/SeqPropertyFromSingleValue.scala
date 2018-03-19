@@ -79,6 +79,11 @@ private[properties]
 class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
   extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer) with SeqProperty[B, Property[B]] {
 
+  override protected[properties] def valueChanged(): Unit = {
+    super.valueChanged()
+    origin.set(revert(get))
+  }
+
   override def replace(idx: Int, amount: Int, values: B*): Unit = {
     val current = mutable.ListBuffer(get: _*)
     current.remove(idx, amount)

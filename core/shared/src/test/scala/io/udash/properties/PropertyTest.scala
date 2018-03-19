@@ -686,6 +686,34 @@ class PropertyTest extends UdashSharedTest {
       elementsUpdated should be(0)
     }
 
+    "handle child modification in transformToSeq result" in {
+      val s = Property("1,2,3,4,5,6")
+      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
+
+      var counter = 0
+      s.listen(_ => counter += 1)
+
+      i.append(7)
+
+      s.get should be("1,2,3,4,5,6,7")
+      i.get should be(Seq(1,2,3,4,5,6,7))
+      counter should be(1)
+
+      CallbackSequencer().sequence {
+        i.elemProperties.foreach(_.set(12))
+      }
+
+      s.get should be("12,12,12,12,12,12,12")
+      i.get should be(Seq(12,12,12,12,12,12,12))
+      counter should be(2)
+
+      i.elemProperties.foreach(_.set(1))
+
+      s.get should be("1,1,1,1,1,1,1")
+      i.get should be(Seq(1,1,1,1,1,1,1))
+      counter should be(9)
+    }
+
     "stream value to another property" in {
       val source = SeqProperty(1, 2, 3)
       val transformed = source.transform((i: Int) => i * 2)
