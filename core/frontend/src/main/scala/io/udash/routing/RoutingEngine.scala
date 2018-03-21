@@ -82,7 +82,7 @@ class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : Property
     * @param callback Callback getting StateChangeEvent as arguments
     */
   def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Any): Registration =
-    onStateChange(PartialFunction(callback))
+    onStateChange({ case x => callback(x) }: callbacks.CallbackType)
 
   /**
     * Register a callback for the routing state change.

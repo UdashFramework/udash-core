@@ -26,7 +26,7 @@ jdk:
 
 scala:
   - 2.11.12
-  - 2.12.4
+  - 2.12.5
 
 env:
   - TEST_PACKAGE="core-macros/test core-shared/test core-shared-JS/test core-frontend/test"
