@@ -1,6 +1,5 @@
 package io.udash.bindings
 
-import io.udash._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.seq.ReadableSeqProperty
@@ -443,7 +442,7 @@ object Bindings extends Bindings {
       element.removeAttribute(attr.name)
 
     /** Synchronises attribute value with property content. */
-    def bind(property: ReadableProperty[String]): Modifier[Element] =
+    def bind(property: ReadableProperty[String]): Binding =
       property.reactiveApply {
         case (elem, null) => removeFrom(elem)
         case (elem, v) => applyTo(elem, v)
@@ -453,7 +452,7 @@ object Bindings extends Bindings {
       * Synchronises attribute value with property content by adding it when property is not null and
       * condition property is 'true' and removing otherwise.
       */
-    def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Modifier[Element] =
+    def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Binding =
       property.combine(conditionProperty)((_, _)).reactiveApply {
         case (elem, (null, _) | (_, false)) => removeFrom(elem)
         case (elem, (v, true)) => applyTo(elem, v)
