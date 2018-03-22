@@ -886,7 +886,7 @@ class PropertyTest extends UdashSharedTest {
       target.get should be(Seq(1, 2))
 
       //Init update
-      val registration = source.sync(target)((i: Int) => 1 to i, (s: Seq[Int]) => s.length)
+      source.sync(target)((i: Int) => 1 to i, (s: Seq[Int]) => s.length)
 
       source.get should be(1)
       target.get should be(Seq(1))
