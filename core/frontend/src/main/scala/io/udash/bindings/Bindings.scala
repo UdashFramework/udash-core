@@ -2,6 +2,7 @@ package io.udash.bindings
 
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
 import io.udash.bindings.modifiers._
+import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._

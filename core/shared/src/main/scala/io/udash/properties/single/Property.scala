@@ -8,7 +8,6 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
-import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 object Property {
