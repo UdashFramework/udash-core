@@ -3,8 +3,6 @@ package io.udash.view
 import io.udash.testing.{TestFinalView, TestView, UdashFrontendTest}
 
 class ViewRendererTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
-
   "ViewRenderer" should {
     "render clear views hierarchy" in {
       val renderer = new ViewRenderer(emptyComponent())

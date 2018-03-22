@@ -5,7 +5,6 @@ import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
 import io.udash.testing.UdashSharedTest
 
-import scala.language.higherKinds
 import scala.util.Random
 
 private case class CustomException(error: String, counter: Int) extends Throwable
@@ -24,11 +23,11 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
     implicit val codec: GenCodec[RPCResponse] = RPCResponseCodec(exceptionsRegistry)
 
-    val inv = RawInvocation("r{p[c\"]}Name", List(List(stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""))))
-    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List(stringToRaw("\",a\""), stringToRaw("\"B,,\""), stringToRaw("\"v\"")), List(stringToRaw("\"xy,z\""))))
+    val inv = RawInvocation("r{p[c\"]}Name", List(List(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
+    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List("\",a\"", "\"B,,\"", "\"v\""), List("\"xy,z\"")))
     val getter2 = RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
     val req = RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
-    val success = RPCResponseSuccess(stringToRaw(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
+    val success = RPCResponseSuccess(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""", "\"ca{[]}ll1\"")
     val failure = RPCResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
     val exception = RPCResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
     val runtimeException = RPCResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
@@ -162,36 +161,36 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "handle plain numbers in JSON as Int, Long and Double" in {
-      val json = RPC.stringToRaw("123")
+      val json = "123"
       RPC.read[Int](json) should be(123)
       RPC.read[Long](json) should be(123)
       RPC.read[Double](json) should be(123)
 
       val maxIntPlusOne: Long = Int.MaxValue.toLong + 1
-      val jsonLong = RPC.stringToRaw(maxIntPlusOne.toString)
+      val jsonLong = maxIntPlusOne.toString
       intercept[ReadFailure](RPC.read[Int](jsonLong))
       RPC.read[Long](jsonLong) should be(maxIntPlusOne)
       RPC.read[Double](jsonLong) should be(maxIntPlusOne)
 
-      val jsonLongMax = RPC.stringToRaw(Long.MaxValue.toString)
+      val jsonLongMax = Long.MaxValue.toString
       intercept[ReadFailure](RPC.read[Int](jsonLong))
       RPC.read[Long](jsonLongMax) should be(Long.MaxValue)
       RPC.read[Double](jsonLongMax) should be(Long.MaxValue)
 
-      val jsonDouble = RPC.stringToRaw(Double.MaxValue.toString)
+      val jsonDouble = Double.MaxValue.toString
       intercept[ReadFailure](RPC.read[Int](jsonDouble))
       intercept[ReadFailure](RPC.read[Long](jsonDouble))
       RPC.read[Double](jsonDouble) should be(Double.MaxValue)
 
-      val jsonDouble2 = RPC.stringToRaw("123.00")
+      val jsonDouble2 = "123.00"
       RPC.read[Int](jsonDouble2) should be(123)
       RPC.read[Long](jsonDouble2) should be(123)
       RPC.read[Double](jsonDouble2) should be(123.0)
 
       val brokenDouble = "312,321"
-      intercept[ReadFailure](RPC.read[Int](RPC.stringToRaw(brokenDouble)))
-      intercept[ReadFailure](RPC.read[Long](RPC.stringToRaw(brokenDouble)))
-      intercept[ReadFailure](RPC.read[Double](RPC.stringToRaw(brokenDouble)))
+      intercept[ReadFailure](RPC.read[Int](brokenDouble))
+      intercept[ReadFailure](RPC.read[Long](brokenDouble))
+      intercept[ReadFailure](RPC.read[Double](brokenDouble))
     }
 
     "work with skipping" in {

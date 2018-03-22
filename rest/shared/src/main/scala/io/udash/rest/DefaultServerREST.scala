@@ -1,7 +1,6 @@
 package io.udash.rest
 
 import io.udash.rest.internal.{RESTConnector, UsesREST}
-import io.udash.rpc.serialization.URLEncoder
 
 import scala.concurrent.ExecutionContext
 

@@ -38,7 +38,7 @@ final class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, overrid
     BootstrapTags.dataDismiss := "alert", aria.label := "close",
     span(aria.hidden := "true")("×")
   )
-  button.listen { case ev => _dismissed.set(true) }
+  button.listen { case UdashButton.ButtonClickEvent(_, _) => _dismissed.set(true) }
 
   private val buttonRendered = button.render
 

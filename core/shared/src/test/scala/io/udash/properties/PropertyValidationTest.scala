@@ -252,7 +252,6 @@ class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedT
     }
 
     "allow usage of custom validation error types" in {
-      sealed trait RangeValidationErrors
       case class ValueIsTooSmall(value: Int, min: Int) extends ValidationError {
         override def message: String =
           s"$value is smaller than $min!"

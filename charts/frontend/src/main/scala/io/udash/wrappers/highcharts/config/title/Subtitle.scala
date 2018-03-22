@@ -10,7 +10,6 @@ import scala.scalajs.js
 trait Subtitle extends AbstractTitle
 
 object Subtitle {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align The horizontal alignment of the subtitle. Can be one of "left", "center" and "right".

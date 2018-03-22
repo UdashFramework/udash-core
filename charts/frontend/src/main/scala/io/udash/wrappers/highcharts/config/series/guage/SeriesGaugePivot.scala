@@ -35,7 +35,6 @@ trait SeriesGaugePivot extends js.Object {
 }
 
 object SeriesGaugePivot {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param backgroundColor The background color or fill of the pivot.

@@ -6,7 +6,6 @@ import io.udash.wrappers.highcharts.config.axis._
 import io.udash.wrappers.highcharts.config.utils.Animation
 
 import scala.scalajs.js
-import scala.scalajs.js.`|`
 
 
 @js.native

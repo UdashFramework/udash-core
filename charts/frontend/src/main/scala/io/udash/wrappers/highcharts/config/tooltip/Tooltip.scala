@@ -266,7 +266,6 @@ trait Tooltip extends js.Object {
 }
 
 object Tooltip {
-  import scala.scalajs.js.JSConverters._
 
   @js.native
   trait FormatterData extends js.Object {

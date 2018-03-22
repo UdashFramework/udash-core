@@ -72,7 +72,6 @@ class ValidationTagsBindingTest extends AsyncUdashFrontendTest with Bindings { b
 
     "not swap position" in {
       val p = Property[Int](5)
-      val p2 = Property[Int](3)
       p.addValidator(new Validator[Int] {
         override def apply(element: Int): Future[ValidationResult] = Future.failed(new NullPointerException)
       })

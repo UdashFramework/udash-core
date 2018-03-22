@@ -295,6 +295,13 @@ class PropertyTest extends UdashSharedTest {
 
       pageProperty.set(3)
       counter should be(1)
+
+      totalPagesProperty.get should be(None)
+
+      seenAllProperty.set(true)
+      counter should be(2)
+      totalPagesProperty.get should be(Some(3))
+      lastPageProperty.get should be(true)
     }
 
     "combine with other properties" in {
@@ -533,7 +540,7 @@ class PropertyTest extends UdashSharedTest {
 
       s.elemProperties.foreach {
         case p: Property[Int] => p.set(20)
-        case p: ReadableProperty[Int] => //ignore
+        case _: ReadableProperty[Int] => //ignore
       }
 
       s.get should be(Seq(1,2,3,4,5))
@@ -677,6 +684,34 @@ class PropertyTest extends UdashSharedTest {
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
+    }
+
+    "handle child modification in transformToSeq result" in {
+      val s = Property("1,2,3,4,5,6")
+      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
+
+      var counter = 0
+      s.listen(_ => counter += 1)
+
+      i.append(7)
+
+      s.get should be("1,2,3,4,5,6,7")
+      i.get should be(Seq(1,2,3,4,5,6,7))
+      counter should be(1)
+
+      CallbackSequencer().sequence {
+        i.elemProperties.foreach(_.set(12))
+      }
+
+      s.get should be("12,12,12,12,12,12,12")
+      i.get should be(Seq(12,12,12,12,12,12,12))
+      counter should be(2)
+
+      i.elemProperties.foreach(_.set(1))
+
+      s.get should be("1,1,1,1,1,1,1")
+      i.get should be(Seq(1,1,1,1,1,1,1))
+      counter should be(9)
     }
 
     "stream value to another property" in {
@@ -1653,8 +1688,8 @@ class PropertyTest extends UdashSharedTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      var states = mutable.ArrayBuffer.empty[Seq[Int]]
-      var patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
+      val states = mutable.ArrayBuffer.empty[Seq[Int]]
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
 
       f.listen(v => states += v)
       f.listenStructure(p => patches += p)
@@ -1897,7 +1932,7 @@ class PropertyTest extends UdashSharedTest {
 
       val c = s.combine(p)(_ * _)
 
-      var listenCalls = mutable.ListBuffer[Seq[Int]]()
+      val listenCalls = mutable.ListBuffer[Seq[Int]]()
       c.listen(v => listenCalls += v)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null

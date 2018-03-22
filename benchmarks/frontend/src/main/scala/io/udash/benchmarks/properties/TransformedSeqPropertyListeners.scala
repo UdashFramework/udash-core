@@ -4,8 +4,6 @@ import io.udash._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
 
-import scala.util.Random
-
 object TransformedSeqPropertyListeners extends BenchmarkUtils {
   private val seqSize = 50
   private val properties: Seq[(String, () => (SeqProperty[Int], ReadableSeqProperty[Int]))] = Seq(

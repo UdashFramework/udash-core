@@ -65,7 +65,7 @@ object UdashButtonGroup {
   def apply(size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
            (buttons: dom.Element*): UdashButtonGroup[dom.Element, Property[dom.Element]] =
-    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](buttons), size, vertical, justified)(_.get)
+    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](buttons), size, vertical, justified, componentId)(_.get)
 
 
   /**

@@ -76,7 +76,6 @@ trait Accessibility extends js.Object {
 }
 
 object Accessibility {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param describeSingleSeries Whether or not to add series descriptions to charts with a single series.

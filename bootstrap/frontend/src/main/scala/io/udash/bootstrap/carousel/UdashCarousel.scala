@@ -8,12 +8,10 @@ import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.UdashIcons
-import io.udash.properties.PropertyCreator
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
-import scala.language.postfixOps
 import scala.scalajs.js
 import scala.scalajs.js.Dictionary
 import scala.util.Try

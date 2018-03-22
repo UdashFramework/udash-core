@@ -26,7 +26,6 @@ trait SeriesHoverHalo extends js.Object {
 }
 
 object SeriesHoverHalo {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param attributes A collection of SVG attributes to override the appearance of the halo, for example <code>fill</code>, <code>stroke</code> and <code>stroke-width</code>.

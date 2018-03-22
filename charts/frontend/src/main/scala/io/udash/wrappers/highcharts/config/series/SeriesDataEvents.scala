@@ -74,7 +74,6 @@ trait SeriesDataEvents extends js.Object {
 }
 
 object SeriesDataEvents {
-  import scala.scalajs.js.JSConverters._
 
   @js.native
   trait UpdateEvent extends JQueryEvent {

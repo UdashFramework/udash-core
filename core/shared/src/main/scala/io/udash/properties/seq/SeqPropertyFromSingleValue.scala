@@ -34,7 +34,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](or
     def commonIdx(s1: Iterator[B], s2: Iterator[B]): Int =
       math.max(0,
         s1.zipAll(s2, null, null).zipWithIndex
-          .indexWhere { case (((x, y), idx)) => x != y })
+          .indexWhere { case (((x, y), _)) => x != y })
 
     val commonBegin = commonIdx(transformed.iterator, current.iterator)
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
@@ -78,6 +78,11 @@ class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Readabl
 private[properties]
 class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
   extends BaseReadableSeqPropertyFromSingleValue[A, B](origin, transformer) with SeqProperty[B, Property[B]] {
+
+  override protected[properties] def valueChanged(): Unit = {
+    super.valueChanged()
+    origin.set(revert(get))
+  }
 
   override def replace(idx: Int, amount: Int, values: B*): Unit = {
     val current = mutable.ListBuffer(get: _*)

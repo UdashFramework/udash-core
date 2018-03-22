@@ -4,7 +4,6 @@ package tooltip
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
-import scala.language.postfixOps
 import scala.scalajs.js
 
 final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)

@@ -1,10 +1,6 @@
 package io.udash.bindings
 
-import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
-
-import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
 
 class QueuedNodeModifierTest extends AsyncUdashFrontendTest with Bindings { bindings: Bindings =>
   import scalatags.JsDom.all._

@@ -1,14 +1,15 @@
-import Dependencies._
-import UdashBuild._
+import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.remote.DesiredCapabilities
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 name := "udash"
-cancelable in Global := true
 
 inThisBuild(Seq(
   version := "0.7.0-SNAPSHOT",
-  scalaVersion := versionOfScala,
-  crossScalaVersions := Seq("2.11.11", versionOfScala),
+  scalaVersion := Dependencies.versionOfScala,
+  crossScalaVersions := Seq("2.11.11", Dependencies.versionOfScala),
   organization := "io.udash",
+  cancelable := true,
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -16,43 +17,55 @@ inThisBuild(Seq(
     "-language:implicitConversions",
     "-language:existentials",
     "-language:dynamics",
+    "-language:postfixOps",
     "-language:experimental.macros",
     "-Xfuture",
     "-Xfatal-warnings",
-    CrossVersion.partialVersion(scalaVersion.value).collect {
-      // WORKAROUND https://github.com/scala/scala/pull/5402
-      case (2, 12) => "-Xlint:-unused,_"
-    }.getOrElse("-Xlint:_"),
+    "-Xlint:_",
   ),
-  jsTestEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv({
-    import org.openqa.selenium.chrome.ChromeOptions
-    val chrome = org.openqa.selenium.remote.DesiredCapabilities.chrome()
-    val chromeOptions = new ChromeOptions()
-    chromeOptions.addArguments("--headless", "--disable-gpu")
-    chrome.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
-    chrome
-  })
+  scalacOptions ++= {
+    if (CrossVersion.partialVersion((udash / scalaVersion).value).contains((2, 12))) Seq(
+      "-Ywarn-unused:_,-explicits,-implicits",
+      "-Ybackend-parallelism", "4",
+      "-Ycache-plugin-class-loader:last-modified",
+      "-Ycache-macro-class-loader:last-modified"
+    ) else Seq.empty
+  },
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
+val CompileAndTest = "test->test;compile->compile"
+val TestAll = "test->test"
+
+// Settings for JS tests run in browser
+val browserCapabilities: DesiredCapabilities = {
+  // requires ChromeDriver: https://sites.google.com/a/chromium.org/chromedriver/
+  val capabilities = DesiredCapabilities.chrome()
+  capabilities.setCapability(ChromeOptions.CAPABILITY, {
+    val options = new ChromeOptions()
+    options.addArguments("--headless", "--disable-gpu")
+    options
+  })
+  capabilities
+}
 
 val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
-  libraryDependencies ++= compilerPlugins.value,
-  libraryDependencies ++= commonDeps.value,
-  libraryDependencies ++= commonTestDeps.value,
+  libraryDependencies ++= Dependencies.compilerPlugins.value,
+  libraryDependencies ++= Dependencies.commonDeps.value,
+  libraryDependencies ++= Dependencies.commonTestDeps.value,
 )
 
 val commonJSSettings = Seq(
-  emitSourceMaps in Compile := true,
-  scalaJSStage in Test := FastOptStage,
-  jsEnv in Test := jsTestEnv.value,
+  Compile / emitSourceMaps := true,
+  Test / parallelExecution := false,
+  Test / scalaJSStage := FastOptStage,
+  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
   scalacOptions += {
-    val localDir = (baseDirectory in ThisBuild).value.toURI.toString
+    val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
-  parallelExecution in Test := false,
   scalacOptions += "-P:scalajs:sjsDefinedByDefault",
 )
 
@@ -61,7 +74,7 @@ val noPublishSettings = Seq(
   publish := {},
   publishLocal := {},
   publishM2 := {},
-  doc := (target in doc).value,
+  doc := (doc / target).value,
 )
 
 def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
@@ -71,9 +84,9 @@ def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq
 )
 
 def sourceDirsSettings(baseMapper: File => File) = Seq(
-  unmanagedSourceDirectories in Compile ++=
+  Compile / unmanagedSourceDirectories ++=
     mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "main"),
-  unmanagedSourceDirectories in Test ++=
+  Test / unmanagedSourceDirectories ++=
     mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "test"),
 )
 
@@ -87,12 +100,12 @@ lazy val udash = project.in(file("."))
     `css-macros`, `css-shared-JS`, `css-shared`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
-  .settings(noPublishSettings: _*)
+  .settings(noPublishSettings)
 
 lazy val `core-macros` = project.in(file("core/macros"))
-  .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
+    commonSettings,
+    libraryDependencies ++= Dependencies.coreMacroDeps.value,
   )
 
 lazy val `core-shared` = project.in(file("core/shared"))
@@ -101,8 +114,8 @@ lazy val `core-shared` = project.in(file("core/shared"))
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
 
-    libraryDependencies ++= coreCrossDeps.value,
-    libraryDependencies ++= coreCrossJVMDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossJVMDeps.value,
   )
 
 lazy val `core-shared-JS` = project.in(`core-shared`.base / ".js")
@@ -112,25 +125,21 @@ lazy val `core-shared-JS` = project.in(`core-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `core-shared`).value,
+
+    name := (`core-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
 
-    libraryDependencies ++= coreCrossDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossDeps.value,
   )
 
-lazy val `core-frontend` = project.in(file("core/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `core-frontend` = project.in(file("core/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-shared-JS` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
   .settings(
-    emitSourceMaps in Compile := true,
-    libraryDependencies ++= coreFrontendDeps.value,
-    publishedJS := Def.taskDyn {
-      if (isSnapshot.value) Def.task((fastOptJS in Compile).value) else Def.task((fullOptJS in Compile).value)
-    }.value,
-    publishedJSDependencies := Def.taskDyn {
-      if (isSnapshot.value) Def.task((packageJSDependencies in Compile).value) else Def.task((packageMinifiedJSDependencies in Compile).value)
-    }.value
+    commonSettings,
+    commonJSSettings,
+
+    libraryDependencies ++= Dependencies.coreFrontendDeps.value
   )
 
 lazy val `rpc-shared` = project.in(file("rpc/shared"))
@@ -139,8 +148,8 @@ lazy val `rpc-shared` = project.in(file("rpc/shared"))
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
 
-    libraryDependencies ++= rpcCrossTestDeps.value,
-    libraryDependencies ++= rpcSharedJVMDeps.value,
+    libraryDependencies ++= Dependencies.rpcCrossTestDeps.value,
+    libraryDependencies ++= Dependencies.rpcSharedJVMDeps.value,
   )
 
 lazy val `rpc-shared-JS` = project.in(`rpc-shared`.base / ".js")
@@ -150,33 +159,34 @@ lazy val `rpc-shared-JS` = project.in(`rpc-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `rpc-shared`).value,
+
+    name := (`rpc-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
 
-    libraryDependencies ++= rpcCrossTestDeps.value,
+    libraryDependencies ++= Dependencies.rpcCrossTestDeps.value,
   )
 
 lazy val `rpc-backend` = project.in(file("rpc/backend"))
   .dependsOn(`rpc-shared` % CompileAndTest)
-  .settings(commonSettings: _*).settings(
-  libraryDependencies ++= rpcBackendDeps.value
-)
-
-lazy val `rpc-frontend` = project.in(file("rpc/frontend")).enablePlugins(ScalaJSPlugin)
-  .dependsOn(`rpc-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
   .settings(
-    jsDependencies ++= rpcFrontendJsDeps.value
+    commonSettings,
+    libraryDependencies ++= Dependencies.rpcBackendDeps.value
+  )
+
+lazy val `rpc-frontend` = project.in(file("rpc/frontend"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(`rpc-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
+  .settings(
+    commonSettings,
+    commonJSSettings,
+
+    jsDependencies ++= Dependencies.rpcFrontendJsDeps.value
   )
 
 lazy val `rest-macros` = project.in(file("rest/macros"))
-  .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
-    )
+    commonSettings,
+    libraryDependencies ++= Dependencies.restMacroDeps.value
   )
 
 lazy val `rest-shared` = project.in(file("rest/shared"))
@@ -185,7 +195,7 @@ lazy val `rest-shared` = project.in(file("rest/shared"))
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
 
-    libraryDependencies ++= restCrossDeps.value,
+    libraryDependencies ++= Dependencies.restCrossDeps.value,
   )
 
 lazy val `rest-shared-JS` = project.in(`rest-shared`.base / ".js")
@@ -195,17 +205,18 @@ lazy val `rest-shared-JS` = project.in(`rest-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `rest-shared`).value,
+
+    name := (`rest-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
 
-    libraryDependencies ++= restCrossDeps.value,
+    libraryDependencies ++= Dependencies.restCrossDeps.value,
   )
 
 lazy val `rest-backend` = project.in(file("rest/backend"))
   .dependsOn(`rest-shared` % CompileAndTest)
-  .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= restBackendDeps.value
+    commonSettings,
+    libraryDependencies ++= Dependencies.restBackendDeps.value
   )
 
 lazy val `i18n-shared` = project.in(file("i18n/shared"))
@@ -222,19 +233,22 @@ lazy val `i18n-shared-JS` = project.in(`i18n-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `i18n-shared`).value,
+
+    name := (`i18n-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
   )
 
 lazy val `i18n-backend` = project.in(file("i18n/backend"))
   .dependsOn(`i18n-shared` % CompileAndTest, `rpc-backend` % CompileAndTest)
-  .settings(commonSettings: _*)
+  .settings(commonSettings)
 
 lazy val `i18n-frontend` = project.in(file("i18n/frontend"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`i18n-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
+  .settings(
+    commonSettings,
+    commonJSSettings
+  )
 
 lazy val `auth-shared` = project.in(file("auth/shared"))
   .dependsOn(`rpc-shared` % CompileAndTest)
@@ -250,21 +264,23 @@ lazy val `auth-shared-JS` = project.in(`auth-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `auth-shared`).value,
+
+    name := (`auth-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
   )
 
 lazy val `auth-frontend` = project.in(file("auth/frontend"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`auth-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
+  .settings(
+    commonSettings,
+    commonJSSettings
+  )
 
 lazy val `css-macros` = project.in(file("css/macros"))
-  .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value),
-    libraryDependencies ++= cssMacroDeps.value
+    commonSettings,
+    libraryDependencies ++= Dependencies.cssMacroDeps.value
   )
 
 lazy val `css-shared` = project.in(file("css/shared"))
@@ -272,7 +288,8 @@ lazy val `css-shared` = project.in(file("css/shared"))
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
-    libraryDependencies ++= cssMacroDeps.value,
+
+    libraryDependencies ++= Dependencies.cssMacroDeps.value,
   )
 
 lazy val `css-shared-JS` = project.in(`css-shared`.base / ".js")
@@ -282,48 +299,54 @@ lazy val `css-shared-JS` = project.in(`css-shared`.base / ".js")
   .settings(
     commonSettings,
     commonJSSettings,
-    name := (name in `css-shared`).value,
+
+    name := (`css-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
-    libraryDependencies ++= cssMacroDeps.value,
+
+    libraryDependencies ++= Dependencies.cssMacroDeps.value,
   )
 
 lazy val `css-backend` = project.in(file("css/backend"))
   .dependsOn(`css-shared` % CompileAndTest, `core-shared` % TestAll)
-  .settings(commonSettings: _*)
+  .settings(commonSettings)
 
-lazy val `css-frontend` = project.in(file("css/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `css-frontend` = project.in(file("css/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`css-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
   .settings(
-    emitSourceMaps in Compile := true,
-    libraryDependencies ++= cssFrontendDeps.value
+    commonSettings,
+    commonJSSettings,
+    libraryDependencies ++= Dependencies.cssFrontendDeps.value
   )
 
 lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend` % CompileAndTest, `css-frontend` % CompileAndTest, `i18n-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
   .settings(
-    libraryDependencies ++= bootstrapFrontendDeps.value,
-    jsDependencies ++= bootstrapFrontendJsDeps.value
+    commonSettings,
+    commonJSSettings,
+
+    libraryDependencies ++= Dependencies.bootstrapFrontendDeps.value,
+    jsDependencies ++= Dependencies.bootstrapFrontendJsDeps.value
   )
 
-lazy val `charts` = project.in(file("charts/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `charts` = project.in(file("charts/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend` % CompileAndTest)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
   .settings(
-    libraryDependencies ++= chartsFrontendDeps.value
+    commonSettings,
+    commonJSSettings,
+    libraryDependencies ++= Dependencies.chartsFrontendDeps.value
   )
 
-lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend")).enablePlugins(ScalaJSPlugin)
+lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend`, `i18n-frontend`, `css-frontend`)
-  .settings(commonSettings: _*)
-  .settings(commonJSSettings: _*)
-  .settings(noPublishSettings: _*)
   .settings(
-    libraryDependencies ++= benchmarksFrontendDeps.value,
-    scalaJSUseMainModuleInitializer in Compile := true,
+    commonSettings,
+    commonJSSettings,
+    noPublishSettings,
+
+    libraryDependencies ++= Dependencies.benchmarksFrontendDeps.value,
+    Compile / scalaJSUseMainModuleInitializer := true,
   )

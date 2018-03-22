@@ -2,7 +2,6 @@ package io.udash.css
 
 import io.udash.ReadableProperty
 import io.udash.bindings.modifiers.EmptyModifier
-import io.udash.properties.PropertyCreator
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
@@ -70,7 +69,6 @@ object CssView extends CssView {
       )
 
     def styleIf(condition: Boolean): Modifier = {
-      import scalatags.JsDom.all.UnitFrag
       if (condition) new StyleModifier(js.Array(style))
       else new EmptyModifier[Element]
     }

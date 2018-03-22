@@ -5,15 +5,11 @@ import com.avsystem.commons.rpc.{FunctionRPCFramework, GetterRPCFramework, Proce
 trait UdashRESTFramework extends GetterRPCFramework with ProcedureRPCFramework with FunctionRPCFramework {
   trait RawRPC extends GetterRawRPC with ProcedureRawRPC with FunctionRawRPC
 
+  type RawValue = String
   type ParamTypeMetadata[T] = SimplifiedType[T]
 
   class ResultTypeMetadata[+T]
   implicit object ResultTypeMetadata extends ResultTypeMetadata[Nothing]
-
-  /** Transform `String` received from HTTP response to `RawValue`. */
-  def stringToRaw(string: String): RawValue
-  /** Transform `RawValue` to `String` for HTTP request body. */
-  def rawToString(raw: RawValue): String
 
   def bodyValuesWriter: Writer[Map[String, RawValue]]
   def bodyValuesReader: Reader[Map[String, RawValue]]

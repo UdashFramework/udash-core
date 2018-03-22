@@ -3,7 +3,6 @@ package io.udash.testing
 import java.io.PrintWriter
 import java.util
 import java.util.concurrent.{Future, TimeUnit}
-import javax.servlet.http.HttpSession
 
 import io.udash.rpc.{AtmosphereServiceConfig, ExposesServerRPC, Utils}
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT

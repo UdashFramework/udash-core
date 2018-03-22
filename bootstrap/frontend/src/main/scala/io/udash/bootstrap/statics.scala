@@ -2,8 +2,6 @@ package io.udash.bootstrap
 
 import io.udash.css.CssStyleName
 
-import scala.language.postfixOps
-
 object BootstrapTags {
   import scalatags.JsDom.all._
 

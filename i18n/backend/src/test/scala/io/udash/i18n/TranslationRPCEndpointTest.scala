@@ -2,7 +2,7 @@ package io.udash.i18n
 
 import io.udash.testing.UdashRpcBackendTest
 
-import scala.util.{Failure, Success}
+import scala.util.Success
 
 class TranslationRPCEndpointTest extends UdashRpcBackendTest {
   import scala.concurrent.ExecutionContext.Implicits.global

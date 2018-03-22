@@ -29,7 +29,6 @@ trait DrilldownDrillUpButton extends js.Object {
 }
 
 object DrilldownDrillUpButton {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param position   Positioning options for the button within the <code>relativeTo</code> box. Available properties are <code>x</code>, <code>y</code>, <code>align</code> and <code>verticalAlign</code>.

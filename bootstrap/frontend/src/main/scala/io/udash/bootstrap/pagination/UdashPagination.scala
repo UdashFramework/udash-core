@@ -30,7 +30,7 @@ sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType
 }
 
 final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]] private
-                           (size: PaginationSize, showArrows: ReadableProperty[Boolean],
+                           (paginationSize: PaginationSize, showArrows: ReadableProperty[Boolean],
                             highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
                            (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
                            (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
@@ -43,7 +43,7 @@ final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: Readabl
     import scalatags.JsDom.tags2
 
     tags2.nav(
-      ul(id := componentId, BootstrapStyles.Pagination.pagination)(
+      ul(id := componentId, BootstrapStyles.Pagination.pagination, paginationSize)(
         arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage),
         repeat(pages)(page => {
           def currentIdx: Int = pages.elemProperties.indexOf(page)

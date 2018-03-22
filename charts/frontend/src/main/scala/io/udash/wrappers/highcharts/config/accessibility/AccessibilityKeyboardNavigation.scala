@@ -19,7 +19,6 @@ trait AccessibilityKeyboardNavigation extends js.Object {
 }
 
 object AccessibilityKeyboardNavigation {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param enabled Enable keyboard navigation for the chart.

@@ -11,7 +11,6 @@ import scala.scalajs.js
 trait SeriesSplineData extends BaseTwoDimMarkerSeriesData[SeriesDataLabels]
 
 object SeriesSplineData {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param color      Individual color for the point. By default the color is pulled from the global <code>colors</code> array.

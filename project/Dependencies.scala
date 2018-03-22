@@ -1,8 +1,9 @@
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.4"
+  val versionOfScala = "2.12.5"
   val silencerVersion = "0.6"
 
   val jqueryWrapperVersion = "1.1.0"
@@ -46,6 +47,10 @@ object Dependencies {
     "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
 
+  val coreMacroDeps = Def.setting(Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  ))
+
   val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
@@ -76,6 +81,11 @@ object Dependencies {
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
+  val restMacroDeps = Def.setting(Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
+  ))
+
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
@@ -89,6 +99,7 @@ object Dependencies {
   ))
 
   val cssMacroDeps = Def.setting(Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion
   ))
 

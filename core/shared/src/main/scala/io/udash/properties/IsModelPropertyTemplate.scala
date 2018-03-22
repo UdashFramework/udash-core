@@ -1,7 +1,5 @@
 package io.udash.properties
 
-import scala.language.higherKinds
-
 /**
   * Evidence that type `T` can be used to create ModelProperty.
   *

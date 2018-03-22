@@ -84,7 +84,6 @@ trait SeriesPointEvents extends js.Object {
 }
 
 object SeriesPointEvents {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param click     <p></p>Fires when a point is clicked. One parameter, <code>event</code>, is passed to the function. This contains common event information based on jQuery or MooTools depending on  which library is used as the base for Highcharts.<p></p> <p>If the <code>series.allowPointSelect</code> option is true, the default action for the point's click event is to toggle the point's select state. Returning <code>false</code> cancels this action.</p>

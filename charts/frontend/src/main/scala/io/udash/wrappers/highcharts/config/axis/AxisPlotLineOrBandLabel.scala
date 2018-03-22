@@ -66,7 +66,6 @@ trait AxisPlotLineOrBandLabel extends js.Object {
 }
 
 object AxisPlotLineOrBandLabel {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param align Horizontal alignment of the label. Can be one of "left", "center" or "right".

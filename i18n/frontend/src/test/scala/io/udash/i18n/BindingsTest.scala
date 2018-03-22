@@ -1,8 +1,7 @@
 package io.udash.i18n
 
-import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.testing.{AsyncUdashFrontendTest, UdashFrontendTest}
+import io.udash.testing.AsyncUdashFrontendTest
 
 import scala.concurrent.{Future, Promise}
 
@@ -70,7 +69,6 @@ class BindingsTest extends AsyncUdashFrontendTest {
     "handle custom placeholder" in {
       val p: Promise[Translated] = Promise()
       val template = {
-        implicit val lang = Lang("en")
         div(
           translated(p.future, Some(span("placeholder").render))
         ).render
@@ -92,7 +90,6 @@ class BindingsTest extends AsyncUdashFrontendTest {
     "handle None as placeholder" in {
       val p: Promise[Translated] = Promise()
       val template = {
-        implicit val lang = Lang("en")
         div(
           translated(p.future, None)
         ).render
@@ -300,7 +297,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       for {
         _ <- retrying {
           (p.get match {
-            case key: TranslationKey1[_] => true
+            case _: TranslationKey1[_] => true
             case _ => false
           }) should be(true)
         }

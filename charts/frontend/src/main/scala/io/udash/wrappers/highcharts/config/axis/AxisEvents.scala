@@ -6,7 +6,7 @@ package axis
 import io.udash.wrappers.jquery.JQueryEvent
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSGlobal, JSName}
+import scala.scalajs.js.annotation.JSGlobal
 
 trait BaseAxisEvents[AxisType <: BaseAxis[AxisType, _]] extends js.Object {
 
@@ -56,7 +56,6 @@ object AxisEvents {
 }
 
 trait AxisEventsCompanion[AxisType <: BaseAxis[AxisType, AxisEventsType], AxisEventsType <: AxisEvents[AxisType]] {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param afterBreaks      An event fired after the breaks have rendered.
@@ -97,7 +96,6 @@ object ZAxisEvents extends AxisEventsCompanion[ZAxis, ZAxisEvents]
 
 trait ColorAxisEvents extends BaseAxisEvents[ColorAxis]
 object ColorAxisEvents {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param afterSetExtremes As opposed to the <code>setExtremes</code> event, this event fires after the final min and max values are computed and corrected for <code>minRange</code>.

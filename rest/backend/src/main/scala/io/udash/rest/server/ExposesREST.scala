@@ -11,8 +11,9 @@ import scala.util.control.NonFatal
 /**
   * Base trait for anything that exposes REST interface.
   */
-abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](localRest: ServerRPCType) {
+abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](localRest: ServerRPCType) {
   val framework: UdashRESTFramework
+
   import framework._
 
   /**
@@ -21,7 +22,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
     */
   protected def localRpcAsRaw: AsRawRPC[ServerRPCType]
 
-  protected lazy val rawLocalRpc = localRpcAsRaw.asRaw(localRest)
+  protected lazy val rawLocalRpc: framework.RawRPC = localRpcAsRaw.asRaw(localRest)
 
   protected val rpcMetadata: RPCMetadata[ServerRPCType]
 
@@ -36,7 +37,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
     val invocations = List.newBuilder[RawInvocation]
     val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
-    lazy val bodyValues = read[Map[String, framework.RawValue]](stringToRaw(bodyContent))(bodyValuesReader)
+    lazy val bodyValues = read[Map[String, framework.RawValue]](bodyContent)(bodyValuesReader)
 
     def findRestParamName(data: framework.ParamMetadata): String =
       data.annotations.collectFirst {
@@ -79,7 +80,7 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
             case Some(_: Body) =>
               if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
               hasBodyArgs = true
-              stringToRaw(bodyContent)
+              bodyContent
             case Some(_: Query) | None => // Query is a default argument type
               val argName = findRestParamName(arg)
               val param = req.getParameter(argName)
@@ -103,18 +104,14 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
 
     Future {
       parseInvocations(path, rpcMetadata)
-
       val result = invocations.result().reverse
       (rawLocalRpc.resolveGetterChain(result.tail), result.head)
     }.flatMap { case (receiver, invocation) =>
-      Try(
-        receiver
-          .call(invocation.rpcName, invocation.argLists)
-          .map(rawToString)
-      ).recover { case NonFatal(_) =>
-        receiver.fire(invocation.rpcName, invocation.argLists)
-        Future.successful("")
-      }.get
+      Try(receiver.call(invocation.rpcName, invocation.argLists))
+        .recover { case NonFatal(_) =>
+          receiver.fire(invocation.rpcName, invocation.argLists)
+          Future.successful("")
+        }.get
     }
   }
 }

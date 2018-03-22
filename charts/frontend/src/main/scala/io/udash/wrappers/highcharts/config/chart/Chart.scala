@@ -380,7 +380,6 @@ trait Chart extends js.Object {
 }
 
 object Chart {
-  import scala.scalajs.js.JSConverters._
 
   final class ZoomType(val value: String) extends AnyVal
   object ZoomType {

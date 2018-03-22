@@ -58,7 +58,6 @@ trait LegendNavigation extends js.Object {
 }
 
 object LegendNavigation {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param activeColor   The color for the active up or down arrow in the legend page navigation.

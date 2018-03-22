@@ -55,7 +55,6 @@ trait SeriesTreemapLevels extends js.Object {
 }
 
 object SeriesTreemapLevels {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param borderColor Can set borderColor on all points which lies on the same level.

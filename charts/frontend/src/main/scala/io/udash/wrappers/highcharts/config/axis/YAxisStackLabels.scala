@@ -93,7 +93,6 @@ trait YAxisStackLabels extends js.Object {
 }
 
 object YAxisStackLabels {
-  import scala.scalajs.js.JSConverters._
 
   @js.native
   trait FormatterData extends js.Object {

@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import org.scalajs.dom.{Element, Node}
+import org.scalajs.dom.Node
 
 private[bindings]
 trait DOMManipulator {

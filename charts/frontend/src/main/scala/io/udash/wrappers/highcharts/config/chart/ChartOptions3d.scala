@@ -52,7 +52,6 @@ trait ChartOptions3d extends js.Object {
 }
 
 object ChartOptions3d {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param alpha        One of the two rotation angles for the chart.

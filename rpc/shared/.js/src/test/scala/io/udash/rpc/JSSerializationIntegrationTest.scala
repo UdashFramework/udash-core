@@ -1,6 +1,5 @@
 package io.udash.rpc
 
-import scala.language.higherKinds
 
 class JSSerializationIntegrationTest extends SerializationIntegrationTestBase {
   override val repeats = 3

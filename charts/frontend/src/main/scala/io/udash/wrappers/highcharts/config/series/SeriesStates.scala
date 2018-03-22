@@ -18,7 +18,6 @@ trait SeriesAreaStates extends SeriesStates[SeriesAreaStatesHover]
 trait SeriesBarStates extends SeriesStates[SeriesBarStatesHover]
 
 object SeriesAreaStates {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param hover Options for the hovered series
@@ -32,7 +31,6 @@ object SeriesAreaStates {
 }
 
 object SeriesBarStates {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param hover Options for the hovered series

@@ -11,7 +11,6 @@ import scala.scalajs.js
 trait SeriesBarData extends BaseTwoDimSeriesData[SeriesDataLabels]
 
 object SeriesBarData {
-  import scala.scalajs.js.JSConverters._
 
   /**
     * @param color      Individual color for the point. By default the color is pulled from the global <code>colors</code> array.

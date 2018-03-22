@@ -4,7 +4,7 @@ import io.udash.testing.UdashSharedTest
 
 class UtilsTest extends UdashSharedTest {
   class ClassWithVar(x: String) {
-    var s: String = "qwe"
+    var s: String = s"qwe$x"
   }
 
   class ClassicClass(i: Int) {
