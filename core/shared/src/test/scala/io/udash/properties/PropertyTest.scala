@@ -866,7 +866,6 @@ class PropertyTest extends UdashSharedTest {
 
       // Restart streaming, source touch
       registration.restart()
-      source.touch()
 
       source.get should be(1)
       target.get should be(2)

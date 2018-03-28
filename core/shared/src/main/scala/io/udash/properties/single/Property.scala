@@ -255,7 +255,8 @@ trait Property[A] extends ReadableProperty[A] {
     new SeqPropertyFromSingleValue(this, transformer, revert)
 
   /**
-    * Bidirectionally synchronizes Property[B] with `this`.
+    * Bidirectionally synchronizes Property[B] with `this`. The transformed value is synchronized from `this`
+    * to Property[B] on initialization.
     *
     * @param p           Property to be synchronized with `this`.
     * @param transformer Method transforming type A of existing Property to type B of new Property.
@@ -279,6 +280,7 @@ trait Property[A] extends ReadableProperty[A] {
       override def restart(): Unit = {
         transformerRegistration.restart()
         revertRegistration.restart()
+        touch()
       }
     }
 
