@@ -18,8 +18,8 @@ object Dependencies {
   val atmosphereJSVersion = "2.3.4"
   val atmosphereVersion = "2.4.15"
 
-  val upickleVersion = "0.6.2" // benchmark only
-  val circeVersion = "0.9.2" //benchmark only
+  val upickleVersion = "0.6.2" // Tests only
+  val circeVersion = "0.9.2" // benchmarks only
 
   val scalaHttpClientVersion = "2.1.0"
 
@@ -63,6 +63,10 @@ object Dependencies {
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
+
+  val rpcCrossTestDeps = Def.setting(Seq(
+    "com.lihaoyi" %%% "upickle" % upickleVersion
+  ).map(_ % Test))
 
   val rpcFrontendJsDeps = Def.setting(Seq(
     "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
