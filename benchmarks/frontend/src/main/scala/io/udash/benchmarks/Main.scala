@@ -20,7 +20,7 @@ object Main {
 
       CssStylesApply.suite,
 
-      SerializationBenchmarks.suite,
+      SerializationBenchmarks.suite
     )
   }
 }
