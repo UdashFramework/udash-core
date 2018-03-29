@@ -25,8 +25,12 @@ inThisBuild(Seq(
     "-Xlint:_",
   ),
   scalacOptions ++= {
-    if (CrossVersion.partialVersion((udash / scalaVersion).value).contains((2, 12))) Seq("-Ywarn-unused:_,-explicits,-implicits")
-    else Seq.empty
+    if (CrossVersion.partialVersion((udash / scalaVersion).value).contains((2, 12))) Seq(
+      "-Ywarn-unused:_,-explicits,-implicits",
+      "-Ybackend-parallelism", "4",
+      "-Ycache-plugin-class-loader:last-modified",
+      "-Ycache-macro-class-loader:last-modified"
+    ) else Seq.empty
   },
 ))
 

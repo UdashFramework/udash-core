@@ -253,5 +253,37 @@ trait Property[A] extends ReadableProperty[A] {
     */
   def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
+
+  /**
+    * Bidirectionally synchronizes Property[B] with `this`. The transformed value is synchronized from `this`
+    * to Property[B] on initialization.
+    *
+    * @param p           Property to be synchronized with `this`.
+    * @param transformer Method transforming type A of existing Property to type B of new Property.
+    * @param revert      Method transforming type B of new Property to type A of existing Property.
+    * @tparam B Type of new Property.
+    * @return Bidirectional registration between existing and new property.
+    */
+  def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration = {
+    val transformerRegistration = this.streamTo(p)(transformer)
+    val revertRegistration = p.streamTo(this, initUpdate = false)(revert)
+    new Registration {
+      override def cancel(): Unit = {
+        transformerRegistration.cancel()
+        revertRegistration.cancel()
+      }
+
+      override def isActive: Boolean = {
+        transformerRegistration.isActive && revertRegistration.isActive
+      }
+
+      override def restart(): Unit = {
+        transformerRegistration.restart()
+        revertRegistration.restart()
+        touch()
+      }
+    }
+
+  }
 }
 
