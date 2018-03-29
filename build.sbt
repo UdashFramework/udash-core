@@ -147,9 +147,6 @@ lazy val `rpc-shared` = project.in(file("rpc/shared"))
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
-
-    libraryDependencies ++= Dependencies.rpcCrossTestDeps.value,
-    libraryDependencies ++= Dependencies.rpcSharedJVMDeps.value,
   )
 
 lazy val `rpc-shared-JS` = project.in(`rpc-shared`.base / ".js")
@@ -162,8 +159,6 @@ lazy val `rpc-shared-JS` = project.in(`rpc-shared`.base / ".js")
 
     name := (`rpc-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
-
-    libraryDependencies ++= Dependencies.rpcCrossTestDeps.value,
   )
 
 lazy val `rpc-backend` = project.in(file("rpc/backend"))

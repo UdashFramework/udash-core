@@ -181,16 +181,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       intercept[ReadFailure](RPC.read[Int](jsonDouble))
       intercept[ReadFailure](RPC.read[Long](jsonDouble))
       RPC.read[Double](jsonDouble) should be(Double.MaxValue)
-
-      val jsonDouble2 = "123.00"
-      RPC.read[Int](jsonDouble2) should be(123)
-      RPC.read[Long](jsonDouble2) should be(123)
-      RPC.read[Double](jsonDouble2) should be(123.0)
-
-      val brokenDouble = "312,321"
-      intercept[ReadFailure](RPC.read[Int](brokenDouble))
-      intercept[ReadFailure](RPC.read[Long](brokenDouble))
-      intercept[ReadFailure](RPC.read[Double](brokenDouble))
     }
 
     "work with skipping" in {
@@ -251,9 +241,4 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized should be(test)
     }
   }
-}
-
-class UPickleRpcMessagesTest extends RpcMessagesTestScenarios {
-  "RPCMessages client uPickle serializers" should tests(ClientUPickleUdashRPCFramework)
-  "RPCMessages server uPickle serializers" should tests(ServerUPickleUdashRPCFramework)
 }

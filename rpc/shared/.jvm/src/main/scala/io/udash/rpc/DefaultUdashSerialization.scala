@@ -1,16 +1,14 @@
 package io.udash.rpc
 
-import com.avsystem.commons.serialization.{GenCodec, Input, Output}
-import io.udash.rpc.serialization.{JsonInput, JsonOutput}
-import io.udash.rpc.serialization.jawn.JawnFacade
-import jawn.Parser
+import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput, JsonStringOutput}
+import com.avsystem.commons.serialization.{GenCodec, Input}
 
-/** Provides JAWN based serialization to JSON `String`. */
 trait DefaultUdashSerialization {
-  def inputSerialization(value: String): Input =
-    try { new JsonInput(Parser.parseFromString(value)(JawnFacade).get) }
-    catch { case ex: jawn.ParseException => throw new GenCodec.ReadFailure("JAWN parse error!", ex) }
+  def inputSerialization(value: String): Input = {
+    new JsonStringInput(new JsonReader(value))
+  }
 
-  def outputSerialization(valueConsumer: String => Unit): Output =
-    new JsonOutput(valueConsumer)
+  def write[T: GenCodec](value: T): String = {
+    JsonStringOutput.write(value)
+  }
 }

@@ -13,13 +13,13 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.25.5"
+  val avsCommonsVersion = "1.26.3"
 
   val atmosphereJSVersion = "2.3.4"
   val atmosphereVersion = "2.4.15"
 
-  val upickleVersion = "0.4.4" // Tests only
-  val jawnParserVersion = "0.10.4"
+  val upickleVersion = "0.6.2" // benchmark only
+  val circeVersion = "0.9.2" //benchmark only
 
   val scalaHttpClientVersion = "2.1.0"
 
@@ -64,16 +64,8 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
 
-  val rpcCrossTestDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion
-  ).map(_ % Test))
-
   val rpcFrontendJsDeps = Def.setting(Seq(
     "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
-  ))
-
-  val rpcSharedJVMDeps = Def.setting(Seq(
-    "org.spire-math" %% "jawn-parser" % jawnParserVersion
   ))
 
   val rpcBackendDeps = Def.setting(Seq(
@@ -124,6 +116,10 @@ object Dependencies {
   ))
 
   val benchmarksFrontendDeps = Def.setting(Seq(
-    "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion
+    "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,
+    "io.circe" %%% "circe-core" % circeVersion,
+    "io.circe" %%% "circe-generic" % circeVersion,
+    "io.circe" %%% "circe-parser" % circeVersion,
+    "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 }
