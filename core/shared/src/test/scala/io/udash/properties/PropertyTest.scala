@@ -811,6 +811,97 @@ class PropertyTest extends UdashSharedTest {
       p.set("asd")
       t.get should be(false)
     }
+
+    "synchronize values with another property" in {
+      val source = Property(1)
+      val target = Property(5)
+
+      source.get should be(1)
+      target.get should be(5)
+
+      //Init update
+      val registration = source.sync(target)((i: Int) => i * 2, (i: Int) => i / 2)
+
+      registration.isActive should be(true)
+      source.get should be(1)
+      target.get should be(2)
+
+      // Source update
+      source.set(2)
+
+      source.get should be(2)
+      target.get should be(4)
+
+      // Source touch
+      source.touch()
+
+      source.get should be(2)
+      target.get should be(4)
+
+      // Target update
+      target.set(8)
+
+      source.get should be(4)
+      target.get should be(8)
+
+      // Source update
+      source.set(2)
+
+      source.get should be(2)
+      target.get should be(4)
+
+      // Registration cancel and source update
+      registration.cancel()
+      source.set(1)
+
+      registration.isActive should be(false)
+      source.get should be(1)
+      target.get should be(4)
+
+      // Target update
+      target.set(1)
+
+      source.get should be(1)
+      target.get should be(1)
+
+      // Restart streaming, source touch
+      registration.restart()
+
+      source.get should be(1)
+      target.get should be(2)
+
+      // Target update
+      target.set(8)
+
+      source.get should be(4)
+      target.get should be(8)
+    }
+
+    "synchronize values with SeqProperty" in {
+      val source = Property(1)
+      val target = SeqProperty[Int](1, 2)
+
+      source.get should be(1)
+      target.get should be(Seq(1, 2))
+
+      //Init update
+      source.sync(target)((i: Int) => 1 to i, (s: Seq[Int]) => s.length)
+
+      source.get should be(1)
+      target.get should be(Seq(1))
+
+      // Source update
+      source.set(5)
+
+      source.get should be(5)
+      target.get should be(Seq(1, 2, 3, 4, 5))
+
+      // Target update
+      target.set(Seq(1, 2, 3, 4))
+
+      source.get should be(4)
+      target.get should be(Seq(1, 2, 3, 4))
+    }
   }
 
   "ModelProperty" should {
