@@ -2,7 +2,7 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import upickle.Js
+import ujson.Js
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try

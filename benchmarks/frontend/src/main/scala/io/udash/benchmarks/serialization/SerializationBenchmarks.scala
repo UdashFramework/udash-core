@@ -98,7 +98,7 @@ object SerializationBenchmarks {
       },
       Benchmark("Reading foos: NativeJson") {
         NativeJsonInput.read[Map[String, Foo]](Foo.ExampleJsonString)
-      },
+      }
     )
   )
 }
