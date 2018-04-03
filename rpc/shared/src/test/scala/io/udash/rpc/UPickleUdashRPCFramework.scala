@@ -33,12 +33,12 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     }
 
     def readString() = value match {
-      case Js.Str(str) => str
+      case Js.Str(str) => str.toString
       case _ => throw new ReadFailure("Not Js.Str")
     }
 
     def readLong() = value match {
-      case Js.Str(num) => num.toLong
+      case Js.Str(num) => num.toString.toLong
       case Js.Num(num) if num == num.toLong => num.toLong
       case _ => throw new ReadFailure("Not Js.Num (Long)")
     }

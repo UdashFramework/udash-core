@@ -187,6 +187,11 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       RPC.read[Long](jsonDouble2) should be(123)
       RPC.read[Double](jsonDouble2) should be(123.0)
 
+      val jsonDouble3 = "123.1"
+      intercept[ReadFailure](RPC.read[Int](jsonDouble3))
+      intercept[ReadFailure](RPC.read[Long](jsonDouble3))
+      RPC.read[Double](jsonDouble3) should be(123.1)
+
       val brokenDouble = "312,321"
       intercept[ReadFailure](RPC.read[Int](brokenDouble))
       intercept[ReadFailure](RPC.read[Long](brokenDouble))
