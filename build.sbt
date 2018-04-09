@@ -6,7 +6,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.7.0-M3",
+  version := "0.7.0-M4",
   scalaVersion := Dependencies.versionOfScala,
   crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
   organization := "io.udash",
