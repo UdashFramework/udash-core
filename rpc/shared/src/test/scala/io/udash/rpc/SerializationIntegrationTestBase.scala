@@ -2,13 +2,14 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.{GenCodec, Input, InputType, Output}
 import io.udash.testing.UdashSharedTest
+import org.scalactic.source.Position
 
 import scala.util.Random
 
 class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
   val repeats = 1000
 
-  def tests(writer: UdashRPCFramework, reader: UdashRPCFramework) = {
+  def tests(writer: UdashRPCFramework, reader: UdashRPCFramework)(implicit pos: Position): Unit = {
     "serialize and deserialize all types" in {
       for (i <- 1 to repeats) {
         def cc() = TestCC(Random.nextInt(), Random.nextLong(), 123, Random.nextBoolean(), Random.nextString(200), List.fill(Random.nextInt(200))('a'))

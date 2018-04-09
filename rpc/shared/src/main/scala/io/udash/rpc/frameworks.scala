@@ -4,24 +4,14 @@ import com.avsystem.commons.rpc.{FunctionRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
 
 trait GenCodecSerializationFramework { this: RPCFramework =>
-  type Writer[T] = GenCodec[T]
-  type Reader[T] = GenCodec[T]
-
-  /** Converts value of type `T` into `RawValue`. */
-  def write[T: Writer](value: T): RawValue = {
-    var result: RawValue = null.asInstanceOf[RawValue]
-    GenCodec.write[T](outputSerialization(result = _), value)
-    result
-  }
+  override type Writer[T] = GenCodec[T]
+  override type Reader[T] = GenCodec[T]
 
   /** Converts `RawValue` into value of type `T`. */
-  def read[T: Reader](raw: RawValue): T =
-    GenCodec.read[T](inputSerialization(raw))
+  override def read[T: Reader](raw: RawValue): T = GenCodec.read[T](inputSerialization(raw))
 
   /** Returns `Input` for data marshalling. */
   def inputSerialization(value: RawValue): Input
-  /** Returns `Output` for data unmarshalling. */
-  def outputSerialization(valueConsumer: RawValue => Unit): Output
 }
 
 /** Base RPC framework for client RPC interface. This one does not allow RPC interfaces to contain methods with return type `Future[T]`. */
@@ -38,5 +28,6 @@ trait ServerUdashRPCFramework extends UdashRPCFramework with FunctionRPCFramewor
 
 /** Default Udash client application RPC framework. */
 object DefaultClientUdashRPCFramework extends ClientUdashRPCFramework with DefaultUdashSerialization
+
 /** Default Udash server application RPC framework. */
 object DefaultServerUdashRPCFramework extends ServerUdashRPCFramework with DefaultUdashSerialization
