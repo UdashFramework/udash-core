@@ -1,7 +1,9 @@
 package io.udash.rpc.serialization
 
-import com.avsystem.commons.serialization.{ListOutput, ObjectOutput, Output}
-import scalajs.js
+import com.avsystem.commons.serialization.{GenCodec, ListOutput, ObjectOutput, Output}
+
+import scala.scalajs.js
+import scala.scalajs.js.JSON
 
 class NativeJsonOutput(valueConsumer: js.Any => Unit) extends Output {
   override def writeNull(): Unit =
@@ -44,5 +46,13 @@ class NativeJsonOutput(valueConsumer: js.Any => Unit) extends Output {
     val l = writeList()
     binary.foreach(b => l.writeElement().writeInt(b))
     l.finish()
+  }
+}
+
+object NativeJsonOutput {
+  def write[T: GenCodec](value: T): String = {
+    var result = ""
+    GenCodec.write(new NativeJsonOutput(value => result = JSON.stringify(value)), value)
+    result
   }
 }

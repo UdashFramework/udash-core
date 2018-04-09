@@ -2,7 +2,7 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import upickle.Js
+import ujson.Js
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
@@ -10,13 +10,15 @@ import scala.util.Try
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
   override def inputSerialization(value: String): Input = {
-      Try(upickle.json.read(value))
+    Try(upickle.json.read(value))
       .map(new JsObjectInput(_))
-      .recover {case ex => throw new ReadFailure("Parse error!", ex)}.get
-    }
+      .recover { case ex => throw new ReadFailure("Parse error!", ex) }.get
+  }
 
-  override def outputSerialization(valueConsumer: String => Unit): Output = {
-    new JsObjectOutput(v => valueConsumer(upickle.json.write(v)))
+  override def write[T: GenCodec](value: T): String = {
+    var result: String = null
+    GenCodec.write(new JsObjectOutput(v => result = upickle.json.write(v)), value)
+    result
   }
 
   class JsObjectInput(value: Js.Value) extends Input {

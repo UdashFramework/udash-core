@@ -4,8 +4,10 @@ import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 
 import scala.scalajs.js
+import scala.scalajs.js.JSON
 import scala.util.Try
 
+//todo move to scala-commons
 class NativeJsonInput(value: Any) extends Input { self =>
   private def read[T](expected: String)(matcher: PartialFunction[Any, T]): T =
     matcher.applyOrElse(value, (_: Any) => throw new ReadFailure(s"$expected expected."))
@@ -101,3 +103,10 @@ class NativeJsonInput(value: Any) extends Input { self =>
 }
 
 class NativeJsonFieldInput(val fieldName: String, value: Any) extends NativeJsonInput(value) with FieldInput
+
+
+object NativeJsonInput {
+  def read[T: GenCodec](value: String): T = {
+    GenCodec.read[T](new NativeJsonInput(JSON.parse(value)))
+  }
+}
