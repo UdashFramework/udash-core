@@ -65,7 +65,9 @@ object Dependencies {
   ))
 
   val rpcCrossTestDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion
+    "com.lihaoyi" %%% "upickle" % upickleVersion,
+    "io.circe" %%% "circe-core" % circeVersion,
+    "io.circe" %%% "circe-parser" % circeVersion,
   ).map(_ % Test))
 
   val rpcFrontendJsDeps = Def.setting(Seq(
