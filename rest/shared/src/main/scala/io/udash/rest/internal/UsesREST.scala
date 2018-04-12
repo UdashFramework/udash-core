@@ -60,7 +60,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       val methodMetadata = metadata.signatures(rpcMethodName)
 
       if (!shouldSkipRestName(methodMetadata.annotations))
-        urlBuilder += findRestName(methodMetadata.annotations).getOrElse(rpcMethodName)
+        urlBuilder += URLEncoder.encode(findRestName(methodMetadata.annotations).getOrElse(rpcMethodName))
       methodMetadata.paramMetadata.zip(inv.argLists).foreach { case (params, values) =>
         params.zip(values).foreach { case (param, value) =>
           val paramName: String = findRestParamName(param)
@@ -112,7 +112,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
     }
 
     connector.send(
-      url = s"/${urlBuilder.result().map(URLEncoder.encode).mkString("/")}",
+      url = s"/${urlBuilder.result().mkString("/")}",
       method = findRestMethod(invocation, metadata, body != null),
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),

@@ -35,7 +35,10 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
 
   def handleRestCall(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod])(implicit ec: ExecutionContext): Future[String] = {
     val invocations = List.newBuilder[RawInvocation]
-    val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
+    val path: Array[String] =
+      Option(req.getRequestURI.stripPrefix(req.getServletPath))
+        .map(_.stripPrefix("/").split("/"))
+        .getOrElse(Array.empty[String])
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
     lazy val bodyValues = read[Map[String, framework.RawValue]](bodyContent)(bodyValuesReader)
 
