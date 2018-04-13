@@ -1,7 +1,7 @@
 package io.udash.web.guide.views
 
 object Versions {
-  val udashVersion = "0.6.0"
+  val udashVersion = "0.6.1"
   val udashJQueryVersion = "1.1.0"
 
   val scalaVersion = "2.12.4"

@@ -6,7 +6,7 @@ import sbt.Compile
 name := "udash-guide"
 
 inThisBuild(Seq(
-  version := "0.6.0",
+  version := "0.6.1",
   scalaVersion := Dependencies.versionOfScala,
   organization := "io.udash",
   scalacOptions ++= Seq(
