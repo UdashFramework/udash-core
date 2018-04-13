@@ -191,6 +191,41 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       } yield r
     }
 
+    "encode URL part arguments" in {
+      restServer.serviceThree("a b /? @#$%^&+").fireAndForget(123)
+      retrying {
+        connector.url should be("/service_three/a%20b%20%2F%3F%20%40%23%24%25%5E%26%2B/fireAndForget")
+        connector.method should be(RESTConnector.POST)
+        connector.queryArguments should be(Map.empty)
+        connector.headers should be(Map.empty)
+        connector.body should be("123")
+      }
+    }
+
+    "not encode query arguments (connector encodes these parameters)" in {
+      restServer.serviceOne().load(123, "a b /? @#$%^&+", "a b /? @#$%^&+")
+      retrying {
+        connector.url should be("/serviceOne/load/123")
+        connector.method should be(RESTConnector.GET)
+        connector.queryArguments("trash") should be("a b /? @#$%^&+")
+        connector.queryArguments("trash_two") should be("a b /? @#$%^&+")
+        connector.headers should be(Map.empty)
+        connector.body should be(null)
+      }
+    }
+
+    "not encode headers" in {
+      restServer.serviceTwo("a b /? @#$%^&+", "a b /? @#$%^&+").create(r)
+      retrying {
+        connector.url should be("/serviceTwo/create")
+        connector.method should be(RESTConnector.POST)
+        connector.queryArguments should be(Map.empty)
+        connector.headers("X_AUTH_TOKEN") should be("a b /? @#$%^&+")
+        connector.headers("lang") should be("a b /? @#$%^&+")
+        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+      }
+    }
+
     "compile recursive interface" in {
       """import io.udash.rpc.RPCName
          |case class TestRESTRecord(id: Option[Int], s: String)
@@ -561,7 +596,6 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
          |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
        """.stripMargin shouldNot typeCheck
     }
-
 
     "not mix @Body and @BodyValue" in {
       """import io.udash.rpc._

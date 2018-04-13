@@ -1,7 +1,7 @@
 package io.udash.rest.server
 
+import com.avsystem.commons.misc.Opt
 import javax.servlet.http.HttpServletRequest
-
 import io.udash.rest.{UdashRESTFramework, _}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +34,10 @@ abstract class ExposesREST[ServerRPCType : UdashRESTFramework#ValidServerREST](l
 
   def handleRestCall(req: HttpServletRequest, httpMethod: Class[_ <: RESTMethod])(implicit ec: ExecutionContext): Future[String] = {
     val invocations = List.newBuilder[RawInvocation]
-    val path: Array[String] = Option(req.getPathInfo).map(_.stripPrefix("/").split("/")).getOrElse(Array.empty[String])
+    val path: Array[String] =
+      Opt(req.getRequestURI)
+        .map(_.stripPrefix(req.getServletPath).stripPrefix("/").split("/"))
+        .getOrElse(Array.empty[String])
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
     lazy val bodyValues = read[Map[String, framework.RawValue]](stringToRaw(bodyContent))(bodyValuesReader)
 
