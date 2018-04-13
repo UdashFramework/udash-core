@@ -419,7 +419,7 @@ class BootstrapExtView extends FinalView {
           |user.subProp(_.age).set(25)
           |user.subProp(_.shirtSize).set(Medium)
           |user.subProp(_.age).addValidator(new Validator[Int] {
-          |  def apply(element: Int)(implicit ec: ExecutionContext) =
+          |  def apply(element: Int): Future[ValidationResult] =
           |    Future {
           |      if (element < 0) Invalid(Seq("Age should be a non-negative integer!"))
           |      else Valid
