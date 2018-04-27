@@ -1,6 +1,5 @@
 package io.udash.rpc.internals
 
-import com.avsystem.commons.serialization.Input
 import io.udash.logging.CrossLogging
 import io.udash.rpc._
 import io.udash.rpc.serialization.ExceptionCodecRegistry
@@ -19,9 +18,9 @@ trait ServerConnector[RPCRequest] {
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
 abstract class AtmosphereServerConnector[RPCRequest](
-  private val serverUrl: String,
-  val exceptionsRegistry: ExceptionCodecRegistry
-) extends ServerConnector[RPCRequest] with CrossLogging {
+                                                      private val serverUrl: String,
+                                                      val exceptionsRegistry: ExceptionCodecRegistry
+                                                    ) extends ServerConnector[RPCRequest] with CrossLogging {
 
   protected val clientRpc: ExposesClientRPC[_]
 
@@ -76,17 +75,13 @@ abstract class AtmosphereServerConnector[RPCRequest](
   }
 
   private def handleMessage(msg: String) = {
-    try {
-      import remoteFramework.RPCResponseCodec
-      val rawMsgInput: Input = remoteFramework.inputSerialization(msg)
-      val response = RPCResponseCodec(exceptionsRegistry).read(rawMsgInput)
-      handleResponse(response)
-    } catch {
+    import remoteFramework.{RPCResponse, RPCResponseCodec}
+    import localFramework.RPCRequestCodec
+    implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
+    try handleResponse(remoteFramework.read[RPCResponse](msg)) catch {
       case _: Exception =>
         try {
-          import localFramework.RPCRequestCodec
-          val rawMsgInput: Input = localFramework.inputSerialization(msg)
-          RPCRequestCodec.read(rawMsgInput) match {
+          localFramework.read[localFramework.RPCRequest](msg) match {
             case fire: localFramework.RPCFire =>
               handleRpcFire(fire)
             case unhandled =>

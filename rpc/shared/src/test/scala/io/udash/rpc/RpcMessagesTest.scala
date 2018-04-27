@@ -21,7 +21,7 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   def tests(RPC: UdashRPCFramework) = {
     import RPC._
 
-    implicit val codec: GenCodec[RPCResponse] = RPCResponseCodec(exceptionsRegistry)
+    implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
     val inv = RawInvocation("r{p[c\"]}Name", List(List(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
     val getter1 = RawInvocation("g{}[]\",\"etter1", List(List("\",a\"", "\"B,,\"", "\"v\""), List("\"xy,z\"")))
@@ -75,19 +75,19 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized3 should be(sealedException)
     }
 
-//    "serialize and deserialize exception stacktrace" in {
-//      val serialized = write[RPCResponse](exception)
-//      val deserialized = read[RPCResponse](serialized)
-//      deserialized.asInstanceOf[RPCResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
-//
-//      val serialized2 = write[RPCResponse](runtimeException)
-//      val deserialized2 = read[RPCResponse](serialized2)
-//      deserialized2.asInstanceOf[RPCResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
-//
-//      val serialized3 = write[RPCResponse](sealedException)
-//      val deserialized3 = read[RPCResponse](serialized3)
-//      deserialized3.asInstanceOf[RPCResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
-//    }
+    //    "serialize and deserialize exception stacktrace" in {
+    //      val serialized = write[RPCResponse](exception)
+    //      val deserialized = read[RPCResponse](serialized)
+    //      deserialized.asInstanceOf[RPCResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
+    //
+    //      val serialized2 = write[RPCResponse](runtimeException)
+    //      val deserialized2 = read[RPCResponse](serialized2)
+    //      deserialized2.asInstanceOf[RPCResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
+    //
+    //      val serialized3 = write[RPCResponse](sealedException)
+    //      val deserialized3 = read[RPCResponse](serialized3)
+    //      deserialized3.asInstanceOf[RPCResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
+    //    }
 
     "serialize and deserialize rpc failure msg" in {
       val serialized = write[RPCFailure](rpcFail)

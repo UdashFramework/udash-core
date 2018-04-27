@@ -6,12 +6,6 @@ import com.avsystem.commons.serialization._
 trait GenCodecSerializationFramework { this: RPCFramework =>
   override type Writer[T] = GenCodec[T]
   override type Reader[T] = GenCodec[T]
-
-  /** Converts `RawValue` into value of type `T`. */
-  override def read[T: Reader](raw: RawValue): T = GenCodec.read[T](inputSerialization(raw))
-
-  /** Returns `Input` for data marshalling. */
-  def inputSerialization(value: RawValue): Input
 }
 
 /** Base RPC framework for client RPC interface. This one does not allow RPC interfaces to contain methods with return type `Future[T]`. */

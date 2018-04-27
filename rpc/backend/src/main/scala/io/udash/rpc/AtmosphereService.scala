@@ -1,13 +1,12 @@
 package io.udash.rpc
 
 import java.util.UUID
-import javax.servlet.ServletInputStream
-import javax.servlet.http.HttpServletResponse
 
-import com.avsystem.commons.serialization.GenCodec
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
 import io.udash.rpc.serialization.ExceptionCodecRegistry
+import javax.servlet.ServletInputStream
+import javax.servlet.http.HttpServletResponse
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
@@ -110,10 +109,12 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def handleRequest(resource: AtmosphereResource, onCall: (String) => Unit, onFire: () => Unit): Unit = {
+  private def handleRequest(resource: AtmosphereResource, onCall: String => Unit, onFire: () => Unit): Unit = {
     val rpc = config.resolveRpc(resource)
     import rpc.localFramework._
-    implicit val codec: GenCodec[RPCResponse] = RPCResponseCodec(exceptionsRegistry)
+
+    implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
+
     val input: String = readInput(resource.getRequest.getInputStream)
     if (input.nonEmpty) {
       val rpcRequest = readRequest(input, rpc)

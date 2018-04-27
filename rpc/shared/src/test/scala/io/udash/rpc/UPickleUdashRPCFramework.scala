@@ -5,21 +5,28 @@ import com.avsystem.commons.serialization._
 import ujson.Js
 
 import scala.collection.mutable.ListBuffer
-import scala.util.Try
 
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
-  override def inputSerialization(value: String): Input = {
-    Try(upickle.json.read(value))
-      .map(new JsObjectInput(_))
-      .recover { case ex => throw new ReadFailure("Parse error!", ex) }.get
-  }
+  override def read[T: GenCodec](value: String): T =
+    GenCodec.read[T](new JsObjectInput(upickle.json.read(value)))
 
   override def write[T: GenCodec](value: T): String = {
     var result: String = null
     GenCodec.write(new JsObjectOutput(v => result = upickle.json.write(v)), value)
     result
   }
+
+  protected val rawValueCodec: GenCodec[String] = GenCodec.createNonNull(
+    {
+      case cji: JsObjectInput => upickle.json.write(cji.readRaw())
+      case in => in.readString()
+    },
+    {
+      case (cjo: JsObjectOutput, json) => cjo.writeRaw(upickle.json.read(json))
+      case (out, v) => out.writeString(v)
+    }
+  )
 
   class JsObjectInput(value: Js.Value) extends Input {
     def inputType = value match {
@@ -96,6 +103,8 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
         throw new ReadFailure("Not Js.Arr")
     }
 
+    def readRaw(): Js.Value = value
+
     def skip() = ()
   }
 
@@ -138,6 +147,8 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
       def finish() = setResultThenConsume(Js.Obj(builder.result(): _*))
     }
+
+    def writeRaw(js: Js.Value) = consumer(js)
   }
 }
 
