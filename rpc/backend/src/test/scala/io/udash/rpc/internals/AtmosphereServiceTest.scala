@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 
 class AtmosphereServiceTest extends UdashRpcBackendTest {
 
-  val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
+  implicit val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
   exceptionsRegistry.register(GenCodec.materialize[CustomRPCException])
 
   def createBroadcasters(): (BroadcasterMock, BroadcasterFactoryMock, MetaBroadcasterMock) = {
@@ -471,7 +471,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -499,7 +498,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -527,7 +525,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123123123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")

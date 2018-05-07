@@ -42,6 +42,26 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   case class RPCFailure(remoteCause: String, remoteMessage: String)
     extends Exception(s"$remoteCause: $remoteMessage")
 
+  object RPCResponse {
+    implicit def RPCResponseExceptionCodec(implicit ecr: ExceptionCodecRegistry): GenCodec[RPCResponseException] =
+      GenCodec.createNullableObject(
+        in => {
+          val name = peekOrNextField(in, "name").readString()
+          val exception = ecr.get[Throwable](name).read(peekOrNextField(in, "exception"))
+          val callId = peekOrNextField(in, "callId").readString()
+          RPCResponseException(name, exception, callId)
+        },
+        { case (out, RPCResponseException(name, exception, callId)) =>
+          out.writeField("name").writeString(name)
+          ecr.get[Throwable](name).write(out.writeField("exception"), exception)
+          out.writeField("callId").writeString(callId)
+        }
+      )
+
+    implicit def RPCResponseCodec(implicit ecr: ExceptionCodecRegistry): GenCodec[RPCResponse] =
+      GenCodec.materialize[RPCResponse]
+  }
+
   private def peekOrNextField(oi: ObjectInput, name: String): Input =
     oi.peekField(name).getOrElse {
       val fi = oi.nextField()
@@ -58,19 +78,4 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   implicit val RawInvocationCodec: GenCodec[RawInvocation] = GenCodec.materialize
   implicit val RPCRequestCodec: GenCodec[RPCRequest] = GenCodec.materialize
   implicit val RPCFailureCodec: GenCodec[RPCFailure] = GenCodec.materialize
-  implicit def RPCResponseExceptionCodec(implicit ecr: ExceptionCodecRegistry): GenCodec[RPCResponseException] =
-    GenCodec.createNullableObject(
-      in => {
-        val name = peekOrNextField(in, "name").readString()
-        val exception = ecr.get[Throwable](name).read(peekOrNextField(in, "exception"))
-        val callId = peekOrNextField(in, "callId").readString()
-        RPCResponseException(name, exception, callId)
-      },
-      { case (out, RPCResponseException(name, exception, callId)) =>
-        out.writeField("name").writeString(name)
-        ecr.get[Throwable](name).write(out.writeField("exception"), exception)
-        out.writeField("callId").writeString(callId)
-      }
-    )
-  implicit def RPCResponseCodec(implicit ecr: ExceptionCodecRegistry): GenCodec[RPCResponse] = GenCodec.materialize
 }
