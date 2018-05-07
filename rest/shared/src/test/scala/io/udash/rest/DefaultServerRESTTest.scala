@@ -73,7 +73,8 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
           connector.method should be(RESTConnector.PATCH)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
-          read[Map[String, RawValue]](JsonStr(connector.body)) should be(Map("s" -> "\"test\"", "i" -> "5")) // in this framework RawValue = String
+          read[Map[String, RawValue]](JsonStr(connector.body)) should
+            be(Map("s" -> JsonStr("\"test\""), "i" -> JsonStr("5"))) // in this framework RawValue = String
         }
 
         _ <- Future { connector.response = write(r).json }
