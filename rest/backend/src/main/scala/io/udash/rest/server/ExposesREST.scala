@@ -1,8 +1,10 @@
 package io.udash.rest.server
 
+import com.avsystem.commons.concurrent.RunNowEC
 import com.avsystem.commons.misc.Opt
-import javax.servlet.http.HttpServletRequest
 import io.udash.rest.{UdashRESTFramework, _}
+import io.udash.rpc.serialization.JsonStr
+import javax.servlet.http.HttpServletRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -40,7 +42,7 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
         .map(_.stripPrefix(req.getServletPath).stripPrefix("/").split("/"))
         .getOrElse(Array.empty[String])
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
-    lazy val bodyValues = read[Map[String, framework.RawValue]](bodyContent)(bodyValuesReader)
+    lazy val bodyValues = read[Map[String, framework.RawValue]](JsonStr(bodyContent))(bodyValuesReader)
 
     def findRestParamName(data: framework.ParamMetadata): String =
       data.annotations.collectFirst {
@@ -83,7 +85,7 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
             case Some(_: Body) =>
               if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
               hasBodyArgs = true
-              bodyContent
+              JsonStr(bodyContent)
             case Some(_: Query) | None => // Query is a default argument type
               val argName = findRestParamName(arg)
               val param = req.getParameter(argName)
@@ -110,7 +112,7 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
       val result = invocations.result().reverse
       (rawLocalRpc.resolveGetterChain(result.tail), result.head)
     }.flatMap { case (receiver, invocation) =>
-      Try(receiver.call(invocation.rpcName, invocation.argLists))
+      Try(receiver.call(invocation.rpcName, invocation.argLists).map(_.json)(RunNowEC))
         .recover { case NonFatal(_) =>
           receiver.fire(invocation.rpcName, invocation.argLists)
           Future.successful("")

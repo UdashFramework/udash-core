@@ -3,12 +3,11 @@ package io.udash.rpc
 import com.avsystem.commons.rpc.{GetterRPCFramework, ProcedureRPCFramework}
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import com.github.ghik.silencer.silent
-import io.udash.rpc.serialization.ExceptionCodecRegistry
+import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
 
 /** Base for all RPC frameworks in Udash. */
 trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework with GenCodecSerializationFramework {
-  override type RawValue = String
+  type RawValue = JsonStr
   type RawRPC <: GetterRawRPC with ProcedureRawRPC
 
   class ParamTypeMetadata[+T]
@@ -17,7 +16,7 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
   class ResultTypeMetadata[+T]
   implicit object ResultTypeMetadata extends ResultTypeMetadata[Nothing]
 
-  protected def rawValueCodec: GenCodec[RawValue]
+  implicit def rawValueCodec: GenCodec[RawValue]
 
   sealed trait RPCRequest {
     def invocation: RawInvocation
@@ -70,9 +69,6 @@ trait UdashRPCFramework extends GetterRPCFramework with ProcedureRPCFramework wi
       }
       fi
     }
-
-  @silent // this overrides default String codec, scalac thinks it's unused
-  private implicit def implicitRawValueCodec: GenCodec[RawValue] = rawValueCodec
 
   /* GenCodecs for internal classes of RPC framework. */
   implicit val RawInvocationCodec: GenCodec[RawInvocation] = GenCodec.materialize

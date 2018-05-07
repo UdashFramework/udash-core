@@ -2,6 +2,7 @@ package io.udash.rpc
 
 import com.avsystem.commons.rpc.{FunctionRPCFramework, RPCFramework}
 import com.avsystem.commons.serialization._
+import io.udash.rpc.serialization.DefaultUdashSerialization
 
 trait GenCodecSerializationFramework { this: RPCFramework =>
   override type Writer[T] = GenCodec[T]

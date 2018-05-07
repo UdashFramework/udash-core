@@ -3,6 +3,7 @@ package io.udash.rpc
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 import io.circe.{Json, JsonObject, ParsingFailure}
+import io.udash.rpc.serialization.JsonStr
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -16,19 +17,19 @@ object CirceUdashRpcFramework extends UdashRPCFramework {
       throw new ReadFailure(s"Could not parse JSON $str: $msg", cause)
   }
 
-  protected val rawValueCodec: GenCodec[String] = GenCodec.createNonNull(
+  val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
     {
-      case cji: CirceJsonInput => cji.readRaw().toString()
-      case in => in.readString()
+      case cji: CirceJsonInput => JsonStr(cji.readRaw().toString())
+      case in => JsonStr(in.readString())
     },
     {
-      case (cjo: CirceJsonOutput, json) => cjo.writeRaw(parseJson(json))
-      case (out, v) => out.writeString(v)
+      case (cjo: CirceJsonOutput, json) => cjo.writeRaw(parseJson(json.json))
+      case (out, v) => out.writeString(v.json)
     }
   )
 
-  override def read[T: GenCodec](json: String): T = CirceJsonInput.read[T](parseJson(json))
-  override def write[T: GenCodec](value: T): String = CirceJsonOutput.write[T](value).toString()
+  override def read[T: GenCodec](json: JsonStr): T = CirceJsonInput.read[T](parseJson(json.json))
+  override def write[T: GenCodec](value: T): JsonStr = JsonStr(CirceJsonOutput.write[T](value).toString())
 }
 
 object CirceJsonOutput {

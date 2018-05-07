@@ -2,29 +2,30 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
+import io.udash.rpc.serialization.JsonStr
 import ujson.Js
 
 import scala.collection.mutable.ListBuffer
 
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
-  override def read[T: GenCodec](value: String): T =
-    GenCodec.read[T](new JsObjectInput(upickle.json.read(value)))
+  override def read[T: GenCodec](value: JsonStr): T =
+    GenCodec.read[T](new JsObjectInput(upickle.json.read(value.json)))
 
-  override def write[T: GenCodec](value: T): String = {
+  override def write[T: GenCodec](value: T): JsonStr = {
     var result: String = null
     GenCodec.write(new JsObjectOutput(v => result = upickle.json.write(v)), value)
-    result
+    JsonStr(result)
   }
 
-  protected val rawValueCodec: GenCodec[String] = GenCodec.createNonNull(
+  val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
     {
-      case cji: JsObjectInput => upickle.json.write(cji.readRaw())
-      case in => in.readString()
+      case cji: JsObjectInput => JsonStr(upickle.json.write(cji.readRaw()))
+      case in => JsonStr(in.readString())
     },
     {
-      case (cjo: JsObjectOutput, json) => cjo.writeRaw(upickle.json.read(json))
-      case (out, v) => out.writeString(v)
+      case (cjo: JsObjectOutput, json) => cjo.writeRaw(upickle.json.read(json.json))
+      case (out, v) => out.writeString(v.json)
     }
   )
 

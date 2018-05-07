@@ -2,7 +2,7 @@ package io.udash.rpc.internals
 
 import io.udash.logging.CrossLogging
 import io.udash.rpc._
-import io.udash.rpc.serialization.ExceptionCodecRegistry
+import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
 import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
@@ -78,10 +78,10 @@ abstract class AtmosphereServerConnector[RPCRequest](
     import localFramework.RPCRequestCodec
     import remoteFramework.RPCResponse
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
-    try handleResponse(remoteFramework.read[RPCResponse](msg)) catch {
+    try handleResponse(remoteFramework.read[RPCResponse](JsonStr(msg))) catch {
       case _: Exception =>
         try {
-          localFramework.read[localFramework.RPCRequest](msg) match {
+          localFramework.read[localFramework.RPCRequest](JsonStr(msg)) match {
             case fire: localFramework.RPCFire =>
               handleRpcFire(fire)
             case unhandled =>
@@ -155,7 +155,7 @@ class DefaultAtmosphereServerConnector(override protected val clientRpc: Default
   override val localFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework
 
   override def requestToString(request: remoteFramework.RPCRequest): String =
-    remoteFramework.write(request)
+    remoteFramework.write(request).json
 
   override def handleResponse(response: remoteFramework.RPCResponse): Any =
     responseHandler(response)

@@ -2,24 +2,24 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
-import io.udash.rpc.serialization.{NativeJsonInput, NativeJsonOutput}
+import io.udash.rpc.serialization.{DefaultUdashSerialization, JsonStr, NativeJsonInput, NativeJsonOutput}
 
 class JSSerializationIntegrationTest extends SerializationIntegrationTestBase {
   override val repeats = 3
   object NativeJsonUdashRPCFramework extends ClientUdashRPCFramework {
-    protected val rawValueCodec: GenCodec[String] = GenCodec.createNonNull(
+    val rawValueCodec: GenCodec[RawValue] = GenCodec.createNonNull(
       {
-        case jsi: JsonStringInput => jsi.readRawJson()
-        case in => in.readString()
+        case jsi: JsonStringInput => JsonStr(jsi.readRawJson())
+        case in => JsonStr(in.readString())
       },
       {
-        case (jso: JsonStringOutput, json) => jso.writeRawJson(json)
-        case (out, v) => out.writeString(v)
+        case (jso: JsonStringOutput, v) => jso.writeRawJson(v.json)
+        case (out, v) => out.writeString(v.json)
       }
     )
 
-    def read[T: GenCodec](value: String): T = NativeJsonInput.read[T](value)
-    def write[T: GenCodec](value: T): String = NativeJsonOutput.write[T](value)
+    def read[T: GenCodec](value: RawValue): T = NativeJsonInput.read[T](value.json)
+    def write[T: GenCodec](value: T): RawValue = JsonStr(NativeJsonOutput.write[T](value))
   }
   object JsonStringUdashRPCFramework extends ClientUdashRPCFramework with DefaultUdashSerialization
 

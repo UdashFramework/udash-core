@@ -2,7 +2,7 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry, JsonStr}
 import io.udash.testing.UdashSharedTest
 
 import scala.util.Random
@@ -23,11 +23,12 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
-    val inv = RawInvocation("r{p[c\"]}Name", List(List(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
-    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List("\",a\"", "\"B,,\"", "\"v\""), List("\"xy,z\"")))
+    val inv = RawInvocation("r{p[c\"]}Name", List(List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""))))
+    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\"")),
+      List(JsonStr("\"xy,z\""))))
     val getter2 = RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
     val req = RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
-    val success = RPCResponseSuccess(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""", "\"ca{[]}ll1\"")
+    val success = RPCResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
     val failure = RPCResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
     val exception = RPCResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
     val runtimeException = RPCResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
@@ -161,23 +162,23 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "handle plain numbers in JSON as Int, Long and Double" in {
-      val json = "123"
+      val json = JsonStr("123")
       RPC.read[Int](json) should be(123)
       RPC.read[Long](json) should be(123)
       RPC.read[Double](json) should be(123)
 
       val maxIntPlusOne: Long = Int.MaxValue.toLong + 1
-      val jsonLong = maxIntPlusOne.toString
+      val jsonLong = JsonStr(maxIntPlusOne.toString)
       intercept[ReadFailure](RPC.read[Int](jsonLong))
       RPC.read[Long](jsonLong) should be(maxIntPlusOne)
       RPC.read[Double](jsonLong) should be(maxIntPlusOne)
 
-      val jsonLongMax = Long.MaxValue.toString
+      val jsonLongMax = JsonStr(Long.MaxValue.toString)
       intercept[ReadFailure](RPC.read[Int](jsonLong))
       RPC.read[Long](jsonLongMax) should be(Long.MaxValue)
       RPC.read[Double](jsonLongMax) should be(Long.MaxValue)
 
-      val jsonDouble = Double.MaxValue.toString
+      val jsonDouble = JsonStr(Double.MaxValue.toString)
       intercept[ReadFailure](RPC.read[Int](jsonDouble))
       intercept[ReadFailure](RPC.read[Long](jsonDouble))
       RPC.read[Double](jsonDouble) should be(Double.MaxValue)
