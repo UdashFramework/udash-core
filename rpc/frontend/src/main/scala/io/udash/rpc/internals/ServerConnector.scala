@@ -18,9 +18,9 @@ trait ServerConnector[RPCRequest] {
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
 abstract class AtmosphereServerConnector[RPCRequest](
-                                                      private val serverUrl: String,
-                                                      val exceptionsRegistry: ExceptionCodecRegistry
-                                                    ) extends ServerConnector[RPCRequest] with CrossLogging {
+  private val serverUrl: String,
+  val exceptionsRegistry: ExceptionCodecRegistry
+) extends ServerConnector[RPCRequest] with CrossLogging {
 
   protected val clientRpc: ExposesClientRPC[_]
 
@@ -30,6 +30,7 @@ abstract class AtmosphereServerConnector[RPCRequest](
   def requestToString(request: RPCRequest): String
 
   def handleResponse(response: remoteFramework.RPCResponse): Any
+
   def handleRpcFire(fire: localFramework.RPCFire): Any
 
   private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
@@ -46,9 +47,9 @@ abstract class AtmosphereServerConnector[RPCRequest](
       if (websocketSupport)
         createRequestObject(
           Transport.WEBSOCKET, reconnectInterval,
-          onOpen = (res: AtmosphereResponse) => ready(ConnectionStatus.Open),
-          onReopen = (res: AtmosphereResponse) => ready(ConnectionStatus.Open),
-          onReconnect = (req: AtmosphereRequest, res: AtmosphereResponse) => {
+          onOpen = _ => ready(ConnectionStatus.Open),
+          onReopen = _ => ready(ConnectionStatus.Open),
+          onReconnect = (_, _) => {
             if (onReconnectTimeoutHandler != 0) dom.window.clearTimeout(onReconnectTimeoutHandler)
             ready(ConnectionStatus.Closed)
             onReconnectTimeoutHandler = dom.window.setTimeout(() => {
@@ -56,9 +57,9 @@ abstract class AtmosphereServerConnector[RPCRequest](
               onReconnectTimeoutHandler = 0
             }, reconnectInterval * 2)
           },
-          onError = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed),
-          onClose = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed),
-          onClientTimeout = (res: AtmosphereResponse) => ready(ConnectionStatus.Closed)
+          onError = _ => ready(ConnectionStatus.Closed),
+          onClose = _ => ready(ConnectionStatus.Closed),
+          onClientTimeout = _ => ready(ConnectionStatus.Closed)
         )
       else {
         isReady = ConnectionStatus.Open
@@ -75,8 +76,8 @@ abstract class AtmosphereServerConnector[RPCRequest](
   }
 
   private def handleMessage(msg: String) = {
-    import remoteFramework.{RPCResponse, RPCResponseCodec}
     import localFramework.RPCRequestCodec
+    import remoteFramework.{RPCResponse, RPCResponseCodec}
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
     try handleResponse(remoteFramework.read[RPCResponse](msg)) catch {
       case _: Exception =>
@@ -115,15 +116,16 @@ abstract class AtmosphereServerConnector[RPCRequest](
     connectionStatusCallbacks.fire(isReady)
   }
 
-  private def createRequestObject(transport: Transport, reconnectInterval: Int,
-                                  onOpen: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-                                  onReopen: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-                                  onClose: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-                                  onError: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-                                  onReconnect: js.Function2[AtmosphereRequest, AtmosphereResponse, Any] = (_: AtmosphereRequest, _: AtmosphereResponse) => {},
-                                  onClientTimeout: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-                                  onTransportFailure: js.Function2[String, AtmosphereRequest, Any] = (_: String, _: AtmosphereRequest) => {}
-                                 ): AtmosphereRequest = {
+  private def createRequestObject(
+    transport: Transport, reconnectInterval: Int,
+    onOpen: js.Function1[AtmosphereResponse, Any] = _ => {},
+    onReopen: js.Function1[AtmosphereResponse, Any] = _ => {},
+    onClose: js.Function1[AtmosphereResponse, Any] = _ => {},
+    onError: js.Function1[AtmosphereResponse, Any] = _ => {},
+    onReconnect: js.Function2[AtmosphereRequest, AtmosphereResponse, Any] = (_, _) => {},
+    onClientTimeout: js.Function1[AtmosphereResponse, Any] = _ => {},
+    onTransportFailure: js.Function2[String, AtmosphereRequest, Any] = (_, _) => {}
+  ): AtmosphereRequest = {
     AtmosphereRequest(
       url = serverUrl,
       contentType = "application/json",
@@ -145,11 +147,12 @@ abstract class AtmosphereServerConnector[RPCRequest](
   }
 }
 
-class DefaultAtmosphereServerConnector(override protected val clientRpc: DefaultExposesClientRPC[_],
-                                       responseHandler: (DefaultServerUdashRPCFramework.RPCResponse) => Any,
-                                       serverUrl: String,
-                                       override val exceptionsRegistry: ExceptionCodecRegistry)
-  extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl, exceptionsRegistry) {
+class DefaultAtmosphereServerConnector(
+  override protected val clientRpc: DefaultExposesClientRPC[_],
+  responseHandler: DefaultServerUdashRPCFramework.RPCResponse => Any,
+  serverUrl: String,
+  override val exceptionsRegistry: ExceptionCodecRegistry
+) extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl, exceptionsRegistry) {
 
   override val remoteFramework: DefaultServerUdashRPCFramework.type = DefaultServerUdashRPCFramework
   override val localFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework

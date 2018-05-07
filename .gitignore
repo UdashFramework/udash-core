@@ -55,7 +55,13 @@ buildNumber.properties
 *.iml
 
 ## Directory-based project format:
-.idea/
+.idea/*
+!.idea/vcs.xml
+!.idea/codeStyleSettings.xml
+!.idea/codeInsightSettings.xml
+!.idea/runConfigurations/
+!.idea/inspectionProfiles/
+!.idea/codeStyles/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
