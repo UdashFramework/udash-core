@@ -31,19 +31,18 @@ import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{BootstrapExtState, Context, IntroState}
 import org.scalajs.dom
+import scalatags.JsDom
 
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
-import scalatags.JsDom
 
 object BootstrapDemos extends CrossLogging with CssView {
 
+  import JsDom.all._
   import io.udash.web.guide.Context._
   import org.scalajs.dom._
-
-  import JsDom.all._
 
   def statics(): dom.Element =
     div(BootstrapStyles.row, GuideStyles.frame)(
@@ -65,15 +64,16 @@ object BootstrapDemos extends CrossLogging with CssView {
     div(GuideStyles.frame)(
       UdashButtonToolbar(
         UdashButtonGroup()(
-          UdashButton()(UdashIcons.Glyphicon.alignLeft).render,
-          UdashButton()(UdashIcons.Glyphicon.alignCenter).render,
-          UdashButton()(UdashIcons.Glyphicon.alignRight).render,
-          UdashButton()(UdashIcons.Glyphicon.alignJustify).render
+          UdashButton()(i(UdashIcons.Glyphicon.alignLeft)).render,
+          UdashButton()(i(UdashIcons.Glyphicon.alignCenter)).render,
+          UdashButton()(i(UdashIcons.Glyphicon.alignRight)).render,
+          UdashButton()(i(UdashIcons.Glyphicon.alignJustify)).render
         ).render,
         UdashButtonGroup()(
-          UdashButton()(UdashIcons.FontAwesome.bitcoin).render,
-          UdashButton()(UdashIcons.FontAwesome.euro).render,
-          UdashButton()(UdashIcons.FontAwesome.dollar).render
+          UdashButton()(i(UdashIcons.FontAwesome.bitcoin)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.euro)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.dollar)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.superpowers)).render,
         ).render
       ).render
     ).render
