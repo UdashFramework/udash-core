@@ -7,7 +7,6 @@ import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.BootstrapDemos
 import io.udash.web.guide.views.{References, Versions}
-
 import scalatags.JsDom
 
 case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.type](() => new BootstrapExtView)
@@ -54,15 +53,16 @@ class BootstrapExtView extends FinalView {
       s"""UdashBootstrap.loadFontAwesome(),
          |UdashButtonToolbar(
          |  UdashButtonGroup()(
-         |    UdashButton()(Icons.Glyphicon.alignLeft).render,
-         |    UdashButton()(Icons.Glyphicon.alignCenter).render,
-         |    UdashButton()(Icons.Glyphicon.alignRight).render,
-         |    UdashButton()(Icons.Glyphicon.alignJustify).render
+         |    UdashButton()(i(Icons.Glyphicon.alignLeft)).render,
+         |    UdashButton()(i(Icons.Glyphicon.alignCenter)).render,
+         |    UdashButton()(i(Icons.Glyphicon.alignRight)).render,
+         |    UdashButton()(i(Icons.Glyphicon.alignJustify)).render
          |  ).render,
          |  UdashButtonGroup()(
-         |    UdashButton()(Icons.FontAwesome.bitcoin).render,
-         |    UdashButton()(Icons.FontAwesome.euro).render,
-         |    UdashButton()(Icons.FontAwesome.dollar).render
+         |    UdashButton()(i(Icons.FontAwesome.bitcoin)).render,
+         |    UdashButton()(i(Icons.FontAwesome.euro)).render,
+         |    UdashButton()(i(Icons.FontAwesome.dollar)).render,
+         |    UdashButton()(i(UdashIcons.FontAwesome.superpowers)).render,
          |  ).render
          |).render""".stripMargin
     )(GuideStyles),
