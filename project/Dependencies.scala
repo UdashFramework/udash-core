@@ -32,7 +32,7 @@ object Dependencies {
   val bootstrapDatepickerVersion = "4.17.47"
   val momentJsVersion = "2.19.4"
 
-  val scalaJsBenchmarkVersion = "0.2.4"
+  val scalaJsBenchmarkVersion = "0.2.5"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" %% "silencer-plugin" % silencerVersion
