@@ -18,13 +18,18 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val MacroModelPropertyCreatorCls = tq"$Package.MacroModelPropertyCreator"
 
   val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
+  val CastableReadablePropertyCls = tq"$Package.single.CastableReadableProperty"
   val PropertyCls = tq"$Package.single.Property"
   val DirectPropertyImplCls = tq"$Package.single.DirectPropertyImpl"
+  val ReadableSeqPropertyCls = tq"$Package.seq.ReadableSeqProperty"
   val SeqPropertyCls = tq"$Package.seq.SeqProperty"
   val DirectSeqPropertyImplCls = tq"$Package.seq.DirectSeqPropertyImpl"
+  val ReadableModelPropertyCls = tq"$Package.model.ReadableModelProperty"
   val ModelPropertyCls = tq"$Package.model.ModelProperty"
   val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
   val CastablePropertyCls = tq"$Package.single.CastableProperty"
+  val ImmutablePropertyCls = tq"$Package.ImmutableProperty"
+  val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
 
   val PatchCls = tq"$Package.SeqProperty.Patch"
 
@@ -223,7 +228,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
               members.map { case (name, returnTpe) =>
                 q"""
                   setSubProp(
-                    getSubProperty[$returnTpe](${name.toString}),
+                    getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}),
                     if (newValue != null) newValue.$name else null.asInstanceOf[$returnTpe],
                     withCallbacks, force
                   )
@@ -246,7 +251,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
               order.map { case name =>
                 val returnTpe = members(name)
-                q"""getSubProperty[$returnTpe](${name.toString}).get"""
+                q"""getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
               }
             }
           )
@@ -259,7 +264,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           new $tpe {
             ..${
               members.map { case (name, returnTpe) =>
-                q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${name.toString}).get"""
+                q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
               }
             }
           }
@@ -269,10 +274,36 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
-    reifySubProperty[A, B](f)
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$PropertyCls[$resultType]]"
   }
 
-  def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B]): c.Tree = {
+  def reifySubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$ModelPropertyCls[$resultType]]"
+  }
+
+  def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$SeqPropertyCls[$resultType, $PropertyCls[$resultType] with $CastablePropertyCls[$resultType]]]"
+  }
+
+  def reifyRoSubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadablePropertyCls[$resultType]]"
+  }
+
+  def reifyRoSubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadableModelPropertyCls[$resultType]]"
+  }
+
+  def reifyRoSubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+    val resultType = weakTypeOf[B]
+    q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadableSeqPropertyCls[$resultType, $CastableReadablePropertyCls[$resultType]]]"
+  }
+
+  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B]): c.Tree = {
     val model = c.prefix
     val modelPath = getModelPath(f.tree)
 
@@ -305,16 +336,21 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
       case (select, term) :: _ if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
-        q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString})
-           .asInstanceOf[$SeqPropertyCls[${select.tpe.typeArgs.head.widen}, $PropertyCls[${select.tpe.typeArgs.head.widen}] with $CastablePropertyCls[${select.tpe.typeArgs.head.widen}]]]"""
+        q"""$targetTree.getSubSeq[${select.tpe.typeArgs.head.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
+      case (select, term) :: Nil if hasModelPropertyCreator(select.tpe.widen) =>
+        q"""{
+            val tmp = $targetTree
+            tmp.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[tmp.ModelSubProperty[${select.tpe.widen}]]
+        }"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
-        genTree(tail, q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$ModelPropertyImplCls[${select.tpe.widen}]]""")
+        genTree(tail, q"""$targetTree.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[${select.tpe.widen}]]""")
       case (select, term) :: _ =>
-        q"""$targetTree.getSubProperty[${select.tpe.widen}](${term.decodedName.toString}).asInstanceOf[$PropertyCls[${select.tpe.widen}]]"""
+        q"""$targetTree.getSubProperty[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
       case Nil => targetTree
     }
 
-    genTree(parts, q"""$model.asInstanceOf[$ModelPropertyImplCls[_]]""")
+    val tpe = weakTypeOf[A]
+    q"${genTree(parts, q"""$model.asInstanceOf[$ModelPropertyMacroApiCls[$tpe]]""")}"
   }
 
   def reifyModelPropertyCreator[A: c.WeakTypeTag](ev: c.Tree): c.Tree = {

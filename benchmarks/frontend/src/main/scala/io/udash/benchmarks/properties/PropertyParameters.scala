@@ -29,7 +29,7 @@ object PropertyParameters {
   }
 
   val bindImmutableProperty = Benchmark("bind to an immutable property") {
-    for (_ <- 1 until 1000) renderProperty("asd")
+    for (_ <- 1 until 1000) renderProperty("asd".toProperty)
   }
 
   val bindStandardModelProperty = Benchmark("bind to a standard model property") {
@@ -37,7 +37,7 @@ object PropertyParameters {
   }
 
   val bindImmutableModelProperty = Benchmark("bind to an immutable model property") {
-    for (_ <- 1 until 1000) renderModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null))))
+    for (_ <- 1 until 1000) renderModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null))).toModelProperty)
   }
 
   val bindStandardSeqProperty = Benchmark("bind to a standard seq property") {
@@ -45,7 +45,7 @@ object PropertyParameters {
   }
 
   val bindImmutableSeqProperty = Benchmark("bind to an immutable seq property") {
-    for (_ <- 1 until 1000) renderSeqProperty(Seq("A", "B", "C"))
+    for (_ <- 1 until 1000) renderSeqProperty(Seq("A", "B", "C").toSeqProperty)
   }
 
   val suite = GuiSuite(

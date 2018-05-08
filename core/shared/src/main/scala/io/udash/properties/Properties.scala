@@ -25,6 +25,18 @@ trait Properties {
   val Valid = io.udash.properties.Valid
   val Invalid = io.udash.properties.Invalid
   val DefaultValidationError = io.udash.properties.DefaultValidationError
+
+  implicit class Any2Property[A](val value: A) {
+    def toProperty: ReadableProperty[A] = new ImmutableProperty[A](value)
+  }
+
+  implicit class Any2ModelProperty[A : ModelPropertyCreator](val value: A) {
+    def toModelProperty: ReadableModelProperty[A] = new ImmutableProperty[A](value)
+  }
+
+  implicit class Any2SeqProperty[A](val value: Seq[A]) {
+    def toSeqProperty: ReadableSeqProperty[A] = new ImmutableSeqProperty[A](value)
+  }
 }
 
 object Properties extends Properties

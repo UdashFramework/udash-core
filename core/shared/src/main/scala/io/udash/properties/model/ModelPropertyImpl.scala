@@ -3,11 +3,14 @@ package model
 
 import java.util.UUID
 
+import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 
 
 abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
-  extends ModelProperty[A] with CastableProperty[A] {
+  extends ModelProperty[A] with CastableProperty[A] with ModelPropertyMacroApi[A] {
+
+  override type ModelSubProperty[_] = ModelPropertyImpl[_]
 
   /** False if subproperties were not created yet. */
   protected var initialized: Boolean = false
@@ -25,13 +28,19 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     super.valueChanged()
   }
 
-  def getSubProperty[T](key: String): Property[T] = {
+  override def getSubProperty[T](getter: A => T, key: String): Property[T] = {
     if (!initialized) {
       initialized = true
       initialize()
     }
     properties(key).asInstanceOf[Property[T]]
   }
+
+  def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
+    getSubProperty(getter, key).asInstanceOf[ReadableModelProperty[T]]
+
+  def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
+    getSubProperty(getter, key).asInstanceOf[ReadableSeqProperty[T, ReadableProperty[T]]]
 
   def touch(): Unit = CallbackSequencer().sequence {
     properties.values.foreach(_.touch())

@@ -7,8 +7,10 @@ import scala.concurrent.Future
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties]
-class TransformedReadableProperty[A, B](override protected val origin: ReadableProperty[A],
-                                        transformer: A => B) extends ForwarderReadableProperty[B] {
+class TransformedReadableProperty[A, B](
+  override protected val origin: ReadableProperty[A],
+  transformer: A => B
+) extends ForwarderReadableProperty[B] {
   protected var lastValue: Option[A] = None
   protected var transformedValue: B = _
   protected var originListenerRegistration: Registration = _

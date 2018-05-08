@@ -9,7 +9,7 @@ import io.udash.utils.{Registration, SetRegistration}
 import scala.collection.mutable
 
 private[properties]
-abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, ReadableProperty[O]] {
+abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
   override val id: UUID = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
