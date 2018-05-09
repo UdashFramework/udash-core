@@ -1,7 +1,5 @@
 package io.udash.properties
 
-import java.util.UUID
-
 import io.udash.properties.model.{ModelPropertyMacroApi, ReadableModelProperty}
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
@@ -13,7 +11,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override type ModelSubProperty[_] = ImmutableProperty[_]
 
   /** Unique property ID. */
-  override val id: UUID = UUID.randomUUID()
+  override val id: PropertyId = PropertyCreator.newID()
 
   /** @return Current property value. */
   @inline override def get: A = value
