@@ -1,13 +1,12 @@
 package io.udash.rpc
 
 import java.util.UUID
-import javax.servlet.ServletInputStream
-import javax.servlet.http.HttpServletResponse
 
-import com.avsystem.commons.serialization.GenCodec
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
-import io.udash.rpc.serialization.ExceptionCodecRegistry
+import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
+import javax.servlet.ServletInputStream
+import javax.servlet.http.HttpServletResponse
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
@@ -43,9 +42,9 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @tparam ServerRPCType Main server side RPC interface
   */
 class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType],
-                                       exceptionsRegistry: ExceptionCodecRegistry,
-                                       sseSuspendTime: FiniteDuration = 1 minute)
-                                      (implicit val executionContext: ExecutionContext)
+  exceptionsRegistry: ExceptionCodecRegistry,
+  sseSuspendTime: FiniteDuration = 1 minute)
+  (implicit val executionContext: ExecutionContext)
   extends AtmosphereServletProcessor with LazyLogging {
 
   private var brodcasterFactory: BroadcasterFactory = _
@@ -78,7 +77,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
 
     try {
       handleRequest(resource,
-        data => BroadcastManager.sendToClient(uuid, data),
+        data => BroadcastManager.sendToClient(uuid, data.json),
         () => ()
       )
     } catch {
@@ -98,7 +97,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
       resource.suspend()
       handleRequest(resource,
         data => {
-          resource.getResponse.write(data)
+          resource.getResponse.write(data.json)
           resource.resume()
         },
         () => resource.resume()
@@ -110,12 +109,14 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def handleRequest(resource: AtmosphereResource, onCall: (String) => Unit, onFire: () => Unit): Unit = {
+  private def handleRequest(resource: AtmosphereResource, onCall: JsonStr => Unit, onFire: () => Unit): Unit = {
     val rpc = config.resolveRpc(resource)
     import rpc.localFramework._
-    implicit val codec: GenCodec[RPCResponse] = RPCResponseCodec(exceptionsRegistry)
-    val input: String = readInput(resource.getRequest.getInputStream)
-    if (input.nonEmpty) {
+
+    implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
+
+    val input = readInput(resource.getRequest.getInputStream)
+    if (input.json.nonEmpty) {
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
         case (call: RPCCall, Some(response)) =>
@@ -164,8 +165,8 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
   override def destroy(): Unit = {}
 
   private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])
-                              (resource: AtmosphereResource,
-                               request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
+    (resource: AtmosphereResource,
+      request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
 
     val filterResult = config.filters.foldLeft[Try[Any]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
@@ -191,12 +192,12 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
     }
   }
 
-  private def readRequest(input: String, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
+  private def readRequest(input: JsonStr, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
     import rpc.localFramework._
     read[RPCRequest](input)
   }
 
-  private def readInput(inputStream: ServletInputStream): String = {
-    scala.io.Source.fromInputStream(inputStream).mkString
+  private def readInput(inputStream: ServletInputStream): JsonStr = {
+    JsonStr(scala.io.Source.fromInputStream(inputStream).mkString)
   }
 }

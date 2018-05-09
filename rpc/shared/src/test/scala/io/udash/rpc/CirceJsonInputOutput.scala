@@ -2,7 +2,8 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import io.circe.{Json, JsonObject}
+import io.circe.{Json, JsonObject, ParsingFailure}
+import io.udash.rpc.serialization.JsonStr
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -10,15 +11,25 @@ object CirceUdashRpcFramework extends UdashRPCFramework {
 
   import io.circe.parser._
 
-  override def inputSerialization(value: String): Input = {
-    val parsed = parse(value) match {
-      case Right(json) => json
-      case Left(failure) => throw new ReadFailure(s"Could not parse JSON $value", failure)
-    }
-    new CirceJsonInput(parsed)
+  private def parseJson(str: String): Json = parse(str) match {
+    case Right(json) => json
+    case Left(ParsingFailure(msg, cause)) =>
+      throw new ReadFailure(s"Could not parse JSON $str: $msg", cause)
   }
 
-  override def write[T: GenCodec](value: T): String = CirceJsonOutput.write(value).toString()
+  val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
+    {
+      case cji: CirceJsonInput => JsonStr(cji.readRaw().toString())
+      case in => JsonStr(in.readString())
+    },
+    {
+      case (cjo: CirceJsonOutput, json) => cjo.writeRaw(parseJson(json.json))
+      case (out, v) => out.writeString(v.json)
+    }
+  )
+
+  override def read[T: GenCodec](json: JsonStr): T = CirceJsonInput.read[T](parseJson(json.json))
+  override def write[T: GenCodec](value: T): JsonStr = JsonStr(CirceJsonOutput.write[T](value).toString())
 }
 
 object CirceJsonOutput {
@@ -39,6 +50,7 @@ class CirceJsonOutput(consumer: Json => Any) extends Output {
   def writeBinary(binary: Array[Byte]): Unit = ???
   def writeList(): ListOutput = new CirceJsonListOutput(consumer)
   def writeObject(): ObjectOutput = new CirceJsonObjectOutput(consumer)
+  def writeRaw(json: Json) = consumer(json)
   override def writeFloat(float: Float): Unit = consumer(Json.fromFloatOrString(float))
 }
 
@@ -87,6 +99,7 @@ class CirceJsonInput(json: Json) extends Input {
     val asObject = json.asObject
     new CirceJsonObjectInput(asObject.getOrElse(failNot("object")))
   }
+  def readRaw(): Json = json
   def skip(): Unit = ()
 }
 

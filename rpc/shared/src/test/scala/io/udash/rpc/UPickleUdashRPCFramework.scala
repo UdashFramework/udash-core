@@ -2,24 +2,32 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
+import io.udash.rpc.serialization.JsonStr
 import ujson.Js
 
 import scala.collection.mutable.ListBuffer
-import scala.util.Try
 
 trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
-  override def inputSerialization(value: String): Input = {
-    Try(upickle.json.read(value))
-      .map(new JsObjectInput(_))
-      .recover { case ex => throw new ReadFailure("Parse error!", ex) }.get
-  }
+  override def read[T: GenCodec](value: JsonStr): T =
+    GenCodec.read[T](new JsObjectInput(upickle.json.read(value.json)))
 
-  override def write[T: GenCodec](value: T): String = {
+  override def write[T: GenCodec](value: T): JsonStr = {
     var result: String = null
     GenCodec.write(new JsObjectOutput(v => result = upickle.json.write(v)), value)
-    result
+    JsonStr(result)
   }
+
+  val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
+    {
+      case cji: JsObjectInput => JsonStr(upickle.json.write(cji.readRaw()))
+      case in => JsonStr(in.readString())
+    },
+    {
+      case (cjo: JsObjectOutput, json) => cjo.writeRaw(upickle.json.read(json.json))
+      case (out, v) => out.writeString(v.json)
+    }
+  )
 
   class JsObjectInput(value: Js.Value) extends Input {
     def inputType = value match {
@@ -96,6 +104,8 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
         throw new ReadFailure("Not Js.Arr")
     }
 
+    def readRaw(): Js.Value = value
+
     def skip() = ()
   }
 
@@ -138,6 +148,8 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
       def finish() = setResultThenConsume(Js.Obj(builder.result(): _*))
     }
+
+    def writeRaw(js: Js.Value) = consumer(js)
   }
 }
 

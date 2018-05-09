@@ -3,6 +3,7 @@ package io.udash.rest
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.internal.RESTConnector
 import io.udash.rest.internal.RESTConnector.HTTPMethod
+import io.udash.rpc.serialization.JsonStr
 import io.udash.testing.AsyncUdashSharedTest
 import org.scalatest.Succeeded
 
@@ -38,12 +39,13 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     val connector = new ConnectorMock
     val rest: DefaultServerREST[TestRESTInterface] = new DefaultServerREST[TestRESTInterface](connector)
+    import rest.framework._
     val restServer = rest.remoteRpc
 
     "send valid REST requests via RESTConnector" in {
       val responses = Seq.newBuilder[Future[org.scalatest.Assertion]]
 
-      connector.response = rest.framework.write(r3)
+      connector.response = write(r3).json
       for {
         _ <- retrying {
           responses += restServer.serviceOne().create(r).map(_ should be(r3))
@@ -51,30 +53,31 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
           connector.method should be(RESTConnector.POST)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
-          rest.framework.read[TestRESTRecord](connector.body) should be(r)
+          read[TestRESTRecord](JsonStr(connector.body)) should be(r)
         }
 
-        _ <- Future { connector.response = rest.framework.write(r2) }
+        _ <- Future { connector.response = write(r2).json }
         _ <- retrying {
           responses += restServer.serviceOne().update(r2.id.get)(r2).map(_ should be(r2))
           connector.url should be(s"/serviceOne/update/${r2.id.get}")
           connector.method should be(RESTConnector.PUT)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
-          rest.framework.read[TestRESTRecord](connector.body) should be(r2)
+          read[TestRESTRecord](JsonStr(connector.body)) should be(r2)
         }
 
-        _ <- Future { connector.response = rest.framework.write(r3) }
+        _ <- Future { connector.response = write(r3).json }
         _ <- retrying {
           responses += restServer.serviceOne().modify(r2.id.get)("test", 5).map(_ should be(r3))
           connector.url should be(s"/serviceOne/change/${r2.id.get}")
           connector.method should be(RESTConnector.PATCH)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
-          rest.framework.read[Map[String, rest.framework.RawValue]](connector.body) should be(Map("s" -> "\"test\"", "i" -> "5")) // in this framework RawValue = String
+          read[Map[String, RawValue]](JsonStr(connector.body)) should
+            be(Map("s" -> JsonStr("\"test\""), "i" -> JsonStr("5"))) // in this framework RawValue = String
         }
 
-        _ <- Future { connector.response = rest.framework.write(r) }
+        _ <- Future { connector.response = write(r).json }
         r <- retrying {
           responses += restServer.serviceOne().delete(r2.id.get).map(_ should be(r))
           connector.url should be(s"/serviceOne/remove/${r2.id.get}")
@@ -109,7 +112,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
     "handle overloaded methods" in {
       val s = Seq(r, r2, r3)
-      connector.response = rest.framework.write(s)
+      connector.response = write(s).json
       val resp = restServer.serviceOne().load()
       retrying {
         connector.url should be(s"/serviceOne/load")
@@ -141,7 +144,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         connector.queryArguments should be(Map.empty)
         connector.headers("X_AUTH_TOKEN") should be("token_123")
         connector.headers("lang") should be("pl")
-        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+        read[TestRESTRecord](JsonStr(connector.body)) should be(r)
       }
     }
 
@@ -152,12 +155,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         connector.method should be(RESTConnector.POST)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
-        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+        read[TestRESTRecord](JsonStr(connector.body)) should be(r)
       }
     }
 
     "handle broken HTTP response" in {
-      connector.response = rest.framework.write(r2)
+      connector.response = write(r2).json
       val resp = restServer.serviceOne().load()
       retrying {
         connector.url should be(s"/serviceOne/load")
@@ -222,7 +225,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         connector.queryArguments should be(Map.empty)
         connector.headers("X_AUTH_TOKEN") should be("a b /? @#$%^&+")
         connector.headers("lang") should be("a b /? @#$%^&+")
-        rest.framework.read[TestRESTRecord](connector.body) should be(r)
+        read[TestRESTRecord](JsonStr(connector.body)) should be(r)
       }
     }
 

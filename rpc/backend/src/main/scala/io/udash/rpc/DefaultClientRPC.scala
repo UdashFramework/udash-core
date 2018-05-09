@@ -20,9 +20,9 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
     val msg: RawValue = write[RPCRequest](RPCFire(invocation, getterChain))
     target match {
       case AllClients =>
-        BroadcastManager.broadcast(msg)
+        BroadcastManager.broadcast(msg.json)
       case ClientId(clientId) =>
-        BroadcastManager.sendToClient(clientId, msg)
+        BroadcastManager.sendToClient(clientId, msg.json)
     }
   }
 

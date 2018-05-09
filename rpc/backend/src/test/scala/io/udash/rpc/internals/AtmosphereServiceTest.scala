@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 
 class AtmosphereServiceTest extends UdashRpcBackendTest {
 
-  val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
+  implicit val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
   exceptionsRegistry.register(GenCodec.materialize[CustomRPCException])
 
   def createBroadcasters(): (BroadcasterMock, BroadcasterFactoryMock, MetaBroadcasterMock) = {
@@ -99,7 +99,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
           DefaultServerUdashRPCFramework.RPCFire(
             DefaultServerUdashRPCFramework.RawInvocation("doStuffInteger", List(List(DefaultServerUdashRPCFramework.write[Int](5)))), List()
           )
-        ))
+        ).json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -135,7 +135,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
             List(),
             "callId1"
           )
-        ))
+        ).json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -172,7 +172,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
             DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
             List()
           )
-        ))
+        ).json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -207,7 +207,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
             List(),
             "callId1"
           )
-        ))
+        ).json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -237,7 +237,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(failRequestBody)
+        request.body(failRequestBody.json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -266,7 +266,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(exRequestBody)
+        request.body(exRequestBody.json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
 
@@ -300,7 +300,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
             DefaultServerUdashRPCFramework.RawInvocation("handle", List()),
             List()
           )
-        ))
+        ).json)
 
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request)
 
@@ -334,7 +334,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
             List(),
             "callId1"
           )
-        ))
+        ).json)
 
         val response = new AtmosphereResponseMock(null)
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
@@ -365,7 +365,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(exRequestBody)
+        request.body(exRequestBody.json)
 
         val response = new AtmosphereResponseMock(null)
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
@@ -397,7 +397,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
-        request.body(failRequestBody.substring(5))
+        request.body(failRequestBody.json.substring(5))
 
         val response = new AtmosphereResponseMock(null)
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
@@ -471,7 +471,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -499,7 +498,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
@@ -527,7 +525,6 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123123123", request, response)
 
         val event = new AtmosphereResourceEventImpl(resource)
-        implicit val codec: GenCodec[DefaultServerUdashRPCFramework.RPCResponse] = DefaultServerUdashRPCFramework.RPCResponseCodec(exceptionsRegistry)
         event.setMessage(
           DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCResponse](
             DefaultServerUdashRPCFramework.RPCResponseSuccess(DefaultServerUdashRPCFramework.write[String]("response"), "call1")
