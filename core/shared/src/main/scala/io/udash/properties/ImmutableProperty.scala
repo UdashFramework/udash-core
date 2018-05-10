@@ -8,8 +8,6 @@ import io.udash.utils.Registration
 import scala.concurrent.Future
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] with ReadableModelProperty[A] with ModelPropertyMacroApi[A] {
-  override type ModelSubProperty[_] = ImmutableProperty[_]
-
   /** Unique property ID. */
   override val id: PropertyId = PropertyCreator.newID()
 

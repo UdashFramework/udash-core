@@ -340,7 +340,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
       case (select, term) :: Nil if hasModelPropertyCreator(select.tpe.widen) =>
         q"""{
             val tmp = $targetTree
-            tmp.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[tmp.ModelSubProperty[${select.tpe.widen}]]
+            tmp.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})
         }"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
         genTree(tail, q"""$targetTree.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[${select.tpe.widen}]]""")

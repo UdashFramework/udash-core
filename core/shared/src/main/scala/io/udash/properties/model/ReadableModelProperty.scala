@@ -5,7 +5,6 @@ import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{AbstractReadableProperty, CastableReadableProperty, Property, ReadableProperty}
 
 import scala.concurrent.Future
-import scala.language.higherKinds
 
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
@@ -24,7 +23,6 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 }
 
 trait ModelPropertyMacroApi[A] {
-  type ModelSubProperty[_] <: ModelPropertyMacroApi[_]
   def getSubProperty[T](getter: A => T, key: String): ReadableProperty[T]
   def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T]
   def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]]
@@ -39,8 +37,8 @@ private[properties] trait AbstractReadableModelProperty[A] extends ReadableModel
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed.
     */
   override def isValid: Future[ValidationResult] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
     import Validator._
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     if (validationResult == null) {
       validationResult = Future.sequence(

@@ -1259,6 +1259,18 @@ class PropertyTest extends UdashSharedTest {
         p.subProp(_._3).get should be("asd")
       }
     }
+
+    "cache subproperties" in {
+      val p = ModelProperty.empty[TT]
+      p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
+
+      p.subProp(_.i) should be theSameInstanceAs p.subProp(_.i)
+      p.subProp(_.s) should be theSameInstanceAs p.subProp(_.s)
+      p.subModel(_.t) should be theSameInstanceAs p.subModel(_.t)
+      p.subModel(_.t) should be theSameInstanceAs p.subProp(_.t)
+      p.subSeq(_.t.s) should be theSameInstanceAs p.subSeq(_.t.s)
+      p.subSeq(_.t.s) should be theSameInstanceAs p.subProp(_.t.s)
+    }
   }
 
   "SeqProperty" should {

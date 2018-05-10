@@ -8,8 +8,6 @@ import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: PropertyId)
   extends ModelProperty[A] with CastableProperty[A] with ModelPropertyMacroApi[A] {
 
-  override type ModelSubProperty[_] = ModelPropertyImpl[_]
-
   /** False if subproperties were not created yet. */
   protected var initialized: Boolean = false
   /** True if value was never changed. */
