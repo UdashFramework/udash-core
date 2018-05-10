@@ -1,7 +1,5 @@
 package io.udash.properties.single
 
-import java.util.UUID
-
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
 import io.udash.utils.Registration
@@ -12,7 +10,7 @@ import scala.concurrent.{Future, Promise}
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[A] {
   /** Unique property ID. */
-  val id: UUID
+  val id: PropertyId
 
   /** @return Current property value. */
   def get: A

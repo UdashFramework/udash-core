@@ -1,12 +1,10 @@
 package io.udash.properties.seq
 
-import java.util.UUID
-
-import io.udash.properties.{CrossCollections, MutableBufferRegistration, PropertyCreator}
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
+import io.udash.properties.{CrossCollections, MutableBufferRegistration, PropertyCreator, PropertyId}
 import io.udash.utils.Registration
 
-class DirectSeqPropertyImpl[A : PropertyCreator](val parent: ReadableProperty[_], override val id: UUID)
+class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_], override val id: PropertyId)
   extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]

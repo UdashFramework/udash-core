@@ -1,15 +1,13 @@
 package io.udash.properties.single
 
-import java.util.UUID
-
-import io.udash.properties.{PropertyCreator, ValidationResult}
+import io.udash.properties.{PropertyCreator, PropertyId, ValidationResult}
 
 import scala.concurrent.Future
 
 trait ForwarderReadableProperty[A] extends AbstractReadableProperty[A] {
   protected def origin: ReadableProperty[_]
 
-  override val id: UUID = PropertyCreator.newID()
+  override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
 
   override def isValid: Future[ValidationResult] =

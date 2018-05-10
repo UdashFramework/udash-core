@@ -136,4 +136,3 @@ trait Property[A] extends AbstractReadableProperty[A] {
 
   }
 }
-

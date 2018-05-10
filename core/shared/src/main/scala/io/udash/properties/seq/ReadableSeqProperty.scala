@@ -1,7 +1,5 @@
 package io.udash.properties.seq
 
-import java.util.UUID
-
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.{Registration, SetRegistration}
@@ -50,7 +48,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
     class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B])
       extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
 
-      override val id: UUID = PropertyCreator.newID()
+      override val id: PropertyId = PropertyCreator.newID()
       override protected[properties] val parent: ReadableProperty[_] = null
 
       private val children = CrossCollections.createArray[ReadableProperty[O]]
@@ -109,8 +107,9 @@ trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends A
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   override def isValid: Future[ValidationResult] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
     import Validator._
+
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     if (validationResult == null) {
       validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult

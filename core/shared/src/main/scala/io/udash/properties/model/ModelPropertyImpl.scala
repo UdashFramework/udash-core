@@ -1,13 +1,11 @@
 package io.udash.properties
 package model
 
-import java.util.UUID
-
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 
 
-abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: UUID)
+abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override val id: PropertyId)
   extends ModelProperty[A] with CastableProperty[A] with ModelPropertyMacroApi[A] {
 
   override type ModelSubProperty[_] = ModelPropertyImpl[_]
