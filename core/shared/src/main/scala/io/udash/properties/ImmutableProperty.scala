@@ -5,6 +5,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
 
+import scala.collection.immutable
 import scala.concurrent.Future
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] with ReadableModelProperty[A] with ModelPropertyMacroApi[A] {
@@ -60,7 +61,12 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   }
 }
 
-private[properties] class ImmutableSeqProperty[A](value: Seq[A]) extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
+private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
+  def this(value: Seq[A]) = this(value match {
+    case v: immutable.Seq[A] => v
+    case _ => value.to[immutable.Seq]
+  })
+
   override lazy val elemProperties: Seq[ImmutableProperty[A]] =
     value.map(v => new ImmutableProperty(v))
 
