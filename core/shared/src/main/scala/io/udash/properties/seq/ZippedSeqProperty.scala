@@ -1,16 +1,14 @@
 package io.udash.properties.seq
 
-import java.util.UUID
-
 import io.udash.properties.single.ReadableProperty
-import io.udash.properties.{CallbackSequencer, CrossCollections, PropertyCreator}
+import io.udash.properties.{CallbackSequencer, CrossCollections, PropertyCreator, PropertyId}
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 
 private[properties]
-abstract class ZippedSeqPropertyUtils[O] extends ReadableSeqProperty[O, ReadableProperty[O]] {
-  override val id: UUID = PropertyCreator.newID()
+abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
+  override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
   protected final val children = CrossCollections.createArray[ReadableProperty[O]]
