@@ -5,7 +5,7 @@ import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty,
 import io.udash.utils.Registration
 
 trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
-  extends ForwarderReadableProperty[Seq[B]] with ReadableSeqProperty[B, ElemType] {
+  extends ForwarderReadableProperty[Seq[B]] with AbstractReadableSeqProperty[B, ElemType] {
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 

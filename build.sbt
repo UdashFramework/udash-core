@@ -299,7 +299,7 @@ lazy val `auth-shared` = project.in(file("auth/shared"))
 lazy val `auth-shared-JS` = project.in(`auth-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`rpc-shared-JS` % CompileAndTest)
-  .configure(p => if (forIdeaImport) p.dependsOn(`i18n-shared`) else p)
+  .configure(p => if (forIdeaImport) p.dependsOn(`auth-shared`) else p)
   .settings(
     commonSettings,
     commonJSSettings,

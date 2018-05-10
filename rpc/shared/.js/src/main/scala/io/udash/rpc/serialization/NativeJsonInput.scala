@@ -1,5 +1,6 @@
 package io.udash.rpc.serialization
 
+import com.avsystem.commons.misc.Opt
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 
@@ -8,7 +9,7 @@ import scala.scalajs.js.JSON
 import scala.util.Try
 
 //todo move to scala-commons
-class NativeJsonInput(value: Any) extends Input { self =>
+class NativeJsonInput(value: js.Any) extends Input { self =>
   private def read[T](expected: String)(matcher: PartialFunction[Any, T]): T =
     matcher.applyOrElse(value, (_: Any) => throw new ReadFailure(s"$expected expected."))
 
@@ -41,7 +42,7 @@ class NativeJsonInput(value: Any) extends Input { self =>
 
   override def readLong(): Long = {
     def parseLong(): Option[Long] = {
-      value match {
+      (value: Any) match {
         case s: String => Try(s.toLong).toOption
         case i: Int => Some(i)
         case d: Double if d == d.toLong => Some(d.toLong)
@@ -62,12 +63,12 @@ class NativeJsonInput(value: Any) extends Input { self =>
 
   override def readList(): ListInput =
     read("List") {
-      case array: js.Array[_] => new JsonListInput(array)
+      case array: js.Array[js.Any@unchecked] => new JsonListInput(array)
     }
 
   override def readObject(): ObjectInput =
     read("Object") {
-      case obj: js.Object => new JsonObjectInput(obj.asInstanceOf[js.Dictionary[_]])
+      case obj: js.Object => new JsonObjectInput(obj.asInstanceOf[js.Dictionary[js.Any]])
     }
 
   override def skip(): Unit = ()
@@ -76,34 +77,39 @@ class NativeJsonInput(value: Any) extends Input { self =>
     readList().iterator(i => i.readInt().toByte).toArray
   }
 
-  class JsonListInput(list: js.Array[_]) extends ListInput {
-    var it = 0
+  def readRaw(): Any = value
+}
 
-    override def hasNext: Boolean =
-      it < list.length
+class JsonListInput(list: js.Array[js.Any]) extends ListInput {
+  var it = 0
 
-    override def nextElement(): Input = {
-      val in = new NativeJsonInput(list(it))
-      it += 1
-      in
-    }
-  }
+  override def hasNext: Boolean =
+    it < list.length
 
-  class JsonObjectInput(dict: js.Dictionary[_]) extends ObjectInput {
-    val it = dict.keysIterator
-
-    override def hasNext: Boolean =
-      it.hasNext
-
-    override def nextField(): FieldInput = {
-      val key = it.next()
-      new NativeJsonFieldInput(key, dict.apply(key))
-    }
+  override def nextElement(): Input = {
+    val in = new NativeJsonInput(list(it))
+    it += 1
+    in
   }
 }
 
-class NativeJsonFieldInput(val fieldName: String, value: Any) extends NativeJsonInput(value) with FieldInput
+class JsonObjectInput(dict: js.Dictionary[js.Any]) extends ObjectInput {
+  val it = dict.keysIterator
 
+  override def hasNext: Boolean =
+    it.hasNext
+
+  override def peekField(name: String): Opt[FieldInput] =
+    if (dict.contains(name)) Opt(new NativeJsonFieldInput(name, dict(name))) else Opt.Empty
+
+  override def nextField(): FieldInput = {
+    val key = it.next()
+    new NativeJsonFieldInput(key, dict.apply(key))
+  }
+}
+
+class NativeJsonFieldInput(val fieldName: String, value: js.Any)
+  extends NativeJsonInput(value) with FieldInput
 
 object NativeJsonInput {
   def read[T: GenCodec](value: String): T = {

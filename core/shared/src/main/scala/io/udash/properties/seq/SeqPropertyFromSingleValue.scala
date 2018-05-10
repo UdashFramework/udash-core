@@ -1,18 +1,18 @@
 package io.udash.properties
 package seq
 
-import java.util.UUID
-
 import io.udash.properties.single._
 import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 
 private[properties]
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
-  extends ReadableSeqProperty[B, ReadableProperty[B]] {
+abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
+  origin: ReadableProperty[A],
+  transformer: A => Seq[B]
+) extends AbstractReadableSeqProperty[B, ReadableProperty[B]] {
 
-  override val id: UUID = PropertyCreator.newID()
+  override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
 
   protected final val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()

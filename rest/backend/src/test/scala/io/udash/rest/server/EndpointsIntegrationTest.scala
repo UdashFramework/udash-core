@@ -63,7 +63,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       await(restServer.serviceOne().load()).size should be(3)
     }
     "work with Udash REST client (4)" in {
-      await(restServer.serviceOne().load(42, "a\\bc", "q:/we")) should be(TestRESTRecord(Some(42), "one/load/a\\bc/q:/we"))
+      await(restServer.serviceOne().load(42, "a\\b?x=2&c", "q:/w?x=2e")) should be(TestRESTRecord(Some(42), "one/load/a\\b?x=2&c/q:/w?x=2e"))
     }
     "work with Udash REST client (5)" in {
       await(restServer.serviceTwo("tok:/\\en123", "en_GB").create(TestRESTRecord(None, "test123"))) should be(TestRESTRecord(None, "two/tok:/\\en123/en_GB/create/None/test123"))

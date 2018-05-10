@@ -1,8 +1,12 @@
 package io.udash.rest
 
-import io.udash.rpc.{DefaultUdashSerialization, GenCodecSerializationFramework}
+import com.avsystem.commons.serialization.GenCodec
+import io.udash.rpc.GenCodecSerializationFramework
+import io.udash.rpc.serialization.{DefaultUdashSerialization, JsonStr}
 
 object DefaultRESTFramework extends UdashRESTFramework with DefaultUdashSerialization with GenCodecSerializationFramework {
-  override val bodyValuesWriter: DefaultRESTFramework.Writer[Map[String, String]] = implicitly
-  override val bodyValuesReader: DefaultRESTFramework.Reader[Map[String, String]] = implicitly
+  implicit val bodyValuesCodec: GenCodec[Map[String, JsonStr]] = GenCodec.mapCodec
+
+  override val bodyValuesWriter = bodyValuesCodec
+  override val bodyValuesReader = bodyValuesCodec
 }

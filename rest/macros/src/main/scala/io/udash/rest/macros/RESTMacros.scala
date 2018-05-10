@@ -15,13 +15,13 @@ class RESTMacros(override val c: blackbox.Context) extends RPCFrameworkMacros(c)
     case object HasBodyValue extends BodyArgumentsState
   }
 
-  val RestPackage = q"io.udash.rest"
+  val RestPackage = q"_root_.io.udash.rest"
 
   val RESTFrameworkType = getType(tq"$RestPackage.UdashRESTFramework")
   val ValidRESTCls = tq"$FrameworkObj.ValidREST"
   val ValidServerRESTCls = tq"$FrameworkObj.ValidServerREST"
 
-  val RpcNameCls = tq"io.udash.rpc.RPCName"
+  val RpcNameCls = tq"_root_.io.udash.rpc.RPCName"
   val RestNameCls = tq"$RestPackage.RESTName"
   val RestParamNameCls = tq"$RestPackage.RESTParamName"
   val SkipRestNameCls = tq"$RestPackage.SkipRESTName"

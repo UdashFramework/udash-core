@@ -2,12 +2,12 @@ package io.udash.rest.internal
 
 import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.rest._
-import io.udash.rpc.serialization.URLEncoder
+import io.udash.rpc.serialization.{JsonStr, URLEncoder}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashRESTFramework#ValidREST]
-                       (implicit val ec: ExecutionContext) {
+abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTFramework#ValidREST]
+(implicit val ec: ExecutionContext) {
 
   val framework: UdashRESTFramework
 
@@ -60,7 +60,7 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
       val methodMetadata = metadata.signatures(rpcMethodName)
 
       if (!shouldSkipRestName(methodMetadata.annotations))
-        urlBuilder += findRestName(methodMetadata.annotations).getOrElse(rpcMethodName)
+        urlBuilder += URLEncoder.encode(findRestName(methodMetadata.annotations).getOrElse(rpcMethodName))
       methodMetadata.paramMetadata.zip(inv.argLists).foreach { case (params, values) =>
         params.zip(values).foreach { case (param, value) =>
           val paramName: String = findRestParamName(param)
@@ -71,11 +71,11 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
             case Some(_: URLPart) =>
               urlBuilder += rawToURLPart(value)
             case Some(_: Body) =>
-              body = value
+              body = value.json
             case Some(_: BodyValue) =>
               bodyArgsBuilder += (paramName -> value)
             case Some(_: Query) | None => // Query is a default argument type
-              queryArgsBuilder += (paramName ->  rawToQueryArgument(value))
+              queryArgsBuilder += (paramName -> rawToQueryArgument(value))
           }
         }
       }
@@ -108,16 +108,17 @@ abstract class UsesREST[ServerRPCType : UdashRESTFramework#AsRealRPC : UdashREST
     val bodyArgs = bodyArgsBuilder.result()
     if (body != null && bodyArgs.nonEmpty) throw new IllegalStateException("@Body and @BodyValue annotations used at the same time!")
     else if (body == null && bodyArgs.nonEmpty) {
-      body = framework.write(bodyArgs)(framework.bodyValuesWriter)
+      body = framework.write(bodyArgs)(framework.bodyValuesWriter).json
     }
 
+    import com.avsystem.commons._
     connector.send(
-      url = s"/${urlBuilder.result().map(URLEncoder.encode).mkString("/")}",
+      url = s"/${urlBuilder.result().mkString("/")}",
       method = findRestMethod(invocation, metadata, body != null),
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body
-    )
+    ).mapNow(JsonStr)
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {

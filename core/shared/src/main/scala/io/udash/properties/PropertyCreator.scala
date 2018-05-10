@@ -1,7 +1,5 @@
 package io.udash.properties
 
-import java.util.UUID
-
 import io.udash.properties.seq.DirectSeqPropertyImpl
 import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
 
@@ -24,7 +22,7 @@ object PropertyCreator extends PropertyCreatorImplicits {
   def propertyCreator[T: PropertyCreator]: PropertyCreator[T] =
     implicitly[PropertyCreator[T]]
 
-  def newID(): UUID = UUID.randomUUID()
+  def newID(): PropertyId = PropertyIdGenerator.next()
 }
 
 class SinglePropertyCreator[T] extends PropertyCreator[T] {
