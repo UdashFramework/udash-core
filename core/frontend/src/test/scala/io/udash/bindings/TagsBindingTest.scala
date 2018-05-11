@@ -2,6 +2,7 @@ package io.udash.bindings
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.avsystem.commons.misc.Opt
 import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.{HasModelPropertyCreator, seq}
@@ -1887,6 +1888,19 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       binding.kill()
       p.set(true)
       textArea.getAttribute("test").toBoolean shouldBe false
+    }
+  }
+
+  "Opt bindings" should {
+    "implicitly convert Opt to Modifier" in {
+      val stringOpt: Opt[Modifier] = Opt("test")
+      val testDiv = div(stringOpt).render
+      testDiv.innerHTML should ===("test")
+    }
+    "implicitly convert Opt.Empty to Modifier" in {
+      val stringOpt: Opt[String] = Opt.Empty
+      val testDiv = div(stringOpt).render
+      testDiv.innerHTML shouldBe empty
     }
   }
 }
