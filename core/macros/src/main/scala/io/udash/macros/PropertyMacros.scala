@@ -31,6 +31,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val ImmutablePropertyCls = tq"$Package.ImmutableProperty"
   val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
 
+  val DefaultValueCls = tq"$Package.DefaultValue"
   val PatchCls = tq"$Package.SeqProperty.Patch"
 
   private lazy val SeqTpe = typeOf[Seq[_]]
@@ -215,7 +216,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
               members.map {
                 case (name, returnTpe) =>
-                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(this)"""
+                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(null.asInstanceOf[$returnTpe], this)"""
               }
             }
           }
@@ -357,7 +358,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val tpe = weakTypeOf[A]
     q"""{
       new $ModelPropertyCreatorCls[$tpe] with $PropertyCreatorCompanion.MacroGeneratedPropertyCreator {
-        override def newProperty(prt: $ReadablePropertyCls[_]): $CastablePropertyCls[$tpe] = {
+        override protected def create(prt: $ReadablePropertyCls[_]): $CastablePropertyCls[$tpe] = {
           implicit val ${TermName(c.freshName())}: $ModelPropertyCreatorCls[$tpe] with $PropertyCreatorCompanion.MacroGeneratedPropertyCreator = this
           ${generateModelProperty(tpe)}
         }

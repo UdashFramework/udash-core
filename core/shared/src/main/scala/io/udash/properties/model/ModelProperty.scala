@@ -7,8 +7,8 @@ import io.udash.properties.single._
 object ModelProperty {
   /** Creates an empty ModelProperty[T].
     * It's not recommended to use this method. Use `apply` with initial value if possible. */
-  def empty[T: ModelPropertyCreator]: ModelProperty[T] =
-    Property.empty(implicitly[ModelPropertyCreator[T]]).asModel
+  def empty[T: ModelPropertyCreator : DefaultValue]: ModelProperty[T] =
+    Property.empty.asModel
 
   /** Creates an empty ModelProperty[T]. */
   @deprecated("Use `ModelProperty.empty` instead.", "0.6.0")
@@ -17,7 +17,7 @@ object ModelProperty {
 
   /** Creates ModelProperty[T] with initial value. */
   def apply[T: ModelPropertyCreator](init: T): ModelProperty[T] =
-    Property[T](init)(implicitly[ModelPropertyCreator[T]]).asModel
+    Property[T](init).asModel
 }
 
 /** Property based on trait representing data model. */

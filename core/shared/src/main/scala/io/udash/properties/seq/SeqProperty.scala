@@ -5,7 +5,7 @@ import io.udash.properties.single.{CastableProperty, Property}
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
-  def empty[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def empty[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]], defaultValue: DefaultValue[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.empty[Seq[T]].asSeq[T]
 
   /** Creates an empty DirectSeqProperty[T]. */

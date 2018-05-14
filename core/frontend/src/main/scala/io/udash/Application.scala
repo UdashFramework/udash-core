@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
   * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
   * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
   */
-class Application[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
+class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider
