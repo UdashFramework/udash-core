@@ -61,7 +61,7 @@ trait ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
-  def transformToSeq[B : PropertyCreator : DefaultValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
+  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Streams value changes to the `target` property.
     * It is not as strong relation as `transform`, because `target` can change value independently. */
@@ -77,16 +77,15 @@ trait ReadableProperty[A] {
     * @tparam O Output property elements type.
     * @return Property[O] updated on any change in `this` or `property`.
     */
-  def combine[B, O: PropertyCreator : DefaultValue](
+  def combine[B, O: PropertyCreator](
     property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
   )(combiner: (A, B) => O): ReadableProperty[O] = {
     val pc = implicitly[PropertyCreator[O]]
-    val output = pc.newProperty(combinedParent)
+    val output = pc.newProperty(combiner(get, property.get), combinedParent)
 
     def update(x: A, y: B): Unit =
       output.set(combiner(x, y))
 
-    output.setInitValue(combiner(get, property.get))
     listen(x => update(x, property.get))
     property.listen(y => update(get, y))
     output
@@ -131,7 +130,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
 
-  override def transformToSeq[B : PropertyCreator : DefaultValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B : PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {

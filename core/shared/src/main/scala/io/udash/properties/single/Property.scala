@@ -10,7 +10,7 @@ object Property {
   /** Creates an empty `DirectProperty[T]`.
     * It's not recommended to use this method. Use `apply` with initial value if possible. */
   def empty[T](implicit pc: PropertyCreator[T], default: DefaultValue[T]): CastableProperty[T] =
-    pc.newProperty(null)
+    pc.newProperty(null)(default)
 
   /** Creates an empty `DirectProperty[T]`. */
   @deprecated("Use `Property.empty` instead.", "0.6.0")
@@ -101,7 +101,7 @@ trait Property[A] extends AbstractReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transformToSeq[B : PropertyCreator : DefaultValue](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
 
   /**

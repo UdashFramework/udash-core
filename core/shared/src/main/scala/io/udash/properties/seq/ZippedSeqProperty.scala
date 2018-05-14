@@ -38,18 +38,18 @@ abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, 
   override def elemProperties: Seq[ReadableProperty[O]] =
     children
 
-  override def listenStructure(structureListener: (Patch[ReadableProperty[O]]) => Any): Registration = {
+  override def listenStructure(structureListener: Patch[ReadableProperty[O]] => Any): Registration = {
     structureListeners += structureListener
     new SetRegistration(structureListeners, structureListener)
   }
 }
 
 private[properties]
-class ZippedReadableSeqProperty[A, B, O : PropertyCreator : DefaultValue]
-                               (s: ReadableSeqProperty[A, ReadableProperty[A]],
-                                p: ReadableSeqProperty[B, ReadableProperty[B]],
-                                combiner: (A, B) => O)
-  extends ZippedSeqPropertyUtils[O] {
+class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
+  s: ReadableSeqProperty[A, ReadableProperty[A]],
+  p: ReadableSeqProperty[B, ReadableProperty[B]],
+  combiner: (A, B) => O
+) extends ZippedSeqPropertyUtils[O] {
 
   protected final def appendChildren(toCombine: Seq[(ReadableProperty[A], ReadableProperty[B])]): Unit =
     toCombine.foreach { case (x, y) => children.+=(x.combine(y, this)(combiner)) }
@@ -63,11 +63,11 @@ class ZippedReadableSeqProperty[A, B, O : PropertyCreator : DefaultValue]
 }
 
 private[properties]
-class ZippedAllReadableSeqProperty[A, B, O : PropertyCreator : DefaultValue]
-                                  (s: ReadableSeqProperty[A, ReadableProperty[A]],
-                                   p: ReadableSeqProperty[B, ReadableProperty[B]],
-                                   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B])
-  extends ZippedReadableSeqProperty(s, p, combiner) {
+class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator](
+  s: ReadableSeqProperty[A, ReadableProperty[A]],
+  p: ReadableSeqProperty[B, ReadableProperty[B]],
+  combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B]
+) extends ZippedReadableSeqProperty(s, p, combiner) {
 
   override protected def update(fromIdx: Int): Unit =
     appendChildren(s.elemProperties.zipAll(p.elemProperties, defaultA, defaultB).drop(fromIdx))

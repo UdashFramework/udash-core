@@ -52,7 +52,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
 
-  override def transformToSeq[B: PropertyCreator : DefaultValue](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B: PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty[B](transformer(value))
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
