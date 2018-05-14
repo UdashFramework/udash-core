@@ -1,16 +1,17 @@
 package io.udash.bindings
 
+import com.avsystem.commons.misc.Opt
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
+import scalatags.JsDom
+import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 import scala.concurrent.Future
 import scala.scalajs.js
-import scalatags.JsDom
-import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
 trait Bindings {
   val Checkbox      = io.udash.bindings.Checkbox
@@ -25,6 +26,9 @@ trait Bindings {
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
+  implicit def seqNodeFromOpt[T](el: Opt[T])(implicit ev: T => Modifier[Element]): Modifier[Element] = {
+    new JsDom.all.SeqNode(el.toSeq)
+  }
 
   /** Creates empty text node, which is useful as placeholder. */
   def emptyStringNode(): Node =
