@@ -7,7 +7,7 @@ import io.udash.properties.single._
 object ModelProperty {
   /** Creates an empty ModelProperty[T].
     * It's not recommended to use this method. Use `apply` with initial value if possible. */
-  def empty[T: ModelPropertyCreator : DefaultValue]: ModelProperty[T] =
+  def empty[T: ModelPropertyCreator : Blank]: ModelProperty[T] =
     Property.empty.asModel
 
   /** Creates an empty ModelProperty[T]. */

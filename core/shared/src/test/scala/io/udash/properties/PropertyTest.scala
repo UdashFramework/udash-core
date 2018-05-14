@@ -30,7 +30,7 @@ class PropertyTest extends UdashSharedTest {
     }
   }
   object TT extends HasModelPropertyCreator[TT] {
-    implicit val default: DefaultValue[TT] = DefaultValue.Simple(null)
+    implicit val default: Blank[TT] = Blank.Simple(null)
   }
 
   trait ST {
@@ -806,7 +806,7 @@ class PropertyTest extends UdashSharedTest {
 
     "fire transform on empty property" in {
       val p = Property.empty[String]
-      val t = p.transform(_ == implicitly[DefaultValue[String]].value)
+      val t = p.transform(_ == implicitly[Blank[String]].value)
 
       t.get should be(true)
 
@@ -1150,13 +1150,13 @@ class PropertyTest extends UdashSharedTest {
         def y: Int = 5
       }
       implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = MacroModelPropertyCreator.materialize[ModelWithImplDef].pc
-      implicit val defaultDef: DefaultValue[ModelWithImplDef] = DefaultValue.Simple(null)
+      implicit val defaultDef: Blank[ModelWithImplDef] = Blank.Simple(null)
       trait ModelWithImplVal {
         val x: Int
         val y: Int = 5
       }
       implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
-      implicit val defaultVal: DefaultValue[ModelWithImplVal] = DefaultValue.Simple(null)
+      implicit val defaultVal: Blank[ModelWithImplVal] = Blank.Simple(null)
 
       val p1 = ModelProperty.empty[ModelWithImplDef]
       val p2 = ModelProperty.empty[ModelWithImplVal]
@@ -1202,7 +1202,7 @@ class PropertyTest extends UdashSharedTest {
       implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
       case class Test(a: SubTest, s: SubTest)
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
-      implicit val default: DefaultValue[Test] = DefaultValue.Simple(null)
+      implicit val default: Blank[Test] = Blank.Simple(null)
 
       val p = ModelProperty.empty[Test]
       val sub = p.subModel(_.s)
@@ -1226,7 +1226,7 @@ class PropertyTest extends UdashSharedTest {
         def s: SubTest
       }
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
-      implicit val default: DefaultValue[Test] = DefaultValue.Simple(null)
+      implicit val default: Blank[Test] = Blank.Simple(null)
 
       val p = ModelProperty.empty[Test]
       val sub = p.subModel(_.s)

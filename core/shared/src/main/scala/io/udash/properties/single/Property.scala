@@ -9,8 +9,8 @@ import scala.util.{Failure, Success}
 object Property {
   /** Creates an empty `DirectProperty[T]`.
     * It's not recommended to use this method. Use `apply` with initial value if possible. */
-  def empty[T](implicit pc: PropertyCreator[T], default: DefaultValue[T]): CastableProperty[T] =
-    pc.newProperty(null)(default)
+  def empty[T](implicit pc: PropertyCreator[T], blank: Blank[T]): CastableProperty[T] =
+    pc.newProperty(null)(blank)
 
   /** Creates an empty `DirectProperty[T]`. */
   @deprecated("Use `Property.empty` instead.", "0.6.0")

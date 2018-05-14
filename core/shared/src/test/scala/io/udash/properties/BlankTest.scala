@@ -5,8 +5,8 @@ import io.udash.properties.model.ModelProperty
 import io.udash.properties.single.Property
 import io.udash.testing.UdashSharedTest
 
-class DefaultValueTest extends UdashSharedTest {
-  import DefaultValueTest._
+class BlankTest extends UdashSharedTest {
+  import BlankTest._
 
   "DefaultValue" should {
     "should be used as initial value of a property" in {
@@ -32,9 +32,9 @@ class DefaultValueTest extends UdashSharedTest {
   }
 }
 
-object DefaultValueTest {
+object BlankTest {
   case class Entity(i: Int, s: String)
   object Entity extends HasModelPropertyCreator[Entity] {
-    implicit val default: DefaultValue[Entity] = DefaultValue.Simple(Entity(5, "asd"))
+    implicit val default: Blank[Entity] = Blank.Simple(Entity(5, "asd"))
   }
 }

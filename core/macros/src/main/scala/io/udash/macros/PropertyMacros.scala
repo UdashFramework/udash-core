@@ -31,7 +31,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val ImmutablePropertyCls = tq"$Package.ImmutableProperty"
   val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
 
-  val DefaultValueCls = tq"$Package.DefaultValue"
   val PatchCls = tq"$Package.SeqProperty.Patch"
 
   private lazy val SeqTpe = typeOf[Seq[_]]
