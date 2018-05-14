@@ -25,20 +25,23 @@ object DefaultValue extends LowPrioImplicits {
   implicit val int: DefaultValue[Int] = Simple(0)
   implicit val short: DefaultValue[Short] = Simple(0)
   implicit val byte: DefaultValue[Byte] = Simple(0)
-  implicit val char: DefaultValue[Char] = Simple(' ')
   implicit val boolean: DefaultValue[Boolean] = Simple(false)
   implicit val unit: DefaultValue[Unit] = Simple(())
   implicit val string: DefaultValue[String] = Simple("")
 
-  implicit def option[A]: DefaultValue[Option[A]] = Simple(None)
-  implicit def opt[A]: DefaultValue[Opt[A]] = Simple(Opt.Empty)
+  private val simpleNone = Simple(None)
+  implicit def option[A]: DefaultValue[Option[A]] = simpleNone.asInstanceOf[DefaultValue[Option[A]]]
+  private val simpleOptEmpty = Simple(Opt.Empty)
+  implicit def opt[A]: DefaultValue[Opt[A]] = simpleOptEmpty.asInstanceOf[DefaultValue[Opt[A]]]
+  private val simpleMapEmpty = Simple(Map.empty)
+  implicit def map[K, V]: DefaultValue[Map[K, V]] = simpleMapEmpty.asInstanceOf[DefaultValue[Map[K, V]]]
   implicit def traversable[T, A[_] <: Traversable[_]](implicit ev: CanBuildFrom[Nothing, T, A[T]]): DefaultValue[A[T]] = Simple(Seq.empty[T].to[A])
-  implicit def map[K, V]: DefaultValue[Map[K, V]] = Simple(Map.empty[K,V])
 }
 
 trait LowPrioImplicits {
-  @deprecated("Setting Property value to `null` is highly unrecommended. Please, define implicit `DefaultValue` for your type.", "0.7.0")
-  implicit def fallbackNull[A]: DefaultValue[A] = DefaultValue.Simple[A](null.asInstanceOf[A])
+  private val nullDefaultValue = DefaultValue.Simple(null)
+  @deprecated("Setting Property value to `null` is highly discouraged. Please, define implicit `DefaultValue` for your type.", "0.7.0")
+  implicit def fallbackNull[A]: DefaultValue[A] = nullDefaultValue.asInstanceOf[DefaultValue[A]]
 
   private type D[T] = DefaultValue[T]
   implicit def tuple1[T : D]: D[Tuple1[T]] =
