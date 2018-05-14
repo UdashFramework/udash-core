@@ -2,6 +2,7 @@ package io.udash.rpc
 
 import java.util.UUID
 
+import com.avsystem.commons._
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rpc.internals._
 import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
@@ -10,8 +11,8 @@ import javax.servlet.http.HttpServletResponse
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
+import scala.concurrent.Future
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait AtmosphereServiceConfig[ServerRPCType] {
@@ -41,11 +42,11 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   * @param config Configuration of AtmosphereService.
   * @tparam ServerRPCType Main server side RPC interface
   */
-class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPCType],
+class AtmosphereService[ServerRPCType](
+  config: AtmosphereServiceConfig[ServerRPCType],
   exceptionsRegistry: ExceptionCodecRegistry,
-  sseSuspendTime: FiniteDuration = 1 minute)
-  (implicit val executionContext: ExecutionContext)
-  extends AtmosphereServletProcessor with LazyLogging {
+  sseSuspendTime: FiniteDuration = 1 minute
+) extends AtmosphereServletProcessor with LazyLogging {
 
   private var brodcasterFactory: BroadcasterFactory = _
 
@@ -120,7 +121,7 @@ class AtmosphereService[ServerRPCType](config: AtmosphereServiceConfig[ServerRPC
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
         case (call: RPCCall, Some(response)) =>
-          response onComplete {
+          response.onCompleteNow {
             case Success(r) =>
               onCall(write[RPCResponse](RPCResponseSuccess(r, call.callId)))
             case Failure(ex) =>
