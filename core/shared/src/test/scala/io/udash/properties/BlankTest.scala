@@ -10,24 +10,24 @@ class BlankTest extends UdashSharedTest {
 
   "DefaultValue" should {
     "should be used as initial value of a property" in {
-      Property.empty[Double].get should be(0.0)
-      Property.empty[Float].get should be(0.0f)
-      Property.empty[Long].get should be(0L)
-      Property.empty[Int].get should be(0)
-      Property.empty[Boolean].get should be(false)
-      Property.empty[String].get should be("")
-      Property.empty[Option[String]].get should be(None)
-      Property.empty[Opt[String]].get should be(Opt.empty)
-      Property.empty[Map[String, String]].get should be(Map.empty)
-      Property.empty[Set[String]].get should be(Set.empty)
-      Property.empty[Seq[String]].get should be(Seq.empty)
+      Property.blank[Double].get should be(0.0)
+      Property.blank[Float].get should be(0.0f)
+      Property.blank[Long].get should be(0L)
+      Property.blank[Int].get should be(0)
+      Property.blank[Boolean].get should be(false)
+      Property.blank[String].get should be("")
+      Property.blank[Option[String]].get should be(None)
+      Property.blank[Opt[String]].get should be(Opt.empty)
+      Property.blank[Map[String, String]].get should be(Map.empty)
+      Property.blank[Set[String]].get should be(Set.empty)
+      Property.blank[Seq[String]].get should be(Seq.empty)
     }
 
     "should be used as initial value of a model property" in {
-      ModelProperty.empty[Entity].get.i should be(5)
-      ModelProperty.empty[Entity].get.s should be("asd")
-      ModelProperty.empty[Entity].subProp(_.i).get should be(5)
-      ModelProperty.empty[Entity].subProp(_.s).get should be("asd")
+      ModelProperty.blank[Entity].get.i should be(5)
+      ModelProperty.blank[Entity].get.s should be("asd")
+      ModelProperty.blank[Entity].subProp(_.i).get should be(5)
+      ModelProperty.blank[Entity].subProp(_.s).get should be("asd")
     }
   }
 }

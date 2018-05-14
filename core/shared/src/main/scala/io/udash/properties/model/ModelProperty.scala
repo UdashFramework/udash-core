@@ -7,8 +7,13 @@ import io.udash.properties.single._
 object ModelProperty {
   /** Creates an empty ModelProperty[T].
     * It's not recommended to use this method. Use `apply` with initial value if possible. */
-  def empty[T: ModelPropertyCreator : Blank]: ModelProperty[T] =
+  @deprecated("Use `ModelProperty.blank` instead.", "0.7.0")
+  def empty[T: ModelPropertyCreator]: ModelProperty[T] =
     Property.empty.asModel
+
+  /** Creates a blank ModelProperty[T].  */
+  def blank[T: ModelPropertyCreator : Blank]: ModelProperty[T] =
+    Property.blank.asModel
 
   /** Creates an empty ModelProperty[T]. */
   @deprecated("Use `ModelProperty.empty` instead.", "0.6.0")

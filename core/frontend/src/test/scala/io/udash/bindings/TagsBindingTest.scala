@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.avsystem.commons.misc.Opt
 import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.properties.{Blank, HasModelPropertyCreator, seq}
+import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Node}
@@ -52,9 +52,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         override def toString: String =
           s"C($i)"
       }
-      implicit val default: Blank[C] = Blank.Simple(null)
 
-      val p = Property.empty[C]
+      val p = Property.empty[C]: @silent
       val template = div(bind(p)).render
       val template2 = div(bind(p)).render
 
@@ -548,9 +547,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         class SubTest(val i: Int)
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
-      implicit val default: Blank[Model.Test] = Blank.Simple(null)
 
-      val p = ModelProperty.empty[Model.Test]
+      val p = ModelProperty.empty[Model.Test]: @silent
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -580,9 +578,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         }
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
-      implicit val default: Blank[Model.Test] = Blank.Simple(null)
 
-      val p = ModelProperty.empty[Model.Test]
+      val p = ModelProperty.empty[Model.Test]: @silent
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -1406,9 +1403,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      implicit val default: Blank[NumbersFilter] = Blank.Simple(null)
-      val filter = Property.empty[NumbersFilter]
-      val numbers = seq.SeqProperty.empty[Int]
+      val filter = Property.empty[NumbersFilter]: @silent
+      val numbers = seq.SeqProperty.empty[Int]: @silent
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1486,9 +1482,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      implicit val default: Blank[NumbersFilter] = Blank.Simple(null)
-      val filter = Property.empty[NumbersFilter]
-      val numbers = seq.SeqProperty.empty[Int]
+      val filter = Property.empty[NumbersFilter]: @silent
+      val numbers = seq.SeqProperty.empty[Int]: @silent
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1542,9 +1537,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
 
-      implicit val default: Blank[TodosFilter] = Blank.Simple(null)
-      val filter = Property.empty[TodosFilter]
-      val todos = seq.SeqProperty.empty[TodoElement]
+      val filter = Property.empty[TodosFilter]: @silent
+      val todos = seq.SeqProperty.empty[TodoElement]: @silent
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]
