@@ -32,7 +32,8 @@ object DefaultValue extends LowPrioImplicits {
 
   implicit def option[A]: DefaultValue[Option[A]] = Simple(None)
   implicit def opt[A]: DefaultValue[Opt[A]] = Simple(Opt.Empty)
-  implicit def traversable[T, A[_] <: Traversable[_]](implicit ev: CanBuildFrom[Seq[T], T, A[T]]): DefaultValue[A[T]] = Simple(Seq.empty[T].to[A])
+  implicit def traversable[T, A[_] <: Traversable[_]](implicit ev: CanBuildFrom[Nothing, T, A[T]]): DefaultValue[A[T]] = Simple(Seq.empty[T].to[A])
+  implicit def map[K, V]: DefaultValue[Map[K, V]] = Simple(Map.empty[K,V])
 }
 
 trait LowPrioImplicits {
