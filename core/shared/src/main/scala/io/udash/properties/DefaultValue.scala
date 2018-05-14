@@ -7,8 +7,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 @implicitNotFound(
-  "Class ${A} does not have a default value. Please, specify the value of this property " +
-  "or add `implicit val default: DefaultValue[${A}] = ???` in ${A}'s companion object."
+  "Class ${A} does not have a default value. Please, specify the value of this property or add `implicit val default: DefaultValue[${A}] = ???` in ${A}'s companion object."
 )
 trait DefaultValue[A] {
   def value: A
