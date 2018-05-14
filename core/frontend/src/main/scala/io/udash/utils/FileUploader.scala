@@ -1,7 +1,7 @@
 package io.udash.utils
 
 import io.udash._
-import io.udash.properties.HasModelPropertyCreator
+import io.udash.properties.{DefaultValue, HasModelPropertyCreator}
 import org.scalajs.dom._
 import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
@@ -60,12 +60,15 @@ class FileUploader(url: Url) {
 object FileUploader {
   sealed trait FileUploadState
   object FileUploadState {
+    case object NotStarted extends FileUploadState
     case object InProgress extends FileUploadState
 
     sealed trait Done extends FileUploadState
     case object Completed extends Done
     case object Failed extends Done
     case object Cancelled extends Done
+
+    implicit val default: DefaultValue[FileUploadState] = DefaultValue.Simple(NotStarted)
   }
 
   class FileUploadModel(
