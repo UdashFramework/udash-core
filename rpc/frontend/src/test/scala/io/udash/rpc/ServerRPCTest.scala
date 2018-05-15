@@ -48,7 +48,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       serverRPC.handleResponse(RPCResponseSuccess(write("response1"), "1"))
       serverRPC.handleResponse(RPCResponseSuccess(write("response2"), "2"))
       serverRPC.handleResponse(RPCResponseSuccess(write[Int](5), "3"))
-      serverRPC.handleResponse(RPCResponseSuccess(write[Int](5), "5"))
+      serverRPC.handleResponse(RPCResponseSuccess(write[Unit](()), "5"))
 
       f1.isCompleted should be(true)
       f2.isCompleted should be(true)
