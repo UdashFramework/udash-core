@@ -18,6 +18,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   override val remoteFramework: ServerUdashRPCFramework
 
   import remoteFramework._
+
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
     */
@@ -31,7 +32,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 
   protected val connector: ServerConnector[RPCRequest]
 
-  protected val callTimeout: Duration = 30 seconds
+  protected def callTimeout: Duration = 30 seconds
   private val pendingCalls: Dictionary[(RPCRequest, Promise[RawValue])] = js.Dictionary.empty
   private val exceptionCallbacks = new CallbacksHandler[Throwable]
 
@@ -76,7 +77,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   protected[rpc] def callRemote(callId: String, getterChain: List[RawInvocation], invocation: RawInvocation): RPCCall =
     RPCCall(invocation, getterChain, callId).setup(sendRPCRequest)
 
-  private def sendRPCRequest(request: RPCRequest) =
+  private def sendRPCRequest(request: RPCRequest): Unit =
     connector.sendRPCRequest(request)
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
