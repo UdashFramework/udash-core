@@ -16,7 +16,9 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       requests += request
   }
 
-  def tests[LocalFramework <: UdashRPCFramework, ServerFramework <: UdashRPCFramework](createServerRpc: () => (MockServerConnector[ServerFramework#RPCRequest], ServerRPC[TestRPC])) = {
+  def tests[LocalFramework <: UdashRPCFramework, ServerFramework <: UdashRPCFramework](
+    createServerRpc: () => (MockServerConnector[ServerFramework#RPCRequest], ServerRPC[TestRPC])
+  ): Unit = {
     "gain access to RPC methods of server" in {
       val (connectorMock, serverRPC) = createServerRpc()
       val rpc = serverRPC.remoteRpc
@@ -147,18 +149,16 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
   }
 
   def createDefaultServerRpc(): (MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest], DefaultServerRPC[TestRPC]) = {
+    import scala.concurrent.duration.DurationInt
     val connectorMock = new MockServerConnector[DefaultServerUdashRPCFramework.RPCRequest]
     @silent
-    val serverRPC = new DefaultServerRPC[TestRPC](connectorMock) {
-      import scala.concurrent.duration.DurationInt
-      override protected val callTimeout: Duration = 500 millis
-    }
+    val serverRPC = new DefaultServerRPC[TestRPC](connectorMock, 500 millis)
     (connectorMock, serverRPC)
   }
 
-  class UPickleServerRPC[ServerRPCType : ServerUPickleUdashRPCFramework.AsRealRPC]
-                        (override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest])
-    extends ServerRPC[ServerRPCType] {
+  class UPickleServerRPC[ServerRPCType : ServerUPickleUdashRPCFramework.AsRealRPC](
+    override protected val connector: ServerConnector[ServerUPickleUdashRPCFramework.RPCRequest]
+  ) extends ServerRPC[ServerRPCType] {
 
     import scala.concurrent.duration.DurationInt
     override protected val callTimeout: Duration = 500 millis
@@ -175,10 +175,9 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
     (connectorMock, serverRPC)
   }
 
-  class MixedServerRPC[ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC]
-                      (override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest])
-    extends ServerRPC[ServerRPCType] {
-
+  class MixedServerRPC[ServerRPCType : DefaultServerUdashRPCFramework.AsRealRPC](
+    override protected val connector: ServerConnector[DefaultServerUdashRPCFramework.RPCRequest]
+  ) extends ServerRPC[ServerRPCType] {
     import scala.concurrent.duration.DurationInt
     override protected val callTimeout: Duration = 500 millis
 
