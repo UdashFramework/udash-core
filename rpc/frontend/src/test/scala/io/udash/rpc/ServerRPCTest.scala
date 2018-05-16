@@ -42,20 +42,24 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val f2 = rpc.innerRpc("bla").func(123)
       val f3 = rpc.doStuffInt(true)
       val f4 = rpc.doStuff(true)
+      val f5 = rpc.doStuffUnit()
 
       import serverRPC.remoteFramework._
       serverRPC.handleResponse(RPCResponseSuccess(write("response1"), "1"))
       serverRPC.handleResponse(RPCResponseSuccess(write("response2"), "2"))
       serverRPC.handleResponse(RPCResponseSuccess(write[Int](5), "3"))
+      serverRPC.handleResponse(RPCResponseSuccess(write[Unit](()), "5"))
 
       f1.isCompleted should be(true)
       f2.isCompleted should be(true)
       f3.isCompleted should be(true)
       f4.isCompleted should be(false)
+      f5.isCompleted should be(true)
 
       f1.value.get.get should be("response1")
       f2.value.get.get should be("response2")
       f3.value.get.get should be(5)
+      f5.value.get.get should be(())
     }
 
     "handle fail responses from server" in {

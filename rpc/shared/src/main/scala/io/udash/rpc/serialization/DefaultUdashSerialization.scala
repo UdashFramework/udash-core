@@ -7,7 +7,7 @@ import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutpu
 trait DefaultUdashSerialization { this: RPCFramework =>
   override type RawValue = JsonStr
 
-  implicit val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
+  implicit val rawValueCodec: GenCodec[JsonStr] = GenCodec.create(
     {
       case jsi: JsonStringInput => JsonStr(jsi.readRawJson())
       case in => JsonStr(in.readString())

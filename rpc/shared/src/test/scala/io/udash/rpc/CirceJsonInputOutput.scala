@@ -17,7 +17,7 @@ object CirceUdashRpcFramework extends UdashRPCFramework {
       throw new ReadFailure(s"Could not parse JSON $str: $msg", cause)
   }
 
-  val rawValueCodec: GenCodec[JsonStr] = GenCodec.createNonNull(
+  val rawValueCodec: GenCodec[JsonStr] = GenCodec.create(
     {
       case cji: CirceJsonInput => JsonStr(cji.readRaw().toString())
       case in => JsonStr(in.readString())
