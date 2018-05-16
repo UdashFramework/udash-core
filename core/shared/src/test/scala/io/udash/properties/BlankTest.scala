@@ -8,7 +8,7 @@ import io.udash.testing.UdashSharedTest
 class BlankTest extends UdashSharedTest {
   import BlankTest._
 
-  "DefaultValue" should {
+  "Blank" should {
     "should be used as initial value of a property" in {
       Property.blank[Double].get should be(0.0)
       Property.blank[Float].get should be(0.0f)

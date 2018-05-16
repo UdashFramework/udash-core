@@ -68,7 +68,7 @@ object FileUploader {
     case object Failed extends Done
     case object Cancelled extends Done
 
-    implicit val default: Blank[FileUploadState] = Blank.Simple(NotStarted)
+    implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
   }
 
   class FileUploadModel(

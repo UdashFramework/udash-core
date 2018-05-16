@@ -16,7 +16,7 @@ object ModelProperty {
     Property.blank.asModel
 
   /** Creates an empty ModelProperty[T]. */
-  @deprecated("Use `ModelProperty.empty` instead.", "0.6.0")
+  @deprecated("Use `ModelProperty.blank` instead.", "0.6.0")
   def apply[T: ModelPropertyCreator]: ModelProperty[T] =
     empty
 

@@ -18,7 +18,7 @@ object Property {
     pc.newProperty(null)(blank)
 
   /** Creates an empty `DirectProperty[T]`. */
-  @deprecated("Use `Property.empty` instead.", "0.6.0")
+  @deprecated("Use `Property.blank` instead.", "0.6.0")
   def apply[T: PropertyCreator]: CastableProperty[T] =
     empty
 

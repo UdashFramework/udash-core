@@ -7,7 +7,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 @implicitNotFound(
-  "Class ${A} does not have a default value. Please, specify the value of this property or add `implicit val default: DefaultValue[${A}] = ???` in ${A}'s companion object."
+  "Class ${A} does not have a blank value. Please, specify the value of this property or add `implicit val blank: Blank[${A}] = ???` in ${A}'s companion object."
 )
 trait Blank[A] {
   def value: A
@@ -39,9 +39,9 @@ object Blank extends LowPrioImplicits {
 }
 
 trait LowPrioImplicits {
-  private val nullDefaultValue = Blank.Simple(null)
-  @deprecated("Setting Property value to `null` is highly discouraged. Please, define implicit `DefaultValue` for your type.", "0.7.0")
-  implicit def fallbackNull[A]: Blank[A] = nullDefaultValue.asInstanceOf[Blank[A]]
+  private val nullBlank = Blank.Simple(null)
+  @deprecated("Setting Property value to `null` is highly discouraged. Please, define implicit `Blank` for your type.", "0.7.0")
+  implicit def fallbackNull[A]: Blank[A] = nullBlank.asInstanceOf[Blank[A]]
 
   private type D[T] = Blank[T]
   implicit def tuple1[T : D]: D[Tuple1[T]] =
