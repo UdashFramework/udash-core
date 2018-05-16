@@ -9,7 +9,7 @@ import scala.util.Try
 /**
   * RoutingRegistry mixin simplifying logging app navigation.
   */
-trait UrlLogging[S <: GState[S]] extends CrossLogging { app: Application[S] =>
+trait UrlLogging[S >: Null <: GState[S]] extends CrossLogging { app: Application[S] =>
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   protected def log(url: String, referrer: Option[String]): Unit

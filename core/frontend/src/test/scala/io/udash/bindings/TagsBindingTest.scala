@@ -53,7 +53,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           s"C($i)"
       }
 
-      val p = Property.empty[C]
+      val p = Property.empty[C]: @silent
       val template = div(bind(p)).render
       val template2 = div(bind(p)).render
 
@@ -548,7 +548,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Model.Test]
+      val p = ModelProperty.empty[Model.Test]: @silent
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -579,7 +579,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Model.Test]
+      val p = ModelProperty.empty[Model.Test]: @silent
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -1399,12 +1399,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work with filtered SeqProperty" in {
-      sealed abstract class NumbersFilter(val matcher: (Int) => Boolean)
+      sealed abstract class NumbersFilter(val matcher: Int => Boolean)
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property.empty[NumbersFilter]
-      val numbers = seq.SeqProperty.empty[Int]
+      val filter = Property.empty[NumbersFilter]: @silent
+      val numbers = seq.SeqProperty.empty[Int]: @silent
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1478,12 +1478,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work with filtered SeqProperty and CallbackSequencer" in {
-      sealed abstract class NumbersFilter(val matcher: (Int) => Boolean)
+      sealed abstract class NumbersFilter(val matcher: Int => Boolean)
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property.empty[NumbersFilter]
-      val numbers = seq.SeqProperty.empty[Int]
+      val filter = Property.empty[NumbersFilter]: @silent
+      val numbers = seq.SeqProperty.empty[Int]: @silent
 
       filter.set(OddsFilter)
       numbers.set(Seq(1, 2, 3, 4, 5))
@@ -1523,7 +1523,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "work with filtered SeqProperty of models" in {
-      sealed abstract class TodosFilter(val matcher: (TodoElement) => Boolean)
+      sealed abstract class TodosFilter(val matcher: TodoElement => Boolean)
       case object AllTodosFilter       extends TodosFilter(_ => true)
       case object ActiveTodosFilter    extends TodosFilter(todo => !todo.completed)
       case object CompletedTodosFilter extends TodosFilter(todo => todo.completed)
@@ -1537,8 +1537,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
 
-      val filter = Property.empty[TodosFilter]
-      val todos = seq.SeqProperty.empty[TodoElement]
+      val filter = Property.empty[TodosFilter]: @silent
+      val todos = seq.SeqProperty.empty[TodoElement]: @silent
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]

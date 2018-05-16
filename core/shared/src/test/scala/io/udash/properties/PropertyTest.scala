@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import com.github.ghik.silencer.silent
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
@@ -29,7 +30,9 @@ class PropertyTest extends UdashSharedTest {
       case _ => false
     }
   }
-  object TT extends HasModelPropertyCreator[TT]
+  object TT extends HasModelPropertyCreator[TT] {
+    implicit val default: Blank[TT] = Blank.Simple(null)
+  }
 
   trait ST {
     def c: C
@@ -803,7 +806,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "fire transform on empty property" in {
-      val p = Property.empty[String]
+      val p = Property.empty[String]: @silent
       val t = p.transform(_ == null)
 
       t.get should be(true)
@@ -906,7 +909,7 @@ class PropertyTest extends UdashSharedTest {
 
   "ModelProperty" should {
     "update value and provide access to subproperties" in {
-      val p = ModelProperty.empty[TT]
+      val p = ModelProperty.empty[TT]: @silent
 
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
@@ -940,7 +943,7 @@ class PropertyTest extends UdashSharedTest {
       val oneTimeValues = mutable.ArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
-      val p = ModelProperty.empty[TT]
+      val p = ModelProperty.empty[TT]: @silent
       p.listen(listener, initUpdate = true)
       p.listenOnce(oneTimeListener)
 
@@ -1012,7 +1015,7 @@ class PropertyTest extends UdashSharedTest {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
-      val p = ModelProperty.empty[TT]
+      val p = ModelProperty.empty[TT]: @silent
       val t = p.transform[Int](
         (p: TT) => p.i + p.t.c.i,
         (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
@@ -1154,8 +1157,8 @@ class PropertyTest extends UdashSharedTest {
       }
       implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
 
-      val p1 = ModelProperty.empty[ModelWithImplDef]
-      val p2 = ModelProperty.empty[ModelWithImplVal]
+      val p1 = ModelProperty.empty[ModelWithImplDef]: @silent
+      val p2 = ModelProperty.empty[ModelWithImplVal]: @silent
 
       p1.subProp(_.x).set(12)
       p1.subProp(_.x).get should be(12)
@@ -1196,10 +1199,10 @@ class PropertyTest extends UdashSharedTest {
     "handle empty model property after subProp call" in {
       case class SubTest(x: Int)
       implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
-      case class Test(a: String, s: SubTest)
+      case class Test(a: SubTest, s: SubTest)
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
-      val p = ModelProperty.empty[Test]
+      val p = ModelProperty.empty[Test]: @silent
       val sub = p.subModel(_.s)
 
       p.get should be(null)
@@ -1217,12 +1220,12 @@ class PropertyTest extends UdashSharedTest {
       }
       implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
       trait Test {
-        def a: String
+        def a: SubTest
         def s: SubTest
       }
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
-      val p = ModelProperty.empty[Test]
+      val p = ModelProperty.empty[Test]: @silent
       val sub = p.subModel(_.s)
 
       p.get should be(null)
@@ -1261,7 +1264,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "cache subproperties" in {
-      val p = ModelProperty.empty[TT]
+      val p = ModelProperty.empty[TT]: @silent
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
       p.subProp(_.i) should be theSameInstanceAs p.subProp(_.i)
@@ -1477,7 +1480,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "fire value listeners on every child change" in {
-      val p = SeqProperty.empty[Int]
+      val p = SeqProperty.empty[Int]: @silent
 
       val values = mutable.ArrayBuffer[Seq[Int]]()
       val listener = (s: Seq[Int]) => values += s
@@ -1506,7 +1509,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "fire structure listeners on structure change" in {
-      val p = SeqProperty.empty[Int]
+      val p = SeqProperty.empty[Int]: @silent
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
@@ -1568,7 +1571,7 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "not fire structure listeners on child change" in {
-      val p = SeqProperty.empty[Int]
+      val p = SeqProperty.empty[Int]: @silent
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
@@ -1699,8 +1702,8 @@ class PropertyTest extends UdashSharedTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      val states = mutable.ArrayBuffer.empty[Seq[Int]]
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
+      val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]: @silent
 
       f.listen(v => states += v)
       f.listenStructure(p => patches += p)

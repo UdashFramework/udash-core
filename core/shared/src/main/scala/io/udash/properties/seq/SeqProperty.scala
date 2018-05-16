@@ -5,11 +5,16 @@ import io.udash.properties.single.{CastableProperty, Property}
 
 object SeqProperty {
   /** Creates an empty DirectSeqProperty[T]. */
+  @deprecated("Use `SeqProperty.blank` instead.", "0.7.0")
   def empty[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.empty[Seq[T]].asSeq[T]
 
+  /** Creates a blank DirectSeqProperty[T]. */
+  def blank[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+    Property.blank[Seq[T]].asSeq[T]
+
   /** Creates an empty DirectSeqProperty[T]. */
-  @deprecated("Use `SeqProperty.empty` instead.", "0.6.0")
+  @deprecated("Use `SeqProperty.blank` instead.", "0.6.0")
   def apply[T : PropertyCreator](implicit pc: PropertyCreator[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     empty
 
