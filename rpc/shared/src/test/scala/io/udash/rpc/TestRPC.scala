@@ -55,6 +55,8 @@ trait TestRPC extends RPCMethods {
 
   def doStuffInt(yes: Boolean): Future[Int]
 
+  def doStuffUnit(): Future[Unit]
+
   def innerRpc(name: String): InnerRPC
 
   def throwingGetter(): InnerRPC
@@ -130,6 +132,9 @@ object TestRPC {
 
     override def doStuffInt(yes: Boolean): Future[Int] =
       onCall("doStuffInt", List(List(yes)), 5)
+
+    def doStuffUnit(): Future[Unit] =
+      onCall("doStuffUnit", List(Nil), ())
 
     override def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any = onInvocation
 

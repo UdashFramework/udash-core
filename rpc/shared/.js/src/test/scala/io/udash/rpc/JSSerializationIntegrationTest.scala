@@ -7,7 +7,7 @@ import io.udash.rpc.serialization.{DefaultUdashSerialization, JsonStr, NativeJso
 class JSSerializationIntegrationTest extends SerializationIntegrationTestBase {
   override val repeats = 3
   object NativeJsonUdashRPCFramework extends ClientUdashRPCFramework {
-    val rawValueCodec: GenCodec[RawValue] = GenCodec.createNonNull(
+    val rawValueCodec: GenCodec[RawValue] = GenCodec.create(
       {
         case jsi: JsonStringInput => JsonStr(jsi.readRawJson())
         case in => JsonStr(in.readString())

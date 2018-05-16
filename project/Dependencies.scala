@@ -18,8 +18,8 @@ object Dependencies {
   val atmosphereJSVersion = "2.3.4"
   val atmosphereVersion = "2.4.15"
 
-  val upickleVersion = "0.6.2" // Tests only
-  val circeVersion = "0.9.2" // benchmarks only
+  val upickleVersion = "0.6.5" // Tests only
+  val circeVersion = "0.9.3" // Tests only
 
   val scalaHttpClientVersion = "2.1.0"
 
