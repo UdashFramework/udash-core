@@ -4,7 +4,7 @@ import io.udash.testing.UdashFrontendTest
 
 class RoutingOperatorTest extends UdashFrontendTest {
 
-  import io.udash.core.RoutingRegistry._
+  import io.udash.routing.RoutingRegistry._
 
   "/ operator" should {
     "create valid string" in {

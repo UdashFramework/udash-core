@@ -2,7 +2,7 @@ package io.udash
 
 import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
-import io.udash.routing.{StateChangeEvent, WindowUrlChangeProvider}
+import io.udash.routing.{StateChangeEvent, WindowUrlFragmentChangeProvider}
 import io.udash.utils.CallbacksHandler
 import org.scalajs.dom.Element
 
@@ -11,14 +11,14 @@ import scala.reflect.ClassTag
 /**
   * Root application which is used to start single instance of app.
   *
-  * @param routingRegistry     [[io.udash.core.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
+  * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
   * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
   * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
   */
 class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-  urlChangeProvider: UrlChangeProvider = WindowUrlChangeProvider
+  urlChangeProvider: UrlChangeProvider = WindowUrlFragmentChangeProvider
 ) extends CrossLogging {
 
   private var rootElement: Element = _
@@ -95,5 +95,9 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
   /** @return Property reflecting current routing state */
   def currentStateProperty: ReadableProperty[HierarchyRoot] =
     routingEngine.currentStateProperty
+
+  /** @return the URL part representing the current frontend routing state. */
+  def currentUrl: Url =
+    urlChangeProvider.currentFragment
 
 }
