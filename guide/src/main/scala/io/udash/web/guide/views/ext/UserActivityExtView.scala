@@ -33,7 +33,7 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
 case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.type] {
 
   override def create(): (View, Presenter[UserActivityExtState.type]) = {
-    val model = SeqProperty.empty[Call]
+    val model = SeqProperty.blank[Call]
     val presenter = new UserActivityExtPresenter(model)
     (new UserActivityExtView(model, presenter), presenter)
   }

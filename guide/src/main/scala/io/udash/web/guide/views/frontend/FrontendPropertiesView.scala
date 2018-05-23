@@ -24,7 +24,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "convenient value change listening and validation. Take a look at the example below:"
     ),
     CodeBlock(
-      """val username = Property.empty[String]
+      """val username = Property.blank[String]
         |
         |// Register value change listener
         |username.listen((name: String) =>
@@ -89,7 +89,11 @@ class FrontendPropertiesView extends FinalView with CssView {
         |}
         |object Person extends HasModelPropertyCreator[Person]
         |
-        |val person = ModelProperty.empty[Person]
+        |val person = ModelProperty(new Person {
+        |  def name: String = "John"
+        |  def birthYear: Int = 1987
+        |  def friends: Seq[Person] = Seq.empty
+        |})
         |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
     CodeBlock(
@@ -102,7 +106,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |)
         |object Person {
         |  implicit val modelPropertyCreator: ModelPropertyCreator[Person] =
-        |   ModelPropertyCreator.materialize[Person]
+        |    ModelPropertyCreator.materialize[Person]
         |}
         |
         |val person = ModelProperty(Person("John", 1987, Seq.empty))
@@ -191,7 +195,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "in this property, yet it will not fire on change inside children of a property. For example:"
     ),
     CodeBlock(
-      """val ints = SeqProperty.empty[Int]
+      """val ints = SeqProperty.blank[Int]
         |ints.listen(_ => println("listen"))
         |ints.listenStructure(_ => println("listenStructure"))
         |

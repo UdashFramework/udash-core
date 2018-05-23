@@ -37,7 +37,7 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
 
   object GenCodecsDemoViewFactory {
     def apply(): Modifier = {
-      val GenCodecs = ModelProperty.empty[GenCodecsDemoModel]
+      val GenCodecs = ModelProperty(null: GenCodecsDemoModel) // we don't need to initialize this model
       val presenter = new GenCodecsDemoPresenter(GenCodecs)
       new GenCodecsDemoView(GenCodecs, presenter).render
     }

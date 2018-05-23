@@ -25,7 +25,7 @@ class NotificationsDemoComponent extends Component {
 
   object NotificationsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty.empty[NotificationsDemoModel]
+      val model = ModelProperty(null: NotificationsDemoModel) // init below
       model.subProp(_.registered).set(false)
       model.subProp(_.lastMessage).set("-")
 

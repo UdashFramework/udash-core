@@ -2,6 +2,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import sbt.Compile
+import sbtcrossproject.{crossProject, CrossType}
 
 name := "udash-guide"
 
@@ -71,7 +72,7 @@ lazy val udashGuide = project.in(file("."))
     Compile / mainClass := Some("io.udash.web.Launcher")
   )
 
-lazy val shared = crossProject.crossType(CrossType.Pure).in(file("shared"))
+lazy val shared = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("shared"))
   .settings(commonSettings)
   .jsSettings(commonJSSettings)
   .settings(

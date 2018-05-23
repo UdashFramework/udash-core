@@ -11,10 +11,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-trait PingPongPushDemoModel {
-  def pingId: Int
-}
-object PingPongPushDemoModel extends HasModelPropertyCreator[PingPongPushDemoModel]
 
 class PingPongPushDemoComponent extends Component {
 
@@ -22,26 +18,24 @@ class PingPongPushDemoComponent extends Component {
 
   object PingPongPushDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty.empty[PingPongPushDemoModel]
-      clientId.subProp(_.pingId).set(0)
-
+      val clientId = Property[Int](0)
       val presenter = new PingPongPushDemoPresenter(clientId)
       new PingPongPushDemoView(clientId, presenter).render
     }
   }
 
-  class PingPongPushDemoPresenter(model: ModelProperty[PingPongPushDemoModel]) {
+  class PingPongPushDemoPresenter(model: Property[Int]) {
     private var registered = false
 
     def onButtonClick(btn: UdashButton) = {
       btn.disabled.set(true)
       registerCallback(btn)
-      Context.serverRpc.demos().pingDemo().ping(model.subProp(_.pingId).get)
+      Context.serverRpc.demos().pingDemo().ping(model.get)
     }
 
     private def registerCallback(btn: UdashButton) = if (!registered) {
       val listener: Int => Any = (id: Int) => {
-        model.subProp(_.pingId).set(id + 1)
+        model.set(id + 1)
         btn.disabled.set(false)
       }
       PingClient.registerPongListener(listener)
@@ -49,13 +43,13 @@ class PingPongPushDemoComponent extends Component {
     }
   }
 
-  class PingPongPushDemoView(model: ModelProperty[PingPongPushDemoModel], presenter: PingPongPushDemoPresenter) {
+  class PingPongPushDemoView(model: Property[Int], presenter: PingPongPushDemoPresenter) {
     import JsDom.all._
 
     val pingButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
       componentId = ComponentId("ping-pong-push-demo")
-    )("Ping(", bind(model.subProp(_.pingId)), ")")
+    )("Ping(", bind(model), ")")
 
     pingButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>

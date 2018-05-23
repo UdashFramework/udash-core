@@ -399,7 +399,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inputGroups(): dom.Element = {
-    val vanityUrl = Property.empty[String]
+    val vanityUrl = Property.blank[String]
     val buttonDisabled = Property(true)
     vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
     val button = UdashButton()("Clear")
@@ -444,7 +444,7 @@ object BootstrapDemos extends CrossLogging with CssView {
     }
     object UserModel extends HasModelPropertyCreator[UserModel]
 
-    val user = ModelProperty.empty[UserModel]
+    val user = ModelProperty(null: UserModel) // initialized below
     user.subProp(_.name).set("")
     user.subProp(_.age).set(25)
     user.subProp(_.shirtSize).set(Medium)
@@ -476,8 +476,8 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inlineForm(): dom.Element = {
-    val search = Property.empty[String]
-    val something = Property.empty[String]
+    val search = Property.blank[String]
+    val something = Property.blank[String]
     div(GuideStyles.frame)(
       UdashForm.inline(
         UdashForm.group(
@@ -754,7 +754,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleModal(): dom.Element = {
-    val events = SeqProperty.empty[UdashModal.ModalEvent]
+    val events = SeqProperty.blank[UdashModal.ModalEvent]
     val header = () => div(
       "Modal events",
       UdashButton()(UdashModal.CloseButtonAttr, BootstrapStyles.close, "×").render
@@ -886,7 +886,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleCollapse(): dom.Element = {
-    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
       div(BootstrapStyles.Well.well)(
         ul(repeat(events)(event => li(event.get.toString).render))
@@ -910,7 +910,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def accordionCollapse(): dom.Element = {
-    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val news = SeqProperty[String](
       "Title 1", "Title 2", "Title 3"
     )

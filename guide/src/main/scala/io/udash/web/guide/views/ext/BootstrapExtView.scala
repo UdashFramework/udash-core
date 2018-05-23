@@ -382,7 +382,7 @@ class BootstrapExtView extends FinalView {
       i("input"), " for wrapping input elements, ", i("addon"), " for text elements and ", i("buttons"), " buttons."
     ),
     CodeBlock(
-      s"""val vanityUrl = Property.empty[String]
+      s"""val vanityUrl = Property.blank[String]
           |val buttonDisabled = Property(true)
           |vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
           |val button = UdashButton()("Clear")
@@ -414,7 +414,7 @@ class BootstrapExtView extends FinalView {
           |  def shirtSize: ShirtSize
           |}
           |
-         |val user = ModelProperty.empty[UserModel]
+         |val user = ModelProperty(null: UserModel) // initialized below
           |user.subProp(_.name).set("")
           |user.subProp(_.age).set(25)
           |user.subProp(_.shirtSize).set(Medium)
@@ -449,8 +449,8 @@ class BootstrapExtView extends FinalView {
     ),
     p("It is also possible to create an ", i("inline"), " or ", i("horizontal"), " form."),
     CodeBlock(
-      s"""|val search = Property.empty[String]
-          |val something = Property.empty[String]
+      s"""|val search = Property.blank[String]
+          |val something = Property.blank[String]
           |div(
           |  UdashForm.inline(
           |    UdashForm.group(
@@ -803,7 +803,7 @@ class BootstrapExtView extends FinalView {
       "The ", i("UdashModal"), " class exposes methods for opening/hiding window. It is also possible to listen on window's events."
     ),
     CodeBlock(
-      s"""|val events = SeqProperty.empty[UdashModal.ModalEvent]
+      s"""|val events = SeqProperty.blank[UdashModal.ModalEvent]
           |val header = () => div(
           |  "Modal events",
           |  UdashButton()(
@@ -937,7 +937,7 @@ class BootstrapExtView extends FinalView {
       i("toggleButtonAttrs"), " for easy creation of toggle button."
     ),
     CodeBlock(
-      s"""|val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+      s"""|val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
           |val collapse = UdashCollapse()(
           |  div(BootstrapStyles.Well.well)(
           |    ul(repeat(events)(event => li(event.get.toString).render))
@@ -970,7 +970,7 @@ class BootstrapExtView extends FinalView {
       i("collapseOf"), " method for obtaining ", i("UdashCollapse"), " created for selected element."
     ),
     CodeBlock(
-      s"""val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+      s"""val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
           |val news = SeqProperty[String](
           |  "Title 1", "Title 2", "Title 3"
           |)
