@@ -44,8 +44,15 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       li(i("ViewFactoryRegistry"), " - mapping from ", i("RoutingState"), " to ", i("ViewFactory"), ".")
     ),
     h3("URL"),
-    p("The Udash routing engine is based on the URL part following the ", b("#"), " sign. To get the current URL, you can use the code presented below:"),
-    CodeBlock("val url = io.udash.routing.WindowUrlChangeProvider.currentFragment")(GuideStyles),
+    p(
+      "The routing support in Udash comes in two flavours (both available in package ",
+      i("io.udash.routing"), "):"
+    ),
+    ul(GuideStyles.defaultList)(
+      li(i("WindowUrlFragmentChangeProvider"), " - based on the URL part following the ", b("#"), " sign."),
+      li(i("WindowUrlPathChangeProvider"), " - based on the URL path.")
+    ),
+    p("To get the current URL, you can use the method ", i("currentUrl"), " from your ", i("Application"), " instance."),
     ForceBootstrap(
       div(GuideStyles.frame, GuideStyles.useBootstrap)(
         p(
@@ -60,6 +67,13 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
         br(), br(),
         input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
       )
+    ),
+    p(
+      i("WindowUrlFragmentChangeProvider"), " is a default routing mechanism. If you want to use ",
+      i("WindowUrlPathChangeProvider"), ", you should remember that your web server has to handle frontend routing paths ",
+      "by serving ", i("index.html"), " file. Your should also refer all your resources (like images, styles or scripts) ",
+      "with an absolute URLs. Take a look at this guide sources migration from hash-based to path-based routing (",
+      a(href := "https://github.com/UdashFramework/udash-guide/commit/cc54f57cc2128e446e1df1c29f65d0baa97c6fc9")("GitHub commit"), ")."
     ),
     h3("RoutingState & RoutingRegistry"),
     p(
