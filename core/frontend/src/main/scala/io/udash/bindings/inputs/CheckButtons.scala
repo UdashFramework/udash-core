@@ -2,7 +2,9 @@ package io.udash.bindings.inputs
 
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.ReadableProperty
-import org.scalajs.dom.{html, _}
+import org.scalajs.dom.{Element, Event}
+import org.scalajs.dom.html.{Input => JSInput}
+
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -17,26 +19,28 @@ object CheckButtons {
     * @param xs Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
-  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String],
-            decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*): JsDom.TypedTag[html.Element] = {
+  def apply(
+    property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String],
+    decorator: Seq[(JSInput, String)] => JsDom.TypedTag[Element], xs: Modifier*
+  ): JsDom.TypedTag[Element] = {
     val htmlInputs = prepareHtmlInputs(options)(xs:_*)
     val bind = prepareBind(property)
     htmlInputs.foreach(bind.applyTo)
     decorator(htmlInputs.zip(options))
   }
 
-  private def prepareHtmlInputs(options: Seq[String])(xs: Modifier*) =
+  private def prepareHtmlInputs(options: Seq[String])(xs: Modifier*): Seq[JSInput] =
     options.map(opt => input(tpe := "checkbox", value := opt)(xs:_*).render)
 
   private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]]): JsDom.Modifier = {
-    def updateInput(t: html.Input): Unit = {
+    def updateInput(t: JSInput): Unit = {
       val selection = property.get
       t.checked = selection.contains(t.value)
     }
 
     new JsDom.Modifier {
       override def applyTo(t: Element): Unit = {
-        val element = t.asInstanceOf[html.Input]
+        val element = t.asInstanceOf[JSInput]
 
         updateInput(element)
         property.listen(_ => updateInput(element))

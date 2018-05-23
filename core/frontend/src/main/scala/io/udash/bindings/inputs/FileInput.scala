@@ -1,8 +1,9 @@
 package io.udash.bindings.inputs
 
 import io.udash._
-import org.scalajs.dom
-import org.scalajs.dom.{Event, File, html}
+import org.scalajs.dom.{Element, Event, File}
+import org.scalajs.dom.html.{Input => JSInput}
+
 import scalatags.generic.Modifier
 
 object FileInput {
@@ -15,9 +16,11 @@ object FileInput {
     * @param selectedFiles This property contains information about files selected by user.
     * @return
     */
-  def apply(inputName: String, acceptMultipleFiles: ReadableProperty[Boolean], selectedFiles: SeqProperty[File])
-           (inputMds: Modifier[dom.Element]*): html.Input = {
+  def apply(
+    inputName: String, acceptMultipleFiles: ReadableProperty[Boolean], selectedFiles: SeqProperty[File]
+  )(inputMds: Modifier[Element]*): JSInput = {
     import scalatags.JsDom.all._
+
     val inp = input(
       `type` := "file", name := inputName,
       (multiple := "multiple").attrIf(acceptMultipleFiles),

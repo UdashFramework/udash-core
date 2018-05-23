@@ -3,7 +3,9 @@ package io.udash.bindings.inputs
 import java.{util => ju}
 
 import io.udash.properties.single.Property
-import org.scalajs.dom.{html, _}
+import org.scalajs.dom.{Element, Event}
+import org.scalajs.dom.html.{Input => JSInput}
+
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -18,33 +20,36 @@ object RadioButtons {
     * @param xs Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
-  def apply(property: Property[String], options: Seq[String], decorator: Seq[(html.Input, String)] => JsDom.TypedTag[html.Element], xs: Modifier*): JsDom.TypedTag[html.Element] = {
+  def apply(
+    property: Property[String], options: Seq[String],
+    decorator: Seq[(JSInput, String)] => JsDom.TypedTag[Element], xs: Modifier*
+  ): JsDom.TypedTag[Element] = {
     val bind = prepareBind(property)
     val htmlInputs = prepareHtmlInputs(options, bind)(xs:_*)
     decorator(htmlInputs.zip(options))
   }
 
-  private def prepareHtmlInputs(options: Seq[String], binding: JsDom.Modifier)(xs: Modifier*) = {
+  private def prepareHtmlInputs(options: Seq[String], binding: JsDom.Modifier)(xs: Modifier*): Seq[JSInput] = {
     val uuid: String = ju.UUID.randomUUID().toString
-    options.map(opt => {
-      val el: html.Input = input(tpe := "radio", value := opt, binding)(xs:_*).render
+    options.map { opt =>
+      val el: JSInput = input(tpe := "radio", value := opt, binding)(xs:_*).render
       el.name = uuid
       el
-    })
+    }
   }
 
   private def prepareBind(property: Property[String]): JsDom.Modifier = {
-    def updateInput(t: html.Input) = {
+    def updateInput(t: JSInput): Unit = {
       t.checked = property.get == t.value
     }
 
     new JsDom.Modifier {
       override def applyTo(t: Element): Unit = {
-        val element = t.asInstanceOf[html.Input]
+        val element = t.asInstanceOf[JSInput]
 
         updateInput(element)
         property.listen(_ => updateInput(element))
-        element.onchange = (event: Event) => {
+        element.onchange = (_: Event) => {
           property.set(element.value)
         }
       }

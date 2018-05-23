@@ -21,14 +21,15 @@ object Select {
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return HTML select tag with bound ValueProperty, applied modifiers and nested options.
     */
-  def apply(property: Property[String], options: Seq[String], label: String => Modifier)
-           (xs: Modifier*): JsDom.TypedTag[html.Select] = {
+  def apply(
+    property: Property[String], options: Seq[String], label: String => Modifier
+  )(xs: Modifier*): JsDom.TypedTag[html.Select] = {
     val htmlOptions = prepareHtmlOptions(options, label)
 
-    def refreshSelectedItems() = {
-      htmlOptions.foreach(option => {
+    def refreshSelectedItems(): Unit = {
+      htmlOptions.foreach { option =>
         option.selected = property.get == option.value
-      })
+      }
     }
 
     val bind = new JsDom.Modifier {
@@ -37,7 +38,7 @@ object Select {
 
         refreshSelectedItems()
         property.listen(_ => refreshSelectedItems())
-        element.onchange = (event: Event) => {
+        element.onchange = (_: Event) => {
           property.set(htmlOptions.find(o => o.selected).get.value)
         }
       }
@@ -55,16 +56,16 @@ object Select {
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return HTML select tag with bound SeqProperty, applied modifiers and nested options.
     */
-  def apply(property: SeqProperty[String, _ <: ReadableProperty[String]],
-            options: Seq[String], label: String => Modifier)
-           (xs: Modifier*): JsDom.TypedTag[html.Select] = {
+  def apply(
+    property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], label: String => Modifier
+  )(xs: Modifier*): JsDom.TypedTag[html.Select] = {
     val htmlOptions = prepareHtmlOptions(options, label)
 
-    def refreshSelectedItems() = {
+    def refreshSelectedItems(): Unit = {
       val selection = property.get
-      htmlOptions.foreach(option => {
+      htmlOptions.foreach { option =>
         option.selected = selection.contains(option.value)
-      })
+      }
     }
 
     def collectSelectedItems: Seq[String] = {
@@ -84,9 +85,8 @@ object Select {
     select(multiple := true, bind, xs)(htmlOptions)
   }
 
-  private def prepareHtmlOptions(options: Seq[String], label: String => Modifier) =
-    options.map(opt => {
-      val v = opt
-      option(value := v)(label(v)).render
-    })
+  private def prepareHtmlOptions(options: Seq[String], label: String => Modifier): Seq[html.Option] =
+    options.map { opt =>
+      option(value := opt)(label(opt)).render
+    }
 }

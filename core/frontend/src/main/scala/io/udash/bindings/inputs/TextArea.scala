@@ -25,16 +25,16 @@ object TextArea {
       override def setElementValue(t: Element, v: String): Unit =
         t.asInstanceOf[html.TextArea].value = v
 
-      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit =
+      override def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit =
         t.asInstanceOf[html.TextArea].onkeyup = callback
 
-      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnChange(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.TextArea].onchange = callback
 
-      override def setElementOnInput(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnInput(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.TextArea].oninput = callback
 
-      override def setElementOnPaste(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnPaste(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.TextArea].onpaste = callback
     }
 

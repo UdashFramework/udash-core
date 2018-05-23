@@ -18,9 +18,9 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
   override def applyTo(t: Element): Unit = {
     if (property.get != null) setElementValue(t, property.get)
 
-    property.listen(value => {
+    property.listen { value =>
       if (elementValue(t) != value) setElementValue(t, value)
-    })
+    }
 
     var propertyUpdateHandler: Int = 0
     val callback = if (debounce.nonEmpty) {

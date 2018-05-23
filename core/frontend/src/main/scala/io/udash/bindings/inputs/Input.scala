@@ -25,16 +25,16 @@ private[bindings] abstract class Input(inputType: String) {
       override def setElementValue(t: Element, v: String): Unit =
         t.asInstanceOf[html.Input].value = if (v != null) v else ""
 
-      override def setElementKeyUp(t: Element, callback: (KeyboardEvent) => Any): Unit =
+      override def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit =
         t.asInstanceOf[html.Input].onkeyup = callback
 
-      override def setElementOnChange(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnChange(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.Input].onchange = callback
 
-      override def setElementOnInput(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnInput(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.Input].oninput = callback
 
-      override def setElementOnPaste(t: Element, callback: (Event) => Any): Unit =
+      override def setElementOnPaste(t: Element, callback: Event => Any): Unit =
         t.asInstanceOf[html.Input].onpaste = callback
     }
 
