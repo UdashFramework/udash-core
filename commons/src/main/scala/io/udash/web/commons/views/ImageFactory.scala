@@ -9,9 +9,9 @@ import scalatags.generic.Namespace
 
 class ImageFactoryPrefix(val value: String)
 object ImageFactoryPrefixSet {
-  case object Intro extends ImageFactoryPrefix(value = "assets/images/quick")
-  case object Boostrapping extends ImageFactoryPrefix(value = "assets/images/views/bootstrapping")
-  case object Frontend extends ImageFactoryPrefix(value = "assets/images/views/frontend")
+  case object Intro extends ImageFactoryPrefix(value = "/assets/images/quick")
+  case object Boostrapping extends ImageFactoryPrefix(value = "/assets/images/views/bootstrapping")
+  case object Frontend extends ImageFactoryPrefix(value = "/assets/images/views/frontend")
 }
 
 object ClickableImageFactory {
@@ -28,14 +28,14 @@ class ImageFactory(prefix: String) {
   }
 }
 
-object Image extends ImageFactory("assets/images")
+object Image extends ImageFactory("/assets/images")
 
 object SVG {
   import scalatags.JsDom.{svgAttrs, svgTags}
   def apply(name: String, size: Size, xs: Modifier*): JsDom.TypedTag[Element] = {
     div(style := s"position: relative; width: 100%; padding-top: ${100 * size.height / size.width}%")(
       svgTags.svg(xmlns := Namespace.svgNamespaceConfig.uri, svgAttrs.viewBox := s"0 0 ${size.width} ${size.height}", style := "position: absolute; top: 0; left: 0; width: 100%; height: 100%;")(
-        svgTags.use(svgAttrs.xmlnsXlink := Namespace.svgXlinkNamespaceConfig.uri, svgAttrs.xLinkHref := s"assets/svg/$name")
+        svgTags.use(svgAttrs.xmlnsXlink := Namespace.svgXlinkNamespaceConfig.uri, svgAttrs.xLinkHref := s"/assets/svg/$name")
       )
     )
   }

@@ -2,6 +2,7 @@ package io.udash.web.homepage
 
 import io.udash._
 import io.udash.logging.CrossLogging
+import io.udash.routing.WindowUrlPathChangeProvider
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 
@@ -12,7 +13,7 @@ object Context {
   private val routingRegistry = new RoutingRegistryDef
   private val viewFactoriesRegistry = new StatesToViewFactoryDef
 
-  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoriesRegistry)
+  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoriesRegistry, WindowUrlPathChangeProvider)
 }
 
 object Init extends CrossLogging {

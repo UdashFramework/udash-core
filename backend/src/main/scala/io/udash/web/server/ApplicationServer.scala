@@ -22,43 +22,65 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     server.start()
   }
 
-  def stop(): Unit =
+  def stop(): Unit = {
     server.stop()
-
-  private val homepage = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
-  private val guide = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
-  guide.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
-
-  homepage.addServlet(createStaticHandler(homepageResourceBase), "/*")
-  guide.addServlet(createStaticHandler(guideResourceBase), "/*")
-
-  private val atmosphereHolder = {
-    val config = new DefaultAtmosphereServiceConfig[MainServerRPC]((clientId) => {
-      val callLogger = new CallLogger
-      new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
-        import localFramework.RPCMetadata
-        override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
-
-        override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
-          callLogger.append(Call(rpcName, methodName, args))
-      }
-    })
-
-    val framework = new DefaultAtmosphereFramework(config, exceptionsRegistry = GuideExceptions.registry)
-    val atmosphereHolder = new ServletHolder(new RpcServlet(framework))
-    atmosphereHolder.setAsyncSupported(true)
-    atmosphereHolder
   }
-  guide.addServlet(atmosphereHolder, "/atm/*")
 
-  private val restHolder = new ServletHolder(
-    new DefaultRestServlet(new DefaultExposesREST[MainServerREST](new ExposedRestInterfaces)))
-  restHolder.setAsyncSupported(true)
-  guide.addServlet(restHolder, "/rest/*")
+  private val homepage = {
+    val ctx = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
+    ctx.addServlet(createStaticHandler(homepageResourceBase), "/*")
+    ctx
+  }
+
+  private val guide = {
+    val ctx = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
+    ctx.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
+    ctx.addServlet(createStaticHandler(guideResourceBase), "/*")
+
+    val atmosphereHolder = {
+      val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
+        val callLogger = new CallLogger
+        new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
+          import localFramework.RPCMetadata
+          override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
+
+          override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
+            callLogger.append(Call(rpcName, methodName, args))
+        }
+      })
+
+      val framework = new DefaultAtmosphereFramework(config, exceptionsRegistry = GuideExceptions.registry)
+      val atmosphereHolder = new ServletHolder(new RpcServlet(framework))
+      atmosphereHolder.setAsyncSupported(true)
+      atmosphereHolder
+    }
+    ctx.addServlet(atmosphereHolder, "/atm/*")
+
+    val restHolder = new ServletHolder(
+      new DefaultRestServlet(new DefaultExposesREST[MainServerREST](new ExposedRestInterfaces)))
+    restHolder.setAsyncSupported(true)
+    ctx.addServlet(restHolder, "/rest_api/*")
+    ctx
+  }
 
   private val contexts = new ContextHandlerCollection
   contexts.setHandlers(Array(homepage, guide))
-  server.setHandler(contexts)
+
+  private val rewriteHandler = {
+    import org.eclipse.jetty.rewrite.handler.RewriteRegexRule
+    val rewrite = new org.eclipse.jetty.rewrite.handler.RewriteHandler()
+    rewrite.setRewriteRequestURI(true)
+    rewrite.setRewritePathInfo(false)
+
+    val spaRewrite = new RewriteRegexRule
+    spaRewrite.setRegex("^/(?!assets|scripts|styles|atm|rest_api)(.*/?)*$")
+    spaRewrite.setReplacement("/")
+    rewrite.addRule(spaRewrite)
+    rewrite.setHandler(contexts)
+    rewrite
+  }
+
+  server.setHandler(rewriteHandler)
 
   private def createContextHandler(hosts: Array[String]): ServletContextHandler = {
     val context = new ServletContextHandler

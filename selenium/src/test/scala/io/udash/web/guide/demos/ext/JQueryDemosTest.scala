@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
 
 class JQueryDemosTest extends SeleniumTest {
-  val url = "/#/ext/jquery"
+  val url = "/ext/jquery"
 
   "JQueryExt view" should {
     driver.get(server.createUrl(url))

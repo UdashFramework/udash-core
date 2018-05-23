@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.WebElement
 
 class RpcIntroTest extends SeleniumTest {
-  val rpcIntroUrl = "/#/rpc"
+  val rpcIntroUrl = "/rpc"
 
   "RpcIntro view" should {
     driver.get(server.createUrl(rpcIntroUrl))

@@ -5,7 +5,7 @@ import org.openqa.selenium.By.{ByCssSelector, ById}
 import com.avsystem.commons.jiop.JavaInterop._
 
 class I18nDemosTest extends SeleniumTest {
-  val url = "/#/ext/i18n"
+  val url = "/ext/i18n"
 
   "I18n view" should {
     driver.get(server.createUrl(url))

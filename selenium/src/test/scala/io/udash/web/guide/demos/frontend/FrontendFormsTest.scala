@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {
-  val url = "/#/frontend/forms"
+  val url = "/frontend/forms"
 
   "FrontendForms view" should {
     driver.get(server.createUrl(url))

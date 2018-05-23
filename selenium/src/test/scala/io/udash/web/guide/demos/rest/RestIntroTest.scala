@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ById, ByTagName}
 
 class RestIntroTest extends SeleniumTest {
-  val rpcIntroUrl = "/#/rest"
+  val rpcIntroUrl = "/rest"
 
   "RestIntro view" should {
     driver.get(server.createUrl(rpcIntroUrl))

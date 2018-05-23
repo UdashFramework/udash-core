@@ -16,7 +16,7 @@ import scalatags.generic.Attr
   * Created by malchik on 2016-04-04.
   */
 
-class DemoComponent(url: Property[String]) extends Component {
+class DemoComponent(url: Property[IndexState]) extends Component {
 
   private val fiddleContainer = div(DemoStyles.demoFiddle).render
   private val jqFiddleContainer = jQ(fiddleContainer)
@@ -27,7 +27,7 @@ class DemoComponent(url: Property[String]) extends Component {
       ul(DemoStyles.demoTabs)(
         DemoComponent.demoEntries.map(entry =>
           li(DemoStyles.demoTabsItem)(
-            a(DemoStyles.demoTabsLink, href := entry.url)(
+            a(DemoStyles.demoTabsLink, href := entry.targetState.url)(
               entry.name
             )
           )
@@ -39,10 +39,10 @@ class DemoComponent(url: Property[String]) extends Component {
 
   url.listen(onUrlChange, initUpdate = true)
 
-  private def onUrlChange(update: String) = {
-    val entryOption = DemoComponent.demoEntries.find(_.url.substring(1) == update)
+  private def onUrlChange(update: IndexState) = {
+    val entryOption = DemoComponent.demoEntries.find(_.targetState == update)
     val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
-    val urlString = s""""${entry.url}""""
+    val urlString = s""""${entry.targetState.url}""""
     val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.className}[href=$urlString]")
 
     jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.className}").attr(Attributes.data(Attributes.Active), "false")
@@ -69,10 +69,10 @@ object DemoComponent {
     ).render
 
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")).url, fiddle("13Wn0gZ/1")),
-    DemoEntry("Properties", IndexState(Option("properties")).url, fiddle("OZe6XBJ/3")),
-    DemoEntry("Validation", IndexState(Option("validation")).url, fiddle("Yiz0JO2/1")),
-    DemoEntry("i18n", IndexState(Option("i18n")).url, fiddle("ll4AVYz/1")),
+    DemoEntry("Hello World", IndexState(Option("hello")), fiddle("13Wn0gZ/1")),
+    DemoEntry("Properties", IndexState(Option("properties")), fiddle("OZe6XBJ/3")),
+    DemoEntry("Validation", IndexState(Option("validation")), fiddle("Yiz0JO2/1")),
+    DemoEntry("i18n", IndexState(Option("i18n")), fiddle("ll4AVYz/1")),
   )
 }
 

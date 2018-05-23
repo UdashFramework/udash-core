@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.ById
 
 class FrontendIntroTest extends SeleniumTest {
-  val url = "/#/frontend"
+  val url = "/frontend"
 
   "FrontendIntro view" should {
     driver.get(server.createUrl(url))

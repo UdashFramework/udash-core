@@ -37,7 +37,7 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
       unsafeChild(s".${headerLogo.className}")(
         width(48 px),
         height(56 px),
-        backgroundImage := "url(../assets/images/udash_logo.png)",
+        backgroundImage := "url(/assets/images/udash_logo.png)",
 
         MediaQueries.tabletPortrait(
           display.none
@@ -77,7 +77,7 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     width(65 px),
     height(96 px),
     marginRight(25 px),
-    backgroundImage := "url(../assets/images/udash_logo_l.png)",
+    backgroundImage := "url(/assets/images/udash_logo_l.png)",
     backgroundRepeat.noRepeat,
     backgroundSize := "100%",
 

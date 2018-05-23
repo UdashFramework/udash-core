@@ -3,7 +3,6 @@ package io.udash.web.guide.views.frontend
 import io.udash._
 import io.udash.bootstrap.BootstrapStyles
 import io.udash.css.CssView
-import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.ForceBootstrap
@@ -23,8 +22,9 @@ case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState]
 }
 
 class FrontendRoutingPresenter(url: Property[String]) extends Presenter[FrontendRoutingState] {
+  import Context.applicationInstance
   override def handleState(state: FrontendRoutingState) = {
-    url.set(WindowUrlChangeProvider.currentFragment.value)
+    url.set(applicationInstance.currentUrl.value)
   }
 }
 
@@ -179,7 +179,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
             true
           })
         ),
-        p("This view was created with: ", span(id := "url-demo-link-init")(WindowUrlChangeProvider.currentFragment.value))
+        p("This view was created with: ", span(id := "url-demo-link-init")(applicationInstance.currentUrl.value))
       )
     ),
     h3("Handling routing errors"),

@@ -111,7 +111,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
       right(-30 px),
       width(400 px),
       height(213 px),
-      backgroundImage := "url(../assets/images/intro_bird.png)",
+      backgroundImage := "url(/assets/images/intro_bird.png)",
       backgroundSize := "100%",
 
       media.minHeight(1 px).maxHeight(850 px)(

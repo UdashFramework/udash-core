@@ -2,7 +2,6 @@ package io.udash.web.homepage.views
 
 import io.udash._
 import io.udash.core.Presenter
-import io.udash.routing.WindowUrlChangeProvider
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.views.{Image, SVG, Size}
@@ -13,25 +12,25 @@ import io.udash.web.homepage.styles.partials.HomepageStyles
 
 case object IndexViewFactory extends ViewFactory[IndexState] {
   override def create(): (View, Presenter[IndexState]) = {
-    val url = Property.empty[String]
-    (new IndexView(url), new IndexPresenter(url))
+    val state = Property[IndexState](IndexState(None))
+    (new IndexView(state), new IndexPresenter(state))
   }
 }
 
-class IndexPresenter(url: Property[String]) extends Presenter[IndexState] {
+class IndexPresenter(stateProperty: Property[IndexState]) extends Presenter[IndexState] {
   override def handleState(state: IndexState): Unit = {
-    url.set(WindowUrlChangeProvider.currentFragment.value)
+    stateProperty.set(state)
   }
 }
 
-class IndexView(url: Property[String]) extends FinalView {
+class IndexView(state: Property[IndexState]) extends FinalView {
   import scalatags.JsDom.all._
 
   private lazy val content = div(
     IndexView.sectionIntro,
     IndexView.sectionFeatures,
     IndexView.sectionMore,
-    IndexView.sectionDemo(url)
+    IndexView.sectionDemo(state)
   )
 
   override def getTemplate: Modifier = content
@@ -132,10 +131,10 @@ private[views] object IndexView {
     )
   )
 
-  def sectionDemo(url: Property[String]) = section(HomepageStyles.sectionDemo)(
+  def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
     div(GlobalStyles.body)(
       h1("Have a code preview"),
-      new DemoComponent(url).getTemplate,
+      new DemoComponent(state).getTemplate,
       p(HomepageStyles.demoDescription)("It's free, try it now!"),
       Buttons.blackBorderButton(ExternalUrls.guide, "Start your project")
     )

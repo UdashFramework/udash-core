@@ -3,7 +3,7 @@ package io.udash.web.guide.demos.frontend
 import io.udash.web.SeleniumTest
 
 class FrontendRoutingTest extends SeleniumTest {
-  val url = "/#/frontend/routing"
+  val url = "/frontend/routing"
 
   "FrontendRouting view" should {
     "contain demo element" in {

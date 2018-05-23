@@ -937,7 +937,7 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def carousel(): dom.Element = {
     def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-      Url("assets/images/ext/bootstrap/carousel.jpg")
+      Url("/assets/images/ext/bootstrap/carousel.jpg")
     )(
       h3(randomString()),
       p(randomString())

@@ -1005,7 +1005,7 @@ class BootstrapExtView extends FinalView {
     ),
     CodeBlock(
       s"""|def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-          |  Url("assets/images/ext/bootstrap/carousel.png")
+          |  Url("/assets/images/ext/bootstrap/carousel.png")
           |)(
           |  h3(randomString()),
           |  p(randomString())

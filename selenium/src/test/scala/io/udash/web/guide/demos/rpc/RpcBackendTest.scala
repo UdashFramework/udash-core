@@ -3,7 +3,7 @@ package io.udash.web.guide.demos.rpc
 import io.udash.web.SeleniumTest
 
 class RpcBackendTest extends SeleniumTest {
-  val rpcBackendUrl = "/#/rpc/client-server"
+  val rpcBackendUrl = "/rpc/client-server"
 
   "Rpcbackend view" should {
     driver.get(server.createUrl(rpcBackendUrl))
