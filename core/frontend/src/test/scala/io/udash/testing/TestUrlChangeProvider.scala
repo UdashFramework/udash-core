@@ -1,13 +1,14 @@
 package io.udash.testing
 
 import io.udash._
+import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 
 class TestUrlChangeProvider(init: Url) extends UrlChangeProvider {
   var currUrl: Url = init
   var urlsHistory: mutable.ArrayBuffer[Url] = mutable.ArrayBuffer.empty
-  val changeListeners: mutable.Set[(Url) => Unit] = mutable.Set.empty
+  val changeListeners: mutable.Set[Url => Unit] = mutable.Set.empty
 
   override def changeFragment(url: Url): Unit = {
     currUrl = url
@@ -19,5 +20,8 @@ class TestUrlChangeProvider(init: Url) extends UrlChangeProvider {
 
   override def currentFragment: Url = currUrl
 
-  override def onFragmentChange(callback: (Url) => Unit): Unit = changeListeners.add(callback)
+  override def onFragmentChange(callback: Url => Unit): Registration = {
+    changeListeners.add(callback)
+    new SetRegistration(changeListeners, callback)
+  }
 }

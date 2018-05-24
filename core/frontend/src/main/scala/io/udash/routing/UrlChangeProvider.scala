@@ -1,6 +1,8 @@
 package io.udash.routing
 
 import io.udash.core.Url
+import io.udash.properties.MutableBufferRegistration
+import io.udash.utils.Registration
 import org.scalajs.dom
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HashChangeEvent
@@ -16,7 +18,7 @@ trait UrlChangeProvider {
   def currentFragment: Url
 
   /** Registers listener for URL changes. */
-  def onFragmentChange(callback: Url => Unit): Unit
+  def onFragmentChange(callback: Url => Unit): Registration
 
   /** Changes the whole URL. */
   def changeUrl(url: String): Unit
@@ -32,7 +34,10 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
     callbacks.foreach(_.apply(currentFragment))
   }
 
-  override def onFragmentChange(callback: Url => Unit): Unit = callbacks.push(callback)
+  override def onFragmentChange(callback: Url => Unit): Registration = {
+    callbacks.push(callback)
+    new MutableBufferRegistration(callbacks, callback)
+  }
   override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
   override def changeFragment(url: Url): Unit = document.location.hash = url.value
   override def changeUrl(url: String): Unit = document.location.replace(url)
@@ -88,8 +93,12 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
 
-  override def onFragmentChange(callback: Url => Unit): Unit = callbacks.push(callback)
   override def changeUrl(url: String): Unit = document.location.replace(url)
+
+  override def onFragmentChange(callback: Url => Unit): Registration = {
+    callbacks.push(callback)
+    new MutableBufferRegistration(callbacks, callback)
+  }
 
   override def changeFragment(url: Url): Unit = {
     window.history.pushState(js.Dynamic.literal(url = url.value), "", url.value)
