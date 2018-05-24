@@ -1,6 +1,5 @@
 package io.udash.web.homepage.components
 
-import io.udash.core.DomWindow
 import io.udash.web.commons.components.{HeaderButtons, HeaderNav}
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
@@ -20,7 +19,7 @@ object Header extends HeaderButtons with HeaderNav {
   override val buttonStyles: HeaderButtonsStyles = HeaderStyles
   override val navStyles: HeaderNavStyles = HeaderStyles
 
-  private val window = jQ(DomWindow)
+  private val window = jQ(org.scalajs.dom.window)
   window.on("scroll", onScroll)
 
   private lazy val btnMobileMenu = a(href := "#", MobileMenuStyles.btnMobile, HeaderStyles.btnMobile)(
@@ -61,7 +60,7 @@ object Header extends HeaderButtons with HeaderNav {
     val pinnedAttr: String = Attributes.data(Attributes.Pinned)
 
     val pin = jQ(template).attr(pinnedAttr).getOrElse("false").toBoolean
-    val scrollTop = jQ(DomWindow).scrollTop()
+    val scrollTop = jQ(org.scalajs.dom.window).scrollTop()
     val introHeight = jQ(s".${HomepageStyles.sectionIntro.className}").height()
 
     if (scrollTop >= introHeight && !pin) {

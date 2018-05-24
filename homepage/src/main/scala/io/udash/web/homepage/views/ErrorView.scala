@@ -1,7 +1,6 @@
 package io.udash.web.homepage.views
 
 import io.udash._
-import io.udash.core.DomWindow
 import io.udash.css.CssView
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
@@ -36,7 +35,7 @@ class ErrorView extends FinalView with CssView {
 
   private lazy val jqTemplate = jQ(content)
 
-  val window = jQ(DomWindow)
+  val window = jQ(org.scalajs.dom.window)
   window.resize((element: Element, _: JQueryEvent) => onResize())
   onResize()
 
