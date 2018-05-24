@@ -1,8 +1,9 @@
 package io.udash.routing
 
-import io.udash.core.{Url, Window}
+import io.udash.core.Url
 import org.scalajs.dom
 import org.scalajs.dom.Element
+import org.scalajs.dom.raw.HashChangeEvent
 
 import scala.scalajs.js
 
@@ -23,13 +24,13 @@ trait UrlChangeProvider {
 
 /** Used for routing based on the URL part following # sign. */
 object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
-  import dom.document
+  import dom.{document, window}
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
-  Window.onFragmentChange(() => {
+  window.onhashchange = (_: HashChangeEvent) => {
     callbacks.foreach(_.apply(currentFragment))
-  })
+  }
 
   override def onFragmentChange(callback: Url => Unit): Unit = callbacks.push(callback)
   override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
@@ -42,9 +43,9 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
   * Don't forget to configure your web server to handle frontend routes. You may find "rewrite rules" mechanism useful.
   */
 object WindowUrlPathChangeProvider extends UrlChangeProvider {
-  import org.scalajs.dom.experimental.{URL => JSUrl}
-  import org.scalajs.dom.raw.{MouseEvent, PopStateEvent, Node}
   import dom.{document, window}
+  import org.scalajs.dom.experimental.{URL => JSUrl}
+  import org.scalajs.dom.raw.{MouseEvent, Node, PopStateEvent}
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
@@ -79,7 +80,6 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
         if (!isSamePath(href)) {
           val url = Url(href)
           changeFragment(url)
-          callbacks.foreach(_.apply(url))
         }
         event.preventDefault()
       }

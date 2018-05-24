@@ -7,8 +7,10 @@ import scala.scalajs.js.annotation.JSGlobalScope
 
 @js.native
 @JSGlobalScope
+@deprecated("Use `org.scalajs.dom.window` instead.", "0.7.0")
 object DomWindow extends Element
 
+@deprecated("The application should not directly depend on URL fragment.", "0.7.0")
 object Window {
   private var onHashChangedCallbacks: List[() => Any] = List()
 

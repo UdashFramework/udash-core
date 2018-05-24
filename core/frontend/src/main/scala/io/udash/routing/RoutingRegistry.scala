@@ -22,17 +22,18 @@ trait RoutingRegistry[HierarchyRoot <: State] {
 }
 
 object RoutingRegistry {
-  implicit class StringRoutingOps(val left: String) extends AnyVal {
+  implicit final class StringRoutingOps(private val left: String) extends AnyVal {
     def /(right: Any): String = RoutingRegistry./(left, right.toString)
   }
 
   object / {
     def unapply(path: String): Option[(String, String)] = {
       val strippedPath = path.stripSuffix("/")
-      Some(strippedPath.lastIndexOf("/")).filter(_ >= 0).map { splitIndex =>
-        val left = strippedPath.substring(0, splitIndex)
-        val right = strippedPath.substring(splitIndex + 1, strippedPath.length)
-        (left, right)
+      Some(strippedPath.lastIndexOf("/")).collect {
+        case splitIndex if splitIndex >= 0 =>
+          val left = strippedPath.substring(0, splitIndex)
+          val right = strippedPath.substring(splitIndex + 1, strippedPath.length)
+          (left, right)
       }
     }
 

@@ -10,7 +10,9 @@ package object udash
   type DefaultViewPresenterFactory[S <: State] = io.udash.core.StaticViewFactory[S]
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
   type EmptyPresenter[S <: State] = io.udash.core.EmptyPresenter[S]
-  val  Window = io.udash.core.Window
+
+  @deprecated("The application should not directly depend on URL fragment.", "0.7.0")
+  lazy val Window: io.udash.core.Window.type = io.udash.core.Window
 
   // Definitions
   val  Url = io.udash.core.Url
