@@ -1,4 +1,4 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest

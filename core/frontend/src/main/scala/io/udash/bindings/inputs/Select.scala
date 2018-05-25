@@ -1,9 +1,8 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom.{html, _}
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 

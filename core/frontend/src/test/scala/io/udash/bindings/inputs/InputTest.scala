@@ -1,13 +1,14 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash._
+import io.udash.bindings.inputs
 import io.udash.testing.AsyncUdashFrontendTest
 
 class InputTest extends AsyncUdashFrontendTest {
   "Input" should {
     "synchronise state with property changes" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, None).render
+      val input = inputs.TextInput(p, None).render
 
       input.value should be("ABC")
 
@@ -32,7 +33,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise property with state changes" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, None).render
+      val input = inputs.TextInput(p, None).render
 
       input.value = "ABCD"
       input.onpaste(null)
@@ -66,7 +67,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise property with state changes with debouncing" in {
       val p = Property[String]("ABC")
-      val input = TextInput.debounced(p).render
+      val input = inputs.TextInput.debounced(p).render
 
       input.value = "ABCD"
       input.onpaste(null)

@@ -1,10 +1,10 @@
-package io.udash.bindings.modifiers
+package io.udash.bindings.inputs
 
 import io.udash.properties.single.Property
 import org.scalajs.dom._
+import scalatags.JsDom
 
 import scala.concurrent.duration.Duration
-import scalatags.JsDom
 
 /** Template of binding for text inputs. */
 private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Option[Duration]) extends JsDom.Modifier {
@@ -12,8 +12,8 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
   def setElementValue(t: Element, v: String): Unit
   def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit
   def setElementOnChange(t: Element, callback: Event => Any): Unit
-  def setElementOnInput(t: Element, callback: (Event) => Any): Unit
-  def setElementOnPaste(t: Element, callback: (Event) => Any): Unit
+  def setElementOnInput(t: Element, callback: Event => Any): Unit
+  def setElementOnPaste(t: Element, callback: Event => Any): Unit
 
   override def applyTo(t: Element): Unit = {
     if (property.get != null) setElementValue(t, property.get)

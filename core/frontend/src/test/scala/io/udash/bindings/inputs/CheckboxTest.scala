@@ -1,13 +1,14 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash._
+import io.udash.bindings.inputs
 import io.udash.testing.UdashFrontendTest
 
 class CheckboxTest extends UdashFrontendTest {
   "Checkbox" should {
     "synchronise state with property changes" in {
       val p = Property[Boolean](true)
-      val checkbox = Checkbox(p).render
+      val checkbox = inputs.Checkbox(p).render
 
       checkbox.checked should be(true)
 
@@ -23,7 +24,7 @@ class CheckboxTest extends UdashFrontendTest {
 
     "synchronise property with state changes" in {
       val p = Property[Boolean](true)
-      val checkbox = Checkbox(p).render
+      val checkbox = inputs.Checkbox(p).render
 
       checkbox.checked should be(true)
 

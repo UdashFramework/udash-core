@@ -1,9 +1,8 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash._
 import org.scalajs.dom
 import org.scalajs.dom.{Event, File, html}
-
 import scalatags.generic.Modifier
 
 object FileInput {

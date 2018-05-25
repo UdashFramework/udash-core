@@ -1,6 +1,7 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import io.udash._
+import io.udash.bindings.inputs
 import io.udash.testing.UdashFrontendTest
 
 class RadioButtonsTest extends UdashFrontendTest {
@@ -11,7 +12,7 @@ class RadioButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val buttons = RadioButtons(p, options, s => div(s.map(t => t._1))).render
+      val buttons = inputs.RadioButtons(p, options, s => div(s.map(t => t._1))).render
 
       buttons.childElementCount should be(5)
       buttons.childNodes(0).asInstanceOf[org.scalajs.dom.html.Input].checked should be(false)
@@ -34,7 +35,7 @@ class RadioButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("X")
 
-      val buttons = RadioButtons(p, options, s => div(s.map(t => t._1))).render
+      val buttons = inputs.RadioButtons(p, options, s => div(s.map(t => t._1))).render
 
       buttons.childElementCount should be(5)
 

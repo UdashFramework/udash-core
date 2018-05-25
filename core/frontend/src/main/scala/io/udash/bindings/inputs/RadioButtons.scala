@@ -1,10 +1,9 @@
-package io.udash.bindings
+package io.udash.bindings.inputs
 
 import java.{util => ju}
 
 import io.udash.properties.single.Property
 import org.scalajs.dom.{html, _}
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
