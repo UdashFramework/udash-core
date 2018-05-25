@@ -16,12 +16,13 @@ case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
   * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
   * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
   */
-class RoutingEngine[HierarchyRoot <: GState[HierarchyRoot] : ClassTag : PropertyCreator]
-                   (routingRegistry: RoutingRegistry[HierarchyRoot],
-                    viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-                    viewRenderer: ViewRenderer) {
+class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
+  routingRegistry: RoutingRegistry[HierarchyRoot],
+  viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
+  viewRenderer: ViewRenderer
+) {
 
-  private val currentStateProp = Property.empty[HierarchyRoot]
+  private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 

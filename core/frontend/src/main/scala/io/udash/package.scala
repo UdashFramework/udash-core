@@ -1,15 +1,18 @@
 package io
 
-package object udash extends io.udash.bindings.Bindings
-                        with io.udash.properties.Properties
-                        with io.udash.routing.Routing
-{
+package object udash
+  extends io.udash.bindings.Bindings
+  with io.udash.properties.Properties
+  with io.udash.routing.Routing {
+
   // Defaults
   @deprecated("Renamed to `StaticViewFactory`.", "0.6.0")
   type DefaultViewPresenterFactory[S <: State] = io.udash.core.StaticViewFactory[S]
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
   type EmptyPresenter[S <: State] = io.udash.core.EmptyPresenter[S]
-  val  Window = io.udash.core.Window
+
+  @deprecated("The application should not directly depend on URL fragment.", "0.7.0")
+  lazy val Window: io.udash.core.Window.type = io.udash.core.Window
 
   // Definitions
   val  Url = io.udash.core.Url
@@ -32,7 +35,7 @@ package object udash extends io.udash.bindings.Bindings
   type ContainerState = io.udash.core.ContainerState
   type FinalState = io.udash.core.FinalState
 
-  type RoutingRegistry[HierarchyRoot <: State] = io.udash.core.RoutingRegistry[HierarchyRoot]
+  type RoutingRegistry[HierarchyRoot <: State] = io.udash.routing.RoutingRegistry[HierarchyRoot]
 
   @deprecated("Renamed to `ViewFactoryRegistry`.", "0.6.0")
   type ViewPresenterRegistry[HierarchyRoot <: State] = io.udash.core.ViewFactoryRegistry[HierarchyRoot]

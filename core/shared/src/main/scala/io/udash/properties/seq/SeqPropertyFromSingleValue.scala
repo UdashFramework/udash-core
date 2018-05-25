@@ -34,13 +34,15 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
     def commonIdx(s1: Iterator[B], s2: Iterator[B]): Int =
       math.max(0,
         s1.zipAll(s2, null, null).zipWithIndex
-          .indexWhere { case (((x, y), _)) => x != y })
+          .indexWhere { case ((x, y), _) => x != y })
 
     val commonBegin = commonIdx(transformed.iterator, current.iterator)
     val commonEnd = commonIdx(transformed.reverseIterator, current.reverseIterator)
 
     val patch = if (transformed.size > current.size) {
-      val added: Seq[CastableProperty[B]] = Seq.fill(transformed.size - current.size)(implicitly[PropertyCreator[B]].newProperty(this))
+      val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
+        implicitly[PropertyCreator[B]].newProperty(transformed(current.size + idx), this)
+      }
       CrossCollections.replace(children, commonBegin, 0, added: _*)
       Some(Patch(commonBegin, Seq(), added, clearsProperty = false))
     } else if (transformed.size < current.size) {
@@ -69,7 +71,7 @@ private[properties]
 class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
   extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
   /** Registers listener, which will be called on every property structure change. */
-  override def listenStructure(structureListener: (Patch[ReadableProperty[B]]) => Any): Registration = {
+  override def listenStructure(structureListener: Patch[ReadableProperty[B]] => Any): Registration = {
     structureListeners += structureListener
     new SetRegistration(structureListeners, structureListener)
   }
@@ -103,7 +105,7 @@ class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], tr
   override def elemProperties: Seq[Property[B]] =
     children
 
-  override def listenStructure(structureListener: (Patch[Property[B]]) => Any): Registration = {
+  override def listenStructure(structureListener: Patch[Property[B]] => Any): Registration = {
     structureListeners += structureListener
     new SetRegistration(structureListeners, structureListener)
   }

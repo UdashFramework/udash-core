@@ -25,11 +25,13 @@ class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_],
 
   override def set(t: Seq[A], force: Boolean = false): Unit =
     if (force || t != get) {
-      replace(0, properties.length, t: _*)
+      replace(0, properties.length, Option(t).getOrElse(Seq.empty): _*)
     }
 
   override def setInitValue(t: Seq[A]): Unit = {
-    val newProperties = t.map(value => implicitly[PropertyCreator[A]].newProperty(value, this))
+    val newProperties = Option(t)
+      .getOrElse(Seq.empty)
+      .map(value => implicitly[PropertyCreator[A]].newProperty(value, this))
     properties.insertAll(0, newProperties)
   }
 

@@ -6,13 +6,16 @@ import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, Readabl
 import scala.annotation.implicitNotFound
 
 trait PropertyCreator[T] {
-  def newProperty(prt: ReadableProperty[_]): CastableProperty[T]
+  def newProperty(prt: ReadableProperty[_])(implicit blank: Blank[T]): CastableProperty[T] =
+    newProperty(blank.value, prt)
 
   def newProperty(value: T, prt: ReadableProperty[_]): CastableProperty[T] = {
-    val prop = newProperty(prt)
+    val prop = create(prt)
     prop.setInitValue(value)
     prop
   }
+
+  protected def create(prt: ReadableProperty[_]): CastableProperty[T]
 }
 
 object PropertyCreator extends PropertyCreatorImplicits {
@@ -26,12 +29,12 @@ object PropertyCreator extends PropertyCreatorImplicits {
 }
 
 class SinglePropertyCreator[T] extends PropertyCreator[T] {
-  def newProperty(prt: ReadableProperty[_]): CastableProperty[T] =
+  protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
 class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
-  def newProperty(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
+  protected def create(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
     new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
 }
 

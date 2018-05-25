@@ -81,12 +81,11 @@ trait ReadableProperty[A] {
     property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
   )(combiner: (A, B) => O): ReadableProperty[O] = {
     val pc = implicitly[PropertyCreator[O]]
-    val output = pc.newProperty(combinedParent)
+    val output = pc.newProperty(combiner(get, property.get), combinedParent)
 
     def update(x: A, y: B): Unit =
       output.set(combiner(x, y))
 
-    output.setInitValue(combiner(get, property.get))
     listen(x => update(x, property.get))
     property.listen(y => update(get, y))
     output
