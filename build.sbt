@@ -31,6 +31,7 @@ inThisBuild(Seq(
       "-Ycache-macro-class-loader:last-modified"
     ) else Seq.empty
   },
+  resolvers += Resolver.defaultLocal
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null

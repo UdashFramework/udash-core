@@ -3,6 +3,7 @@ package io.udash.rpc
 import com.avsystem.commons.serialization.HasGenCodec
 import com.github.ghik.silencer.silent
 import io.udash.rpc.utils.Logged
+import io.udash.rpc.{DefaultClientUdashRPCFramework => CF, DefaultServerUdashRPCFramework => SF}
 
 import scala.concurrent.Future
 
@@ -30,22 +31,27 @@ trait RPCMethods {
 }
 
 /** Inner Server side RPC interface */
-@RPC
 trait InnerRPC {
   def proc(): Unit
 
   @Logged
   def func(arg: Int): Future[String]
 }
+object InnerRPC extends SF.RPCCompanion[InnerRPC] {
+  implicit val serverUpickleAsRealRaw: ServerUPickleUdashRPCFramework.AsRealRawRPC[InnerRPC] =
+    ServerUPickleUdashRPCFramework.materializeAsRealRaw
+}
 
 /** Inner Client RPC interface */
-@RPC
 trait InnerClientRPC {
   def proc(): Unit
 }
+object InnerClientRPC extends CF.RPCCompanion[InnerClientRPC] {
+  implicit val clientUpickleAsRealRaw: ClientUPickleUdashRPCFramework.AsRealRawRPC[InnerClientRPC] =
+    ClientUPickleUdashRPCFramework.materializeAsRealRaw
+}
 
 /** Main Server side RPC interface */
-@RPC
 trait TestRPC extends RPCMethods {
   def doStuff(yes: Boolean): Future[String]
 
@@ -65,29 +71,28 @@ trait TestRPC extends RPCMethods {
 }
 
 /** Main Client RPC interface */
-@RPC
 trait TestClientRPC extends RPCMethods {
   def innerRpc(name: String): InnerClientRPC
 }
 
 /** Basic RPC methods implementation with callbacks support */
 trait RPCMethodsImpl extends RPCMethods {
-  def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any
+  def onInvocationInternal: (String, List[Any], Option[Any]) => Any
 
-  protected def onProcedure(methodName: String, args: List[List[Any]]): Unit =
+  protected def onProcedure(methodName: String, args: List[Any]): Unit =
     onInvocationInternal(methodName, args, None)
 
-  protected def onCall[T](methodName: String, args: List[List[Any]], result: T): Future[T] = {
+  protected def onCall[T](methodName: String, args: List[Any], result: T): Future[T] = {
     onInvocationInternal(methodName, args, Some(result))
     Future.successful(result)
   }
 
-  protected def onFailingCall[T](methodName: String, args: List[List[Any]], result: Throwable): Future[T] = {
+  protected def onFailingCall[T](methodName: String, args: List[Any], result: Throwable): Future[T] = {
     onInvocationInternal(methodName, args, Some(result))
     Future.failed(result)
   }
 
-  protected def onGet[T](methodName: String, args: List[List[Any]], result: T): T = {
+  protected def onGet[T](methodName: String, args: List[Any], result: T): T = {
     onInvocationInternal(methodName, args, None)
     result
   }
@@ -118,9 +123,13 @@ trait RPCMethodsImpl extends RPCMethods {
     onProcedure("srslyDude", List(Nil))
 }
 
-object TestRPC {
+@silent
+object TestRPC extends SF.RPCCompanion[TestRPC] {
+  implicit val serverUpickleAsRealRaw: ServerUPickleUdashRPCFramework.AsRealRawRPC[TestRPC] =
+    ServerUPickleUdashRPCFramework.materializeAsRealRaw
+
   /** Returns implementation of server side RPC interface */
-  def rpcImpl(onInvocation: (String, List[List[Any]], Option[Any]) => Any) = new TestRPC with RPCMethodsImpl {
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestRPC with RPCMethodsImpl {
     override def doStuff(yes: Boolean): Future[String] =
       onCall("doStuff", List(List(yes)), "doStuffResult")
 
@@ -136,7 +145,7 @@ object TestRPC {
     def doStuffUnit(): Future[Unit] =
       onCall("doStuffUnit", List(Nil), ())
 
-    override def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any = onInvocation
+    override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
 
     override def innerRpc(name: String): InnerRPC = {
       onInvocationInternal("innerRpc", List(List(name)), None)
@@ -161,10 +170,14 @@ object TestRPC {
   }
 }
 
-object TestClientRPC {
+@silent
+object TestClientRPC extends CF.RPCCompanion[TestClientRPC] {
+  implicit val clientUpickleAsRealRaw: ClientUPickleUdashRPCFramework.AsRealRawRPC[TestClientRPC] =
+    ClientUPickleUdashRPCFramework.materializeAsRealRaw
+
   /** Returns implementation of client side RPC interface */
-  def rpcImpl(onInvocation: (String, List[List[Any]], Option[Any]) => Any) = new TestClientRPC with RPCMethodsImpl {
-    override def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any = onInvocation
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestClientRPC with RPCMethodsImpl {
+    override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
 
     override def innerRpc(name: String): InnerClientRPC = {
       onInvocationInternal("innerRpc", List(List(name)), None)

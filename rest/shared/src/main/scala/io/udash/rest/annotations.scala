@@ -2,8 +2,10 @@ package io.udash.rest
 
 import com.avsystem.commons.rpc.MetadataAnnotation
 
+import scala.annotation.StaticAnnotation
+
 /** Marker trait for REST interfaces. */
-class REST extends io.udash.rpc.RPC
+class REST extends StaticAnnotation
 
 /** Annotated method name will be skipped in the REST path.
   * This annotation cannot be used in interface which you are going to expose.

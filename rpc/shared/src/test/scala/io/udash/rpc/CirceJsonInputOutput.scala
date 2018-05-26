@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.OneWayRPCFramework
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 import io.circe.{Json, JsonObject, ParsingFailure}
@@ -7,7 +8,7 @@ import io.udash.rpc.serialization.JsonStr
 
 import scala.collection.mutable.ArrayBuffer
 
-object CirceUdashRpcFramework extends UdashRPCFramework {
+object CirceUdashRpcFramework extends UdashRPCFramework with OneWayRPCFramework {
 
   import io.circe.parser._
 

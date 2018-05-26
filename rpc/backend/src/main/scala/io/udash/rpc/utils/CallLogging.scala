@@ -8,7 +8,9 @@ import scala.concurrent.Future
   * ExposesServerRPC mixin simplifying RPC calls logging.
   */
 trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
+
   import localFramework.RPCMetadata
+
   protected val metadata: RPCMetadata[ServerRPCType]
 
   def log(rpcName: String, methodName: String, args: Seq[String]): Unit
@@ -16,16 +18,16 @@ trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
   override def handleRpcCall(call: localFramework.RPCCall): Future[localFramework.RawValue] = {
     val classMetadata = call
       .gettersChain.reverse
-      .foldLeft[RPCMetadata[_]](metadata)((metadata, invocation) => metadata.getterResults(invocation.rpcName))
+      .foldLeft[RPCMetadata[_]](metadata)((metadata, invocation) =>
+      metadata.getterSignatures(invocation.rpcName).resultMetadata.value)
 
     classMetadata
-      .signatures
+      .functionSignatures
       .get(call.invocation.rpcName)
-      .filter(_.annotations.exists(_.isInstanceOf[Logged]))
+      .filter(_.annotations.collectFirst({ case a: Logged => a }).nonEmpty)
       .foreach(methodMetadata =>
-        log(classMetadata.name, methodMetadata.methodName, call.invocation.argLists.flatten.map(_.json))
+        log(classMetadata.name, methodMetadata.name, call.invocation.args.map(_.json))
       )
     super.handleRpcCall(call)
   }
-
 }

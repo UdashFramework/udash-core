@@ -1,6 +1,6 @@
 package io.udash.auth
 
-import io.udash.Application
+import io.udash.{Application, RoutingRegistry}
 import io.udash.core._
 import io.udash.testing.AsyncUdashFrontendTest
 

@@ -35,7 +35,7 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
   /** Transform `RawValue` into String used as URL part. */
   def rawToURLPart(raw: RawValue): String
 
-  private def callRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Future[RawValue] = {
+  private def callRemote(getterChain: List[RawInvocation], invocation: RawInvocation, function: Boolean): Future[RawValue] = {
     val urlBuilder = Seq.newBuilder[String]
     val queryArgsBuilder = Map.newBuilder[String, String]
     val headersArgsBuilder = Map.newBuilder[String, String]
@@ -50,41 +50,39 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
         case a: RESTName => a.restName
       }
 
-    def findRestParamName(data: framework.ParamMetadata): String =
+    def findRestParamName(data: framework.ParamMetadata[_]): String =
       data.annotations.collectFirst {
         case rpn: RESTParamName => rpn.restName
       }.getOrElse(data.name)
 
-    def parseInvocation(inv: framework.RawInvocation, metadata: RPCMetadata[_]): Unit = {
+    def parseInvocation(inv: framework.RawInvocation, signatures: Map[String, Signature]): Unit = {
       val rpcMethodName: String = inv.rpcName
-      val methodMetadata = metadata.signatures(rpcMethodName)
+      val methodMetadata = signatures(rpcMethodName)
 
       if (!shouldSkipRestName(methodMetadata.annotations))
         urlBuilder += URLEncoder.encode(findRestName(methodMetadata.annotations).getOrElse(rpcMethodName))
-      methodMetadata.paramMetadata.zip(inv.argLists).foreach { case (params, values) =>
-        params.zip(values).foreach { case (param, value) =>
-          val paramName: String = findRestParamName(param)
-          val argTypeAnnotations = param.annotations.collectFirst { case x: ArgumentType => x }
-          argTypeAnnotations match {
-            case Some(_: Header) =>
-              headersArgsBuilder += (paramName -> rawToHeaderArgument(value))
-            case Some(_: URLPart) =>
-              urlBuilder += rawToURLPart(value)
-            case Some(_: Body) =>
-              body = value.json
-            case Some(_: BodyValue) =>
-              bodyArgsBuilder += (paramName -> value)
-            case Some(_: Query) | None => // Query is a default argument type
-              queryArgsBuilder += (paramName -> rawToQueryArgument(value))
-          }
+      methodMetadata.paramMetadata.zip(inv.args).foreach { case (param, value) =>
+        val paramName: String = findRestParamName(param)
+        val argTypeAnnotations = param.annotations.collectFirst { case x: ArgumentType => x }
+        argTypeAnnotations match {
+          case Some(_: Header) =>
+            headersArgsBuilder += (paramName -> rawToHeaderArgument(value))
+          case Some(_: URLPart) =>
+            urlBuilder += rawToURLPart(value)
+          case Some(_: Body) =>
+            body = value.json
+          case Some(_: BodyValue) =>
+            bodyArgsBuilder += (paramName -> value)
+          case Some(_: Query) | None => // Query is a default argument type
+            queryArgsBuilder += (paramName -> rawToQueryArgument(value))
         }
       }
     }
 
-    def findRestMethod(inv: framework.RawInvocation, metadata: RPCMetadata[_], hasBody: Boolean): RESTConnector.HTTPMethod = {
+    def findRestMethod(inv: framework.RawInvocation, signatures: Map[String, Signature], hasBody: Boolean): RESTConnector.HTTPMethod = {
       val rpcMethodName: String = inv.rpcName
-      val methodMetadata = metadata.signatures(rpcMethodName)
-      val methodAnnotations = methodMetadata.annotations.filter(_.isInstanceOf[RESTMethod])
+      val methodMetadata = signatures(rpcMethodName)
+      val methodAnnotations = methodMetadata.annotations.collect({ case rm: RESTMethod => rm })
       if (methodAnnotations.lengthCompare(1) > 0) throw new RuntimeException(s"Too many method type annotations! ($methodAnnotations)")
       methodAnnotations.headOption match {
         case Some(_: GET) => RESTConnector.GET
@@ -99,11 +97,12 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
     }
 
     var metadata: RPCMetadata[_] = rpcMetadata
+    val signatures = if (function) metadata.functionSignatures else metadata.procedureSignatures
     getterChain.reverse.foreach { inv =>
-      parseInvocation(inv, metadata)
-      metadata = metadata.getterResults(inv.rpcName)
+      parseInvocation(inv, metadata.getterSignatures)
+      metadata = metadata.getterSignatures(inv.rpcName).resultMetadata.value
     }
-    parseInvocation(invocation, metadata)
+    parseInvocation(invocation, signatures)
 
     val bodyArgs = bodyArgsBuilder.result()
     if (body != null && bodyArgs.nonEmpty) throw new IllegalStateException("@Body and @BodyValue annotations used at the same time!")
@@ -114,7 +113,7 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
     import com.avsystem.commons._
     connector.send(
       url = s"/${urlBuilder.result().mkString("/")}",
-      method = findRestMethod(invocation, metadata, body != null),
+      method = findRestMethod(invocation, signatures, body != null),
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body
@@ -122,15 +121,13 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def call(rpcName: String, argLists: List[List[RawValue]]): Future[RawValue] = {
-      callRemote(getterChain, RawInvocation(rpcName, argLists))
-    }
+    def call(rpcName: String)(args: List[RawValue]): Future[RawValue] =
+      callRemote(getterChain, RawInvocation(rpcName, args), function = true)
 
-    def fire(rpcName: String, argLists: List[List[RawValue]]): Unit = {
-      callRemote(getterChain, RawInvocation(rpcName, argLists))
-    }
+    def fire(rpcName: String)(args: List[RawValue]): Unit =
+      callRemote(getterChain, RawInvocation(rpcName, args), function = false)
 
-    def get(rpcName: String, argLists: List[List[RawValue]]): RawRPC =
-      new RawRemoteRPC(RawInvocation(rpcName, argLists) :: getterChain)
+    def get(rpcName: String)(args: List[RawValue]): RawRPC =
+      new RawRemoteRPC(RawInvocation(rpcName, args) :: getterChain)
   }
 }

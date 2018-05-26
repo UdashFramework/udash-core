@@ -13,7 +13,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.27.3"
+  val avsCommonsVersion = "1.28.0-SNAPSHOT"
 
   val atmosphereJSVersion = "2.3.4"
   val atmosphereVersion = "2.4.15"

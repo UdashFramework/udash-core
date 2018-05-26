@@ -1,6 +1,7 @@
 package io.udash.rest
 
 import com.avsystem.commons.serialization.HasGenCodec
+import io.udash.rest.DefaultRESTFramework._
 import io.udash.rpc.RPCName
 
 import scala.concurrent.Future
@@ -15,21 +16,37 @@ trait TestRESTInterface {
   @RESTName("service_three") def serviceThree(@URLPart arg: String): TestRESTInternalInterface
   @SkipRESTName def serviceSkip(): TestRESTInternalInterface
 }
+object TestRESTInterface {
+  implicit val restAsReal: AsRealRPC[TestRESTInterface] = materializeAsReal
+  implicit val restMetadata: RPCMetadata[TestRESTInterface] = materializeMetadata
+}
 
 @REST
 trait TestRESTInternalInterface {
-  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-  @GET def load(@URLPart id: Int, @Query trash: String, /*@Query */@RESTParamName("trash_two") trash2: String): Future[TestRESTRecord] // trash2 uses default @Query
+  @GET
+  @RESTName("load")
+  @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+  @GET def load(@URLPart id: Int, @Query trash: String, /*@Query */ @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord] // trash2 uses default @Query
   @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+  @PATCH
+  @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
+  @DELETE
+  @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
   def fireAndForget(@Body id: Int): Unit
   def deeper(): TestRESTDeepInterface
+}
+object TestRESTInternalInterface {
+  implicit val restAsReal: AsRealRPC[TestRESTInternalInterface] = materializeAsReal
+  implicit val restMetadata: RPCMetadata[TestRESTInternalInterface] = materializeMetadata
 }
 
 @REST
 trait TestRESTDeepInterface {
   @GET def load(@URLPart id: Int): Future[TestRESTRecord]
   @GET def fire(@URLPart id: Int): Unit
+}
+object TestRESTDeepInterface {
+  implicit val restAsReal: AsRealRPC[TestRESTDeepInterface] = materializeAsReal
+  implicit val restMetadata: RPCMetadata[TestRESTDeepInterface] = materializeMetadata
 }

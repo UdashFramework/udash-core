@@ -1,7 +1,8 @@
 package io.udash.rest.server
 
-import io.udash.rpc.RPCName
+import io.udash.rest.DefaultRESTFramework._
 import io.udash.rest._
+import io.udash.rpc.RPCName
 
 import scala.concurrent.Future
 
@@ -13,6 +14,7 @@ trait TestServerRESTInterface {
 
   def auth(@Header @RESTParamName("X-Password") pass: String): TestServerRESTInternalInterface
 }
+object TestServerRESTInterface extends RPCCompanion[TestServerRESTInterface]
 
 @REST
 trait TestServerRESTInternalInterface {
@@ -25,9 +27,11 @@ trait TestServerRESTInternalInterface {
   def fireAndForget(@Body id: Int): Unit
   def deeper(): TestServerRESTDeepInterface
 }
+object TestServerRESTInternalInterface extends RPCCompanion[TestServerRESTInternalInterface]
 
 @REST
 trait TestServerRESTDeepInterface {
   @GET def load(@URLPart id: Int): Future[TestRESTRecord]
   @GET def fire(@URLPart id: Int): Unit
 }
+object TestServerRESTDeepInterface extends RPCCompanion[TestServerRESTDeepInterface]

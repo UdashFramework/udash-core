@@ -11,8 +11,8 @@ import scala.scalajs.js
 import scala.scalajs.js.Dictionary
 
 /**
- * Base trait for client-side components which use some RPC exposed by server-side.
- */
+  * Base trait for client-side components which use some RPC exposed by server-side.
+  */
 private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCType] {
   override val localFramework: ClientUdashRPCFramework
   override val remoteFramework: ServerUdashRPCFramework
@@ -69,7 +69,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
             promise.failure(exception)
         }
       }
-    }
+  }
 
   override protected[rpc] def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
     sendRPCRequest(RPCFire(invocation, getterChain))
@@ -81,13 +81,13 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     connector.sendRPCRequest(request)
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def fire(rpcName: String, argLists: List[List[RawValue]]): Unit =
-      fireRemote(getterChain, RawInvocation(rpcName, argLists))
+    def fire(rpcName: String)(args: List[RawValue]): Unit =
+      fireRemote(getterChain, RawInvocation(rpcName, args))
 
-    def call(rpcName: String, argLists: List[List[RawValue]]): Future[RawValue] = {
+    def call(rpcName: String)(args: List[RawValue]): Future[RawValue] = {
       val callId = newCallId()
       Promise[RawValue]().setup { promise =>
-        val request = callRemote(callId, getterChain, RawInvocation(rpcName, argLists))
+        val request = callRemote(callId, getterChain, RawInvocation(rpcName, args))
         pendingCalls.put(callId, (request, promise))
         dom.window.setTimeout(
           () => handleResponse(RPCResponseException("Request timeout", UsesServerRPC.CallTimeout(callTimeout), callId)),
@@ -96,8 +96,8 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
       }.future
     }
 
-    def get(rpcName: String, argLists: List[List[RawValue]]): RawRPC =
-      new RawRemoteRPC(RawInvocation(rpcName, argLists) :: getterChain)
+    def get(rpcName: String)(args: List[RawValue]): RawRPC =
+      new RawRemoteRPC(RawInvocation(rpcName, args) :: getterChain)
   }
 }
 

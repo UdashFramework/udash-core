@@ -16,8 +16,8 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
       calls.result() should contain("handle")
 
       rpc.handleRpcFire(RPCFire(
-        RawInvocation("proc", List(List())),
-        List(RawInvocation("innerRpc", List(List(write("arg0")))))
+        RawInvocation("proc", Nil),
+        List(RawInvocation("innerRpc", List(write("arg0"))))
       ))
       calls.result() should contain("innerRpc.proc")
     }
@@ -28,21 +28,21 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
   }
 
   def createDefaultExposesClientRPC(calls: mutable.Builder[String, Seq[String]]): DefaultExposesClientRPC[TestClientRPC] = {
-    val impl = TestClientRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+    val impl = TestClientRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
       calls += method
     })
     new DefaultExposesClientRPC[TestClientRPC](impl)
   }
 
   final class UPickleExposesClientRPC[ClientRPCType]
-    (local: ClientRPCType)(implicit protected val localRpcAsRaw: ClientUPickleUdashRPCFramework.AsRawRPC[ClientRPCType])
+  (local: ClientRPCType)(implicit protected val localRpcAsRaw: ClientUPickleUdashRPCFramework.AsRawRPC[ClientRPCType])
     extends ExposesClientRPC(local) {
 
     override val localFramework = ClientUPickleUdashRPCFramework
   }
 
   def createCustomExposesClientRPC(calls: mutable.Builder[String, Seq[String]]): UPickleExposesClientRPC[TestClientRPC] = {
-    val impl = TestClientRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+    val impl = TestClientRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
       calls += method
     })
     new UPickleExposesClientRPC[TestClientRPC](impl)
