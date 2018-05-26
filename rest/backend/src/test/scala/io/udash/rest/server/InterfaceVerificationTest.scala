@@ -10,14 +10,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |import scala.concurrent.Future
          |
          |@REST
-         |trait TestServerRESTInterface {
+         |trait TestServerRESTInterface extends HasFakeInstances {
          |  def serviceOne(): TestServerRESTInternalInterface
          |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
          |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
          |}
          |
          |@REST
-         |trait TestServerRESTInternalInterface {
+         |trait TestServerRESTInternalInterface extends HasFakeInstances {
          |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -35,14 +35,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |import scala.concurrent.Future
          |
          |@REST
-         |trait TestServerRESTInterface {
+         |trait TestServerRESTInterface extends HasFakeInstances {
          |  def serviceOne(): TestServerRESTInternalInterface
          |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
          |  @RESTName("service_three") def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
          |}
          |
          |@REST
-         |trait TestServerRESTInternalInterface {
+         |trait TestServerRESTInternalInterface extends HasFakeInstances {
          |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -60,14 +60,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |import scala.concurrent.Future
          |
          |@REST
-         |trait TestServerRESTInterface {
+         |trait TestServerRESTInterface extends HasFakeInstances {
          |  def serviceOne(): TestServerRESTInternalInterface
          |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
          |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
          |}
          |
          |@REST
-         |trait TestServerRESTInternalInterface {
+         |trait TestServerRESTInternalInterface extends HasFakeInstances {
          |  @GET @RESTName("test") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -87,14 +87,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |import scala.concurrent.Future
         |
         |@REST
-        |trait TestServerRESTInterface {
+        |trait TestServerRESTInterface extends HasFakeInstances {
         |  def serviceOne(): TestServerRESTInternalInterface
         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
         |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
         |}
         |
         |@REST
-        |trait TestServerRESTInternalInterface {
+        |trait TestServerRESTInternalInterface extends HasFakeInstances {
         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -112,14 +112,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |import scala.concurrent.Future
         |
         |@REST
-        |trait TestServerRESTInterface {
+        |trait TestServerRESTInterface extends HasFakeInstances {
         |  def serviceOne(): TestServerRESTInternalInterface
         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
         |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
         |}
         |
         |@REST
-        |trait TestServerRESTInternalInterface {
+        |trait TestServerRESTInternalInterface extends HasFakeInstances {
         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -137,14 +137,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |import scala.concurrent.Future
         |
         |@REST
-        |trait TestServerRESTInterface {
+        |trait TestServerRESTInterface extends HasFakeInstances {
         |  def serviceOne(): TestServerRESTInternalInterface
         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
         |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
         |}
         |
         |@REST
-        |trait TestServerRESTInternalInterface {
+        |trait TestServerRESTInternalInterface extends HasFakeInstances {
         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
@@ -162,14 +162,14 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |import scala.concurrent.Future
         |
         |@REST
-        |trait TestServerRESTInterface {
+        |trait TestServerRESTInterface extends HasFakeInstances {
         |  def serviceOne(): TestServerRESTInternalInterface
         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): TestServerRESTInternalInterface
         |  def serviceThree(@URLPart arg: String): TestServerRESTInternalInterface
         |}
         |
         |@REST
-        |trait TestServerRESTInternalInterface {
+        |trait TestServerRESTInternalInterface extends HasFakeInstances {
         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]

@@ -97,11 +97,11 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
     }
 
     var metadata: RPCMetadata[_] = rpcMetadata
-    val signatures = if (function) metadata.functionSignatures else metadata.procedureSignatures
     getterChain.reverse.foreach { inv =>
       parseInvocation(inv, metadata.getterSignatures)
       metadata = metadata.getterSignatures(inv.rpcName).resultMetadata.value
     }
+    val signatures = if (function) metadata.functionSignatures else metadata.procedureSignatures
     parseInvocation(invocation, signatures)
 
     val bodyArgs = bodyArgsBuilder.result()
