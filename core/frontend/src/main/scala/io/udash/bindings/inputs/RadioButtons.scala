@@ -2,10 +2,10 @@ package io.udash.bindings.inputs
 
 import java.{util => ju}
 
-import io.udash.properties.single.Property
-import org.scalajs.dom.{Element, Event}
-import org.scalajs.dom.html.{Input => JSInput}
-
+import io.udash._
+import io.udash.properties.PropertyCreator
+import org.scalajs.dom.{Element, Event, Node}
+import org.scalajs.dom.html.{Div, Input => JSInput}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -13,6 +13,51 @@ import scalatags.JsDom.all._
   * Radio buttons group for finite options with one element selection.
   */
 object RadioButtons {
+  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] = _.map(_._1)
+  def spanWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
+    _.map { case (in, v) => span(in, label(labelFactory(v))).render }
+  def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
+    _.map { case (in, v) => div(in, label(labelFactory(v))).render }
+
+  /**
+    * @param selectedItem Property which gonna be bound to radio buttons group.
+    * @param options Seq of available options, one radio button will be created for each option.
+    * @param decorator Function creating HTML element from buttons Seq.
+    *                  (Check: `RadioButtons.inputsOnlyDecorator`, `RadioButtons.spanWithLabelDecorator` and `RadioButtons.divWithLabelDecorator`)
+    * @param xs Modifiers to apply on each generated checkbox.
+    * @return HTML element created by decorator.
+    */
+  def apply[T : PropertyCreator](
+    selectedItem: Property[T], options: ReadableProperty[Seq[T]]
+  )(decorator: Seq[(JSInput, T)] => Seq[Node], xs: Modifier*): InputBinding[Div] = {
+    new InputBinding[Div] {
+      private val buttons = div(
+        nestedInterceptor(
+          produceWithNested(options) { case (opts, nested) =>
+            if (opts.nonEmpty && !opts.contains(selectedItem.get)) {
+              selectedItem.set(opts.head)
+            }
+
+            decorator(
+              opts.zipWithIndex.map { case (opt, idx) =>
+                val in = input(
+                  tpe := "radio", value := idx.toString,
+                  nested((checked := "checked").attrIf(selectedItem.transform(_ == opt)))
+                )(xs:_*).render
+
+                in.onchange = (_: Event) => selectedItem.set(opt)
+
+                (in, opt)
+              }
+            )
+          }
+        )
+      ).render
+
+      override def render: Div = buttons
+    }
+  }
+
   /**
     * @param property Property which gonna be bound to radio buttons group.
     * @param options Seq of available options, one radio button will be created for each option.
@@ -20,6 +65,7 @@ object RadioButtons {
     * @param xs Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
+  @deprecated("Use the constructor with dynamic options set and generic element type.", "0.7.0")
   def apply(
     property: Property[String], options: Seq[String],
     decorator: Seq[(JSInput, String)] => JsDom.TypedTag[Element], xs: Modifier*
