@@ -1,23 +1,42 @@
 package io.udash.bindings.inputs
 
-import io.udash.properties.single.Property
+import io.udash._
 import org.scalajs.dom.{Element, Event}
 import org.scalajs.dom.html.{Input => JSInput}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
 /**
-  * Plain checkbox with bidirectionally binding with Property.
+  * Plain checkbox bidirectionally bound to Property.
   *
-  * For SeqProperty look at [[io.udash.bindings.CheckButtons]]
+  * For SeqProperty take a look at [[io.udash.bindings.CheckButtons]]
   */
 object Checkbox {
+  /**
+    * @param selected Property to bind.
+    * @param xs Additional Modifiers, don't use modifiers on type, checked and onchange attributes.
+    * @return HTML input (checkbox) tag with bound Property and applied modifiers.
+    */
+  def apply(selected: Property[Boolean])(xs: Modifier*): InputBinding[JSInput] = {
+    new InputBinding[JSInput] {
+      private val in = input(
+        tpe := "checkbox", xs,
+        nestedInterceptor((checked := "checked").attrIf(selected))
+      ).render
+
+      in.onchange = (_: Event) => selected.set(in.checked)
+
+      override def render: JSInput = in
+    }
+  }
+
   /**
     * @param property Property to bind.
     * @param xs Additional Modifiers, don't use modifiers on type, checked and onchange attributes.
     * @return HTML input (checkbox) tag with bound Property and applied modifiers.
     */
-  def apply(property: Property[Boolean], xs: Modifier*): JsDom.TypedTag[JSInput] = {
+  @deprecated("Use the constructor with dynamic options set and generic element type.", "0.7.0")
+  def deprecated(property: Property[Boolean], xs: Modifier*): JsDom.TypedTag[JSInput] = {
     val bind = new JsDom.Modifier {
       override def applyTo(t: Element): Unit = {
         val element = t.asInstanceOf[JSInput]
