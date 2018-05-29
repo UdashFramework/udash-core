@@ -21,7 +21,7 @@ object FileInput {
   )(inputName: String, xs: Modifier*): InputBinding[JSInput] = {
     new InputBinding[JSInput] {
       private val in = input(
-        `type` := "file", name := inputName, xs,
+        xs, `type` := "file", name := inputName,
         nestedInterceptor((multiple := "multiple").attrIf(acceptMultipleFiles))
       ).render
 

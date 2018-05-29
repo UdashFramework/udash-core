@@ -35,9 +35,9 @@ object CheckButtons {
             decorator(
               opts.zipWithIndex.map { case (opt, idx) =>
                 val in = input(
-                  tpe := "checkbox", value := idx.toString,
+                  xs, tpe := "checkbox", value := idx.toString,
                   nested((checked := "checked").attrIf(selectedItems.transform(_.contains(opt))))
-                )(xs:_*).render
+                ).render
 
                 in.onchange = (_: Event) => {
                   if (in.checked && !selectedItems.get.contains(opt)) selectedItems.append(opt)

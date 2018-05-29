@@ -41,9 +41,9 @@ object RadioButtons {
             decorator(
               opts.zipWithIndex.map { case (opt, idx) =>
                 val in = input(
-                  tpe := "radio", value := idx.toString,
+                  xs, tpe := "radio", value := idx.toString,
                   nested((checked := "checked").attrIf(selectedItem.transform(_ == opt)))
-                )(xs:_*).render
+                ).render
 
                 in.onchange = (_: Event) => selectedItem.set(opt)
 

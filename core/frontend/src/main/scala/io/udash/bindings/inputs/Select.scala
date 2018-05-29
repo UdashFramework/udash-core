@@ -18,34 +18,34 @@ object Select {
   /**
     * Single select for ValueProperty.
     *
-    * @param selectedItems Property to bind.
+    * @param selectedItem Property to bind.
     * @param options SeqProperty of available options.
     * @param label Provides element's label.
     * @param xs Additional Modifiers for the select tag, don't use modifiers on value, onchange and selected attributes.
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
   def apply[T : PropertyCreator](
-    selectedItems: Property[T], options: ReadableProperty[Seq[T]]
+    selectedItem: Property[T], options: ReadableProperty[Seq[T]]
   )(label: T => Modifier, xs: Modifier*): InputBinding[Select] = {
     new InputBinding[Select] {
       private val selector = select(xs)(
         nestedInterceptor(
           produceWithNested(options) { case (opts, nested) =>
-            if (opts.nonEmpty && !opts.contains(selectedItems.get)) {
-              selectedItems.set(opts.head)
+            if (opts.nonEmpty && !opts.contains(selectedItem.get)) {
+              selectedItem.set(opts.head)
             }
 
             opts.zipWithIndex.map { case (opt, idx) =>
               option(
                 value := idx.toString,
-                nested((selected := "selected").attrIf(selectedItems.transform(_ == opt)))
+                nested((selected := "selected").attrIf(selectedItem.transform(_ == opt)))
               )(label(opt)).render
             }
           }
         )
       ).render
 
-      selector.onchange = (_: Event) => selectedItems.set(options.get.apply(selector.value.toInt))
+      selector.onchange = (_: Event) => selectedItem.set(options.get.apply(selector.value.toInt))
 
       override def render: Select = selector
     }
@@ -64,7 +64,7 @@ object Select {
     selectedItems: SeqProperty[T, ElemType], options: ReadableProperty[Seq[T]]
   )(label: T => Modifier, xs: Modifier*): InputBinding[Select] = {
     new InputBinding[Select] {
-      private val selector = select(multiple := true, xs)(
+      private val selector = select(xs, multiple := true)(
         nestedInterceptor(
           produceWithNested(options) { case (opts, nested) =>
             selectedItems.set(selectedItems.get.filter(opts.contains))

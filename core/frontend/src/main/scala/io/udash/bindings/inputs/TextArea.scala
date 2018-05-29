@@ -11,15 +11,15 @@ import scala.concurrent.duration.{Duration, DurationInt}
 /** Simple HTML text area with bound Property.*/
 object TextArea {
   /**
-    * @param property Property to bind.
+    * @param value Property to bind.
     * @param debounce Property update timeout after input changes.
     * @param xs Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
     * @return HTML textarea with bound Property, applied modifiers and nested options.
     */
-  def apply(property: Property[String], debounce: Duration = 20 millis)(xs: Modifier*): InputBinding[TextArea] =
+  def apply(value: Property[String], debounce: Duration = 20 millis)(xs: Modifier*): InputBinding[TextArea] =
     new InputBinding[TextArea] {
       private val element = textarea(
-        nestedInterceptor(new TextAreaModifier(property, Some(debounce))), xs
+        xs, nestedInterceptor(new TextAreaModifier(value, Some(debounce)))
       ).render
 
       override def render: TextArea = element
