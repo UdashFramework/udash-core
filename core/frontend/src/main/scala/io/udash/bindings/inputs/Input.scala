@@ -20,7 +20,7 @@ private[bindings] abstract class Input(inputType: String) {
     new InputBinding[JSInput] {
       private val element = input(
         xs, tpe := inputType,
-        nestedInterceptor(new InputModifier(value, Some(debounce))),
+        nestedInterceptor(new InputModifier(value, Some(debounce)))
       ).render
 
       override def render: JSInput = element

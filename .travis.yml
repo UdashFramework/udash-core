@@ -33,7 +33,8 @@ env:
   - TEST_PACKAGE="rpc-shared/test rpc-shared-JS/test rpc-backend/test rpc-frontend/test"
   - TEST_PACKAGE="rest-macros/test rest-shared/test rest-shared-JS/test rest-backend/test"
   - TEST_PACKAGE="i18n-shared/test i18n-shared-JS/test i18n-backend/test i18n-frontend/test"
+  - TEST_PACKAGE="auth-shared/test auth-shared-JS/test auth-frontend/test"
+  - TEST_PACKAGE="css-macros/test css-shared/test css-shared-JS/test css-backend/test css-frontend/test"
   - TEST_PACKAGE=bootstrap/test
   - TEST_PACKAGE=charts/test
-  - TEST_PACKAGE="css-macros/test css-shared/test css-shared-JS/test css-backend/test css-frontend/test"
   - TEST_PACKAGE="benchmarks-frontend/compile"

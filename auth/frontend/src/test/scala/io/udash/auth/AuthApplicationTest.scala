@@ -2,6 +2,7 @@ package io.udash.auth
 
 import io.udash.Application
 import io.udash.core._
+import io.udash.routing.RoutingRegistry
 import io.udash.testing.AsyncUdashFrontendTest
 
 
