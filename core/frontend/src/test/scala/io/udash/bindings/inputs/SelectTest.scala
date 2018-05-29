@@ -5,6 +5,7 @@ import io.udash._
 import io.udash.wrappers.jquery._
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
+import org.scalajs.dom.html.{Option => JSOption, Select => JSSelect}
 
 class SelectTest extends UdashFrontendTest {
   "Select" should {
@@ -114,6 +115,18 @@ class SelectTest extends UdashFrontendTest {
   }
 
   "Select with multiple on" should {
+    def checkSelected(select: JSSelect, selected: Seq[Boolean]): Unit = {
+      selected.zipWithIndex.foreach {
+        case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected should be(value)
+      }
+    }
+
+    def setSelected(select: JSSelect, selected: Seq[Boolean]): Unit = {
+      selected.zipWithIndex.foreach {
+        case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected = value
+      }
+    }
+
     "synchronise state with property changes (deprecated)" in {
       val options = Seq("A", "B", "C", "D", "E")
       val p = SeqProperty[String]("B")
@@ -121,34 +134,18 @@ class SelectTest extends UdashFrontendTest {
       val select = (Select(p, options, Select.defaultLabel)(): @silent).render
 
       select.childElementCount should be(5)
-      select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
+      checkSelected(select, List(false, true, false, false, false))
 
-      for (o <- options) {
-        p.set(Seq(o))
-        select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 0)
-        select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 1)
-        select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 2)
-        select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 3)
-        select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 4)
+      for ((opt, idx) <- options.zipWithIndex) {
+        p.set(Seq(opt))
+        checkSelected(select, List.fill(5)(false).updated(idx, true))
       }
 
       p.set(Seq("A", "B", "C", "D", "E"))
-      select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
+      checkSelected(select, List(true, true, true, true, true))
 
       p.clear()
-      select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
+      checkSelected(select, List(false, false, false, false, false))
     }
 
     "synchronise property with state changes (deprecated)" in {
@@ -159,31 +156,19 @@ class SelectTest extends UdashFrontendTest {
 
       select.childElementCount should be(5)
 
-      for (o <- options) {
-        select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 0
-        select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 1
-        select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 2
-        select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 3
-        select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 4
+      for ((opt, idx) <- options.zipWithIndex) {
+        setSelected(select, List.fill(5)(false).updated(idx, true))
         select.onchange(null)
-        p.get should be(Seq(o))
+        p.get should be(Seq(opt))
       }
 
-      select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = false
+      setSelected(select, List(false, true, false, true, false))
       select.onchange(null)
       p.get.size should be(2)
       p.get should contain("B")
       p.get should contain("D")
 
-      select.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      select.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      select.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      select.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      select.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = true
+      setSelected(select, List(true, false, true, false, true))
       select.onchange(null)
       p.get.size should be(3)
       p.get should contain("A")
@@ -199,34 +184,18 @@ class SelectTest extends UdashFrontendTest {
       val selectElement = select.render
 
       selectElement.childElementCount should be(5)
-      selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
+      checkSelected(selectElement, List(false, true, false, false, false))
 
-      for (o <- options) {
-        p.set(Seq(o))
-        selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 0)
-        selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 1)
-        selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 2)
-        selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 3)
-        selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(options.indexOf(o) == 4)
+      for ((opt, idx) <- options.zipWithIndex) {
+        p.set(Seq(opt))
+        checkSelected(selectElement, List.fill(5)(false).updated(idx, true))
       }
 
       p.set(Seq("A", "B", "C", "D", "E"))
-      selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
-      selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(true)
+      checkSelected(selectElement, List(true, true, true, true, true))
 
       p.clear()
-      selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
-      selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected should be(false)
+      checkSelected(selectElement, List(false, false, false, false, false))
     }
 
     "synchronise property with state changes" in {
@@ -238,31 +207,19 @@ class SelectTest extends UdashFrontendTest {
 
       selectElement.childElementCount should be(5)
 
-      for (o <- options) {
-        selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 0
-        selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 1
-        selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 2
-        selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 3
-        selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = options.indexOf(o) == 4
+      for ((opt, idx) <- options.zipWithIndex) {
+        setSelected(selectElement, List.fill(5)(false).updated(idx, true))
         selectElement.onchange(null)
-        p.get should be(Seq(o))
+        p.get should be(Seq(opt))
       }
 
-      selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = false
+      setSelected(selectElement, List(false, true, false, true, false))
       selectElement.onchange(null)
       p.get.size should be(2)
       p.get should contain("B")
       p.get should contain("D")
 
-      selectElement.childNodes(0).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      selectElement.childNodes(1).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      selectElement.childNodes(2).asInstanceOf[org.scalajs.dom.html.Option].selected = true
-      selectElement.childNodes(3).asInstanceOf[org.scalajs.dom.html.Option].selected = false
-      selectElement.childNodes(4).asInstanceOf[org.scalajs.dom.html.Option].selected = true
+      setSelected(selectElement, List(true, false, true, false, true))
       selectElement.onchange(null)
       p.get.size should be(3)
       p.get should contain("A")
