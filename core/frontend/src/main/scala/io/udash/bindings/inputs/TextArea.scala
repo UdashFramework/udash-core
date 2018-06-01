@@ -13,13 +13,13 @@ object TextArea {
   /**
     * @param value Property to bind.
     * @param debounce Property update timeout after input changes.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
+    * @param textareaModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
     * @return HTML textarea with bound Property, applied modifiers and nested options.
     */
-  def apply(value: Property[String], debounce: Duration = 20 millis)(xs: Modifier*): InputBinding[TextArea] =
+  def apply(value: Property[String], debounce: Duration = 20 millis)(textareaModifiers: Modifier*): InputBinding[TextArea] =
     new InputBinding[TextArea] {
       private val element = textarea(
-        xs, nestedInterceptor(new TextAreaModifier(value, Some(debounce)))
+        textareaModifiers, nestedInterceptor(new TextAreaModifier(value, Some(debounce)))
       ).render
 
       override def render: TextArea = element
@@ -54,16 +54,16 @@ object TextArea {
     override def setElementValue(t: Element, v: String): Unit =
       t.asInstanceOf[TextArea].value = v
 
-    override def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit =
+    override def setElementKeyUp(t: Element, callback: KeyboardEvent => Unit): Unit =
       t.asInstanceOf[TextArea].onkeyup = callback
 
-    override def setElementOnChange(t: Element, callback: Event => Any): Unit =
+    override def setElementOnChange(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[TextArea].onchange = callback
 
-    override def setElementOnInput(t: Element, callback: Event => Any): Unit =
+    override def setElementOnInput(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[TextArea].oninput = callback
 
-    override def setElementOnPaste(t: Element, callback: Event => Any): Unit =
+    override def setElementOnPaste(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[TextArea].onpaste = callback
   }
 }

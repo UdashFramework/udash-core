@@ -14,14 +14,15 @@ object FileInput {
     * @param selectedFiles This property contains information about files selected by user.
     * @param acceptMultipleFiles Accepts more than one file if true.
     * @param inputName Input element name.
+    * @param inputModifiers Additional modifiers to apply on a generated input.
     * @return
     */
   def apply(
     selectedFiles: SeqProperty[File], acceptMultipleFiles: ReadableProperty[Boolean]
-  )(inputName: String, xs: Modifier*): InputBinding[JSInput] = {
+  )(inputName: String, inputModifiers: Modifier*): InputBinding[JSInput] = {
     new InputBinding[JSInput] {
       private val in = input(
-        xs, `type` := "file", name := inputName,
+        inputModifiers, `type` := "file", name := inputName,
         nestedInterceptor((multiple := "multiple").attrIf(acceptMultipleFiles))
       ).render
 

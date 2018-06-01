@@ -10,10 +10,10 @@ import scala.concurrent.duration.Duration
 private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Option[Duration]) extends Binding {
   def elementValue(t: Element): String
   def setElementValue(t: Element, v: String): Unit
-  def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit
-  def setElementOnChange(t: Element, callback: Event => Any): Unit
-  def setElementOnInput(t: Element, callback: Event => Any): Unit
-  def setElementOnPaste(t: Element, callback: Event => Any): Unit
+  def setElementKeyUp(t: Element, callback: KeyboardEvent => Unit): Unit
+  def setElementOnChange(t: Element, callback: Event => Unit): Unit
+  def setElementOnInput(t: Element, callback: Event => Unit): Unit
+  def setElementOnPaste(t: Element, callback: Event => Unit): Unit
 
   override def applyTo(t: Element): Unit = {
     if (property.get != null) setElementValue(t, property.get)

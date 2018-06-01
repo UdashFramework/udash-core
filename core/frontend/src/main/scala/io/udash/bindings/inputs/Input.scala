@@ -13,13 +13,13 @@ private[bindings] abstract class Input(inputType: String) {
   /**
     * @param value Property to bind.
     * @param debounce Property update timeout after input changes.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
+    * @param inputModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
     * @return HTML input with bound Property, applied modifiers and nested options.
     */
-  def apply(value: Property[String], debounce: Duration = 20 millis)(xs: Modifier*): InputBinding[JSInput] =
+  def apply(value: Property[String], debounce: Duration = 20 millis)(inputModifiers: Modifier*): InputBinding[JSInput] =
     new InputBinding[JSInput] {
       private val element = input(
-        xs, tpe := inputType,
+        inputModifiers, tpe := inputType,
         nestedInterceptor(new InputModifier(value, Some(debounce)))
       ).render
 
@@ -55,16 +55,16 @@ private[bindings] abstract class Input(inputType: String) {
     override def setElementValue(t: Element, v: String): Unit =
       t.asInstanceOf[JSInput].value = if (v != null) v else ""
 
-    override def setElementKeyUp(t: Element, callback: KeyboardEvent => Any): Unit =
+    override def setElementKeyUp(t: Element, callback: KeyboardEvent => Unit): Unit =
       t.asInstanceOf[JSInput].onkeyup = callback
 
-    override def setElementOnChange(t: Element, callback: Event => Any): Unit =
+    override def setElementOnChange(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[JSInput].onchange = callback
 
-    override def setElementOnInput(t: Element, callback: Event => Any): Unit =
+    override def setElementOnInput(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[JSInput].oninput = callback
 
-    override def setElementOnPaste(t: Element, callback: Event => Any): Unit =
+    override def setElementOnPaste(t: Element, callback: Event => Unit): Unit =
       t.asInstanceOf[JSInput].onpaste = callback
   }
 }

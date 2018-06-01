@@ -10,22 +10,23 @@ import scalatags.JsDom.all._
 
 /** Checkboxes for finite options with many elements selection. Bound to SeqProperty. */
 object CheckButtons {
-  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] = RadioButtons.inputsOnlyDecorator
+  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] =
+    RadioButtons.inputsOnlyDecorator
   def spanWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.spanWithLabelDecorator(labelFactory)
   def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.divWithLabelDecorator(labelFactory)
 
   /**
-    * @param selectedItems SeqProperty which gonna be bound to checkboxes
+    * @param selectedItems SeqProperty which is going to be bound to checkboxes
     * @param options Seq of available options, one checkbox will be created for each option.
     * @param decorator Function creating HTML element from checkboxes Seq.
-    * @param xs Modifiers to apply on each generated checkbox.
+    * @param inputModifiers Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
   def apply[T : PropertyCreator](
     selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableProperty[Seq[T]]
-  )(decorator: Seq[(JSInput, T)] => Seq[Node], xs: Modifier*): InputBinding[Div] = {
+  )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new InputBinding[Div] {
       private val buttons = div(
         nestedInterceptor(
@@ -35,7 +36,7 @@ object CheckButtons {
             decorator(
               opts.zipWithIndex.map { case (opt, idx) =>
                 val in = input(
-                  xs, tpe := "checkbox", value := idx.toString,
+                  inputModifiers, tpe := "checkbox", value := idx.toString,
                   nested((checked := "checked").attrIf(selectedItems.transform(_.contains(opt))))
                 ).render
 
@@ -56,7 +57,7 @@ object CheckButtons {
   }
 
   /**
-    * @param property SeqProperty which gonna be bound to checkboxes
+    * @param property SeqProperty which is going to be bound to checkboxes
     * @param options Seq of available options, one checkbox will be created for each option.
     * @param decorator Function creating HTML element from checkboxes Seq.
     * @param xs Modifiers to apply on each generated checkbox.

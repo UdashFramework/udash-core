@@ -21,14 +21,14 @@ object Select {
     * @param selectedItem Property to bind.
     * @param options SeqProperty of available options.
     * @param label Provides element's label.
-    * @param xs Additional Modifiers for the select tag, don't use modifiers on value, onchange and selected attributes.
+    * @param selectModifiers Additional Modifiers for the select tag, don't use modifiers on value, onchange and selected attributes.
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
   def apply[T : PropertyCreator](
     selectedItem: Property[T], options: ReadableProperty[Seq[T]]
-  )(label: T => Modifier, xs: Modifier*): InputBinding[Select] = {
+  )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new InputBinding[Select] {
-      private val selector = select(xs)(
+      private val selector = select(selectModifiers)(
         nestedInterceptor(
           produceWithNested(options) { case (opts, nested) =>
             if (opts.nonEmpty && !opts.contains(selectedItem.get)) {
@@ -57,14 +57,14 @@ object Select {
     * @param selectedItems Property to bind.
     * @param options SeqProperty of available options.
     * @param label Provides element label.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
+    * @param selectModifiers Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
   def apply[T : PropertyCreator, ElemType <: Property[T]](
     selectedItems: SeqProperty[T, ElemType], options: ReadableProperty[Seq[T]]
-  )(label: T => Modifier, xs: Modifier*): InputBinding[Select] = {
+  )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new InputBinding[Select] {
-      private val selector = select(xs, multiple := true)(
+      private val selector = select(selectModifiers, multiple := true)(
         nestedInterceptor(
           produceWithNested(options) { case (opts, nested) =>
             selectedItems.set(selectedItems.get.filter(opts.contains))

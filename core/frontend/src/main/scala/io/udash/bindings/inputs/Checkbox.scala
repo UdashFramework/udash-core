@@ -14,13 +14,13 @@ import scalatags.JsDom.all._
 object Checkbox {
   /**
     * @param selected Property to bind.
-    * @param xs Additional Modifiers, don't use modifiers on type, checked and onchange attributes.
+    * @param inputModifiers Additional Modifiers, don't use modifiers on type, checked and onchange attributes.
     * @return HTML input (checkbox) tag with bound Property and applied modifiers.
     */
-  def apply(selected: Property[Boolean])(xs: Modifier*): InputBinding[JSInput] = {
+  def apply(selected: Property[Boolean])(inputModifiers: Modifier*): InputBinding[JSInput] = {
     new InputBinding[JSInput] {
       private val in = input(
-        xs, tpe := "checkbox",
+        inputModifiers, tpe := "checkbox",
         nestedInterceptor((checked := "checked").attrIf(selected))
       ).render
 
