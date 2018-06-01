@@ -2,9 +2,10 @@ package io.udash.bindings.inputs
 
 import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.jQ
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
+import org.scalactic.source.Position
 import org.scalajs.dom.html.{Option => JSOption, Select => JSSelect}
 
 class SelectTest extends UdashFrontendTest {
@@ -115,7 +116,7 @@ class SelectTest extends UdashFrontendTest {
   }
 
   "Select with multiple on" should {
-    def checkSelected(select: JSSelect, selected: Seq[Boolean]): Unit = {
+    def checkSelected(select: JSSelect, selected: Seq[Boolean])(implicit pos: Position): Unit = {
       selected.zipWithIndex.foreach {
         case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected should be(value)
       }
