@@ -31,32 +31,12 @@ object RadioButtons {
   def apply[T : PropertyCreator](
     selectedItem: Property[T], options: ReadableProperty[Seq[T]]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
-    new InputBinding[Div] {
-      private val buttons = div(
-        nestedInterceptor(
-          produceWithNested(options) { case (opts, nested) =>
-            if (opts.nonEmpty && !opts.contains(selectedItem.get)) {
-              selectedItem.set(opts.head)
-            }
-
-            decorator(
-              opts.zipWithIndex.map { case (opt, idx) =>
-                val in = input(
-                  inputModifiers, tpe := "radio", value := idx.toString,
-                  nested((checked := "checked").attrIf(selectedItem.transform(_ == opt)))
-                ).render
-
-                in.onchange = (_: Event) => selectedItem.set(opt)
-
-                (in, opt)
-              }
-            )
-          }
-        )
-      ).render
-
-      override def render: Div = buttons
-    }
+    new GroupedButtonsBinding(options, decorator, inputModifiers)(
+      "checkbox",
+      opt => selectedItem.transform(_ == opt),
+      opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
+      (_: JSInput, opt: T) => (_: Event) => selectedItem.set(opt)
+    )
   }
 
   /**

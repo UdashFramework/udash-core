@@ -27,28 +27,11 @@ object Select {
   def apply[T : PropertyCreator](
     selectedItem: Property[T], options: ReadableProperty[Seq[T]]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
-    new InputBinding[Select] {
-      private val selector = select(selectModifiers)(
-        nestedInterceptor(
-          produceWithNested(options) { case (opts, nested) =>
-            if (opts.nonEmpty && !opts.contains(selectedItem.get)) {
-              selectedItem.set(opts.head)
-            }
-
-            opts.zipWithIndex.map { case (opt, idx) =>
-              option(
-                value := idx.toString,
-                nested((selected := "selected").attrIf(selectedItem.transform(_ == opt)))
-              )(label(opt)).render
-            }
-          }
-        )
-      ).render
-
-      selector.onchange = (_: Event) => selectedItem.set(options.get.apply(selector.value.toInt))
-
-      override def render: Select = selector
-    }
+    new SelectBinding(options, label, selectModifiers :+ (multiple := true))(
+      opt => selectedItem.transform(_ == opt),
+      opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
+      selector => (_: Event) => selectedItem.set(options.get.apply(selector.value.toInt))
+    )
   }
 
   /**
@@ -63,23 +46,10 @@ object Select {
   def apply[T : PropertyCreator, ElemType <: Property[T]](
     selectedItems: SeqProperty[T, ElemType], options: ReadableProperty[Seq[T]]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
-    new InputBinding[Select] {
-      private val selector = select(selectModifiers, multiple := true)(
-        nestedInterceptor(
-          produceWithNested(options) { case (opts, nested) =>
-            selectedItems.set(selectedItems.get.filter(opts.contains))
-
-            opts.zipWithIndex.map { case (opt, idx) =>
-              option(
-                value := idx.toString,
-                nested((selected := "selected").attrIf(selectedItems.transform(_.contains(opt))))
-              )(label(opt)).render
-            }
-          }
-        )
-      ).render
-
-      selector.onchange = (_: Event) => {
+    new SelectBinding(options, label, selectModifiers :+ (multiple := true))(
+      opt => selectedItems.transform(_.contains(opt)),
+      opts => selectedItems.set(selectedItems.get.filter(opts.contains)),
+      selector => (_: Event) => {
         val opts = options.get
         val selectedNodes = selector.querySelectorAll("option:checked")
         val selection = (0 until selectedNodes.length).map { idx =>
@@ -87,9 +57,7 @@ object Select {
         }
         selectedItems.set(selection)
       }
-
-      override def render: Select = selector
-    }
+    )
   }
 
   /**

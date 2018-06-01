@@ -27,33 +27,15 @@ object CheckButtons {
   def apply[T : PropertyCreator](
     selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableProperty[Seq[T]]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
-    new InputBinding[Div] {
-      private val buttons = div(
-        nestedInterceptor(
-          produceWithNested(options) { case (opts, nested) =>
-            selectedItems.set(selectedItems.get.filter(opts.contains))
-
-            decorator(
-              opts.zipWithIndex.map { case (opt, idx) =>
-                val in = input(
-                  inputModifiers, tpe := "checkbox", value := idx.toString,
-                  nested((checked := "checked").attrIf(selectedItems.transform(_.contains(opt))))
-                ).render
-
-                in.onchange = (_: Event) => {
-                  if (in.checked && !selectedItems.get.contains(opt)) selectedItems.append(opt)
-                  else selectedItems.remove(opt)
-                }
-
-                (in, opt)
-              }
-            )
-          }
-        )
-      ).render
-
-      override def render: Div = buttons
-    }
+    new GroupedButtonsBinding(options, decorator, inputModifiers)(
+      "checkbox",
+      opt => selectedItems.transform(_.contains(opt)),
+      opts => selectedItems.set(selectedItems.get.filter(opts.contains)),
+      (in: JSInput, opt: T) => (_: Event) => {
+        if (in.checked && !selectedItems.get.contains(opt)) selectedItems.append(opt)
+        else selectedItems.remove(opt)
+      }
+    )
   }
 
   /**
