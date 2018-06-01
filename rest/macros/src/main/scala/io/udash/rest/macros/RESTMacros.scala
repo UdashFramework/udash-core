@@ -4,11 +4,9 @@ import com.avsystem.commons.macros.rpc.RPCMacros
 
 import scala.reflect.macros.blackbox
 
-class RESTMacros(val ctx: blackbox.Context) {
-  val rpcm = new RPCMacros(ctx)
+class RESTMacros(val ctx: blackbox.Context) extends RPCMacros(ctx) {
 
-  import rpcm._
-  import rpcm.c.universe._
+  import c.universe._
 
   sealed trait BodyArgumentsState
   object BodyArgumentsState {
