@@ -8,5 +8,6 @@ import scala.annotation.StaticAnnotation
 class RPC extends StaticAnnotation
 
 object `package` {
+  @deprecated("Use rpcName from com.avsystem.commons.rpc", "0.7.0")
   type RPCName = rpcName
 }

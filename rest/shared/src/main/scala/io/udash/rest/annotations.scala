@@ -5,6 +5,7 @@ import com.avsystem.commons.rpc.MetadataAnnotation
 import scala.annotation.StaticAnnotation
 
 /** Marker trait for REST interfaces. */
+@deprecated("This annotation is no longer needed", "0.7.0")
 class REST extends StaticAnnotation
 
 /** Annotated method name will be skipped in the REST path.
