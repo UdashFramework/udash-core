@@ -14,7 +14,7 @@ class REST extends StaticAnnotation
 class SkipRESTName extends MetadataAnnotation
 /** Forces name of a method used in the interface to REST mapping.
   * This annotation has no effect on exposed interface, it should be used in case of wrapping external API.
-  * If you want to overwrite method name in exposed interface you should use @RPCName annotation. */
+  * If you want to overwrite method name in exposed interface you should use @rpcName annotation. */
 class RESTName(val restName: String) extends MetadataAnnotation
 /** Forces name of an argument used in the interface to REST mapping. It also affects exposed interfaces. */
 class RESTParamName(val restName: String) extends MetadataAnnotation

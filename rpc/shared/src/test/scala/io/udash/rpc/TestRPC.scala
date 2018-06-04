@@ -19,10 +19,10 @@ trait RPCMethods {
 
   def handleMore(): Unit
 
-  @RPCName("doStuffBase")
+  @rpcName("doStuffBase")
   def doStuff(lol: Int, fuu: String)(cos: Option[Boolean]): Unit
 
-  @RPCName("doStuffInteger")
+  @rpcName("doStuffInteger")
   def doStuff(num: Int): Unit
 
   def takeCC(r: Record): Unit

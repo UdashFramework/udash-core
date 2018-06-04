@@ -247,7 +247,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |  def serviceOne(): NotBrokenRESTInterface
         |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): NotBrokenRESTInterface
         |  @RESTName("service_three") def serviceThree(@URLPart arg: String): NotBrokenRESTInterface
-        |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |}
         |
         |val rest: DefaultServerREST[NotBrokenRESTInterface] = new DefaultServerREST[NotBrokenRESTInterface](connector)
@@ -266,12 +266,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait NotBrokenRESTInternalInterface extends HasFakeInstances {
-        |  @RESTName("load") @RPCName("loadAll") def load(): NotBrokenRESTInterface
+        |  @RESTName("load") @rpcName("loadAll") def load(): NotBrokenRESTInterface
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |val rest: DefaultServerREST[NotBrokenRESTInterface] = new DefaultServerREST[NotBrokenRESTInterface](connector)
@@ -291,12 +291,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -316,12 +316,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |}
         |
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -448,12 +448,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord, @Body record2: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -555,7 +555,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       """.stripMargin should compile
     }
 
-    "not compile with empty @RESTName or @RPCName or @RESTParamName" in {
+    "not compile with empty @RESTName or @rpcName or @RESTParamName" in {
       """import io.udash.rpc.RPCName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
@@ -567,7 +567,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -584,7 +584,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @RPCName("") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("load") @rpcName("") def load(): Future[Seq[TestRESTRecord]]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -601,7 +601,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("") @RPCName("load") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @RESTName("") @rpcName("load") def load(): Future[Seq[TestRESTRecord]]
         |}
         |
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
@@ -621,12 +621,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |implicit val valid: DefaultRESTFramework.ValidServerREST[TestServerRESTInterface] = DefaultRESTFramework.materializeValidServerREST
@@ -644,12 +644,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@BodyValue id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |implicit val valid: DefaultRESTFramework.ValidServerREST[TestServerRESTInterface] = DefaultRESTFramework.materializeValidServerREST
@@ -667,12 +667,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@Body id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |}
         |
         |implicit val valid: DefaultRESTFramework.ValidServerREST[TestServerRESTInterface] = DefaultRESTFramework.materializeValidServerREST
@@ -690,12 +690,12 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@Body s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |  def deeper(): TestServerRESTDeepInterface
         |}
         |

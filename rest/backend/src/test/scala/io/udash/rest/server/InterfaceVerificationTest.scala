@@ -18,12 +18,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |
          |@REST
          |trait TestServerRESTInternalInterface extends HasFakeInstances {
-         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+         |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-         |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+         |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
          |  def deeper(): TestServerRESTDeepInterface
          |}
          |
@@ -43,12 +43,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |
          |@REST
          |trait TestServerRESTInternalInterface extends HasFakeInstances {
-         |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+         |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-         |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+         |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
          |  def deeper(): TestServerRESTDeepInterface
          |}
          |
@@ -68,12 +68,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
          |
          |@REST
          |trait TestServerRESTInternalInterface extends HasFakeInstances {
-         |  @GET @RESTName("test") @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+         |  @GET @RESTName("test") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
          |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
          |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
          |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-         |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+         |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
          |  def deeper(): TestServerRESTDeepInterface
          |}
          |
@@ -95,12 +95,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |  def deeper(): TestServerRESTDeepInterface
         |}
         |
@@ -120,12 +120,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@BodyValue id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |  def deeper(): TestServerRESTDeepInterface
         |}
         |
@@ -145,12 +145,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@Body id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |  def deeper(): TestServerRESTDeepInterface
         |}
         |
@@ -170,12 +170,12 @@ class InterfaceVerificationTest extends UdashSharedTest {
         |
         |@REST
         |trait TestServerRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RPCName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+        |  @GET @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
         |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
         |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
         |  @PUT def modify(@URLPart id: Int)(@Body s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @RPCName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
         |  def deeper(): TestServerRESTDeepInterface
         |}
         |
