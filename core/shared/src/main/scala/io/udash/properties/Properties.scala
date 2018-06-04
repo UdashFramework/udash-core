@@ -33,15 +33,15 @@ trait Properties {
 }
 
 object Properties extends Properties {
-  class Any2Property[A] private[properties](val value: A) extends AnyVal {
+  class Any2Property[A] private[properties](private val value: A) extends AnyVal {
     def toProperty: ReadableProperty[A] = new ImmutableProperty[A](value)
   }
 
-  class Any2ModelProperty[A] private[properties](val value: A) extends AnyVal {
+  class Any2ModelProperty[A] private[properties](private val value: A) extends AnyVal {
     def toModelProperty: ReadableModelProperty[A] = new ImmutableProperty[A](value)
   }
 
-  class Any2SeqProperty[A] private[properties](val value: Seq[A]) extends AnyVal {
+  class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {
     def toSeqProperty: ReadableSeqProperty[A] = new ImmutableSeqProperty[A](value)
   }
 }

@@ -1816,7 +1816,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
   "AttrOps" should {
     "allow reactive attribute bind" in {
       val p = Property("idValue")
-      val textArea = TextArea.debounced(Property(""),
+      val textArea = TextArea(Property(""))(
         id.bind(p)
       ).render
       textArea.getAttribute("id") shouldBe "idValue"
@@ -1827,10 +1827,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set("idValue3")
       textArea.getAttribute("id") shouldBe "idValue3"
     }
+
     "allow reactive attribute bind with condition" in {
       val p = Property("idValue")
       val c = Property(true)
-      val textArea = TextArea.debounced(Property(""),
+      val textArea = TextArea(Property(""))(
         id.bindIf(p, c)
       ).render
       textArea.getAttribute("id") shouldBe "idValue"
@@ -1851,7 +1852,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "allow reactive attribute apply" in {
       val p = Property(false)
       val binding = (disabled := "disabled").attrIf(p)
-      val textArea = TextArea.debounced(Property(""), binding).render
+      val textArea = TextArea(Property(""))(binding).render
       textArea.hasAttribute("disabled") shouldBe false
       p.set(true)
       textArea.hasAttribute("disabled") shouldBe true
@@ -1863,7 +1864,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(false)
       val binding2 = (disabled := "disabled").attrIfNot(p)
-      val textArea2 = TextArea.debounced(Property(""), binding2).render
+      val textArea2 = TextArea(Property(""))(binding2).render
       textArea2.hasAttribute("disabled") shouldBe true
       p.set(true)
       textArea2.hasAttribute("disabled") shouldBe false
@@ -1879,7 +1880,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "allow reactive attr changes" in {
       val p = Property(false)
       val binding = p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
-      val textArea = TextArea.debounced(Property(""), binding).render
+      val textArea = TextArea(Property(""))(binding).render
       textArea.getAttribute("test").toBoolean shouldBe false
       p.set(true)
       textArea.getAttribute("test").toBoolean shouldBe true

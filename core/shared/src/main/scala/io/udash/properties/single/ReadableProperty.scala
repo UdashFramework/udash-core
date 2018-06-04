@@ -118,7 +118,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   }
 
   /** Returns listeners count. */
-  private[properties] def listenersCount(): Int =
+  def listenersCount(): Int =
     listeners.length + oneTimeListeners.length
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
