@@ -2,7 +2,6 @@ package io.udash.rest
 
 import com.avsystem.commons.rpc.rpcName
 import com.avsystem.commons.serialization.HasGenCodec
-import io.udash.rest.DefaultRESTFramework._
 
 import scala.concurrent.Future
 
@@ -16,8 +15,8 @@ trait TestRESTInterface {
   @SkipRESTName def serviceSkip(): TestRESTInternalInterface
 }
 object TestRESTInterface {
-  implicit val restAsReal: AsRealRPC[TestRESTInterface] = materializeAsReal
-  implicit val restMetadata: RPCMetadata[TestRESTInterface] = materializeMetadata
+  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTInterface] = DefaultRESTFramework.materializeAsReal
+  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTInterface] = DefaultRESTFramework.materializeMetadata
 }
 
 trait TestRESTInternalInterface {
@@ -31,8 +30,8 @@ trait TestRESTInternalInterface {
   def deeper(): TestRESTDeepInterface
 }
 object TestRESTInternalInterface {
-  implicit val restAsReal: AsRealRPC[TestRESTInternalInterface] = materializeAsReal
-  implicit val restMetadata: RPCMetadata[TestRESTInternalInterface] = materializeMetadata
+  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTInternalInterface] = DefaultRESTFramework.materializeAsReal
+  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTInternalInterface] = DefaultRESTFramework.materializeMetadata
 }
 
 trait TestRESTDeepInterface {
@@ -40,6 +39,6 @@ trait TestRESTDeepInterface {
   @GET def fire(@URLPart id: Int): Unit
 }
 object TestRESTDeepInterface {
-  implicit val restAsReal: AsRealRPC[TestRESTDeepInterface] = materializeAsReal
-  implicit val restMetadata: RPCMetadata[TestRESTDeepInterface] = materializeMetadata
+  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTDeepInterface] = DefaultRESTFramework.materializeAsReal
+  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTDeepInterface] = DefaultRESTFramework.materializeMetadata
 }
