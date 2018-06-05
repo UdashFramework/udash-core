@@ -3,7 +3,7 @@ package io.udash.rpc
 import java.util.UUID
 
 import com.avsystem.commons._
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.{Logger, StrictLogging}
 import io.udash.rpc.internals._
 import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
 import javax.servlet.ServletInputStream
@@ -33,7 +33,7 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   def initRpc(resource: AtmosphereResource): Unit
 
   /** @return If a filter returns failure, RPC method is not called. */
-  def filters: Seq[AtmosphereResource => Try[Any]]
+  def filters: ISeq[AtmosphereResource => Try[Unit]]
 }
 
 /**
@@ -45,8 +45,9 @@ trait AtmosphereServiceConfig[ServerRPCType] {
 class AtmosphereService[ServerRPCType](
   config: AtmosphereServiceConfig[ServerRPCType],
   exceptionsRegistry: ExceptionCodecRegistry,
-  sseSuspendTime: FiniteDuration = 1 minute
-) extends AtmosphereServletProcessor with LazyLogging {
+  sseSuspendTime: FiniteDuration = 1 minute,
+  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex)
+) extends AtmosphereServletProcessor with StrictLogging {
 
   private var brodcasterFactory: BroadcasterFactory = _
 
@@ -125,7 +126,7 @@ class AtmosphereService[ServerRPCType](
             case Success(r) =>
               onCall(write[RPCResponse](RPCResponseSuccess(r, call.callId)))
             case Failure(ex) =>
-              logger.error("RPC request handling failed", ex)
+              onRequestHandlingFailure(ex, logger)
               val exceptionName = exceptionsRegistry.name(ex)
               onCall(write[RPCResponse](
                 if (exceptionsRegistry.contains(exceptionName)) {
@@ -169,7 +170,7 @@ class AtmosphereService[ServerRPCType](
     (resource: AtmosphereResource,
       request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
 
-    val filterResult = config.filters.foldLeft[Try[Any]](Success(()))((result, filter) => result match {
+    val filterResult = config.filters.foldLeft[Try[Unit]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
       case failure: Failure[_] => failure
     })
