@@ -27,7 +27,7 @@ object Select {
   def apply[T : PropertyCreator](
     selectedItem: Property[T], options: ReadableProperty[Seq[T]]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
-    new SelectBinding(options, label, selectModifiers :+ (multiple := true))(
+    new SelectBinding(options, label, selectModifiers)(
       opt => selectedItem.transform(_ == opt),
       opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
       selector => (_: Event) => selectedItem.set(options.get.apply(selector.value.toInt))

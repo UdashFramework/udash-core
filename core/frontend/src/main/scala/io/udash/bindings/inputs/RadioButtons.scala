@@ -32,7 +32,7 @@ object RadioButtons {
     selectedItem: Property[T], options: ReadableProperty[Seq[T]]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
-      "checkbox",
+      "radio",
       opt => selectedItem.transform(_ == opt),
       opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
       (_: JSInput, opt: T) => (_: Event) => selectedItem.set(opt)

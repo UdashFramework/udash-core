@@ -15,24 +15,22 @@ private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
   onChange: (JSInput, T) => Event => Unit
 ) extends InputBinding[Div] {
   private val buttons = div(
-    nestedInterceptor(
-      produceWithNested(options) { case (opts, nested) =>
-        refreshSelection(opts)
+    produce(options) { case opts =>
+      kill()
+      refreshSelection(opts)
 
-        decorator(
-          opts.zipWithIndex.map { case (opt, idx) =>
-            val in = input(
-              inputModifiers, tpe := inputTpe, value := idx.toString,
-              nested((checked := "checked").attrIf(checkedIf(opt)))
-            ).render
+      decorator(
+        opts.zipWithIndex.map { case (opt, idx) =>
+          val in = input(inputModifiers, tpe := inputTpe, value := idx.toString).render
 
-            in.onchange = onChange(in, opt)
+          val selected = checkedIf(opt)
+          propertyListeners += selected.listen(in.checked = _, initUpdate = true)
+          in.onchange = onChange(in, opt)
 
-            (in, opt)
-          }
-        )
-      }
-    )
+          (in, opt)
+        }
+      )
+    }
   ).render
 
   override def render: Div = buttons

@@ -14,18 +14,18 @@ private[inputs] class SelectBinding[T : PropertyCreator](
   onChange: Select => Event => Unit
 ) extends InputBinding[Select] {
   private val selector = select(selectModifiers)(
-    nestedInterceptor(
-      produceWithNested(options) { case (opts, nested) =>
-        refreshSelection(opts)
+    produce(options) { case opts =>
+      kill()
+      refreshSelection(opts)
 
-        opts.zipWithIndex.map { case (opt, idx) =>
-          option(
-            value := idx.toString,
-            nested((selected := "selected").attrIf(checkedIf(opt)))
-          )(label(opt)).render
-        }
+      opts.zipWithIndex.map { case (opt, idx) =>
+        val el = option(value := idx.toString, label(opt)).render
+
+        val selected = checkedIf(opt)
+        propertyListeners += selected.listen(el.selected = _, initUpdate = true)
+        el
       }
-    )
+    }
   ).render
 
   selector.onchange = onChange(selector)
