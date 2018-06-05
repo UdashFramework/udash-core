@@ -238,7 +238,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "compile recursive interface" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |case class TestRESTRecord(id: Option[Int], s: String)
         |implicit val x: GenCodec[TestRESTRecord] = null
         |
@@ -253,7 +253,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[NotBrokenRESTInterface] = new DefaultServerREST[NotBrokenRESTInterface](connector)
       """.stripMargin should compile
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |case class TestRESTRecord(id: Option[Int], s: String)
         |implicit val x: GenCodec[TestRESTRecord] = null
         |
@@ -278,58 +278,8 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       """.stripMargin should compile
     }
 
-    "not compile with interface without @REST annotation" in {
-      """import io.udash.rpc.RPCName
-        |case class TestRESTRecord(id: Option[Int], s: String)
-        |implicit val x: GenCodec[TestRESTRecord] = null
-        |
-        |trait BrokenRESTInterface extends HasFakeInstances {
-        |  def serviceOne(): BrokenRESTInternalInterface
-        |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): BrokenRESTInternalInterface
-        |  @RESTName("service_three") def serviceThree(@URLPart arg: String): BrokenRESTInternalInterface
-        |}
-        |
-        |@REST
-        |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-        |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
-        |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
-        |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-        |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
-        |}
-        |
-        |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-      """.stripMargin shouldNot compile
-    }
-
-    "not compile with internal interface without @REST annotation" in {
-      """import io.udash.rpc.RPCName
-        |case class TestRESTRecord(id: Option[Int], s: String)
-        |implicit val x: GenCodec[TestRESTRecord] = null
-        |
-        |@REST
-        |trait BrokenRESTInterface extends HasFakeInstances {
-        |  def serviceOne(): BrokenRESTInternalInterface
-        |  def serviceTwo(@RESTParamName("X_AUTH_TOKEN") @Header token: String, @Header lang: String): BrokenRESTInternalInterface
-        |  @RESTName("service_three") def serviceThree(@URLPart arg: String): BrokenRESTInternalInterface
-        |}
-        |
-        |trait BrokenRESTInternalInterface extends HasFakeInstances {
-        |  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-        |  @GET def load(@URLPart id: Int, @Query trash: String, @Query @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord]
-        |  @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
-        |  @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-        |  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-        |  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
-        |}
-        |
-        |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
-      """.stripMargin shouldNot compile
-    }
-
     "not compile with @Body argument in getter" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -348,7 +298,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with REST method annotation on getter" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -365,7 +315,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -382,7 +332,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -399,7 +349,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -416,7 +366,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -435,7 +385,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with more than one @Body argument" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -461,7 +411,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with @Body argument in @GET annotated method" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -480,7 +430,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with more than one REST method annotation" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -499,7 +449,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "compile without REST method annotation (@GET or @POST as default)" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -518,7 +468,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with more than one argument type annotation" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -537,7 +487,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "compile without argument type annotation (use @Query as default)" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -556,7 +506,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     }
 
     "not compile with empty @RESTName or @rpcName or @RESTParamName" in {
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -573,7 +523,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -590,7 +540,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         |val rest: DefaultServerREST[BrokenRESTInterface] = new DefaultServerREST[BrokenRESTInterface](connector)
       """.stripMargin shouldNot typeCheck
 
-      """import io.udash.rpc.RPCName
+      """import com.avsystem.commons.rpc.rpcName
         |implicit val x: GenCodec[TestRESTRecord] = null
         |case class TestRESTRecord(id: Option[Int], s: String)
         |
@@ -611,6 +561,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
     "not mix @Body and @BodyValue" in {
       """import io.udash.rpc._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {
@@ -634,6 +585,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
       """import io.udash.rpc._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {
@@ -657,6 +609,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
       """import io.udash.rpc._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {
@@ -680,6 +633,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
       """import io.udash.rpc._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {

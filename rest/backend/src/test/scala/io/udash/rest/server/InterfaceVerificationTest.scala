@@ -8,6 +8,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
          |import io.udash.rest._
          |import scala.concurrent.Future
+         |import com.avsystem.commons.rpc.rpcName
          |
          |@REST
          |trait TestServerRESTInterface extends HasFakeInstances {
@@ -33,6 +34,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
          |import io.udash.rest._
          |import scala.concurrent.Future
+         |import com.avsystem.commons.rpc.rpcName
          |
          |@REST
          |trait TestServerRESTInterface extends HasFakeInstances {
@@ -58,6 +60,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
          |import io.udash.rest._
          |import scala.concurrent.Future
+         |import com.avsystem.commons.rpc.rpcName
          |
          |@REST
          |trait TestServerRESTInterface extends HasFakeInstances {
@@ -110,6 +113,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
         |import io.udash.rest._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {
@@ -135,6 +139,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
         |import io.udash.rest._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {
@@ -160,6 +165,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """import io.udash.rpc._
         |import io.udash.rest._
         |import scala.concurrent.Future
+        |import com.avsystem.commons.rpc.rpcName
         |
         |@REST
         |trait TestServerRESTInterface extends HasFakeInstances {

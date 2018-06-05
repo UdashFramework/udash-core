@@ -33,7 +33,6 @@ class RESTMacros(val ctx: blackbox.Context) extends RPCMacros(ctx) {
   val PutCls = tq"$RestPackage.PUT"
   val PatchCls = tq"$RestPackage.PATCH"
   val DeleteCls = tq"$RestPackage.DELETE"
-  val RestCls = tq"$RestPackage.REST"
 
   val ArgumentTypeCls = tq"$RestPackage.ArgumentType"
   val BodyCls = tq"$RestPackage.Body"
@@ -43,7 +42,6 @@ class RESTMacros(val ctx: blackbox.Context) extends RPCMacros(ctx) {
   val URLPartCls = tq"$RestPackage.URLPart"
 
   def hasAnnot(annotations: List[Annot], annotation: Type) = annotations.exists(_.tree.tpe <:< annotation)
-  def hasRestAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(RestCls))
   def hasRestMethodAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(RestMethodCls))
   def hasArgumentTypeAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(ArgumentTypeCls))
   def hasSkipRestNameAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(SkipRestNameCls))
@@ -110,9 +108,6 @@ class RESTMacros(val ctx: blackbox.Context) extends RPCMacros(ctx) {
   }
 
   private def validRest(restType: Type, isServer: Boolean): c.Tree = {
-    if (!hasRestAnnot(allAnnotations(restType.dealias.typeSymbol))) {
-      abort(s"All REST interfaces must be annotated as @REST, $restType is not.")
-    }
     val realRpc = RealRpcTrait(restType)
     val proxyables: List[RealMethod] = realRpc.realMethods
     val (subinterfaces, methods) = proxyables.partition(rm =>

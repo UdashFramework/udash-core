@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.rpcName
 import com.avsystem.commons.serialization.HasGenCodec
 import com.github.ghik.silencer.silent
 import io.udash.rpc.utils.Logged
