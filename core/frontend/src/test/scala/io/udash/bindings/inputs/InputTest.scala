@@ -178,5 +178,48 @@ class InputTest extends AsyncUdashFrontendTest {
         p.listenersCount() should be(0)
       }
     }
+
+    "synchronise with two inputs bound to a single property" in {
+      val p = Property[String]("ABC")
+      val input = TextInput(p, 0 millis)()
+      val input2 = TextInput(p, 0 millis)()
+
+      val r = input.render
+      val r2 = input2.render
+
+      r.value should be("ABC")
+      r2.value should be("ABC")
+
+      p.set("test")
+      r.value should be("test")
+      r2.value should be("test")
+
+      r.value = "qwe"
+      r.onchange(null)
+      p.get should be("qwe")
+      r2.value should be("qwe")
+
+      r2.value = "asd"
+      r2.onchange(null)
+      p.get should be("asd")
+      r.value should be("asd")
+
+      p.listenersCount() should be(2)
+
+      input2.kill()
+      p.listenersCount() should be(1)
+
+      r.value = "qaz"
+      r.onchange(null)
+      p.get should be("qaz")
+      r2.value should be("asd")
+
+      input.kill()
+      p.listenersCount() should be(0)
+
+      p.set("trewq")
+      r.value should be("qaz")
+      r2.value should be("asd")
+    }
   }
 }

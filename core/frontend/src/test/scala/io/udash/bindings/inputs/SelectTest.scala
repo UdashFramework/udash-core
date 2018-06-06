@@ -7,6 +7,7 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
 import org.scalactic.source.Position
 import org.scalajs.dom.html.{Option => JSOption, Select => JSSelect}
+import scalatags.JsDom.all.StringFrag
 
 class SelectTest extends UdashFrontendTest {
   "Select" should {
@@ -112,6 +113,50 @@ class SelectTest extends UdashFrontendTest {
 
       select.kill()
       p.listenersCount() should be(0)
+    }
+
+    "synchronise with two inputs bound to a single property" in {
+      val p = Property[Int](2)
+      val options: Seq[Int] = 0 until 5
+      val input = Select(p, options.toProperty)(v => StringFrag(v.toString))
+      val input2 = Select(p, options.toProperty)(v => StringFrag(v.toString))
+
+      val r = input.render
+      val r2 = input2.render
+
+      r.value should be("2")
+      r2.value should be("2")
+
+      p.set(3)
+      r.value should be("3")
+      r2.value should be("3")
+
+      r.value = "0"
+      r.onchange(null)
+      p.get should be(0)
+      r2.value should be("0")
+
+      r2.value = "1"
+      r2.onchange(null)
+      p.get should be(1)
+      r.value should be("1")
+
+      p.listenersCount() should be(10)
+
+      input2.kill()
+      p.listenersCount() should be(5)
+
+      r.value = "4"
+      r.onchange(null)
+      p.get should be(4)
+      r2.value should be("1")
+
+      input.kill()
+      p.listenersCount() should be(0)
+
+      p.set(2)
+      r.value should be("4")
+      r2.value should be("1")
     }
   }
 
@@ -266,6 +311,58 @@ class SelectTest extends UdashFrontendTest {
 
       select.kill()
       p.listenersCount() should be(0)
+    }
+
+    "synchronise with two inputs bound to a single property" in {
+      val p = SeqProperty[Int](2)
+      val options: Seq[Int] = 0 until 5
+      val input = Select(p, options.toProperty)(v => StringFrag(v.toString))
+      val input2 = Select(p, options.toProperty)(v => StringFrag(v.toString))
+
+      val r = input.render
+      val r2 = input2.render
+
+      checkSelected(r, List(false, false, true, false, false))
+      checkSelected(r2, List(false, false, true, false, false))
+
+      p.append(3)
+      checkSelected(r, List(false, false, true, true, false))
+      checkSelected(r2, List(false, false, true, true, false))
+
+      r.childNodes(0).asInstanceOf[JSOption].selected = true
+      r.onchange(null)
+      p.get.size should be(3)
+      p.get should contain(2)
+      p.get should contain(3)
+      p.get should contain(0)
+      r2.childNodes(0).asInstanceOf[JSOption].selected should be(true)
+
+      r2.childNodes(0).asInstanceOf[JSOption].selected = false
+      r2.onchange(null)
+      p.get.size should be(2)
+      p.get should contain(2)
+      p.get should contain(3)
+      r.childNodes(0).asInstanceOf[JSOption].selected should be(false)
+
+      p.listenersCount() should be(10)
+
+      input2.kill()
+      p.listenersCount() should be(5)
+
+      r.childNodes(4).asInstanceOf[JSOption].selected = true
+      r.onchange(null)
+      p.get.size should be(3)
+      p.get should contain(2)
+      p.get should contain(3)
+      p.get should contain(4)
+      r2.childNodes(4).asInstanceOf[JSOption].selected should be(false)
+
+      input.kill()
+      p.listenersCount() should be(0)
+
+      p.set(Seq.empty)
+      r.childNodes(2).asInstanceOf[JSOption].selected should be(true)
+      r2.childNodes(2).asInstanceOf[JSOption].selected should be(true)
     }
   }
 }
