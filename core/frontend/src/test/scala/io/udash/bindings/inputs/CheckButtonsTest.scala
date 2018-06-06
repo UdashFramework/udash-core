@@ -98,7 +98,7 @@ class CheckButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = SeqProperty[String]("A", "C")
 
-      val buttons = CheckButtons(p, options.toProperty)(CheckButtons.inputsOnlyDecorator).render
+      val buttons = CheckButtons(p, options.toSeqProperty)(CheckButtons.inputsOnlyDecorator).render
 
       buttons.childElementCount should be(5)
       checkSelected(buttons, List(true, false, true, false, false))
@@ -117,7 +117,7 @@ class CheckButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = SeqProperty[String]("A", "C")
 
-      val buttons = CheckButtons(p, options.toProperty)(CheckButtons.inputsOnlyDecorator).render
+      val buttons = CheckButtons(p, options.toSeqProperty)(CheckButtons.inputsOnlyDecorator).render
 
       buttons.childElementCount should be(5)
 
@@ -213,8 +213,8 @@ class CheckButtonsTest extends UdashFrontendTest {
     "synchronise with two inputs bound to a single property" in {
       val p = SeqProperty[Int](2)
       val options: Seq[Int] = 0 until 5
-      val input = CheckButtons(p, options.toProperty)(CheckButtons.inputsOnlyDecorator)
-      val input2 = CheckButtons(p, options.toProperty)(CheckButtons.inputsOnlyDecorator)
+      val input = CheckButtons(p, options.toSeqProperty)(CheckButtons.inputsOnlyDecorator)
+      val input2 = CheckButtons(p, options.toSeqProperty)(CheckButtons.inputsOnlyDecorator)
 
       val r = input.render
       val r2 = input2.render

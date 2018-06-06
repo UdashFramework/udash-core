@@ -7,7 +7,7 @@ import org.scalajs.dom.{Event, Node}
 import scalatags.JsDom.all._
 
 private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
-  options: ReadableProperty[Seq[T]], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
+  options: ReadableSeqProperty[T], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
 )(
   inputTpe: String,
   checkedIf: T => ReadableProperty[Boolean],
@@ -15,7 +15,7 @@ private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
   onChange: (JSInput, T) => Event => Unit
 ) extends InputBinding[Div] {
   private val buttons = div(
-    produce(options) { case opts =>
+    produce(options) { opts =>
       kill()
       refreshSelection(opts)
 

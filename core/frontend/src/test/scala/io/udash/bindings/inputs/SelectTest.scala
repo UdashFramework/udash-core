@@ -46,7 +46,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val select = Select(p, options.toProperty)(Select.defaultLabel).render
+      val select = Select(p, options.toSeqProperty)(Select.defaultLabel).render
 
       select.childElementCount should be(5)
       select.value should be("1")
@@ -61,7 +61,7 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val select = Select(p, options.toProperty)(Select.defaultLabel).render
+      val select = Select(p, options.toSeqProperty)(Select.defaultLabel).render
 
       select.childElementCount should be(5)
 
@@ -118,8 +118,8 @@ class SelectTest extends UdashFrontendTest {
     "synchronise with two inputs bound to a single property" in {
       val p = Property[Int](2)
       val options: Seq[Int] = 0 until 5
-      val input = Select(p, options.toProperty)(v => StringFrag(v.toString))
-      val input2 = Select(p, options.toProperty)(v => StringFrag(v.toString))
+      val input = Select(p, options.toSeqProperty)(v => StringFrag(v.toString))
+      val input2 = Select(p, options.toSeqProperty)(v => StringFrag(v.toString))
 
       val r = input.render
       val r2 = input2.render
@@ -316,8 +316,8 @@ class SelectTest extends UdashFrontendTest {
     "synchronise with two inputs bound to a single property" in {
       val p = SeqProperty[Int](2)
       val options: Seq[Int] = 0 until 5
-      val input = Select(p, options.toProperty)(v => StringFrag(v.toString))
-      val input2 = Select(p, options.toProperty)(v => StringFrag(v.toString))
+      val input = Select(p, options.toSeqProperty)(v => StringFrag(v.toString))
+      val input2 = Select(p, options.toSeqProperty)(v => StringFrag(v.toString))
 
       val r = input.render
       val r2 = input2.render

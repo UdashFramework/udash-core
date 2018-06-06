@@ -25,7 +25,7 @@ object Select {
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
   def apply[T : PropertyCreator](
-    selectedItem: Property[T], options: ReadableProperty[Seq[T]]
+    selectedItem: Property[T], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new SelectBinding(options, label, selectModifiers)(
       opt => selectedItem.transform(_ == opt),
@@ -44,7 +44,7 @@ object Select {
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
   def apply[T : PropertyCreator, ElemType <: Property[T]](
-    selectedItems: SeqProperty[T, ElemType], options: ReadableProperty[Seq[T]]
+    selectedItems: SeqProperty[T, ElemType], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new SelectBinding(options, label, selectModifiers :+ (multiple := true))(
       opt => selectedItems.transform(_.contains(opt)),

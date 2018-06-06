@@ -57,7 +57,7 @@ class RadioButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
 
-      val buttons = RadioButtons(p, options.toProperty)(RadioButtons.inputsOnlyDecorator).render
+      val buttons = RadioButtons(p, options.toSeqProperty)(RadioButtons.inputsOnlyDecorator).render
 
       buttons.childElementCount should be(5)
       p.get should be("B")
@@ -73,7 +73,7 @@ class RadioButtonsTest extends UdashFrontendTest {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("X")
 
-      val buttons = RadioButtons(p, options.toProperty)(RadioButtons.inputsOnlyDecorator).render
+      val buttons = RadioButtons(p, options.toSeqProperty)(RadioButtons.inputsOnlyDecorator).render
 
       buttons.childElementCount should be(5)
       p.get should be("A")
@@ -116,8 +116,8 @@ class RadioButtonsTest extends UdashFrontendTest {
     "synchronise with two inputs bound to a single property" in {
       val p = Property[Int](2)
       val options: Seq[Int] = 0 until 5
-      val input = RadioButtons(p, options.toProperty)(RadioButtons.inputsOnlyDecorator)
-      val input2 = RadioButtons(p, options.toProperty)(RadioButtons.inputsOnlyDecorator)
+      val input = RadioButtons(p, options.toSeqProperty)(RadioButtons.inputsOnlyDecorator)
+      val input2 = RadioButtons(p, options.toSeqProperty)(RadioButtons.inputsOnlyDecorator)
 
       val r = input.render
       val r2 = input2.render
