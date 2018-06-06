@@ -5,6 +5,7 @@ import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.testing.UdashSharedTest
+import com.avsystem.commons._
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
@@ -2477,6 +2478,38 @@ class PropertyTest extends UdashSharedTest {
 
       numbers.touch()
       indexed.get should be(numbers.get.zipWithIndex)
+    }
+  }
+
+  "Seq[Property]" should {
+    "combine into ReadableSeqProperty" in {
+      def validateContents[A](propertySeq: ISeq[Property[A]], combined: ReadableSeqProperty[A, ReadableProperty[A]]): Unit = {
+        combined.get.zip(propertySeq).foreach {
+          case (c, s) => c should ===(s.get)
+        }
+      }
+
+      val propertySeq = ISeq(Property("test1"), Property("test2"), Property("test3"))
+
+      import Properties._
+      val combined = propertySeq.combineToSeqProperty
+
+      validateContents(propertySeq, combined)
+
+      var listenCounter = 0
+      var listenStructureCounter = 0
+      combined.listen(_ => listenCounter+=1)
+      combined.listenStructure(_ => listenStructureCounter+=1)
+
+      propertySeq.head.set("t1")
+      listenCounter should ===(1)
+      propertySeq(1).set("")
+      listenCounter should ===(2)
+      propertySeq(2).set("123123")
+      listenCounter should ===(3)
+      listenStructureCounter should ===(0)
+
+      validateContents(propertySeq, combined)
     }
   }
 }
