@@ -1,7 +1,7 @@
 package io.udash.web.guide.demos.rpc
 
 import com.avsystem.commons.serialization.{GenCodec, HasGenCodec, Input, Output}
-import io.udash.rpc.{DefaultServerUdashRPCFramework, _}
+import io.udash.rpc.DefaultServerUdashRPCFramework
 
 import scala.concurrent.Future
 
@@ -52,7 +52,6 @@ object GenCodecServerRPC {
   implicit def metadata: DefaultServerUdashRPCFramework.RPCMetadata[GenCodecServerRPC] = fullRpcInfo.metadata
 }
 
-@RPC
 trait GenCodecServerRPC {
   import GenCodecServerRPC._
 

@@ -89,7 +89,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |  new ExposedRpcInterfaces(clientId)
         |) with CallLogging[MainServerRPC] {
         |  override protected val metadata: RPCMetadata[MainServerRPC] =
-        |    RPCMetadata[MainServerRPC]
+        |    MainServerRPC.metadata
         |
         |  override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
         |    println(s"$rpcName $methodName $args")

@@ -4,7 +4,6 @@ import io.udash.rpc._
 
 import scala.concurrent.Future
 
-@RPC
 trait CallServerRPC {
   def calls: Future[Seq[Call]]
 }

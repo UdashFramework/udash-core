@@ -1,10 +1,9 @@
 package io.udash.web.guide.demos.rpc
 
-import io.udash.rpc.{DefaultServerUdashRPCFramework, RPC}
+import io.udash.rpc.DefaultServerUdashRPCFramework
 
 import scala.concurrent.Future
 
-@RPC
 trait ExceptionsRPC {
   def example(): Future[Unit]
   def exampleWithTranslatableError(): Future[Unit]

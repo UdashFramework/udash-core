@@ -2,7 +2,7 @@ package io.udash.web.server
 
 import io.udash.rest.server.{DefaultExposesREST, DefaultRestServlet}
 import io.udash.rpc._
-import io.udash.rpc.utils.CallLogging
+import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.web.guide.rest.ExposedRestInterfaces
@@ -42,7 +42,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
         val callLogger = new CallLogger
         new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
           import localFramework.RPCMetadata
-          override protected val metadata: RPCMetadata[MainServerRPC] = RPCMetadata[MainServerRPC]
+          override protected val metadata: RPCMetadata[MainServerRPC] = MainServerRPC.metadata
 
           override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
             callLogger.append(Call(rpcName, methodName, args))

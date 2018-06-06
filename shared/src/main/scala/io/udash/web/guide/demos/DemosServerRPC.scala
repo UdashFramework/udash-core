@@ -4,7 +4,6 @@ import io.udash.rpc._
 import io.udash.web.guide.demos.activity.CallServerRPC
 import io.udash.web.guide.demos.rpc._
 
-@RPC
 trait DemosServerRPC {
   import io.udash.i18n._
 
