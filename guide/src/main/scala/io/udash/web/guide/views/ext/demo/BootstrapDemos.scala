@@ -408,7 +408,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       label("Your URL"),
       UdashInputGroup(InputGroupSize.Large)(
         UdashInputGroup.addon("https://example.com/users/", bind(vanityUrl)),
-        UdashInputGroup.input(TextInput.debounced(vanityUrl).render),
+        UdashInputGroup.input(TextInput(vanityUrl)().render),
         UdashInputGroup.buttons(
           UdashButton(
             disabled = buttonDisabled
@@ -483,13 +483,13 @@ object BootstrapDemos extends CrossLogging with CssView {
         UdashForm.group(
           UdashInputGroup()(
             UdashInputGroup.addon("Search: "),
-            UdashInputGroup.input(TextInput.debounced(search).render)
+            UdashInputGroup.input(TextInput(search)().render)
           ).render
         ),
         UdashForm.group(
           UdashInputGroup()(
             UdashInputGroup.addon("Something: "),
-            UdashInputGroup.input(TextInput.debounced(something).render)
+            UdashInputGroup.input(TextInput(something)().render)
           ).render
         )
       ).render
@@ -805,7 +805,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       UdashProgressBar(value, showPercentage, Success)().render,
       UdashProgressBar(value, showPercentage, Striped)(value => value + " percent").render,
       UdashProgressBar.animated(value, showPercentage, animate, Danger)().render,
-      NumberInput.debounced(value.transform(_.toString, Integer.parseInt))(
+      NumberInput(value.transform(_.toString, Integer.parseInt))(
         BootstrapStyles.Form.formControl, placeholder := "Percentage"
       )
     ).render

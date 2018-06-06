@@ -13,7 +13,7 @@ class FileInputDemoComponent extends Component {
   val acceptMultipleFiles: Property[Boolean] = Property(true)
   val selectedFiles: SeqProperty[File] = SeqProperty(Seq.empty)
 
-  val input = FileInput("files", acceptMultipleFiles, selectedFiles)()
+  val input = FileInput(selectedFiles, acceptMultipleFiles)("files")
 
   override def getTemplate: Modifier = div(id := "file-input-demo", GuideStyles.frame)(
     input,

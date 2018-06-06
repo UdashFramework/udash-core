@@ -2,9 +2,9 @@ package io.udash.web.guide.styles.utils
 
 import io.udash.css.CssBase
 import io.udash.web.commons.styles.utils.StyleConstants
+import scalacss.internal.DslBase.ToStyle
 
 import scala.language.postfixOps
-import scalacss.internal.DslBase.ToStyle
 
 /**
   * Created by malchik on 2016-03-30.

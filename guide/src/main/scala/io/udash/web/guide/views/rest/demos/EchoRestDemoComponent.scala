@@ -101,7 +101,7 @@ class EchoRestDemoComponent extends Component {
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "echo-rest-demo")(
       UdashInputGroup()(
         UdashInputGroup.input(
-          TextInput.debounced(content, id := "echo-rest-demo-input").render
+          TextInput(content)(id := "echo-rest-demo-input").render
         ),
         UdashInputGroup.buttons(
           queryButton.render,

@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import io.udash.css.CssBase
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
-import io.udash.web.guide.styles.utils.{MediaQueries, GuideStyleUtils}
+import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps

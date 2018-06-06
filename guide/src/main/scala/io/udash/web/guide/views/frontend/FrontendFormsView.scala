@@ -124,7 +124,8 @@ class FrontendFormsView extends FinalView with CssView {
         |
         |form(
         |  CheckButtons(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
+        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+        |  )(
         |    (els: Seq[(Input, String)]) => span(
         |      els.map { case (i: Input, l: String) => label(i, l) }
         |    )
@@ -155,7 +156,8 @@ class FrontendFormsView extends FinalView with CssView {
         |
         |form(
         |  RadioButtons(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
+        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+        |  )(
         |    (els: Seq[(Input, String)]) => span(
         |      els.map { case (i: Input, l: String) => label(i, l) }
         |    )
@@ -183,8 +185,8 @@ class FrontendFormsView extends FinalView with CssView {
         |
         |form(
         |  Select(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
-        |  )()
+        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+        |  )(Select.defaultLabel)
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new SelectDemoComponent),
@@ -208,8 +210,8 @@ class FrontendFormsView extends FinalView with CssView {
         |
         |form(
         |  Select(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString), Select.defaultLabel
-        |  )()
+        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+        |  )(Select.defaultLabel)
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new MultiSelectDemoComponent),

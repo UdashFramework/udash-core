@@ -5,7 +5,7 @@ import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
-import io.udash.web.guide.styles.utils.{MediaQueries, GuideStyleUtils}
+import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps

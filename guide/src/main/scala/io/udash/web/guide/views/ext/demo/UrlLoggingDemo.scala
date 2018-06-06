@@ -1,7 +1,6 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash._
-import io.udash.bindings.Checkbox
 import io.udash.bootstrap.BootstrapStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
@@ -26,7 +25,7 @@ object UrlLoggingDemo {
           div(BootstrapStyles.Grid.colMd4)(
             div(BootstrapStyles.Form.inputGroup)(
               div(BootstrapStyles.Form.inputGroupAddon)("Turn on logging:"),
-              div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(UrlLoggingDemo.enabled, cls := "checkbox-demo-a"))
+              div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(UrlLoggingDemo.enabled)(cls := "checkbox-demo-a"))
             )
           )
         )

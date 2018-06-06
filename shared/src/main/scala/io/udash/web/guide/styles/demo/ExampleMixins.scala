@@ -1,9 +1,9 @@
 package io.udash.web.guide.styles.demo
 
 import io.udash.css.{CssBase, CssStyle}
+import scalacss.internal.AV
 
 import scala.concurrent.duration.FiniteDuration
-import scalacss.internal.AV
 
 object ExampleMixins extends CssBase {
   import dsl._

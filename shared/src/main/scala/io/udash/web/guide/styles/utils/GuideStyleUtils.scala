@@ -4,11 +4,11 @@ import java.util.concurrent.TimeUnit
 
 import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.utils.StyleConstants
+import scalacss.internal.Macros.Color
+import scalacss.internal.{AV, Attr, Length}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
-import scalacss.internal.Macros.Color
-import scalacss.internal.{AV, Attr, Length}
 
 object GuideStyleUtils extends CssBase {
   import dsl._
