@@ -1,12 +1,13 @@
 package io.udash.bindings
 
 import com.avsystem.commons.misc.Opt
-import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
+import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, HasCssName, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
+import org.scalajs.dom.raw._
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
@@ -395,6 +396,36 @@ trait Bindings {
   implicit def toPropertyOps[T](property: ReadableProperty[T]): PropertyOps[T] =
     new PropertyOps(property)
 
+  implicit class InlineStyleOps[T: HasCssName](style: T) {
+    /** Sets style on element. */
+    def applyTo(element: HTMLElement, value: String = ""): Unit =
+      element.style.setProperty(implicitly[HasCssName[T]].cssName(style), value)
+
+
+    /** Removes style from element. */
+    def removeFrom(element: HTMLElement): Unit =
+      element.style.setProperty(implicitly[HasCssName[T]].cssName(style), "")
+
+    /** Synchronises style value with property content. */
+    def bind(property: ReadableProperty[String]): Binding =
+      property.reactiveApply {
+        case (elem: HTMLElement, null) => removeFrom(elem)
+        case (elem: HTMLElement, v) => applyTo(elem, v)
+        case _ =>
+      }
+
+    /**
+      * Synchronises style value with property content by adding it when property is not null and
+      * condition property is 'true' and removing otherwise.
+      */
+    def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Binding =
+      property.combine(conditionProperty)((_, _)).reactiveApply {
+        case (elem: HTMLElement, (null, _) | (_, false)) => removeFrom(elem)
+        case (elem: HTMLElement, (v, true)) => applyTo(elem, v)
+        case _ =>
+      }
+  }
+
 }
 
 object Bindings extends Bindings {
@@ -506,6 +537,19 @@ object Bindings extends Bindings {
         )
         if (available(t)) callback(t, property.get)
       }
+    }
+  }
+
+  /** Abstraction over scalatags styles representation. */
+  trait HasCssName[-T] {
+    def cssName(v: T): String
+  }
+  object HasCssName {
+    implicit val StyleHasCssName: HasCssName[scalatags.generic.Style] = new HasCssName[scalatags.generic.Style] {
+      override def cssName(v: scalatags.generic.Style): String = v.cssName
+    }
+    implicit val PixelStyleHasCssName: HasCssName[scalatags.generic.PixelStyle] = new HasCssName[scalatags.generic.PixelStyle] {
+      override def cssName(v: scalatags.generic.PixelStyle): String = v.cssName
     }
   }
 

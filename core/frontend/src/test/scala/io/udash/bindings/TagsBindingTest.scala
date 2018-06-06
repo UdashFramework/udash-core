@@ -1904,4 +1904,48 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       testDiv.innerHTML shouldBe empty
     }
   }
+
+  "InlineStyleOps" should {
+    "allow reactive inlined style bind" in {
+      val styleProperty = Property("red")
+      val pixelStyleProperty = Property("10px")
+      val testDiv = div(
+        backgroundColor.bind(styleProperty),
+        width.bind(pixelStyleProperty)
+      ).render
+      testDiv.style.getPropertyValue("background-color") should ===("red")
+      testDiv.style.getPropertyValue("width") should ===("10px")
+      styleProperty.set("black")
+      pixelStyleProperty.set("100px")
+      testDiv.style.getPropertyValue("background-color") should ===("black")
+      testDiv.style.getPropertyValue("width") should ===("100px")
+      styleProperty.set(null)
+      pixelStyleProperty.set(null)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      testDiv.style.getPropertyValue("width") should ===("")
+      styleProperty.set("blue")
+      pixelStyleProperty.set("2rem")
+      testDiv.style.getPropertyValue("background-color") should ===("blue")
+      testDiv.style.getPropertyValue("width") should ===("2rem")
+    }
+
+    "allow reactive inlined style bind with condition" in {
+      val styleProperty = Property("red")
+      val conditionProperty = Property(true)
+      val testDiv = div(
+        backgroundColor.bindIf(styleProperty, conditionProperty)
+      ).render
+      testDiv.style.getPropertyValue("background-color") should ===("red")
+      conditionProperty.set(false)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      styleProperty.set("black")
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      conditionProperty.set(true)
+      testDiv.style.getPropertyValue("background-color") should ===("black")
+      styleProperty.set(null)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      styleProperty.set("blue")
+      testDiv.style.getPropertyValue("background-color") should ===("blue")
+    }
+  }
 }
