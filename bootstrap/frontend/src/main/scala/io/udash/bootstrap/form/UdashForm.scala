@@ -249,7 +249,7 @@ object UdashForm {
   def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
-    CheckButtons(selected, options.toProperty)(
+    CheckButtons(selected, options.toSeqProperty)(
       (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
@@ -270,7 +270,7 @@ object UdashForm {
   def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, groupId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
-    RadioButtons(selected, options.toProperty)(
+    RadioButtons(selected, options.toSeqProperty)(
       (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
@@ -290,7 +290,7 @@ object UdashForm {
   def select(selected: Property[String], options: Seq[String],
              label: String => Modifier = Select.defaultLabel,
              inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options.toProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id).render
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id).render
 
   /**
     * Creates multiple selection input for provided `options`.
@@ -304,7 +304,7 @@ object UdashForm {
   def multiselect(selected: SeqProperty[String], options: Seq[String],
                   label: String => Modifier = Select.defaultLabel,
                   inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options.toProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id)
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id)
 
   /** Creates static control element. */
   def staticControl(content: Modifier*): Modifier =

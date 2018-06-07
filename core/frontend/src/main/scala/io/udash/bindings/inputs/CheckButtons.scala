@@ -25,7 +25,7 @@ object CheckButtons {
     * @return HTML element created by decorator.
     */
   def apply[T : PropertyCreator](
-    selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableProperty[Seq[T]]
+    selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableSeqProperty[T]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
       "checkbox",
