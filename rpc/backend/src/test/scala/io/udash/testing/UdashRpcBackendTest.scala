@@ -4,6 +4,7 @@ import java.io.PrintWriter
 import java.util
 import java.util.concurrent.{Future, TimeUnit}
 
+import com.avsystem.commons._
 import io.udash.rpc.{AtmosphereServiceConfig, ExposesServerRPC, Utils}
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
@@ -55,7 +56,7 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
     }
   }
 
-  class AtmosphereServiceConfigMock[RPCType](override val filters: Seq[(AtmosphereResource) => Try[Any]] = Seq.empty,
+  class AtmosphereServiceConfigMock[RPCType](override val filters: ISeq[AtmosphereResource => Try[Unit]] = Nil,
                                              resolveRpcResult: ExposesServerRPC[RPCType] = null)
     extends AtmosphereServiceConfig[RPCType] {
     var closed = false

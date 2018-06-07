@@ -9,7 +9,7 @@ import scalatags.JsDom.all._
 /**
   * Plain checkbox bidirectionally bound to Property.
   *
-  * For SeqProperty take a look at [[io.udash.bindings.CheckButtons]]
+  * For SeqProperty take a look at [[io.udash.bindings.inputs.CheckButtons]]
   */
 object Checkbox {
   /**
@@ -19,11 +19,9 @@ object Checkbox {
     */
   def apply(selected: Property[Boolean])(inputModifiers: Modifier*): InputBinding[JSInput] = {
     new InputBinding[JSInput] {
-      private val in = input(
-        inputModifiers, tpe := "checkbox",
-        nestedInterceptor((checked := "checked").attrIf(selected))
-      ).render
+      private val in = input(inputModifiers, tpe := "checkbox").render
 
+      propertyListeners += selected.listen(in.checked = _, initUpdate = true)
       in.onchange = (_: Event) => selected.set(in.checked)
 
       override def render: JSInput = in
