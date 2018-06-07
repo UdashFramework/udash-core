@@ -39,8 +39,8 @@ trait InnerRPC {
   def func(arg: Int): Future[String]
 }
 object InnerRPC extends SF.RPCCompanion[InnerRPC] {
-  implicit val serverUpickleAsRealRaw: ServerUPickleUdashRPCFramework.AsRealRawRPC[InnerRPC] =
-    ServerUPickleUdashRPCFramework.materializeAsRealRaw
+  implicit val serverUpickleAsRawReal: ServerUPickleUdashRPCFramework.AsRawRealRPC[InnerRPC] =
+    ServerUPickleUdashRPCFramework.materializeAsRawReal
 }
 
 /** Inner Client RPC interface */
@@ -48,8 +48,8 @@ trait InnerClientRPC {
   def proc(): Unit
 }
 object InnerClientRPC extends CF.RPCCompanion[InnerClientRPC] {
-  implicit val clientUpickleAsRealRaw: ClientUPickleUdashRPCFramework.AsRealRawRPC[InnerClientRPC] =
-    ClientUPickleUdashRPCFramework.materializeAsRealRaw
+  implicit val clientUpickleAsRawReal: ClientUPickleUdashRPCFramework.AsRawRealRPC[InnerClientRPC] =
+    ClientUPickleUdashRPCFramework.materializeAsRawReal
 }
 
 /** Main Server side RPC interface */
@@ -126,8 +126,8 @@ trait RPCMethodsImpl extends RPCMethods {
 
 @silent
 object TestRPC extends SF.RPCCompanion[TestRPC] {
-  implicit val serverUpickleAsRealRaw: ServerUPickleUdashRPCFramework.AsRealRawRPC[TestRPC] =
-    ServerUPickleUdashRPCFramework.materializeAsRealRaw
+  implicit val serverUpickleAsRawReal: ServerUPickleUdashRPCFramework.AsRawRealRPC[TestRPC] =
+    ServerUPickleUdashRPCFramework.materializeAsRawReal
 
   /** Returns implementation of server side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestRPC with RPCMethodsImpl {
@@ -173,8 +173,8 @@ object TestRPC extends SF.RPCCompanion[TestRPC] {
 
 @silent
 object TestClientRPC extends CF.RPCCompanion[TestClientRPC] {
-  implicit val clientUpickleAsRealRaw: ClientUPickleUdashRPCFramework.AsRealRawRPC[TestClientRPC] =
-    ClientUPickleUdashRPCFramework.materializeAsRealRaw
+  implicit val clientUpickleAsRawReal: ClientUPickleUdashRPCFramework.AsRawRealRPC[TestClientRPC] =
+    ClientUPickleUdashRPCFramework.materializeAsRawReal
 
   /** Returns implementation of client side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestClientRPC with RPCMethodsImpl {

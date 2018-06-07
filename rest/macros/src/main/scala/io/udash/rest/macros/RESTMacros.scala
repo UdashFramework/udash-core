@@ -1,10 +1,10 @@
 package io.udash.rest.macros
 
-import com.avsystem.commons.macros.rpc.RPCMacros
+import com.avsystem.commons.macros.rpc.RpcMacros
 
 import scala.reflect.macros.blackbox
 
-class RESTMacros(val ctx: blackbox.Context) extends RPCMacros(ctx) {
+class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
 
   import c.universe._
 
