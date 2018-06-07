@@ -14,15 +14,15 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 trait Bindings {
-  val Checkbox      = io.udash.bindings.Checkbox
-  val CheckButtons  = io.udash.bindings.CheckButtons
-  val FileInput     = io.udash.bindings.FileInput
-  val NumberInput   = io.udash.bindings.NumberInput
-  val PasswordInput = io.udash.bindings.PasswordInput
-  val RadioButtons  = io.udash.bindings.RadioButtons
-  val Select        = io.udash.bindings.Select
-  val TextArea      = io.udash.bindings.TextArea
-  val TextInput     = io.udash.bindings.TextInput
+  val Checkbox      = inputs.Checkbox
+  val CheckButtons  = inputs.CheckButtons
+  val FileInput     = inputs.FileInput
+  val NumberInput   = inputs.NumberInput
+  val PasswordInput = inputs.PasswordInput
+  val RadioButtons  = inputs.RadioButtons
+  val Select        = inputs.Select
+  val TextArea      = inputs.TextArea
+  val TextInput     = inputs.TextInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)

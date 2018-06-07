@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons._
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.utils.{CallbacksHandler, Registration}
 import org.atmosphere.cpr._
@@ -11,7 +12,7 @@ import scala.util.Try
   *
   * <p>Creates RPC endpoint per HTTP connection. Endpoint can be aware of [[io.udash.rpc.ClientId]]. </p>
   */
-class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: (ClientId) => ExposesServerRPC[ServerRPCType])
+class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: ClientId => ExposesServerRPC[ServerRPCType])
   extends AtmosphereServiceConfig[ServerRPCType] with LazyLogging {
 
   protected final val RPCName = "RPC"
@@ -37,7 +38,7 @@ class DefaultAtmosphereServiceConfig[ServerRPCType](localRpc: (ClientId) => Expo
     }
   }
 
-  override def filters: Seq[(AtmosphereResource) => Try[Any]] = List()
+  override def filters: ISeq[AtmosphereResource => Try[Unit]] = List()
 
   override def onClose(resource: AtmosphereResource): Unit = {
     val clientId = ClientId(resource.uuid())
