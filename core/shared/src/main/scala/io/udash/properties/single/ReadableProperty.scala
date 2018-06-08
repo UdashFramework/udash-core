@@ -25,7 +25,7 @@ trait ReadableProperty[A] {
   def listenOnce(valueListener: A => Any): Registration
 
   /** Returns listeners count. */
-  private[properties] def listenersCount(): Int
+  def listenersCount(): Int
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   def isValid: Future[ValidationResult]
@@ -82,25 +82,16 @@ trait ReadableProperty[A] {
     */
   def combine[B, O: PropertyCreator](
     property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
-  )(combiner: (A, B) => O): ReadableProperty[O] = {
-    val pc = implicitly[PropertyCreator[O]]
-    val output = pc.newProperty(combiner(get, property.get), combinedParent)
-
-    def update(x: A, y: B): Unit =
-      output.set(combiner(x, y))
-
-    listen(x => update(x, property.get))
-    property.listen(y => update(get, y))
-    output
-  }
+  )(combiner: (A, B) => O): ReadableProperty[O] =
+    new CombinedProperty[A, B, O](this, property, combinedParent, combiner)
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
-  protected[this] val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
+  protected[this] final val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
+  protected[this] final val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
 
-  protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
+  protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
+  protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
   protected[this] var validationResult: Future[ValidationResult] = _
 
   /**
