@@ -8,7 +8,7 @@ import io.udash.utils.Registration
 import scala.collection.immutable
 import scala.concurrent.Future
 
-private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] with ReadableModelProperty[A] with ModelPropertyMacroApi[A] {
+private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
   override val id: PropertyId = PropertyCreator.newID()
 
@@ -40,15 +40,6 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override protected[properties] def validate(): Unit = {}
   override private[properties] def listenersCount() = 0
 
-  override def getSubProperty[T](getter: A => T, key: String): ImmutableProperty[T] =
-    new ImmutableProperty[T](getter(value))
-
-  override def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
-    new ImmutableProperty[T](getter(value))
-
-  override def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
-    new ImmutableSeqProperty[T](getter(value))
-
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
 
@@ -59,6 +50,21 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     if (initUpdate) target.set(transformer(value))
     ImmutableProperty.noopRegistration
   }
+
+  override def readable: ReadableProperty[A] = this
+}
+
+private[properties] class ImmutableModelProperty[A](value: A) extends ImmutableProperty[A](value) with ReadableModelProperty[A] with ModelPropertyMacroApi[A] {
+  override def getSubProperty[T](getter: A => T, key: String): ImmutableProperty[T] =
+    new ImmutableProperty[T](getter(value))
+
+  override def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
+    new ImmutableModelProperty[T](getter(value))
+
+  override def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
+    new ImmutableSeqProperty[T](getter(value))
+
+  override def readable: ReadableModelProperty[A] = this
 }
 
 private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
@@ -88,6 +94,8 @@ private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) exten
 
   override def zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =
     new ImmutableSeqProperty(value.zipWithIndex)
+
+  override def readable: ReadableSeqProperty[A, ImmutableProperty[A]] = this
 }
 
 private[properties] object ImmutableProperty {

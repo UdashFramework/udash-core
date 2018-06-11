@@ -33,6 +33,9 @@ trait ReadableProperty[A] {
   /** Property containing validation result. */
   def valid: ReadableProperty[ValidationResult]
 
+  /** Ensures read-only access to this property. */
+  def readable: ReadableProperty[A]
+
   /** Parent property. `null` if this property has no parent. */
   protected[properties] def parent: ReadableProperty[_]
 
@@ -126,6 +129,9 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     if (validationResult == null) validate()
     validationResult
   }
+
+  override lazy val readable: ReadableProperty[A] =
+    new ReadableWrapper[A](this)
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)

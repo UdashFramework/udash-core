@@ -10,25 +10,28 @@ import scala.concurrent.Future
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
   /** Returns child ModelProperty[B]. */
   def roSubModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ReadableModelProperty[B] =
-  macro io.udash.macros.PropertyMacros.reifyRoSubModel[A, B]
+    macro io.udash.macros.PropertyMacros.reifyRoSubModel[A, B]
 
   /** Returns child DirectProperty[B]. */
   def roSubProp[B](f: A => B)(implicit ev: PropertyCreator[B]): ReadableProperty[B] =
-  macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
+    macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
   def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
-  macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
+    macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
 
+  /** Ensures read-only access to this property. */
+  override def readable: ReadableModelProperty[A]
 }
 
-trait ModelPropertyMacroApi[A] {
+trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
   def getSubProperty[T](getter: A => T, key: String): ReadableProperty[T]
   def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T]
   def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]]
 }
 
-private[properties] trait AbstractReadableModelProperty[A] extends ReadableModelProperty[A] with AbstractReadableProperty[A] {
+private[properties] trait AbstractReadableModelProperty[A]
+  extends ReadableModelProperty[A] with AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
   protected val properties = CrossCollections.createDictionary[Property[_]]
 
   /**
@@ -47,4 +50,7 @@ private[properties] trait AbstractReadableModelProperty[A] extends ReadableModel
     }
     validationResult
   }
+
+  override lazy val readable: ReadableModelProperty[A] =
+    new ReadableWrapper[A](this)
 }

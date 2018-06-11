@@ -100,7 +100,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
   def currentState: HierarchyRoot = currentStateProp.get
 
   /** @return Property reflecting current routing state */
-  def currentStateProperty: ReadableProperty[HierarchyRoot] = currentStateProp.transform(identity)
+  def currentStateProperty: ReadableProperty[HierarchyRoot] = currentStateProp.readable
 
   @tailrec
   private def getStatePath(forState: Option[HierarchyRoot], acc: List[HierarchyRoot] = Nil): List[HierarchyRoot] = forState match {

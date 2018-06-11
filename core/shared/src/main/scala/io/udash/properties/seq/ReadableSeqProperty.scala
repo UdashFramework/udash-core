@@ -102,6 +102,8 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
 
   /** Zips elements from `this` SeqProperty with their indexes. */
   def zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]]
+
+  override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
 trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
@@ -137,4 +139,7 @@ trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends A
     val cpy = CrossCollections.copyArray(structureListeners)
     CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
   }
+
+  override lazy val readable: ReadableSeqProperty[A, ReadableProperty[A]] =
+    new ReadableWrapper[A](this)
 }
