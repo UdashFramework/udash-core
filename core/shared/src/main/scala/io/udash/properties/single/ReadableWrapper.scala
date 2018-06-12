@@ -10,7 +10,7 @@ private[properties] class ReadableWrapper[T](private val p: ReadableProperty[T])
   override def get: T = p.get
   override def listen(valueListener: T => Any, initUpdate: Boolean): Registration = p.listen(valueListener, initUpdate)
   override def listenOnce(valueListener: T => Any): Registration = p.listenOnce(valueListener)
-  override private[properties] def listenersCount() = p.listenersCount()
+  override def listenersCount(): Int = p.listenersCount()
   override def isValid: Future[ValidationResult] = p.isValid
   override def valid: ReadableProperty[ValidationResult] = p.valid
   override protected[properties] def parent: ReadableProperty[_] = p.parent
