@@ -28,7 +28,7 @@ object FileInput {
 
       in.onchange = (ev: Event) => {
         ev.preventDefault()
-        selectedFiles.replace(0, selectedFiles.size, (0 until in.files.length).map { idx => in.files(idx) }:_*)
+        selectedFiles.replace(0, selectedFiles.size, (0 until in.files.length).map { idx => in.files(idx) }: _*)
       }
 
       override def render: JSInput = in

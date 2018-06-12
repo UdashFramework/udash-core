@@ -85,5 +85,48 @@ class CheckboxTest extends UdashFrontendTest {
       checkbox.kill()
       p.listenersCount() should be(0)
     }
+
+    "synchronise with two inputs bound to a single property" in {
+      val p = Property[Boolean](true)
+      val input = Checkbox(p)()
+      val input2 = Checkbox(p)()
+
+      val r = input.render
+      val r2 = input2.render
+
+      r.checked should be(true)
+      r2.checked should be(true)
+
+      p.set(false)
+      r.checked should be(false)
+      r2.checked should be(false)
+
+      r.checked = true
+      r.onchange(null)
+      p.get should be(true)
+      r2.checked should be(true)
+
+      r2.checked = false
+      r2.onchange(null)
+      p.get should be(false)
+      r.checked should be(false)
+
+      p.listenersCount() should be(2)
+
+      input2.kill()
+      p.listenersCount() should be(1)
+
+      r.checked = true
+      r.onchange(null)
+      p.get should be(true)
+      r2.checked should be(false)
+
+      input.kill()
+      p.listenersCount() should be(0)
+
+      p.set(false)
+      r.checked should be(true)
+      r2.checked should be(false)
+    }
   }
 }

@@ -3,7 +3,7 @@ package modal
 
 import io.udash.css.CssStyle
 
-final class ModalSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq:_*) {
+final class ModalSize(sizeStyle: Option[CssStyle]) extends ClassModifier(sizeStyle.toSeq: _*) {
   def this(sizeStyle: CssStyle) = this(Some(sizeStyle))
 }
 

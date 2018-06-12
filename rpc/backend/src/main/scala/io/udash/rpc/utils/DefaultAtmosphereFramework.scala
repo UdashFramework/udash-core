@@ -1,13 +1,17 @@
 package io.udash.rpc.utils
 
+import com.typesafe.scalalogging.Logger
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig}
 import javax.servlet.ServletConfig
 import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
 
 /** AtmosphereFramework with default configuration for Udash. */
-class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_], exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry)
-  extends AtmosphereFramework {
+class DefaultAtmosphereFramework(
+  config: AtmosphereServiceConfig[_],
+  exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry,
+  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex)
+) extends AtmosphereFramework {
   addInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_NATIVE_COMETSUPPORT, "true")
@@ -22,6 +26,6 @@ class DefaultAtmosphereFramework(config: AtmosphereServiceConfig[_], exceptionsR
 
   override def init(sc: ServletConfig): AtmosphereFramework = {
     super.init(sc)
-    addAtmosphereHandler("/*", new AtmosphereService(config, exceptionsRegistry))
+    addAtmosphereHandler("/*", new AtmosphereService(config, exceptionsRegistry, onRequestHandlingFailure = onRequestHandlingFailure))
   }
 };

@@ -11,8 +11,8 @@ class TestViewRenderer extends ViewRenderer(null) {
 
   override def renderView(subPathToLeave: List[View], pathToAdd: List[View]): Unit = {
     views.clear()
-    views.append(subPathToLeave:_*)
-    views.append(pathToAdd:_*)
+    views.append(subPathToLeave: _*)
+    views.append(pathToAdd: _*)
 
     lastSubPathToLeave = subPathToLeave
     lastPathToAdd = pathToAdd

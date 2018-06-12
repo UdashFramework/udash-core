@@ -88,10 +88,10 @@ class TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9](override val key: Stri
 
 class TranslationKeyX(override val key: String) extends TranslationKey {
   def apply(argv: Any*)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, argv:_*)
+    provider.translate(key, argv: _*)
 
   def reduce(argv: Any*): TranslationKey0 =
-    new TranslationKey.ReducedTranslationKey(key, argv:_*)
+    new TranslationKey.ReducedTranslationKey(key, argv: _*)
 }
 
 object TranslationKey {
@@ -133,7 +133,7 @@ object TranslationKey {
 
   private[i18n] class ReducedTranslationKey(override val key: String, val argv: Any*) extends TranslationKey0(key) {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-      provider.translate(key, argv:_*)
+      provider.translate(key, argv: _*)
   }
 
   private[i18n] class Untranslatable(override val key: String) extends TranslationKey0(key) {

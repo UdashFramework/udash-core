@@ -42,7 +42,7 @@ object Property {
         listener(target.get)
         target.listen(listener)
       }
-      p.transform(identity)
+      p.readable
     }
 
     def clear(): Unit =

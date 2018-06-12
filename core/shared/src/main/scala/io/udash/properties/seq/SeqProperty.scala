@@ -52,6 +52,11 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends AbstractReadableSeqProper
   /** Removes all elements from this SeqProperty. */
   def clear(): Unit = remove(0, size)
 
+  override def clearListeners(): Unit = {
+    super.clearListeners()
+    structureListeners.clear()
+  }
+
   /** Transforms SeqProperty[A] into SeqProperty[B].
     *
     * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */

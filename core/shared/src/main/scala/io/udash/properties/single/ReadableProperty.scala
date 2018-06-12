@@ -25,13 +25,16 @@ trait ReadableProperty[A] {
   def listenOnce(valueListener: A => Any): Registration
 
   /** Returns listeners count. */
-  private[properties] def listenersCount(): Int
+  def listenersCount(): Int
 
   /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
   def isValid: Future[ValidationResult]
 
   /** Property containing validation result. */
   def valid: ReadableProperty[ValidationResult]
+
+  /** Ensures read-only access to this property. */
+  def readable: ReadableProperty[A]
 
   /** Parent property. `null` if this property has no parent. */
   protected[properties] def parent: ReadableProperty[_]
@@ -79,53 +82,40 @@ trait ReadableProperty[A] {
     */
   def combine[B, O: PropertyCreator](
     property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
-  )(combiner: (A, B) => O): ReadableProperty[O] = {
-    val pc = implicitly[PropertyCreator[O]]
-    val output = pc.newProperty(combiner(get, property.get), combinedParent)
-
-    def update(x: A, y: B): Unit =
-      output.set(combiner(x, y))
-
-    listen(x => update(x, property.get))
-    property.listen(y => update(get, y))
-    output
-  }
+  )(combiner: (A, B) => O): ReadableProperty[O] =
+    new CombinedProperty[A, B, O](this, property, combinedParent, combiner)
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
-  protected[this] val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
+  protected[this] final val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
+  protected[this] final val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
 
-  protected[this] lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
+  protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
+  protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
   protected[this] var validationResult: Future[ValidationResult] = _
 
-  /**
-    * Registers listener which will be called on value change.
-    * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
-    */
-  def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
+  override def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
     if (initUpdate) valueListener(this.get)
     new MutableBufferRegistration(listeners, valueListener)
   }
 
-  /** Registers listener which will be called on the next value change. This listener will be fired only once. */
-  def listenOnce(valueListener: A => Any): Registration = {
+  override def listenOnce(valueListener: A => Any): Registration = {
     val reg = new MutableBufferRegistration(listeners, valueListener)
     oneTimeListeners += ((valueListener, () => reg.cancel()))
     reg
   }
 
-  /** Returns listeners count. */
-  def listenersCount(): Int =
+  override def listenersCount(): Int =
     listeners.length + oneTimeListeners.length
 
-  /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
-  def isValid: Future[ValidationResult] = {
+  override def isValid: Future[ValidationResult] = {
     if (validationResult == null) validate()
     validationResult
   }
+
+  override lazy val readable: ReadableProperty[A] =
+    new ReadableWrapper[A](this)
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
@@ -147,10 +137,9 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     }
   }
 
-  /** Property containing validation result. */
-  lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
+  override lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
 
-  protected[properties] def fireValueListeners(): Unit = {
+  protected[properties] override def fireValueListeners(): Unit = {
     CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
       val listenersCopy = CrossCollections.copyArray(listeners)
@@ -164,13 +153,13 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     })
   }
 
-  protected[properties] def valueChanged(): Unit = {
+  protected[properties] override def valueChanged(): Unit = {
     validationResult = null
     fireValueListeners()
     if (parent != null) parent.valueChanged()
   }
 
-  protected[properties] def validate(): Unit = {
+  protected[properties] override def validate(): Unit = {
     import scala.concurrent.ExecutionContext.Implicits.global
     if (validators.nonEmpty) {
       val p = Promise[ValidationResult]

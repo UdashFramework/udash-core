@@ -29,10 +29,10 @@ object RadioButtons {
     * @return HTML element created by decorator.
     */
   def apply[T : PropertyCreator](
-    selectedItem: Property[T], options: ReadableProperty[Seq[T]]
+    selectedItem: Property[T], options: ReadableSeqProperty[T]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
-      "checkbox",
+      "radio",
       opt => selectedItem.transform(_ == opt),
       opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
       (_: JSInput, opt: T) => (_: Event) => selectedItem.set(opt)
@@ -52,14 +52,14 @@ object RadioButtons {
     decorator: Seq[(JSInput, String)] => JsDom.TypedTag[Element], xs: Modifier*
   ): JsDom.TypedTag[Element] = {
     val bind = prepareBind(property)
-    val htmlInputs = prepareHtmlInputs(options, bind)(xs:_*)
+    val htmlInputs = prepareHtmlInputs(options, bind)(xs: _*)
     decorator(htmlInputs.zip(options))
   }
 
   private def prepareHtmlInputs(options: Seq[String], binding: JsDom.Modifier)(xs: Modifier*): Seq[JSInput] = {
     val uuid: String = ju.UUID.randomUUID().toString
     options.map { opt =>
-      val el: JSInput = input(tpe := "radio", value := opt, binding)(xs:_*).render
+      val el: JSInput = input(tpe := "radio", value := opt, binding)(xs: _*).render
       el.name = uuid
       el
     }
