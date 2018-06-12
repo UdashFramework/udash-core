@@ -50,7 +50,7 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
 
-      CrossCollections.replace(filteredProps, idx, removed.size, added:_*)
+      CrossCollections.replace(filteredProps, idx, removed.size, added: _*)
 
       val filteredPatch = Patch[ElemType](idx, removed, added, filteredProps.isEmpty)
 

@@ -1761,7 +1761,7 @@ class PropertyTest extends UdashSharedTest {
 
     "return immutable sequence from get" in {
       val p = SeqProperty[Int](1, 2, 3)
-      p.replace(0, 3, p.get.map(_ + 1):_*)
+      p.replace(0, 3, p.get.map(_ + 1): _*)
       p.get should be(Seq(2, 3, 4))
     }
 

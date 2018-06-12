@@ -43,7 +43,7 @@ object TextArea {
     */
   @deprecated("Use `apply` returning `InputBinding` instead.", "0.7.0")
   def debounced(property: Property[String], xs: Modifier*): JsDom.TypedTag[TextArea] =
-    apply(property, Some(20 millis), xs:_*)
+    apply(property, Some(20 millis), xs: _*)
 
   private class TextAreaModifier(property: Property[String], debounce: Option[Duration])
     extends TextInputsModifier(property, debounce)  {

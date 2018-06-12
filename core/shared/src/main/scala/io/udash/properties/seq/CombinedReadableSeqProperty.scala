@@ -22,7 +22,7 @@ class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
       removed = originPatch.removed.indices.map(idx => combinedChildren.get(idx + originPatch.idx)),
       added = combinedNewChildren
     )
-    CrossCollections.replace(combinedChildren.get, originPatch.idx, originPatch.removed.size, combinedNewChildren:_*)
+    CrossCollections.replace(combinedChildren.get, originPatch.idx, originPatch.removed.size, combinedNewChildren: _*)
     fireElementsListeners(mappedPatch, structureListeners)
   }
 
