@@ -7,7 +7,7 @@ import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
-import org.scalajs.dom.raw._
+import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
@@ -396,15 +396,14 @@ trait Bindings {
   implicit def toPropertyOps[T](property: ReadableProperty[T]): PropertyOps[T] =
     new PropertyOps(property)
 
-  implicit class InlineStyleOps[T: HasCssName](style: T) {
+  implicit class InlineStyleOps[T: HasCssName](style: T)(implicit hasCssName: HasCssName[T]) {
     /** Sets style on element. */
     def applyTo(element: HTMLElement, value: String = ""): Unit =
-      element.style.setProperty(implicitly[HasCssName[T]].cssName(style), value)
-
+      element.style.setProperty(hasCssName.cssName(style), value)
 
     /** Removes style from element. */
     def removeFrom(element: HTMLElement): Unit =
-      element.style.setProperty(implicitly[HasCssName[T]].cssName(style), "")
+      element.style.removeProperty(hasCssName.cssName(style))
 
     /** Synchronises style value with property content. */
     def bind(property: ReadableProperty[String]): Binding =
@@ -545,10 +544,13 @@ object Bindings extends Bindings {
     def cssName(v: T): String
   }
   object HasCssName {
-    implicit val StyleHasCssName: HasCssName[scalatags.generic.Style] = new HasCssName[scalatags.generic.Style] {
+
+    import scalatags.generic.{PixelStyle, Style}
+
+    implicit val StyleHasCssName: HasCssName[Style] = new HasCssName[Style] {
       override def cssName(v: scalatags.generic.Style): String = v.cssName
     }
-    implicit val PixelStyleHasCssName: HasCssName[scalatags.generic.PixelStyle] = new HasCssName[scalatags.generic.PixelStyle] {
+    implicit val PixelStyleHasCssName: HasCssName[PixelStyle] = new HasCssName[PixelStyle] {
       override def cssName(v: scalatags.generic.PixelStyle): String = v.cssName
     }
   }
