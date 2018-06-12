@@ -31,7 +31,7 @@ trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
 }
 
 private[properties] trait AbstractReadableModelProperty[A]
-  extends ReadableModelProperty[A] with AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
+  extends AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
   protected val properties = CrossCollections.createDictionary[Property[_]]
 
   /**
