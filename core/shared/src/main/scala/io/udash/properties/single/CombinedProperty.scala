@@ -1,5 +1,6 @@
 package io.udash.properties.single
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 
@@ -23,7 +24,10 @@ class CombinedProperty[A, B, R](
   }
 
   private def initOriginListener(): Unit = {
-    if (originListenerRegistrations == null || !originListenerRegistrations._1.isActive || !originListenerRegistrations._2.isActive) {
+    val alreadyActive = Opt(originListenerRegistrations).exists {
+      case (listenerOne, listenerTwo) => listenerOne.isActive && listenerTwo.isActive
+    }
+    if (!alreadyActive) {
       listeners.clear()
       originListenerRegistrations = (origin.listen(originListenerOne), originTwo.listen(originListenerTwo))
     }
@@ -31,8 +35,9 @@ class CombinedProperty[A, B, R](
 
   private def killOriginListener(): Unit = {
     if (originListenerRegistrations != null && listeners.isEmpty) {
-      originListenerRegistrations._1.cancel()
-      originListenerRegistrations._2.cancel()
+      val (listenerOne, listenerTwo) = originListenerRegistrations
+      listenerOne.cancel()
+      listenerTwo.cancel()
       originListenerRegistrations = null
     }
   }

@@ -38,7 +38,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override protected[properties] def fireValueListeners(): Unit = {}
   override protected[properties] def valueChanged(): Unit = {}
   override protected[properties] def validate(): Unit = {}
-  override def listenersCount() = 0
+  override def listenersCount(): Int = 0
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
