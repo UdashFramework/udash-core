@@ -277,6 +277,7 @@ class PropertyTest extends UdashSharedTest {
 
     "fire transform method when needed (2)" in {
       var counter = 0
+      var counter2 = 0
       val pageProperty = Property(1)
       val seenAllProperty = Property(false)
 
@@ -285,46 +286,73 @@ class PropertyTest extends UdashSharedTest {
         if (all) Some(pageProperty.get) else None
       })
 
-      val lastPageProperty = totalPagesProperty.combine(pageProperty)((total, page) =>
+      val lastPageProperty = totalPagesProperty.combine(pageProperty) { (total, page) =>
+        counter2 += 1
         total.exists(_ <= page)
-      )
+      }
 
-      counter should be(1)
+      counter should be(0)
+      counter2 should be(0)
 
       pageProperty.set(1)
-      counter should be(1)
+      counter should be(0)
+      counter2 should be(0)
 
       pageProperty.set(2)
-      counter should be(1)
+      counter should be(0)
+      counter2 should be(0)
 
       pageProperty.set(3)
-      counter should be(1)
+      counter should be(0)
+      counter2 should be(0)
 
       totalPagesProperty.get should be(None)
+      counter should be(1)
+      counter2 should be(0)
 
       seenAllProperty.set(true)
-      counter should be(2)
+      counter should be(1)
+      counter2 should be(0)
+
       totalPagesProperty.get should be(Some(3))
+      counter should be(2)
+      counter2 should be(0)
+
       lastPageProperty.get should be(true)
+      counter should be(2)
+      counter2 should be(1)
     }
 
-    "combine with other properties" in {
+    "combine with other properties (single properties)" in {
       val p1 = Property(1)
       val p2 = Property(2)
 
       val sum = p1.combine(p2)(_ + _)
       val mul = p1.combine(p2)(_ * _)
 
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
       sum.get should be(3)
       mul.get should be(2)
 
       p1.set(12)
 
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
       sum.get should be(14)
       mul.get should be(24)
 
+      var sumCallbackValue = 0
+      var mulCallbackValue = 0
+      val r1 = sum.listen(sumCallbackValue = _)
+      val r2 = mul.listen(mulCallbackValue = _)
+      p1.listenersCount() should be(2)
+      p2.listenersCount() should be(2)
+
       p2.set(-2)
 
+      sumCallbackValue should be(10)
+      mulCallbackValue should be(-24)
       sum.get should be(10)
       mul.get should be(-24)
 
@@ -333,6 +361,17 @@ class PropertyTest extends UdashSharedTest {
       sum.get should be(10)
       mul.get should be(-24)
 
+      p1.listenersCount() should be(2)
+      p2.listenersCount() should be(2)
+      r1.cancel()
+      p1.listenersCount() should be(1)
+      p2.listenersCount() should be(1)
+      r2.cancel()
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
+    }
+
+    "combine with other properties (model properties)" in {
       trait M {
         def x: Double
         def y: Double
@@ -345,10 +384,22 @@ class PropertyTest extends UdashSharedTest {
           }
       }
 
+      val p1 = Property(12)
+      val p2 = Property(-2)
+
+      val sum = p1.combine(p2)(_ + _)
       val m = ModelProperty[M](M(0.5, 0.3))
+
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
 
       val mxc = sum.combine(m)(_ * _.x)
       val myc = sum.combine(m.subProp(_.y))(_ * _)
+
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
+      sum.listenersCount() should be(0)
+      m.listenersCount() should be(0)
 
       // sum.get == 10
       mxc.get should be(5.0)
@@ -357,12 +408,21 @@ class PropertyTest extends UdashSharedTest {
       var mxcChanges = 0
       var mycChanges = 0
       var mycChangesWithInit = 0
-      mxc.listen(_ => mxcChanges += 1)
-      myc.listen(_ => mycChanges += 1)
-      myc.listen(_ => mycChangesWithInit += 1, initUpdate = true)
+      val r1 = mxc.listen(_ => mxcChanges += 1)
+      val r2 = myc.listen(_ => mycChanges += 1)
+      val r3 = myc.listen(_ => mycChangesWithInit += 1, initUpdate = true)
 
-      m.subProp(_.x).set(0.2)
-      m.subProp(_.y).set(0.1)
+      p1.listenersCount() should be(1)
+      p2.listenersCount() should be(1)
+      sum.listenersCount() should be(2)
+      m.listenersCount() should be(1)
+      m.subProp(_.x).listenersCount() should be(0)
+      m.subProp(_.y).listenersCount() should be(1)
+
+      CallbackSequencer().sequence {
+        m.subProp(_.x).set(0.2)
+        m.subProp(_.y).set(0.1)
+      }
 
       // sum.get == 10
       mxc.get should be(2.0)
@@ -371,16 +431,60 @@ class PropertyTest extends UdashSharedTest {
       mycChanges should be(1)
       mycChangesWithInit should be(2)
 
+      p1.listenersCount() should be(1)
+      p2.listenersCount() should be(1)
+      sum.listenersCount() should be(2)
+      m.listenersCount() should be(1)
+      m.subProp(_.x).listenersCount() should be(0)
+      m.subProp(_.y).listenersCount() should be(1)
+
+      r1.cancel()
+      r2.cancel()
+      r3.cancel()
+
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
+      sum.listenersCount() should be(0)
+      m.listenersCount() should be(0)
+      m.subProp(_.x).listenersCount() should be(0)
+      m.subProp(_.y).listenersCount() should be(0)
+    }
+
+    "combine with other properties (seq properties)" in {
+      val p1 = Property(12)
+      val p2 = Property(-2)
+
+      val sum = p1.combine(p2)(_ + _)
       val s = SeqProperty(1, 2, 3, 4)
+
       val sc = sum.combine(s)((m, items) => items.map(_ * m))
       val sqc = s.combine(sum)(_ * _)
+
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
+      sum.listenersCount() should be(0)
+      s.listenersCount() should be(0)
 
       // sum.get == 10
       sc.get should be(Seq(10, 20, 30, 40))
       sqc.get should be(Seq(10, 20, 30, 40))
 
       var sqcHeadChanges = 0
-      sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+      val r1 = sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+
+      p1.listenersCount() should be(1)
+      p2.listenersCount() should be(1)
+      sum.listenersCount() should be(1)
+      s.listenersCount() should be(0)
+
+      var sqcChanges = 0
+      val r2 = sqc.listen(_ => sqcChanges += 1)
+
+      p1.listenersCount() should be(1)
+      p2.listenersCount() should be(1)
+      sum.listenersCount() should be(2)
+      s.listenersCount() should be(1)
+
       s.replace(1, 2, 7, 8, 9)
 
       // sum.get == 10
@@ -388,15 +492,25 @@ class PropertyTest extends UdashSharedTest {
       sqc.get should be(Seq(10, 70, 80, 90, 40))
 
       sqcHeadChanges should be(0)
+      sqcChanges should be(1)
 
       p1.set(0)
       p2.set(0)
 
       sqcHeadChanges should be(2)
+      sqcChanges should be(3)
 
       // sum.get == 0
       sc.get should be(Seq(0, 0, 0, 0, 0))
       sqc.get should be(Seq(0, 0, 0, 0, 0))
+
+      r1.cancel()
+      r2.cancel()
+
+      p1.listenersCount() should be(0)
+      p2.listenersCount() should be(0)
+      sum.listenersCount() should be(0)
+      s.listenersCount() should be(0)
     }
 
     "transform to ReadableSeqProperty" in {
@@ -1648,7 +1762,7 @@ class PropertyTest extends UdashSharedTest {
 
     "return immutable sequence from get" in {
       val p = SeqProperty[Int](1, 2, 3)
-      p.replace(0, 3, p.get.map(_ + 1):_*)
+      p.replace(0, 3, p.get.map(_ + 1): _*)
       p.get should be(Seq(2, 3, 4))
     }
 
@@ -1946,12 +2060,21 @@ class PropertyTest extends UdashSharedTest {
       val p = Property(2)
 
       val c = s.combine(p)(_ * _)
+      s.listenersCount() should be(0)
+      s.structureListenersCount() should be(0)
+      p.listenersCount() should be(0)
 
       val listenCalls = mutable.ListBuffer[Seq[Int]]()
-      c.listen(v => listenCalls += v)
+      val r1 = c.listen(v => listenCalls += v)
+      s.listenersCount() should be(1)
+      s.structureListenersCount() should be(0)
+      p.listenersCount() should be(1)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      c.listenStructure(patch => lastPatch = patch)
+      val r2 = c.listenStructure(patch => lastPatch = patch)
+      s.listenersCount() should be(1)
+      s.structureListenersCount() should be(1)
+      p.listenersCount() should be(1)
 
       c.get should be(Seq(2, 4, 6, 8))
 
@@ -2017,6 +2140,16 @@ class PropertyTest extends UdashSharedTest {
       lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
+
+      r1.cancel()
+      s.listenersCount() should be(0)
+      s.structureListenersCount() should be(1)
+      p.listenersCount() should be(0)
+
+      r2.cancel()
+      s.listenersCount() should be(0)
+      s.structureListenersCount() should be(0)
+      p.listenersCount() should be(0)
     }
 
     "provide reversed version" in {

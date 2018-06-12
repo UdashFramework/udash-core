@@ -50,14 +50,14 @@ object CheckButtons {
     property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String],
     decorator: Seq[(JSInput, String)] => TypedTag[Element], xs: Modifier*
   ): TypedTag[Element] = {
-    val htmlInputs = prepareHtmlInputs(options)(xs:_*)
+    val htmlInputs = prepareHtmlInputs(options)(xs: _*)
     val bind = prepareBind(property)
     htmlInputs.foreach(bind.applyTo)
     decorator(htmlInputs.zip(options))
   }
 
   private def prepareHtmlInputs(options: Seq[String])(xs: Modifier*): Seq[JSInput] =
-    options.map(opt => input(tpe := "checkbox", value := opt)(xs:_*).render)
+    options.map(opt => input(tpe := "checkbox", value := opt)(xs: _*).render)
 
   private def prepareBind(property: SeqProperty[String, _ <: ReadableProperty[String]]): Modifier = {
     def updateInput(t: JSInput): Unit = {

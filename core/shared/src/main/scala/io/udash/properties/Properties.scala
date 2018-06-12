@@ -41,7 +41,7 @@ object Properties extends Properties {
   }
 
   class Any2ModelProperty[A] private[properties](private val value: A) extends AnyVal {
-    def toModelProperty: ReadableModelProperty[A] = new ImmutableProperty[A](value)
+    def toModelProperty: ReadableModelProperty[A] = new ImmutableModelProperty[A](value)
   }
 
   class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {

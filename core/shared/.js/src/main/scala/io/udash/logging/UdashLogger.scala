@@ -18,25 +18,25 @@ class UdashLogger extends CrossLogger {
   }
 
   def debug(message: String, params: Any*): Unit =
-    printWithParams(console.log)(message, params:_*)
+    printWithParams(console.log)(message, params: _*)
 
   def debug(message: String, cause: Throwable): Unit =
     printWithCause(console.log)(message, cause)
 
   def info(message: String, params: Any*): Unit =
-    printWithParams(console.info)(message, params:_*)
+    printWithParams(console.info)(message, params: _*)
 
   def info(message: String, cause: Throwable): Unit =
     printWithCause(console.info)(message, cause)
 
   def warn(message: String, params: Any*): Unit =
-    printWithParams(console.warn)(message, params:_*)
+    printWithParams(console.warn)(message, params: _*)
 
   def warn(message: String, cause: Throwable): Unit =
     printWithCause(console.warn)(message, cause)
 
   def error(message: String, params: Any*): Unit =
-    printWithParams(console.error)(message, params:_*)
+    printWithParams(console.error)(message, params: _*)
 
   def error(message: String, cause: Throwable): Unit =
     printWithCause(console.error)(message, cause)

@@ -102,7 +102,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
   /**
     * @return Property containing active slide index
     */
-  def activeIndex: ReadableProperty[Int] = _activeIndex.transform(identity)
+  def activeIndex: ReadableProperty[Int] = _activeIndex.readable
 
   /**
     * Turn on slide transition.

@@ -57,6 +57,9 @@ trait TestRPC extends RPCMethods {
 
   def doStuffUnit(): Future[Unit]
 
+  @Logged
+  def fireSomething(arg: Int): Unit
+
   def innerRpc(name: String): InnerRPC
 
   def throwingGetter(): InnerRPC
@@ -74,7 +77,7 @@ trait TestClientRPC extends RPCMethods {
 trait RPCMethodsImpl extends RPCMethods {
   def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any
 
-  protected def onProcedure(methodName: String, args: List[List[Any]]): Unit =
+  protected def onFire(methodName: String, args: List[List[Any]]): Unit =
     onInvocationInternal(methodName, args, None)
 
   protected def onCall[T](methodName: String, args: List[List[Any]], result: T): Future[T] = {
@@ -93,13 +96,13 @@ trait RPCMethodsImpl extends RPCMethods {
   }
 
   override def handleMore(): Unit =
-    onProcedure("handleMore", List(Nil))
+    onFire("handleMore", List(Nil))
 
   override def doStuff(lol: Int, fuu: String)(cos: Option[Boolean]): Unit =
-    onProcedure("doStuff", List(List(lol, fuu), List(cos)))
+    onFire("doStuff", List(List(lol, fuu), List(cos)))
 
   override def doStuff(num: Int): Unit =
-    onProcedure("doStuffInt", List(List(num)))
+    onFire("doStuffInt", List(List(num)))
 
   def doStuff(yes: Boolean): Future[String] =
     onCall("doStuff", List(List(yes)), "doStuffResult")
@@ -109,13 +112,13 @@ trait RPCMethodsImpl extends RPCMethods {
 
   @silent
   override def handle: Unit =
-    onProcedure("handle", Nil)
+    onFire("handle", Nil)
 
   override def takeCC(r: Record): Unit =
-    onProcedure("recordCC", List(List(r)))
+    onFire("recordCC", List(List(r)))
 
   override def srslyDude(): Unit =
-    onProcedure("srslyDude", List(Nil))
+    onFire("srslyDude", List(Nil))
 }
 
 object TestRPC {
@@ -136,6 +139,9 @@ object TestRPC {
     def doStuffUnit(): Future[Unit] =
       onCall("doStuffUnit", List(Nil), ())
 
+    override def fireSomething(arg: Int): Unit =
+      onFire("fireSomething", List(List(arg)))
+
     override def onInvocationInternal: (String, List[List[Any]], Option[Any]) => Any = onInvocation
 
     override def innerRpc(name: String): InnerRPC = {
@@ -145,7 +151,7 @@ object TestRPC {
           onCall("innerRpc.func", List(List(arg)), "innerRpc.funcResult")
 
         def proc(): Unit =
-          onProcedure("innerRpc.proc", List(Nil))
+          onFire("innerRpc.proc", List(Nil))
       }
     }
 
@@ -170,7 +176,7 @@ object TestClientRPC {
       onInvocationInternal("innerRpc", List(List(name)), None)
       new InnerClientRPC {
         def proc(): Unit =
-          onProcedure("innerRpc.proc", List(Nil))
+          onFire("innerRpc.proc", List(Nil))
       }
     }
   }

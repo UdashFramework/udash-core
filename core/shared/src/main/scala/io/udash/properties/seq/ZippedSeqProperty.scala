@@ -1,10 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.single.ReadableProperty
 import io.udash.properties._
-import io.udash.utils.{Registration, SetRegistration}
-
-import scala.collection.mutable
+import io.udash.properties.single.ReadableProperty
 
 private[properties]
 abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
@@ -12,7 +9,6 @@ abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, 
   override protected[properties] val parent: ReadableProperty[_] = null
 
   protected final val children = CrossCollections.createArray[ReadableProperty[O]]
-  private val structureListeners: mutable.Set[Patch[ReadableProperty[O]] => Any] = mutable.Set()
 
   protected def update(fromIdx: Int): Unit
 
@@ -37,11 +33,6 @@ abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, 
 
   override def elemProperties: Seq[ReadableProperty[O]] =
     children
-
-  override def listenStructure(structureListener: Patch[ReadableProperty[O]] => Any): Registration = {
-    structureListeners += structureListener
-    new SetRegistration(structureListeners, structureListener)
-  }
 }
 
 private[properties]
