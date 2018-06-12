@@ -42,11 +42,11 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
 
   def style(impl: Expr[ToStyle]*): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
-    style(q"$fullName", impl:_*)
+    style(q"$fullName", impl: _*)
   }
 
   def namedStyle(className: Expr[String], impl: Expr[ToStyle]*): Tree =
-    style(className.tree, impl:_*)
+    style(className.tree, impl: _*)
 
   private def keyframes(name: Tree, impl: Expr[(Double, Seq[ToStyle])]*): Tree =
     handleScalaJs(name,
@@ -54,7 +54,7 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
         {
           val tmp = new $KeyframesCls($name,
             Seq(..$impl).map { case (p, s) =>
-              (p, $Dsl.style(s:_*)($Compose.trust))
+              (p, $Dsl.style(s: _*)($Compose.trust))
             }
           )
           ${c.prefix}.elementsBuffer += tmp
@@ -64,11 +64,11 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
 
   def keyframes(impl: Expr[(Double, Seq[ToStyle])]*): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
-    keyframes(q"$fullName", impl:_*)
+    keyframes(q"$fullName", impl: _*)
   }
 
   def namedKeyframes(className: Expr[String], impl: Expr[(Double, Seq[ToStyle])]*): Tree =
-    keyframes(className.tree, impl:_*)
+    keyframes(className.tree, impl: _*)
 
   private def fontFace(name: Tree, font: Expr[FontFace.FontSrcSelector => FontFace[Option[String]]]): Tree =
     handleScalaJs(name,

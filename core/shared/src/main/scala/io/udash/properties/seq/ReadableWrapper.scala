@@ -19,6 +19,8 @@ private[properties] class ReadableWrapper[T](private val p: ReadableSeqProperty[
       ))
     }
 
+
+  override def structureListenersCount(): Int = p.structureListenersCount()
   override def transform[B](transformer: T => B): ReadableSeqProperty[B, ReadableProperty[B]] = p.transform(transformer)
   override def reversed(): ReadableSeqProperty[T, ReadableProperty[T]] = p.reversed()
   override def filter(matcher: T => Boolean): ReadableSeqProperty[T, _ <: ReadableProperty[T]] = p.filter(matcher)

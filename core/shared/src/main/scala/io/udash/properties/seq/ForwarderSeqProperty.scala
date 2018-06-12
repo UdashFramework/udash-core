@@ -1,6 +1,6 @@
 package io.udash.properties.seq
 
-import io.udash.properties.{CrossCollections, MutableBufferRegistration}
+import io.udash.properties.CrossCollections
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
 import io.udash.utils.Registration
 
@@ -11,11 +11,10 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
 
   protected var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
-  protected final val structureListeners = CrossCollections.createArray[Patch[ElemType] => Any]
 
   protected def originListener(originValue: Seq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
-
+  override def structureListenersCount(): Int = structureListeners.size
   protected def onListenerInit(): Unit = {}
 
   protected def initOriginListeners(): Unit = {
@@ -41,18 +40,17 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
     }
   }
 
-  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
+  override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
-    structureListeners += structureListener
-    wrapListenerRegistration(new MutableBufferRegistration(structureListeners, structureListener))
+    wrapListenerRegistration(super.listenStructure(structureListener))
   }
 
-  override def listen(valueListener: (Seq[B]) => Any, initUpdate: Boolean = false): Registration = {
+  override def listen(valueListener: Seq[B] => Any, initUpdate: Boolean = false): Registration = {
     initOriginListeners()
     wrapListenerRegistration(super.listen(valueListener, initUpdate))
   }
 
-  override def listenOnce(valueListener: (Seq[B]) => Any): Registration = {
+  override def listenOnce(valueListener: Seq[B] => Any): Registration = {
     initOriginListeners()
     wrapListenerRegistration(super.listenOnce(valueListener))
   }
@@ -120,9 +118,4 @@ trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] with ForwarderProperty[Seq[B]] with SeqProperty[B, ElemType] {
 
   protected def origin: SeqProperty[A, OrigType]
-
-  override def clearListeners(): Unit = {
-    structureListeners.clear()
-    super.clearListeners()
-  }
 }

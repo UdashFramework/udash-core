@@ -2,7 +2,6 @@ package io.udash.properties
 package seq
 
 import io.udash.properties.single._
-import io.udash.utils.{Registration, SetRegistration}
 
 import scala.collection.mutable
 
@@ -15,7 +14,6 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
 
-  protected final val structureListeners: mutable.Set[Patch[Property[B]] => Any] = mutable.Set()
   protected final val children = CrossCollections.createArray[Property[B]]
 
   update(origin.get)
@@ -69,13 +67,7 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
 
 private[properties]
 class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
-  extends BaseReadableSeqPropertyFromSingleValue(origin, transformer) {
-  /** Registers listener, which will be called on every property structure change. */
-  override def listenStructure(structureListener: Patch[ReadableProperty[B]] => Any): Registration = {
-    structureListeners += structureListener
-    new SetRegistration(structureListeners, structureListener)
-  }
-}
+  extends BaseReadableSeqPropertyFromSingleValue(origin, transformer)
 
 private[properties]
 class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A)
@@ -104,15 +96,4 @@ class SeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Property[A], tr
 
   override def elemProperties: Seq[Property[B]] =
     children
-
-  override def listenStructure(structureListener: Patch[Property[B]] => Any): Registration = {
-    structureListeners += structureListener
-    new SetRegistration(structureListeners, structureListener)
-  }
-
-  /** Removes all listeners from property. */
-  override def clearListeners(): Unit = {
-    super.clearListeners()
-    structureListeners.clear()
-  }
 }

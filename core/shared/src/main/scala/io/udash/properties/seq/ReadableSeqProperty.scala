@@ -2,7 +2,7 @@ package io.udash.properties.seq
 
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
-import io.udash.utils.{Registration, SetRegistration}
+import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -14,6 +14,9 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
 
   /** Registers listener, which will be called on every property structure change. */
   def listenStructure(structureListener: Patch[ElemType] => Any): Registration
+
+  /** Returns structure listeners count. */
+  def structureListenersCount(): Int
 
   /** The size of this sequence, equivalent to length. */
   def size: Int =
@@ -44,46 +47,8 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType]
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
-  def combine[B, O : PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] = {
-    class CombinedReadableSeqProperty(s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B])
-      extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
-
-      override val id: PropertyId = PropertyCreator.newID()
-      override protected[properties] val parent: ReadableProperty[_] = null
-
-      private val children = CrossCollections.createArray[ReadableProperty[O]]
-      private val structureListeners = mutable.Set.empty[Patch[ReadableProperty[O]] => Any]
-
-      s.elemProperties.foreach(c => children.+=(c.combine(p, this)(combiner)))
-      s.listenStructure(patch => {
-        val added = patch.added.map(c => c.combine(p, this)(combiner))
-        val removed = CrossCollections.slice(children, patch.idx, patch.idx + patch.removed.size)
-        CrossCollections.replace(children, patch.idx, patch.removed.size, added: _*)
-        val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
-        CallbackSequencer().queue(
-          s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
-          () => structureListeners.foreach(_.apply(mappedPatch))
-        )
-        valueChanged()
-      })
-
-      /** @return Current property value. */
-      override def get: Seq[O] =
-        children.map(_.get)
-
-      /** @return Sequence of child properties. */
-      override def elemProperties: Seq[ReadableProperty[O]] =
-        children
-
-      /** Registers listener, which will be called on every property structure change. */
-      override def listenStructure(structureListener: Patch[ReadableProperty[O]] => Any): Registration = {
-        structureListeners += structureListener
-        new SetRegistration(structureListeners, structureListener)
-      }
-    }
-
-    new CombinedReadableSeqProperty(this, property)
-  }
+  def combine[B, O : PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+    new CombinedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
   def zip[B, O : PropertyCreator](
@@ -106,7 +71,18 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
-trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
+trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
+  extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
+
+  protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = CrossCollections.createArray
+
+  override def structureListenersCount(): Int = structureListeners.size
+
+  override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
+    structureListeners += structureListener
+    new MutableBufferRegistration(structureListeners, structureListener)
+  }
+
   /** SeqProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
     *
     * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */

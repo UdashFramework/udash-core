@@ -38,7 +38,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override protected[properties] def fireValueListeners(): Unit = {}
   override protected[properties] def valueChanged(): Unit = {}
   override protected[properties] def validate(): Unit = {}
-  override private[properties] def listenersCount() = 0
+  override def listenersCount(): Int = 0
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
@@ -81,6 +81,7 @@ private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) exten
   override def size: Int = value.size
   override def isEmpty: Boolean = value.isEmpty
   override def nonEmpty: Boolean = value.nonEmpty
+  override def structureListenersCount(): Int = 0
 
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
     ImmutableProperty.noopRegistration
