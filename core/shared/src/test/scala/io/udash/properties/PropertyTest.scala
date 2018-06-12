@@ -1,11 +1,11 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import com.github.ghik.silencer.silent
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.testing.UdashSharedTest
-import com.avsystem.commons._
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
@@ -2622,27 +2622,57 @@ class PropertyTest extends UdashSharedTest {
         }
       }
 
+      var listenCounter = 0
+      var listenStructureCounter = 0
+      var listenOnceCounter = 0
+      val listener = (v: Any) => listenCounter += 1
+      val oneTimeListener = (v: Any) => listenOnceCounter += 1
+      val structureListener = (v: Any) => listenStructureCounter += 1
+
       val propertySeq = ISeq(Property("test1"), Property("test2"), Property("test3"))
 
       import Properties._
       val combined = propertySeq.combineToSeqProperty
 
-      validateContents(propertySeq, combined)
+      propertySeq.foreach(_.listen(listener))
+      propertySeq.foreach(_.listenOnce(oneTimeListener))
+      val listenRegistration = combined.listen(listener)
+      combined.listenOnce(oneTimeListener)
+      combined.listenStructure(structureListener)
 
-      var listenCounter = 0
-      var listenStructureCounter = 0
-      combined.listen(_ => listenCounter+=1)
-      combined.listenStructure(_ => listenStructureCounter+=1)
+      validateContents(propertySeq, combined)
 
       propertySeq.head.set("t1")
-      listenCounter should ===(1)
-      propertySeq(1).set("")
+      validateContents(propertySeq, combined)
       listenCounter should ===(2)
-      propertySeq(2).set("123123")
-      listenCounter should ===(3)
+      listenOnceCounter should ===(2)
       listenStructureCounter should ===(0)
 
+      propertySeq(1).set("")
       validateContents(propertySeq, combined)
+      listenCounter should ===(4)
+      listenOnceCounter should ===(3)
+      listenStructureCounter should ===(0)
+
+      propertySeq(2).set("123123")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(6)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
+
+      listenRegistration.cancel()
+      propertySeq(1).set("test2")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(7)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
+
+      listenRegistration.restart()
+      propertySeq(1).set("")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(9)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
     }
   }
 }

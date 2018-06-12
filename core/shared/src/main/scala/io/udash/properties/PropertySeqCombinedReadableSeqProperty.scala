@@ -1,32 +1,77 @@
 package io.udash.properties
 
 import com.avsystem.commons.ISeq
-import io.udash.properties.Properties.{Patch, Property, ReadableProperty}
+import io.udash.properties.Properties.{Patch, ReadableProperty}
 import io.udash.properties.seq.AbstractReadableSeqProperty
 import io.udash.utils.Registration
 
-private[properties] final class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[Property[A]])
+private[properties]
+class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
   extends AbstractReadableSeqProperty[A, ReadableProperty[A]] {
 
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  private val children = CrossCollections.createArray[ReadableProperty[A]]
+  private val children = value.map(_.readable)
+  private var originListenerRegistration: Registration = _
 
-  value.foreach(property => {
-    children.+=(property.transform(value => value))
-    property.listen(_ => valueChanged())
-  })
+  private def killOriginListeners(): Unit = {
+    if (originListenerRegistration != null && listeners.isEmpty) {
+      originListenerRegistration.cancel()
+      originListenerRegistration = null
+    }
+  }
 
-  /** @return Current property value. */
+  private def initOriginListeners(): Unit = {
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) {
+      listeners.clear()
+      val registrations = value.map(_.listen(_ => fireValueListeners()))
+      originListenerRegistration = new Registration {
+        override def restart(): Unit = {
+          registrations.foreach(_.restart())
+        }
+
+        override def cancel(): Unit = {
+          registrations.foreach(_.cancel())
+        }
+
+        override def isActive: Boolean =
+          registrations.forall(_.isActive)
+      }
+    }
+  }
+
+  private def wrapListenerRegistration(registration: Registration): Registration = new Registration {
+    override def restart(): Unit = {
+      initOriginListeners()
+      registration.restart()
+    }
+
+    override def cancel(): Unit = {
+      registration.cancel()
+      killOriginListeners()
+    }
+
+    override def isActive: Boolean =
+      registration.isActive
+  }
+
+  override def listen(valueListener: Seq[A] => Any, initUpdate: Boolean = false): Registration = {
+    initOriginListeners()
+    wrapListenerRegistration(super.listen(valueListener, initUpdate))
+  }
+
+  override def listenOnce(valueListener: Seq[A] => Any): Registration = {
+    initOriginListeners()
+    wrapListenerRegistration(super.listenOnce(valueListener))
+  }
+
   override def get: Seq[A] =
     children.map(_.get)
 
-  /** @return Sequence of child properties. */
   override def elemProperties: Seq[ReadableProperty[A]] =
     children
 
-  /** Registers listener, which will be called on every property structure change. */
   override def listenStructure(structureListener: Patch[ReadableProperty[A]] => Any): Registration = {
     new Registration {
       override def cancel(): Unit = {}
