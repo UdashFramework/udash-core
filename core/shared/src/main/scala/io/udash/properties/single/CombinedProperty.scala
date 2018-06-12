@@ -3,13 +3,14 @@ package io.udash.properties.single
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 
+private[properties]
 class CombinedProperty[A, B, R](
   override val origin: ReadableProperty[A], originTwo: ReadableProperty[B],
   override val parent: ReadableProperty[_], combiner: (A, B) => R
 ) extends ForwarderReadableProperty[R] {
-  protected var lastValueOne: Option[A] = None
-  protected var lastValueTwo: Option[B] = None
-  protected var originListenerRegistrations: (Registration, Registration) = _
+  private var lastValueOne: Option[A] = None
+  private var lastValueTwo: Option[B] = None
+  private var originListenerRegistrations: (Registration, Registration) = _
 
   protected def originListenerOne(originValue: A) : Unit = {
     lastValueOne = Some(originValue)

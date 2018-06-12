@@ -6,14 +6,15 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 
+private[properties]
 class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
 ) extends CombinedProperty[Seq[A], B, Seq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
-  protected var combinedChildren: Option[mutable.Buffer[ReadableProperty[R]]] = None
-  protected var originListenerRegistration: Registration = _
+  private var combinedChildren: Option[mutable.Buffer[ReadableProperty[R]]] = None
+  private var originListenerRegistration: Registration = _
 
   protected def originStructureListener(originPatch: Patch[ReadableProperty[A]]): Unit = {
     val combinedNewChildren = originPatch.added.map(sub => sub.combine(p)(combiner))
