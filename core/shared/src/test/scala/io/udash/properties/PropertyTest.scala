@@ -2631,14 +2631,24 @@ class PropertyTest extends UdashSharedTest {
 
       val propertySeq = ISeq(Property("test1"), Property("test2"), Property("test3"))
 
+      propertySeq.map(_.listenersCount()) should be(Seq(0, 0, 0))
+
       import Properties._
       val combined = propertySeq.combineToSeqProperty
 
+      propertySeq.map(_.listenersCount()) should be(Seq(0, 0, 0))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
+
       propertySeq.foreach(_.listen(listener))
       propertySeq.foreach(_.listenOnce(oneTimeListener))
-      val listenRegistration = combined.listen(listener)
-      combined.listenOnce(oneTimeListener)
-      combined.listenStructure(structureListener)
+      val r1 = combined.listen(listener)
+      val r2 = combined.listenOnce(oneTimeListener)
+      val r3 = combined.listenStructure(structureListener)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(3, 3, 3))
+      combined.listenersCount() should be(2)
+      combined.structureListenersCount() should be(0)
 
       validateContents(propertySeq, combined)
 
@@ -2648,11 +2658,19 @@ class PropertyTest extends UdashSharedTest {
       listenOnceCounter should ===(2)
       listenStructureCounter should ===(0)
 
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 3, 3))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
       propertySeq(1).set("")
       validateContents(propertySeq, combined)
       listenCounter should ===(4)
       listenOnceCounter should ===(3)
       listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 3))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
 
       propertySeq(2).set("123123")
       validateContents(propertySeq, combined)
@@ -2660,19 +2678,39 @@ class PropertyTest extends UdashSharedTest {
       listenOnceCounter should ===(4)
       listenStructureCounter should ===(0)
 
-      listenRegistration.cancel()
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 2))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      r1.cancel()
       propertySeq(1).set("test2")
       validateContents(propertySeq, combined)
       listenCounter should ===(7)
       listenOnceCounter should ===(4)
       listenStructureCounter should ===(0)
 
-      listenRegistration.restart()
+      propertySeq.map(_.listenersCount()) should be(Seq(1, 1, 1))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
+
+      r1.restart()
       propertySeq(1).set("")
       validateContents(propertySeq, combined)
       listenCounter should ===(9)
       listenOnceCounter should ===(4)
       listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 2))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      r1.cancel()
+      r2.cancel()
+      r3.cancel()
+
+      propertySeq.map(_.listenersCount()) should be(Seq(1, 1, 1))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
     }
   }
 }
