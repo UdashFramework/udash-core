@@ -52,10 +52,10 @@ class UdashButtonTest extends UdashFrontendTest {
 
       val el = jQ(button.render)
       for (i <- 1 to 10) {
-        el.click()
+        el.trigger(EventName.click)
         activeProperty.get should be(true)
         el.hasClass(BootstrapStyles.active.className) should be(true)
-        el.click()
+        el.trigger(EventName.click)
         activeProperty.get should be(false)
         el.hasClass(BootstrapStyles.active.className) should be(false)
       }

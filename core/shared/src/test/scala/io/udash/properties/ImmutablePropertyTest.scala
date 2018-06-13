@@ -31,7 +31,7 @@ class ImmutablePropertyTest extends UdashSharedTest {
   "ImmutableModelProperty" should {
     "handle standard operations of ReadableModelProperty" in {
       val e = ModelEntity("a", Seq(1), ModelEntity("b", Seq(2), ModelEntity("c", Seq(3,4), null)))
-      val p: ReadableModelProperty[ModelEntity] = new ImmutableProperty[ModelEntity](e)
+      val p: ReadableModelProperty[ModelEntity] = new ImmutableModelProperty[ModelEntity](e)
 
       p.get should be(e)
       p.roSubProp(_.i).get should be(Seq(1))

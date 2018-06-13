@@ -1,6 +1,6 @@
 package io.udash.properties.seq
 
-import io.udash.properties.{CrossCollections, MutableBufferRegistration}
+import io.udash.properties.CrossCollections
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
 
@@ -50,18 +50,13 @@ class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]]
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
 
-      CrossCollections.replace(filteredProps, idx, removed.size, added:_*)
+      CrossCollections.replace(filteredProps, idx, removed.size, added: _*)
 
       val filteredPatch = Patch[ElemType](idx, removed, added, filteredProps.isEmpty)
 
       fireValueListeners()
       fireElementsListeners(filteredPatch, structureListeners)
     }
-  }
-
-  override def listenStructure(structureListener: (Patch[ElemType]) => Any): Registration = {
-    structureListeners += structureListener
-    new MutableBufferRegistration(structureListeners, structureListener)
   }
 
   override def elemProperties: Seq[ElemType] =

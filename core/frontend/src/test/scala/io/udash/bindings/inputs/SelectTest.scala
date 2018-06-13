@@ -2,7 +2,7 @@ package io.udash.bindings.inputs
 
 import com.github.ghik.silencer.silent
 import io.udash._
-import io.udash.wrappers.jquery.jQ
+import io.udash.wrappers.jquery.{EventName, jQ}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
 import org.scalactic.source.Position
@@ -67,7 +67,7 @@ class SelectTest extends UdashFrontendTest {
 
       for ((o, idx) <- options.zipWithIndex) {
         select.value = idx.toString
-        jQ(select).change()
+        jQ(select).trigger(EventName.change)
         p.get should be(o)
       }
     }

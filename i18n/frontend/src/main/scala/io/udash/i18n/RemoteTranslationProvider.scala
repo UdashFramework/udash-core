@@ -36,7 +36,7 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
     fromCache(key)
       .recoverWith { case _ => translationsEndpoint.loadTemplate(key) }
       .recoverWith { case _ => Future.successful(missingTranslationError) }
-      .map(template => putArgs(template, argv:_*))
+      .map(template => putArgs(template, argv: _*))
 
   private def fromCache(key: String)(implicit lang: Lang): Future[String] =
     cache match {

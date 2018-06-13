@@ -42,5 +42,5 @@ class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
       origin.touch()
 
     override def replace(idx: Int, amount: Int, values: A*): Unit =
-      origin.replace(origin.size - idx, amount, values.reverse:_*)
+      origin.replace(origin.size - idx, amount, values.reverse: _*)
   }

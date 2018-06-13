@@ -32,7 +32,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
   private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
-    jQ(elem).click(jQFire(SelectionEvent(this, items.get(id))))
+    jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, items.get(id))))
     elem
   }
 
