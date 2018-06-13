@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import com.github.ghik.silencer.silent
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
@@ -2610,6 +2611,106 @@ class PropertyTest extends UdashSharedTest {
 
       numbers.touch()
       indexed.get should be(numbers.get.zipWithIndex)
+    }
+  }
+
+  "Seq[Property]" should {
+    "combine into ReadableSeqProperty" in {
+      def validateContents[A](propertySeq: ISeq[Property[A]], combined: ReadableSeqProperty[A, ReadableProperty[A]]): Unit = {
+        combined.get.zip(propertySeq).foreach {
+          case (c, s) => c should ===(s.get)
+        }
+      }
+
+      var listenCounter = 0
+      var listenStructureCounter = 0
+      var listenOnceCounter = 0
+      val listener = (v: Any) => listenCounter += 1
+      val oneTimeListener = (v: Any) => listenOnceCounter += 1
+      val structureListener = (v: Any) => listenStructureCounter += 1
+
+      val propertySeq = ISeq(Property("test1"), Property("test2"), Property("test3"))
+
+      propertySeq.map(_.listenersCount()) should be(Seq(0, 0, 0))
+
+      import Properties._
+      val combined = propertySeq.combineToSeqProperty
+
+      propertySeq.map(_.listenersCount()) should be(Seq(0, 0, 0))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
+
+      propertySeq.foreach(_.listen(listener))
+      propertySeq.foreach(_.listenOnce(oneTimeListener))
+      val r1 = combined.listen(listener)
+      val r2 = combined.listenOnce(oneTimeListener)
+      val r3 = combined.listenStructure(structureListener)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(3, 3, 3))
+      combined.listenersCount() should be(2)
+      combined.structureListenersCount() should be(0)
+
+      validateContents(propertySeq, combined)
+
+      propertySeq.head.set("t1")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(2)
+      listenOnceCounter should ===(2)
+      listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 3, 3))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      propertySeq(1).set("")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(4)
+      listenOnceCounter should ===(3)
+      listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 3))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      propertySeq(2).set("123123")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(6)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 2))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      r1.cancel()
+      propertySeq(1).set("test2")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(7)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(1, 1, 1))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
+
+      r1.restart()
+      propertySeq(1).set("")
+      validateContents(propertySeq, combined)
+      listenCounter should ===(9)
+      listenOnceCounter should ===(4)
+      listenStructureCounter should ===(0)
+
+      propertySeq.map(_.listenersCount()) should be(Seq(2, 2, 2))
+      combined.listenersCount() should be(1)
+      combined.structureListenersCount() should be(0)
+
+      r1.cancel()
+      r2.cancel()
+      r3.cancel()
+
+      propertySeq.map(_.listenersCount()) should be(Seq(1, 1, 1))
+      combined.listenersCount() should be(0)
+      combined.structureListenersCount() should be(0)
     }
   }
 }
