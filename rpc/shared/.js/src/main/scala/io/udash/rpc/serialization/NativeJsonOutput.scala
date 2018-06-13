@@ -21,6 +21,12 @@ class NativeJsonOutput(valueConsumer: js.Any => Unit) extends Output {
   override def writeLong(long: Long): Unit =
     writeString(long.toString)
 
+  override def writeBigInt(bigInt: BigInt): Unit =
+    writeString(bigInt.toString)
+
+  override def writeBigDecimal(bigDecimal: BigDecimal): Unit =
+    writeString(bigDecimal.toString)
+
   override def writeBoolean(boolean: Boolean): Unit =
     valueConsumer(boolean)
 
