@@ -34,7 +34,7 @@ class CombinedProperty[A, B, R](
   }
 
   private def killOriginListener(): Unit = {
-    if (originListenerRegistrations != null && listeners.isEmpty) {
+    if (originListenerRegistrations != null && listeners.isEmpty && oneTimeListeners.isEmpty) {
       val (listenerOne, listenerTwo) = originListenerRegistrations
       listenerOne.cancel()
       listenerTwo.cancel()

@@ -110,7 +110,7 @@ trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
     new ZippedWithIndexReadableSeqProperty[A](this)
 
   protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
-    patch: Patch[ItemType], structureListeners: mutable.Buffer[(Patch[ItemType]) => Any]
+    patch: Patch[ItemType], structureListeners: mutable.Buffer[Patch[ItemType] => Any]
   ): Unit = {
     val cpy = CrossCollections.copyArray(structureListeners)
     CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))

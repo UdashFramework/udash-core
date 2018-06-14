@@ -29,7 +29,7 @@ class TransformedReadableProperty[A, B](
   }
 
   private def killOriginListener(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty) {
+    if (originListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty) {
       originListenerRegistration.cancel()
       originListenerRegistration = null
     }

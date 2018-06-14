@@ -1820,8 +1820,14 @@ class PropertyTest extends UdashSharedTest {
       val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]: @silent
 
-      f.listen(v => states += v)
-      f.listenStructure(p => patches += p)
+      p.listenersCount() should be(0)
+      p.structureListenersCount() should be(0)
+
+      val r1 = f.listen(v => states += v)
+      val r2 = f.listenStructure(p => patches += p)
+
+      p.listenersCount() should be(1)
+      p.structureListenersCount() should be(1)
 
       p.append(4)
 
@@ -1989,6 +1995,15 @@ class PropertyTest extends UdashSharedTest {
       patches(2).removed.map(_.get) should be(Seq())
 
       f.get should be(Seq(2, 2, 4, 6))
+
+      p.listenersCount() should be(1)
+      p.structureListenersCount() should be(1)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.listenersCount() should be(0)
+      p.structureListenersCount() should be(0)
     }
 
     "be able to modify after transformation" in {
@@ -2007,6 +2022,19 @@ class PropertyTest extends UdashSharedTest {
       val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
       val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
+
+      doubles.listenersCount() should be(0)
+      ints.listenersCount() should be(0)
+
+      val r1 = evens.listenStructure(_ => ())
+
+      doubles.listenersCount() should be(1)
+      ints.listenersCount() should be(1)
+
+      doubles.listenersCount() should be(1)
+      doubles.structureListenersCount() should be(1)
+      ints.listenersCount() should be(1)
+      ints.structureListenersCount() should be(1)
 
       doubles.get should be(Seq(1.5, 2.3, 3.7))
       ints.get should be(Seq(1, 2, 3))
@@ -2053,6 +2081,13 @@ class PropertyTest extends UdashSharedTest {
       doubles.get should be(Seq(8.5, 12.0, 8.2, 10.3))
       ints.get should be(Seq(8, 12, 8, 10))
       evens.get should be(Seq(8, 12, 8, 10))
+
+      r1.cancel()
+
+      doubles.listenersCount() should be(0)
+      doubles.structureListenersCount() should be(0)
+      ints.listenersCount() should be(0)
+      ints.structureListenersCount() should be(0)
     }
 
     "provide valid patch when combined" in {

@@ -14,8 +14,8 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
 
   protected def originListener(originValue: Seq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
-  override def structureListenersCount(): Int = structureListeners.size
   protected def onListenerInit(): Unit = {}
+  protected def onListenerDestroy(): Unit = {}
 
   protected def initOriginListeners(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
@@ -30,11 +30,12 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   }
 
   protected def killOriginListeners(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty) {
+    if (originListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty && structureListeners.isEmpty) {
       originListenerRegistration.cancel()
+      onListenerDestroy()
       originListenerRegistration = null
     }
-    if (originStructureListenerRegistration != null && listeners.isEmpty) {
+    if (originStructureListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty && structureListeners.isEmpty) {
       originStructureListenerRegistration.cancel()
       originStructureListenerRegistration = null
     }
