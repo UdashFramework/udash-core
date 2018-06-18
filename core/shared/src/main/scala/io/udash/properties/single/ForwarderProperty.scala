@@ -20,6 +20,6 @@ trait ForwarderReadableProperty[A] extends AbstractReadableProperty[A] {
     origin.valueChanged()
 }
 
-trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with Property[A] {
+trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with AbstractProperty[A] {
   protected def origin: Property[_]
 }

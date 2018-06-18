@@ -17,6 +17,7 @@ private[properties] class ReadableWrapper[T](private val p: ReadableProperty[T])
   override protected[properties] def fireValueListeners(): Unit = p.fireValueListeners()
   override protected[properties] def valueChanged(): Unit = p.valueChanged()
   override protected[properties] def validate(): Unit = p.validate()
+  override protected[properties] def listenersUpdate(): Unit = p.listenersUpdate()
   override def transform[B](transformer: T => B): ReadableProperty[B] = p.transform(transformer)
 
   override def transformToSeq[B: PropertyCreator](transformer: T => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =

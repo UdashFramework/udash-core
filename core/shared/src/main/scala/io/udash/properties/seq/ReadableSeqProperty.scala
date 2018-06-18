@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.Registration
@@ -77,10 +78,15 @@ trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
   protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = CrossCollections.createArray
 
   override def structureListenersCount(): Int = structureListeners.size
+  protected def wrapStructureListenerRegistration(reg: Registration): Registration =
+    wrapListenerRegistration(reg)
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     structureListeners += structureListener
-    new MutableBufferRegistration(structureListeners, structureListener)
+    listenersUpdate()
+    wrapStructureListenerRegistration(
+      new MutableBufferRegistration(structureListeners, structureListener, Opt(listenersUpdate _))
+    )
   }
 
   /** SeqProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.

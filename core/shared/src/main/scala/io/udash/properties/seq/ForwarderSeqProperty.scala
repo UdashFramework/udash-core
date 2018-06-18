@@ -5,7 +5,7 @@ import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty,
 import io.udash.utils.Registration
 
 trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
-  extends ForwarderReadableProperty[Seq[B]] with AbstractReadableSeqProperty[B, ElemType] {
+  extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
@@ -30,12 +30,12 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
   }
 
   protected def killOriginListeners(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty && structureListeners.isEmpty) {
+    if (originListenerRegistration != null && listeners.isEmpty && structureListeners.isEmpty) {
       originListenerRegistration.cancel()
       onListenerDestroy()
       originListenerRegistration = null
     }
-    if (originStructureListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty && structureListeners.isEmpty) {
+    if (originStructureListenerRegistration != null && listeners.isEmpty && structureListeners.isEmpty) {
       originStructureListenerRegistration.cancel()
       originStructureListenerRegistration = null
     }
@@ -43,33 +43,34 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
-    wrapListenerRegistration(super.listenStructure(structureListener))
+    super.listenStructure(structureListener)
   }
 
   override def listen(valueListener: Seq[B] => Any, initUpdate: Boolean = false): Registration = {
     initOriginListeners()
-    wrapListenerRegistration(super.listen(valueListener, initUpdate))
+    super.listen(valueListener, initUpdate)
   }
 
   override def listenOnce(valueListener: Seq[B] => Any): Registration = {
     initOriginListeners()
-    wrapListenerRegistration(super.listenOnce(valueListener))
+    super.listenOnce(valueListener)
   }
 
-  protected def wrapListenerRegistration(reg: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListeners()
-      reg.restart()
-    }
+  override protected def wrapListenerRegistration(reg: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListeners()
+        reg.restart()
+      }
 
-    override def cancel(): Unit = {
-      reg.cancel()
-      killOriginListeners()
-    }
+      override def cancel(): Unit = {
+        reg.cancel()
+        killOriginListeners()
+      }
 
-    override def isActive: Boolean =
-      reg.isActive
-  }
+      override def isActive: Boolean =
+        reg.isActive
+    })
 }
 
 trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
@@ -116,7 +117,7 @@ trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: 
 
 
 trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A]]
-  extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] with ForwarderProperty[Seq[B]] with SeqProperty[B, ElemType] {
-
+  extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType]
+    with ForwarderProperty[Seq[B]] with AbstractSeqProperty[B, ElemType] {
   protected def origin: SeqProperty[A, OrigType]
 }

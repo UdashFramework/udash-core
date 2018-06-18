@@ -4,9 +4,9 @@ import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
 
 private[properties]
-abstract class BaseReversedSeqProperty[A, ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]]
-                                      (override protected val origin: OriginType)
-  extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] with ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
+abstract class BaseReversedSeqProperty[A, ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]](
+  override protected val origin: OriginType
+) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] with ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
 
   override protected def loadFromOrigin(): Seq[A] = origin.get.reverse
   override protected def elementsFromOrigin(): Seq[ElemType] = origin.elemProperties.reverse
@@ -30,7 +30,8 @@ class ReversedReadableSeqProperty[A](origin: ReadableSeqProperty[A, ReadableProp
 private[properties]
 class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
   extends BaseReversedSeqProperty[A, Property[A], SeqProperty[A, Property[A]]](origin)
-    with ForwarderSeqProperty[A, A, Property[A], Property[A]] {
+    with ForwarderSeqProperty[A, A, Property[A], Property[A]]
+    with AbstractSeqProperty[A, Property[A]] {
 
     override def setInitValue(t: Seq[A]): Unit =
       origin.setInitValue(t.reverse)

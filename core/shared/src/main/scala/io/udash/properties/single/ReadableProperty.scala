@@ -1,5 +1,6 @@
 package io.udash.properties.single
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
 import io.udash.utils.Registration
@@ -48,6 +49,9 @@ trait ReadableProperty[A] {
   /** Triggers validation. */
   protected[properties] def validate(): Unit
 
+  /** This method should be called when the listener is registered or removed. */
+  protected[properties] def listenersUpdate(): Unit
+
   /**
     * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
     *
@@ -88,26 +92,40 @@ trait ReadableProperty[A] {
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
   protected[this] final val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
-  protected[this] final val oneTimeListeners: mutable.Buffer[(A => Any, () => Any)] = CrossCollections.createArray[(A => Any, () => Any)]
+  protected[this] final val oneTimeListeners: mutable.Buffer[Registration] = CrossCollections.createArray[Registration]
 
   protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
   protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
   protected[this] var validationResult: Future[ValidationResult] = _
 
+  protected def wrapListenerRegistration(reg: Registration): Registration = reg
+  protected def wrapOneTimeListenerRegistration(reg: Registration): Registration = wrapListenerRegistration(reg)
+
   override def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
+    listenersUpdate()
     if (initUpdate) valueListener(this.get)
-    new MutableBufferRegistration(listeners, valueListener)
+    wrapListenerRegistration(
+      new MutableBufferRegistration(listeners, valueListener, Opt(listenersUpdate _))
+    )
   }
 
   override def listenOnce(valueListener: A => Any): Registration = {
-    val reg = new MutableBufferRegistration(listeners, valueListener)
-    oneTimeListeners += ((valueListener, () => reg.cancel()))
+    val reg = wrapOneTimeListenerRegistration(
+      new MutableBufferRegistration(listeners, valueListener, Opt(listenersUpdate _))
+    )
+    listeners += valueListener
+    oneTimeListeners += reg
+    listenersUpdate()
     reg
   }
 
   override def listenersCount(): Int =
-    listeners.length + oneTimeListeners.length
+    listeners.length
+
+  override protected[properties] def listenersUpdate(): Unit = {
+    if (parent != null) parent.listenersUpdate()
+  }
 
   override def isValid: Future[ValidationResult] = {
     if (validationResult == null) validate()
@@ -145,11 +163,8 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
       val listenersCopy = CrossCollections.copyArray(listeners)
       val oneTimeListenersCopy = CrossCollections.copyArray(oneTimeListeners)
       oneTimeListeners.clear()
+      oneTimeListenersCopy.foreach(_.cancel())
       listenersCopy.foreach(_.apply(t))
-      oneTimeListenersCopy.foreach { case (callback, cancel) =>
-        callback(t)
-        cancel()
-      }
     })
   }
 

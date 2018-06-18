@@ -44,26 +44,27 @@ class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
     }
   }
 
-  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListener()
-      reg.restart()
-    }
+  override protected def wrapListenerRegistration(reg: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListener()
+        reg.restart()
+      }
 
-    override def cancel(): Unit = {
-      reg.cancel()
-      killOriginListener()
-    }
+      override def cancel(): Unit = {
+        reg.cancel()
+        killOriginListener()
+      }
 
-    override def isActive: Boolean =
-      reg.isActive
-  }
+      override def isActive: Boolean =
+        reg.isActive
+    })
 
   override def elemProperties: Seq[ReadableProperty[R]] =
     combinedChildren.getOrElse(s.elemProperties.map(_.combine(p)(combiner)))
 
   override def listenStructure(structureListener: Patch[ReadableProperty[R]] => Any): Registration = {
     initOriginListener()
-    wrapListenerRegistration(super.listenStructure(structureListener))
+    super.listenStructure(structureListener)
   }
 }

@@ -29,37 +29,36 @@ class TransformedReadableProperty[A, B](
   }
 
   private def killOriginListener(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty && oneTimeListeners.isEmpty) {
+    if (originListenerRegistration != null && listeners.isEmpty) {
       originListenerRegistration.cancel()
       originListenerRegistration = null
     }
   }
 
-  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListener()
-      reg.restart()
-    }
+  override protected def wrapListenerRegistration(reg: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListener()
+        reg.restart()
+      }
 
-    override def cancel(): Unit = {
-      reg.cancel()
-      killOriginListener()
-    }
+      override def cancel(): Unit = {
+        reg.cancel()
+        killOriginListener()
+      }
 
-    override def isActive: Boolean =
-      reg.isActive
+      override def isActive: Boolean =
+        reg.isActive
+    })
+
+  override def listen(valueListener: B => Any, initUpdate: Boolean = false): Registration = {
+    initOriginListener()
+    super.listen(valueListener, initUpdate)
   }
 
-  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+  override def listenOnce(valueListener: B => Any): Registration = {
     initOriginListener()
-    wrapListenerRegistration(super.listen(valueListener, initUpdate))
-  }
-
-  override def listenOnce(valueListener: (B) => Any): Registration = {
-    initOriginListener()
-    val reg = wrapListenerRegistration(new MutableBufferRegistration(listeners, valueListener))
-    oneTimeListeners += ((valueListener, () => reg.cancel()))
-    reg
+    super.listenOnce(valueListener)
   }
 
   override def get: B = {

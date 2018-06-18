@@ -6,6 +6,7 @@ import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.testing.UdashSharedTest
+import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
@@ -514,23 +515,34 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "transform to ReadableSeqProperty" in {
+      val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
       def registerElementListener(props: Seq[ReadableProperty[_]]) =
-        props.foreach(_.listen(_ => elementsUpdated += 1))
+        props.foreach { p =>
+          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+        }
 
       val p = Property("1,2,3,4,5")
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] =
+        p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      p.listenersCount() should be(0)
 
       registerElementListener(s.elemProperties)
+      p.listenersCount() should be(1)
 
       var lastValue: Seq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      s.listen(v => lastValue = v)
-      s.listenStructure(p => {
+      val r1 = s.listen(lastValue = _)
+      val r2 = s.listenStructure { p =>
         registerElementListener(p.added)
+        p.removed.foreach { p =>
+          elemListeners(p.id).cancel()
+        }
         lastPatch = p
-      })
+      }
 
+      p.listenersCount() should be(1)
       s.get should be(Seq(1, 2, 3, 4, 5))
 
       lastValue = null
@@ -649,6 +661,20 @@ class PropertyTest extends UdashSharedTest {
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.listenersCount() should be(1)
+
+      elemListeners.foreach(_._2.cancel())
+
+      p.listenersCount() should be(0)
+
+      p.set("1,2,3")
+      s.get should be(Seq(1,2,3))
+      p.set("1,2,3,-1,-2,-3")
+      s.get should be(Seq(1,2,3,-1,-2,-3))
     }
 
     "not allow children modification after transformation into ReadableSeqProperty" in {
@@ -665,9 +691,12 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "transform to SeqProperty" in {
+      val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
-      def registerElementListener(props: Seq[ReadableProperty[_]]) =
-        props.foreach(_.listen(_ => elementsUpdated += 1))
+      def registerElementListener(props: Seq[ReadableProperty[_]]): Unit =
+        props.foreach { p =>
+          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+        }
 
       val p = Property("1,2,3,4,5")
       val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
@@ -675,17 +704,23 @@ class PropertyTest extends UdashSharedTest {
         (s: Seq[Int]) => s.mkString(",")
       )
 
+      p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
+      p.listenersCount() should be(1)
 
       var lastValue: Seq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      s.listen(v => lastValue = v)
-      s.listenStructure(p => {
+      val r1 = s.listen(lastValue = _)
+      val r2 = s.listenStructure(p => {
         registerElementListener(p.added)
+        p.removed.foreach { p =>
+          elemListeners(p.id).cancel()
+        }
         lastPatch = p
       })
 
       s.get should be(Seq(1, 2, 3, 4, 5))
+      p.listenersCount() should be(1)
 
       lastValue = null
       lastPatch = null
@@ -802,6 +837,13 @@ class PropertyTest extends UdashSharedTest {
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
+
+      r1.cancel()
+      p.listenersCount() should be(1)
+      r2.cancel()
+      p.listenersCount() should be(1)
+      elemListeners.foreach(_._2.cancel())
+      p.listenersCount() should be(0)
     }
 
     "handle child modification in transformToSeq result" in {
@@ -911,10 +953,14 @@ class PropertyTest extends UdashSharedTest {
       val r = t1.listen(_ => ())
       t2.listenOnce(_ => ())
 
+      p.listenersCount() should be(2)
       t1.listenersCount() should be(1)
       t2.listenersCount() should be(1)
 
       p.set(25)
+
+      p.listenersCount() should be(1)
+
       r.cancel()
 
       p.listenersCount() should be(0)
@@ -2099,14 +2145,14 @@ class PropertyTest extends UdashSharedTest {
       s.structureListenersCount() should be(0)
       p.listenersCount() should be(0)
 
-      val listenCalls = mutable.ListBuffer[Seq[Int]]()
-      val r1 = c.listen(v => listenCalls += v)
-      s.listenersCount() should be(1)
-      s.structureListenersCount() should be(0)
-      p.listenersCount() should be(1)
-
       var lastPatch: Patch[ReadableProperty[Int]] = null
       val r2 = c.listenStructure(patch => lastPatch = patch)
+      s.listenersCount() should be(0)
+      s.structureListenersCount() should be(1)
+      p.listenersCount() should be(0)
+
+      val listenCalls = mutable.ListBuffer[Seq[Int]]()
+      val r1 = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(1)

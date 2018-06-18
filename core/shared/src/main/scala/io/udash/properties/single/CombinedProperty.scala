@@ -1,7 +1,6 @@
 package io.udash.properties.single
 
 import com.avsystem.commons.misc.Opt
-import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 
 private[properties]
@@ -34,7 +33,7 @@ class CombinedProperty[A, B, R](
   }
 
   private def killOriginListener(): Unit = {
-    if (originListenerRegistrations != null && listeners.isEmpty && oneTimeListeners.isEmpty) {
+    if (originListenerRegistrations != null && listeners.isEmpty) {
       val (listenerOne, listenerTwo) = originListenerRegistrations
       listenerOne.cancel()
       listenerTwo.cancel()
@@ -42,31 +41,30 @@ class CombinedProperty[A, B, R](
     }
   }
 
-  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListener()
-      reg.restart()
-    }
+  override protected def wrapListenerRegistration(reg: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListener()
+        reg.restart()
+      }
 
-    override def cancel(): Unit = {
-      reg.cancel()
-      killOriginListener()
-    }
+      override def cancel(): Unit = {
+        reg.cancel()
+        killOriginListener()
+      }
 
-    override def isActive: Boolean =
-      reg.isActive
-  }
+      override def isActive: Boolean =
+        reg.isActive
+    })
 
   override def listen(valueListener: R => Any, initUpdate: Boolean = false): Registration = {
     initOriginListener()
-    wrapListenerRegistration(super.listen(valueListener, initUpdate))
+    super.listen(valueListener, initUpdate)
   }
 
   override def listenOnce(valueListener: R => Any): Registration = {
     initOriginListener()
-    val reg = wrapListenerRegistration(new MutableBufferRegistration(listeners, valueListener))
-    oneTimeListeners += ((valueListener, () => reg.cancel()))
-    reg
+    super.listenOnce(valueListener)
   }
 
   override def get: R = {
