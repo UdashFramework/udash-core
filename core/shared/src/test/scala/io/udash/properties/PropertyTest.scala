@@ -2376,14 +2376,37 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "zip with another ReadableProperty" in {
-      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
       val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
 
-      val pairs = odds.zip(evens)((x, y) => (x, y))
+      val pairs = odds.zip(evens)((_, _))
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(20)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8)))
+
+      numbers.append(10)
 
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      pairs.listenStructure(p => patches.append(p))
+      val r1 = pairs.listenStructure(p => patches.append(p))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
@@ -2490,6 +2513,29 @@ class PropertyTest extends UdashSharedTest {
 
       numbers.touch()
       pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+
+      numbers.remove(4)
+      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20)))
+
+      numbers.remove(9)
+      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
     }
 
     "zip all with another ReadableProperty" in {
@@ -2502,8 +2548,29 @@ class PropertyTest extends UdashSharedTest {
 
       val pairs = odds.zipAll(evens)((x, y) => (x, y), defaultA, defaultB)
 
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20), (21, -2)))
+
+      numbers.remove(21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(20)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      pairs.listenStructure(p => patches.append(p))
+      val r1 = pairs.listenStructure(p => patches.append(p))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
@@ -2631,14 +2698,51 @@ class PropertyTest extends UdashSharedTest {
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
       patches.last.removed.size should be(4)
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+
+      numbers.remove(4)
+      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20), (21, -2)))
+
+      numbers.remove(9)
+      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
     }
 
     "zip with indexes" in {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val indexed = numbers.zipWithIndex
 
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.append(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.remove(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      indexed.listenStructure(p => patches.append(p))
+      val r1 = indexed.listenStructure(p => patches.append(p))
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(1)
 
       indexed.get should be(numbers.get.zipWithIndex)
       patches.size should be(0)
@@ -2691,6 +2795,22 @@ class PropertyTest extends UdashSharedTest {
       patches.last.removed.size should be(7)
 
       numbers.touch()
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.append(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.remove(-1)
       indexed.get should be(numbers.get.zipWithIndex)
     }
   }
