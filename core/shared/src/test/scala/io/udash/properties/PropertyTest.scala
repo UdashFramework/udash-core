@@ -370,6 +370,12 @@ class PropertyTest extends UdashSharedTest {
       r2.cancel()
       p1.listenersCount() should be(0)
       p2.listenersCount() should be(0)
+
+      p1.set(7)
+      p2.set(2)
+
+      sum.get should be(9)
+      mul.get should be(14)
     }
 
     "combine with other properties (model properties)" in {
@@ -512,6 +518,12 @@ class PropertyTest extends UdashSharedTest {
       p2.listenersCount() should be(0)
       sum.listenersCount() should be(0)
       s.listenersCount() should be(0)
+
+      p1.set(2)
+      p2.set(3)
+      s.set(Seq(2,1))
+      sc.get should be(Seq(10, 5))
+      sqc.get should be(Seq(10, 5))
     }
 
     "transform to ReadableSeqProperty" in {
@@ -844,14 +856,22 @@ class PropertyTest extends UdashSharedTest {
       p.listenersCount() should be(1)
       elemListeners.foreach(_._2.cancel())
       p.listenersCount() should be(0)
+
+      p.set("1,-1,2,-2")
+      s.get should be(Seq(1,-1,2,-2))
+
+      s.set(Seq(4,-4,2,-2))
+      p.get should be("4,-4,2,-2")
     }
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
       val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
 
+      i.get should be(Seq(1,2,3,4,5,6))
+
       var counter = 0
-      s.listen(_ => counter += 1)
+      val r1 = s.listen(_ => counter += 1)
 
       i.append(7)
 
@@ -866,6 +886,22 @@ class PropertyTest extends UdashSharedTest {
       s.get should be("12,12,12,12,12,12,12")
       i.get should be(Seq(12,12,12,12,12,12,12))
       counter should be(2)
+
+      i.elemProperties.foreach(_.set(1))
+
+      s.get should be("1,1,1,1,1,1,1")
+      i.get should be(Seq(1,1,1,1,1,1,1))
+      counter should be(9)
+
+      r1.cancel()
+
+      CallbackSequencer().sequence {
+        i.elemProperties.foreach(_.set(13))
+      }
+
+      s.get should be("13,13,13,13,13,13,13")
+      i.get should be(Seq(13,13,13,13,13,13,13))
+      counter should be(9)
 
       i.elemProperties.foreach(_.set(1))
 
@@ -960,10 +996,18 @@ class PropertyTest extends UdashSharedTest {
       p.set(25)
 
       p.listenersCount() should be(1)
+      t1.listenersCount() should be(1)
+      t2.listenersCount() should be(0)
 
       r.cancel()
 
       p.listenersCount() should be(0)
+      t1.listenersCount() should be(0)
+      t2.listenersCount() should be(0)
+
+      p.set(-7)
+      t1.get should be(0)
+      t2.get should be(1)
     }
 
     "fire transform on empty property" in {
@@ -1182,11 +1226,11 @@ class PropertyTest extends UdashSharedTest {
         (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
       )
 
-      p.listen(listener)
-      t.listen(listener)
+      val r1 = p.listen(listener)
+      val r2 = t.listen(listener)
 
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
-      t.get should be(123+5)
+      t.get should be(128)
 
       t.set(64)
       p.get.i should be(32)
@@ -1199,6 +1243,16 @@ class PropertyTest extends UdashSharedTest {
       values.size should be(6)
       values should contain(64)
       values should contain(128)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.set(newTT(2, Some("s"), new C(3, "asd"), Seq('a', 'b', 'c')))
+      t.get should be(5)
+
+      t.set(32)
+      p.get.i should be(16)
+      p.get.t.c.i should be(16)
     }
 
     "work with simple case class" in {
@@ -2072,6 +2126,8 @@ class PropertyTest extends UdashSharedTest {
       doubles.listenersCount() should be(0)
       ints.listenersCount() should be(0)
 
+      evens.get should be(Seq(2))
+
       val r1 = evens.listenStructure(_ => ())
 
       doubles.listenersCount() should be(1)
@@ -2134,6 +2190,14 @@ class PropertyTest extends UdashSharedTest {
       doubles.structureListenersCount() should be(0)
       ints.listenersCount() should be(0)
       ints.structureListenersCount() should be(0)
+
+      doubles.set(Seq(3.2, 4.7, 5.2))
+      ints.get should be(Seq(3, 4, 5))
+      evens.get should be(Seq(4))
+
+      doubles.append(8.1)
+      ints.get should be(Seq(3, 4, 5, 8))
+      evens.get should be(Seq(4, 8))
     }
 
     "provide valid patch when combined" in {
