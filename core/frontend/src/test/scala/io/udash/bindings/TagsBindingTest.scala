@@ -1816,9 +1816,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
   "AttrOps" should {
     "allow reactive attribute bind" in {
       val p = Property("idValue")
-      val textArea = TextArea.debounced(Property(""),
-        id.bind(p)
-      ).render
+      val b = id.bind(p)
+      val textArea = TextArea(Property(""))(b).render
       textArea.getAttribute("id") shouldBe "idValue"
       p.set("idValue2")
       textArea.getAttribute("id") shouldBe "idValue2"
@@ -1826,13 +1825,16 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       textArea.hasAttribute("disabled") shouldBe false
       p.set("idValue3")
       textArea.getAttribute("id") shouldBe "idValue3"
+      p.listenersCount() should be(1)
+      b.kill()
+      p.listenersCount() should be(0)
     }
+
     "allow reactive attribute bind with condition" in {
       val p = Property("idValue")
       val c = Property(true)
-      val textArea = TextArea.debounced(Property(""),
-        id.bindIf(p, c)
-      ).render
+      val b = id.bindIf(p, c)
+      val textArea = TextArea(Property(""))(b).render
       textArea.getAttribute("id") shouldBe "idValue"
       c.set(false)
       textArea.getAttribute("id") shouldBe null
@@ -1844,6 +1846,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       textArea.hasAttribute("disabled") shouldBe false
       p.set("idValue3")
       textArea.getAttribute("id") shouldBe "idValue3"
+      p.listenersCount() should be(1)
+      c.listenersCount() should be(1)
+      b.kill()
+      p.listenersCount() should be(0)
+      c.listenersCount() should be(0)
     }
   }
 
@@ -1851,7 +1858,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "allow reactive attribute apply" in {
       val p = Property(false)
       val binding = (disabled := "disabled").attrIf(p)
-      val textArea = TextArea.debounced(Property(""), binding).render
+      val textArea = TextArea(Property(""))(binding).render
       textArea.hasAttribute("disabled") shouldBe false
       p.set(true)
       textArea.hasAttribute("disabled") shouldBe true
@@ -1863,7 +1870,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(false)
       val binding2 = (disabled := "disabled").attrIfNot(p)
-      val textArea2 = TextArea.debounced(Property(""), binding2).render
+      val textArea2 = TextArea(Property(""))(binding2).render
       textArea2.hasAttribute("disabled") shouldBe true
       p.set(true)
       textArea2.hasAttribute("disabled") shouldBe false
@@ -1879,7 +1886,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "allow reactive attr changes" in {
       val p = Property(false)
       val binding = p.reactiveApply((el, v) => el.setAttribute("test", v.toString))
-      val textArea = TextArea.debounced(Property(""), binding).render
+      val textArea = TextArea(Property(""))(binding).render
       textArea.getAttribute("test").toBoolean shouldBe false
       p.set(true)
       textArea.getAttribute("test").toBoolean shouldBe true
@@ -1901,6 +1908,61 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val stringOpt: Opt[String] = Opt.Empty
       val testDiv = div(stringOpt).render
       testDiv.innerHTML shouldBe empty
+    }
+  }
+
+  "InlineStyleOps" should {
+    "allow reactive inlined style bind" in {
+      val styleProperty = Property("red")
+      val pixelStyleProperty = Property("10px")
+      val bindStyle = backgroundColor.bind(styleProperty)
+      val bindPixelStyle = width.bind(pixelStyleProperty)
+      val testDiv = div(bindStyle, bindPixelStyle).render
+      testDiv.style.getPropertyValue("background-color") should ===("red")
+      testDiv.style.getPropertyValue("width") should ===("10px")
+      styleProperty.set("black")
+      pixelStyleProperty.set("100px")
+      testDiv.style.getPropertyValue("background-color") should ===("black")
+      testDiv.style.getPropertyValue("width") should ===("100px")
+      styleProperty.set(null)
+      pixelStyleProperty.set(null)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      testDiv.style.getPropertyValue("width") should ===("")
+      styleProperty.set("blue")
+      pixelStyleProperty.set("2rem")
+      testDiv.style.getPropertyValue("background-color") should ===("blue")
+      testDiv.style.getPropertyValue("width") should ===("2rem")
+      styleProperty.listenersCount() should be(1)
+      pixelStyleProperty.listenersCount() should be(1)
+      bindStyle.kill()
+      styleProperty.listenersCount() should be(0)
+      pixelStyleProperty.listenersCount() should be(1)
+      bindPixelStyle.kill()
+      styleProperty.listenersCount() should be(0)
+      pixelStyleProperty.listenersCount() should be(0)
+    }
+
+    "allow reactive inlined style bind with condition" in {
+      val styleProperty = Property("red")
+      val conditionProperty = Property(true)
+      val bindIfStyle = backgroundColor.bindIf(styleProperty, conditionProperty)
+      val testDiv = div(bindIfStyle).render
+      testDiv.style.getPropertyValue("background-color") should ===("red")
+      conditionProperty.set(false)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      styleProperty.set("black")
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      conditionProperty.set(true)
+      testDiv.style.getPropertyValue("background-color") should ===("black")
+      styleProperty.set(null)
+      testDiv.style.getPropertyValue("background-color") should ===("")
+      styleProperty.set("blue")
+      testDiv.style.getPropertyValue("background-color") should ===("blue")
+      styleProperty.listenersCount() should be(1)
+      conditionProperty.listenersCount() should be(1)
+      bindIfStyle.kill()
+      styleProperty.listenersCount() should be(0)
+      conditionProperty.listenersCount() should be(0)
     }
   }
 }

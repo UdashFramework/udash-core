@@ -31,7 +31,7 @@ final class DismissibleUdashAlert private[alert](alertStyle: AlertStyle, overrid
   import io.udash.css.CssView._
 
   private val _dismissed = Property[Boolean](false)
-  val dismissed: ReadableProperty[Boolean] = _dismissed.transform(identity)
+  val dismissed: ReadableProperty[Boolean] = _dismissed.readable
 
   private val button = UdashButton()(
     `type` := "button", BootstrapStyles.close,

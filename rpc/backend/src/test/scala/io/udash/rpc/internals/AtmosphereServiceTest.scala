@@ -2,6 +2,7 @@ package io.udash.rpc.internals
 
 import java.io.{CharArrayWriter, PrintWriter}
 
+import com.avsystem.commons._
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rpc._
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
@@ -10,6 +11,7 @@ import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 import scala.util.{Failure, Success, Try}
 
 class AtmosphereServiceTest extends UdashRpcBackendTest {
@@ -33,7 +35,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
     (calls, rpc)
   }
 
-  def createConfigs(filters: Seq[(AtmosphereResource) => Try[Any]], resolveRpcResult: ExposesServerRPC[TestRPC],
+  def createConfigs(filters: ISeq[AtmosphereResource => Try[Unit]], resolveRpcResult: ExposesServerRPC[TestRPC],
     broadcasterFactory: BroadcasterFactoryMock, metaBroadcaster: MetaBroadcasterMock): (AtmosphereService[TestRPC], AtmosphereConfigMock) = {
     val config = new AtmosphereServiceConfigMock[TestRPC](filters, resolveRpcResult)
     val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry)
@@ -67,7 +69,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
     "init BroadcastManager" in {
       BroadcastManager.synchronized {
         val (_, broadcasterFactory, metaBroadcaster) = createBroadcasters()
-        val (atm, atmConfig) = createConfigs(Seq.empty, null, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, null, broadcasterFactory, metaBroadcaster)
 
         BroadcastManager.init(null, null)
         intercept[IllegalArgumentException] {
@@ -89,7 +91,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
         val (atm, atmConfig) = createConfigs(
-          Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")),
+          Vector(_ => Success(()), _ => Failure(new RuntimeException), _ => Success(())),
           rpc, broadcasterFactory, metaBroadcaster
         )
 
@@ -123,7 +125,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
         val (atm, atmConfig) = createConfigs(
-          Seq((_) => Success(""), (_) => Failure(new RuntimeException), (_) => Success("")),
+          Vector(_ => Success(()), _ => Failure(new RuntimeException), _ => Success(())),
           rpc, broadcasterFactory, metaBroadcaster
         )
 
@@ -161,7 +163,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
         val (atm, atmConfig) = createConfigs(
-          Seq((_) => Success(""), (_) => Success("")),
+          Vector(_ => Success(()), _ => Success(())),
           rpc, broadcasterFactory, metaBroadcaster
         )
 
@@ -197,7 +199,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
@@ -233,7 +235,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(failRequestBody.json)
@@ -256,13 +258,47 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
       }
     }
 
+    "log websocket failing call" in {
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
+
+        val loggerMock = new {
+          private val errors = new MArrayBuffer[(String, Throwable)]
+          def error(msg: String, throwable: Throwable) = errors += msg -> throwable
+          def currentErrors = errors.toList
+        }
+        val expectedMsg = "Request handling failure"
+
+
+        val (_, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (_, rpc) = createTestRPC()
+        val config = new AtmosphereServiceConfigMock[TestRPC](Nil, rpc)
+        val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry,
+          onRequestHandlingFailure = (ex, _) => loggerMock.error(expectedMsg, ex))
+        val atmConfig = new AtmosphereConfigMock(broadcasterFactory, metaBroadcaster)
+
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(failRequestBody.json)
+
+        val resource = new AtmosphereResourceMock(TRANSPORT.WEBSOCKET, "uuid123", request)
+
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+        eventually {
+          resource.suspended should be(true)
+          loggerMock.currentErrors.size shouldBe 1
+          loggerMock.currentErrors.head._1 shouldBe expectedMsg
+        }
+      }
+    }
+
     "handle incoming websocket call throwing registered exception" in {
       BroadcastManager.synchronized {
         BroadcastManager.init(null, null)
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(exRequestBody.json)
@@ -291,7 +327,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
@@ -324,7 +360,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
@@ -361,7 +397,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(exRequestBody.json)
@@ -387,13 +423,48 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
       }
     }
 
+    "log polling call throwing registered exception" in {
+      BroadcastManager.synchronized {
+        BroadcastManager.init(null, null)
+
+        val loggerMock = new {
+          private val errors = new MArrayBuffer[(String, Throwable)]
+          def error(msg: String, throwable: Throwable) = errors += msg -> throwable
+          def currentErrors = errors.toList
+        }
+        val expectedMsg = "Request handling failure"
+
+        val (_, broadcasterFactory, metaBroadcaster) = createBroadcasters()
+        val (_, rpc) = createTestRPC()
+        val config = new AtmosphereServiceConfigMock[TestRPC](Nil, rpc)
+        val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry,
+          onRequestHandlingFailure = (ex, _) => loggerMock.error(expectedMsg, ex))
+        val atmConfig = new AtmosphereConfigMock(broadcasterFactory, metaBroadcaster)
+
+        val request = AtmosphereRequestImpl.newInstance()
+        request.body(exRequestBody.json)
+
+        val response = new AtmosphereResponseMock(null)
+        val resource = new AtmosphereResourceMock(TRANSPORT.POLLING, "123456-654321", request, response)
+
+        atm.init(atmConfig)
+        atm.onRequest(resource)
+
+        eventually {
+          resource.suspended should be(false)
+          loggerMock.currentErrors.size shouldBe 1
+          loggerMock.currentErrors.head._1 shouldBe expectedMsg
+        }
+      }
+    }
+
     "handle incoming polling broken request" in {
       BroadcastManager.synchronized {
         BroadcastManager.init(null, null)
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
         val (calls, rpc) = createTestRPC()
-        val (atm, atmConfig) = createConfigs(Seq.empty, rpc, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, rpc, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         request.body(failRequestBody.json.substring(5))
@@ -420,7 +491,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         BroadcastManager.init(null, null)
 
         val (broadcaster, broadcasterFactory, metaBroadcaster) = createBroadcasters()
-        val (atm, atmConfig) = createConfigs(Seq.empty, null, broadcasterFactory, metaBroadcaster)
+        val (atm, atmConfig) = createConfigs(Nil, null, broadcasterFactory, metaBroadcaster)
 
         val request = AtmosphereRequestImpl.newInstance()
         val resource = new AtmosphereResourceMock(TRANSPORT.SSE, "sseUuid123", request)

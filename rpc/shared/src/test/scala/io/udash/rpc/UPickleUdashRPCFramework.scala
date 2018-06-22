@@ -162,7 +162,7 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
       def writeField(key: String) = new JsObjectOutput(v => builder += ((key, v)))
 
-      def finish() = setResultThenConsume(Js.Obj(builder.result(): _*))
+      def finish() = setResultThenConsume(Js.Obj.from(builder.result()))
     }
 
     def writeRaw(js: Js.Value) = consumer(js)

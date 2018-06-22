@@ -1,17 +1,14 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.properties.{CrossCollections, MutableBufferRegistration, PropertyCreator, PropertyId}
-import io.udash.utils.Registration
+import io.udash.properties.{CrossCollections, PropertyCreator, PropertyId}
 
 class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_], override val id: PropertyId)
   extends SeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
-  private val structureListeners = CrossCollections.createArray[Patch[CastableProperty[A]] => Any]
 
-  override def elemProperties: Seq[CastableProperty[A]] =
-    properties
+  override def elemProperties: Seq[CastableProperty[A]] = properties
 
   override def replace(idx: Int, amount: Int, values: A*): Unit = {
     val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
@@ -40,14 +37,4 @@ class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_],
 
   def get: Seq[A] =
     properties.map(_.get)
-
-  override def listenStructure(l: (Patch[CastableProperty[A]]) => Any): Registration = {
-    structureListeners += l
-    new MutableBufferRegistration(structureListeners, l)
-  }
-
-  override def clearListeners(): Unit = {
-    super.clearListeners()
-    structureListeners.clear()
-  }
 }

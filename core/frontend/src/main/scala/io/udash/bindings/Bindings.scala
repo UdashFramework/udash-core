@@ -1,12 +1,13 @@
 package io.udash.bindings
 
 import com.avsystem.commons.misc.Opt
-import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, PropertyOps}
+import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, HasCssName, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
+import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
@@ -14,15 +15,15 @@ import scala.concurrent.Future
 import scala.scalajs.js
 
 trait Bindings {
-  val Checkbox      = io.udash.bindings.Checkbox
-  val CheckButtons  = io.udash.bindings.CheckButtons
-  val FileInput     = io.udash.bindings.FileInput
-  val NumberInput   = io.udash.bindings.NumberInput
-  val PasswordInput = io.udash.bindings.PasswordInput
-  val RadioButtons  = io.udash.bindings.RadioButtons
-  val Select        = io.udash.bindings.Select
-  val TextArea      = io.udash.bindings.TextArea
-  val TextInput     = io.udash.bindings.TextInput
+  val Checkbox      = inputs.Checkbox
+  val CheckButtons  = inputs.CheckButtons
+  val FileInput     = inputs.FileInput
+  val NumberInput   = inputs.NumberInput
+  val PasswordInput = inputs.PasswordInput
+  val RadioButtons  = inputs.RadioButtons
+  val Select        = inputs.Select
+  val TextArea      = inputs.TextArea
+  val TextInput     = inputs.TextInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
@@ -395,6 +396,35 @@ trait Bindings {
   implicit def toPropertyOps[T](property: ReadableProperty[T]): PropertyOps[T] =
     new PropertyOps(property)
 
+  implicit class InlineStyleOps[T: HasCssName](style: T)(implicit hasCssName: HasCssName[T]) {
+    /** Sets style on element. */
+    def applyTo(element: HTMLElement, value: String = ""): Unit =
+      element.style.setProperty(hasCssName.cssName(style), value)
+
+    /** Removes style from element. */
+    def removeFrom(element: HTMLElement): Unit =
+      element.style.removeProperty(hasCssName.cssName(style))
+
+    /** Synchronises style value with property content. */
+    def bind(property: ReadableProperty[String]): Binding =
+      property.reactiveApply {
+        case (elem: HTMLElement, null) => removeFrom(elem)
+        case (elem: HTMLElement, v) => applyTo(elem, v)
+        case _ =>
+      }
+
+    /**
+      * Synchronises style value with property content by adding it when property is not null and
+      * condition property is 'true' and removing otherwise.
+      */
+    def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Binding =
+      property.combine(conditionProperty)((_, _)).reactiveApply {
+        case (elem: HTMLElement, (null, _) | (_, false)) => removeFrom(elem)
+        case (elem: HTMLElement, (v, true)) => applyTo(elem, v)
+        case _ =>
+      }
+  }
+
 }
 
 object Bindings extends Bindings {
@@ -506,6 +536,22 @@ object Bindings extends Bindings {
         )
         if (available(t)) callback(t, property.get)
       }
+    }
+  }
+
+  /** Abstraction over scalatags styles representation. */
+  trait HasCssName[-T] {
+    def cssName(v: T): String
+  }
+  object HasCssName {
+
+    import scalatags.generic.{PixelStyle, Style}
+
+    implicit val StyleHasCssName: HasCssName[Style] = new HasCssName[Style] {
+      override def cssName(v: scalatags.generic.Style): String = v.cssName
+    }
+    implicit val PixelStyleHasCssName: HasCssName[PixelStyle] = new HasCssName[PixelStyle] {
+      override def cssName(v: scalatags.generic.PixelStyle): String = v.cssName
     }
   }
 

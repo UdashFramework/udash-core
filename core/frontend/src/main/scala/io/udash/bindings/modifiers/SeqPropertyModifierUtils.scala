@@ -96,7 +96,7 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with
       }
 
       val sizeChange = patch.added.size - patch.removed.size
-      if (sizeChange > 0) producedElementsCount.insert(patch.idx, Seq.fill(sizeChange)(0):_*)
+      if (sizeChange > 0) producedElementsCount.insert(patch.idx, Seq.fill(sizeChange)(0): _*)
       else producedElementsCount.remove(patch.idx, -sizeChange)
       newElements.zipWithIndex.foreach {
         case (res, idx) =>

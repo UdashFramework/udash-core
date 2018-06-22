@@ -49,8 +49,8 @@ class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: I
       .withPort(port)
       .withPath(pathPrefix.stripSuffix("/") + url)
       .withMethod(method)
-      .withQueryParameters(queryArguments.toSeq:_*)
-      .withHeaders(headers.toSeq:_*)
+      .withQueryParameters(queryArguments.toSeq: _*)
+      .withHeaders(headers.toSeq: _*)
 
     val response =
       if (body == null) request.send()

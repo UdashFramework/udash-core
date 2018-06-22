@@ -147,7 +147,7 @@ object UdashForm {
   def textInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
                (labelContent: Modifier*)
                (property: Property[String], inputModifiers: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(TextInput.debounced(property, id := inputId, inputModifiers).render)
+    inputGroup(inputId, validation)(labelContent)(TextInput(property)(id := inputId, inputModifiers).render)
 
   /**
     * Creates password input group.
@@ -162,7 +162,7 @@ object UdashForm {
   def passwordInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
                    (labelContent: Modifier*)
                    (property: Property[String], inputModifiers: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(PasswordInput.debounced(property, id := inputId, inputModifiers).render)
+    inputGroup(inputId, validation)(labelContent)(PasswordInput(property)(id := inputId, inputModifiers).render)
 
   /**
     * Creates number input group.
@@ -177,7 +177,7 @@ object UdashForm {
   def numberInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
                  (labelContent: Modifier*)
                  (property: Property[String], inputModifiers: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(NumberInput.debounced(property, id := inputId, inputModifiers).render)
+    inputGroup(inputId, validation)(labelContent)(NumberInput(property)(id := inputId, inputModifiers).render)
 
   /**
     * Creates text area input group.
@@ -192,7 +192,7 @@ object UdashForm {
   def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
               (labelContent: Modifier*)
               (property: Property[String], inputModifiers: Modifier*): Modifier =
-    inputGroup(inputId, validation)(labelContent)(TextArea.debounced(property, id := inputId, inputModifiers).render)
+    inputGroup(inputId, validation)(labelContent)(TextArea(property)(id := inputId, inputModifiers).render)
 
   /**
     * Creates file input group.
@@ -211,7 +211,7 @@ object UdashForm {
                (name: String, acceptMultipleFiles: ReadableProperty[Boolean],
                 selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(
-      FileInput(name, acceptMultipleFiles, selectedFiles)(id := inputId, inputModifiers)
+      FileInput(selectedFiles, acceptMultipleFiles)(name, id := inputId, inputModifiers).render
     )
 
   /**
@@ -228,7 +228,7 @@ object UdashForm {
               (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
     div(BootstrapStyles.Form.checkbox)(
       label(
-        Checkbox(property, id := inputId, inputModifiers).render
+        Checkbox(property)(id := inputId, inputModifiers).render
       )(labelContent),
       validation
     )
@@ -249,13 +249,12 @@ object UdashForm {
   def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
-    CheckButtons(
-      selected, options,
-      items => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
+    CheckButtons(selected, options.toSeqProperty)(
+      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
-      )
+      ).render
     )
 
   /**
@@ -271,13 +270,12 @@ object UdashForm {
   def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, groupId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
-    RadioButtons(
-      selected, options,
-      items => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
+    RadioButtons(selected, options.toSeqProperty)(
+      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
-      )
+      ).render
     )
 
   /**
@@ -292,7 +290,7 @@ object UdashForm {
   def select(selected: Property[String], options: Seq[String],
              label: String => Modifier = Select.defaultLabel,
              inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options, label)(BootstrapStyles.Form.formControl, id := inputId.id)
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id).render
 
   /**
     * Creates multiple selection input for provided `options`.
@@ -306,7 +304,7 @@ object UdashForm {
   def multiselect(selected: SeqProperty[String], options: Seq[String],
                   label: String => Modifier = Select.defaultLabel,
                   inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options, label)(BootstrapStyles.Form.formControl, id := inputId.id)
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id)
 
   /** Creates static control element. */
   def staticControl(content: Modifier*): Modifier =

@@ -151,11 +151,13 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
   "DefaultExposesServerRPC" should tests(createDefaultRpc)
   "CustomExposesServerRPC" should tests(createCustomRpc)
+
   "LoggingExposesServerRPC" should {
     import io.udash.rpc.InnerRPC
     val calls = Seq.newBuilder[String]
     val rpc: ExposesServerRPC[TestRPC] = createLoggingRpc(calls)
     import rpc.localFramework._
+
     "not log calls of regular RPC methods" in {
       rpc.handleRpcCall(
         RPCCall(
@@ -171,8 +173,15 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
           "callId1"
         )
       )
+      rpc.handleRpcFire(
+        RPCFire(
+          RawInvocation("proc", List(List())),
+          List(RawInvocation("innerRpc", List(List(write[String]("arg0")))))
+        )
+      )
       loggedCalls shouldBe empty
     }
+
     "log calls of annotated RPC methods" in {
       rpc.handleRpcCall(
         RPCCall(
@@ -188,9 +197,16 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
           "callId2"
         )
       )
+      rpc.handleRpcFire(
+        RPCFire(
+          RawInvocation("fireSomething", List(List(write[Int](13)))),
+          List()
+        )
+      )
       loggedCalls.toList shouldBe List(
         s"${classOf[InnerRPC].getSimpleName} func List(5)",
-        s"${classOf[InnerRPC].getSimpleName} func List(10)"
+        s"${classOf[InnerRPC].getSimpleName} func List(10)",
+        s"${classOf[TestRPC].getSimpleName} fireSomething List(13)"
       )
     }
   }
