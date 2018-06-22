@@ -143,7 +143,7 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
       import localFramework.RPCMetadata
 
-      override protected val metadata: RPCMetadata[TestRPC] = TestRPC.metadata
+      override protected val metadata: RPCMetadata[TestRPC] = RPCMetadata.materializeForRpc
 
       override def log(rpcName: String, methodName: String, args: Seq[String]): Unit = loggedCalls += s"$rpcName $methodName $args"
     }
@@ -175,8 +175,8 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       )
       rpc.handleRpcFire(
         RPCFire(
-          RawInvocation("proc", List(List())),
-          List(RawInvocation("innerRpc", List(List(write[String]("arg0")))))
+          RawInvocation("proc", List()),
+          List(RawInvocation("innerRpc", List(write[String]("arg0"))))
         )
       )
       loggedCalls shouldBe empty
@@ -199,7 +199,7 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       )
       rpc.handleRpcFire(
         RPCFire(
-          RawInvocation("fireSomething", List(List(write[Int](13)))),
+          RawInvocation("fireSomething", List(write[Int](13))),
           List()
         )
       )
