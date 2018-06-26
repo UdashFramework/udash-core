@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.Registration
@@ -71,16 +72,21 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
-trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
+private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
 
   protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = CrossCollections.createArray
 
   override def structureListenersCount(): Int = structureListeners.size
+  protected def wrapStructureListenerRegistration(reg: Registration): Registration =
+    wrapListenerRegistration(reg)
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     structureListeners += structureListener
-    new MutableBufferRegistration(structureListeners, structureListener)
+    listenersUpdate()
+    wrapStructureListenerRegistration(
+      new MutableBufferRegistration(structureListeners, structureListener, Opt(listenersUpdate _))
+    )
   }
 
   /** SeqProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
@@ -110,7 +116,7 @@ trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
     new ZippedWithIndexReadableSeqProperty[A](this)
 
   protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
-    patch: Patch[ItemType], structureListeners: mutable.Buffer[(Patch[ItemType]) => Any]
+    patch: Patch[ItemType], structureListeners: mutable.Buffer[Patch[ItemType] => Any]
   ): Unit = {
     val cpy = CrossCollections.copyArray(structureListeners)
     CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))

@@ -1,5 +1,6 @@
 package io.udash.properties.single
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.seq.{SeqProperty, SeqPropertyFromSingleValue}
 import io.udash.utils.Registration
@@ -51,7 +52,7 @@ object Property {
 }
 
 /** Property which can be modified. */
-trait Property[A] extends AbstractReadableProperty[A] {
+trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Fires value change listeners.
     * @param t Should not be null!
     * @param force If true, the value change listeners will be fired even if value didn't change. */
@@ -64,28 +65,16 @@ trait Property[A] extends AbstractReadableProperty[A] {
   def touch(): Unit
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(v: Validator[A]): Registration = {
-    validators += v
-    validationResult = null
-    new MutableBufferRegistration(validators, v)
-  }
+  def addValidator(v: Validator[A]): Registration
 
   /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(f: (A) => ValidationResult): Registration =
-    addValidator(Validator(f))
+  def addValidator(f: A => ValidationResult): Registration
 
   /** Removes all validators from property and clears current validation result. It does not fire validation process. */
-  def clearValidators(): Unit = {
-    validators.clear()
-    validationResult = null
-    validationProperty.clear()
-  }
+  def clearValidators(): Unit
 
   /** Removes all listeners from property. */
-  def clearListeners(): Unit = {
-    listeners.clear()
-    oneTimeListeners.clear()
-  }
+  def clearListeners(): Unit
 
   /**
     * Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
@@ -95,8 +84,7 @@ trait Property[A] extends AbstractReadableProperty[A] {
     * @tparam B Type of new Property.
     * @return New Property[B], which will be synchronised with original Property[A].
     */
-  def transform[B](transformer: A => B, revert: B => A): Property[B] =
-    new TransformedProperty[A, B](this, transformer, revert)
+  def transform[B](transformer: A => B, revert: B => A): Property[B]
 
   /**
     * Creates SeqProperty[B] linked to `this`. Changes will be synchronized with `this` in both directions.
@@ -106,8 +94,7 @@ trait Property[A] extends AbstractReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
-    new SeqPropertyFromSingleValue(this, transformer, revert)
+  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]]
 
   /**
     * Bidirectionally synchronizes Property[B] with `this`. The transformed value is synchronized from `this`
@@ -119,7 +106,39 @@ trait Property[A] extends AbstractReadableProperty[A] {
     * @tparam B Type of new Property.
     * @return Bidirectional registration between existing and new property.
     */
-  def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration = {
+  def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration
+}
+
+/** Property which can be modified. */
+private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A] with Property[A] {
+  override def addValidator(v: Validator[A]): Registration = {
+    validators += v
+    validationResult = null
+    new MutableBufferRegistration(validators, v, Opt.empty)
+  }
+
+  override def addValidator(f: A => ValidationResult): Registration =
+    addValidator(Validator(f))
+
+  override def clearValidators(): Unit = {
+    validators.clear()
+    validationResult = null
+    validationProperty.clear()
+  }
+
+  override def clearListeners(): Unit = {
+    listenersUpdate()
+    listeners.clear()
+    oneTimeListeners.clear()
+  }
+
+  override def transform[B](transformer: A => B, revert: B => A): Property[B] =
+    new TransformedProperty[A, B](this, transformer, revert)
+
+  override def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+    new SeqPropertyFromSingleValue(this, transformer, revert)
+
+  override def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration = {
     val transformerRegistration = this.streamTo(p)(transformer)
     val revertRegistration = p.streamTo(this, initUpdate = false)(revert)
     new Registration {
