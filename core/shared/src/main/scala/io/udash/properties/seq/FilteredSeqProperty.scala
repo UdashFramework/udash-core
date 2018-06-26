@@ -1,6 +1,5 @@
 package io.udash.properties.seq
 
-import com.avsystem.commons.misc.Opt
 import io.udash.properties.CrossCollections
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration

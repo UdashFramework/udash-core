@@ -15,6 +15,7 @@ object Main {
       TransformedSeqPropertyListeners.suite,
       FilteredSeqPropertyListeners.suite,
       ReversedSeqPropertyListeners.suite,
+      ZippedSeqPropertyListeners.suite,
 
       StaticTranslationBinding.suite,
 

@@ -93,8 +93,9 @@ private[properties] class TransformedProperty[A, B](
       super.clearValidators()
       originValidatorRegistration = origin.addValidator(new Validator[A] {
         override def apply(element: A): Future[ValidationResult] = {
-          import scala.concurrent.ExecutionContext.Implicits.global
           import Validator._
+
+          import scala.concurrent.ExecutionContext.Implicits.global
 
           val transformedValue = transformer(element)
           Future.sequence(

@@ -98,7 +98,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
   protected def killOriginListeners(): Unit = {
     if (originListenerRegistration != null && listeners.isEmpty
-      && structureListeners.isEmpty && children.map(_.listenersCount()).sum == 0) {
+      && structureListeners.isEmpty && children.forall(_.listenersCount() == 0)) {
       originListenerRegistration.cancel()
       originListenerRegistration = null
     }

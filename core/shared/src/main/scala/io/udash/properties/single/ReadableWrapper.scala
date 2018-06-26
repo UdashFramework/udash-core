@@ -1,6 +1,6 @@
 package io.udash.properties.single
-import io.udash.properties.{PropertyCreator, PropertyId, ValidationResult}
 import io.udash.properties.seq.ReadableSeqProperty
+import io.udash.properties.{PropertyCreator, PropertyId, ValidationResult}
 import io.udash.utils.Registration
 
 import scala.concurrent.Future
