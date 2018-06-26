@@ -25,7 +25,7 @@ class PropertyTest extends UdashSharedTest {
     def s: Option[String]
     def t: ST
 
-    override def equals(obj: scala.Any): Boolean = obj match {
+    override def equals(obj: Any): Boolean = obj match {
       case tt: TT =>
         i == tt.i && s == tt.s && t == tt.t
       case _ => false
@@ -39,7 +39,7 @@ class PropertyTest extends UdashSharedTest {
     def c: C
     def s: Seq[Char]
 
-    override def equals(obj: scala.Any): Boolean = obj match {
+    override def equals(obj: Any): Boolean = obj match {
       case st: ST =>
         c == st.c && s == st.s
       case _ => false

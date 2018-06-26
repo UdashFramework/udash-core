@@ -1,5 +1,5 @@
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys.scalaVersion
 import sbt._
 
@@ -14,7 +14,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.28.0"
+  val avsCommonsVersion = "1.28.1"
 
   val atmosphereJSVersion = "2.3.5"
   val atmosphereVersion = "2.4.24"
@@ -36,7 +36,8 @@ object Dependencies {
   val scalaJsBenchmarkVersion = "0.2.5"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-plugin" % silencerVersion
+    "com.github.ghik" %% "silencer-plugin" % silencerVersion,
+    "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
