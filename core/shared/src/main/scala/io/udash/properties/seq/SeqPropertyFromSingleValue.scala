@@ -1,6 +1,7 @@
 package io.udash.properties
 package seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties.single._
 import io.udash.utils.Registration
 
@@ -15,7 +16,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
   protected final val children = CrossCollections.createArray[Property[B]]
   private var originListenerRegistration: Registration = _
-  protected var lastOriginValue: Option[A] = None
+  protected var lastOriginValue: Opt[A] = Opt.empty
 
   override def get: Seq[B] = {
     updateIfNeeded()
@@ -44,7 +45,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     )
 
   private def update(v: A): Unit = {
-    lastOriginValue = Some(v)
+    lastOriginValue = Opt(v)
 
     val transformed = transformer(v)
     val current = children.map(_.get)

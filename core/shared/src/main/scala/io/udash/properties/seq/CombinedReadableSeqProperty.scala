@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties.{CrossCollections, PropertyCreator}
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.Registration
@@ -12,7 +13,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
 ) extends CombinedProperty[Seq[A], B, Seq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
-  private var combinedChildren: Option[mutable.Buffer[ReadableProperty[R]]] = None
+  private var combinedChildren: Opt[mutable.Buffer[ReadableProperty[R]]] = Opt.empty
   private var originListenerRegistration: Registration = _
 
   protected def originStructureListener(originPatch: Patch[ReadableProperty[A]]): Unit = {
@@ -30,7 +31,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
       structureListeners.clear()
       val children: mutable.Buffer[ReadableProperty[R]] = CrossCollections.createArray
       s.elemProperties.foreach(sub => children += sub.combine(p)(combiner))
-      combinedChildren = Some(children)
+      combinedChildren = Opt(children)
       originListenerRegistration = s.listenStructure(originStructureListener)
     }
   }
@@ -38,7 +39,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   private def killOriginListener(): Unit = {
     if (originListenerRegistration != null && structureListeners.isEmpty) {
       originListenerRegistration.cancel()
-      combinedChildren = None
+      combinedChildren = Opt.empty
       originListenerRegistration = null
     }
   }

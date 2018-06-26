@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties.CrossCollections
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
@@ -10,12 +11,12 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  private var lastValue: Option[mutable.Buffer[ElemType]] = None
+  private var lastValue: Opt[mutable.Buffer[ElemType]] = Opt.empty
   private val originListeners: mutable.Buffer[Registration] = CrossCollections.createArray
 
   override protected def onListenerInit(): Unit = {
     super.onListenerInit()
-    lastValue = Some(CrossCollections.toCrossArray(origin.elemProperties.filter(el => matcher(el.get))))
+    lastValue = Opt(CrossCollections.toCrossArray(origin.elemProperties.filter(el => matcher(el.get))))
     origin.elemProperties.foreach { el => originListeners += el.listen(v => elementChanged(el, v)) }
   }
 
@@ -23,7 +24,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     super.onListenerDestroy()
     originListeners.foreach(_.cancel())
     originListeners.clear()
-    lastValue = None
+    lastValue = Opt.empty
   }
 
   override protected def originStructureListener(patch: Patch[ElemType]): Unit = {

@@ -1,6 +1,7 @@
 package io.udash.properties
 package single
 
+import com.avsystem.commons.misc.Opt
 import io.udash.utils.Registration
 
 import scala.concurrent.Future
@@ -10,12 +11,12 @@ private[properties] class TransformedReadableProperty[A, B](
   override protected val origin: ReadableProperty[A],
   transformer: A => B
 ) extends ForwarderReadableProperty[B] {
-  protected var lastValue: Option[A] = None
+  protected var lastValue: Opt[A] = Opt.empty
   protected var transformedValue: B = _
   protected var originListenerRegistration: Registration = _
 
   protected def originListener(originValue: A) : Unit = {
-    lastValue = Some(originValue)
+    lastValue = Opt(originValue)
     transformedValue = transformer(originValue)
     fireValueListeners()
   }
@@ -63,7 +64,7 @@ private[properties] class TransformedReadableProperty[A, B](
   override def get: B = {
     val originValue = origin.get
     if (lastValue.isEmpty || lastValue.get != originValue) {
-      lastValue = Some(originValue)
+      lastValue = Opt(originValue)
       transformedValue = transformer(originValue)
     }
     transformedValue

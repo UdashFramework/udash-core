@@ -7,17 +7,17 @@ private[properties] class CombinedProperty[A, B, R](
   override val origin: ReadableProperty[A], originTwo: ReadableProperty[B],
   override val parent: ReadableProperty[_], combiner: (A, B) => R
 ) extends ForwarderReadableProperty[R] {
-  private var lastValueOne: Option[A] = None
-  private var lastValueTwo: Option[B] = None
+  private var lastValueOne: Opt[A] = Opt.empty
+  private var lastValueTwo: Opt[B] = Opt.empty
   private var originListenerRegistrations: (Registration, Registration) = _
 
   protected def originListenerOne(originValue: A) : Unit = {
-    lastValueOne = Some(originValue)
+    lastValueOne = Opt(originValue)
     fireValueListeners()
   }
 
   protected def originListenerTwo(originValue: B) : Unit = {
-    lastValueTwo = Some(originValue)
+    lastValueTwo = Opt(originValue)
     fireValueListeners()
   }
 
@@ -70,8 +70,8 @@ private[properties] class CombinedProperty[A, B, R](
     val originValueOne = origin.get
     val originValueTwo = originTwo.get
     if (lastValueOne.isEmpty || lastValueTwo.isEmpty || lastValueOne.get != originValueOne || lastValueTwo.get != originValueTwo) {
-      lastValueOne = Some(originValueOne)
-      lastValueTwo = Some(originValueTwo)
+      lastValueOne = Opt(originValueOne)
+      lastValueTwo = Opt(originValueTwo)
     }
     combiner(originValueOne, originValueTwo)
   }

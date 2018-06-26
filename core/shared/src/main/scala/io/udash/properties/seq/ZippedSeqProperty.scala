@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
@@ -10,7 +11,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  protected var children: Option[mutable.Buffer[ReadableProperty[O]]] = None
+  protected var children: Opt[mutable.Buffer[ReadableProperty[O]]] = Opt.empty
   protected final val originListener: Patch[ReadableProperty[_]] => Unit =
     (patch: Patch[ReadableProperty[_]]) => {
       val idx = patch.idx
@@ -89,7 +90,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
 
   override protected def initOriginListeners(): Unit = {
     if (registation == null || !registation._1.isActive || !registation._2.isActive) {
-      children = Some(CrossCollections.toCrossArray(updatedPart(0)))
+      children = Opt(CrossCollections.toCrossArray(updatedPart(0)))
       registation = (s.listenStructure(originListener), p.listenStructure(originListener))
     }
   }
@@ -99,7 +100,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
       val (sReg, pReg) = registation
       sReg.cancel()
       pReg.cancel()
-      children = None
+      children = Opt.empty
       registation = null
     }
   }
@@ -130,14 +131,14 @@ private[properties] class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqPr
 
   override protected def initOriginListeners(): Unit = {
     if (registation == null || !registation.isActive) {
-      children = Some(CrossCollections.toCrossArray(updatedPart(0)))
+      children = Opt(CrossCollections.toCrossArray(updatedPart(0)))
       registation = s.listenStructure(originListener)
     }
   }
 
   override protected def killOriginListeners(): Unit = {
     if (registation != null && listenersCount() == 0 && structureListenersCount() == 0) {
-      children = None
+      children = Opt.empty
       registation.cancel()
       registation = null
     }
