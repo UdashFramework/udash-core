@@ -8,33 +8,35 @@ import scala.concurrent.Future
   * ExposesServerRPC mixin simplifying RPC calls logging.
   */
 trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
+
   import localFramework.RPCMetadata
+
   protected val metadata: RPCMetadata[ServerRPCType]
 
   def log(rpcName: String, methodName: String, args: Seq[String]): Unit
 
-  private def handleRpcRequest(msg: localFramework.RPCRequest): Unit = {
+  private def handleRpcRequest(msg: localFramework.RPCRequest, signatures: RPCMetadata[_] => Map[String, localFramework.Signature]): Unit = {
     val classMetadata = msg
       .gettersChain.reverse
-      .foldLeft[RPCMetadata[_]](metadata)((metadata, invocation) => metadata.getterResults(invocation.rpcName))
+      .foldLeft[RPCMetadata[_]](metadata) { (metadata, invocation) =>
+        metadata.getterSignatures(invocation.rpcName).resultMetadata.value
+      }
 
-    classMetadata
-      .signatures
+    signatures(classMetadata)
       .get(msg.invocation.rpcName)
-      .filter(_.annotations.exists(_.isInstanceOf[Logged]))
-      .foreach(methodMetadata =>
-        log(classMetadata.name, methodMetadata.methodName, msg.invocation.argLists.flatten.map(_.json))
-      )
+      .filter(_.annotations.collectFirst({ case a: Logged => a }).nonEmpty)
+      .foreach { methodMetadata =>
+        log(classMetadata.name, methodMetadata.name, msg.invocation.args.map(_.json))
+      }
   }
 
   override def handleRpcFire(fire: localFramework.RPCFire): Unit = {
-    handleRpcRequest(fire)
+    handleRpcRequest(fire, _.procedureSignatures)
     super.handleRpcFire(fire)
   }
 
   override def handleRpcCall(call: localFramework.RPCCall): Future[localFramework.RawValue] = {
-    handleRpcRequest(call)
+    handleRpcRequest(call, _.functionSignatures)
     super.handleRpcCall(call)
   }
-
 }

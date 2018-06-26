@@ -21,7 +21,7 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
   def handleRpcCall(call: RPCCall): Future[RawValue] = {
     try {
       val receiver = rawLocalRpc.resolveGetterChain(call.gettersChain)
-      receiver.call(call.invocation.rpcName, call.invocation.argLists)
+      receiver.call(call.invocation.rpcName)(call.invocation.args)
     } catch {
       case ex: Exception =>
         Future.failed(ex)
@@ -31,12 +31,12 @@ abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends Exp
   /** Handles RPCFire */
   def handleRpcFire(fire: RPCFire): Unit = {
     val receiver = rawLocalRpc.resolveGetterChain(fire.gettersChain)
-    receiver.fire(fire.invocation.rpcName, fire.invocation.argLists)
+    receiver.fire(fire.invocation.rpcName)(fire.invocation.args)
   }
 }
 
 class DefaultExposesServerRPC[ServerRPCType](local: ServerRPCType)
-                                            (implicit protected val localRpcAsRaw: DefaultServerUdashRPCFramework.AsRawRPC[ServerRPCType])
+  (implicit protected val localRpcAsRaw: DefaultServerUdashRPCFramework.AsRawRPC[ServerRPCType])
   extends ExposesServerRPC(local) {
 
   override val localFramework = DefaultServerUdashRPCFramework

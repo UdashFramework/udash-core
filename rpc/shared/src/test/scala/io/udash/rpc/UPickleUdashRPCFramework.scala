@@ -49,7 +49,7 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
 
     def readLong() = value match {
       case Js.Str(num) => num.toLong
-      case Js.Num(num) if num == num.toLong => num.toLong
+      case Js.Num(num) if num.isWhole => num.toLong
       case _ => throw new ReadFailure("Not Js.Num (Long)")
     }
 
@@ -67,6 +67,18 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     def readInt() = value match {
       case Js.Num(num) if num == num.toInt => num.toInt
       case _ => throw new ReadFailure("Not Js.Num (Int) ")
+    }
+
+    def readBigInt(): BigInt = value match {
+      case Js.Str(num) => BigInt(num)
+      case Js.Num(num) if num.isWhole => BigInt(num.toLong)
+      case _ => throw new ReadFailure("Not Js.Num (BigInt)")
+    }
+
+    def readBigDecimal(): BigDecimal = value match {
+      case Js.Str(num) => BigDecimal(num)
+      case Js.Num(num) => BigDecimal(num)
+      case _ => throw new ReadFailure("Not Js.Num (BigInt)")
     }
 
     def readObject() = value match {
@@ -129,6 +141,10 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
     def writeLong(long: Long) = setResultThenConsume(Js.Str(long.toString))
 
     def writeDouble(double: Double) = setResultThenConsume(Js.Num(double))
+
+    def writeBigInt(bigInt: BigInt): Unit = setResultThenConsume(Js.Str(bigInt.toString))
+
+    def writeBigDecimal(bigDecimal: BigDecimal): Unit = setResultThenConsume(Js.Str(bigDecimal.toString))
 
     def writeBinary(binary: Array[Byte]) =
       setResultThenConsume(Js.Arr(binary.map(b => Js.Num(b.toDouble)): _*))

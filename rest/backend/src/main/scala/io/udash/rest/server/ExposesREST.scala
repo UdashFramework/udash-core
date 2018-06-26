@@ -7,8 +7,6 @@ import io.udash.rpc.serialization.JsonStr
 import javax.servlet.http.HttpServletRequest
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
-import scala.util.control.NonFatal
 
 /**
   * Base trait for anything that exposes REST interface.
@@ -44,79 +42,85 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
     lazy val bodyContent = req.getReader.lines().toArray.mkString("\n")
     lazy val bodyValues = read[Map[String, framework.RawValue]](JsonStr(bodyContent))(bodyValuesReader)
 
-    def findRestParamName(data: framework.ParamMetadata): String =
+    def findRestParamName(data: framework.ParamMetadata[_]): String =
       data.annotations.collectFirst {
         case rpn: RESTParamName => rpn.restName
       }.getOrElse(data.name)
 
-    def parseInvocations(path: Seq[String], metadata: RPCMetadata[_]): Unit = {
+    def parseInvocations(path: Seq[String], metadata: RPCMetadata[_]): RPCMetadata[_] = {
       if (path.isEmpty) throw ExposesREST.NotFound(req.getPathInfo)
+
+      val allSignatures: PartialFunction[String, Signature] =
+        metadata.getterSignatures orElse metadata.functionSignatures orElse metadata.procedureSignatures
 
       val methodName = path.head
       var nextParts = path.tail
 
-      if (!metadata.signatures.contains(methodName))
+      if (!allSignatures.isDefinedAt(methodName))
         throw ExposesREST.NotFound(req.getPathInfo)
 
-      val methodMetadata = metadata.signatures(methodName)
+      val methodMetadata = allSignatures(methodName)
       var hasBodyArgs = false
 
-      val args: List[List[RawValue]] = methodMetadata.paramMetadata.map { argsList =>
-        argsList.map { arg =>
-          val argTypeAnnotation = arg.annotations.collectFirst {
-            case at: ArgumentType => at
-          }
-          argTypeAnnotation match {
-            case Some(_: Header) =>
-              val argName = findRestParamName(arg)
-              val headerValue = req.getHeader(argName)
-              if (headerValue == null) throw ExposesREST.MissingHeader(argName)
-              headerArgumentToRaw(headerValue, arg.typeMetadata == framework.SimplifiedType.StringType)
-            case Some(_: URLPart) =>
-              if (nextParts.isEmpty) throw ExposesREST.MissingURLPart(arg.name)
-              val v = nextParts.head
-              nextParts = nextParts.tail
-              urlPartToRaw(v, arg.typeMetadata == framework.SimplifiedType.StringType)
-            case Some(_: BodyValue) =>
-              val argName = findRestParamName(arg)
-              if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(argName)
-              hasBodyArgs = true
-              bodyValues(argName)
-            case Some(_: Body) =>
-              if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
-              hasBodyArgs = true
-              JsonStr(bodyContent)
-            case Some(_: Query) | None => // Query is a default argument type
-              val argName = findRestParamName(arg)
-              val param = req.getParameter(argName)
-              if (param == null) throw ExposesREST.MissingQueryArgument(argName)
-              queryArgumentToRaw(param, arg.typeMetadata == framework.SimplifiedType.StringType)
-          }
+      val args: List[RawValue] = methodMetadata.paramMetadata.map { arg =>
+        val argTypeAnnotation = arg.annotations.collectFirst {
+          case at: ArgumentType => at
+        }
+        argTypeAnnotation match {
+          case Some(_: Header) =>
+            val argName = findRestParamName(arg)
+            val headerValue = req.getHeader(argName)
+            if (headerValue == null) throw ExposesREST.MissingHeader(argName)
+            headerArgumentToRaw(headerValue, arg.typeMetadata == framework.SimplifiedType.StringType)
+          case Some(_: URLPart) =>
+            if (nextParts.isEmpty) throw ExposesREST.MissingURLPart(arg.name)
+            val v = nextParts.head
+            nextParts = nextParts.tail
+            urlPartToRaw(v, arg.typeMetadata == framework.SimplifiedType.StringType)
+          case Some(_: BodyValue) =>
+            val argName = findRestParamName(arg)
+            if (!bodyValues.contains(argName)) throw ExposesREST.MissingBodyValue(argName)
+            hasBodyArgs = true
+            bodyValues(argName)
+          case Some(_: Body) =>
+            if (bodyContent.isEmpty) throw ExposesREST.MissingBody(arg.name)
+            hasBodyArgs = true
+            JsonStr(bodyContent)
+          case Some(_: Query) | None => // Query is a default argument type
+            val argName = findRestParamName(arg)
+            val param = req.getParameter(argName)
+            if (param == null) throw ExposesREST.MissingQueryArgument(argName)
+            queryArgumentToRaw(param, arg.typeMetadata == framework.SimplifiedType.StringType)
         }
       }
 
       invocations += RawInvocation(methodName, args)
 
-      if (metadata.getterResults.contains(methodName))
-        parseInvocations(nextParts, metadata.getterResults(methodName))
+      if (metadata.getterSignatures.contains(methodName))
+        parseInvocations(nextParts, metadata.getterSignatures(methodName).resultMetadata.value)
       else {
         val methodAnnotation = methodMetadata.annotations.find(_.isInstanceOf[RESTMethod])
           .getOrElse(if (hasBodyArgs) new POST else new GET)
         if (methodAnnotation.getClass != httpMethod)
           throw new ExposesREST.MethodNotAllowed()
+        metadata
       }
     }
 
     Future {
-      parseInvocations(path, rpcMetadata)
+      val metadata = parseInvocations(path, rpcMetadata)
       val result = invocations.result().reverse
-      (rawLocalRpc.resolveGetterChain(result.tail), result.head)
-    }.flatMap { case (receiver, invocation) =>
-      Try(receiver.call(invocation.rpcName, invocation.argLists).map(_.json)(RunNowEC))
-        .recover { case NonFatal(_) =>
-          receiver.fire(invocation.rpcName, invocation.argLists)
-          Future.successful("")
-        }.get
+      val invocation = result.head
+      val receiver = rawLocalRpc.resolveGetterChain(result.tail)
+      val function = metadata.functionSignatures.contains(invocation.rpcName)
+      (receiver, function, result.head)
+    }.flatMap { case (receiver, function, invocation) =>
+      if (function)
+        receiver.call(invocation.rpcName)(invocation.args).map(_.json)(RunNowEC)
+      else {
+        receiver.fire(invocation.rpcName)(invocation.args)
+        Future.successful("")
+      }
     }
   }
 }

@@ -23,9 +23,9 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
-    val inv = RawInvocation("r{p[c\"]}Name", List(List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""))))
-    val getter1 = RawInvocation("g{}[]\",\"etter1", List(List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\"")),
-      List(JsonStr("\"xy,z\""))))
+    val inv = RawInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
+    val getter1 = RawInvocation("g{}[]\",\"etter1",
+      List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\""), JsonStr("\"xy,z\"")))
     val getter2 = RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
     val req = RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
     val success = RPCResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
