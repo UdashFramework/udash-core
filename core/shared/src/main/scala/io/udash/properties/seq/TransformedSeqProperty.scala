@@ -3,8 +3,7 @@ package io.udash.properties.seq
 import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
 
-private[properties]
-class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
+private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B
 ) extends ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
 
@@ -41,8 +40,7 @@ class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], Orig
     el.transform(transformer).asInstanceOf[ElemType]
 }
 
-private[properties]
-class TransformedSeqProperty[A, B](
+private[properties] class TransformedSeqProperty[A, B](
   override protected val origin: SeqProperty[A, Property[A]],
   transformer: A => B, revert: B => A
 ) extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer)

@@ -6,8 +6,7 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 
-private[properties]
-class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
+private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 

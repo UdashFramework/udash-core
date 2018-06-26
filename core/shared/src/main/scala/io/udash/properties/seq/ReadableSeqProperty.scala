@@ -72,7 +72,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
-trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
+private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
 
   protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = CrossCollections.createArray

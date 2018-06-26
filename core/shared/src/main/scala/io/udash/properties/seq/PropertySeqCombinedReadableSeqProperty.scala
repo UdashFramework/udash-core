@@ -1,12 +1,11 @@
-package io.udash.properties
+package io.udash.properties.seq
 
 import com.avsystem.commons.ISeq
-import io.udash.properties.Properties.{Patch, ReadableProperty}
-import io.udash.properties.seq.AbstractReadableSeqProperty
+import io.udash.properties.Properties.ReadableProperty
+import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.Registration
 
-private[properties]
-class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
+private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
   extends AbstractReadableSeqProperty[A, ReadableProperty[A]] {
 
   override val id: PropertyId = PropertyCreator.newID()

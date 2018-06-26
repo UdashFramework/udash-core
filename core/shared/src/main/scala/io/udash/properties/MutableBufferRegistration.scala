@@ -5,8 +5,7 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 
-private[udash]
-class MutableBufferRegistration[ElementType](
+private[udash] class MutableBufferRegistration[ElementType](
   s: mutable.Buffer[ElementType], el: ElementType,
   statusChangeListener: Opt[() => Unit]
 ) extends Registration {

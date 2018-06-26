@@ -1,6 +1,7 @@
 package io.udash.properties
 
 import com.avsystem.commons._
+import io.udash.properties.seq.PropertySeqCombinedReadableSeqProperty
 
 trait Properties {
   val Property = single.Property
@@ -19,6 +20,8 @@ trait Properties {
   type SeqProperty[A] = seq.SeqProperty[A, _ <: Property[A]]
 
   type Patch[+P <: ReadableProperty[_]] = seq.Patch[P]
+  type Blank[T] = io.udash.properties.Blank[T]
+  val Blank = io.udash.properties.Blank
 
   type ValidationError = io.udash.properties.ValidationError
   type DefaultValidationError = io.udash.properties.DefaultValidationError

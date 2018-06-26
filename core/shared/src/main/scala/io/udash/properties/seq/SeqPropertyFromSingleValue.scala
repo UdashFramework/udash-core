@@ -6,8 +6,7 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 
-private[properties]
-abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
+private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
   origin: ReadableProperty[A], transformer: A => Seq[B]
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
@@ -127,9 +126,9 @@ abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, Ele
     })
 }
 
-private[properties]
-class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: ReadableProperty[A], transformer: A => Seq[B])
-  extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer) {
+private[properties] class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](
+  origin: ReadableProperty[A], transformer: A => Seq[B]
+) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer) {
   override def elemProperties: Seq[ReadableProperty[B]] = {
     updateIfNeeded()
     children.map(_.readable)
@@ -139,8 +138,7 @@ class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](origin: Readabl
     p.readable
 }
 
-private[properties]
-class SeqPropertyFromSingleValue[A, B : PropertyCreator](
+private[properties] class SeqPropertyFromSingleValue[A, B : PropertyCreator](
   origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer)
   with AbstractSeqProperty[B, Property[B]] {

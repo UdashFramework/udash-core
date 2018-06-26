@@ -6,8 +6,7 @@ import io.udash.utils.Registration
 import scala.concurrent.Future
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
-private[properties]
-class TransformedReadableProperty[A, B](
+private[properties] class TransformedReadableProperty[A, B](
   override protected val origin: ReadableProperty[A],
   transformer: A => B
 ) extends ForwarderReadableProperty[B] {
@@ -72,9 +71,10 @@ class TransformedReadableProperty[A, B](
 }
 
 /** Represents Property[A] transformed to Property[B]. */
-private[properties]
-class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
-  extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
+private[properties] class TransformedProperty[A, B](
+  override protected val origin: Property[A],
+  transformer: A => B, revert: B => A
+) extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
   protected var originValidatorRegistration: Registration = _
 

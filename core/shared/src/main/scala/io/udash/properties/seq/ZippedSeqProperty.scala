@@ -6,8 +6,7 @@ import io.udash.utils.Registration
 
 import scala.collection.mutable
 
-private[properties]
-abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
+private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
@@ -74,8 +73,7 @@ abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, 
     })
 }
 
-private[properties]
-class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
+private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O
@@ -107,8 +105,7 @@ class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
   }
 }
 
-private[properties]
-class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator](
+private[properties] class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B]
@@ -121,8 +118,7 @@ class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator](
   }
 }
 
-private[properties]
-class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadableProperty[A]])
+private[properties] class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadableProperty[A]])
   extends ZippedSeqPropertyUtils[(A, Int)] {
 
   private var registation: Registration = _

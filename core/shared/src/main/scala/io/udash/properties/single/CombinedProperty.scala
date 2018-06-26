@@ -3,8 +3,7 @@ package io.udash.properties.single
 import com.avsystem.commons.misc.Opt
 import io.udash.utils.Registration
 
-private[properties]
-class CombinedProperty[A, B, R](
+private[properties] class CombinedProperty[A, B, R](
   override val origin: ReadableProperty[A], originTwo: ReadableProperty[B],
   override val parent: ReadableProperty[_], combiner: (A, B) => R
 ) extends ForwarderReadableProperty[R] {

@@ -4,7 +4,7 @@ import io.udash.properties.CrossCollections
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
 import io.udash.utils.Registration
 
-trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
+private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {
 
   protected def origin: ReadableSeqProperty[A, OrigType]
@@ -73,7 +73,7 @@ trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigTy
     })
 }
 
-trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
+private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
   protected var transformedElements = CrossCollections.createArray[ElemType]
@@ -116,7 +116,7 @@ trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: 
 }
 
 
-trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A]]
+private[properties] trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType]
     with ForwarderProperty[Seq[B]] with AbstractSeqProperty[B, ElemType] {
   protected def origin: SeqProperty[A, OrigType]
