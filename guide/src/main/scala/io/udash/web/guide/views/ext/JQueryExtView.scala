@@ -60,15 +60,15 @@ class JQueryExtView extends FinalView {
          |    id := "off",
          |    onclick :+= ((_: Event) =>
          |      jQ(".demo #click")
-         |        .off("click", onCallback)
-         |        .off("click", oneCallback)
+         |        .off(EventName.click, onCallback)
+         |        .off(EventName.click, oneCallback)
          |    )
          |  )("Off")
          |).render
          |
          |jQ(".demo #click")
-         |  .on("click", onCallback)
-         |  .one("click", oneCallback)""".stripMargin
+         |  .on(EventName.click, onCallback)
+         |  .one(EventName.click, oneCallback)""".stripMargin
     )(GuideStyles),
     p(
       "Notice that if you want to use the ", i("off()"), " method, then you have to pass exactly the same object ",

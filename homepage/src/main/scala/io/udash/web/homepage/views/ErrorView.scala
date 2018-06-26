@@ -36,7 +36,7 @@ class ErrorView extends FinalView with CssView {
   private lazy val jqTemplate = jQ(content)
 
   val window = jQ(org.scalajs.dom.window)
-  window.resize((element: Element, _: JQueryEvent) => onResize())
+  window.on(EventName.resize, (element: Element, _: JQueryEvent) => onResize())
   onResize()
 
   private def onResize(): Unit = {

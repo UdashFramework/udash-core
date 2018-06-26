@@ -50,7 +50,7 @@ object Header extends HeaderButtons with HeaderNav {
   private lazy val jqNav = jQ(navElement)
   private lazy val jqMobileButton = jQ(btnMobileMenu)
 
-  jqMobileButton.click((_: Element, jqEvent: JQueryEvent) => {
+  jqMobileButton.on(EventName.click, (_: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
     toggleBooleanAttribute(jqNav, Attributes.data(Attributes.Active))
     toggleBooleanAttribute(jqMobileButton, Attributes.data(Attributes.Active))
