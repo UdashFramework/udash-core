@@ -13,16 +13,16 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
 ) extends CombinedProperty[Seq[A], B, Seq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
-  private var combinedChildren: Opt[mutable.Buffer[ReadableProperty[R]]] = Opt.empty
+  private var combinedChildren: mutable.Buffer[ReadableProperty[R]] = _
   private var originListenerRegistration: Registration = _
 
   protected def originStructureListener(originPatch: Patch[ReadableProperty[A]]): Unit = {
     val combinedNewChildren = originPatch.added.map(sub => sub.combine(p)(combiner))
     val mappedPatch: Patch[ReadableProperty[R]] = originPatch.copy(
-      removed = originPatch.removed.indices.map(idx => combinedChildren.get(idx + originPatch.idx)),
+      removed = originPatch.removed.indices.map(idx => combinedChildren(idx + originPatch.idx)),
       added = combinedNewChildren
     )
-    CrossCollections.replace(combinedChildren.get, originPatch.idx, originPatch.removed.size, combinedNewChildren: _*)
+    CrossCollections.replace(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren: _*)
     fireElementsListeners(mappedPatch, structureListeners)
   }
 
@@ -31,7 +31,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
       structureListeners.clear()
       val children: mutable.Buffer[ReadableProperty[R]] = CrossCollections.createArray
       s.elemProperties.foreach(sub => children += sub.combine(p)(combiner))
-      combinedChildren = Opt(children)
+      combinedChildren = children
       originListenerRegistration = s.listenStructure(originStructureListener)
     }
   }
@@ -39,7 +39,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   private def killOriginListener(): Unit = {
     if (originListenerRegistration != null && structureListeners.isEmpty) {
       originListenerRegistration.cancel()
-      combinedChildren = Opt.empty
+      combinedChildren = null
       originListenerRegistration = null
     }
   }
@@ -61,7 +61,8 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
     })
 
   override def elemProperties: Seq[ReadableProperty[R]] =
-    combinedChildren.getOrElse(s.elemProperties.map(_.combine(p)(combiner)))
+    if (combinedChildren != null) combinedChildren
+    else s.elemProperties.map(_.combine(p)(combiner))
 
   override def listenStructure(structureListener: Patch[ReadableProperty[R]] => Any): Registration = {
     initOriginListener()

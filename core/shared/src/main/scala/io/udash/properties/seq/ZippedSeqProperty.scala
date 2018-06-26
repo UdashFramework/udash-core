@@ -11,11 +11,11 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  protected var children: Opt[mutable.Buffer[ReadableProperty[O]]] = Opt.empty
+  protected var children: mutable.Buffer[ReadableProperty[O]] = _
   protected final val originListener: Patch[ReadableProperty[_]] => Unit =
     (patch: Patch[ReadableProperty[_]]) => {
       val idx = patch.idx
-      val els = children.get
+      val els = children
       val removed = CrossCollections.slice(els, patch.idx, els.length)
       val added = updatedPart(idx)
       CrossCollections.replace(els, idx, els.length - idx, added:_*)
@@ -35,11 +35,11 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
   protected def killOriginListeners(): Unit
 
   override def get: Seq[O] = {
-    children.getOrElse(updatedPart(0)).map(_.get)
+    (if (children != null) children else updatedPart(0)).map(_.get)
   }
 
   override def elemProperties: Seq[ReadableProperty[O]] = {
-    children.getOrElse(updatedPart(0)).toVector
+    (if (children != null) children else updatedPart(0)).toVector
   }
 
   override def listenStructure(structureListener: Patch[ReadableProperty[O]] => Any): Registration = {
@@ -90,7 +90,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
 
   override protected def initOriginListeners(): Unit = {
     if (registation == null || !registation._1.isActive || !registation._2.isActive) {
-      children = Opt(CrossCollections.toCrossArray(updatedPart(0)))
+      children = CrossCollections.toCrossArray(updatedPart(0))
       registation = (s.listenStructure(originListener), p.listenStructure(originListener))
     }
   }
@@ -100,7 +100,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
       val (sReg, pReg) = registation
       sReg.cancel()
       pReg.cancel()
-      children = Opt.empty
+      children = null
       registation = null
     }
   }
@@ -131,14 +131,14 @@ private[properties] class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqPr
 
   override protected def initOriginListeners(): Unit = {
     if (registation == null || !registation.isActive) {
-      children = Opt(CrossCollections.toCrossArray(updatedPart(0)))
+      children = CrossCollections.toCrossArray(updatedPart(0))
       registation = s.listenStructure(originListener)
     }
   }
 
   override protected def killOriginListeners(): Unit = {
     if (registation != null && listenersCount() == 0 && structureListenersCount() == 0) {
-      children = Opt.empty
+      children = null
       registation.cancel()
       registation = null
     }
