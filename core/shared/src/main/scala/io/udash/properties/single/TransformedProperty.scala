@@ -1,22 +1,22 @@
 package io.udash.properties
 package single
 
+import com.avsystem.commons.misc.Opt
 import io.udash.utils.Registration
 
 import scala.concurrent.Future
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
-private[properties]
-class TransformedReadableProperty[A, B](
+private[properties] class TransformedReadableProperty[A, B](
   override protected val origin: ReadableProperty[A],
   transformer: A => B
 ) extends ForwarderReadableProperty[B] {
-  protected var lastValue: Option[A] = None
+  protected var lastValue: Opt[A] = Opt.empty
   protected var transformedValue: B = _
   protected var originListenerRegistration: Registration = _
 
   protected def originListener(originValue: A) : Unit = {
-    lastValue = Some(originValue)
+    lastValue = Opt(originValue)
     transformedValue = transformer(originValue)
     fireValueListeners()
   }
@@ -35,37 +35,36 @@ class TransformedReadableProperty[A, B](
     }
   }
 
-  private def wrapListenerRegistration(reg: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListener()
-      reg.restart()
-    }
+  override protected def wrapListenerRegistration(reg: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListener()
+        reg.restart()
+      }
 
-    override def cancel(): Unit = {
-      reg.cancel()
-      killOriginListener()
-    }
+      override def cancel(): Unit = {
+        reg.cancel()
+        killOriginListener()
+      }
 
-    override def isActive: Boolean =
-      reg.isActive
+      override def isActive: Boolean =
+        reg.isActive
+    })
+
+  override def listen(valueListener: B => Any, initUpdate: Boolean = false): Registration = {
+    initOriginListener()
+    super.listen(valueListener, initUpdate)
   }
 
-  override def listen(valueListener: (B) => Any, initUpdate: Boolean = false): Registration = {
+  override def listenOnce(valueListener: B => Any): Registration = {
     initOriginListener()
-    wrapListenerRegistration(super.listen(valueListener, initUpdate))
-  }
-
-  override def listenOnce(valueListener: (B) => Any): Registration = {
-    initOriginListener()
-    val reg = wrapListenerRegistration(new MutableBufferRegistration(listeners, valueListener))
-    oneTimeListeners += ((valueListener, () => reg.cancel()))
-    reg
+    super.listenOnce(valueListener)
   }
 
   override def get: B = {
     val originValue = origin.get
     if (lastValue.isEmpty || lastValue.get != originValue) {
-      lastValue = Some(originValue)
+      lastValue = Opt(originValue)
       transformedValue = transformer(originValue)
     }
     transformedValue
@@ -73,9 +72,10 @@ class TransformedReadableProperty[A, B](
 }
 
 /** Represents Property[A] transformed to Property[B]. */
-private[properties]
-class TransformedProperty[A, B](override protected val origin: Property[A], transformer: A => B, revert: B => A)
-  extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
+private[properties] class TransformedProperty[A, B](
+  override protected val origin: Property[A],
+  transformer: A => B, revert: B => A
+) extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
   protected var originValidatorRegistration: Registration = _
 
@@ -93,8 +93,9 @@ class TransformedProperty[A, B](override protected val origin: Property[A], tran
       super.clearValidators()
       originValidatorRegistration = origin.addValidator(new Validator[A] {
         override def apply(element: A): Future[ValidationResult] = {
-          import scala.concurrent.ExecutionContext.Implicits.global
           import Validator._
+
+          import scala.concurrent.ExecutionContext.Implicits.global
 
           val transformedValue = transformer(element)
           Future.sequence(

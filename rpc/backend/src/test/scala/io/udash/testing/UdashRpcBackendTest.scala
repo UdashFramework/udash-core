@@ -1,7 +1,6 @@
 package io.udash.testing
 
 import java.io.PrintWriter
-import java.util
 import java.util.concurrent.{Future, TimeUnit}
 
 import com.avsystem.commons._
@@ -22,7 +21,7 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
     val broadcasts = mutable.ListBuffer[String]()
     val addedResources = mutable.ListBuffer[AtmosphereResource]()
 
-    override def broadcast(msg: scala.Any): Future[AnyRef] = {
+    override def broadcast(msg: Any): Future[AnyRef] = {
       broadcasts += msg.toString
       null
     }
@@ -41,16 +40,16 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
       broadcaster.asInstanceOf[T]
     }
 
-    override def lookup[T <: Broadcaster](c: Class[T], id: scala.Any): T = _lookup(id.toString)
-    override def lookup[T <: Broadcaster](c: Class[T], id: scala.Any, createIfNull: Boolean): T = _lookup(id.toString)
-    override def lookup[T <: Broadcaster](id: scala.Any): T = _lookup(id.toString)
-    override def lookup[T <: Broadcaster](id: scala.Any, createIfNull: Boolean): T = _lookup(id.toString)
+    override def lookup[T <: Broadcaster](c: Class[T], id: Any): T = _lookup(id.toString)
+    override def lookup[T <: Broadcaster](c: Class[T], id: Any, createIfNull: Boolean): T = _lookup(id.toString)
+    override def lookup[T <: Broadcaster](id: Any): T = _lookup(id.toString)
+    override def lookup[T <: Broadcaster](id: Any, createIfNull: Boolean): T = _lookup(id.toString)
   }
 
   class MetaBroadcasterMock extends DefaultMetaBroadcaster {
     val broadcasts = mutable.ListBuffer[(String, String)]()
 
-    override def broadcastTo(broadcasterID: String, message: scala.Any): Future[util.List[Broadcaster]] = {
+    override def broadcastTo(broadcasterID: String, message: Any): Future[JList[Broadcaster]] = {
       broadcasts.+=((broadcasterID, message.toString))
       null
     }

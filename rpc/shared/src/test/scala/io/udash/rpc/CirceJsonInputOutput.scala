@@ -1,5 +1,6 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.OneWayRPCFramework
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 import io.circe.{Json, JsonObject, ParsingFailure}
@@ -7,7 +8,7 @@ import io.udash.rpc.serialization.JsonStr
 
 import scala.collection.mutable.ArrayBuffer
 
-object CirceUdashRpcFramework extends UdashRPCFramework {
+object CirceUdashRpcFramework extends UdashRPCFramework with OneWayRPCFramework {
 
   import io.circe.parser._
 
@@ -47,6 +48,8 @@ class CirceJsonOutput(consumer: Json => Any) extends Output {
   def writeInt(int: Int): Unit = consumer(Json.fromInt(int))
   def writeLong(long: Long): Unit = consumer(Json.fromLong(long))
   def writeDouble(double: Double): Unit = consumer(Json.fromDoubleOrString(double))
+  def writeBigInt(bigInt: BigInt): Unit = consumer(Json.fromBigInt(bigInt))
+  def writeBigDecimal(bigDecimal: BigDecimal): Unit = consumer(Json.fromBigDecimal(bigDecimal))
   def writeBinary(binary: Array[Byte]): Unit = ???
   def writeList(): ListOutput = new CirceJsonListOutput(consumer)
   def writeObject(): ObjectOutput = new CirceJsonObjectOutput(consumer)
@@ -93,6 +96,8 @@ class CirceJsonInput(json: Json) extends Input {
   def readInt(): Int = asNumber.toInt.getOrElse(failNot("int"))
   def readLong(): Long = asNumber.toLong.getOrElse(failNot("long"))
   def readDouble(): Double = asNumber.toDouble
+  def readBigInt(): BigInt = asNumber.toBigInt.getOrElse(failNot("big int"))
+  def readBigDecimal(): BigDecimal = asNumber.toBigDecimal.getOrElse(failNot("big decimal"))
   def readBinary(): Array[Byte] = ???
   def readList(): ListInput = new CirceJsonListInput(json.asArray.getOrElse(failNot("array")))
   def readObject(): ObjectInput = {

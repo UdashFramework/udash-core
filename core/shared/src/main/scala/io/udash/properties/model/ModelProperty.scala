@@ -26,7 +26,7 @@ object ModelProperty {
 }
 
 /** Property based on trait representing data model. */
-trait ModelProperty[A] extends AbstractReadableModelProperty[A] with Property[A] {
+trait ModelProperty[A] extends AbstractReadableModelProperty[A] with AbstractProperty[A] {
   /** Returns child ModelProperty[B]. */
   def subModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ModelProperty[B] =
     macro io.udash.macros.PropertyMacros.reifySubModel[A, B]

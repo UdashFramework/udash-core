@@ -4,7 +4,7 @@ import io.udash.properties.{PropertyCreator, PropertyId, ValidationResult}
 
 import scala.concurrent.Future
 
-trait ForwarderReadableProperty[A] extends AbstractReadableProperty[A] {
+private[properties] trait ForwarderReadableProperty[A] extends AbstractReadableProperty[A] {
   protected def origin: ReadableProperty[_]
 
   override val id: PropertyId = PropertyCreator.newID()
@@ -20,6 +20,6 @@ trait ForwarderReadableProperty[A] extends AbstractReadableProperty[A] {
     origin.valueChanged()
 }
 
-trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with Property[A] {
+private[properties] trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with AbstractProperty[A] {
   protected def origin: Property[_]
 }

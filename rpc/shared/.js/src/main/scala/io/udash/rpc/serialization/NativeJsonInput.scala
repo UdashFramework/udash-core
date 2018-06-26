@@ -6,7 +6,6 @@ import com.avsystem.commons.serialization._
 
 import scala.scalajs.js
 import scala.scalajs.js.JSON
-import scala.util.Try
 
 //todo move to scala-commons
 class NativeJsonInput(value: js.Any) extends Input { self =>
@@ -41,18 +40,38 @@ class NativeJsonInput(value: js.Any) extends Input { self =>
     }
 
   override def readLong(): Long = {
-    def parseLong(): Option[Long] = {
-      (value: Any) match {
-        case s: String => Try(s.toLong).toOption
-        case i: Int => Some(i)
-        case d: Double if d == d.toLong => Some(d.toLong)
-        case _ => None
+    def fail = throw new ReadFailure(s"Long expected.")
+    (value: Any) match {
+      case s: String => try s.toLong catch {
+        case _: NumberFormatException => fail
       }
+      case i: Int => i
+      case d: Double if d.isWhole => d.toLong
+      case _ => fail
     }
+  }
 
-    parseLong() match {
-      case Some(l) => l
-      case None => throw new ReadFailure(s"Long expected.")
+  override def readBigInt(): BigInt = {
+    def fail = throw new ReadFailure(s"BigInt expected.")
+    (value: Any) match {
+      case s: String => try BigInt(s) catch {
+        case _: NumberFormatException => fail
+      }
+      case i: Int => BigInt(i)
+      case d: Double if d.isWhole => BigInt(d.toLong)
+      case _ => fail
+    }
+  }
+
+  override def readBigDecimal(): BigDecimal = {
+    def fail = throw new ReadFailure(s"BigDecimal expected.")
+    (value: Any) match {
+      case s: String => try BigDecimal(s) catch {
+        case _: NumberFormatException => fail
+      }
+      case i: Int => BigDecimal(i)
+      case d: Double => BigDecimal(d)
+      case _ => fail
     }
   }
 

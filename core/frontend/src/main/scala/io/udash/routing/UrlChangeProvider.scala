@@ -1,5 +1,6 @@
 package io.udash.routing
 
+import com.avsystem.commons.misc.Opt
 import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
@@ -36,7 +37,7 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback)
+    new MutableBufferRegistration(callbacks, callback, Opt.empty)
   }
   override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
   override def changeFragment(url: Url): Unit = document.location.hash = url.value
@@ -97,7 +98,7 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback)
+    new MutableBufferRegistration(callbacks, callback, Opt.empty)
   }
 
   override def changeFragment(url: Url): Unit = {

@@ -16,7 +16,7 @@ abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPC
   /** Handles RPCFires */
   def handleRpcFire(fire: localFramework.RPCFire): Unit = {
     val receiver = localRpcAsRaw.asRaw(localRpc).resolveGetterChain(fire.gettersChain)
-    receiver.fire(fire.invocation.rpcName, fire.invocation.argLists)
+    receiver.fire(fire.invocation.rpcName)(fire.invocation.args)
   }
 }
 

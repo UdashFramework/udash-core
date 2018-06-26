@@ -1,11 +1,10 @@
 package io.udash.i18n
 
-import io.udash.rpc.{DefaultServerUdashRPCFramework, RPC}
+import io.udash.rpc.DefaultServerUdashRPCFramework
 
 import scala.concurrent.Future
 
 /** RPC interface for Udash i18n handling on server-side. */
-@RPC
 trait RemoteTranslationRPC {
   /** Returns text to replace translation key. */
   def loadTemplate(key: String)(implicit lang: Lang): Future[String] =

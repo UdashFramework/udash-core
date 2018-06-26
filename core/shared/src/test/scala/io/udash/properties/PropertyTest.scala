@@ -6,6 +6,7 @@ import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 import io.udash.testing.UdashSharedTest
+import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
@@ -25,7 +26,7 @@ class PropertyTest extends UdashSharedTest {
     def s: Option[String]
     def t: ST
 
-    override def equals(obj: scala.Any): Boolean = obj match {
+    override def equals(obj: Any): Boolean = obj match {
       case tt: TT =>
         i == tt.i && s == tt.s && t == tt.t
       case _ => false
@@ -39,7 +40,7 @@ class PropertyTest extends UdashSharedTest {
     def c: C
     def s: Seq[Char]
 
-    override def equals(obj: scala.Any): Boolean = obj match {
+    override def equals(obj: Any): Boolean = obj match {
       case st: ST =>
         c == st.c && s == st.s
       case _ => false
@@ -369,6 +370,12 @@ class PropertyTest extends UdashSharedTest {
       r2.cancel()
       p1.listenersCount() should be(0)
       p2.listenersCount() should be(0)
+
+      p1.set(7)
+      p2.set(2)
+
+      sum.get should be(9)
+      mul.get should be(14)
     }
 
     "combine with other properties (model properties)" in {
@@ -511,26 +518,43 @@ class PropertyTest extends UdashSharedTest {
       p2.listenersCount() should be(0)
       sum.listenersCount() should be(0)
       s.listenersCount() should be(0)
+
+      p1.set(2)
+      p2.set(3)
+      s.set(Seq(2,1))
+      sc.get should be(Seq(10, 5))
+      sqc.get should be(Seq(10, 5))
     }
 
     "transform to ReadableSeqProperty" in {
+      val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
       def registerElementListener(props: Seq[ReadableProperty[_]]) =
-        props.foreach(_.listen(_ => elementsUpdated += 1))
+        props.foreach { p =>
+          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+        }
 
       val p = Property("1,2,3,4,5")
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] =
+        p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+
+      p.listenersCount() should be(0)
 
       registerElementListener(s.elemProperties)
+      p.listenersCount() should be(1)
 
       var lastValue: Seq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      s.listen(v => lastValue = v)
-      s.listenStructure(p => {
+      val r1 = s.listen(lastValue = _)
+      val r2 = s.listenStructure { p =>
         registerElementListener(p.added)
+        p.removed.foreach { p =>
+          elemListeners(p.id).cancel()
+        }
         lastPatch = p
-      })
+      }
 
+      p.listenersCount() should be(1)
       s.get should be(Seq(1, 2, 3, 4, 5))
 
       lastValue = null
@@ -649,6 +673,20 @@ class PropertyTest extends UdashSharedTest {
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.listenersCount() should be(1)
+
+      elemListeners.foreach(_._2.cancel())
+
+      p.listenersCount() should be(0)
+
+      p.set("1,2,3")
+      s.get should be(Seq(1,2,3))
+      p.set("1,2,3,-1,-2,-3")
+      s.get should be(Seq(1,2,3,-1,-2,-3))
     }
 
     "not allow children modification after transformation into ReadableSeqProperty" in {
@@ -665,9 +703,12 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "transform to SeqProperty" in {
+      val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
-      def registerElementListener(props: Seq[ReadableProperty[_]]) =
-        props.foreach(_.listen(_ => elementsUpdated += 1))
+      def registerElementListener(props: Seq[ReadableProperty[_]]): Unit =
+        props.foreach { p =>
+          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+        }
 
       val p = Property("1,2,3,4,5")
       val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
@@ -675,17 +716,23 @@ class PropertyTest extends UdashSharedTest {
         (s: Seq[Int]) => s.mkString(",")
       )
 
+      p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
+      p.listenersCount() should be(1)
 
       var lastValue: Seq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      s.listen(v => lastValue = v)
-      s.listenStructure(p => {
+      val r1 = s.listen(lastValue = _)
+      val r2 = s.listenStructure(p => {
         registerElementListener(p.added)
+        p.removed.foreach { p =>
+          elemListeners(p.id).cancel()
+        }
         lastPatch = p
       })
 
       s.get should be(Seq(1, 2, 3, 4, 5))
+      p.listenersCount() should be(1)
 
       lastValue = null
       lastPatch = null
@@ -802,14 +849,29 @@ class PropertyTest extends UdashSharedTest {
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
+
+      r1.cancel()
+      p.listenersCount() should be(1)
+      r2.cancel()
+      p.listenersCount() should be(1)
+      elemListeners.foreach(_._2.cancel())
+      p.listenersCount() should be(0)
+
+      p.set("1,-1,2,-2")
+      s.get should be(Seq(1,-1,2,-2))
+
+      s.set(Seq(4,-4,2,-2))
+      p.get should be("4,-4,2,-2")
     }
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
       val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
 
+      i.get should be(Seq(1,2,3,4,5,6))
+
       var counter = 0
-      s.listen(_ => counter += 1)
+      val r1 = s.listen(_ => counter += 1)
 
       i.append(7)
 
@@ -824,6 +886,22 @@ class PropertyTest extends UdashSharedTest {
       s.get should be("12,12,12,12,12,12,12")
       i.get should be(Seq(12,12,12,12,12,12,12))
       counter should be(2)
+
+      i.elemProperties.foreach(_.set(1))
+
+      s.get should be("1,1,1,1,1,1,1")
+      i.get should be(Seq(1,1,1,1,1,1,1))
+      counter should be(9)
+
+      r1.cancel()
+
+      CallbackSequencer().sequence {
+        i.elemProperties.foreach(_.set(13))
+      }
+
+      s.get should be("13,13,13,13,13,13,13")
+      i.get should be(Seq(13,13,13,13,13,13,13))
+      counter should be(9)
 
       i.elemProperties.foreach(_.set(1))
 
@@ -911,13 +989,25 @@ class PropertyTest extends UdashSharedTest {
       val r = t1.listen(_ => ())
       t2.listenOnce(_ => ())
 
+      p.listenersCount() should be(2)
       t1.listenersCount() should be(1)
       t2.listenersCount() should be(1)
 
       p.set(25)
+
+      p.listenersCount() should be(1)
+      t1.listenersCount() should be(1)
+      t2.listenersCount() should be(0)
+
       r.cancel()
 
       p.listenersCount() should be(0)
+      t1.listenersCount() should be(0)
+      t2.listenersCount() should be(0)
+
+      p.set(-7)
+      t1.get should be(0)
+      t2.get should be(1)
     }
 
     "fire transform on empty property" in {
@@ -1136,11 +1226,11 @@ class PropertyTest extends UdashSharedTest {
         (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
       )
 
-      p.listen(listener)
-      t.listen(listener)
+      val r1 = p.listen(listener)
+      val r2 = t.listen(listener)
 
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
-      t.get should be(123+5)
+      t.get should be(128)
 
       t.set(64)
       p.get.i should be(32)
@@ -1153,6 +1243,16 @@ class PropertyTest extends UdashSharedTest {
       values.size should be(6)
       values should contain(64)
       values should contain(128)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.set(newTT(2, Some("s"), new C(3, "asd"), Seq('a', 'b', 'c')))
+      t.get should be(5)
+
+      t.set(32)
+      p.get.i should be(16)
+      p.get.t.c.i should be(16)
     }
 
     "work with simple case class" in {
@@ -1820,8 +1920,14 @@ class PropertyTest extends UdashSharedTest {
       val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]: @silent
 
-      f.listen(v => states += v)
-      f.listenStructure(p => patches += p)
+      p.listenersCount() should be(0)
+      p.structureListenersCount() should be(0)
+
+      val r1 = f.listen(v => states += v)
+      val r2 = f.listenStructure(p => patches += p)
+
+      p.listenersCount() should be(1)
+      p.structureListenersCount() should be(1)
 
       p.append(4)
 
@@ -1989,6 +2095,15 @@ class PropertyTest extends UdashSharedTest {
       patches(2).removed.map(_.get) should be(Seq())
 
       f.get should be(Seq(2, 2, 4, 6))
+
+      p.listenersCount() should be(1)
+      p.structureListenersCount() should be(1)
+
+      r1.cancel()
+      r2.cancel()
+
+      p.listenersCount() should be(0)
+      p.structureListenersCount() should be(0)
     }
 
     "be able to modify after transformation" in {
@@ -2007,6 +2122,21 @@ class PropertyTest extends UdashSharedTest {
       val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
       val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
+
+      doubles.listenersCount() should be(0)
+      ints.listenersCount() should be(0)
+
+      evens.get should be(Seq(2))
+
+      val r1 = evens.listenStructure(_ => ())
+
+      doubles.listenersCount() should be(1)
+      ints.listenersCount() should be(1)
+
+      doubles.listenersCount() should be(1)
+      doubles.structureListenersCount() should be(1)
+      ints.listenersCount() should be(1)
+      ints.structureListenersCount() should be(1)
 
       doubles.get should be(Seq(1.5, 2.3, 3.7))
       ints.get should be(Seq(1, 2, 3))
@@ -2053,6 +2183,21 @@ class PropertyTest extends UdashSharedTest {
       doubles.get should be(Seq(8.5, 12.0, 8.2, 10.3))
       ints.get should be(Seq(8, 12, 8, 10))
       evens.get should be(Seq(8, 12, 8, 10))
+
+      r1.cancel()
+
+      doubles.listenersCount() should be(0)
+      doubles.structureListenersCount() should be(0)
+      ints.listenersCount() should be(0)
+      ints.structureListenersCount() should be(0)
+
+      doubles.set(Seq(3.2, 4.7, 5.2))
+      ints.get should be(Seq(3, 4, 5))
+      evens.get should be(Seq(4))
+
+      doubles.append(8.1)
+      ints.get should be(Seq(3, 4, 5, 8))
+      evens.get should be(Seq(4, 8))
     }
 
     "provide valid patch when combined" in {
@@ -2064,14 +2209,14 @@ class PropertyTest extends UdashSharedTest {
       s.structureListenersCount() should be(0)
       p.listenersCount() should be(0)
 
-      val listenCalls = mutable.ListBuffer[Seq[Int]]()
-      val r1 = c.listen(v => listenCalls += v)
-      s.listenersCount() should be(1)
-      s.structureListenersCount() should be(0)
-      p.listenersCount() should be(1)
-
       var lastPatch: Patch[ReadableProperty[Int]] = null
       val r2 = c.listenStructure(patch => lastPatch = patch)
+      s.listenersCount() should be(0)
+      s.structureListenersCount() should be(1)
+      p.listenersCount() should be(0)
+
+      val listenCalls = mutable.ListBuffer[Seq[Int]]()
+      val r1 = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(1)
@@ -2295,14 +2440,37 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "zip with another ReadableProperty" in {
-      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+      val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
       val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
 
-      val pairs = odds.zip(evens)((x, y) => (x, y))
+      val pairs = odds.zip(evens)((_, _))
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(20)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8)))
+
+      numbers.append(10)
 
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      pairs.listenStructure(p => patches.append(p))
+      val r1 = pairs.listenStructure(p => patches.append(p))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
@@ -2409,6 +2577,29 @@ class PropertyTest extends UdashSharedTest {
 
       numbers.touch()
       pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+
+      numbers.remove(4)
+      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20)))
+
+      numbers.remove(9)
+      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
     }
 
     "zip all with another ReadableProperty" in {
@@ -2421,8 +2612,29 @@ class PropertyTest extends UdashSharedTest {
 
       val pairs = odds.zipAll(evens)((x, y) => (x, y), defaultA, defaultB)
 
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20), (21, -2)))
+
+      numbers.remove(21)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+
+      numbers.remove(20)
+      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      pairs.listenStructure(p => patches.append(p))
+      val r1 = pairs.listenStructure(p => patches.append(p))
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
@@ -2550,14 +2762,51 @@ class PropertyTest extends UdashSharedTest {
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
       patches.last.removed.size should be(4)
+
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      odds.structureListenersCount() should be(1)
+      evens.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      odds.listenersCount() should be(0)
+      evens.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+      odds.structureListenersCount() should be(0)
+      evens.structureListenersCount() should be(0)
+
+      numbers.append(20, 21)
+      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+
+      numbers.remove(4)
+      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20), (21, -2)))
+
+      numbers.remove(9)
+      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
     }
 
     "zip with indexes" in {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val indexed = numbers.zipWithIndex
 
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.append(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.remove(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      indexed.listenStructure(p => patches.append(p))
+      val r1 = indexed.listenStructure(p => patches.append(p))
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(1)
 
       indexed.get should be(numbers.get.zipWithIndex)
       patches.size should be(0)
@@ -2610,6 +2859,22 @@ class PropertyTest extends UdashSharedTest {
       patches.last.removed.size should be(7)
 
       numbers.touch()
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(1)
+
+      r1.cancel()
+
+      numbers.listenersCount() should be(0)
+      numbers.structureListenersCount() should be(0)
+
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.append(-1)
+      indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.remove(-1)
       indexed.get should be(numbers.get.zipWithIndex)
     }
   }

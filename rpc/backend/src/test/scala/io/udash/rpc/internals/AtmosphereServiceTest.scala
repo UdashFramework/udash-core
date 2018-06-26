@@ -28,7 +28,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
   def createTestRPC(): (mutable.Builder[String, Seq[String]], DefaultExposesServerRPC[TestRPC]) = {
     val calls: mutable.Builder[String, Seq[String]] = Seq.newBuilder[String]
-    val impl = TestRPC.rpcImpl((method: String, args: List[List[Any]], result: Option[Any]) => {
+    val impl = TestRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
       calls += method
     })
     val rpc: DefaultExposesServerRPC[TestRPC] = new DefaultExposesServerRPC[TestRPC](impl)
@@ -36,14 +36,14 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
   }
 
   def createConfigs(filters: ISeq[AtmosphereResource => Try[Unit]], resolveRpcResult: ExposesServerRPC[TestRPC],
-                    broadcasterFactory: BroadcasterFactoryMock, metaBroadcaster: MetaBroadcasterMock): (AtmosphereService[TestRPC], AtmosphereConfigMock)  = {
+    broadcasterFactory: BroadcasterFactoryMock, metaBroadcaster: MetaBroadcasterMock): (AtmosphereService[TestRPC], AtmosphereConfigMock) = {
     val config = new AtmosphereServiceConfigMock[TestRPC](filters, resolveRpcResult)
     val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry)
     val atmConfig = new AtmosphereConfigMock(broadcasterFactory, metaBroadcaster)
     (atm, atmConfig)
   }
 
-  def createConfigsWithoutRpc(): (AtmosphereServiceConfigMock[TestRPC], AtmosphereService[TestRPC])  = {
+  def createConfigsWithoutRpc(): (AtmosphereServiceConfigMock[TestRPC], AtmosphereService[TestRPC]) = {
     val config = new AtmosphereServiceConfigMock[TestRPC]()
     val atm = new AtmosphereService[TestRPC](config, exceptionsRegistry)
     (config, atm)
@@ -51,7 +51,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
   val failRequestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
     DefaultServerUdashRPCFramework.RPCCall(
-      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithFail", List(DefaultServerUdashRPCFramework.write[Boolean](true))),
       List(),
       "callId1"
     )
@@ -59,7 +59,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
   val exRequestBody = DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
     DefaultServerUdashRPCFramework.RPCCall(
-      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithEx", List(List())),
+      DefaultServerUdashRPCFramework.RawInvocation("doStuffWithEx", Nil),
       List(),
       "callId2"
     )
@@ -98,7 +98,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
           DefaultServerUdashRPCFramework.RPCFire(
-            DefaultServerUdashRPCFramework.RawInvocation("doStuffInteger", List(List(DefaultServerUdashRPCFramework.write[Int](5)))), List()
+            DefaultServerUdashRPCFramework.RawInvocation("doStuffInteger", List(DefaultServerUdashRPCFramework.write[Int](5))), List()
           )
         ).json)
 
@@ -132,7 +132,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
           DefaultServerUdashRPCFramework.RPCCall(
-            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(DefaultServerUdashRPCFramework.write[Boolean](true))),
             List(),
             "callId1"
           )
@@ -204,7 +204,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
           DefaultServerUdashRPCFramework.RPCCall(
-            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(DefaultServerUdashRPCFramework.write[Boolean](true))),
             List(),
             "callId1"
           )
@@ -365,7 +365,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         val request = AtmosphereRequestImpl.newInstance()
         request.body(DefaultServerUdashRPCFramework.write[DefaultServerUdashRPCFramework.RPCRequest](
           DefaultServerUdashRPCFramework.RPCCall(
-            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(List(DefaultServerUdashRPCFramework.write[Boolean](true)))),
+            DefaultServerUdashRPCFramework.RawInvocation("doStuff", List(DefaultServerUdashRPCFramework.write[Boolean](true))),
             List(),
             "callId1"
           )

@@ -1,12 +1,11 @@
-package io.udash.properties
+package io.udash.properties.seq
 
 import com.avsystem.commons.ISeq
-import io.udash.properties.Properties.{Patch, ReadableProperty}
-import io.udash.properties.seq.AbstractReadableSeqProperty
+import io.udash.properties.Properties.ReadableProperty
+import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.Registration
 
-private[properties]
-class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
+private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
   extends AbstractReadableSeqProperty[A, ReadableProperty[A]] {
 
   override val id: PropertyId = PropertyCreator.newID()
@@ -41,29 +40,30 @@ class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]]
     }
   }
 
-  private def wrapListenerRegistration(registration: Registration): Registration = new Registration {
-    override def restart(): Unit = {
-      initOriginListeners()
-      registration.restart()
-    }
+  override protected def wrapListenerRegistration(registration: Registration): Registration =
+    super.wrapListenerRegistration(new Registration {
+      override def restart(): Unit = {
+        initOriginListeners()
+        registration.restart()
+      }
 
-    override def cancel(): Unit = {
-      registration.cancel()
-      killOriginListeners()
-    }
+      override def cancel(): Unit = {
+        registration.cancel()
+        killOriginListeners()
+      }
 
-    override def isActive: Boolean =
-      registration.isActive
-  }
+      override def isActive: Boolean =
+        registration.isActive
+    })
 
   override def listen(valueListener: Seq[A] => Any, initUpdate: Boolean = false): Registration = {
     initOriginListeners()
-    wrapListenerRegistration(super.listen(valueListener, initUpdate))
+    super.listen(valueListener, initUpdate)
   }
 
   override def listenOnce(valueListener: Seq[A] => Any): Registration = {
     initOriginListeners()
-    wrapListenerRegistration(super.listenOnce(valueListener))
+    super.listenOnce(valueListener)
   }
 
   override def get: Seq[A] =

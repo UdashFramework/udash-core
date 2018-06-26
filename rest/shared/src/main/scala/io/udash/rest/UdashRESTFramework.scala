@@ -1,11 +1,9 @@
 package io.udash.rest
 
-import com.avsystem.commons.rpc.{FunctionRPCFramework, GetterRPCFramework, ProcedureRPCFramework}
+import com.avsystem.commons.rpc.StandardRPCFramework
 import io.udash.rpc.serialization.JsonStr
 
-trait UdashRESTFramework extends GetterRPCFramework with ProcedureRPCFramework with FunctionRPCFramework {
-  trait RawRPC extends GetterRawRPC with ProcedureRawRPC with FunctionRawRPC
-
+trait UdashRESTFramework extends StandardRPCFramework {
   type RawValue = JsonStr
   type ParamTypeMetadata[T] = SimplifiedType[T]
 

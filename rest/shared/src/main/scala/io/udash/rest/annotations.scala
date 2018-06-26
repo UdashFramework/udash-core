@@ -2,8 +2,11 @@ package io.udash.rest
 
 import com.avsystem.commons.rpc.MetadataAnnotation
 
+import scala.annotation.StaticAnnotation
+
 /** Marker trait for REST interfaces. */
-class REST extends io.udash.rpc.RPC
+@deprecated("This annotation is no longer needed", "0.7.0")
+class REST extends StaticAnnotation
 
 /** Annotated method name will be skipped in the REST path.
   * This annotation cannot be used in interface which you are going to expose.
@@ -11,7 +14,7 @@ class REST extends io.udash.rpc.RPC
 class SkipRESTName extends MetadataAnnotation
 /** Forces name of a method used in the interface to REST mapping.
   * This annotation has no effect on exposed interface, it should be used in case of wrapping external API.
-  * If you want to overwrite method name in exposed interface you should use @RPCName annotation. */
+  * If you want to overwrite method name in exposed interface you should use @rpcName annotation. */
 class RESTName(val restName: String) extends MetadataAnnotation
 /** Forces name of an argument used in the interface to REST mapping. It also affects exposed interfaces. */
 class RESTParamName(val restName: String) extends MetadataAnnotation
