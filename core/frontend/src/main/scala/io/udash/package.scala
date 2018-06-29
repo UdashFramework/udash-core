@@ -15,7 +15,7 @@ package object udash
   lazy val Window: io.udash.core.Window.type = io.udash.core.Window
 
   // Definitions
-  val  Url = io.udash.core.Url
+  final val  Url = io.udash.core.Url
   type Url = io.udash.core.Url
 
   type Presenter[S <: State] = io.udash.core.Presenter[S]
@@ -47,7 +47,7 @@ package object udash
   @deprecated("Use `io.udash.logging.CrossLogging` instead.", "0.6.0")
   type StrictLogging = io.udash.utils.StrictLogging
   type FileUploader = io.udash.utils.FileUploader
-  val  FileUploader = io.udash.utils.FileUploader
+  final val FileUploader = io.udash.utils.FileUploader
 
   // View
   type ViewRenderer = io.udash.view.ViewRenderer

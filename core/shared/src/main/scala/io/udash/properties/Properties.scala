@@ -4,11 +4,11 @@ import com.avsystem.commons._
 import io.udash.properties.seq.PropertySeqCombinedReadableSeqProperty
 
 trait Properties {
-  val Property = single.Property
-  val ModelProperty = model.ModelProperty
-  val SeqProperty = seq.SeqProperty
+  final val Property = single.Property
+  final val ModelProperty = model.ModelProperty
+  final val SeqProperty = seq.SeqProperty
   type CallbackSequencer = io.udash.properties.CallbackSequencer
-  val CallbackSequencer = io.udash.properties.CallbackSequencer
+  final val CallbackSequencer = io.udash.properties.CallbackSequencer
 
   type CastableReadableProperty[A] = single.CastableReadableProperty[A]
   type CastableProperty[A] = single.CastableProperty[A]
@@ -21,15 +21,15 @@ trait Properties {
 
   type Patch[+P <: ReadableProperty[_]] = seq.Patch[P]
   type Blank[T] = io.udash.properties.Blank[T]
-  val Blank = io.udash.properties.Blank
+  final val Blank = io.udash.properties.Blank
 
   type ValidationError = io.udash.properties.ValidationError
   type DefaultValidationError = io.udash.properties.DefaultValidationError
   type Validator[T] = io.udash.properties.Validator[T]
   type ValidationResult = io.udash.properties.ValidationResult
-  val Valid = io.udash.properties.Valid
-  val Invalid = io.udash.properties.Invalid
-  val DefaultValidationError = io.udash.properties.DefaultValidationError
+  final val Valid = io.udash.properties.Valid
+  final val Invalid = io.udash.properties.Invalid
+  final val DefaultValidationError = io.udash.properties.DefaultValidationError
 
   import Properties._
   implicit def any2Property[A](value: A): Any2Property[A] = new Any2Property(value)
