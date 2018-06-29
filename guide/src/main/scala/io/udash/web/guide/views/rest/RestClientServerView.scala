@@ -37,8 +37,7 @@ class RestClientServerView extends FinalView with CssView {
     ),
     p("The following demo uses a REST interface to call the echo server API: "),
     CodeBlock(
-      """@REST
-        |trait EchoServerREST {
+      """trait EchoServerREST {
         |  def withQuery(@Query @RESTParamName("param") arg: String): Future[String]
         |  def withHeader(@Header @RESTParamName("X-test") arg: String): Future[String]
         |  def withUrlPart(@URLPart arg: String): Future[String]

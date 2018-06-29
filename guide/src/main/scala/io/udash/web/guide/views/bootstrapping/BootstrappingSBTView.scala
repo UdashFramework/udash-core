@@ -45,6 +45,7 @@ class BootstrappingSBTView extends FinalView with CssView {
       ),
       CodeBlock(
         s"""import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+           |import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
            |import sbt._
            |
            |object Dependencies {

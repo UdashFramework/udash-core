@@ -48,7 +48,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait RESTInterface {
         |  @GET def getMethod(): Future[String]
         |  @POST def postMethod(): Future[String]
@@ -71,7 +70,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait MainServerREST {
         |  def nested(): NestedREST
         |
@@ -82,7 +80,6 @@ class RestInterfacesView extends FinalView with CssView {
         |  def name(): NestedREST
         |}
         |
-        |@REST
         |trait NestedREST {
         |  @GET
         |  def string(): Future[String]
@@ -125,7 +122,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait RESTInterface {
         |  @GET def url(@URLPart arg: String): Future[String]
         |  @GET def query(@Query arg: String): Future[String]

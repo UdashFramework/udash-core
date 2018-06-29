@@ -162,7 +162,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |  /** Renders view HTML code */
         |  override def getTemplate: Modifier = div(
         |    // automatic two way binding with html input
-        |    TextInput.debounced(model.subProp(_.email)),
+        |    TextInput(model.subProp(_.email))().render,
         |    // :+= operator allows to add more than one callback for one event
         |    button(onclick :+= ((_: Event) => {
         |      presenter.subscribe()
@@ -282,7 +282,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Now all parts of the Udash application are ready. You can find a complete demo application in the",
+      "Now all parts of the Udash application are ready. You can find a complete demo application in the ",
       a(href := IntroState.url)("Udash applications generator"), "."
     ),
 

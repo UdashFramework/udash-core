@@ -167,6 +167,7 @@ class FrontendBindingsView extends FinalView with CssView {
         |  div(v, nested(bind(p2))).render
         |}""".stripMargin
     )(GuideStyles),
+    p("Each binding method returns a ", i("Binding"), " which enables manual management of the binding lifecycle. "),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendFormsState.url)("Two-way Forms Binding"), " chapter to read about binding properties to HTML forms."

@@ -40,12 +40,12 @@ class RpcInterfacesView extends FinalView with CssView {
     p("Let's take a look at the following example of the server-side RPC interface:"),
     CodeBlock(
       """import io.udash.rpc._
+        |import com.avsystem.commons.rpc.rpcName
         |
         |case class Record(i: Int, fuu: String)
         |// create GenCodec for the default RPC serialization method
         |object Record extends HasGenCodec[Record]
         |
-        |@RPC
         |trait ServerRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
@@ -60,7 +60,6 @@ class RpcInterfacesView extends FinalView with CssView {
         |object ServerRPC
         |  extends DefaultServerUdashRPCFramework.RPCCompanion[ServerRPC]
         |
-        |@RPC
         |trait InnerRPC {
         |  def innerFire(): Unit
         |  def innerCall(arg: Int): Future[String]
@@ -72,7 +71,7 @@ class RpcInterfacesView extends FinalView with CssView {
     )(GuideStyles),
     p(
       "Inside ", i("ServerRPC"), " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
-      i("@RPCName"), " allows you to change a method name for serialization purposes, it is useful for overloaded methods in the RPC interface. ",
+      i("@rpcName"), " allows you to change a method name for serialization purposes, it is useful for overloaded methods in the RPC interface. ",
       "Take a look at the example of RPC usage:"
     ),
     CodeBlock(
@@ -104,16 +103,16 @@ class RpcInterfacesView extends FinalView with CssView {
     ),
     CodeBlock(
       """import io.udash.rpc._
+        |import com.avsystem.commons.rpc.rpcName
         |
         |case class Record(i: Int, fuu: String)
         |// create GenCodec for the default RPC serialization method
         |object Record extends HasGenCodec[Record]
         |
-        |@RPC
         |trait ClientRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
-        |  @RPCName("fireWithManyArgsLists")
+        |  @rpcName("fireWithManyArgsLists")
         |  def fireWithArgs(i: Int, s: String)(o: Option[Boolean]): Unit
         |  def fireWithCaseClass(r: Record): Unit
         |  def innerRpc(name: String): ClientInnerRPC
@@ -123,7 +122,6 @@ class RpcInterfacesView extends FinalView with CssView {
         |object ClientRPC
         |  extends DefaultClientUdashRPCFramework.RPCCompanion[ClientRPC]
         |
-        |@RPC
         |trait ClientInnerRPC {
         |  def innerFire(): Unit
         |}
@@ -148,24 +146,20 @@ class RpcInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rpc._
         |
-        |@RPC
         |trait MainServerRPC {
         |  def auth(): AuthenticationRPC
         |  def newsletter(): NewsletterRPC
         |}
         |
-        |@RPC
         |trait AuthenticationRPC {
         |  def login(username: String, password: String): Future[AuthToken]
         |}
         |
-        |@RPC
         |trait NewsletterRPC {
         |  def loadNews(limit: Int, skip: Int): Future[Seq[News]]
         |  def subscriptions(): NewsletterSubscriptionRPC
         |}
         |
-        |@RPC
         |trait NewsletterSubscriptionRPC {
         |  def subscribe(): Unit
         |  def unsubscribe(reason: String): Unit

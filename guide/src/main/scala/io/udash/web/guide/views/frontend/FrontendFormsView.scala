@@ -26,11 +26,11 @@ class FrontendFormsView extends FinalView with CssView {
     p("Let's briefly introduce all bindable form elements:"),
     ul(GuideStyles.defaultList)(
       li(i("Checkbox"), " - a single checkbox bound to ", i("Property[Boolean]"), "."),
-      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[String]"), "."),
+      li(i("CheckButtons"), " - a group of checkboxes bound to ", i("SeqProperty[T]"), "."),
       li(i("NumberInput"), " - input accepting only numbers, bound to ", i("Property[String]"), "."),
       li(i("PasswordInput"), " - password input bound to ", i("Property[String]"), "."),
-      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[String]"), "."),
-      li(i("Select"), " - a select element bound to ", i("Property[String]"), "."),
+      li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[T]"), "."),
+      li(i("Select"), " - a select element bound to ", i("Property[T]"), "."),
       li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
       li(i("TextInput"), " - standard input bound to ", i("Property[String]"), ".")
     ),
@@ -48,19 +48,19 @@ class FrontendFormsView extends FinalView with CssView {
         |form(
         |  div(
         |    "Name: ",
-        |    TextInput(name)(placeholder := "Input your name..."),
+        |    TextInput(name)(placeholder := "Input your name...").render,
         |    span(bind(name))
         |  ),
         |  div(
         |    "Password: ",
-        |    PasswordInput(password)(placeholder := "Input your password..."),
+        |    PasswordInput(password)(placeholder := "Input your password...").render,
         |    span(bind(password))
         |  ),
         |  div(
         |    "Age: ",
         |    NumberInput(
         |      age.transform(_.toString, Integer.parseInt)
-        |    )(placeholder := "Input your age..."),
+        |    )(placeholder := "Input your age...").render,
         |    span(bind(age))
         |  )
         |)""".stripMargin
@@ -72,9 +72,9 @@ class FrontendFormsView extends FinalView with CssView {
       """val text: Property[String] = Property("")
         |
         |form(
-        |  TextArea(text),
-        |  TextArea(text),
-        |  TextArea(text)
+        |  TextArea(text).render,
+        |  TextArea(text).render,
+        |  TextArea(text).render
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new TextAreaDemoComponent),
@@ -93,9 +93,9 @@ class FrontendFormsView extends FinalView with CssView {
         |)
         |
         |form(
-        |  Checkbox(propA), " A -> ", bind(propA),
-        |  Checkbox(propB), " B -> ", bind(propB),
-        |  Checkbox(propCAsBoolean), " C -> ", bind(propC)
+        |  Checkbox(propA).render, " A -> ", bind(propA),
+        |  Checkbox(propB).render, " B -> ", bind(propB),
+        |  Checkbox(propCAsBoolean).render, " C -> ", bind(propC)
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new CheckboxDemoComponent),
@@ -129,7 +129,7 @@ class FrontendFormsView extends FinalView with CssView {
         |    (els: Seq[(Input, String)]) => span(
         |      els.map { case (i: Input, l: String) => label(i, l) }
         |    )
-        |  )
+        |  ).render
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new CheckButtonsDemoComponent),
@@ -161,7 +161,7 @@ class FrontendFormsView extends FinalView with CssView {
         |    (els: Seq[(Input, String)]) => span(
         |      els.map { case (i: Input, l: String) => label(i, l) }
         |    )
-        |  )
+        |  ).render
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new RadioButtonsDemoComponent),
@@ -186,7 +186,7 @@ class FrontendFormsView extends FinalView with CssView {
         |form(
         |  Select(
         |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel)
+        |  )(Select.defaultLabel).render
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new SelectDemoComponent),
@@ -211,7 +211,7 @@ class FrontendFormsView extends FinalView with CssView {
         |form(
         |  Select(
         |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel)
+        |  )(Select.defaultLabel).render
         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(new MultiSelectDemoComponent),

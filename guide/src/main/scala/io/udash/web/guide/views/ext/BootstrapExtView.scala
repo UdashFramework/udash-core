@@ -25,22 +25,28 @@ class BootstrapExtView extends FinalView {
     )(GuideStyles),
     p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage)("Twitter Bootstrap"), " API."),
     h2("Statics"),
-    p(s"All Bootstrap tags and styles are available as UdashCSS styles."),
+    p(
+      "All Bootstrap tags and styles are available as UdashCSS styles. If you want to use ",
+      i("BootstrapStyles"), " import ", i("io.udash.css.CssView._"), ". It enables implicit conversion ",
+      "from these styles into Scalatags modifiers."
+    ),
     CodeBlock(
-      s"""|div(BootstrapStyles.row)(
-          |  div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
-          |    ".col-xs-9"
-          |  ),
-          |  div(BootstrapStyles.Grid.colXs4, BootstrapStyles.Well.well)(
-          |    ".col-xs-4",br,
-          |    "Since 9 + 4 = 13 > 12, this 4-column-wide div",
-          |    "gets wrapped onto a new line as one contiguous unit."
-          |  ),
-          |  div(BootstrapStyles.Grid.colXs6, BootstrapStyles.Well.well)(
-          |    ".col-xs-6",br,
-          |    "Subsequent columns continue along the new line."
-          |  )
-          |)""".stripMargin
+      s"""import io.udash.css.CssView._
+         |
+         |div(BootstrapStyles.row)(
+         |  div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
+         |    ".col-xs-9"
+         |  ),
+         |  div(BootstrapStyles.Grid.colXs4, BootstrapStyles.Well.well)(
+         |    ".col-xs-4",br,
+         |    "Since 9 + 4 = 13 > 12, this 4-column-wide div",
+         |    "gets wrapped onto a new line as one contiguous unit."
+         |  ),
+         |  div(BootstrapStyles.Grid.colXs6, BootstrapStyles.Well.well)(
+         |    ".col-xs-6",br,
+         |    "Subsequent columns continue along the new line."
+         |  )
+         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(
       BootstrapDemos.statics()
