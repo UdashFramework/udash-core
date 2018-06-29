@@ -5,7 +5,7 @@ import io.udash.GState
 trait Routing {
   type RoutingEngine[S >: Null <: GState[S]] = io.udash.routing.RoutingEngine[S]
   type UrlChangeProvider = io.udash.routing.UrlChangeProvider
-  val WindowUrlFragmentChangeProvider = io.udash.routing.WindowUrlFragmentChangeProvider
-  val WindowUrlPathChangeProvider = io.udash.routing.WindowUrlPathChangeProvider
+  final val WindowUrlFragmentChangeProvider = io.udash.routing.WindowUrlFragmentChangeProvider
+  final val WindowUrlPathChangeProvider = io.udash.routing.WindowUrlPathChangeProvider
 }
 
