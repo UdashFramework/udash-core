@@ -419,11 +419,15 @@ class BootstrapExtView extends FinalView {
           |  def age: Int
           |  def shirtSize: ShirtSize
           |}
+          |object UserModel extends HasModelPropertyCreator[UserModel] {
+          |  implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
+          |    override def name: String = ""
+          |    override def age: Int = 25
+          |    override def shirtSize: ShirtSize = Medium
+          |  })
+          |}
           |
-         |val user = ModelProperty(null: UserModel) // initialized below
-          |user.subProp(_.name).set("")
-          |user.subProp(_.age).set(25)
-          |user.subProp(_.shirtSize).set(Medium)
+          |val user = ModelProperty.blank[UserModel]
           |user.subProp(_.age).addValidator(new Validator[Int] {
           |  def apply(element: Int): Future[ValidationResult] =
           |    Future {
@@ -432,7 +436,7 @@ class BootstrapExtView extends FinalView {
           |    }
           |})
           |
-         |div(
+          |div(
           |  UdashForm(
           |    UdashForm.textInput()("User name")(user.subProp(_.name)),
           |    UdashForm.numberInput(
