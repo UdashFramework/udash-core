@@ -57,9 +57,23 @@ class FrontendPropertiesView extends FinalView with CssView {
         |s.replace(idx = 1, amount = 2, values = Seq(8,9,10):_*)
         |""".stripMargin
     )(GuideStyles),
+    p("As you can see, you can create a Property based on case class or Seq. This will be discussed later. "),
+    h4("Initialization"),
     p(
-      "As you can see, you can create a Property based on case class or Seq. This will be discussed later. "
+      "Each property should be initialized with some meaningful value. You can put an initial value directly into ",
+      "the property constructor as in the example above, but it is also possible to use a blank value. The blank constructor looks ",
+      "for an implicit instance of the type class ", i("Blank[T]"), " and uses this value to initialize the property. ",
+      "The blank values are defined for some basic types like ", i("String"), ", ", i("Int"), ", ", i("Option"), " or collections. "
     ),
+    CodeBlock(
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange] {
+        |  implicit val blank: Blank[NumbersInRange] =
+        |    Blank.Simple(NumbersInRange(0, 42, Seq.empty))
+        |}
+        |
+        |val numbers = ModelProperty.blank[NumbersInRange]""".stripMargin
+    )(GuideStyles),
     h3("Types of Properties"),
     p(
       i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value, ",
