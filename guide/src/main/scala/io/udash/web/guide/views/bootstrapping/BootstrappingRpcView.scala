@@ -28,8 +28,8 @@ class BootstrappingRpcView extends FinalView with CssView {
     p(
       "Each RPC trait requires a companion object extending ", i("RPCCompanion"),
       " from an RPC framework which you are planning to use. Usually it will be ",
-      i("`io.udash.rpc.DefaultClientUdashRPCFramework"), " for client's interfaces and ",
-      i("`io.udash.rpc.DefaultServerUdashRPCFramework"), " for server's interfaces.",
+      i("io.udash.rpc.DefaultClientUdashRPCFramework"), " for client's interfaces and ",
+      i("io.udash.rpc.DefaultServerUdashRPCFramework"), " for server's interfaces.",
     ),
     p(
       "That is all you have to do in the ", i("shared"), " module. Implementation of those interfaces will be covered in ",

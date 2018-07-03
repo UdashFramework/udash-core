@@ -20,7 +20,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     height(100 vh),
     color.white,
     backgroundColor.black,
-    backgroundImage := "url(../assets/images/intro_bg.jpg)",
+    backgroundImage := "url(/assets/images/intro_bg.jpg)",
     backgroundSize := "cover",
 
     media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
