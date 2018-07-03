@@ -307,7 +307,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |val floats: ReadableSeqProperty[Float] =
         |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
     )(GuideStyles),
-    h3("Properties combining"),
+    h4("Properties combining"),
     p("You can combine two properties into a new one synchronised with both of them:"),
     CodeBlock(
       """val x = Property(5)
@@ -336,7 +336,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5, 5), false
         |println(filtered.get)    // prints: Seq(2, 4, 6)""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty filtering"),
+    h4("SeqProperty filtering"),
     p(
       "You can filter SeqProperty if you need, however you will not be able to modify the filtered property. ",
       "A filtered property is synchronised with the original one."
@@ -347,7 +347,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
         |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty zip/zipAll"),
+    h4("SeqProperty zip/zipAll"),
     p("It is possible to zip elements from two ", i("SeqProperties"), ". You have to pass a combiner, so you can combine the elements as you want."),
     CodeBlock(
       """val numbers = SeqProperty[Int](1, 2, 3)
@@ -362,7 +362,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |//z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
         |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty zipWithIndex"),
+    h4("SeqProperty zipWithIndex"),
     p("It is also very easy to create sequence of elements zipped with index."),
     CodeBlock(
       """val strings = SeqProperty[String]("A", "B", "C", "D")
@@ -377,6 +377,26 @@ class FrontendPropertiesView extends FinalView with CssView {
         |
         |strings.clear()
         |// withIdx.get == Seq()""".stripMargin
+    )(GuideStyles),
+    h3("Immutable properties"),
+    p(
+      "GUI components may take numerous arguments defining their behaviour as the properties. ",
+      "Sometimes you do not need to change these options after component creation and transformation ",
+      "of arguments to  properties is an unnecessary overhead. The static value can be wrapped ",
+      "into the immutable property, which takes advantage of the value immutability ",
+      "and improves the application performance without reducing the API flexibility. ",
+      "The ", i("import io.udash._"), " provides three extension methods: ",
+      i("_.toProperty"), ", ", i("_.toModelProperty"), " and ", i("_.toSeqProperty"), "."
+    ),
+    CodeBlock(
+      """def component(
+        |  i: ReadableProperty[Int],
+        |  model: ReadableModelProperty[ComplexModelClass]
+        |) = ???
+        |
+        |val number: Int = ???
+        |val complex: ComplexModelClass = ???
+        |component(number.toProperty, complex.toModelProperty)""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(
