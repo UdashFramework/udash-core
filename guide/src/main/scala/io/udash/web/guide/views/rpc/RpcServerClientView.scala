@@ -79,7 +79,6 @@ class RpcServerClientView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rpc._
         |
-        |@RPC
         |trait NotificationsClientRPC {
         |  def notify(msg: String): Unit
         |}
@@ -88,7 +87,6 @@ class RpcServerClientView extends FinalView with CssView {
         |object NotificationsClientRPC
         |  extends DefaultClientUdashRPCFramework.RPCCompanion[NotificationsClientRPC]
         |
-        |@RPC
         |trait NotificationsServerRPC {
         |  def register(): Future[Unit]
         |  def unregister(): Future[Unit]

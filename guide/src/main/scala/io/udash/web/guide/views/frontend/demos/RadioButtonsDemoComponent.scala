@@ -45,9 +45,10 @@ class RadioButtonsDemoComponent extends Component {
     UdashInputGroup()(
       UdashInputGroup.addon("Fruits:"),
       UdashInputGroup.addon(
-        RadioButtons(
-          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString),
-          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l) })
+        RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
+          (els: Seq[(Input, String)]) => span(els.map {
+            case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l)
+          }).render
         ).render
       ),
       UdashInputGroup.addon(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))

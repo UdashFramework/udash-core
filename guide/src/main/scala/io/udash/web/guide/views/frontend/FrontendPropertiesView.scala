@@ -24,7 +24,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "convenient value change listening and validation. Take a look at the example below:"
     ),
     CodeBlock(
-      """val username = Property.empty[String]
+      """val username = Property.blank[String]
         |
         |// Register value change listener
         |username.listen((name: String) =>
@@ -57,9 +57,23 @@ class FrontendPropertiesView extends FinalView with CssView {
         |s.replace(idx = 1, amount = 2, values = Seq(8,9,10):_*)
         |""".stripMargin
     )(GuideStyles),
+    p("As you can see, you can create a Property based on case class or Seq. This will be discussed later. "),
+    h4("Initialization"),
     p(
-      "As you can see, you can create a Property based on case class or Seq. This will be discussed later. "
+      "Each property should be initialized with some meaningful value. You can put an initial value directly into ",
+      "the property constructor as in the example above, but it is also possible to use a blank value. The blank constructor looks ",
+      "for an implicit instance of the type class ", i("Blank[T]"), " and uses this value to initialize the property. ",
+      "The blank values are defined for some basic types like ", i("String"), ", ", i("Int"), ", ", i("Option"), " or collections. "
     ),
+    CodeBlock(
+      """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
+        |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange] {
+        |  implicit val blank: Blank[NumbersInRange] =
+        |    Blank.Simple(NumbersInRange(0, 42, Seq.empty))
+        |}
+        |
+        |val numbers = ModelProperty.blank[NumbersInRange]""".stripMargin
+    )(GuideStyles),
     h3("Types of Properties"),
     p(
       i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value, ",
@@ -89,7 +103,11 @@ class FrontendPropertiesView extends FinalView with CssView {
         |}
         |object Person extends HasModelPropertyCreator[Person]
         |
-        |val person = ModelProperty.empty[Person]
+        |val person = ModelProperty(new Person {
+        |  def name: String = "John"
+        |  def birthYear: Int = 1987
+        |  def friends: Seq[Person] = Seq.empty
+        |})
         |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
     CodeBlock(
@@ -102,7 +120,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |)
         |object Person {
         |  implicit val modelPropertyCreator: ModelPropertyCreator[Person] =
-        |   ModelPropertyCreator.materialize[Person]
+        |    ModelPropertyCreator.materialize[Person]
         |}
         |
         |val person = ModelProperty(Person("John", 1987, Seq.empty))
@@ -191,7 +209,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       "in this property, yet it will not fire on change inside children of a property. For example:"
     ),
     CodeBlock(
-      """val ints = SeqProperty.empty[Int]
+      """val ints = SeqProperty.blank[Int]
         |ints.listen(_ => println("listen"))
         |ints.listenStructure(_ => println("listenStructure"))
         |
@@ -289,7 +307,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |val floats: ReadableSeqProperty[Float] =
         |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
     )(GuideStyles),
-    h3("Properties combining"),
+    h4("Properties combining"),
     p("You can combine two properties into a new one synchronised with both of them:"),
     CodeBlock(
       """val x = Property(5)
@@ -318,7 +336,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5, 5), false
         |println(filtered.get)    // prints: Seq(2, 4, 6)""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty filtering"),
+    h4("SeqProperty filtering"),
     p(
       "You can filter SeqProperty if you need, however you will not be able to modify the filtered property. ",
       "A filtered property is synchronised with the original one."
@@ -329,7 +347,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
         |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty zip/zipAll"),
+    h4("SeqProperty zip/zipAll"),
     p("It is possible to zip elements from two ", i("SeqProperties"), ". You have to pass a combiner, so you can combine the elements as you want."),
     CodeBlock(
       """val numbers = SeqProperty[Int](1, 2, 3)
@@ -344,7 +362,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |//z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
         |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))""".stripMargin
     )(GuideStyles),
-    h3("SeqProperty zipWithIndex"),
+    h4("SeqProperty zipWithIndex"),
     p("It is also very easy to create sequence of elements zipped with index."),
     CodeBlock(
       """val strings = SeqProperty[String]("A", "B", "C", "D")
@@ -359,6 +377,35 @@ class FrontendPropertiesView extends FinalView with CssView {
         |
         |strings.clear()
         |// withIdx.get == Seq()""".stripMargin
+    )(GuideStyles),
+    h4("Ensuring readonly access"),
+    p(
+      "When you expose a property and you want to ensure that the exposed reference enables only the read access ",
+      "use the ", i("_.readable"), " method which does not allow to modify the property by type casting. "
+    ),
+    CodeBlock(
+      """val p: Property[Int] = Property(0)
+        |val ro: ReadableProperty[Int] = p.readable""".stripMargin
+    )(GuideStyles),
+    h3("Immutable properties"),
+    p(
+      "GUI components may take numerous arguments defining their behaviour as the properties. ",
+      "Sometimes you do not need to change these options after component creation and transformation ",
+      "of arguments to  properties is an unnecessary overhead. The static value can be wrapped ",
+      "into the immutable property, which takes advantage of the value immutability ",
+      "and improves the application performance without reducing the API flexibility. ",
+      "The ", i("import io.udash._"), " provides three extension methods: ",
+      i("_.toProperty"), ", ", i("_.toModelProperty"), " and ", i("_.toSeqProperty"), "."
+    ),
+    CodeBlock(
+      """def component(
+        |  i: ReadableProperty[Int],
+        |  model: ReadableModelProperty[ComplexModelClass]
+        |) = ???
+        |
+        |val number: Int = ???
+        |val complex: ComplexModelClass = ???
+        |component(number.toProperty, complex.toModelProperty)""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(

@@ -1,24 +1,25 @@
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt._
 
 object Dependencies {
 
-  val versionOfScala = "2.12.4"
-  val jettyVersion = "9.4.8.v20171121"
+  val versionOfScala = "2.12.6"
+  val jettyVersion = "9.4.10.v20180503"
 
-  val udashVersion = "0.6.1"
-  val udashJQueryVersion = "1.1.0"
+  val udashVersion = "0.7.0"
+  val udashJQueryVersion = "1.2.0"
   val highchartsVersion = "5.0.10"
 
-  val scalaLoggingVersion = "3.7.2"
+  val scalaLoggingVersion = "3.9.0"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.25.5"
+  val avsystemCommonsVersion = "1.27.3"
   val typesafeConfigVersion = "1.3.1"
-  val springVersion = "4.3.8.RELEASE"
+  val springVersion = "4.3.17.RELEASE"
 
-  val seleniumVersion = "3.8.1"
-  val scalatestVersion = "3.0.3"
+  val seleniumVersion = "3.12.0"
+  val scalatestVersion = "3.0.5"
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core-shared" % udashVersion,
@@ -69,6 +70,7 @@ object Dependencies {
     "ch.qos.logback" % "logback-classic" % logbackVersion,
 
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
+    "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,

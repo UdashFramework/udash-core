@@ -12,35 +12,29 @@ import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-trait ClientIdDemoModel {
-  def clientId: String
-}
-object ClientIdDemoModel extends HasModelPropertyCreator[ClientIdDemoModel]
-
 class ClientIdDemoComponent extends Component {
   import Context._
   override def getTemplate: Modifier = ClientIdDemoViewFactory()
 
   object ClientIdDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty.empty[ClientIdDemoModel]
-      clientId.subProp(_.clientId).set("???")
+      val clientId = Property[String]("???")
 
       val presenter = new ClientIdDemoPresenter(clientId)
       new ClientIdDemoView(clientId, presenter).render
     }
   }
 
-  class ClientIdDemoPresenter(model: ModelProperty[ClientIdDemoModel]) {
+  class ClientIdDemoPresenter(model: Property[String]) {
     def onButtonClick() = {
       Context.serverRpc.demos().clientIdDemo().clientId() onComplete {
-        case Success(cid) => println(cid); model.subProp(_.clientId).set(cid)
-        case Failure(ex) => println(ex); model.subProp(_.clientId).set(ex.toString)
+        case Success(cid) => println(cid); model.set(cid)
+        case Failure(ex) => println(ex); model.set(ex.toString)
       }
     }
   }
 
-  class ClientIdDemoView(model: ModelProperty[ClientIdDemoModel], presenter: ClientIdDemoPresenter) {
+  class ClientIdDemoView(model: Property[String], presenter: ClientIdDemoPresenter) {
     import JsDom.all._
 
     val loadIdButton = UdashButton(
@@ -58,7 +52,7 @@ class ClientIdDemoComponent extends Component {
       UdashInputGroup()(
         UdashInputGroup.addon(
           "Your client id: ",
-          produce(model)(cid => span(id := "client-id-demo-response", cid.clientId).render)
+          produce(model)(cid => span(id := "client-id-demo-response", cid).render)
         ),
         UdashInputGroup.buttons(loadIdButton.render)
       ).render

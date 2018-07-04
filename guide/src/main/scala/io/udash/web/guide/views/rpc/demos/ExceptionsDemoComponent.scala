@@ -29,7 +29,7 @@ class ExceptionsDemoComponent extends Component {
 
   object ExceptionsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty.empty[ExceptionsDemoModel]
+      val model = ModelProperty[ExceptionsDemoModel](ExceptionsDemoModel("", TranslationKey.untranslatable(""), ""))
       val presenter = new ExceptionsDemoPresenter(model)
       new ExceptionsDemoView(model, presenter).render
     }

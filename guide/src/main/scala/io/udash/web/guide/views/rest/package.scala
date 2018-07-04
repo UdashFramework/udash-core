@@ -10,12 +10,10 @@ package object rest {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait MainServerREST {
         |  def simple(): SimpleServerREST
         |}
         |
-        |@REST
         |trait SimpleServerREST {
         |  @GET def string(): Future[String]
         |  @GET def int(): Future[Int]

@@ -30,13 +30,9 @@ class CheckButtonsDemoComponent extends Component {
   override def getTemplate: Modifier = div(id := "check-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.row)(
-        div(
-          checkboxes()
-        ),
+        div(checkboxes()),
         br(),
-        div(
-          checkboxes()
-        )
+        div(checkboxes())
       )
     )
   )
@@ -46,9 +42,10 @@ class CheckButtonsDemoComponent extends Component {
       UdashInputGroup.addon("Fruits:"),
       UdashInputGroup.addon(
         CheckButtons(
-          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString),
-          (els: Seq[(Input, String)]) => span(els.map { case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, attr("data-label") := l)(i, l) })
-        ).render
+          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+        )((els: Seq[(Input, String)]) => span(els.map {
+          case (i: Input, l: String) => label(BootstrapStyles.Form.checkboxInline, attr("data-label") := l)(i, l)
+        }).render).render
       ),
       UdashInputGroup.addon(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
     ).render

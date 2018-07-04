@@ -3,7 +3,7 @@ package io.udash.web.guide.styles.partials
 import io.udash.css.CssBase
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.styles.utils.StyleConstants
-import io.udash.web.guide.styles.utils.{MediaQueries, GuideStyleUtils}
+import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
 import scala.language.postfixOps
 

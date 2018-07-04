@@ -74,7 +74,6 @@ class RpcSerializationView extends FinalView with CssView {
         |  }
         |}
         |
-        |@RPC
         |trait GenCodecServerRPC {
         |  import GenCodecServerRPC._
         |

@@ -1,7 +1,6 @@
 package io.udash.web.homepage.views
 
 import io.udash._
-import io.udash.core.DomWindow
 import io.udash.css.CssView
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
@@ -26,7 +25,7 @@ class ErrorView extends FinalView with CssView {
           span(GlobalStyles.red)("Oops! 404"), br(),
           span(
             "The link doesn't work. Or maybe it never did? You can still ",
-            a(GlobalStyles.grey, href := "assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
+            a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
           ), br(),
           span("... or go "), a(GlobalStyles.red, href := IndexState(None).url)("home"), span(".")
         )
@@ -36,8 +35,8 @@ class ErrorView extends FinalView with CssView {
 
   private lazy val jqTemplate = jQ(content)
 
-  val window = jQ(DomWindow)
-  window.resize((element: Element, _: JQueryEvent) => onResize())
+  val window = jQ(org.scalajs.dom.window)
+  window.on(EventName.resize, (element: Element, _: JQueryEvent) => onResize())
   onResize()
 
   private def onResize(): Unit = {

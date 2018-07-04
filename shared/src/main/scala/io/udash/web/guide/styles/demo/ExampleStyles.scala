@@ -8,8 +8,9 @@ import io.udash.web.commons.styles.attributes.Attributes
 import scala.concurrent.duration.FiniteDuration
 
 object ExampleStyles extends CssBase {
-  import scala.language.postfixOps
   import dsl._
+
+  import scala.language.postfixOps
 
   val btn = style(
     display.inlineBlock,

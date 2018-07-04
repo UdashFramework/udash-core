@@ -5,7 +5,7 @@ import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
-import io.udash.web.guide.styles.utils.{MediaQueries, GuideStyleUtils}
+import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
@@ -227,7 +227,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     height :=! s"calc(100vh - 200px)",
     color.white,
     backgroundColor.black,
-    backgroundImage := "url(../assets/images/intro_bg.jpg)",
+    backgroundImage := "url(/assets/images/intro_bg.jpg)",
     backgroundSize := "cover",
 
     media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
@@ -277,7 +277,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
       right(-30 px),
       width(400 px),
       height(213 px),
-      backgroundImage := "url(../assets/images/intro_bird.png)",
+      backgroundImage := "url(/assets/images/intro_bird.png)",
       backgroundSize := "100%",
 
       media.minHeight(1 px).maxHeight(850 px)(

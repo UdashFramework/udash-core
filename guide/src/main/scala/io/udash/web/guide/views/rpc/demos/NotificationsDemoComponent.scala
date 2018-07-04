@@ -16,7 +16,12 @@ trait NotificationsDemoModel {
   def registered: Boolean
   def lastMessage: String
 }
-object NotificationsDemoModel extends HasModelPropertyCreator[NotificationsDemoModel]
+object NotificationsDemoModel extends HasModelPropertyCreator[NotificationsDemoModel] {
+  implicit val blank: Blank[NotificationsDemoModel] = Blank.Simple(new NotificationsDemoModel {
+    override def registered: Boolean = false
+    override def lastMessage: String = "-"
+  })
+}
 
 class NotificationsDemoComponent extends Component {
   import io.udash.web.guide.Context._
@@ -25,10 +30,7 @@ class NotificationsDemoComponent extends Component {
 
   object NotificationsDemoViewFactory {
     def apply(): Modifier = {
-      val model = ModelProperty.empty[NotificationsDemoModel]
-      model.subProp(_.registered).set(false)
-      model.subProp(_.lastMessage).set("-")
-
+      val model = ModelProperty.blank[NotificationsDemoModel]
       val presenter = new NotificationsDemoPresenter(model)
       new NotificationsDemoView(model, presenter).render
     }

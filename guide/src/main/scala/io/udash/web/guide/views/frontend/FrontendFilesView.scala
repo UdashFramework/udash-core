@@ -46,8 +46,10 @@ class FrontendFilesView extends FinalView {
     p(i("FileUploader"), " is a class taking the server URL as a constructor argument and containing two methods:"),
     CodeBlock(
       """def upload(input: html.Input): ReadableModelProperty[FileUploadModel]
-        |def upload(fieldName: String, files: Seq[File],
-        |           extraData: Map[Any, Any]): ReadableModelProperty[FileUploadModel]""".stripMargin
+        |def upload(
+        |  fieldName: String, files: Seq[File],
+        |  extraData: Map[Any, Any]
+        |): ReadableModelProperty[FileUploadModel]""".stripMargin
     )(GuideStyles),
     p("The first one takes a file HTML input and uploads its content to the server. The second takes a field name, a sequence of files and request's extra data."),
     p("Both methods return property containing ", i("FileUploadModel"), " which provides information about the upload progress."),
@@ -61,6 +63,7 @@ class FrontendFilesView extends FinalView {
         |
         |sealed trait FileUploadState
         |object FileUploadState {
+        |  case object NotStarted extends FileUploadState
         |  case object InProgress extends FileUploadState
         |
         |  sealed trait Done extends FileUploadState

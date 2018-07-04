@@ -399,7 +399,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inputGroups(): dom.Element = {
-    val vanityUrl = Property.empty[String]
+    val vanityUrl = Property.blank[String]
     val buttonDisabled = Property(true)
     vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
     val button = UdashButton()("Clear")
@@ -408,7 +408,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       label("Your URL"),
       UdashInputGroup(InputGroupSize.Large)(
         UdashInputGroup.addon("https://example.com/users/", bind(vanityUrl)),
-        UdashInputGroup.input(TextInput.debounced(vanityUrl).render),
+        UdashInputGroup.input(TextInput(vanityUrl)().render),
         UdashInputGroup.buttons(
           UdashButton(
             disabled = buttonDisabled
@@ -442,12 +442,15 @@ object BootstrapDemos extends CrossLogging with CssView {
       def age: Int
       def shirtSize: ShirtSize
     }
-    object UserModel extends HasModelPropertyCreator[UserModel]
+    object UserModel extends HasModelPropertyCreator[UserModel] {
+      implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
+        override def name: String = ""
+        override def age: Int = 25
+        override def shirtSize: ShirtSize = Medium
+      })
+    }
 
-    val user = ModelProperty.empty[UserModel]
-    user.subProp(_.name).set("")
-    user.subProp(_.age).set(25)
-    user.subProp(_.shirtSize).set(Medium)
+    val user = ModelProperty.blank[UserModel]
     user.subProp(_.age).addValidator(new Validator[Int] {
       override def apply(element: Int): Future[ValidationResult] =
         Future {
@@ -476,20 +479,20 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def inlineForm(): dom.Element = {
-    val search = Property.empty[String]
-    val something = Property.empty[String]
+    val search = Property.blank[String]
+    val something = Property.blank[String]
     div(GuideStyles.frame)(
       UdashForm.inline(
         UdashForm.group(
           UdashInputGroup()(
             UdashInputGroup.addon("Search: "),
-            UdashInputGroup.input(TextInput.debounced(search).render)
+            UdashInputGroup.input(TextInput(search)().render)
           ).render
         ),
         UdashForm.group(
           UdashInputGroup()(
             UdashInputGroup.addon("Something: "),
-            UdashInputGroup.input(TextInput.debounced(something).render)
+            UdashInputGroup.input(TextInput(something)().render)
           ).render
         )
       ).render
@@ -754,7 +757,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleModal(): dom.Element = {
-    val events = SeqProperty.empty[UdashModal.ModalEvent]
+    val events = SeqProperty.blank[UdashModal.ModalEvent]
     val header = () => div(
       "Modal events",
       UdashButton()(UdashModal.CloseButtonAttr, BootstrapStyles.close, "×").render
@@ -805,7 +808,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       UdashProgressBar(value, showPercentage, Success)().render,
       UdashProgressBar(value, showPercentage, Striped)(value => value + " percent").render,
       UdashProgressBar.animated(value, showPercentage, animate, Danger)().render,
-      NumberInput.debounced(value.transform(_.toString, Integer.parseInt))(
+      NumberInput(value.transform(_.toString, Integer.parseInt))(
         BootstrapStyles.Form.formControl, placeholder := "Percentage"
       )
     ).render
@@ -886,7 +889,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def simpleCollapse(): dom.Element = {
-    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
       div(BootstrapStyles.Well.well)(
         ul(repeat(events)(event => li(event.get.toString).render))
@@ -910,7 +913,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def accordionCollapse(): dom.Element = {
-    val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val news = SeqProperty[String](
       "Title 1", "Title 2", "Title 3"
     )
@@ -937,7 +940,7 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def carousel(): dom.Element = {
     def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-      Url("assets/images/ext/bootstrap/carousel.jpg")
+      Url("/assets/images/ext/bootstrap/carousel.jpg")
     )(
       h3(randomString()),
       p(randomString())

@@ -5,7 +5,6 @@ import io.udash.rpc.utils.Logged
 
 import scala.concurrent.Future
 
-@RPC
 trait PingServerRPC {
   def ping(id: Int): Unit
 

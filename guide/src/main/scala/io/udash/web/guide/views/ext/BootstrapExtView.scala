@@ -24,22 +24,28 @@ class BootstrapExtView extends FinalView {
     )(GuideStyles),
     p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage)("Twitter Bootstrap"), " API."),
     h2("Statics"),
-    p(s"All Bootstrap tags and styles are available as UdashCSS styles."),
+    p(
+      "All Bootstrap tags and styles are available as UdashCSS styles. If you want to use ",
+      i("BootstrapStyles"), " import ", i("io.udash.css.CssView._"), ". It enables implicit conversion ",
+      "from these styles into Scalatags modifiers."
+    ),
     CodeBlock(
-      s"""|div(BootstrapStyles.row)(
-          |  div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
-          |    ".col-xs-9"
-          |  ),
-          |  div(BootstrapStyles.Grid.colXs4, BootstrapStyles.Well.well)(
-          |    ".col-xs-4",br,
-          |    "Since 9 + 4 = 13 > 12, this 4-column-wide div",
-          |    "gets wrapped onto a new line as one contiguous unit."
-          |  ),
-          |  div(BootstrapStyles.Grid.colXs6, BootstrapStyles.Well.well)(
-          |    ".col-xs-6",br,
-          |    "Subsequent columns continue along the new line."
-          |  )
-          |)""".stripMargin
+      s"""import io.udash.css.CssView._
+         |
+         |div(BootstrapStyles.row)(
+         |  div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
+         |    ".col-xs-9"
+         |  ),
+         |  div(BootstrapStyles.Grid.colXs4, BootstrapStyles.Well.well)(
+         |    ".col-xs-4",br,
+         |    "Since 9 + 4 = 13 > 12, this 4-column-wide div",
+         |    "gets wrapped onto a new line as one contiguous unit."
+         |  ),
+         |  div(BootstrapStyles.Grid.colXs6, BootstrapStyles.Well.well)(
+         |    ".col-xs-6",br,
+         |    "Subsequent columns continue along the new line."
+         |  )
+         |)""".stripMargin
     )(GuideStyles),
     ForceBootstrap(
       BootstrapDemos.statics()
@@ -382,7 +388,7 @@ class BootstrapExtView extends FinalView {
       i("input"), " for wrapping input elements, ", i("addon"), " for text elements and ", i("buttons"), " buttons."
     ),
     CodeBlock(
-      s"""val vanityUrl = Property.empty[String]
+      s"""val vanityUrl = Property.blank[String]
           |val buttonDisabled = Property(true)
           |vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
           |val button = UdashButton()("Clear")
@@ -413,11 +419,15 @@ class BootstrapExtView extends FinalView {
           |  def age: Int
           |  def shirtSize: ShirtSize
           |}
+          |object UserModel extends HasModelPropertyCreator[UserModel] {
+          |  implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
+          |    override def name: String = ""
+          |    override def age: Int = 25
+          |    override def shirtSize: ShirtSize = Medium
+          |  })
+          |}
           |
-         |val user = ModelProperty.empty[UserModel]
-          |user.subProp(_.name).set("")
-          |user.subProp(_.age).set(25)
-          |user.subProp(_.shirtSize).set(Medium)
+          |val user = ModelProperty.blank[UserModel]
           |user.subProp(_.age).addValidator(new Validator[Int] {
           |  def apply(element: Int): Future[ValidationResult] =
           |    Future {
@@ -426,7 +436,7 @@ class BootstrapExtView extends FinalView {
           |    }
           |})
           |
-         |div(
+          |div(
           |  UdashForm(
           |    UdashForm.textInput()("User name")(user.subProp(_.name)),
           |    UdashForm.numberInput(
@@ -449,8 +459,8 @@ class BootstrapExtView extends FinalView {
     ),
     p("It is also possible to create an ", i("inline"), " or ", i("horizontal"), " form."),
     CodeBlock(
-      s"""|val search = Property.empty[String]
-          |val something = Property.empty[String]
+      s"""|val search = Property.blank[String]
+          |val something = Property.blank[String]
           |div(
           |  UdashForm.inline(
           |    UdashForm.group(
@@ -803,7 +813,7 @@ class BootstrapExtView extends FinalView {
       "The ", i("UdashModal"), " class exposes methods for opening/hiding window. It is also possible to listen on window's events."
     ),
     CodeBlock(
-      s"""|val events = SeqProperty.empty[UdashModal.ModalEvent]
+      s"""|val events = SeqProperty.blank[UdashModal.ModalEvent]
           |val header = () => div(
           |  "Modal events",
           |  UdashButton()(
@@ -937,7 +947,7 @@ class BootstrapExtView extends FinalView {
       i("toggleButtonAttrs"), " for easy creation of toggle button."
     ),
     CodeBlock(
-      s"""|val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+      s"""|val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
           |val collapse = UdashCollapse()(
           |  div(BootstrapStyles.Well.well)(
           |    ul(repeat(events)(event => li(event.get.toString).render))
@@ -970,7 +980,7 @@ class BootstrapExtView extends FinalView {
       i("collapseOf"), " method for obtaining ", i("UdashCollapse"), " created for selected element."
     ),
     CodeBlock(
-      s"""val events = SeqProperty.empty[UdashCollapse.CollapseEvent]
+      s"""val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
           |val news = SeqProperty[String](
           |  "Title 1", "Title 2", "Title 3"
           |)
@@ -1005,7 +1015,7 @@ class BootstrapExtView extends FinalView {
     ),
     CodeBlock(
       s"""|def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-          |  Url("assets/images/ext/bootstrap/carousel.png")
+          |  Url("/assets/images/ext/bootstrap/carousel.png")
           |)(
           |  h3(randomString()),
           |  p(randomString())

@@ -17,17 +17,16 @@ class SimpleRestDemoComponent extends Component {
 
   override def getTemplate: Modifier = SimpleRestDemoViewFactory()
 
-  trait ExampleModel {
-    def string: String
-    def int: Int
-    def cls: RestExampleClass
-  }
+  class ExampleModel(
+    val string: String,
+    val int: Int,
+    val cls: Option[RestExampleClass]
+  )
   object ExampleModel extends HasModelPropertyCreator[ExampleModel]
 
   object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responsesModel = ModelProperty.empty[ExampleModel]
-
+      val responsesModel = ModelProperty(new ExampleModel("-", 0, None))
       val presenter = new SimpleRestDemoPresenter(responsesModel)
       new SimpleRestDemoView(responsesModel, presenter).render
     }
@@ -58,7 +57,7 @@ class SimpleRestDemoComponent extends Component {
       btn.disabled.set(true)
       Context.restServer.simple().cls() onComplete {
         case Success(response) =>
-          model.subProp(_.cls).set(response)
+          model.subProp(_.cls).set(Some(response))
         case Failure(ex) =>
           ex.printStackTrace()
       }

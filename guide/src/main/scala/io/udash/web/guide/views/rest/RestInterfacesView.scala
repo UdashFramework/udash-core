@@ -30,8 +30,8 @@ class RestInterfacesView extends FinalView with CssView {
     p("Take a look at the example from the previous chapter:"),
     simpleExample(),
     p(
-      "Every part of the REST API is described by a trait annotated with ", i("@REST"), ". The method ",
-      i("simple()"), " from the ", i("MainServerREST"), " interface returns ", i("SimpleServerREST"), ". It contains three methods ",
+      "Every part of the REST API is described by a trait. The method ", i("simple()"), " from the ",
+      i("MainServerREST"), " interface returns ", i("SimpleServerREST"), ". It contains three methods ",
       "annotated with the ", i("@GET"), " annotation - this means that this method call will be mapped to HTTP request using the ",
       i("GET"), " method."
     ),
@@ -48,7 +48,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait RESTInterface {
         |  @GET def getMethod(): Future[String]
         |  @POST def postMethod(): Future[String]
@@ -71,7 +70,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait MainServerREST {
         |  def nested(): NestedREST
         |
@@ -82,7 +80,6 @@ class RestInterfacesView extends FinalView with CssView {
         |  def name(): NestedREST
         |}
         |
-        |@REST
         |trait NestedREST {
         |  @GET
         |  def string(): Future[String]
@@ -108,7 +105,7 @@ class RestInterfacesView extends FinalView with CssView {
     ),
     p(
       "These annotations can be used only in Udash REST client. You cannot skip method name in exposed interface. ",
-      "If you want to rename exposed method, use ", i("@RPCName"), " and remember that it has to be unique."
+      "If you want to rename exposed method, use ", i("@rpcName"), " and remember that it has to be unique."
     ),
     h3("Argument types"),
     p(
@@ -125,7 +122,6 @@ class RestInterfacesView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rest._
         |
-        |@REST
         |trait RESTInterface {
         |  @GET def url(@URLPart arg: String): Future[String]
         |  @GET def query(@Query arg: String): Future[String]

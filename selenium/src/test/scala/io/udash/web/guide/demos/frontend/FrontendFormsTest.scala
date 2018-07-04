@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {
-  val url = "/#/frontend/forms"
+  val url = "/frontend/forms"
 
   "FrontendForms view" should {
     driver.get(server.createUrl(url))
@@ -75,9 +75,9 @@ class FrontendFormsTest extends SeleniumTest {
     "contain working multi select demo" in {
       val multiSelect = driver.findElementById("multi-select-demo")
 
-      def clickAndCheck(propertyName: String) = {
+      def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = multiSelect.findElement(new ByTagName("select"))
-        val option = select.findElement(new ByCssSelector(s"[value=$propertyName]"))
+        val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
           multiSelect.findElements(new ByClassName("multi-select-demo-fruits")).asScala.forall(el => {
@@ -85,20 +85,22 @@ class FrontendFormsTest extends SeleniumTest {
             if (option.getAttribute("selected") != null) contains else !contains
           }) should be(true)
           multiSelect.findElements(new ByTagName("select")).asScala.forall(el => {
-            el.findElement(new ByCssSelector(s"[value=$propertyName]")).getAttribute("selected") == option.getAttribute("selected")
+            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected")
           }) should be(true)
         }
       }
 
+      val options = Seq("Apple", "Orange", "Banana").zipWithIndex
       for (_ <- 1 to 15) {
-        clickAndCheck(Random.shuffle(Seq("Apple", "Orange", "Banana")).head)
+        val (name, idx) = Random.shuffle(options).head
+        clickAndCheck(name, idx)
       }
     }
 
     "contain working radio buttons demo" in {
       val radioButtons = driver.findElementById("radio-buttons-demo")
 
-      def clickAndCheck(propertyName: String) = {
+      def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
         radio.click()
         eventually {
@@ -107,35 +109,39 @@ class FrontendFormsTest extends SeleniumTest {
           }) should be(true)
           radioButtons.findElements(new ByCssSelector(s"input")).asScala.forall(el => {
             val eq = el.getAttribute("selected") == radio.getAttribute("selected")
-            if (el.getAttribute("value") == propertyName) eq else !eq
+            if (el.getAttribute("value").toInt == propertyIdx) eq else !eq
           }) should be(true)
         }
       }
 
+      val options = Seq("Apple", "Orange", "Banana").zipWithIndex
       for (_ <- 1 to 15) {
-        clickAndCheck(Random.shuffle(Seq("Apple", "Orange", "Banana")).head)
+        val (name, idx) = Random.shuffle(options).head
+        clickAndCheck(name, idx)
       }
     }
 
     "contain working select demo" in {
       val selectDemo = driver.findElementById("select-demo")
 
-      def clickAndCheck(propertyName: String) = {
+      def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = selectDemo.findElement(new ByTagName("select"))
-        val option = select.findElement(new ByCssSelector(s"[value=$propertyName]"))
+        val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
           selectDemo.findElements(new ByClassName("select-demo-fruits")).asScala.forall(el => {
             el.getText == propertyName
           }) should be(true)
           selectDemo.findElements(new ByTagName(s"select")).asScala.forall(el => {
-            el.findElement(new ByCssSelector(s"[value=$propertyName]")).getAttribute("selected") == option.getAttribute("selected")
+            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected")
           }) should be(true)
         }
       }
 
+      val options = Seq("Apple", "Orange", "Banana").zipWithIndex
       for (_ <- 1 to 15) {
-        clickAndCheck(Random.shuffle(Seq("Apple", "Orange", "Banana")).head)
+        val (name, idx) = Random.shuffle(options).head
+        clickAndCheck(name, idx)
       }
     }
 

@@ -29,21 +29,21 @@ class CheckboxDemoComponent extends Component {
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.addon("Property A:"),
-        UdashInputGroup.addon(Checkbox(propA, cls := "checkbox-demo-a").render),
+        UdashInputGroup.addon(Checkbox(propA)(cls := "checkbox-demo-a").render),
         UdashInputGroup.addon(bind(propA))
       ).render
     ),
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.addon("Property B:"),
-        UdashInputGroup.addon(Checkbox(propB, cls := "checkbox-demo-b").render),
+        UdashInputGroup.addon(Checkbox(propB)(cls := "checkbox-demo-b").render),
         UdashInputGroup.addon(bind(propB))
       ).render
     ),
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.addon("Property C:"),
-        UdashInputGroup.addon(Checkbox(propCAsBoolean, cls := "checkbox-demo-c").render),
+        UdashInputGroup.addon(Checkbox(propCAsBoolean)(cls := "checkbox-demo-c").render),
         UdashInputGroup.addon(bind(propC))
       ).render
     )

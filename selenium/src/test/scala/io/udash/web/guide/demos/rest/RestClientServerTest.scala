@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.ById
 
 class RestClientServerTest extends SeleniumTest {
-  val rpcIntroUrl = "/#/rest/client-server"
+  val rpcIntroUrl = "/rest/client-server"
 
   "RestClientServer view" should {
     driver.get(server.createUrl(rpcIntroUrl))

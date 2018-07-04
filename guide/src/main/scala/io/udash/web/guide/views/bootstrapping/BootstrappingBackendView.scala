@@ -123,6 +123,28 @@ class BootstrappingBackendView extends FinalView with CssView {
       "methods for exceptions, which makes possible throwing exceptions from server to client. You can find more details ",
       "in chapter ", a(href := RpcClientServerState.url)("RPC: Client ➔ server"), "."
     ),
+    h4("Frontend routing without hash"),
+    p(
+      "The above configuration does not support the frontend routing based on the URL path. Take a look at the following ",
+      "path rewrite handler. "
+    ),
+    CodeBlock(
+      """private def createRewriteHandler(context: ContextHandler) = {
+        |  import org.eclipse.jetty.rewrite.handler.RewriteRegexRule
+        |  import org.eclipse.jetty.rewrite.handler.RewriteHandler
+        |
+        |  val rewrite = new RewriteHandler()
+        |  rewrite.setRewriteRequestURI(true)
+        |  rewrite.setRewritePathInfo(false)
+        |
+        |  val spaRewrite = new RewriteRegexRule
+        |  spaRewrite.setRegex("^/(?!assets|scripts|styles|atm)(.*/?)*\$")
+        |  spaRewrite.setReplacement("/")
+        |  rewrite.addRule(spaRewrite)
+        |  rewrite.setHandler(context)
+        |  rewrite
+        |}""".stripMargin)(GuideStyles),
+    p("It returns ", i("index.html"), " for every path except the other static files and the WebSocket connection path."),
     h3("Application launcher"),
     p(
       "Below you can find a simple application launcher. It just creates ", i("ApplicationServer"), " with hardcoded " +

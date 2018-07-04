@@ -11,11 +11,6 @@ import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-trait PingPongCallDemoModel {
-  def pingId: Int
-}
-object PingPongCallDemoModel extends HasModelPropertyCreator[PingPongCallDemoModel]
-
 class PingPongCallDemoComponent extends Component {
   import Context._
 
@@ -23,34 +18,32 @@ class PingPongCallDemoComponent extends Component {
 
   object PingPongCallDemoViewFactory {
     def apply(): Modifier = {
-      val clientId = ModelProperty.empty[PingPongCallDemoModel]
-      clientId.subProp(_.pingId).set(0)
-
+      val clientId = Property[Int](0)
       val presenter = new PingPongCallDemoPresenter(clientId)
       new PingPongCallDemoView(clientId, presenter).render
     }
   }
 
-  class PingPongCallDemoPresenter(model: ModelProperty[PingPongCallDemoModel]) {
+  class PingPongCallDemoPresenter(model: Property[Int]) {
     def onButtonClick(btn: UdashButton) = {
       btn.disabled.set(true)
-      Context.serverRpc.demos().pingDemo().fPing(model.subProp(_.pingId).get) onComplete {
+      Context.serverRpc.demos().pingDemo().fPing(model.get) onComplete {
         case Success(response) =>
-          model.subProp(_.pingId).set(response + 1)
+          model.set(response + 1)
           btn.disabled.set(false)
         case Failure(ex) =>
-          model.subProp(_.pingId).set(-1)
+          model.set(-1)
       }
     }
   }
 
-  class PingPongCallDemoView(model: ModelProperty[PingPongCallDemoModel], presenter: PingPongCallDemoPresenter) {
+  class PingPongCallDemoView(model: Property[Int], presenter: PingPongCallDemoPresenter) {
     import JsDom.all._
 
     val pingButton = UdashButton(
       buttonStyle = ButtonStyle.Primary,
       componentId = ComponentId("ping-pong-call-demo")
-    )("Ping(", bind(model.subProp(_.pingId)), ")")
+    )("Ping(", bind(model), ")")
 
     pingButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>

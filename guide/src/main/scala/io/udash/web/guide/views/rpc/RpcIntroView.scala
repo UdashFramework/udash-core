@@ -47,7 +47,6 @@ class RpcIntroView extends FinalView with CssView {
       """import io.udash.rpc._
         |import scala.concurrent.Future
         |
-        |@RPC
         |trait PingPongServerRPC {
         |  def ping(id: Int): Future[Int]
         |}
@@ -90,7 +89,6 @@ class RpcIntroView extends FinalView with CssView {
       """import io.udash.rpc._
         |import scala.concurrent.Future
         |
-        |@RPC
         |trait PingPongServerRPC {
         |  def ping(id: Int): Unit
         |}
@@ -102,7 +100,6 @@ class RpcIntroView extends FinalView with CssView {
     CodeBlock(
       """import io.udash.rpc._
         |
-        |@RPC
         |trait PingPongClientRPC {
         |  def pong(id: Int): Unit
         |}

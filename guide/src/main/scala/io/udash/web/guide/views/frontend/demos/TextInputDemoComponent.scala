@@ -25,7 +25,7 @@ class TextInputDemoComponent extends Component {
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.input(
-          TextInput.debounced(name)(placeholder := "Input your name...", maxlength := "6").render
+          TextInput(name)(placeholder := "Input your name...", maxlength := "6").render
         ),
         UdashInputGroup.addon(span(bind(name)))
       ).render
@@ -33,7 +33,7 @@ class TextInputDemoComponent extends Component {
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.input(
-          PasswordInput.debounced(password)(placeholder := "Input your password...", maxlength := "6").render
+          PasswordInput(password)(placeholder := "Input your password...", maxlength := "6").render
         ),
         UdashInputGroup.addon(span(bind(password)))
       ).render
@@ -41,7 +41,7 @@ class TextInputDemoComponent extends Component {
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.input(
-          NumberInput.debounced(age.transform(_.toString, Integer.parseInt))(maxlength := "6").render
+          NumberInput(age.transform(_.toString, Integer.parseInt))(maxlength := "6").render
         ),
         UdashInputGroup.addon(span(bind(age)))
       ).render
