@@ -34,6 +34,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
   final def run(attachElement: Element): Unit = {
     rootElement = attachElement
 
+    urlChangeProvider.initialize()
     urlChangeProvider.onFragmentChange { frag =>
       routingEngine.handleUrl(frag)
         .recover { case ex: Throwable => handleRoutingFailure(ex) }

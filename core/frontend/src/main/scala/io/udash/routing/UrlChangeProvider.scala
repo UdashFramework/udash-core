@@ -5,13 +5,17 @@ import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
-import org.scalajs.dom.Element
 import org.scalajs.dom.raw.HashChangeEvent
+import org.scalajs.dom.{Element, Location}
 
 import scala.scalajs.js
 
 /** Provides information about current URL. */
 trait UrlChangeProvider {
+  /** Enables all required event listeners.
+    * [[io.udash.Application]] initializes the provider automatically. */
+  def initialize(): Unit
+
   /** Changes the URL part representing the frontend routing state. */
   def changeFragment(url: Url): Unit
 
@@ -31,14 +35,15 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
-  window.onhashchange = (_: HashChangeEvent) => {
-    callbacks.foreach(_.apply(currentFragment))
+  override def initialize(): Unit = {
+    window.onhashchange = (_: HashChangeEvent) => callbacks.foreach(_.apply(currentFragment))
   }
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
     new MutableBufferRegistration(callbacks, callback, Opt.empty)
   }
+
   override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
   override def changeFragment(url: Url): Unit = document.location.hash = url.value
   override def changeUrl(url: String): Unit = document.location.replace(url)
@@ -55,44 +60,63 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
-  window.document.addEventListener("click", (event: MouseEvent) => {
-    def findLink(el: Node): Element =
-      if (el == null) null
-      else if (el.nodeName.toLowerCase() == "a") el.asInstanceOf[Element]
-      else findLink(el.parentNode)
+  @inline
+  private def isSameOrigin(loc: Location, url: JSUrl): Boolean =
+    loc.protocol == url.protocol && loc.hostname == url.hostname && loc.port == url.port
 
-    def isSameOrigin(href: String): Boolean = {
-      val loc = window.location
-      val url = new JSUrl(href, loc.toString)
+  @inline
+  private def isSamePath(loc: Location, url: JSUrl): Boolean =
+    loc.pathname == url.pathname && loc.search == url.search
 
-      loc.protocol == url.protocol && loc.hostname == url.hostname && loc.port == url.port
-    }
+  @inline
+  private def isSameHash(loc: Location, url: JSUrl): Boolean =
+    loc.hash == url.hash
 
-    def isSamePath(href: String): Boolean = {
-      val loc = window.location
-      val url = new JSUrl(href, loc.toString)
+  @inline
+  private def shouldIgnoreClick(
+    event: MouseEvent, target: Element, href: String,
+    samePath: Boolean, sameHash: Boolean, sameOrigin: Boolean
+  ): Boolean = {
+    // handle only links in the same browser card
+    event.button != 0 || event.metaKey || event.ctrlKey || event.shiftKey ||
+      // ignore click if default already prevented
+      event.defaultPrevented ||
+      // ignore special link types
+      target.hasAttribute("download") || target.getAttribute("rel") == "external" || href.contains("mailto:") ||
+      // ignore if links to different domain
+      !sameOrigin ||
+      // ignore if only the URL fragment changed, but path is the same
+      (samePath && !sameHash)
+  }
 
-      loc.pathname == url.pathname && loc.search == url.search
-    }
+  override def initialize(): Unit = {
+    window.document.addEventListener("click", (event: MouseEvent) => {
+      def findLink(el: Node): Element =
+        if (el == null) null
+        else if (el.nodeName.toLowerCase() == "a") el.asInstanceOf[Element]
+        else findLink(el.parentNode)
 
-    val target = findLink(event.target.asInstanceOf[Node])
-    if (target != null) {
-      val href = target.getAttribute("href")
-      val ignore = event.button != 0 || event.metaKey || event.ctrlKey || event.shiftKey ||
-        event.defaultPrevented || target.hasAttribute("download") ||
-        target.getAttribute("rel") == "external" || href.contains("mailto:") || !isSameOrigin(href)
+      val target = findLink(event.target.asInstanceOf[Node])
+      if (target != null) {
+        val href = target.getAttribute("href")
+        val location = window.location
+        val newUrl = new JSUrl(href, location.toString)
+        val (samePath, sameHash, sameOrigin) =
+          (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
+        val ignore = shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)
 
-      if (!ignore) {
-        if (!isSamePath(href)) {
-          val url = Url(href)
-          changeFragment(url)
+        if (!ignore) {
+          if (!samePath) {
+            val url = Url(href)
+            changeFragment(url)
+          }
+          event.preventDefault()
         }
-        event.preventDefault()
       }
-    }
-  })
+    })
 
-  window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
+    window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
+  }
 
   override def changeUrl(url: String): Unit = document.location.replace(url)
 
@@ -103,7 +127,8 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   override def changeFragment(url: Url): Unit = {
     window.history.pushState(js.Dynamic.literal(url = url.value), "", url.value)
-    callbacks.foreach(_.apply(url))
+    val withoutHash = Url(url.value.takeWhile(_ != '#'))
+    callbacks.foreach(_.apply(withoutHash))
   }
 
   override def currentFragment: Url =
