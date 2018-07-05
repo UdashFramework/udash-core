@@ -7,7 +7,7 @@ import sbtcrossproject.{crossProject, CrossType}
 name := "udash-guide"
 
 inThisBuild(Seq(
-  version := "0.7.0",
+  version := "0.7.1",
   scalaVersion := Dependencies.versionOfScala,
   organization := "io.udash",
   scalacOptions ++= Seq(

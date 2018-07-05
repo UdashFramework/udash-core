@@ -7,14 +7,14 @@ object Dependencies {
   val versionOfScala = "2.12.6"
   val jettyVersion = "9.4.10.v20180503"
 
-  val udashVersion = "0.7.0"
+  val udashVersion = "0.7.1"
   val udashJQueryVersion = "1.2.0"
   val highchartsVersion = "5.0.10"
 
   val scalaLoggingVersion = "3.9.0"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.27.3"
+  val avsystemCommonsVersion = "1.28.1"
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.17.RELEASE"
 

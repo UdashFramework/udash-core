@@ -3,8 +3,10 @@ package io.udash.web.guide
 import io.udash._
 
 class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
-  def matchUrl(url: Url): RoutingState =
-    url2State.applyOrElse("/" + url.value.stripPrefix("/").stripSuffix("/"), (x: String) => ErrorState)
+  def matchUrl(url: Url): RoutingState = {
+    val stripped = url.value.stripPrefix("/").stripSuffix("/")
+    url2State.applyOrElse("/" + stripped, (x: String) => ErrorState)
+  }
 
   def matchState(state: RoutingState): Url =
     Url(state2Url.apply(state))

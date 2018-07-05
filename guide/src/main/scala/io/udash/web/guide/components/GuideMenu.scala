@@ -103,8 +103,10 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
   @tailrec
   private def menuItemByUrl(url: String): JQuery = {
-    val item = jQ(template).find(s".${MenuStyles.link.className}[href = '$url']")
-    if (item.length > 0) item else menuItemByUrl(url.substring(0, url.lastIndexOf("/")))
+    if (url.trim.nonEmpty) {
+      val item = jQ(template).find(s".${MenuStyles.link.className}[href = '$url']")
+      if (item.length > 0) item else menuItemByUrl(url.substring(0, url.lastIndexOf("/")))
+    } else jQ()
   }
 
   private lazy val onSubClick: JQueryCallback = (jqThis: Element, jqEvent: JQueryEvent) => {
