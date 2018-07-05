@@ -5,13 +5,16 @@ import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
-import org.scalajs.dom.Element
+import org.scalajs.dom.{Element, Location}
 import org.scalajs.dom.raw.HashChangeEvent
 
 import scala.scalajs.js
 
 /** Provides information about current URL. */
 trait UrlChangeProvider {
+  /** Enables all required event listeners. */
+  def initialize(): Unit
+
   /** Changes the URL part representing the frontend routing state. */
   def changeFragment(url: Url): Unit
 
@@ -31,14 +34,17 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
-  window.onhashchange = (_: HashChangeEvent) => {
-    callbacks.foreach(_.apply(currentFragment))
+  override def initialize(): Unit = {
+    window.onhashchange = (_: HashChangeEvent) => {
+      callbacks.foreach(_.apply(currentFragment))
+    }
   }
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
     new MutableBufferRegistration(callbacks, callback, Opt.empty)
   }
+
   override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
   override def changeFragment(url: Url): Unit = document.location.hash = url.value
   override def changeUrl(url: String): Unit = document.location.replace(url)
@@ -55,44 +61,50 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
-  window.document.addEventListener("click", (event: MouseEvent) => {
-    def findLink(el: Node): Element =
-      if (el == null) null
-      else if (el.nodeName.toLowerCase() == "a") el.asInstanceOf[Element]
-      else findLink(el.parentNode)
+  override def initialize(): Unit = {
+    window.document.addEventListener("click", (event: MouseEvent) => {
+      def findLink(el: Node): Element =
+        if (el == null) null
+        else if (el.nodeName.toLowerCase() == "a") el.asInstanceOf[Element]
+        else findLink(el.parentNode)
 
-    def isSameOrigin(href: String): Boolean = {
-      val loc = window.location
-      val url = new JSUrl(href, loc.toString)
+      @inline
+      def isSameOrigin(loc: Location, url: JSUrl): Boolean =
+        loc.protocol == url.protocol && loc.hostname == url.hostname && loc.port == url.port
 
-      loc.protocol == url.protocol && loc.hostname == url.hostname && loc.port == url.port
-    }
+      @inline
+      def isSamePath(loc: Location, url: JSUrl): Boolean =
+        loc.pathname == url.pathname && loc.search == url.search
 
-    def isSamePath(href: String): Boolean = {
-      val loc = window.location
-      val url = new JSUrl(href, loc.toString)
+      @inline
+      def isSameHash(loc: Location, url: JSUrl): Boolean =
+        loc.hash == url.hash
 
-      loc.pathname == url.pathname && loc.search == url.search
-    }
-
-    val target = findLink(event.target.asInstanceOf[Node])
-    if (target != null) {
-      val href = target.getAttribute("href")
-      val ignore = event.button != 0 || event.metaKey || event.ctrlKey || event.shiftKey ||
-        event.defaultPrevented || target.hasAttribute("download") ||
-        target.getAttribute("rel") == "external" || href.contains("mailto:") || !isSameOrigin(href)
-
-      if (!ignore) {
-        if (!isSamePath(href)) {
-          val url = Url(href)
-          changeFragment(url)
+      val target = findLink(event.target.asInstanceOf[Node])
+      if (target != null) {
+        val href = target.getAttribute("href")
+        val location = window.location
+        val newUrl = new JSUrl(href, location.toString)
+        val (samePath, sameHash, sameOrigin) = {
+          (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
         }
-        event.preventDefault()
-      }
-    }
-  })
+        val ignore = event.button != 0 || event.metaKey || event.ctrlKey || event.shiftKey ||
+          event.defaultPrevented || target.hasAttribute("download") ||
+          target.getAttribute("rel") == "external" || href.contains("mailto:") ||
+          !sameOrigin || (samePath && !sameHash)
 
-  window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
+        if (!ignore) {
+          if (!samePath) {
+            val url = Url(href)
+            changeFragment(url)
+          }
+          event.preventDefault()
+        }
+      }
+    })
+
+    window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
+  }
 
   override def changeUrl(url: String): Unit = document.location.replace(url)
 
@@ -103,7 +115,8 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   override def changeFragment(url: Url): Unit = {
     window.history.pushState(js.Dynamic.literal(url = url.value), "", url.value)
-    callbacks.foreach(_.apply(url))
+    val withoutHash = Url(url.value.takeWhile(_ != '#'))
+    callbacks.foreach(_.apply(withoutHash))
   }
 
   override def currentFragment: Url =
