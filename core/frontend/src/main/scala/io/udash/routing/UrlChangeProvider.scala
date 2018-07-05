@@ -5,6 +5,7 @@ import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
+import org.scalajs.dom.raw.HashChangeEvent
 import org.scalajs.dom.{Element, Location}
 
 import scala.scalajs.js
@@ -35,7 +36,7 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
   override def initialize(): Unit = {
-    window.onhashchange = _ => callbacks.foreach(_.apply(currentFragment))
+    window.onhashchange = (_: HashChangeEvent) => callbacks.foreach(_.apply(currentFragment))
   }
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
