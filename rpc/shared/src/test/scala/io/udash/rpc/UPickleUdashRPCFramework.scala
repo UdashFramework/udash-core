@@ -30,12 +30,7 @@ trait UPickleUdashRPCFramework extends UdashRPCFramework {
   )
 
   class JsObjectInput(value: Js.Value) extends Input {
-    def inputType = value match {
-      case Js.Null => InputType.Null
-      case _: Js.Arr => InputType.List
-      case _: Js.Obj => InputType.Object
-      case _ => InputType.Simple
-    }
+    def isNull: Boolean = value == Js.Null
 
     def readNull() = value match {
       case Js.Null => null

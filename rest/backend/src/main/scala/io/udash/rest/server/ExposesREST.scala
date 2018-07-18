@@ -116,9 +116,9 @@ abstract class ExposesREST[ServerRPCType: UdashRESTFramework#ValidServerREST](lo
       (receiver, function, result.head)
     }.flatMap { case (receiver, function, invocation) =>
       if (function)
-        receiver.call(invocation.rpcName)(invocation.args).map(_.json)(RunNowEC)
+        receiver.call(invocation).map(_.json)(RunNowEC)
       else {
-        receiver.fire(invocation.rpcName)(invocation.args)
+        receiver.fire(invocation)
         Future.successful("")
       }
     }
