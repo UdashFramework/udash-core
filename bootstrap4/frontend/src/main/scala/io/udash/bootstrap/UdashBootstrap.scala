@@ -23,5 +23,5 @@ object UdashBootstrap {
 
   /** Loads Bootstrap styles. */
   def loadBootstrapStyles(): dom.Element =
-    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css").render
+    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css").render
 }
