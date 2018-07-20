@@ -351,6 +351,10 @@ object BootstrapStyles {
   }
 
   object Form {
+    def formCheck = CssStyleName("form-check")
+    def formCheckInline = CssStyleName("form-check-inline")
+    def formCheckInput = CssStyleName("form-check-input")
+    def formCheckLabel = CssStyleName("form-check-label")
     def formControl = CssStyleName("form-control")
     def formControlStatic = CssStyleName("form-control-static")
     def formGroup = CssStyleName("form-group")
@@ -359,13 +363,13 @@ object BootstrapStyles {
     def formInline = CssStyleName("form-inline")
     def formHorizontal = CssStyleName("form-horizontal")
     def inputGroup = CssStyleName("input-group")
-    def inputGroupAddon = CssStyleName("input-group-addon")
-    def inputGroupBtn = CssStyleName("input-group-btn")
+    def inputGroupAppend = CssStyleName("input-group-append")
+    def inputGroupPrepend = CssStyleName("input-group-prepend")
     def inputGroupLg = CssStyleName("input-group-lg")
     def inputGroupSm = CssStyleName("input-group-sm")
+    def inputGroupText = CssStyleName("input-group-text")
     def inputLg = CssStyleName("input-lg")
     def inputSm = CssStyleName("input-sm")
-    def checkbox = CssStyleName("checkbox")
     def checkboxInline = CssStyleName("checkbox-inline")
     def hasWarning = CssStyleName("has-warning")
     def hasError = CssStyleName("has-error")

@@ -226,10 +226,9 @@ object UdashForm {
     */
   def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = UdashBootstrap.newId())
               (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
-    div(BootstrapStyles.Form.checkbox)(
-      label(
-        Checkbox(property)(id := inputId, inputModifiers).render
-      )(labelContent),
+    div(BootstrapStyles.Form.formCheck)(
+      Checkbox(property)(id := inputId, inputModifiers).render,
+      label()(labelContent),
       validation
     )
 
@@ -246,7 +245,7 @@ object UdashForm {
     * @param decorator      This methods allows you to customize DOM structure around each checkbox.
     *                       By default it creates a `label` around input with option value as its content.
     */
-  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, groupId: ComponentId = UdashBootstrap.newId())
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.formCheck, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(selected, options.toSeqProperty)(

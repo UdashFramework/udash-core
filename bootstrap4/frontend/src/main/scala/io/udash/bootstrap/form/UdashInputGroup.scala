@@ -32,13 +32,21 @@ object UdashInputGroup {
             componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashInputGroup =
     new UdashInputGroup(groupSize, componentId)(content)
 
-  /** Creates addon element for input group. */
-  def addon(content: Modifier*): Modifier =
-    span(BootstrapStyles.Form.inputGroupAddon)(content)
+  /** Creates an element to be prepended to the input of this input group. */
+  def prepend(content: Modifier*): Modifier =
+    div(BootstrapStyles.Form.inputGroupPrepend)(content)
 
-  /** Wraps buttons for input group. */
-  def buttons(content: Modifier*): Modifier =
-    div(BootstrapStyles.Form.inputGroupBtn)(content)
+  /** Convenience method that wraps its content in input-group-text */
+  def prependText(content: Modifier*): Modifier =
+    prepend(span(BootstrapStyles.Form.inputGroupText)(content))
+
+  /** Creates an element to be appended to the input of this input group. */
+  def append(content: Modifier*): Modifier =
+    div(BootstrapStyles.Form.inputGroupAppend)(content)
+
+  /** Convenience method that wraps its content in input-group-text */
+  def appendText(content: Modifier*): Modifier =
+    append(span(BootstrapStyles.Form.inputGroupText)(content))
 
   /** Wraps input for input group. */
   def input(el: dom.Element): dom.Element = {
