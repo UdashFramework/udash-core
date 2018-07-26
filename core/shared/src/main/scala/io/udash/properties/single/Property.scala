@@ -58,6 +58,11 @@ trait Property[A] extends ReadableProperty[A] {
     * @param force If true, the value change listeners will be fired even if value didn't change. */
   def set(t: A, force: Boolean = false): Unit
 
+  /** Toggles the value iff this property holds a boolean value
+    * @param force If true, the value change listeners will be fired even if value didn't change.
+    * */
+  def toggle(force: Boolean = true)(implicit ev: A =:= Boolean): Unit = set((!get).asInstanceOf[A], force)
+
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 

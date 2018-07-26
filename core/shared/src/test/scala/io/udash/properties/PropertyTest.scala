@@ -96,6 +96,21 @@ class PropertyTest extends UdashSharedTest {
       cp.get should be(new C(12, "asd2"))
     }
 
+    "toggle value" in {
+      val p = Property[Boolean](true)
+      p.toggle()
+      p.get shouldBe false
+      p.toggle()
+      p.get shouldBe true
+
+      val blank = Property.blank[Boolean]
+      blank.toggle()
+      blank.get shouldBe true
+
+      """Property[String]("asd").toggle""" shouldNot typeCheck
+      """Property[AnyVal](true).toggle""" shouldNot typeCheck
+    }
+
     "fire listeners on value change" in {
       val values = mutable.ArrayBuffer[Any]()
       val oneTimeValues = mutable.ArrayBuffer[Any]()
