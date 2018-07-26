@@ -304,7 +304,6 @@ object BootstrapStyles {
     def h4 = CssStyleName("h4")
     def h5 = CssStyleName("h5")
     def h6 = CssStyleName("h6")
-    def pageHeader = CssStyleName("page-header")
     def lead = CssStyleName("lead")
     def textCenter = CssStyleName("text-center")
     def textDanger = CssStyleName("text-danger")
@@ -321,6 +320,7 @@ object BootstrapStyles {
     def textUppercase = CssStyleName("text-uppercase")
     def textCapitalize = CssStyleName("text-capitalize")
     def initialism = CssStyleName("initialism")
+    def blockquote = CssStyleName("blockquote")
   }
 
   object List {
@@ -334,7 +334,6 @@ object BootstrapStyles {
     def listItemInfo = CssStyleName("list-group-item-info")
     def listItemWarning = CssStyleName("list-group-item-warning")
     def listItemDanger = CssStyleName("list-group-item-danger")
-    def dlHorizontal = CssStyleName("dl-horizontal")
   }
 
   object Table {
@@ -343,11 +342,16 @@ object BootstrapStyles {
     def tableResponsive = CssStyleName("table-responsive")
     def tableStriped = CssStyleName("table-striped")
     def tableHover = CssStyleName("table-hover")
-    def tableCondensed = CssStyleName("table-condensed")
+    def tableSm = CssStyleName("table-sm")
+    def tableInverse = CssStyleName("table-inverse")
     def success = CssStyleName("success")
-    def info = CssStyleName("info")
-    def warning = CssStyleName("warning")
-    def danger = CssStyleName("danger")
+    def tableInfo = CssStyleName("info")
+    def tableWarning = CssStyleName("warning")
+    def tableDanger = CssStyleName("danger")
+    def tableActive = CssStyleName("active")
+    def tableSuccess = CssStyleName("success")
+    def theadDefault = CssStyleName("thead-default")
+    def theadInverse = CssStyleName("thead-inverse")
   }
 
   object Form {
@@ -373,9 +377,9 @@ object BootstrapStyles {
   }
 
   object Image {
-    def imgCircle = CssStyleName("img-circle")
-    def imgResponsive = CssStyleName("img-responsive")
-    def imgRounded = CssStyleName("img-rounded")
+    def roundedCircle = CssStyleName("rounded-circle")
+    def imgFluid = CssStyleName("img-fluid")
+    def ounded = CssStyleName("rounded")
     def imgThumbnail = CssStyleName("img-thumbnail")
     def caption = CssStyleName("caption")
     def thumbnail = CssStyleName("thumbnail")
