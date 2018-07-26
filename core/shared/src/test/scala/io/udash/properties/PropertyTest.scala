@@ -107,8 +107,9 @@ class PropertyTest extends UdashSharedTest {
       blank.toggle()
       blank.get shouldBe true
 
-      """Property[String]("asd").toggle""" shouldNot typeCheck
-      """Property[AnyVal](true).toggle""" shouldNot typeCheck
+      """Property[String]("asd").toggle()""" shouldNot typeCheck
+      """Property[AnyVal](true).toggle()""" shouldNot typeCheck
+
     }
 
     "fire listeners on value change" in {
