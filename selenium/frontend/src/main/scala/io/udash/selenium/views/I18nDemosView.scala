@@ -13,7 +13,7 @@ class I18nDemosView extends FinalView with CssView {
     h3("I18n demos"),
     new DynamicRemoteTranslationsDemo().getTemplate, hr,
     new RemoteTranslationsDemo().getTemplate, hr,
-    new FrontendTranslationsDemo().getTemplate, hr,
+    new FrontendTranslationsDemo().getTemplate, hr
   )
 
   override def getTemplate: Modifier = content
