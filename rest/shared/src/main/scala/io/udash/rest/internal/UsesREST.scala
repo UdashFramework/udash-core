@@ -121,13 +121,13 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def call(rpcName: String)(args: List[RawValue]): Future[RawValue] =
-      callRemote(getterChain, RawInvocation(rpcName, args), function = true)
+    def call(invocation: RawInvocation): Future[RawValue] =
+      callRemote(getterChain, invocation, function = true)
 
-    def fire(rpcName: String)(args: List[RawValue]): Unit =
-      callRemote(getterChain, RawInvocation(rpcName, args), function = false)
+    def fire(invocation: RawInvocation): Unit =
+      callRemote(getterChain, invocation, function = false)
 
-    def get(rpcName: String)(args: List[RawValue]): RawRPC =
-      new RawRemoteRPC(RawInvocation(rpcName, args) :: getterChain)
+    def get(invocation: RawInvocation): RawRPC =
+      new RawRemoteRPC(invocation :: getterChain)
   }
 }

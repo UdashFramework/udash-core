@@ -23,10 +23,10 @@ private[rpc] abstract class UsesClientRPC[ClientRPCType] extends UsesRemoteRPC[C
   protected def remoteRpcAsReal: AsRealRPC[ClientRPCType]
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def fire(rpcName: String)(args: List[RawValue]): Unit =
-      fireRemote(getterChain, RawInvocation(rpcName, args))
+    def fire(invocation: RawInvocation): Unit =
+      fireRemote(getterChain, invocation)
 
-    def get(rpcName: String)(args: List[RawValue]): RawRPC =
-      new RawRemoteRPC(RawInvocation(rpcName, args) :: getterChain)
+    def get(invocation: RawInvocation): RawRPC =
+      new RawRemoteRPC(invocation :: getterChain)
   }
 }

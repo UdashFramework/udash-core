@@ -28,10 +28,10 @@ trait Utils {
   implicit val codecN: GenCodec[NestedTestCC] = GenCodec.materialize[NestedTestCC]
   implicit val codecDN: GenCodec[DeepNestedTestCC] = new GenCodec[DeepNestedTestCC] {
     override def read(input: Input): DeepNestedTestCC = {
-      def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC = next.inputType match {
-        case InputType.Null =>
+      def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC =
+        if (next.isNull) {
           acc.foldLeft(null: DeepNestedTestCC)((acc: DeepNestedTestCC, n: NestedTestCC) => DeepNestedTestCC(n, acc))
-        case _ =>
+        } else {
           val obj = next.readObject()
           val n: NestedTestCC = obj.nextField() match {
             case in if in.fieldName == "n" =>
@@ -41,7 +41,7 @@ trait Utils {
             case in if in.fieldName == "nest" =>
               _read(n :: acc)(in)
           }
-      }
+        }
 
       _read(Nil)(input)
     }

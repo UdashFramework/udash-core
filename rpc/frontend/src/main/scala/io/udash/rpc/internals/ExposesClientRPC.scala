@@ -16,12 +16,12 @@ abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPC
   /** Handles RPCFires */
   def handleRpcFire(fire: localFramework.RPCFire): Unit = {
     val receiver = localRpcAsRaw.asRaw(localRpc).resolveGetterChain(fire.gettersChain)
-    receiver.fire(fire.invocation.rpcName)(fire.invocation.args)
+    receiver.fire(fire.invocation)
   }
 }
 
 class DefaultExposesClientRPC[ClientRPCType](local: ClientRPCType)
-                                            (implicit protected val localRpcAsRaw: DefaultClientUdashRPCFramework.AsRawRPC[ClientRPCType])
+  (implicit protected val localRpcAsRaw: DefaultClientUdashRPCFramework.AsRawRPC[ClientRPCType])
   extends ExposesClientRPC(local) {
 
   override val localFramework = DefaultClientUdashRPCFramework
