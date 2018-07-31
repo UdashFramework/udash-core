@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import io.udash.selenium.server.ApplicationServer
 import org.openqa.selenium.Dimension
-import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -14,7 +14,8 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
-  val driver: RemoteWebDriver = new ChromeDriver(new ChromeOptions().setHeadless(true))
+//  val driver: RemoteWebDriver = new ChromeDriver(new ChromeOptions().setHeadless(false))
+  val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(false))
   driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
   driver.manage().window().setSize(new Dimension(1440, 800))
 
