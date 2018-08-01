@@ -1,5 +1,7 @@
 package io.udash.rest.server
 
+import java.net.ConnectException
+
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import io.udash.rest._
@@ -37,6 +39,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
   val restServer = DefaultServerREST[TestServerRESTInterface](Protocol.Http, "127.0.0.1", port, contextPrefix)
   val serverConnector = new DefaultRESTConnector(Protocol.Http, "127.0.0.1", port, contextPrefix)
+  val inexistentServerConnector = new DefaultRESTConnector(Protocol.Http, "127.0.0.1", 69, contextPrefix)
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)
@@ -129,7 +132,15 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(401)
       servlet.throwAuthError = false
     }
+    "handle connection refused" in {
+      val eventualResponse =
+        inexistentServerConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null)
+      intercept[ConnectException](await(eventualResponse))
 
+      val eventualResponse2 =
+        inexistentServerConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, "lol")
+      intercept[ConnectException](await(eventualResponse2))
+    }
   }
 
   private class TestServerRESTInterfaceImpl(fires: mutable.ArrayBuffer[String]) extends TestServerRESTInterface {
