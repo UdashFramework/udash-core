@@ -30,8 +30,8 @@ class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: I
       case RESTConnector.DELETE => Method.DELETE
     }
 
+    //needs to be concatenated manually, API for paths would double-escape the url
     val sttpUri =
-    //need to be concatenated manually, API for paths would double-escape the url
       uri"${Uri(protocol.name, host, port).toString() + pathPrefix.stripSuffix("/") + "/" + url.stripPrefix("/")}"
         .copy(queryFragments = queryArguments.map { case (k, v) => KeyValue(k, v) }.toVector)
 
