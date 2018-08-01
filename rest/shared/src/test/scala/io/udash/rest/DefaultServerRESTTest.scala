@@ -2,7 +2,7 @@ package io.udash.rest
 
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.internal.RESTConnector
-import io.udash.rest.internal.RESTConnector.HTTPMethod
+import io.udash.rest.internal.RESTConnector.HttpMethod
 import io.udash.rpc.serialization.JsonStr
 import io.udash.testing.AsyncUdashSharedTest
 import org.scalatest.Succeeded
@@ -15,14 +15,14 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
   class ConnectorMock extends RESTConnector {
     var url: String = null
-    var method: HTTPMethod = null
+    var method: HttpMethod = null
     var queryArguments: Map[String, String] = null
     var headers: Map[String, String] = null
     var body: String = null
 
     var response = "{}"
 
-    override def send(url: String, method: HTTPMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
+    override def send(url: String, method: HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
       this.url = url
       this.method = method
       this.queryArguments = queryArguments

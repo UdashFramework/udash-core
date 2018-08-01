@@ -79,7 +79,7 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
       }
     }
 
-    def findRestMethod(inv: framework.RawInvocation, signatures: Map[String, Signature], hasBody: Boolean): RESTConnector.HTTPMethod = {
+    def findRestMethod(inv: framework.RawInvocation, signatures: Map[String, Signature], hasBody: Boolean): RESTConnector.HttpMethod = {
       val rpcMethodName: String = inv.rpcName
       val methodMetadata = signatures(rpcMethodName)
       val methodAnnotations = methodMetadata.annotations.collect({ case rm: RESTMethod => rm })

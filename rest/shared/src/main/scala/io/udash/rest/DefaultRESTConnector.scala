@@ -1,77 +1,54 @@
 package io.udash.rest
 
-import java.nio.ByteBuffer
-
-import monix.execution.Scheduler.Implicits.global
-import fr.hmil.roshttp.{HttpRequest, Method, Protocol => RProtocol}
-import fr.hmil.roshttp.body.BodyPart
+import com.avsystem.commons.concurrent.RunNowEC
+import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, Opt}
+import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
 import io.udash.rest.internal.RESTConnector
-import io.udash.rest.internal.RESTConnector.HTTPMethod
-import monix.reactive.Observable
+import io.udash.rest.internal.RESTConnector.HttpMethod
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-sealed trait Protocol {
-  val defaultPort: Int
-}
+final class Protocol(val defaultPort: Int)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
 
-object Protocol {
-  case object Http extends Protocol {
-    override val defaultPort: Int = 80
-  }
-  case object Https extends Protocol {
-    override val defaultPort: Int = 443
-  }
-
-  def apply(s: String): Option[Protocol] = s.toLowerCase match {
-    case "http:" | "http" => Some(Http)
-    case "https:" | "https" => Some(Https)
-    case _ => None
-  }
+object Protocol extends AbstractValueEnumCompanion[Protocol] {
+  final val http: Value = new Protocol(80)
+  final val https: Value = new Protocol(443)
 }
 
 /** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
-class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: Int, val pathPrefix: String)(implicit val ec: ExecutionContext) extends RESTConnector {
+class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: Int, val pathPrefix: String) extends RESTConnector {
 
-  private val rosHttpProtocol = protocol match {
-    case Protocol.Http => RProtocol.HTTP
-    case Protocol.Https => RProtocol.HTTPS
-  }
+  override def send(url: String, method: HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
+    import com.softwaremill.sttp._
+    import io.udash.rest.DefaultSttpBackend.backend
 
-  private class InternalBodyPart(override val content: Observable[ByteBuffer]) extends BodyPart {
-    override val contentType: String = s"application/json; charset=utf-8"
-  }
+    val sttpMethod = method match {
+      case RESTConnector.GET => Method.GET
+      case RESTConnector.POST => Method.POST
+      case RESTConnector.PATCH => Method.PATCH
+      case RESTConnector.PUT => Method.PUT
+      case RESTConnector.DELETE => Method.DELETE
+    }
 
-  override def send(url: String, method: HTTPMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
-    val request: HttpRequest = HttpRequest()
-      .withProtocol(rosHttpProtocol)
-      .withHost(host)
-      .withPort(port)
-      .withPath(pathPrefix.stripSuffix("/") + url)
-      .withMethod(method)
-      .withQueryParameters(queryArguments.toSeq: _*)
-      .withHeaders(headers.toSeq: _*)
+    val sttpUri =
+    //need to be concatenated manually, API for paths would double-escape the url
+      uri"${Uri(protocol.name, host, port).toString() + pathPrefix.stripSuffix("/") + "/" + url.stripPrefix("/")}"
+        .copy(queryFragments = queryArguments.map { case (k, v) => KeyValue(k, v) }.toVector)
 
-    val response =
-      if (body == null) request.send()
-      else request.send(new InternalBodyPart(Observable(ByteBuffer.wrap(body.getBytes("utf-8")))))
+    val request = sttp.copy[Id, String, Nothing](
+      uri = sttpUri,
+      method = sttpMethod,
+      headers = headers.toVector,
+      body = Opt(body).map(StringBody(_, "utf-8")).getOrElse(NoBody)
+    )
 
-    response.flatMap(resp => {
-      resp.statusCode / 100 match {
-        case 2 => Future.successful(resp.body)
-        case 3 => Future.failed(RESTConnector.Redirection(resp.statusCode, resp.body))
-        case 4 => Future.failed(RESTConnector.ClientException(resp.statusCode, resp.body))
-        case 5 => Future.failed(RESTConnector.ServerException(resp.statusCode, resp.body))
+    request.send().map(response =>
+      response.code / 100 match {
+        case 2 => response.unsafeBody
+        case 3 => throw RESTConnector.Redirection(response.code, response.body.left.get)
+        case 4 => throw RESTConnector.ClientException(response.code, response.body.left.get)
+        case 5 => throw RESTConnector.ServerException(response.code, response.body.left.get)
       }
-    })
+    )(RunNowEC)
   }
-
-  private implicit def methodConverter(method: HTTPMethod): Method = method match {
-    case RESTConnector.GET => Method.GET
-    case RESTConnector.POST => Method.POST
-    case RESTConnector.PATCH => Method.PATCH
-    case RESTConnector.PUT => Method.PUT
-    case RESTConnector.DELETE => Method.DELETE
-  }
-
 }

@@ -2,10 +2,9 @@ package io.udash.rest.server
 
 import java.net.ConnectException
 
-import fr.hmil.roshttp.exceptions.HttpException
-import fr.hmil.roshttp.response.SimpleHttpResponse
 import io.udash.rest._
 import io.udash.rest.internal.RESTConnector
+import io.udash.rest.internal.RESTConnector.ClientException
 import io.udash.testing.UdashSharedTest
 import javax.servlet.http.HttpServletRequest
 import org.eclipse.jetty.server.Server
@@ -37,9 +36,9 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   context.addServlet(holder, s"${contextPrefix}*")
   server.setHandler(context)
 
-  val restServer = DefaultServerREST[TestServerRESTInterface](Protocol.Http, "127.0.0.1", port, contextPrefix)
-  val serverConnector = new DefaultRESTConnector(Protocol.Http, "127.0.0.1", port, contextPrefix)
-  val inexistentServerConnector = new DefaultRESTConnector(Protocol.Http, "127.0.0.1", 69, contextPrefix)
+  val restServer = DefaultServerREST[TestServerRESTInterface](Protocol.http, "127.0.0.1", port, contextPrefix)
+  val serverConnector = new DefaultRESTConnector(Protocol.http, "127.0.0.1", port, contextPrefix)
+  val inexistentServerConnector = new DefaultRESTConnector(Protocol.http, "127.0.0.1", 69, contextPrefix)
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)
@@ -102,26 +101,26 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     }
     "report valid HTTP codes (1)" in {
       val eventualResponse = serverConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null)
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(404)
+      intercept[ClientException](await(eventualResponse)).code should be(404)
     }
     "report valid HTTP codes (2)" in {
       val eventualResponse = serverConnector.send("/serviceOne/loadAll", RESTConnector.POST, Map.empty, Map.empty, null)
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(405)
+      intercept[ClientException](await(eventualResponse)).code should be(405)
     }
     "report valid HTTP codes (3)" in {
       val eventualResponse = serverConnector.send("/serviceTwo/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(400)
+      intercept[ClientException](await(eventualResponse)).code should be(400)
     }
     "report valid HTTP codes (4)" in {
       val eventualResponse = serverConnector.send("/serviceThree/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(404)
+      intercept[ClientException](await(eventualResponse)).code should be(404)
 
       val eventualResponse2 = serverConnector.send("/service_three/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse2)).response.statusCode should be(404) // "loadAll" is interpreted as URL argument from `serviceThree` getter
+      intercept[ClientException](await(eventualResponse2)).code should be(404) // "loadAll" is interpreted as URL argument from `serviceThree` getter
     }
     "report valid HTTP codes (5)" in {
       val eventualResponse = restServer.auth("invalid_pass").load()
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(401)
+      intercept[ClientException](await(eventualResponse)).code should be(401)
 
       val eventualResponse2 = restServer.auth("TurboSecureAPI").load(42, "a\\bc", "q:/we")
       await(eventualResponse2) should be(TestRESTRecord(Some(42), "auth/load/a\\bc/q:/we"))
@@ -129,7 +128,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     "handle endpoint creation fail" in {
       servlet.throwAuthError = true
       val eventualResponse = restServer.auth("invalid_pass").load()
-      intercept[HttpException[SimpleHttpResponse]](await(eventualResponse)).response.statusCode should be(401)
+      intercept[ClientException](await(eventualResponse)).code should be(401)
       servlet.throwAuthError = false
     }
     "handle connection refused" in {

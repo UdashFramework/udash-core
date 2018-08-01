@@ -6,25 +6,23 @@ import scala.concurrent.Future
 trait RESTConnector {
   /** Sends HTTP request to REST server.
     * It should fail with [[io.udash.rest.internal.RESTConnector.RequestException]] if server returned code different than 2xx. */
-  def send(url: String, method: RESTConnector.HTTPMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String]
+  def send(url: String, method: RESTConnector.HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String]
 }
 
 object RESTConnector {
-  sealed trait HTTPMethod
-  case object GET extends HTTPMethod
-  case object POST extends HTTPMethod
-  case object PATCH extends HTTPMethod
-  case object PUT extends HTTPMethod
-  case object DELETE extends HTTPMethod
+  sealed trait HttpMethod
+  case object GET extends HttpMethod
+  case object POST extends HttpMethod
+  case object PATCH extends HttpMethod
+  case object PUT extends HttpMethod
+  case object DELETE extends HttpMethod
 
-  sealed trait RequestException extends Exception {
-    val code: Int
-    val response: String
-  }
+  sealed abstract class RequestException(code: Int, response: String) extends Exception(s"Request error. Code $code, response: $response")
+
   /** Error returned for 3xx response from server. */
-  case class Redirection(code: Int, response: String) extends RequestException
+  case class Redirection(code: Int, response: String) extends RequestException(code, response)
   /** Error returned for 4xx response from server. */
-  case class ClientException(code: Int, response: String) extends RequestException
+  case class ClientException(code: Int, response: String) extends RequestException(code, response)
   /** Error returned for 5xx response from server. */
-  case class ServerException(code: Int, response: String) extends RequestException
+  case class ServerException(code: Int, response: String) extends RequestException(code, response)
 }
