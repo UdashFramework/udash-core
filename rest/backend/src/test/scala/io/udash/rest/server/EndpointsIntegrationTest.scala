@@ -100,22 +100,22 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       }
     }
     "report valid HTTP codes (1)" in {
-      val eventualResponse = serverConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null)
+      val eventualResponse = serverConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, null)
       intercept[ClientException](await(eventualResponse)).code should be(404)
     }
     "report valid HTTP codes (2)" in {
-      val eventualResponse = serverConnector.send("/serviceOne/loadAll", RESTConnector.POST, Map.empty, Map.empty, null)
+      val eventualResponse = serverConnector.send("/serviceOne/loadAll", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, null)
       intercept[ClientException](await(eventualResponse)).code should be(405)
     }
     "report valid HTTP codes (3)" in {
-      val eventualResponse = serverConnector.send("/serviceTwo/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
+      val eventualResponse = serverConnector.send("/serviceTwo/loadAll", RESTConnector.HttpMethod.GET, Map.empty, Map.empty, null)
       intercept[ClientException](await(eventualResponse)).code should be(400)
     }
     "report valid HTTP codes (4)" in {
-      val eventualResponse = serverConnector.send("/serviceThree/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
+      val eventualResponse = serverConnector.send("/serviceThree/loadAll", RESTConnector.HttpMethod.GET, Map.empty, Map.empty, null)
       intercept[ClientException](await(eventualResponse)).code should be(404)
 
-      val eventualResponse2 = serverConnector.send("/service_three/loadAll", RESTConnector.GET, Map.empty, Map.empty, null)
+      val eventualResponse2 = serverConnector.send("/service_three/loadAll", RESTConnector.HttpMethod.GET, Map.empty, Map.empty, null)
       intercept[ClientException](await(eventualResponse2)).code should be(404) // "loadAll" is interpreted as URL argument from `serviceThree` getter
     }
     "report valid HTTP codes (5)" in {
@@ -133,11 +133,11 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     }
     "handle connection refused" in {
       val eventualResponse =
-        inexistentServerConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, null)
+        inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, null)
       intercept[ConnectException](await(eventualResponse))
 
       val eventualResponse2 =
-        inexistentServerConnector.send("/non/existing/path", RESTConnector.POST, Map.empty, Map.empty, "lol")
+        inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, "lol")
       intercept[ConnectException](await(eventualResponse2))
     }
   }

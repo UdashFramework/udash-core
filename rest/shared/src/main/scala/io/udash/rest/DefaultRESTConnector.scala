@@ -23,11 +23,11 @@ class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: I
     import io.udash.rest.DefaultSttpBackend.backend
 
     val sttpMethod = method match {
-      case RESTConnector.GET => Method.GET
-      case RESTConnector.POST => Method.POST
-      case RESTConnector.PATCH => Method.PATCH
-      case RESTConnector.PUT => Method.PUT
-      case RESTConnector.DELETE => Method.DELETE
+      case RESTConnector.HttpMethod.GET => Method.GET
+      case RESTConnector.HttpMethod.POST => Method.POST
+      case RESTConnector.HttpMethod.PATCH => Method.PATCH
+      case RESTConnector.HttpMethod.PUT => Method.PUT
+      case RESTConnector.HttpMethod.DELETE => Method.DELETE
     }
 
     //needs to be concatenated manually, API for paths would double-escape the url

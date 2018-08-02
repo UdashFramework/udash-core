@@ -1,5 +1,7 @@
 package io.udash.rest.internal
 
+import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+
 import scala.concurrent.Future
 
 /** Provides connection to REST server. */
@@ -10,12 +12,10 @@ trait RESTConnector {
 }
 
 object RESTConnector {
-  sealed trait HttpMethod
-  case object GET extends HttpMethod
-  case object POST extends HttpMethod
-  case object PATCH extends HttpMethod
-  case object PUT extends HttpMethod
-  case object DELETE extends HttpMethod
+  final class HttpMethod(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
+    final val GET, POST, PATCH, PUT, DELETE: Value = new HttpMethod
+  }
 
   sealed abstract class RequestException(code: Int, response: String) extends Exception(s"Request error. Code $code, response: $response")
 
