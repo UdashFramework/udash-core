@@ -196,6 +196,7 @@ lazy val `rest-shared` = project.in(file("rest/shared"))
     sourceDirsSettings(_ / ".jvm"),
 
     libraryDependencies ++= Dependencies.restCrossDeps.value,
+    libraryDependencies ++= Dependencies.restCrossJvmDeps.value,
   )
 
 lazy val `rest-shared-JS` = project.in(`rest-shared`.base / ".js")

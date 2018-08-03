@@ -22,7 +22,7 @@ object Dependencies {
   val upickleVersion = "0.6.6" // Tests only
   val circeVersion = "0.9.3" // Tests only
 
-  val scalaHttpClientVersion = "2.1.0"
+  val sttpVersion = "1.3.0-RC4"
 
   val scalaLoggingVersion = "3.9.0"
 
@@ -88,7 +88,11 @@ object Dependencies {
 
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "fr.hmil" %%% "roshttp" % scalaHttpClientVersion
+    "com.softwaremill.sttp" %%% "core" % sttpVersion,
+  ))
+
+  val restCrossJvmDeps = Def.setting(Seq(
+    "com.softwaremill.sttp" %% "async-http-client-backend-future" % sttpVersion,
   ))
 
   val restBackendDeps = Def.setting(Seq(
