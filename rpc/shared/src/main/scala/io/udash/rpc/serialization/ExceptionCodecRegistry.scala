@@ -1,6 +1,6 @@
 package io.udash.rpc.serialization
 
-import com.avsystem.commons.serialization.{GenCodec, Input, InputType, Output}
+import com.avsystem.commons.serialization.{GenCodec, Input, Output}
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
@@ -17,6 +17,7 @@ trait ExceptionCodecRegistry {
 }
 
 abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
+
   import scala.reflect._
 
   protected final val codecs: mutable.Map[String, GenCodec[_]] = mutable.Map.empty
@@ -25,7 +26,7 @@ abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
     (output: Output, ex: Throwable) => if (ex.getMessage == null) output.writeNull() else output.writeString(ex.getMessage)
 
   protected final val exceptionReader: Input => String =
-    (input: Input) => if (input.inputType == InputType.Null) input.readNull() else input.readString()
+    (input: Input) => if (input.isNull) input.readNull() else input.readString()
 
   register(GenCodec.create(input => new NullPointerException(exceptionReader(input)), exceptionWriter))
   register(GenCodec.create(input => new ClassCastException(exceptionReader(input)), exceptionWriter))

@@ -41,50 +41,50 @@ class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
   val QueryCls = tq"$RestPackage.Query"
   val URLPartCls = tq"$RestPackage.URLPart"
 
-  def hasAnnot(annotations: List[Annot], annotation: Type) = annotations.exists(_.tree.tpe <:< annotation)
-  def hasRestMethodAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(RestMethodCls))
-  def hasArgumentTypeAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(ArgumentTypeCls))
-  def hasSkipRestNameAnnot(annotations: List[Annot]) = hasAnnot(annotations, getType(SkipRestNameCls))
-  def hasRESTNameOverride(annotations: List[Annot]) = hasAnnot(annotations, getType(RestNameCls))
+  def hasAnnot(symbol: Symbol, annotation: Type) = findAnnotation(symbol, annotation).nonEmpty
+  def hasRestMethodAnnot(symbol: Symbol) = hasAnnot(symbol, getType(RestMethodCls))
+  def hasArgumentTypeAnnot(symbol: Symbol) = hasAnnot(symbol, getType(ArgumentTypeCls))
+  def hasSkipRestNameAnnot(symbol: Symbol) = hasAnnot(symbol, getType(SkipRestNameCls))
+  def hasRESTNameOverride(symbol: Symbol) = hasAnnot(symbol, getType(RestNameCls))
 
-  def countAnnot(annotations: List[Annot], annotation: Type) = annotations.count(_.tree.tpe <:< annotation)
-  def countRestMethodAnnot(annotations: List[Annot]) = countAnnot(annotations, getType(RestMethodCls))
-  def countArgumentTypeAnnot(annotations: List[Annot]) = countAnnot(annotations, getType(ArgumentTypeCls))
+  def countAnnot(symbol: Symbol, annotation: Type) = allAnnotations(symbol, annotation).size
+  def countRestMethodAnnot(symbol: Symbol) = countAnnot(symbol, getType(RestMethodCls))
+  def countArgumentTypeAnnot(symbol: Symbol) = countAnnot(symbol, getType(ArgumentTypeCls))
 
-  def isNameAnnotArgumentValid(annotations: List[Annot], annotation: Type) = {
-    val count: Int = countAnnot(annotations, annotation)
+  def isNameAnnotArgumentValid(symbol: Symbol, annotation: Type): Boolean = {
+    val count: Int = countAnnot(symbol, annotation)
     if (count == 1) {
-      val children = annotations.find(_.tree.tpe <:< annotation).get.tree.children
+      val children = findAnnotation(symbol, annotation).get.tree.children
       val Literal(Constant(name: String)) = children(1)
       children.size == 2 && name.nonEmpty
     } else count == 0
   }
 
-  def checkNameOverride(annotations: List[Annot], errorMsg: Tree => String) =
+  def checkNameOverride(symbol: Symbol, errorMsg: Tree => String) =
     Seq(RpcNameCls, RestNameCls, RestParamNameCls).foreach(cls =>
-      if (!isNameAnnotArgumentValid(annotations, getType(cls)))
+      if (!isNameAnnotArgumentValid(symbol, getType(cls)))
         abort(errorMsg(cls))
     )
 
   def checkMethodNameOverride(method: RealMethod) =
-    checkNameOverride(allAnnotations(method.symbol),
+    checkNameOverride(method.symbol,
       cls => s"@$cls annotation argument has to be non empty string, value on ${method.description} is not.")
 
   def checkParameterNameOverride(parameter: RealParam) =
-    checkNameOverride(allAnnotations(parameter.symbol),
+    checkNameOverride(parameter.symbol,
       cls => s"@$cls annotation argument has to be non empty string, value on ${parameter.description} is not.")
 
   def checkParameterTypeAnnots(parameter: RealParam) =
-    if (countArgumentTypeAnnot(allAnnotations(parameter.symbol)) > 1)
+    if (allAnnotations(parameter.symbol, getType(ArgumentTypeCls)).size > 1)
       abort(s"REST method argument has to be annotated with at most one argument type annotation, ${parameter.description} has not.")
 
   def checkGetterParameter(param: RealParam): Unit = {
     checkParameterNameOverride(param)
     checkParameterTypeAnnots(param)
 
-    if (param.annot(getType(BodyCls)).nonEmpty)
+    if (allAnnotations(param.symbol, getType(BodyCls)).nonEmpty)
       abort(s"Subinterface getter cannot contain arguments annotated with @Body annotation, ${param.owner.description} does.")
-    if (param.annot(getType(BodyValueCls)).nonEmpty)
+    if (allAnnotations(param.symbol, getType(BodyValueCls)).nonEmpty)
       abort(s"Subinterface getter cannot contain arguments annotated with @BodyValue annotation, ${param.owner.description} does.")
   }
 
@@ -92,16 +92,16 @@ class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
     checkParameterNameOverride(param)
     checkParameterTypeAnnots(param)
 
-    if (param.annot(getType(BodyCls)).nonEmpty) {
+    if (allAnnotations(param.symbol, getType(BodyCls)).nonEmpty) {
       if (bodyArgsState != BodyArgumentsState.None)
         abort(s"REST method cannot contain more than one argument annotated with @Body annotation, ${param.owner.description} does.")
-      if (param.owner.annot(getType(GetCls)).nonEmpty)
+      if (allAnnotations(param.owner.symbol, getType(GetCls)).nonEmpty)
         abort(s"GET HTTP request cannot contain body argument, ${param.owner.description} does.")
       BodyArgumentsState.HasBody
-    } else if (param.annot(getType(BodyValueCls)).nonEmpty) {
+    } else if (allAnnotations(param.symbol, getType(BodyValueCls)).nonEmpty) {
       if (bodyArgsState == BodyArgumentsState.HasBody)
         abort(s"REST method cannot contain arguments annotated with both @Body and @BodyValue, ${param.owner.description} does.")
-      if (param.owner.annot(getType(GetCls)).nonEmpty)
+      if (allAnnotations(param.owner.symbol, getType(GetCls)).nonEmpty)
         abort(s"GET HTTP request cannot contain body argument, ${param.owner.description} does.")
       BodyArgumentsState.HasBodyValue
     } else bodyArgsState
@@ -115,11 +115,11 @@ class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
 
     val subinterfacesImplicits = subinterfaces.map { getter =>
       checkMethodNameOverride(getter)
-      if (isServer && hasRESTNameOverride(allAnnotations(getter.symbol)))
+      if (isServer && hasRESTNameOverride(getter.symbol))
         abort(s"Subinterface getter cannot be annotated with RESTName annotation in server-side interface, ${getter.description} does.")
-      if (hasRestMethodAnnot(allAnnotations(getter.symbol)))
+      if (hasRestMethodAnnot(getter.symbol))
         abort(s"Subinterface getter cannot be annotated with REST method annotation, ${getter.description} does.")
-      if (isServer && hasSkipRestNameAnnot(allAnnotations(getter.symbol)))
+      if (isServer && hasSkipRestNameAnnot(getter.symbol))
         abort(s"Subinterface getter in server-side REST interface cannot be annotated with @SkipRESTName annotation, ${getter.description} does.")
 
       getter.paramLists.foreach(paramsList =>
@@ -135,11 +135,11 @@ class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
     val methodsImplicits = methods.map { method =>
       var alreadyContainsBodyArgument: BodyArgumentsState = BodyArgumentsState.None
       checkMethodNameOverride(method)
-      if (isServer && hasRESTNameOverride(allAnnotations(method.symbol)))
+      if (isServer && hasRESTNameOverride(method.symbol))
         abort(s"REST method cannot be annotated with RESTName annotation in server-side interface, ${method.description} does.")
-      if (countRestMethodAnnot(allAnnotations(method.symbol)) > 1)
+      if (countRestMethodAnnot(method.symbol) > 1)
         abort(s"REST method has to be annotated with at most one REST method annotation, ${method.description} has not.")
-      if (isServer && hasSkipRestNameAnnot(allAnnotations(method.symbol)))
+      if (isServer && hasSkipRestNameAnnot(method.symbol))
         abort(s"REST method in server-side REST interface cannot be annotated with @SkipRESTName annotation, ${method.description} does.")
 
       method.paramLists.foreach(paramsList =>

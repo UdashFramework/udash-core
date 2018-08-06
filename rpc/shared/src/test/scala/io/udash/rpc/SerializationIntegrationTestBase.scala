@@ -1,6 +1,6 @@
 package io.udash.rpc
 
-import com.avsystem.commons.serialization.{GenCodec, Input, InputType, Output}
+import com.avsystem.commons.serialization.{GenCodec, Input, Output}
 import io.udash.testing.UdashSharedTest
 import org.scalactic.source.Position
 
@@ -35,13 +35,13 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
               case None => output.writeNull()
             }
 
-          override def read(input: Input): Option[T] = input.inputType match {
-            case InputType.Null =>
+          override def read(input: Input): Option[T] =
+            if (input.isNull) {
               input.readNull()
               None
-            case _ =>
+            } else {
               Some(implicitly[GenCodec[T]].read(input))
-          }
+            }
         }
 
       val testOpts = Seq(

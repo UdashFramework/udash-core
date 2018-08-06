@@ -10,6 +10,8 @@ class TestUrlChangeProvider(init: Url) extends UrlChangeProvider {
   var urlsHistory: mutable.ArrayBuffer[Url] = mutable.ArrayBuffer.empty
   val changeListeners: mutable.Set[Url => Unit] = mutable.Set.empty
 
+  override def initialize(): Unit = ()
+
   override def changeFragment(url: Url): Unit = {
     currUrl = url
     urlsHistory.append(url)

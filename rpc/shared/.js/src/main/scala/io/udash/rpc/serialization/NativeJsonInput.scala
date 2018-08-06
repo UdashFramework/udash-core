@@ -12,12 +12,7 @@ class NativeJsonInput(value: js.Any) extends Input { self =>
   private def read[T](expected: String)(matcher: PartialFunction[Any, T]): T =
     matcher.applyOrElse(value, (_: Any) => throw new ReadFailure(s"$expected expected."))
 
-  def inputType = value match {
-    case null => InputType.Null
-    case _: js.Array[_] => InputType.List
-    case _: js.Object => InputType.Object
-    case _ => InputType.Simple
-  }
+  override def isNull: Boolean = value == null
 
   override def readNull(): Null =
     read("Null") {

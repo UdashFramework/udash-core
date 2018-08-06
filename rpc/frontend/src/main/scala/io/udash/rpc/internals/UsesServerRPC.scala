@@ -81,13 +81,13 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     connector.sendRPCRequest(request)
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def fire(rpcName: String)(args: List[RawValue]): Unit =
-      fireRemote(getterChain, RawInvocation(rpcName, args))
+    def fire(invocation: RawInvocation): Unit =
+      fireRemote(getterChain, invocation)
 
-    def call(rpcName: String)(args: List[RawValue]): Future[RawValue] = {
+    def call(invocation: RawInvocation): Future[RawValue] = {
       val callId = newCallId()
       Promise[RawValue]().setup { promise =>
-        val request = callRemote(callId, getterChain, RawInvocation(rpcName, args))
+        val request = callRemote(callId, getterChain, invocation)
         pendingCalls.put(callId, (request, promise))
         dom.window.setTimeout(
           () => handleResponse(RPCResponseException("Request timeout", UsesServerRPC.CallTimeout(callTimeout), callId)),
@@ -96,8 +96,8 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
       }.future
     }
 
-    def get(rpcName: String)(args: List[RawValue]): RawRPC =
-      new RawRemoteRPC(RawInvocation(rpcName, args) :: getterChain)
+    def get(invocation: RawInvocation): RawRPC =
+      new RawRemoteRPC(invocation :: getterChain)
   }
 }
 

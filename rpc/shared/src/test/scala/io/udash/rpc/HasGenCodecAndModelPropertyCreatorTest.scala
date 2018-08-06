@@ -10,7 +10,7 @@ class HasGenCodecAndModelPropertyCreatorTest extends UdashSharedTest {
   "HasGenCodecAndModelPropertyCreator class" should {
     "provide valid GenCodec" in {
       JsonStringOutput.write(Entity(1, "a", Some(Entity(2, "b", None)))) should be(
-        """{"i":1,"s":"a","e":[{"i":2,"s":"b","e":[]}]}"""
+        """{"i":1,"s":"a","e":{"i":2,"s":"b","e":null}}"""
       )
     }
 
