@@ -331,6 +331,17 @@ lazy val `bootstrap` = project.in(file("bootstrap/frontend"))
     jsDependencies ++= Dependencies.bootstrapFrontendJsDeps.value
   )
 
+lazy val `bootstrap4` = project.in(file("bootstrap4/frontend"))
+  .enablePlugins(ScalaJSPlugin)
+  .dependsOn(`core-frontend` % CompileAndTest, `css-frontend` % CompileAndTest, `i18n-frontend` % CompileAndTest)
+  .settings(
+    commonSettings,
+    commonJSSettings,
+
+    libraryDependencies ++= Dependencies.bootstrap4FrontendDeps.value,
+    jsDependencies ++= Dependencies.bootstrap4FrontendJsDeps.value
+  )
+
 lazy val `charts` = project.in(file("charts/frontend"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`core-frontend` % CompileAndTest)

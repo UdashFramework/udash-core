@@ -31,6 +31,7 @@ object Dependencies {
   val scalatestVersion = "3.0.5"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
+  val bootstrap4Version = "4.1.1"
   val momentJsVersion = "2.22.0"
 
   val scalaJsBenchmarkVersion = "0.2.5"
@@ -121,6 +122,15 @@ object Dependencies {
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
       minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+  ))
+
+  val bootstrap4FrontendDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
+  ))
+
+  val bootstrap4FrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+    "org.webjars" % "bootstrap" % bootstrap4Version / "bootstrap.bundle.js" minified "bootstrap.bundle.min.js" dependsOn "jquery.js",
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
   ))
 
   val chartsFrontendDeps = Def.setting(Seq(
