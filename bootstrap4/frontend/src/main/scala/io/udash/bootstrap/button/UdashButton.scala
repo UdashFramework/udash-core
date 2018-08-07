@@ -11,15 +11,21 @@ import org.scalajs.dom._
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, block: Boolean, val active: Property[Boolean],
-                                val disabled: Property[Boolean], override val componentId: ComponentId)(content: Modifier*)
-  extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+final class UdashButton private(
+  buttonStyle: Option[BootstrapStyles.Color], size: ButtonSize, block: Boolean, val active: Property[Boolean],
+  val disabled: Property[Boolean], override val componentId: ComponentId
+)(content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
 
   import io.udash.css.CssView._
 
-  private val classes: List[Modifier] = buttonStyle :: size ::
-    BootstrapStyles.Button.btnBlock.styleIf(block) :: BootstrapStyles.active.styleIf(active) ::
-    BootstrapStyles.disabled.styleIf(disabled) :: JsDom.all.disabled.attrIf(disabled) :: Nil
+  private val classes: List[Modifier] =
+    buttonStyle.map(v => BootstrapStyles.Button.color(v): Modifier).toList ::
+    size ::
+    (BootstrapStyles.Button.btn: Modifier) ::
+    BootstrapStyles.Button.btnBlock.styleIf(block) ::
+    BootstrapStyles.active.styleIf(active) ::
+    BootstrapStyles.disabled.styleIf(disabled) ::
+    JsDom.all.disabled.attrIf(disabled) :: Nil
 
   override val render: dom.html.Button =
     button(id := componentId, tpe := "button")(classes: _*)(
@@ -61,9 +67,11 @@ object UdashButton {
     * @param content     Button content
     * @return `UdashButton` component, call render to create DOM element representing this button.
     */
-  def apply(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
-            active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton =
+  def apply(
+    buttonStyle: Option[BootstrapStyles.Color] = None, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
+    active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
+    componentId: ComponentId = UdashBootstrap.newId()
+  )(content: Modifier*): UdashButton =
     new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
 
   /**
@@ -79,9 +87,11 @@ object UdashButton {
     * @param content     Button content
     * @return `UdashButton` component, call render to create DOM element representing this button.
     */
-  def toggle(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
-             active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-             componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton = {
+  def toggle(
+    buttonStyle: Option[BootstrapStyles.Color] = None, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
+    active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
+    componentId: ComponentId = UdashBootstrap.newId()
+  )(content: Modifier*): UdashButton = {
     val button = new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
     button.listen { case _ => active.set(!active.get) }
     button
