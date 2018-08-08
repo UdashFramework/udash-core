@@ -25,10 +25,10 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
     table(
       id := componentId,
       BootstrapStyles.Table.table,
-      BootstrapStyles.Table.tableStriped.styleIf(striped),
-      BootstrapStyles.Table.tableBordered.styleIf(bordered),
-      BootstrapStyles.Table.tableHover.styleIf(hover),
-      BootstrapStyles.Table.tableSm.styleIf(condensed)
+      BootstrapStyles.Table.striped.styleIf(striped),
+      BootstrapStyles.Table.bordered.styleIf(bordered),
+      BootstrapStyles.Table.hover.styleIf(hover),
+      BootstrapStyles.Table.small.styleIf(condensed)
     )(
       headerFactory.map(head => thead(head()).render),
       tbody(

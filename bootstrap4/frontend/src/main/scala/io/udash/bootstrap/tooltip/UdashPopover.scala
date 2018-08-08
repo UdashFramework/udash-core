@@ -50,8 +50,8 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
     import scalatags.Text.all._
     div(BootstrapStyles.Popover.popover, role := "tooltip")(
       div(BootstrapStyles.arrow),
-      h3(BootstrapStyles.Popover.popoverTitle),
-      div(BootstrapStyles.Popover.popoverContent)
+      h3(BootstrapStyles.Popover.title),
+      div(BootstrapStyles.Popover.content)
     ).render
   }
   override protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)

@@ -8,17 +8,17 @@ import org.scalajs.dom
 
 import scalatags.JsDom.all._
 
-final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                            (val items: seq.ReadableSeqProperty[ItemType, ElemType],
-                             size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
-                             override val componentId: ComponentId)
-                            (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private(
+  val items: seq.ReadableSeqProperty[ItemType, ElemType],
+  size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
+  override val componentId: ComponentId
+)(itemFactory: ElemType => Seq[dom.Element]) extends UdashBootstrapComponent {
   import io.udash.bootstrap.BootstrapTags._
   import io.udash.css.CssView._
 
-  private val classes: List[Modifier] = BootstrapStyles.Button.btnGroup ::
-    BootstrapStyles.Button.btnGroupVertical.styleIf(vertical) ::
-    BootstrapStyles.Button.btnGroupJustified.styleIf(justified) ::
+  private val classes: List[Modifier] = BootstrapStyles.Button.group ::
+    BootstrapStyles.Button.groupVertical.styleIf(vertical) ::
+    BootstrapStyles.Display.flex().styleIf(justified) ::
     size :: Nil
 
   override val render: dom.Element =
@@ -27,7 +27,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
         // "To use justified button groups with <button> elements, you must wrap each button in a button group.
         // Most browsers don't properly apply our CSS for justification to <button> elements,
         // but since we support button dropdowns, we can work around that." ~ http://getbootstrap.com/components/#btn-groups
-        if (justified) (item) => div(BootstrapStyles.Button.btnGroup)(itemFactory(item)).render
+        if (justified) item => div(BootstrapStyles.Sizing.width100)(itemFactory(item)).render
         else itemFactory
       )
     ).render

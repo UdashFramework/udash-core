@@ -21,7 +21,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
 
   extends UdashBootstrapComponent with Listenable[UdashCarousel, CarouselEvent] {
 
-  import BootstrapStyles.Carousel._
+  import BootstrapStyles.Carousel
   import BootstrapTags._
   import UdashCarousel._
   import io.udash.css.CssView._
@@ -45,7 +45,7 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         )
 
       produce(indices)(length =>
-        ol(carouselIndicators)(
+        ol(Carousel.indicators)(
           (0 until length).map(indicator).render
         ).render
       )
@@ -64,20 +64,20 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
 
 
     val counter = new Countdown(firstActive)
-    val res: Element = div(id := componentId, carousel, slide)(
+    val res: Element = div(id := componentId, Carousel.carousel, Carousel.slide)(
       if (showIndicators) indicators() else {},
-      div(carouselInner, role := "listbox")(
+      div(Carousel.inner, role := "listbox")(
         repeat(content) { slide =>
           val res = slide.get.render
           if (counter.left() == 0) BootstrapStyles.active.applyTo(res)
           res
         }
       ),
-      a(BootstrapStyles.left, carouselControl, href := s"#$componentId", role := "button", dataSlide := "prev")(
+      a(Carousel.itemLeft, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "prev")(
 //        span(UdashIcons.Glyphicon.chevronLeft), TODO
         span(`class` := "sr-only", "Previous")
       ),
-      a(BootstrapStyles.right, carouselControl, href := s"#$componentId", role := "button", dataSlide := "next")(
+      a(Carousel.itemRight, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "next")(
 //        span(UdashIcons.Glyphicon.chevronRight), TODO
         span(`class` := "sr-only", "Next")
       )
@@ -273,7 +273,7 @@ case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId
   override lazy val render: Element =
     div(id := componentId, BootstrapStyles.item)(
     img(src := imgSrc.value),
-    div(BootstrapStyles.Carousel.carouselCaption)(
+    div(BootstrapStyles.Carousel.caption)(
       content
     )
   ).render

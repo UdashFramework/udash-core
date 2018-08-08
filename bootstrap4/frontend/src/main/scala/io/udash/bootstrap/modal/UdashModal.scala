@@ -47,9 +47,9 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
 
   override val render: Element = {
     val content = Seq(
-      (headerFactory, BootstrapStyles.Modal.modalHeader),
-      (bodyFactory, BootstrapStyles.Modal.modalBody),
-      (footerFactory, BootstrapStyles.Modal.modalFooter)
+      (headerFactory, BootstrapStyles.Modal.header),
+      (bodyFactory, BootstrapStyles.Modal.body),
+      (footerFactory, BootstrapStyles.Modal.footer)
     ).filter(_._1.nonEmpty).map { case (factory, styleName) =>
       val el = factory.get.apply()
       styleName.classNames.foreach(el.classList.add)
@@ -62,8 +62,8 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
       id := componentId, BootstrapTags.dataBackdrop := backdrop.jsValue,
       BootstrapTags.dataKeyboard := keyboard, BootstrapTags.dataShow := autoInit
     )(
-      div(BootstrapStyles.Modal.modalDialog, modalSize, role := "document")(
-        div(BootstrapStyles.Modal.modalContent)(
+      div(BootstrapStyles.Modal.dialog, modalSize, role := "document")(
+        div(BootstrapStyles.Modal.content)(
           content
         )
       )

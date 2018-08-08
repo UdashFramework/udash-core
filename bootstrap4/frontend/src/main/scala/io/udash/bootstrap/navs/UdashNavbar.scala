@@ -20,19 +20,19 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
   private val collapseId = UdashBootstrap.newId()
 
   override val render: dom.Element =
-    tags2.nav(id := componentId, BootstrapStyles.Navigation.navbar, navbarStyle)(
+    tags2.nav(id := componentId, BootstrapStyles.NavigationBar.navbar, navbarStyle)(
       div(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.Navigation.navbarHeader)(
+        div(BootstrapStyles.NavigationBar.header)(
           button(
             tpe := "button", dataToggle := "collapse", dataTarget := s"#$collapseId", aria.expanded := false,
-            BootstrapStyles.Navigation.navbarToggle, BootstrapStyles.collapsed
+            BootstrapStyles.NavigationBar.toggle, BootstrapStyles.collapsed
           )(
             span(BootstrapStyles.Visibility.srOnly)("Toggle navigation"),
             span(BootstrapStyles.iconBar), span(BootstrapStyles.iconBar), span(BootstrapStyles.iconBar)
           ),
           brand
         ),
-        div(id := collapseId, BootstrapStyles.Collapse.collapse, BootstrapStyles.Navigation.navbarCollapse)(nav.render)
+        div(id := collapseId, BootstrapStyles.Collapse.collapse, BootstrapStyles.NavigationBar.collapse)(nav.render)
       )
     ).render
 }
@@ -50,7 +50,7 @@ object UdashNavbar {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
-    new UdashNavbar(BootstrapStyles.Navigation.navbarDefault, componentId)(brand, nav)
+    new UdashNavbar(BootstrapStyles.NavigationBar.light, componentId)(brand, nav)
 
   /**
     * Creates responsive navigation bar with inverted colors. More: <a href="http://getbootstrap.com/components/#navbar">Bootstrap Docs</a>.
@@ -64,5 +64,5 @@ object UdashNavbar {
     */
   def inverted[ItemType, ElemType <: ReadableProperty[ItemType]]
               (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
-    new UdashNavbar(BootstrapStyles.Navigation.navbarInverse, componentId)(brand, nav)
+    new UdashNavbar(BootstrapStyles.NavigationBar.dark, componentId)(brand, nav)
 }

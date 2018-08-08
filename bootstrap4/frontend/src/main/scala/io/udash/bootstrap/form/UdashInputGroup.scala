@@ -12,7 +12,7 @@ final class UdashInputGroup private(groupSize: InputGroupSize, override val comp
   import io.udash.css.CssView._
 
   override val render: dom.Element =
-    div(BootstrapStyles.Form.inputGroup, groupSize)(
+    div(BootstrapStyles.InputGroup.inputGroup, groupSize)(
       content
     ).render
 }
@@ -34,23 +34,23 @@ object UdashInputGroup {
 
   /** Creates an element to be prepended to the input of this input group. */
   def prepend(content: Modifier*): Modifier =
-    div(BootstrapStyles.Form.inputGroupPrepend)(content)
+    div(BootstrapStyles.InputGroup.prepend)(content)
 
   /** Convenience method that wraps its content in input-group-text */
   def prependText(content: Modifier*): Modifier =
-    prepend(span(BootstrapStyles.Form.inputGroupText)(content))
+    prepend(span(BootstrapStyles.InputGroup.text)(content))
 
   /** Creates an element to be appended to the input of this input group. */
   def append(content: Modifier*): Modifier =
-    div(BootstrapStyles.Form.inputGroupAppend)(content)
+    div(BootstrapStyles.InputGroup.append)(content)
 
   /** Convenience method that wraps its content in input-group-text */
   def appendText(content: Modifier*): Modifier =
-    append(span(BootstrapStyles.Form.inputGroupText)(content))
+    append(span(BootstrapStyles.InputGroup.text)(content))
 
   /** Wraps input for input group. */
   def input(el: dom.Element): dom.Element = {
-    BootstrapStyles.Form.formControl.addTo(el)
+    BootstrapStyles.Form.control.addTo(el)
     el
   }
 }

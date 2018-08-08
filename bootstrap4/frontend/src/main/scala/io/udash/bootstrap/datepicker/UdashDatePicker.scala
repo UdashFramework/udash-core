@@ -28,7 +28,7 @@ final class UdashDatePicker private[datepicker](
 
   import scalatags.JsDom.all._
 
-  private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
+  private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.control).render
   private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
 
   private def dpData(dp: UdashDatePickerJQuery): UdashDatePickerDataJQuery =

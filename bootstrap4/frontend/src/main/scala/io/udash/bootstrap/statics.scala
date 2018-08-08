@@ -81,7 +81,6 @@ object BootstrapStyles {
   def col = CssStyleName("col")
   def collapsed = CssStyleName("collapsed")
   def body = container
-  def divider = CssStyleName("divider")
   def disabled = CssStyleName("disabled")
   def fade = CssStyleName("fade")
   def hide = CssStyleName("hide")
@@ -90,109 +89,415 @@ object BootstrapStyles {
   def in = CssStyleName("in")
   def item = CssStyleName("item")
   def jumbotron = CssStyleName("jumbotron")
-  def left = CssStyleName("left")
-  def next = CssStyleName("next")
   def pillPane = CssStyleName("pill-pane")
   def preScrollable = CssStyleName("pre-scrollable")
   def prettyprint = CssStyleName("prettyprint")
   def previous = CssStyleName("previous")
-  def prev = CssStyleName("prev")
-  def right = CssStyleName("right")
   def show = CssStyleName("show")
   def top = CssStyleName("top")
+
+  object Alert {
+    def alert = CssStyleName("alert")
+
+    def dismissible = CssStyleName("alert-dismissible")
+    def link = CssStyleName("alert-link")
+
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"alert${color.classMarker}")
+  }
+
+  object Background {
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"bg${color.classMarker}")
+
+    def transparent = CssStyleName("bg-transparent")
+  }
+
+  object Badge {
+    def badge = CssStyleName("badge")
+    def pill = CssStyleName("badge-pill")
+
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"badge${color.classMarker}")
+  }
 
   object Border {
     def border(side: Side) = CssStyleName(s"border${side.longClassMarker}")
     def border0(side: Side) = CssStyleName(s"border${side.longClassMarker}-0")
 
-    def borderColor(color: Color) = CssStyleName(s"border${color.classMarker}")
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"border${color.classMarker}")
 
-    def borderRounded(side: Side) = CssStyleName("rounded")
-    def borderRounded0 = CssStyleName("rounded-0")
-    def borderRoundedCircle = CssStyleName("rounded-circle")
+    def rounded(side: Side) = CssStyleName("rounded")
+    def rounded0 = CssStyleName("rounded-0")
+    def roundedCircle = CssStyleName("rounded-circle")
+  }
+
+  object Button {
+    def btn = CssStyleName("btn")
+    def block = CssStyleName("btn-block")
+    def toolbar = CssStyleName("btn-toolbar")
+
+    def group = CssStyleName("btn-group")
+    def groupVertical = CssStyleName("btn-group-vertical")
+
+    def small = CssStyleName("btn-sm")
+    def large = CssStyleName("btn-lg")
+
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"btn${color.classMarker}")
+  }
+
+  object Card {
+    def card = CssStyleName("card")
+
+    def body = CssStyleName("card-body")
+    def group = CssStyleName("card-group")
+    def footer = CssStyleName("card-footer")
+    def header = CssStyleName("card-header")
+    def title = CssStyleName("card-title")
+  }
+
+  object Carousel {
+    def carousel = CssStyleName("carousel")
+
+    def item = CssStyleName("carousel-item")
+
+    def itemNext = CssStyleName("carousel-item-next")
+    def itemPrev = CssStyleName("carousel-item-prev")
+    def itemLeft = CssStyleName("carousel-item-left")
+    def itemRight = CssStyleName("carousel-item-right")
+
+    def control = CssStyleName("carousel-control")
+    def controlNext = CssStyleName("carousel-control-next")
+    def controlPrev = CssStyleName("carousel-control-prev")
+
+    def caption = CssStyleName("carousel-caption")
+    def indicators = CssStyleName("carousel-indicators")
+    def inner = CssStyleName("carousel-inner")
+    def fade = CssStyleName("carousel-fade")
+    def slide = CssStyleName("slide")
   }
 
   object Collapse {
     def collapse = CssStyleName("collapse")
     def collapsing = CssStyleName("collapsing")
-    def collapseIn = in
+    def show = CssStyleName("show")
   }
 
   object Display {
-    def block(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-block")
-    def flex(breakpoint: ResponsiveBreakpoint) = Flex.flex(breakpoint)
-    def inline(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-inline")
-    def inlineBlock(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-inline-block")
-    def inlineFlex(breakpoint: ResponsiveBreakpoint) = Flex.inlineFlex(breakpoint)
-    def none(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-none")
-    def table(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-table")
-    def tableCell(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-table-cell")
-    def tableRow(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-table-row")
+    def block(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-block")
+
+    def flex(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      Flex.flex(breakpoint)
+
+    def inline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-inline")
+
+    def inlineBlock(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-inline-block")
+
+    def inlineFlex(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      Flex.inlineFlex(breakpoint)
+
+    def none(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-none")
+
+    def table(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-table")
+
+    def tableCell(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-table-cell")
+
+    def tableRow(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-table-row")
+  }
+
+  object Dropdown {
+    def dropdown = CssStyleName("dropdown")
+
+    def backdrop = CssStyleName("dropdown-backdrop")
+    def caret = CssStyleName("caret")
+    def divider = CssStyleName("dropdown-divider")
+    def dropup = CssStyleName("dropup")
+    def header = CssStyleName("dropdown-header")
+    def item = CssStyleName("dropdown-item")
+    def menu = CssStyleName("dropdown-menu")
+    def toggle = CssStyleName("dropdown-toggle")
+  }
+
+  object EmbedResponsive {
+    def responsive = CssStyleName("embed-responsive")
+    def item = CssStyleName("embed-responsive-item")
+    def embed16by9 = CssStyleName("embed-responsive-16by9")
+    def embed4by3 = CssStyleName("embed-responsive-4by3")
   }
 
   object Flex {
-    def flex(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-flex")
-    def inlineFlex(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"d${breakpoint.classMarker}-inline-flex")
+    def flex(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-flex")
+    def inlineFlex(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"d${breakpoint.classMarker}-inline-flex")
 
-    def column(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-column")
-    def columnReverse(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-column-reverse")
+    def column(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-column")
+    def columnReverse(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-column-reverse")
 
-    def row(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-row")
-    def rowReverse(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-row-reverse")
+    def row(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-row")
+    def rowReverse(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-row-reverse")
 
-    def fill(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-fill")
-    def grow(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-grow-1")
-    def shrink(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-shrink-1")
+    def fill(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-fill")
+    def grow(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-grow-1")
+    def shrink(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-shrink-1")
 
     def autoMargin(side: Side) = CssStyleName(s"m${side.classMarker}-auto")
 
-    def nowrap(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-nowrap")
-    def wrap(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-wrap")
-    def wrapReverse(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"flex${breakpoint.classMarker}-wrap-reverse")
+    def nowrap(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-nowrap")
+    def wrap(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-wrap")
+    def wrapReverse(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-wrap-reverse")
 
-    def justifyContentStart(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"justify-content${breakpoint.classMarker}-start")
-    def justifyContentEnd(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"justify-content${breakpoint.classMarker}-end")
-    def justifyContentCenter(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"justify-content${breakpoint.classMarker}-center")
-    def justifyContentBetween(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"justify-content${breakpoint.classMarker}-between")
-    def justifyContentAround(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"justify-content${breakpoint.classMarker}-around")
+    def justifyContentStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}-start")
+    def justifyContentEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}-end")
+    def justifyContentCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}-center")
+    def justifyContentBetween(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}-between")
+    def justifyContentAround(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}-around")
 
-    def alignItemsStart(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-items${breakpoint.classMarker}-start")
-    def alignItemsEnd(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-items${breakpoint.classMarker}-end")
-    def alignItemsCenter(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-items${breakpoint.classMarker}-center")
-    def alignItemsBaseline(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-items${breakpoint.classMarker}-baseline")
-    def alignItemsStretch(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-items${breakpoint.classMarker}-stretch")
+    def alignItemsStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}-start")
+    def alignItemsEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}-end")
+    def alignItemsCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}-center")
+    def alignItemsBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}-baseline")
+    def alignItemsStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}-stretch")
 
-    def alignContentStart(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-content${breakpoint.classMarker}-start")
-    def alignContentEnd(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-content${breakpoint.classMarker}-end")
-    def alignContentCenter(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-content${breakpoint.classMarker}-center")
-    def alignContentBaseline(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-content${breakpoint.classMarker}-baseline")
-    def alignContentStretch(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-content${breakpoint.classMarker}-stretch")
+    def alignContentStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}-start")
+    def alignContentEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}-end")
+    def alignContentCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}-center")
+    def alignContentBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}-baseline")
+    def alignContentStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}-stretch")
 
-    def alignSelfStart(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-self${breakpoint.classMarker}-start")
-    def alignSelfEnd(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-self${breakpoint.classMarker}-end")
-    def alignSelfCenter(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-self${breakpoint.classMarker}-center")
-    def alignSelfBaseline(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-self${breakpoint.classMarker}-baseline")
-    def alignSelfStretch(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"align-self${breakpoint.classMarker}-stretch")
+    def alignSelfStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}-start")
+    def alignSelfEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}-end")
+    def alignSelfCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}-center")
+    def alignSelfBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}-baseline")
+    def alignSelfStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}-stretch")
 
     /** Supported size values: [1,12] */
-    def order(breakpoint: ResponsiveBreakpoint, size: Int) = CssStyleName(s"order${breakpoint.classMarker}-$size")
+    def order(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+      CssStyleName(s"order${breakpoint.classMarker}-$size")
+  }
+
+  object Float {
+    def left(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"float${breakpoint.classMarker}-left")
+    def right(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"float${breakpoint.classMarker}-right")
+    def none(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"float${breakpoint.classMarker}-none")
+  }
+
+  object Form {
+    def group = CssStyleName("form-group")
+    def inline = CssStyleName("form-inline")
+    def text = CssStyleName("form-text")
+
+    def check = CssStyleName("form-check")
+    def checkInline = CssStyleName("form-check-inline")
+    def checkInput = CssStyleName("form-check-input")
+    def checkLabel = CssStyleName("form-check-label")
+
+    def control = CssStyleName("form-control")
+    def controlLarge = CssStyleName("form-control-lg")
+    def controlPlaintext = CssStyleName("form-control-plaintext")
+    def controlSmall = CssStyleName("form-control-sm")
+
+    def hasFeedback = CssStyleName("has-feedback")
+    def colFormLabel = CssStyleName("col-form-label")
   }
 
   object Grid {
     /** Supported size values: [1,12] */
-    def col(breakpoint: ResponsiveBreakpoint, size: Int) = CssStyleName(s"col${breakpoint.classMarker}-$size")
+    def col(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+      CssStyleName(s"col${breakpoint.classMarker}-$size")
 
     /** Supported size values: [1,12] */
-    def offset(breakpoint: ResponsiveBreakpoint, size: Int) = CssStyleName(s"offset${breakpoint.classMarker}-$size")
+    def offset(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+      CssStyleName(s"offset${breakpoint.classMarker}-$size")
 
     /** Supported size values: [1,12] */
-    def order(breakpoint: ResponsiveBreakpoint, size: Int) = Flex.order(breakpoint, size)
+    def order(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+      Flex.order(breakpoint, size)
   }
 
-  object Float {
-    def left(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"float${breakpoint.classMarker}-left")
-    def right(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"float${breakpoint.classMarker}-right")
-    def none(breakpoint: ResponsiveBreakpoint) = CssStyleName(s"float${breakpoint.classMarker}-none")
+  object Image {
+    def caption = CssStyleName("caption")
+    def circle = CssStyleName("rounded-circle")
+    def imgFluid = CssStyleName("img-fluid")
+    def imgThumbnail = CssStyleName("img-thumbnail")
+    def rounded = CssStyleName("rounded")
+    def thumbnail = CssStyleName("thumbnail")
+  }
+
+  object InputGroup {
+    def inputGroup = CssStyleName("input-group")
+
+    def append = CssStyleName("input-group-append")
+    def prepend = CssStyleName("input-group-prepend")
+    def text = CssStyleName("input-group-text")
+
+    def large = CssStyleName("input-group-lg")
+    def small = CssStyleName("input-group-sm")
+  }
+
+  object List {
+    def inline = CssStyleName("list-inline")
+    def inlineItem = CssStyleName("list-inline-item")
+    def unstyled = CssStyleName("list-unstyled")
+
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"list-group-item${color.classMarker}")
+  }
+
+  object ListGroup {
+    def listGroup = CssStyleName("list-group")
+
+    def flush = CssStyleName("list-group-flush")
+    def item = CssStyleName("list-group-item")
+    def itemAction = CssStyleName("list-group-item-action")
+    def itemHeading = CssStyleName("list-group-item-heading")
+    def itemText = CssStyleName("list-group-item-text")
+  }
+
+  object Media {
+    def media = CssStyleName("media")
+
+    def body = CssStyleName("media-body")
+    def heading = CssStyleName("media-heading")
+    def list = CssStyleName("media-list")
+    def `object` = CssStyleName("media-object")
+    def mediaObject = CssStyleName("media-object")
+
+    def left = CssStyleName("media-left")
+    def middle = CssStyleName("media-middle")
+    def right = CssStyleName("media-right")
+  }
+
+  object Modal {
+    def modal = CssStyleName("modal")
+
+    def backdrop = CssStyleName("modal-backdrop")
+    def body = CssStyleName("modal-body")
+    def content = CssStyleName("modal-content")
+    def dialog = CssStyleName("modal-dialog")
+    def footer = CssStyleName("modal-footer")
+    def header = CssStyleName("modal-header")
+    def large = CssStyleName("modal-lg")
+    def open = CssStyleName("modal-open")
+    def small = CssStyleName("modal-sm")
+    def title = CssStyleName("modal-title")
+  }
+
+  object Navigation {
+    def nav = CssStyleName("nav")
+
+    def breadcrumb = CssStyleName("breadcrumb")
+    def divider = CssStyleName("nav-divider")
+    def justified = CssStyleName("nav-justified")
+    def stacked = CssStyleName("nav-stacked")
+    def pills = CssStyleName("nav-pills")
+    def tabs = CssStyleName("nav-tabs")
+    def tabsJustified = CssStyleName("nav-tabs-justified")
+  }
+
+  object NavigationBar {
+    def navbar = CssStyleName("navbar")
+
+    def dark = CssStyleName("navbar-dark")
+    def light = CssStyleName("navbar-light")
+
+    def brand = CssStyleName("navbar-brand")
+    def btn = CssStyleName("navbar-btn")
+    def collapse = CssStyleName("navbar-collapse")
+    def fixedBottom = CssStyleName("navbar-fixed-bottom")
+    def fixedTop = CssStyleName("navbar-fixed-top")
+    def header = CssStyleName("navbar-header")
+    def inverse = CssStyleName("navbar-inverse")
+    def left = CssStyleName("navbar-left")
+    def link = CssStyleName("navbar-link")
+    def nav = CssStyleName("navbar-nav")
+    def right = CssStyleName("navbar-right")
+    def staticTop = CssStyleName("navbar-static-top")
+    def text = CssStyleName("navbar-text")
+    def toggle = CssStyleName("navbar-toggler")
+
+    def expand(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"navbar-expand${breakpoint.classMarker}")
+  }
+
+  object Pagination {
+    def pagination = CssStyleName("pagination")
+
+    def large = CssStyleName("pagination-lg")
+    def small = CssStyleName("pagination-sm")
+
+    def item = CssStyleName("page-item")
+    def link = CssStyleName("page-link")
+  }
+
+  object Popover {
+    def popover = CssStyleName("popover")
+
+    def content = CssStyleName("popover-content")
+    def title = CssStyleName("popover-title")
+  }
+
+  object Position {
+    def static = CssStyleName("position-static")
+    def relative = CssStyleName("position-relative")
+    def absolute = CssStyleName("position-absolute")
+    def fixed = CssStyleName("position-fixed")
+    def sticky = CssStyleName("position-sticky")
+
+    def fixedTop = CssStyleName("fixed-top")
+    def fixedBottom = CssStyleName("fixed-bottom")
+
+    def stickyTop = CssStyleName("sticky-top")
+  }
+
+  object ProgressBar {
+    def progress = CssStyleName("progress")
+    def progressBar = CssStyleName("progress-bar")
+
+    def animated = CssStyleName("progress-bar-animated")
+    def striped = CssStyleName("progress-bar-striped")
   }
 
   object Sizing {
@@ -227,7 +532,7 @@ object BootstrapStyles {
       *
       * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
       */
-    def margin(side: Side, breakpoint: ResponsiveBreakpoint, size: String = "3") =
+    def margin(side: Side, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
       CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}-$size")
 
     /**
@@ -244,91 +549,40 @@ object BootstrapStyles {
       *
       * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
       */
-    def padding(side: Side, breakpoint: ResponsiveBreakpoint, size: String = "3") =
+    def padding(side: Side, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
       CssStyleName(s"p${side.classMarker}${breakpoint.classMarker}-$size")
   }
 
-  object Background {
-    def color(color: Color) = CssStyleName(s"bg${color.classMarker}")
-    def transparent = CssStyleName("bg-transparent")
-  }
+  object Table {
+    def table = CssStyleName("table")
 
-  object Button {
-    def btn = CssStyleName("btn")
-    def btnBlock = CssStyleName("btn-block")
-    def btnGroup = CssStyleName("btn-group")
-    def btnGroupJustified = CssStyleName("btn-group-justified")
-    def btnGroupVertical = CssStyleName("btn-group-vertical")
-    def btnLg = CssStyleName("btn-lg")
-    def btnToolbar = CssStyleName("btn-toolbar")
-    def btnXs = CssStyleName("btn-xs")
-    def btnSm = CssStyleName("btn-sm")
+    def active = CssStyleName("table-active")
+    def bordered = CssStyleName("table-bordered")
+    def hover = CssStyleName("table-hover")
+    def dark = CssStyleName("table-dark")
+    def light = CssStyleName("table-light")
+    def small = CssStyleName("table-sm")
+    def striped = CssStyleName("table-striped")
 
-    def color(color: Color) = CssStyleName(s"btn${color.classMarker}")
-  }
+    def theadDark = CssStyleName("thead-dark")
+    def theadLight = CssStyleName("thead-light")
 
-  object Position {
-    def positionStatic = CssStyleName("position-static")
-    def positionRelative = CssStyleName("position-relative")
-    def positionAbsolute = CssStyleName("position-absolute")
-    def positionFixed = CssStyleName("position-fixed")
-    def positionSticky = CssStyleName("position-sticky")
+    def responsive(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"table-responsive${breakpoint.classMarker}")
 
-    def fixedTop = CssStyleName("fixed-top")
-    def fixedBottom = CssStyleName("fixed-bottom")
-
-    def stickyTop = CssStyleName("sticky-top")
-  }
-
-  object Carousel {
-    def carousel = CssStyleName("carousel")
-    def carouselCaption = CssStyleName("carousel-caption")
-    def carouselControl = CssStyleName("carousel-control")
-    def carouselIndicators = CssStyleName("carousel-indicators")
-    def carouselInner = CssStyleName("carousel-inner")
-    def slide = CssStyleName("slide")
-  }
-
-  object Alert {
-    def alert = CssStyleName("alert")
-    def alertDismissible = CssStyleName("alert-dismissible")
-    def alertLink = CssStyleName("alert-link")
-
-    def color(color: Color) = CssStyleName(s"alert${color.classMarker}")
-  }
-
-  object Dropdown {
-    def dropdown = CssStyleName("dropdown")
-    def dropdownBackdrop = CssStyleName("dropdown-backdrop")
-    def dropdownHeader = CssStyleName("dropdown-header")
-    def dropdownMenu = CssStyleName("dropdown-menu")
-    def dropdownToggle = CssStyleName("dropdown-toggle")
-    def dropup = CssStyleName("dropup")
-    def caret = CssStyleName("caret")
-  }
-
-  object Visibility {
-    def clearfix = CssStyleName("clearfix")
-
-    def visible = CssStyleName("visible")
-    def invisible = CssStyleName("invisible")
-
-    def srOnly = CssStyleName("sr-only")
-    def srOnlyFocusable = CssStyleName("sr-only-focusable")
-  }
-
-  object VerticalAlign {
-    def baseline = CssStyleName("align-baseline")
-    def top = CssStyleName("align-top")
-    def middle = CssStyleName("align-middle")
-    def bottom = CssStyleName("align-bottom")
-    def textTop = CssStyleName("align-text-top")
-    def textBottom = CssStyleName("align-text-bottom")
+    def rowColor(color: Color = Color.Secondary) =
+      CssStyleName(s"table${color.classMarker}")
   }
 
   object Text {
-    def align(align: Align, breakpoint: ResponsiveBreakpoint) =
+    def align(align: Align, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"text${breakpoint.classMarker}${align.classMarker}")
+
+    def color(color: Color = Color.Secondary) =
+      CssStyleName(s"text${color.classMarker}")
+
+    def black50 = CssStyleName("text-black-50")
+    def white50 = CssStyleName("text-white-50")
 
     def nowrap = CssStyleName("text-nowrap")
     def truncate = CssStyleName("text-truncate")
@@ -339,9 +593,23 @@ object BootstrapStyles {
     def monospace = CssStyleName("text-monospace")
 
     def weightBold = CssStyleName("font-weight-bold")
+    def weightBolder = CssStyleName("font-weight-bolder")
     def weightNormal = CssStyleName("font-weight-normal")
     def weightLight = CssStyleName("font-weight-light")
+    def weightLighter = CssStyleName("font-weight-lighter")
     def italic = CssStyleName("font-italic")
+
+    def body = CssStyleName("text-body")
+    def decorationNone = CssStyleName("text-decoration-none")
+    def hide = CssStyleName("text-hide")
+    def muted = CssStyleName("text-muted")
+  }
+
+  object Tooltip {
+    def tooltip = CssStyleName("tooltip")
+
+    def arrow = CssStyleName("tooltip-arrow")
+    def inner = CssStyleName("tooltip-inner")
   }
 
   object Typography {
@@ -357,164 +625,25 @@ object BootstrapStyles {
     def initialism = CssStyleName("initialism")
     def lead = CssStyleName("lead")
     def mark = CssStyleName("mark")
-    def muted = CssStyleName("text-muted")
     def small = CssStyleName("small")
-
-    def textDanger = CssStyleName("text-danger")
-    def textDark = CssStyleName("text-dark")
-    def textHide = CssStyleName("text-hide")
-    def textMuted = CssStyleName("text-muted")
-    def textWhite = CssStyleName("text-white")
-    def textWhite50 = CssStyleName("text-white-50")
   }
 
-  object List {
-    def listGroup = CssStyleName("list-group")
-    def listGroupItem = CssStyleName("list-group-item")
-    def listGroupItemHeading = CssStyleName("list-group-item-heading")
-    def listGroupItemText = CssStyleName("list-group-item-text")
-    def listInline = CssStyleName("list-inline")
-    def listInlineItem = CssStyleName("list-inline-item")
-    def listUnstyled = CssStyleName("list-unstyled")
-
-    def itemColor(color: Color) = CssStyleName(s"list-group-item${color.classMarker}")
+  object VerticalAlign {
+    def baseline = CssStyleName("align-baseline")
+    def bottom = CssStyleName("align-bottom")
+    def middle = CssStyleName("align-middle")
+    def textBottom = CssStyleName("align-text-bottom")
+    def textTop = CssStyleName("align-text-top")
+    def top = CssStyleName("align-top")
   }
 
-  object Table {
-    def table = CssStyleName("table")
-    def tableBordered = CssStyleName("table-bordered")
-    def tableResponsive = CssStyleName("table-responsive")
-    def tableStriped = CssStyleName("table-striped")
-    def tableHover = CssStyleName("table-hover")
-    def tableSm = CssStyleName("table-sm")
-    def tableInverse = CssStyleName("table-inverse")
-    def tableActive = CssStyleName("active")
-    def theadDefault = CssStyleName("thead-default")
-    def theadInverse = CssStyleName("thead-inverse")
+  object Visibility {
+    def clearfix = CssStyleName("clearfix")
 
-    def rowColor(color: Color) = CssStyleName(s"table${color.classMarker}")
-  }
+    def visible = CssStyleName("visible")
+    def invisible = CssStyleName("invisible")
 
-  object Form {
-    def formCheck = CssStyleName("form-check")
-    def formCheckInline = CssStyleName("form-check-inline")
-    def formCheckInput = CssStyleName("form-check-input")
-    def formCheckLabel = CssStyleName("form-check-label")
-    def formControl = CssStyleName("form-control")
-    def formControlPlaintext = CssStyleName("form-control-plaintext")
-    def formGroup = CssStyleName("form-group")
-    def formInline = CssStyleName("form-inline")
-    def inputGroup = CssStyleName("input-group")
-    def inputGroupAppend = CssStyleName("input-group-append")
-    def inputGroupPrepend = CssStyleName("input-group-prepend")
-    def inputGroupLg = CssStyleName("input-group-lg")
-    def inputGroupSm = CssStyleName("input-group-sm")
-    def inputGroupText = CssStyleName("input-group-text")
-    def formControlLg = CssStyleName("form-control-lg")
-    def formControlSm = CssStyleName("form-control-sm")
-    def hasFeedback = CssStyleName("has-feedback")
-    def formText = CssStyleName("form-text")
-    def colFormLabel = CssStyleName("col-form-label")
-  }
-
-  object Image {
-    def roundedCircle = CssStyleName("rounded-circle")
-    def imgFluid = CssStyleName("img-fluid")
-    def rounded = CssStyleName("rounded")
-    def imgThumbnail = CssStyleName("img-thumbnail")
-    def caption = CssStyleName("caption")
-    def thumbnail = CssStyleName("thumbnail")
-  }
-
-  object Navigation {
-    def nav = CssStyleName("nav")
-    def navbar = CssStyleName("navbar")
-    def navbarBrand = CssStyleName("navbar-brand")
-    def navbarBtn = CssStyleName("navbar-btn")
-    def navbarCollapse = CssStyleName("navbar-collapse")
-    def navbarDefault = CssStyleName("navbar-default")
-    def navbarFixedBottom = CssStyleName("navbar-fixed-bottom")
-    def navbarFixedTop = CssStyleName("navbar-fixed-top")
-    def navbarForm = CssStyleName("navbar-form")
-    def navbarHeader = CssStyleName("navbar-header")
-    def navbarInverse = CssStyleName("navbar-inverse")
-    def navbarLeft = CssStyleName("navbar-left")
-    def navbarLink = CssStyleName("navbar-link")
-    def navbarNav = CssStyleName("navbar-nav")
-    def navbarRight = CssStyleName("navbar-right")
-    def navbarStaticTop = CssStyleName("navbar-static-top")
-    def navbarText = CssStyleName("navbar-text")
-    def navbarToggle = CssStyleName("navbar-toggle")
-    def navDivider = CssStyleName("nav-divider")
-    def navJustified = CssStyleName("nav-justified")
-    def navStacked = CssStyleName("nav-stacked")
-    def navPills = CssStyleName("nav-pills")
-    def navTabs = CssStyleName("nav-tabs")
-    def navTabsJustified = CssStyleName("nav-tabs-justified")
-    def breadcrumb = CssStyleName("breadcrumb")
-  }
-
-  object Badge {
-    def badge = CssStyleName("badge")
-    def pill = CssStyleName("badge-pill")
-
-    def color(color: Color) = CssStyleName(s"badge${color.classMarker}")
-  }
-
-  object Media {
-    def media = CssStyleName("media")
-    def mediaBody = CssStyleName("media-body")
-    def mediaHeading = CssStyleName("media-heading")
-    def mediaList = CssStyleName("media-list")
-    def mediaObject = CssStyleName("media-object")
-    def mediaLeft = CssStyleName("media-left")
-    def mediaMiddle = CssStyleName("media-middle")
-    def mediaRight = CssStyleName("media-right")
-  }
-
-  object Modal {
-    def modal = CssStyleName("modal")
-    def modalBackdrop = CssStyleName("modal-backdrop")
-    def modalBody = CssStyleName("modal-body")
-    def modalContent = CssStyleName("modal-content")
-    def modalDialog = CssStyleName("modal-dialog")
-    def modalFooter = CssStyleName("modal-footer")
-    def modalHeader = CssStyleName("modal-header")
-    def modalLarge = CssStyleName("modal-lg")
-    def modalOpen = CssStyleName("modal-open")
-    def modalSmall = CssStyleName("modal-sm")
-    def modalTitle = CssStyleName("modal-title")
-  }
-
-  object Pagination {
-    def pagination = CssStyleName("pagination")
-    def paginationLg = CssStyleName("pagination-lg")
-    def paginationSm = CssStyleName("pagination-sm")
-    def pager = CssStyleName("pager")
-  }
-
-  object Popover {
-    def popover = CssStyleName("popover")
-    def popoverContent = CssStyleName("popover-content")
-    def popoverTitle = CssStyleName("popover-title")
-  }
-
-  object ProgressBar {
-    def progress = CssStyleName("progress")
-    def progressBar = CssStyleName("progress-bar")
-    def progressBarStriped = CssStyleName("progress-bar-striped")
-  }
-
-  object Tooltip {
-    def tooltip = CssStyleName("tooltip")
-    def tooltipArrow = CssStyleName("tooltip-arrow")
-    def tooltipInner = CssStyleName("tooltip-inner")
-  }
-
-  object EmbedResponsive {
-    def responsive = CssStyleName("embed-responsive")
-    def item = CssStyleName("embed-responsive-item")
-    def embed16by9 = CssStyleName("embed-responsive-16by9")
-    def embed4by3 = CssStyleName("embed-responsive-4by3")
+    def srOnly = CssStyleName("sr-only")
+    def srOnlyFocusable = CssStyleName("sr-only-focusable")
   }
 }

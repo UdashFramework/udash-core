@@ -9,9 +9,9 @@ final class PaginationSize(sizeStyle: Option[CssStyle]) extends ClassModifier(si
 }
 
 object PaginationSize {
-  import io.udash.bootstrap.BootstrapStyles.Pagination._
+  import io.udash.bootstrap.BootstrapStyles.Pagination
 
   final val Default = new PaginationSize(None)
-  final val Large = new PaginationSize(paginationLg)
-  final val Small = new PaginationSize(paginationSm)
+  final val Large = new PaginationSize(Pagination.large)
+  final val Small = new PaginationSize(Pagination.small)
 }

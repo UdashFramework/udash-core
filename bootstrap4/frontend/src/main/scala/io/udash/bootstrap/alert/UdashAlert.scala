@@ -51,7 +51,7 @@ final class DismissibleUdashAlert private[alert](
   private val buttonRendered = button.render
 
   override val render: Element = template(
-    BootstrapStyles.Alert.alertDismissible,
+    BootstrapStyles.Alert.dismissible,
     buttonRendered, content
   ).render
 

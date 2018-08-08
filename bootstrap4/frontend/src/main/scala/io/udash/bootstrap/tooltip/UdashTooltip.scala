@@ -47,8 +47,8 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
     import scalatags.Text.all._
     import io.udash.css.CssView._
     div(BootstrapStyles.Tooltip.tooltip, role := "tooltip")(
-      div(BootstrapStyles.Tooltip.tooltipArrow),
-      div(BootstrapStyles.Tooltip.tooltipInner)
+      div(BootstrapStyles.Tooltip.arrow),
+      div(BootstrapStyles.Tooltip.inner)
     ).render
   }
   override protected val defaultTrigger: Seq[Trigger] = Seq(HoverTrigger, FocusTrigger)

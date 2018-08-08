@@ -43,13 +43,13 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       _id += 1
       _id
     }
-    val el = div(id := componentId, BootstrapStyles.Button.btnGroup, BootstrapStyles.Dropdown.dropup.styleIf(dropup))(
+    val el = div(id := componentId, BootstrapStyles.Button.group, BootstrapStyles.Dropdown.dropup.styleIf(dropup))(
       UdashButton()(
-        BootstrapStyles.Dropdown.dropdownToggle, id := buttonId, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
+        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
         content, span(BootstrapStyles.Dropdown.caret)
       ).render,
-      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := buttonId, id := menuId)(
-        repeat(items)((item) => withSelectionListener(itemFactory(item), next()))
+      ul(BootstrapStyles.Dropdown.menu, aria.labelledby := buttonId, id := menuId)(
+        repeat(items)(item => withSelectionListener(itemFactory(item), next()))
       )
     ).render
 
@@ -70,11 +70,11 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     }
     Seq(
       a(
-        BootstrapStyles.Dropdown.dropdownToggle, id := buttonId, dataToggle := "dropdown", href := "#",
+        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown", href := "#",
         aria.haspopup := true, aria.expanded := false,
         content, span(BootstrapStyles.Dropdown.caret)
       ),
-      ul(BootstrapStyles.Dropdown.dropdownMenu, aria.labelledby := buttonId, id := menuId)(
+      ul(BootstrapStyles.Dropdown.menu, aria.labelledby := buttonId, id := menuId)(
         repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
       )
     ).render
@@ -103,8 +103,8 @@ object UdashDropdown {
     import io.udash.css.CssView._
     def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
       case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
-      case DropdownHeader(title) => li(BootstrapStyles.Dropdown.dropdownHeader)(produce(p)(_ => span(title).render)).render
-      case DropdownDivider => li(BootstrapStyles.divider, role := "separator").render
+      case DropdownHeader(title) => li(BootstrapStyles.Dropdown.header)(produce(p)(_ => span(title).render)).render
+      case DropdownDivider => li(BootstrapStyles.Dropdown.divider, role := "separator").render
       case DropdownDisabled(item) => itemFactory(item).styles(BootstrapStyles.disabled)
     }
 

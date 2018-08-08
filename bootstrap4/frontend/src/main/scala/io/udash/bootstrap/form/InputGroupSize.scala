@@ -9,8 +9,9 @@ final class InputGroupSize(sizeStyle: Option[CssStyle]) extends ClassModifier(si
 }
 
 object InputGroupSize {
-  import BootstrapStyles.Form._
+  import BootstrapStyles.InputGroup
+
   final val Default = new InputGroupSize(None)
-  final val Large = new InputGroupSize(inputGroupLg)
-  final val Small = new InputGroupSize(inputGroupSm)
+  final val Large = new InputGroupSize(InputGroup.large)
+  final val Small = new InputGroupSize(InputGroup.small)
 }

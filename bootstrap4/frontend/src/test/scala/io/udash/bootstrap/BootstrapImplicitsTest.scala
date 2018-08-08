@@ -11,28 +11,28 @@ class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
 
   "StyleOps" should {
     "apply style conditionally" in {
-      val textArea = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(false)).render
-      textArea.hasStyles(BootstrapStyles.Form.formControl) shouldBe false
-      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(true)).render
-      textArea2.hasStyles(BootstrapStyles.Form.formControl) shouldBe true
+      val textArea = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(false)).render
+      textArea.hasStyles(BootstrapStyles.Form.control) shouldBe false
+      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(true)).render
+      textArea2.hasStyles(BootstrapStyles.Form.control) shouldBe true
     }
 
     "apply style conditionally from property" in {
       val p = Property(false)
-      val textArea = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(p)).render
-      textArea.hasStyles(BootstrapStyles.Form.formControl) shouldBe false
+      val textArea = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(p)).render
+      textArea.hasStyles(BootstrapStyles.Form.control) shouldBe false
       p.set(true)
-      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(p)).render
-      textArea2.hasStyles(BootstrapStyles.Form.formControl) shouldBe true
+      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(p)).render
+      textArea2.hasStyles(BootstrapStyles.Form.control) shouldBe true
     }
 
     "apply style conditionally from property with `true` on init" in {
       val p = Property(true)
-      val textArea = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(p)).render
-      textArea.hasStyles(BootstrapStyles.Form.formControl) shouldBe true
+      val textArea = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(p)).render
+      textArea.hasStyles(BootstrapStyles.Form.control) shouldBe true
       p.set(false)
-      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.formControl.styleIf(p)).render
-      textArea2.hasStyles(BootstrapStyles.Form.formControl) shouldBe false
+      val textArea2 = TextArea(Property(""))(BootstrapStyles.Form.control.styleIf(p)).render
+      textArea2.hasStyles(BootstrapStyles.Form.control) shouldBe false
     }
   }
 

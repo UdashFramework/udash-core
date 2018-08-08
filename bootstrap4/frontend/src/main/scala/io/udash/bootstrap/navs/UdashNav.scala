@@ -23,8 +23,8 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private
     ul(
       id := componentId,
       BootstrapStyles.Navigation.nav, navStyle,
-      BootstrapStyles.Navigation.navJustified.styleIf(justified),
-      BootstrapStyles.Navigation.navStacked.styleIf(stacked)
+      BootstrapStyles.Navigation.justified.styleIf(justified),
+      BootstrapStyles.Navigation.stacked.styleIf(stacked)
     )(
       repeat(panels)(panel => {
         li(role := "presentation")(
@@ -82,7 +82,7 @@ object UdashNav {
             isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
             isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
-    new UdashNav(BootstrapStyles.Navigation.navPills, stacked, justified, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
+    new UdashNav(BootstrapStyles.Navigation.pills, stacked, justified, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 
   /**
     * Creates tabs navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
@@ -105,7 +105,7 @@ object UdashNav {
            isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
            isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
            isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
-    new UdashNav(BootstrapStyles.Navigation.navTabs, stacked, justified, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
+    new UdashNav(BootstrapStyles.Navigation.tabs, stacked, justified, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 
   /**
     * Creates navbar navigation. It's prepared to put into navbar element. <br/>
@@ -127,5 +127,5 @@ object UdashNav {
              isActive: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
              isDisabled: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false),
              isDropdown: (ElemType) => ReadableProperty[Boolean] = (_: ElemType) => Property(false)): UdashNav[ItemType, ElemType] =
-    new UdashNav(BootstrapStyles.Navigation.navbarNav, false, false, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
+    new UdashNav(BootstrapStyles.NavigationBar.navbar, false, false, componentId)(panels)(elemFactory, isActive, isDisabled, isDropdown)
 }

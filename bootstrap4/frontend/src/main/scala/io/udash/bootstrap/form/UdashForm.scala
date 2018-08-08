@@ -77,7 +77,7 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def inline(content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formInline), UdashBootstrap.newId())(content)
+    new UdashForm(Some(BootstrapStyles.Form.inline), UdashBootstrap.newId())(content)
 
   /**
     * Creates inline form with provided content. <br/>
@@ -90,7 +90,7 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def inline(onSubmit: Event => Any)(componentId: ComponentId, content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formInline), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
+    new UdashForm(Some(BootstrapStyles.Form.inline), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /**
     * Creates horizontal form with provided content. <br/>
@@ -121,11 +121,11 @@ object UdashForm {
   /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
     * Example: `UdashForm(UdashForm.group(...)).render` */
   def group(content: Modifier*): Modifier =
-    div(BootstrapStyles.Form.formGroup)(content)
+    div(BootstrapStyles.Form.group)(content)
 
   /** Wrapper for inputs in form. */
   def input(el: dom.Element): dom.Element = {
-    BootstrapStyles.Form.formControl.addTo(el)
+    BootstrapStyles.Form.control.addTo(el)
     el
   }
 
@@ -229,7 +229,7 @@ object UdashForm {
     */
   def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = UdashBootstrap.newId())
               (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
-    div(BootstrapStyles.Form.formCheck)(
+    div(BootstrapStyles.Form.check)(
       Checkbox(property)(id := inputId, inputModifiers).render,
       label()(labelContent),
       validation
@@ -248,11 +248,11 @@ object UdashForm {
     * @param decorator      This methods allows you to customize DOM structure around each checkbox.
     *                       By default it creates a `label` around input with option value as its content.
     */
-  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.formCheck, groupId: ComponentId = UdashBootstrap.newId())
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.check, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(selected, options.toSeqProperty)(
-      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
+      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.group, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
@@ -274,7 +274,7 @@ object UdashForm {
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(selected, options.toSeqProperty)(
-      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
+      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.group, id := groupId.id)(
         items.map {
           case (input, id) => decorator(input, id)
         }
@@ -293,7 +293,7 @@ object UdashForm {
   def select(selected: Property[String], options: Seq[String],
              label: String => Modifier = Select.defaultLabel,
              inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id).render
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id).render
 
   /**
     * Creates multiple selection input for provided `options`.
@@ -307,12 +307,11 @@ object UdashForm {
   def multiselect(selected: SeqProperty[String], options: Seq[String],
                   label: String => Modifier = Select.defaultLabel,
                   inputId: ComponentId = UdashBootstrap.newId()): Modifier =
-    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id)
+    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id)
 
   /** Creates static control element. */
-  // TODO ???
-//  def staticControl(content: Modifier*): Modifier =
-//    p(BootstrapStyles.Form.formControlStatic)(content)
+  def staticControl(content: Modifier*): Modifier =
+    p(BootstrapStyles.Form.controlPlaintext)(content)
 
   /**
     * Wrapper for disabled elements.

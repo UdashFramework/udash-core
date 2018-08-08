@@ -57,7 +57,7 @@ final class AnimatedUdashProgressBar private[progressbar]
   import io.udash.css.CssView._
 
   override protected def modifiers: Seq[Modifier] =
-    super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), BootstrapStyles.ProgressBar.progressBarStriped: Modifier)
+    super.modifiers ++ Seq(BootstrapStyles.active.styleIf(animate), BootstrapStyles.ProgressBar.striped: Modifier)
 }
 
 object UdashProgressBar {

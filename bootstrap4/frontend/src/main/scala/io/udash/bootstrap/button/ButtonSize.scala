@@ -9,10 +9,9 @@ final class ButtonSize(sizeStyle: Option[CssStyleName]) extends ClassModifier(si
 }
 
 object ButtonSize {
-  import BootstrapStyles.Button._
+  import BootstrapStyles.Button
 
   final val Default = new ButtonSize(None)
-  final val Large = new ButtonSize(btnLg)
-  final val Small = new ButtonSize(btnSm)
-  final val ExtraSmall = new ButtonSize(btnXs)
+  final val Large = new ButtonSize(Button.large)
+  final val Small = new ButtonSize(Button.small)
 }

@@ -17,10 +17,10 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
   import scalatags.JsDom.all._
 
   override val render: Element =
-    ul(id := componentId, BootstrapStyles.List.listGroup)(
+    ul(id := componentId, BootstrapStyles.ListGroup.listGroup)(
       repeat(items)(item => {
         val el = body(item)
-        BootstrapStyles.List.listGroupItem.addTo(el)
+        BootstrapStyles.ListGroup.item.addTo(el)
         el
       })
     ).render

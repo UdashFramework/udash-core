@@ -22,7 +22,7 @@ final class UdashButton private(
     buttonStyle.map(v => BootstrapStyles.Button.color(v): Modifier).toList ::
     size ::
     (BootstrapStyles.Button.btn: Modifier) ::
-    BootstrapStyles.Button.btnBlock.styleIf(block) ::
+    BootstrapStyles.Button.block.styleIf(block) ::
     BootstrapStyles.active.styleIf(active) ::
     BootstrapStyles.disabled.styleIf(disabled) ::
     JsDom.all.disabled.attrIf(disabled) :: Nil
