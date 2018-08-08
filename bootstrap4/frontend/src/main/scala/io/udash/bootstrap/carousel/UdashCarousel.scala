@@ -7,7 +7,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
-import io.udash.bootstrap.utils.UdashIcons
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -75,11 +74,11 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
         }
       ),
       a(BootstrapStyles.left, carouselControl, href := s"#$componentId", role := "button", dataSlide := "prev")(
-        span(UdashIcons.Glyphicon.chevronLeft),
+//        span(UdashIcons.Glyphicon.chevronLeft), TODO
         span(`class` := "sr-only", "Previous")
       ),
       a(BootstrapStyles.right, carouselControl, href := s"#$componentId", role := "button", dataSlide := "next")(
-        span(UdashIcons.Glyphicon.chevronRight),
+//        span(UdashIcons.Glyphicon.chevronRight), TODO
         span(`class` := "sr-only", "Next")
       )
     ).render

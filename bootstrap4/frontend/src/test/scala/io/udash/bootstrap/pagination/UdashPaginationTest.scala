@@ -20,10 +20,8 @@ class UdashPaginationTest extends UdashFrontendTest {
     val pagination = UdashPagination(
       showArrows = showArrows, highlightActive = highlightActive
     )(pages, selected)(UdashPagination.defaultPageFactory)
-    val pager = UdashPagination.pager()(pages, selected)(UdashPagination.defaultPageFactory)
 
     val paginationElement = pagination.render
-    val pagerElement = pager.render
 
     "show and hide arrows on property change" in {
       showArrows.set(true)
@@ -44,28 +42,6 @@ class UdashPaginationTest extends UdashFrontendTest {
         selected.set(i)
         jQ(paginationElement).find("li").hasClass("active") should be(false)
       }
-    }
-
-    "disable arrow on edge element selection" in {
-      showArrows.set(true)
-      selected.set(0)
-      checkDisabled(paginationElement, pagerElement)(true, false)
-      selected.set(1)
-      checkDisabled(paginationElement, pagerElement)(false, false)
-      selected.set(pages.get.size - 1)
-      checkDisabled(paginationElement, pagerElement)(false, true)
-    }
-
-    "update arrows on pages property changes" in {
-      showArrows.set(true)
-      selected.set(pages.get.size - 1)
-      checkDisabled(paginationElement, pagerElement)(false, true)
-      pages.remove(pages.get.size - 1, 1)
-      checkDisabled(paginationElement, pagerElement)(false, true)
-      pages.append(DefaultPage("999", Url("")))
-      checkDisabled(paginationElement, pagerElement)(false, true)
-      pages.append(DefaultPage("987", Url("")))
-      checkDisabled(paginationElement, pagerElement)(false, false)
     }
 
     "update highlight on pages property changes" in {

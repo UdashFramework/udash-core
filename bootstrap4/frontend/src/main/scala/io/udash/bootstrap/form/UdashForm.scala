@@ -8,11 +8,11 @@ import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.Event
 
-import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 
-final class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
-                             (content: Modifier*) extends UdashBootstrapComponent {
+final class UdashForm private(
+  formStyle: Option[CssStyle], override val componentId: ComponentId
+)(content: Modifier*) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
@@ -28,19 +28,20 @@ object UdashForm {
   /** Binds provided `property` validation result to element Bootstrap validation style. */
   def validation(property: ReadableProperty[_]): Modifier =
     property.reactiveApply((el, _) => {
-      import BootstrapStyles.Form._
-      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+//      import BootstrapStyles.Form._
+//      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-      Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
-
-      property.isValid onComplete {
-        case Success(Valid) =>
-          hasSuccess.addTo(el)
-        case Success(Invalid(_)) =>
-          hasError.addTo(el)
-        case Failure(_) =>
-          hasWarning.addTo(el)
-      }
+      // TODO ???
+//      Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
+//
+//      property.isValid onComplete {
+//        case Success(Valid) =>
+//          hasSuccess.addTo(el)
+//        case Success(Invalid(_)) =>
+//          hasError.addTo(el)
+//        case Failure(_) =>
+//          hasWarning.addTo(el)
+//      }
     })
 
   /**
@@ -100,7 +101,8 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def horizontal(content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), UdashBootstrap.newId())(content)
+  // TODO fix horizontal styles
+    new UdashForm(None, UdashBootstrap.newId())(content)
 
   /**
     * Creates horizontal form with provided content. <br/>
@@ -113,7 +115,8 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def horizontal(onSubmit: Event => Any)(componentId: ComponentId, content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.formHorizontal), componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
+  // TODO fix horizontal styles
+    new UdashForm(None, componentId)(content, onsubmit :+= { (ev: Event) => onSubmit(ev); true })
 
   /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
     * Example: `UdashForm(UdashForm.group(...)).render` */
@@ -266,7 +269,8 @@ object UdashForm {
     * @param decorator  This methods allows you to customize DOM structure around each checkbox.
     *                   By default it creates a `label` around input with option value as its content.
     */
-  def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, groupId: ComponentId = UdashBootstrap.newId())
+  // TODO radio style BootstrapStyles.Form.radio?
+  def radio(radioStyle: CssStyle = null, groupId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(selected, options.toSeqProperty)(
@@ -306,8 +310,9 @@ object UdashForm {
     Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.formControl, id := inputId.id)
 
   /** Creates static control element. */
-  def staticControl(content: Modifier*): Modifier =
-    p(BootstrapStyles.Form.formControlStatic)(content)
+  // TODO ???
+//  def staticControl(content: Modifier*): Modifier =
+//    p(BootstrapStyles.Form.formControlStatic)(content)
 
   /**
     * Wrapper for disabled elements.

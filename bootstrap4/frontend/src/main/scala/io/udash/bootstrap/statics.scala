@@ -107,7 +107,7 @@ object BootstrapStyles {
 
     def borderColor(color: Color) = CssStyleName(s"border${color.classMarker}")
 
-    def borderRounded(side: Side) = CssStyleName("srounded${side.longClassMarker}")
+    def borderRounded(side: Side) = CssStyleName("rounded")
     def borderRounded0 = CssStyleName("rounded-0")
     def borderRoundedCircle = CssStyleName("rounded-circle")
   }
@@ -280,12 +280,6 @@ object BootstrapStyles {
     def stickyTop = CssStyleName("sticky-top")
   }
 
-  object Well {
-    def well = CssStyleName("well")
-    def wellLg = CssStyleName("well-lg")
-    def wellSm = CssStyleName("well-sm")
-  }
-
   object Carousel {
     def carousel = CssStyleName("carousel")
     def carouselCaption = CssStyleName("carousel-caption")
@@ -426,7 +420,7 @@ object BootstrapStyles {
   object Image {
     def roundedCircle = CssStyleName("rounded-circle")
     def imgFluid = CssStyleName("img-fluid")
-    def ounded = CssStyleName("rounded")
+    def rounded = CssStyleName("rounded")
     def imgThumbnail = CssStyleName("img-thumbnail")
     def caption = CssStyleName("caption")
     def thumbnail = CssStyleName("thumbnail")

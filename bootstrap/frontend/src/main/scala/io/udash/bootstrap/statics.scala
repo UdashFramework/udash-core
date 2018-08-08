@@ -28,7 +28,6 @@ object BootstrapStyles {
   def pullLeft = CssStyleName("pull-left")
   def pullRight = CssStyleName("pull-right")
   def centerBlock = CssStyleName("center-block")
-  def affix = CssStyleName("affix")
   def arrow = CssStyleName("arrow")
   def bottom = CssStyleName("bottom")
   def close = CssStyleName("close")
