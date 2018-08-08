@@ -11,11 +11,12 @@ class UdashIconsTest extends UdashFrontendTest with CssView {
 
   "Bootstrap icons" should {
     "work with .styleIf" in {
+      import UdashIcons.FontAwesome.Regular._
       val p: Property[Boolean] = Property(false)
       val el = span(
-        UdashIcons.FontAwesome.addressBook.styleIf(p),
-        UdashIcons.FontAwesome.addressBookO.styleIf(p.transform(!_)),
-        UdashIcons.FontAwesome.dashboard.styleIf(p)
+        addressBook.styleIf(p),
+        angry.styleIf(p.transform(!_)),
+        heart.styleIf(p)
       ).render
 
 

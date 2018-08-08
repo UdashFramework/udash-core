@@ -7,12 +7,16 @@ sealed trait CssStyle {
   def className: String
   // Primarily introduced for FontAwesome support, which requires adding two classes, e.g. "fa fa-adjust"
   def commonPrefixClass: Option[String] = None
-  final def classNames: Seq[String] = commonPrefixClass.toList :+ className
+  def classNames: Seq[String] = commonPrefixClass.toList :+ className
 }
 case class CssStyleName(className: String) extends CssStyle
 case class CssPrefixedStyleName(prefixClass: String, actualClassSuffix: String) extends CssStyle {
   val className = s"$prefixClass-$actualClassSuffix"
   override val commonPrefixClass: Option[String] = Some(prefixClass)
+}
+case class CssStyleNameWithSharedCompanion(companionClass: String, commonPrefix: String, className: String) extends CssStyle {
+  override val commonPrefixClass: Option[String] = Some(commonPrefix)
+  override def classNames: Seq[String] = Seq(companionClass, className)
 }
 case class CssStyleImpl(className: String, impl: StyleS) extends CssStyle
 case class CssKeyframes(className: String, steps: Seq[(Double, StyleS)]) extends CssStyle
