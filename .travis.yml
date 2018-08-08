@@ -36,5 +36,6 @@ env:
   - TEST_PACKAGE="auth-shared/test auth-shared-JS/test auth-frontend/test"
   - TEST_PACKAGE="css-macros/test css-shared/test css-shared-JS/test css-backend/test css-frontend/test"
   - TEST_PACKAGE=bootstrap/test
+  - TEST_PACKAGE=bootstrap4/test
   - TEST_PACKAGE=charts/test
   - TEST_PACKAGE="benchmarks-frontend/compile"

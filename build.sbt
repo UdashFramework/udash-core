@@ -99,7 +99,7 @@ lazy val udash = project.in(file("."))
     `i18n-shared-JS`, `i18n-shared`, `i18n-frontend`, `i18n-backend`,
     `auth-shared-JS`, `auth-shared`, `auth-frontend`,
     `css-macros`, `css-shared-JS`, `css-shared`, `css-frontend`, `css-backend`,
-    `bootstrap`, `charts`
+    `bootstrap`, `bootstrap4`, `charts`
   )
   .settings(noPublishSettings)
 
