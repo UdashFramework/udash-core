@@ -11,9 +11,9 @@ import scala.util.{Failure, Success}
 
 private[bindings]
 class ValidationValueModifier[T](property: ReadableProperty[T],
-                                 initBuilder: Option[(Future[ValidationResult], Binding => Binding) => Seq[Node]],
-                                 completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
-                                 errorBuilder: Option[(Throwable, Binding => Binding) => Seq[Node]],
+                                 initBuilder: Option[(Future[ValidationResult], Binding.NestedInterceptor) => Seq[Node]],
+                                 completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
+                                 errorBuilder: Option[(Throwable, Binding.NestedInterceptor) => Seq[Node]],
                                  override val customElementsReplace: DOMManipulator.ReplaceMethod)
   extends Binding with DOMManipulator with CrossLogging {
 
@@ -31,7 +31,7 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
   override def applyTo(root: Element): Unit = {
     var elements: Seq[Node] = Seq.empty
 
-    def rebuild[R](result: R, builder: (R, Binding => Binding) => Seq[Node]): Unit = {
+    def rebuild[R](result: R, builder: (R, Binding.NestedInterceptor) => Seq[Node]): Unit = {
       killNestedBindings()
 
       val oldEls = elements

@@ -11,7 +11,7 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
   import Bindings._
 
   protected def property: ReadableProperty[T]
-  protected def builder: ((T, Binding => Binding) => Seq[Node])
+  protected def builder: ((T, Binding.NestedInterceptor) => Seq[Node])
   protected def checkNull: Boolean
   protected def listen(callback: T => Unit): Registration
 

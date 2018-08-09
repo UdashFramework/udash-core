@@ -28,3 +28,7 @@ trait Binding extends Modifier[dom.Element] {
     nestedBindings.length = 0 // JS way to clear an array
   }
 }
+
+object Binding {
+  type NestedInterceptor = Binding => Binding
+}

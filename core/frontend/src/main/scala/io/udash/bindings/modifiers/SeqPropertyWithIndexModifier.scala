@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 private[bindings]
 class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val property: ReadableSeqProperty[T, E],
-                                                                builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node],
+                                                                builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
                                                                 override val customElementsReplace: DOMManipulator.ReplaceMethod,
                                                                 override val customElementsInsert: DOMManipulator.InsertMethod)
   extends SeqPropertyModifierUtils[T, E] {
