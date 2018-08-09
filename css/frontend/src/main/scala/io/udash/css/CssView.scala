@@ -1,13 +1,14 @@
 package io.udash.css
 
 import io.udash.ReadableProperty
-import io.udash.bindings.modifiers.EmptyModifier
+import io.udash.bindings.modifiers.{Binding, EmptyModifier}
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
 import scalatags.JsDom.all.Modifier
 import scalatags.text.Builder
+
 import js.JSConverters._
 
 /** Contains integration of CSS structures with Scalatags. */
@@ -61,7 +62,7 @@ object CssView extends CssView {
       }
     }
 
-    def styleIf(property: ReadableProperty[Boolean]): Modifier =
+    def styleIf(property: ReadableProperty[Boolean]): Binding =
       property.reactiveApply(
         (elem, value) =>
           if (value) addTo(elem)

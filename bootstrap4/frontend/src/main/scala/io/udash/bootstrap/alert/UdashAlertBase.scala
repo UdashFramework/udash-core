@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package alert
 
 import io.udash._
-import io.udash.css.CssStyle
 import io.udash.css.CssView._
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.TypedTag
@@ -39,7 +38,7 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
     alertStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): T = {
-    create(alertStyle, componentId)
+    create(alertStyle, componentId)(content)
   }
 
   def link(link: String)(content: Modifier*): Modifier =
