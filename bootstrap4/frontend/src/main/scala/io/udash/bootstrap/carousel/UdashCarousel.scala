@@ -3,7 +3,7 @@ package carousel
 
 import com.avsystem.commons.misc._
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
@@ -159,7 +159,7 @@ object UdashCarousel {
     * @param animationOptions Carousel animation options.
     * @return `UdashCarousel` component
     */
-  def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
+  def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = ComponentId.newId(),
             showIndicators: Boolean = true, activeSlide: Int = 0, animationOptions: AnimationOptions = AnimationOptions())
            : UdashCarousel =
     new UdashCarousel(content, componentId, showIndicators, activeSlide, animationOptions)
@@ -268,7 +268,7 @@ object UdashCarousel {
   * @param imgSrc  Slide image source url.
   * @param content Slide content.
   */
-case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*) extends UdashBootstrapComponent {
+case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = ComponentId.newId())(content: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
   override lazy val render: Element =
     div(id := componentId, BootstrapStyles.item)(

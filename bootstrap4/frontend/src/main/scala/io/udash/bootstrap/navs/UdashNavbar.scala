@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package navs
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.css.CssStyle
 import org.scalajs.dom
 
@@ -17,7 +17,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
   import BootstrapTags._
   import io.udash.css.CssView._
 
-  private val collapseId = UdashBootstrap.newId()
+  private val collapseId = ComponentId.newId()
 
   override val render: dom.Element =
     tags2.nav(id := componentId, BootstrapStyles.NavigationBar.navbar, navbarStyle)(
@@ -49,7 +49,7 @@ object UdashNavbar {
     * @return `UdashNavbar` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
+           (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.NavigationBar.light, componentId)(brand, nav)
 
   /**
@@ -63,6 +63,6 @@ object UdashNavbar {
     * @return `UdashNavbar` component, call render to create DOM element.
     */
   def inverted[ItemType, ElemType <: ReadableProperty[ItemType]]
-              (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
+              (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.NavigationBar.dark, componentId)(brand, nav)
 }

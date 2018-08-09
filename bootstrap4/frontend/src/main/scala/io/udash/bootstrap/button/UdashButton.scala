@@ -3,7 +3,7 @@ package button
 
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
 import org.scalajs.dom
 import org.scalajs.dom._
@@ -36,7 +36,7 @@ final class UdashButton private(
     )(content: _*).render
 
   private[bootstrap] def radio(radioId: ComponentId, selected: Property[String]): dom.Element = {
-    val inputId = UdashBootstrap.newId()
+    val inputId = ComponentId.newId()
     val in = input(tpe := "radio", name := radioId, id := inputId)
     selected.listen(v => active.set(v == inputId.id))
     active.listen(v => if (v) selected.set(inputId.id))
@@ -70,7 +70,7 @@ object UdashButton {
   def apply(
     buttonStyle: Option[BootstrapStyles.Color] = None, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
     active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-    componentId: ComponentId = UdashBootstrap.newId()
+    componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashButton =
     new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
 
@@ -90,7 +90,7 @@ object UdashButton {
   def toggle(
     buttonStyle: Option[BootstrapStyles.Color] = None, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
     active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-    componentId: ComponentId = UdashBootstrap.newId()
+    componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashButton = {
     val button = new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
     button.listen { case _ => active.set(!active.get) }

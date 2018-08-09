@@ -2,7 +2,7 @@
 //package collapse
 //
 //import io.udash._
-//import io.udash.bootstrap.UdashBootstrap.ComponentId
+//import io.udash.bootstrap.ComponentId
 //import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
 //import io.udash.properties.seq
 //import org.scalajs.dom
@@ -32,7 +32,7 @@
 //  override val render: Element =
 //    div(BootstrapStyles.Panel.panelGroup, id := componentId, role := "tablist", aria.multiselectable := true)(
 //      repeat(panels)(item => {
-//        val headingId = UdashBootstrap.newId()
+//        val headingId = ComponentId.newId()
 //        val collapse = UdashCollapse()(
 //          BootstrapStyles.Panel.panelCollapse, role := "tabpanel", aria.labelledby := headingId,
 //          body(item)
@@ -69,7 +69,7 @@
 //    * @return `UdashAccordion` component, call render to create DOM element.
 //    */
 //  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-//           (panels: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+//           (panels: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
 //           (heading: (ElemType) => Element, body: (ElemType) => Element,
 //            panelTypeSelector: ItemType => PanelStyle = (_: ItemType) => PanelStyle.Default): UdashAccordion[ItemType, ElemType] =
 //    new UdashAccordion(panels, componentId)(panelTypeSelector, heading, body)

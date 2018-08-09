@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package form
 
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -29,7 +29,7 @@ object UdashInputGroup {
     * @return `UdashInputGroup` component, call render to create DOM element.
     */
   def apply(groupSize: InputGroupSize = InputGroupSize.Default,
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashInputGroup =
+            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashInputGroup =
     new UdashInputGroup(groupSize, componentId)(content)
 
   /** Creates an element to be prepended to the input of this input group. */

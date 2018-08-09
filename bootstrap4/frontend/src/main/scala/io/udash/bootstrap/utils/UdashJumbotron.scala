@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package utils
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import org.scalajs.dom
 
 import scalatags.JsDom.all._
@@ -25,7 +25,7 @@ object UdashJumbotron {
     * @param componentId Id of the root DOM node.
     * @return `UdashJumbotron` component, call render to create DOM element.
     */
-  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashJumbotron =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashJumbotron =
     new UdashJumbotron(componentId)(bind(content))
 
   /**
@@ -36,7 +36,7 @@ object UdashJumbotron {
     * @return `UdashJumbotron` component, call render to create DOM element.
     */
   def apply(content: Modifier*): UdashJumbotron =
-    new UdashJumbotron(UdashBootstrap.newId())(content)
+    new UdashJumbotron(ComponentId.newId())(content)
 
   /**
     * Creates jumbotron component.

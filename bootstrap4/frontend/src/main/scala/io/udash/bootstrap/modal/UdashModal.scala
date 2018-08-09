@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package modal
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -107,7 +107,7 @@ object UdashModal {
     */
   def apply(modalSize: ModalSize = ModalSize.Default, fade: Boolean = true, labelId: String = "",
             backdrop: BackdropType = ActiveBackdrop, keyboard: Boolean = true, autoInit: Boolean = true,
-            componentId: ComponentId = UdashBootstrap.newId())
+            componentId: ComponentId = ComponentId.newId())
            (headerFactory: Option[() => Element] = None,
             bodyFactory: Option[() => Element] = None,
             footerFactory: Option[() => Element] = None): UdashModal =

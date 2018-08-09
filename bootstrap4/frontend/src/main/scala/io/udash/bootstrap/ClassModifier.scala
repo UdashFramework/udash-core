@@ -5,6 +5,7 @@ import org.scalajs.dom._
 
 import scalatags.JsDom.all._
 
+// TODO to remove?
 /** Adds selected classes to provided DOM element. */
 abstract class ClassModifier(styles: CssStyle*) extends Modifier {
   import io.udash.css.CssView._

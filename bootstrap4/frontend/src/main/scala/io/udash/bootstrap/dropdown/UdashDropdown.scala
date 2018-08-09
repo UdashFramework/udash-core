@@ -3,7 +3,7 @@ package dropdown
 
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
@@ -23,9 +23,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import io.udash.wrappers.jquery._
 
   /** Dropdown menu list ID. */
-  val menuId: ComponentId = UdashBootstrap.newId()
+  val menuId: ComponentId = ComponentId.newId()
   /** Dropdown button ID. */
-  val buttonId: ComponentId = UdashBootstrap.newId()
+  val buttonId: ComponentId = ComponentId.newId()
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
@@ -123,7 +123,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
            (itemFactory: (ElemType) => dom.Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, false, componentId)(itemFactory)(content)
@@ -141,7 +141,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def dropup[ItemType, ElemType <: ReadableProperty[ItemType]]
-            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
             (itemFactory: (ElemType) => dom.Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true, componentId)(itemFactory)(content)

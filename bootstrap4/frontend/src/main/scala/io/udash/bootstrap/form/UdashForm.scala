@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package form
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._
@@ -53,7 +53,7 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def apply(content: Modifier*): UdashForm =
-    new UdashForm(None, UdashBootstrap.newId())(content)
+    new UdashForm(None, ComponentId.newId())(content)
 
   /**
     * Creates standard form with provided content. <br/>
@@ -77,7 +77,7 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def inline(content: Modifier*): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.inline), UdashBootstrap.newId())(content)
+    new UdashForm(Some(BootstrapStyles.Form.inline), ComponentId.newId())(content)
 
   /**
     * Creates inline form with provided content. <br/>
@@ -102,7 +102,7 @@ object UdashForm {
     */
   def horizontal(content: Modifier*): UdashForm =
   // TODO fix horizontal styles
-    new UdashForm(None, UdashBootstrap.newId())(content)
+    new UdashForm(None, ComponentId.newId())(content)
 
   /**
     * Creates horizontal form with provided content. <br/>
@@ -147,7 +147,7 @@ object UdashForm {
     * @param property       Property which will be synchronised with the input content.
     * @param inputModifiers Modifiers applied directly to the `input` element.
     */
-  def textInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+  def textInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
                (labelContent: Modifier*)
                (property: Property[String], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextInput(property)(id := inputId, inputModifiers).render)
@@ -162,7 +162,7 @@ object UdashForm {
     * @param property       Property which will be synchronised with the input content.
     * @param inputModifiers Modifiers applied directly to the `input` element.
     */
-  def passwordInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+  def passwordInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
                    (labelContent: Modifier*)
                    (property: Property[String], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(PasswordInput(property)(id := inputId, inputModifiers).render)
@@ -177,7 +177,7 @@ object UdashForm {
     * @param property       Property which will be synchronised with the input content.
     * @param inputModifiers Modifiers applied directly to the `input` element.
     */
-  def numberInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+  def numberInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
                  (labelContent: Modifier*)
                  (property: Property[String], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(NumberInput(property)(id := inputId, inputModifiers).render)
@@ -192,7 +192,7 @@ object UdashForm {
     * @param property       Property which will be synchronised with the input content.
     * @param inputModifiers Modifiers applied directly to the `input` element.
     */
-  def textArea(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+  def textArea(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
               (labelContent: Modifier*)
               (property: Property[String], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(TextArea(property)(id := inputId, inputModifiers).render)
@@ -209,7 +209,7 @@ object UdashForm {
     * @param selectedFiles       Property which will be synchronised with the input content.
     * @param inputModifiers      Modifiers applied directly to the `input` element.
     */
-  def fileInput(inputId: ComponentId = UdashBootstrap.newId(), validation: Option[Modifier] = None)
+  def fileInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
                (labelContent: Modifier*)
                (name: String, acceptMultipleFiles: ReadableProperty[Boolean],
                 selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
@@ -227,7 +227,7 @@ object UdashForm {
     * @param property       Property which will be synchronised with the input content.
     * @param inputModifiers Modifiers applied directly to the `input` element.
     */
-  def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = UdashBootstrap.newId())
+  def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = ComponentId.newId())
               (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
     div(BootstrapStyles.Form.check)(
       Checkbox(property)(id := inputId, inputModifiers).render,
@@ -248,7 +248,7 @@ object UdashForm {
     * @param decorator      This methods allows you to customize DOM structure around each checkbox.
     *                       By default it creates a `label` around input with option value as its content.
     */
-  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.check, groupId: ComponentId = UdashBootstrap.newId())
+  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.check, groupId: ComponentId = ComponentId.newId())
                 (selected: SeqProperty[String], options: Seq[String],
                  decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(selected, options.toSeqProperty)(
@@ -270,7 +270,7 @@ object UdashForm {
     *                   By default it creates a `label` around input with option value as its content.
     */
   // TODO radio style BootstrapStyles.Form.radio?
-  def radio(radioStyle: CssStyle = null, groupId: ComponentId = UdashBootstrap.newId())
+  def radio(radioStyle: CssStyle = null, groupId: ComponentId = ComponentId.newId())
            (selected: Property[String], options: Seq[String],
             decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(selected, options.toSeqProperty)(
@@ -292,7 +292,7 @@ object UdashForm {
     */
   def select(selected: Property[String], options: Seq[String],
              label: String => Modifier = Select.defaultLabel,
-             inputId: ComponentId = UdashBootstrap.newId()): Modifier =
+             inputId: ComponentId = ComponentId.newId()): Modifier =
     Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id).render
 
   /**
@@ -306,7 +306,7 @@ object UdashForm {
     */
   def multiselect(selected: SeqProperty[String], options: Seq[String],
                   label: String => Modifier = Select.defaultLabel,
-                  inputId: ComponentId = UdashBootstrap.newId()): Modifier =
+                  inputId: ComponentId = ComponentId.newId()): Modifier =
     Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id)
 
   /** Creates static control element. */

@@ -3,7 +3,7 @@ package pagination
 
 import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion}
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event
@@ -123,7 +123,7 @@ object UdashPagination {
     */
   def apply[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]](
     size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
-    highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId()
+    highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = ComponentId.newId()
   )(
     pages: seq.ReadableSeqProperty[PageType, ElemType],
     selectedPage: Property[Int]

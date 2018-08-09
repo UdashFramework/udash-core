@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash.bootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 
@@ -74,7 +74,7 @@ object UdashCollapse {
     * @return `UdashCollapse` component, call render to create DOM element.
     */
   def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true,
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashCollapse =
+            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashCollapse =
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
 
   @js.native
