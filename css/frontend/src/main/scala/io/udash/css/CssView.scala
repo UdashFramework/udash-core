@@ -74,4 +74,28 @@ object CssView extends CssView {
       else new EmptyModifier[Element]
     }
   }
+
+  implicit class StyleFactoryOps[T](private val factory: T => CssStyle) extends AnyVal {
+    def reactiveApply(p: ReadableProperty[T]): Binding =
+      reactiveOptionApply(p.transform(Some.apply))
+
+    def reactiveOptionApply(p: ReadableProperty[Option[T]]): Binding = new Binding {
+      private var prevStyle: CssStyle = _
+      override def applyTo(el: Element): Unit = {
+        propertyListeners += p.listen(t => {
+          if (prevStyle != null) {
+            prevStyle.classNames.foreach(el.classList.remove)
+          }
+          t match {
+            case Some(t) =>
+              val newStyle = factory(t)
+              newStyle.classNames.foreach(el.classList.add)
+              prevStyle = newStyle
+            case None =>
+              prevStyle = null
+          }
+        }, initUpdate = true)
+      }
+    }
+  }
 }
