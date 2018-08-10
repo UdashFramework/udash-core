@@ -15,11 +15,7 @@ private[alert] abstract class UdashAlertBase(
     div(
       id := componentId, role := "alert",
       BootstrapStyles.Alert.alert,
-      nestedInterceptor(
-        alertStyle.reactiveApply { (el, style) =>
-          BootstrapStyles.Alert.color(style).applyTo(el)
-        }
-      )
+      nestedInterceptor((BootstrapStyles.Alert.color _).reactiveApply(alertStyle))
     )
   }
 }

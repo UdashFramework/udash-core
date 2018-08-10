@@ -18,11 +18,7 @@ class UdashBadge private[badge](
   override val render: Element = {
     baseTag(
       id := componentId, BootstrapStyles.Badge.badge,
-      nestedInterceptor(
-        badgeStyle.reactiveApply { (el, style) =>
-          BootstrapStyles.Badge.color(style).applyTo(el)
-        }
-      ),
+      nestedInterceptor((BootstrapStyles.Badge.color _).reactiveApply(badgeStyle)),
       nestedInterceptor(BootstrapStyles.Badge.pill.styleIf(pillStyle))
     )(content).render
   }
@@ -34,7 +30,7 @@ private[badge] class UdashBadgeLink(
   pillStyle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(content: Modifier*) extends UdashBadge(badgeStyle, pillStyle, componentId)(content) {
-  protected override def baseTag: TypedTag[Element] = span
+  protected override def baseTag: TypedTag[Element] =
     a(nestedInterceptor(href.bind(link)))
 }
 

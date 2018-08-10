@@ -28,5 +28,25 @@ class UdashAlertTest extends UdashFrontendTest {
       alert.dismissed.get shouldBe true
       division.childElementCount shouldBe 0
     }
+
+    "update style" in {
+      val style = Property[BootstrapStyles.Color](BootstrapStyles.Color.Secondary)
+      val alert = UdashAlert(style)("lol")
+      val el = alert.render
+
+      el.classList.length should be(2)
+      el.classList.contains(BootstrapStyles.Alert.alert.className) should be(true)
+      el.classList.contains(BootstrapStyles.Alert.color(BootstrapStyles.Color.Secondary).className) should be(true)
+
+      style.set(BootstrapStyles.Color.Info)
+      el.classList.length should be(2)
+      el.classList.contains(BootstrapStyles.Alert.alert.className) should be(true)
+      el.classList.contains(BootstrapStyles.Alert.color(BootstrapStyles.Color.Info).className) should be(true)
+
+      style.listenersCount() should be(1)
+
+      alert.kill()
+      style.listenersCount() should be(0)
+    }
   }
 }

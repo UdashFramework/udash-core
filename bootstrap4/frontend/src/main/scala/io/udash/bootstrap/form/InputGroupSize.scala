@@ -12,6 +12,6 @@ object InputGroupSize {
   import BootstrapStyles.InputGroup
 
   final val Default = new InputGroupSize(None)
-  final val Large = new InputGroupSize(InputGroup.large)
-  final val Small = new InputGroupSize(InputGroup.small)
+  final val Large = new InputGroupSize(InputGroup.size(BootstrapStyles.Size.Large))
+  final val Small = new InputGroupSize(InputGroup.size(BootstrapStyles.Size.Small))
 }

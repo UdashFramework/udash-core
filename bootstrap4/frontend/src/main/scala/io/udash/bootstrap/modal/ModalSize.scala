@@ -11,6 +11,6 @@ object ModalSize {
   import BootstrapStyles.Modal
 
   final val Default = new ModalSize(None)
-  final val Large = new ModalSize(Modal.large)
-  final val Small = new ModalSize(Modal.small)
+  final val Large = new ModalSize(Modal.size(BootstrapStyles.Size.Large))
+  final val Small = new ModalSize(Modal.size(BootstrapStyles.Size.Small))
 }

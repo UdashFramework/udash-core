@@ -6,7 +6,7 @@ import org.scalajs.dom
 
 /** Bootstrap component exposing events. */
 trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] {
-  private val onClickActions = new CallbacksHandler[EventType]
+  private val actions = new CallbacksHandler[EventType]
 
   /**
     * Register event handler in component.
@@ -17,11 +17,11 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
     * @param onEvent Partial function which handles component events.
     * @return [[Registration]] which allows you to remove listener from this component.
     */
-  def listen(onEvent: onClickActions.CallbackType): Registration =
-    onClickActions.register(onEvent)
+  def listen(onEvent: actions.CallbackType): Registration =
+    actions.register(onEvent)
 
   protected def fire(event: EventType): Unit =
-    onClickActions.fire(event)
+    actions.fire(event)
 
   protected def jQFire(ev: EventType): JQueryCallback =
     (_: dom.Element, _: JQueryEvent) => fire(ev)

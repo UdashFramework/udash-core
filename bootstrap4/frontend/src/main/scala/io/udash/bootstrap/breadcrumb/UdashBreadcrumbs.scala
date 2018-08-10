@@ -41,7 +41,6 @@ object UdashBreadcrumbs {
   /** Default breadcrumb model. */
   class Breadcrumb(val name: String, val link: String)
 
-
   /** Default breadcrumb model factory. */
   val defaultPageFactory: (ReadableProperty[Breadcrumb], Binding.NestedInterceptor) => Modifier = {
     (page, nested) => nested(produce(page) { page =>

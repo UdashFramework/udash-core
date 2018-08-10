@@ -49,6 +49,12 @@ object BootstrapStyles {
     final val Link: Value = new Color("-link")
   }
 
+  final class Size(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Size extends AbstractValueEnumCompanion[Size] {
+    final val Small: Value = new Size("-sm")
+    final val Large: Value = new Size("-lg")
+  }
+
   def active = CssStyleName("active")
   def container = CssStyleName("container")
   def containerFluid = CssStyleName("container-fluid")
@@ -123,11 +129,14 @@ object BootstrapStyles {
     def group = CssStyleName("btn-group")
     def groupVertical = CssStyleName("btn-group-vertical")
 
-    def small = CssStyleName("btn-sm")
-    def large = CssStyleName("btn-lg")
+    def size(size: Size) =
+      CssStyleName(s"btn${size.classMarker}")
 
     def color(color: Color = Color.Secondary) =
       CssStyleName(s"btn${color.classMarker}")
+
+    def outline(color: Color = Color.Secondary) =
+      CssStyleName(s"btn-outline${color.classMarker}")
   }
 
   object Card {
@@ -317,9 +326,10 @@ object BootstrapStyles {
     def checkLabel = CssStyleName("form-check-label")
 
     def control = CssStyleName("form-control")
-    def controlLarge = CssStyleName("form-control-lg")
     def controlPlaintext = CssStyleName("form-control-plaintext")
-    def controlSmall = CssStyleName("form-control-sm")
+
+    def size(size: Size) =
+      CssStyleName(s"form-control${size.classMarker}")
 
     def hasFeedback = CssStyleName("has-feedback")
     def colFormLabel = CssStyleName("col-form-label")
@@ -355,8 +365,8 @@ object BootstrapStyles {
     def prepend = CssStyleName("input-group-prepend")
     def text = CssStyleName("input-group-text")
 
-    def large = CssStyleName("input-group-lg")
-    def small = CssStyleName("input-group-sm")
+    def size(size: Size) =
+      CssStyleName(s"input-group${size.classMarker}")
   }
 
   object List {
@@ -401,10 +411,11 @@ object BootstrapStyles {
     def dialog = CssStyleName("modal-dialog")
     def footer = CssStyleName("modal-footer")
     def header = CssStyleName("modal-header")
-    def large = CssStyleName("modal-lg")
     def open = CssStyleName("modal-open")
-    def small = CssStyleName("modal-sm")
     def title = CssStyleName("modal-title")
+
+    def size(size: Size) =
+      CssStyleName(s"modal${size.classMarker}")
   }
 
   object Navigation {
@@ -447,11 +458,11 @@ object BootstrapStyles {
   object Pagination {
     def pagination = CssStyleName("pagination")
 
-    def large = CssStyleName("pagination-lg")
-    def small = CssStyleName("pagination-sm")
-
     def item = CssStyleName("page-item")
     def link = CssStyleName("page-link")
+
+    def size(size: Size) =
+      CssStyleName(s"pagination${size.classMarker}")
   }
 
   object Popover {
