@@ -1,7 +1,7 @@
 package io.udash.bootstrap.badge
 
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
+import io.udash.bootstrap.{BootstrapStyles, ComponentId, UdashBootstrap, UdashBootstrapComponent}
 import org.scalajs.dom.Element
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -46,8 +46,8 @@ object UdashBadge {
     * @return `UdashBadge` component, call render to create a DOM element.
     */
   def apply(
-    badgeStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
-    pillStyle: ReadableProperty[Boolean] = false.toProperty,
+    badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
+    pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashBadge = {
     new UdashBadge(badgeStyle, pillStyle, componentId)(content)
@@ -66,8 +66,8 @@ object UdashBadge {
     */
   def link(
     link: ReadableProperty[String],
-    badgeStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
-    pillStyle: ReadableProperty[Boolean] = false.toProperty,
+    badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
+    pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashBadge = {
     new UdashBadgeLink(link, badgeStyle, pillStyle, componentId)(content)

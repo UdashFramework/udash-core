@@ -129,6 +129,9 @@ object BootstrapStyles {
     def group = CssStyleName("btn-group")
     def groupVertical = CssStyleName("btn-group-vertical")
 
+    def groupSize(size: Size) =
+      CssStyleName(s"btn-group${size.classMarker}")
+
     def size(size: Size) =
       CssStyleName(s"btn${size.classMarker}")
 

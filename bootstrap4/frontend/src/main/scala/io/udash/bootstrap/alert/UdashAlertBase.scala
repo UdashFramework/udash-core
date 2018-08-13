@@ -31,7 +31,7 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
     * @return `UdashAlert` component, call render to create a DOM element.
     */
   def apply(
-    alertStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
+    alertStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): T = {
     create(alertStyle, componentId)(content)

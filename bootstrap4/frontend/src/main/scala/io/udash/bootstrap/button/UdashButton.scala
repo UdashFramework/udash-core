@@ -47,21 +47,6 @@ final class UdashButton private(
       })
     )(content).render
   }
-
-  private[bootstrap] def radio(radioId: ComponentId, selected: Property[String]): dom.Element = {
-    val inputId = ComponentId.newId()
-    val in = input(tpe := "radio", name := radioId, id := inputId)
-//    selected.listen(v => active.set(v == inputId.id)) // TODO ????
-    active.listen(v => if (v) selected.set(inputId.id))
-    if (active.get) selected.set(inputId.id)
-    label(id := componentId)(classes: _*)(
-      onclick :+= ((me: MouseEvent) => {
-        selected.set(inputId.id)
-        fire(ButtonClickEvent(this, me))
-        false
-      })
-    )(in)(content: _*).render
-  }
 }
 
 object UdashButton {
@@ -82,12 +67,12 @@ object UdashButton {
     * @return `UdashButton` component, call render to create DOM element representing this button.
     */
   def apply(
-    buttonStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
-    size: ReadableProperty[Option[BootstrapStyles.Size]] = (None: Option[BootstrapStyles.Size]).toProperty,
-    outline: ReadableProperty[Boolean] = false.toProperty,
-    block: ReadableProperty[Boolean] = false.toProperty,
-    active: ReadableProperty[Boolean] = false.toProperty,
-    disabled: ReadableProperty[Boolean] = false.toProperty,
+    buttonStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
+    size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
+    outline: ReadableProperty[Boolean] = UdashBootstrap.False,
+    block: ReadableProperty[Boolean] = UdashBootstrap.False,
+    active: ReadableProperty[Boolean] = UdashBootstrap.False,
+    disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashButton =
     new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content: _*)
@@ -107,11 +92,11 @@ object UdashButton {
     */
   def toggle(
     active: Property[Boolean],
-    buttonStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty,
-    size: ReadableProperty[Option[BootstrapStyles.Size]] = (None: Option[BootstrapStyles.Size]).toProperty,
-    outline: ReadableProperty[Boolean] = false.toProperty,
-    block: ReadableProperty[Boolean] = false.toProperty,
-    disabled: ReadableProperty[Boolean] = false.toProperty,
+    buttonStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
+    size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
+    outline: ReadableProperty[Boolean] = UdashBootstrap.False,
+    block: ReadableProperty[Boolean] = UdashBootstrap.False,
+    disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(content: Modifier*): UdashButton = {
     val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content: _*)

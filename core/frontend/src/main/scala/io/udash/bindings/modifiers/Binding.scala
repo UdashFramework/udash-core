@@ -12,7 +12,8 @@ trait Binding extends Modifier[dom.Element] {
   protected final val propertyListeners: js.Array[Registration] = js.Array()
   protected final val nestedBindings: js.Array[Binding] = js.Array()
 
-  protected def nestedInterceptor(binding: Binding): Binding =
+  /** Every interceptor is expected to return the value received as argument. */
+  protected def nestedInterceptor[T <: Binding](binding: T): T =
     binding.setup { nestedBindings += _ }
 
   /** This method clears all bindings and listeners. */
@@ -30,5 +31,6 @@ trait Binding extends Modifier[dom.Element] {
 }
 
 object Binding {
+  /** Every interceptor is expected to return the value received as argument. */
   type NestedInterceptor = Binding => Binding
 }
