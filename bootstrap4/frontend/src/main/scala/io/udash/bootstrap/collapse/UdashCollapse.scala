@@ -40,7 +40,7 @@ final class UdashCollapse private(
 
   override val render: Element = {
     val el = div(
-      dataParent := parentSelector.getOrElse("false"), dataToggle := toggleOnInit,
+      parentSelector.map(dataParent := _), dataToggle := toggleOnInit,
       BootstrapStyles.Collapse.collapse, id := componentId
     )(content).render
 
@@ -73,15 +73,20 @@ object UdashCollapse {
     * Creates collapsible component.
     * More: <a href="http://getbootstrap.com/javascript/#collapse">Bootstrap Docs</a>.
     *
-    * @param parentSelector If a selector is provided, all collapsible elements under the specified parent will be closed when this collapsible item is shown.
+    * @param parentSelector If a selector is provided, all collapsible elements under the specified parent will be
+    *                       closed when this collapsible item is shown.
     * @param toggleOnInit   Toggles the collapsible element on invocation.
     * @param componentId    Id of the root DOM node.
     * @param content        Collapse component content
     * @return `UdashCollapse` component, call render to create DOM element.
     */
-  def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true,
-            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashCollapse =
+  def apply(
+    parentSelector: Option[String] = None,
+    toggleOnInit: Boolean = true,
+    componentId: ComponentId = ComponentId.newId()
+  )(content: Modifier*): UdashCollapse = {
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
+  }
 
   @js.native
   private trait UdashCollapseJQuery extends JQuery {
