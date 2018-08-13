@@ -165,6 +165,8 @@ object BootstrapStyles {
     def control = CssStyleName("carousel-control")
     def controlNext = CssStyleName("carousel-control-next")
     def controlPrev = CssStyleName("carousel-control-prev")
+    def controlNextIcon = CssStyleName("carousel-control-next-icon")
+    def controlPrevIcon = CssStyleName("carousel-control-prev-icon")
 
     def caption = CssStyleName("carousel-caption")
     def indicators = CssStyleName("carousel-indicators")
