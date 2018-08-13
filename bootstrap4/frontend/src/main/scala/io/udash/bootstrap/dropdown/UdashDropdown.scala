@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package dropdown
 
-import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
@@ -21,6 +21,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import UdashDropdown._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
+  import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
 
   /** Dropdown menu list ID. */
   val menuId: ComponentId = ComponentId.newId()
@@ -54,10 +55,10 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.dropdown", jQFire(DropdownShowEvent(this)))
-    jQEl.on("shown.bs.dropdown", jQFire(DropdownShownEvent(this)))
-    jQEl.on("hide.bs.dropdown", jQFire(DropdownHideEvent(this)))
-    jQEl.on("hidden.bs.dropdown", jQFire(DropdownHiddenEvent(this)))
+    jQEl.on("show.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Show)))
+    jQEl.on("shown.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Shown)))
+    jQEl.on("hide.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hide)))
+    jQEl.on("hidden.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hidden)))
     el
   }
 
@@ -83,13 +84,25 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
 object UdashDropdown {
   sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
-    override val source: UdashDropdown[ItemType, ElemType]
-  ) extends AbstractCase with ListenableEvent[UdashDropdown[ItemType, ElemType]]
-  case class DropdownShowEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownShownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownHideEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class DropdownHiddenEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType]) extends DropdownEvent(dropdown)
-  case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](dropdown: UdashDropdown[ItemType, ElemType], item: ItemType) extends DropdownEvent(dropdown)
+    override val source: UdashDropdown[ItemType, ElemType],
+    val tpe: DropdownEvent.EventType
+  ) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
+
+  object DropdownEvent {
+    final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+    object EventType extends AbstractValueEnumCompanion[EventType] {
+      final val Show, Shown, Hide, Hidden, Selection: Value = new EventType
+    }
+
+    case class VisibilityChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+      override val source: UdashDropdown[ItemType, ElemType],
+      override val tpe: DropdownEvent.EventType
+    ) extends DropdownEvent(source, tpe) with CaseMethods
+
+    case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+      override val source: UdashDropdown[ItemType, ElemType], item: ItemType
+    ) extends DropdownEvent(source, EventType.Selection) with CaseMethods
+  }
 
   /** Default dropdown elements. */
   sealed trait DefaultDropdownItem

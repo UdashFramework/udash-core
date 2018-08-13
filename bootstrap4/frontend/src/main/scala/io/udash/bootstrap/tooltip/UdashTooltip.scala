@@ -28,11 +28,11 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.tooltip("setContent")
 
-  selector.on("show.bs.tooltip", jQFire(TooltipEvent.ShowEvent(this)))
-  selector.on("shown.bs.tooltip", jQFire(TooltipEvent.ShownEvent(this)))
-  selector.on("hide.bs.tooltip", jQFire(TooltipEvent.HideEvent(this)))
-  selector.on("hidden.bs.tooltip", jQFire(TooltipEvent.HiddenEvent(this)))
-  selector.on("inserted.bs.tooltip", jQFire(TooltipEvent.InsertedEvent(this)))
+  selector.on("show.bs.tooltip", jQFire(TooltipEvent(this, TooltipEvent.EventType.Show)))
+  selector.on("shown.bs.tooltip", jQFire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
+  selector.on("hide.bs.tooltip", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
+  selector.on("hidden.bs.tooltip", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
+  selector.on("inserted.bs.tooltip", jQFire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
 }
 
 object UdashTooltip extends TooltipUtils[UdashTooltip] {

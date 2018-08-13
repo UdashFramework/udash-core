@@ -29,11 +29,11 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.popover("setContent")
 
-  selector.on("show.bs.popover", jQFire(TooltipEvent.ShowEvent(this)))
-  selector.on("shown.bs.popover", jQFire(TooltipEvent.ShownEvent(this)))
-  selector.on("hide.bs.popover", jQFire(TooltipEvent.HideEvent(this)))
-  selector.on("hidden.bs.popover", jQFire(TooltipEvent.HiddenEvent(this)))
-  selector.on("inserted.bs.popover", jQFire(TooltipEvent.InsertedEvent(this)))
+  selector.on("show.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Show)))
+  selector.on("shown.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
+  selector.on("hide.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
+  selector.on("hidden.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
+  selector.on("inserted.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
 }
 
 object UdashPopover extends TooltipUtils[UdashPopover] {
@@ -46,7 +46,6 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
   override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
-
     import scalatags.Text.all._
     div(BootstrapStyles.Popover.popover, role := "tooltip")(
       div(BootstrapStyles.arrow),

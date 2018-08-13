@@ -19,8 +19,8 @@ class UdashModalTest extends UdashFrontendTest {
       var showCounter = 0
       var hideCounter = 0
       modal.listen {
-        case ModalShowEvent(_) => showCounter += 1
-        case ModalHideEvent(_) => hideCounter += 1
+        case ModalEvent(_, ModalEvent.EventType.Show) => showCounter += 1
+        case ModalEvent(_, ModalEvent.EventType.Hide) => hideCounter += 1
       }
 
       jQ("body").append(modal.render)

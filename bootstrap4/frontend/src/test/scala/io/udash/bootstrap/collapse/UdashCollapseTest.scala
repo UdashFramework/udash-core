@@ -29,10 +29,10 @@ class UdashCollapseTest extends AsyncUdashFrontendTest {
       var hideCounter = 0
       var hiddenCounter = 0
       collapse.listen {
-        case CollapseShowEvent(_) => showCounter += 1
-        case CollapseShownEvent(_) => shownCounter += 1
-        case CollapseHideEvent(_) => hideCounter += 1
-        case CollapseHiddenEvent(_) => hiddenCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Show) => showCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Shown) => shownCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Hide) => hideCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Hidden) => hiddenCounter += 1
       }
 
       collapse.hide()
@@ -87,10 +87,10 @@ class UdashCollapseTest extends AsyncUdashFrontendTest {
       var hideCounter = 0
       var hiddenCounter = 0
       collapse.listen {
-        case CollapseShowEvent(_) => showCounter += 1
-        case CollapseShownEvent(_) => shownCounter += 1
-        case CollapseHideEvent(_) => hideCounter += 1
-        case CollapseHiddenEvent(_) => hiddenCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Show) => showCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Shown) => shownCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Hide) => hideCounter += 1
+        case CollapseEvent(_, CollapseEvent.EventType.Hidden) => hiddenCounter += 1
       }
 
       button.click()

@@ -1,8 +1,7 @@
 package io.udash.bootstrap
 package modal
 
-import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.ComponentId
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -70,10 +69,10 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.modal", jQFire(ModalShowEvent(this)))
-    jQEl.on("shown.bs.modal", jQFire(ModalShownEvent(this)))
-    jQEl.on("hide.bs.modal", jQFire(ModalHideEvent(this)))
-    jQEl.on("hidden.bs.modal", jQFire(ModalHiddenEvent(this)))
+    jQEl.on("show.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Show)))
+    jQEl.on("shown.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Shown)))
+    jQEl.on("hide.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Hide)))
+    jQEl.on("hidden.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Hidden)))
     el
   }
 }
@@ -84,11 +83,17 @@ object UdashModal {
   val StaticBackdrop = new BackdropType("static")
   val NoneBackdrop = new BackdropType("false")
 
-  sealed trait ModalEvent extends AbstractCase with ListenableEvent[UdashModal]
-  final case class ModalShowEvent(source: UdashModal) extends ModalEvent
-  final case class ModalShownEvent(source: UdashModal) extends ModalEvent
-  final case class ModalHideEvent(source: UdashModal) extends ModalEvent
-  final case class ModalHiddenEvent(source: UdashModal) extends ModalEvent
+  final case class ModalEvent(
+    override val source: UdashModal,
+    tpe: ModalEvent.EventType
+  ) extends AbstractCase with ListenableEvent[UdashModal]
+
+  object ModalEvent {
+    final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+    object EventType extends AbstractValueEnumCompanion[EventType] {
+      final val Show, Shown, Hide, Hidden: Value = new EventType
+    }
+  }
 
   /**
     * Creates modal window. More: <a href="http://getbootstrap.com/javascript/#modals">Bootstrap Docs</a>.

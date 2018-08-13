@@ -137,7 +137,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     }
 
     updateContent()
-    tp.listen { case _: TooltipEvent.ShowEvent[TooltipType] => updateContent() }
+    tp.listen { case TooltipEvent(_, TooltipEvent.EventType.Show) => updateContent() }
     tp
   }
 

@@ -1,18 +1,18 @@
 package io.udash.bootstrap
 package collapse
 
-import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.ComponentId
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
-
-import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
 
-final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean,
-                                  override val componentId: ComponentId)(content: Modifier*)
-  extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
+import scala.scalajs.js
+
+final class UdashCollapse private(
+  parentSelector: Option[String], toggleOnInit: Boolean,
+  override val componentId: ComponentId
+)(content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import BootstrapTags._
   import UdashCollapse._
@@ -45,10 +45,10 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
     )(content).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.collapse", jQFire(CollapseShowEvent(this)))
-    jQEl.on("shown.bs.collapse", jQFire(CollapseShownEvent(this)))
-    jQEl.on("hide.bs.collapse", jQFire(CollapseHideEvent(this)))
-    jQEl.on("hidden.bs.collapse", jQFire(CollapseHiddenEvent(this)))
+    jQEl.on("show.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Show)))
+    jQEl.on("shown.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Shown)))
+    jQEl.on("hide.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Hide)))
+    jQEl.on("hidden.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Hidden)))
     el
   }
 
@@ -57,11 +57,17 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
 }
 
 object UdashCollapse {
-  sealed trait CollapseEvent extends AbstractCase with ListenableEvent[UdashCollapse]
-  final case class CollapseShowEvent(source: UdashCollapse) extends CollapseEvent
-  final case class CollapseShownEvent(source: UdashCollapse) extends CollapseEvent
-  final case class CollapseHideEvent(source: UdashCollapse) extends CollapseEvent
-  final case class CollapseHiddenEvent(source: UdashCollapse) extends CollapseEvent
+  final case class CollapseEvent(
+    override val source: UdashCollapse,
+    tpe: CollapseEvent.EventType
+  ) extends AbstractCase with ListenableEvent[UdashCollapse]
+
+  object CollapseEvent {
+    final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+    object EventType extends AbstractValueEnumCompanion[EventType] {
+      final val Show, Shown, Hide, Hidden: Value = new EventType
+    }
+  }
 
   /**
     * Creates collapsible component.

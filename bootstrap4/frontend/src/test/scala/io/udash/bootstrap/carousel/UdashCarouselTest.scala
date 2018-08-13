@@ -1,14 +1,14 @@
 package io.udash.bootstrap.carousel
 
 import io.udash._
-import io.udash.bootstrap.carousel.UdashCarousel.{CarouselEvent, SlideChangeEvent, SlideChangedEvent}
+import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
 import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
+import scalatags.JsDom.all._
 
 import scala.util.Random
-import scalatags.JsDom.all._
 
 class UdashCarouselTest extends AsyncUdashFrontendTest {
 
@@ -110,15 +110,17 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 1
-      var changeEvent: SlideChangeEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
-      var changedEvent: SlideChangedEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
+      var changeEvent: CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
+      var changedEvent: CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
       carousel.listen {
-        case ev: SlideChangeEvent[_, _] => changeEvent = ev.asInstanceOf[SlideChangeEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
-        case ev: SlideChangedEvent[_, _] => changedEvent = ev.asInstanceOf[SlideChangedEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
+        case ev@CarouselEvent(_, _, _, false) =>
+          changeEvent = ev.asInstanceOf[CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
+        case ev@CarouselEvent(_, _, _, true) =>
+          changedEvent = ev.asInstanceOf[CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
       }
       carousel.goTo(5)
-      retrying(changeEvent shouldBe SlideChangeEvent(carousel, 5, CarouselEvent.Direction.Left))
-      retrying(changedEvent shouldBe SlideChangedEvent(carousel, 5, CarouselEvent.Direction.Left))
+      retrying(changeEvent shouldBe CarouselEvent(carousel, 5, CarouselEvent.Direction.Left, false))
+      retrying(changedEvent shouldBe CarouselEvent(carousel, 5, CarouselEvent.Direction.Left, true))
       retrying(carousel.activeSlide.get shouldBe 5)
     }
 

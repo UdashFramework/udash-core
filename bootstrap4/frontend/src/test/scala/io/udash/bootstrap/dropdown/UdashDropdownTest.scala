@@ -23,15 +23,16 @@ class UdashDropdownTest extends UdashFrontendTest {
     jQ("body").append(el)
 
     "call listeners on opening and closing" in {
+      import DropdownEvent._
       var showCounter = 0
       var shownCounter = 0
       var hideCounter = 0
       var hiddenCounter = 0
       dropdown.listen {
-        case DropdownShowEvent(_) => showCounter += 1
-        case DropdownShownEvent(_) => shownCounter += 1
-        case DropdownHideEvent(_) => hideCounter += 1
-        case DropdownHiddenEvent(_) => hiddenCounter += 1
+        case VisibilityChangeEvent(_, EventType.Show) => showCounter += 1
+        case VisibilityChangeEvent(_, EventType.Shown) => shownCounter += 1
+        case VisibilityChangeEvent(_, EventType.Hide) => hideCounter += 1
+        case VisibilityChangeEvent(_, EventType.Hidden) => hiddenCounter += 1
       }
 
       for (i <- 1 to 10) {
@@ -49,15 +50,16 @@ class UdashDropdownTest extends UdashFrontendTest {
     }
 
     "call listeners on toggle call" in {
+      import DropdownEvent._
       var showCounter = 0
       var shownCounter = 0
       var hideCounter = 0
       var hiddenCounter = 0
       dropdown.listen {
-        case DropdownShowEvent(_) => showCounter += 1
-        case DropdownShownEvent(_) => shownCounter += 1
-        case DropdownHideEvent(_) => hideCounter += 1
-        case DropdownHiddenEvent(_) => hiddenCounter += 1
+        case VisibilityChangeEvent(_, EventType.Show) => showCounter += 1
+        case VisibilityChangeEvent(_, EventType.Shown) => shownCounter += 1
+        case VisibilityChangeEvent(_, EventType.Hide) => hideCounter += 1
+        case VisibilityChangeEvent(_, EventType.Hidden) => hiddenCounter += 1
       }
 
       for (i <- 1 to 10) {

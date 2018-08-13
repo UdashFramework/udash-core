@@ -105,12 +105,12 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jqCarousel.on("slide.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       activeSlide.set(idx)
-      fire(SlideChangeEvent(this, idx, dir))
+      fire(CarouselEvent(this, idx, dir, changed = false))
     })
     jqCarousel.on("slid.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       activeSlide.set(idx)
-      fire(SlideChangedEvent(this, idx, dir))
+      fire(CarouselEvent(this, idx, dir, changed = true))
     })
 
     propertyListeners += animationOptions.listen { animationOptions =>
@@ -193,16 +193,6 @@ object UdashCarousel {
     new UdashCarousel(slides, showIndicators, animationOptions, activeSlide, componentId)(slideContentFactory)
   }
 
-  /** Event hierarchy for [[UdashCarousel]]-emitted events. */
-  sealed trait CarouselEvent[ItemType, ElemType <: ReadableProperty[ItemType]]
-    extends AbstractCase with ListenableEvent[UdashCarousel[ItemType, ElemType]] {
-    /** The index of the slide source transitioned to. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]]. */
-    def targetIndex: Int
-
-    /** The animation direction. */
-    def direction: Direction
-  }
-
   /**
     * Event emitted by [[UdashCarousel]] on slide change transition start
     *
@@ -210,20 +200,9 @@ object UdashCarousel {
     * @param targetIndex The index of the slide source transitioned to.
     * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
     */
-  final case class SlideChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
-    source: UdashCarousel[ItemType, ElemType], targetIndex: Int, direction: Direction
-  ) extends CarouselEvent[ItemType, ElemType]
-
-  /**
-    * Event emitted by [[UdashCarousel]] on slide change transition finish.
-    *
-    * @param source      The [[UdashCarousel]] emitting the event.
-    * @param targetIndex The index of the slide source transitioned to.
-    * @param direction   The animation direction. Either [[CarouselEvent.Direction.Left]] or [[CarouselEvent.Direction.Right]].
-    */
-  final case class SlideChangedEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
-    source: UdashCarousel[ItemType, ElemType], targetIndex: Int, direction: Direction
-  ) extends CarouselEvent[ItemType, ElemType]
+  final case class CarouselEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    source: UdashCarousel[ItemType, ElemType], targetIndex: Int, direction: Direction, changed: Boolean
+  ) extends AbstractCase with ListenableEvent[UdashCarousel[ItemType, ElemType]]
 
   object CarouselEvent {
     /** Carousel animation direction. */
