@@ -145,5 +145,24 @@ class UdashDropdownTest extends UdashFrontendTest {
       els.elemProperties(1).set(tmp)
       el.childNodes(1).childNodes(1).firstChild.nodeName should be("A")
     }
+
+    "clean up property listeners" in {
+      val els = SeqProperty(elements)
+      val direction = Property[Direction](Direction.Up)
+      val rightAlign = Property[Boolean](true)
+      val dropdown = UdashDropdown.default(
+        els, direction, rightAlign
+      )("Test")
+      val el = dropdown.render
+      jQ("body").append(el)
+
+      dropdown.kill()
+
+      els.listenersCount() should be(0)
+      els.structureListenersCount() should be(0)
+      els.elemProperties.foreach(_.listenersCount() should be(0))
+      direction.listenersCount() should be(0)
+      rightAlign.listenersCount() should be(0)
+    }
   }
 }
