@@ -93,11 +93,24 @@ class UdashDropdownTest extends UdashFrontendTest {
 
 
       var elClickCounter = 0
-      dropdown.listen { case _ => elClickCounter += 1 }
+      var selectedItem: DefaultDropdownItem = DefaultDropdownItem.Divider
+      dropdown.listen { case ev: SelectionEvent[_, _] =>
+        elClickCounter += 1
+        selectedItem = ev.item
+      }
 
       for (i <- 1 to 5) {
         el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
         elClickCounter should be(i)
+        els.get.contains(selectedItem) should be(true)
+      }
+
+      els.elemProperties(1).set(DefaultDropdownItem.Header("Test Header 123"))
+
+      for (i <- 1 to 5) {
+        el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
+        elClickCounter should be(i + 5)
+        els.get.contains(selectedItem) should be(true)
       }
     }
 

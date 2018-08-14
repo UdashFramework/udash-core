@@ -23,7 +23,7 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
   protected def fire(event: EventType): Unit =
     actions.fire(event)
 
-  protected def jQFire(ev: EventType): JQueryCallback =
+  protected def jQFire(ev: => EventType): JQueryCallback =
     (_: dom.Element, _: JQueryEvent) => fire(ev)
 }
 
