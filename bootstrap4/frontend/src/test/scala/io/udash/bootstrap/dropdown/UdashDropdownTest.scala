@@ -1,6 +1,7 @@
 package io.udash.bootstrap.dropdown
 
 import io.udash._
+import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent.SelectionEvent
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.html.Button
@@ -10,20 +11,22 @@ class UdashDropdownTest extends UdashFrontendTest {
 
   import scalatags.JsDom.all._
 
-  "UdashDropdown component" should {
-    val elements: SeqProperty[DefaultDropdownItem] = SeqProperty(Seq(
-      DropdownHeader("Header"),
-      DropdownLink("Link 1", Url("#")),
-      DropdownLink("Link 2", Url("#")),
-      DropdownDivider,
-      DropdownDisabled(DropdownLink("Link 3", Url("#")))
-    ))
-    val dropdown = UdashDropdown(elements)(UdashDropdown.defaultItemFactory)("Test")
-    val el = dropdown.render
-    jQ("body").append(el)
+  private val elements: Seq[DefaultDropdownItem] =Seq(
+    DefaultDropdownItem.Header("Header"),
+    DefaultDropdownItem.Link("Link 1", Url("#")),
+    DefaultDropdownItem.Link("Link 2", Url("#")),
+    DefaultDropdownItem.Divider,
+    DefaultDropdownItem.Disabled(DefaultDropdownItem.Link("Link 3", Url("#")))
+  )
 
+  "UdashDropdown component" should {
     "call listeners on opening and closing" in {
       import DropdownEvent._
+
+      val dropdown = UdashDropdown.default(SeqProperty(elements))("Test")
+      val el = dropdown.render
+      jQ("body").append(el)
+
       var showCounter = 0
       var shownCounter = 0
       var hideCounter = 0
@@ -51,6 +54,12 @@ class UdashDropdownTest extends UdashFrontendTest {
 
     "call listeners on toggle call" in {
       import DropdownEvent._
+
+      val dropdown = UdashDropdown.default(SeqProperty(elements))("Test")
+      val el = dropdown.render
+      jQ("body").append(el)
+
+
       var showCounter = 0
       var shownCounter = 0
       var hideCounter = 0
@@ -77,6 +86,12 @@ class UdashDropdownTest extends UdashFrontendTest {
     }
 
     "call listeners on element click" in {
+      val els = SeqProperty(elements)
+      val dropdown = UdashDropdown(els)(UdashDropdown.defaultItemFactory, "Test")
+      val el = dropdown.render
+      jQ("body").append(el)
+
+
       var elClickCounter = 0
       dropdown.listen { case _ => elClickCounter += 1 }
 
@@ -87,13 +102,35 @@ class UdashDropdownTest extends UdashFrontendTest {
     }
 
     "update dropdown elements on property change" in {
-      el.childNodes(1).childNodes.length should be(elements.get.length)
+      val els = SeqProperty(elements)
+      val dropdown = UdashDropdown.default(els)("Test")
+      val el = dropdown.render
+      jQ("body").append(el)
 
-      val tmp: DropdownLink = DropdownLink("New", Url("#"))
-      elements.append(tmp)
-      el.childNodes(1).childNodes.length should be(elements.get.length)
-      elements.remove(tmp)
-      el.childNodes(1).childNodes.length should be(elements.get.length)
+
+      el.childNodes(1).childNodes.length should be(els.get.length)
+
+      val tmp: DefaultDropdownItem.Link = DefaultDropdownItem.Link("New", Url("#"))
+      els.append(tmp)
+      el.childNodes(1).childNodes.length should be(els.get.length)
+      els.remove(tmp)
+      el.childNodes(1).childNodes.length should be(els.get.length)
+    }
+
+    "update dropdown element on a single property change" in {
+      val els = SeqProperty(elements)
+      val dropdown = UdashDropdown.default(els)("Test")
+      val el = dropdown.render
+      jQ("body").append(el)
+
+
+      el.childNodes(1).childNodes(1).firstChild.nodeName should be("A")
+
+      val tmp: DefaultDropdownItem = els.elemProperties(1).get
+      els.elemProperties(1).set(DefaultDropdownItem.Divider)
+      el.childNodes(1).childNodes(1).firstChild.nodeName should be("DIV")
+      els.elemProperties(1).set(tmp)
+      el.childNodes(1).childNodes(1).firstChild.nodeName should be("A")
     }
   }
 }

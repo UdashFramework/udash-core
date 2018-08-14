@@ -3,20 +3,27 @@ package dropdown
 
 import com.avsystem.commons.misc._
 import io.udash._
-import io.udash.bootstrap.ComponentId
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton
 import io.udash.properties.seq
+import io.udash.properties.single.ReadableProperty
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
+import org.scalajs.dom.Event
 
 import scala.scalajs.js
 import scalatags.JsDom.all._
 
-final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private
-                         (val items: seq.ReadableSeqProperty[ItemType, ElemType], dropup: Boolean,
-                          override val componentId: ComponentId)
-                         (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
-  extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
+final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private(
+  items: seq.ReadableSeqProperty[ItemType, ElemType],
+  dropDirection: ReadableProperty[UdashDropdown.Direction],
+  rightAlignMenu: ReadableProperty[Boolean],
+  override val componentId: ComponentId
+)(
+  itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
+  buttonContent: Modifier*
+) extends UdashBootstrapComponent
+  with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
   import io.udash.css.CssView._
@@ -30,27 +37,45 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
-    jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
+    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
-  private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
-    jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, items.get(id))))
+  /** Updates the position of an element’s dropdown. */
+  def update(): Unit =
+    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("update")
+
+  private def withSelectionListener(elem: dom.Element, item: ElemType): dom.Element = {
+    jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, item.get)))
     elem
   }
 
   override lazy val render: dom.Element = {
     import BootstrapTags._
-    var _id = -1
-    def next(): Int = {
-      _id += 1
-      _id
-    }
-    val el = div(id := componentId, BootstrapStyles.Button.group, BootstrapStyles.Dropdown.dropup.styleIf(dropup))(
+    val el = div(
+      id := componentId, BootstrapStyles.Button.group,
+      nestedInterceptor(
+        ((direction: Direction) => direction match {
+          case Direction.Up => BootstrapStyles.Dropdown.dropup
+          case Direction.Down => BootstrapStyles.Dropdown.dropdown
+          case Direction.Left => BootstrapStyles.Dropdown.dropleft
+          case Direction.Right => BootstrapStyles.Dropdown.dropright
+        }).reactiveApply(dropDirection)
+      )
+    )(
       UdashButton()(
-        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown", aria.haspopup := true, aria.expanded := false,
-        content, span(BootstrapStyles.Dropdown.caret)
+        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
+        aria.haspopup := true, aria.expanded := false,
+        buttonContent, span(BootstrapStyles.Dropdown.caret)
       ).render,
-      ul(BootstrapStyles.Dropdown.menu, aria.labelledby := buttonId, id := menuId)(
-        repeat(items)(item => withSelectionListener(itemFactory(item), next()))
+      div(
+        BootstrapStyles.Dropdown.menu,
+        nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
+        aria.labelledby := buttonId, id := menuId
+      )(
+        nestedInterceptor(
+          repeatWithNested(items) { case (item, nested) =>
+            withSelectionListener(itemFactory(item, nested), item)
+          }
+        )
       )
     ).render
 
@@ -60,25 +85,6 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQEl.on("hide.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hide)))
     jQEl.on("hidden.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hidden)))
     el
-  }
-
-  lazy val linkRender: dom.Node = {
-    import BootstrapTags._
-    var _id = -1
-    def next(): Int = {
-      _id += 1
-      _id
-    }
-    Seq(
-      a(
-        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown", href := "#",
-        aria.haspopup := true, aria.expanded := false,
-        content, span(BootstrapStyles.Dropdown.caret)
-      ),
-      ul(BootstrapStyles.Dropdown.menu, aria.labelledby := buttonId, id := menuId)(
-        repeat(items)((p) => withSelectionListener(itemFactory(p), next()))
-      )
-    ).render
   }
 }
 
@@ -104,60 +110,92 @@ object UdashDropdown {
     ) extends DropdownEvent(source, EventType.Selection) with CaseMethods
   }
 
+  final class Direction(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Direction extends AbstractValueEnumCompanion[Direction] {
+    final val Up, Down, Left, Right: Value = new Direction()
+  }
+
   /** Default dropdown elements. */
   sealed trait DefaultDropdownItem
-  case class DropdownLink(title: String, url: Url) extends DefaultDropdownItem
-  case class DropdownHeader(title: String) extends DefaultDropdownItem
-  case object DropdownDivider extends DefaultDropdownItem
-  case class DropdownDisabled(link: DropdownLink) extends DefaultDropdownItem
+  object DefaultDropdownItem {
+    case class Text(text: String) extends DefaultDropdownItem
+    case class Link(title: String, url: Url) extends DefaultDropdownItem
+    case class Button(title: String, clickCallback: () => Any) extends DefaultDropdownItem
+    case class Header(title: String) extends DefaultDropdownItem
+    case class Disabled(link: Link) extends DefaultDropdownItem
+    case object Divider extends DefaultDropdownItem
+  }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(p: ReadableProperty[DefaultDropdownItem]): dom.Element = {
+  def defaultItemFactory(
+    item: ReadableProperty[DefaultDropdownItem], nestedInterceptor: Binding.NestedInterceptor
+  ): dom.Element = {
     import io.udash.css.CssView._
+    import DefaultDropdownItem._
     def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
-      case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
-      case DropdownHeader(title) => li(BootstrapStyles.Dropdown.header)(produce(p)(_ => span(title).render)).render
-      case DropdownDivider => li(BootstrapStyles.Dropdown.divider, role := "separator").render
-      case DropdownDisabled(item) => itemFactory(item).styles(BootstrapStyles.disabled)
+      case Text(text) =>
+        p(text).render
+      case Link(title, url) =>
+        a(BootstrapStyles.Dropdown.item, href := url.value)(title).render
+      case Button(title, callback) =>
+        button(BootstrapStyles.Dropdown.item, onclick :+= ((_: Event) => { callback() }))(title).render
+      case Header(title) =>
+        h6(BootstrapStyles.Dropdown.header)(title).render
+      case Disabled(item) =>
+        itemFactory(item).styles(BootstrapStyles.disabled)
+      case Divider =>
+        div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
 
-    itemFactory(p.get)
+    span(nestedInterceptor(produce(item)(itemFactory))).render
+  }
+
+  // TODO update all Bootstrap docs links
+  /**
+    * Creates dropdown component.
+    * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
+    *
+    * @param items          Data items which will be represented as links in dropdown menu.
+    * @param dropDirection  Direction of menu expansion.
+    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+    * @param itemFactory    Creates DOM element which is inserted into dropdown menu.
+    * @param buttonContent  Content of the element opening dropdown.
+    * @tparam ItemType Single element type in `items`.
+    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @return `UdashDropdown` component, call render to create DOM element.
+    */
+  def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
+    items: seq.ReadableSeqProperty[ItemType, ElemType],
+    dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
+    rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
+    componentId: ComponentId = ComponentId.newId()
+  )(
+    itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
+    buttonContent: Modifier*
+  ): UdashDropdown[ItemType, ElemType] = {
+    new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(itemFactory, buttonContent)
   }
 
   /**
     * Creates dropdown component.
     * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
     *
-    * @param items Data items which will be represented as links in dropdown menu.
-    * @param itemFactory Creates DOM element which is inserted into dropdown menu.
-    * @param content Content of the element opening dropdown.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
+    * @param items          Data items which will be represented as links in dropdown menu.
+    * @param dropDirection  Direction of menu expansion.
+    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+    * @param buttonContent  Content of the element opening dropdown.
     * @return `UdashDropdown` component, call render to create DOM element.
     */
-  def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
-           (itemFactory: (ElemType) => dom.Element)
-           (content: Modifier*): UdashDropdown[ItemType, ElemType] =
-    new UdashDropdown(items, false, componentId)(itemFactory)(content)
-
-  /**
-    * Creates dropup component.
-    * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
-    *
-    * @param items Data items which will be represented as links in dropdown menu.
-    * @param componentId Id of the root DOM node.
-    * @param itemFactory Creates DOM element which is inserted into dropdown menu.
-    * @param content Content of the element opening dropdown.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashDropdown` component, call render to create DOM element.
-    */
-  def dropup[ItemType, ElemType <: ReadableProperty[ItemType]]
-            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
-            (itemFactory: (ElemType) => dom.Element)
-            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
-    new UdashDropdown(items, true, componentId)(itemFactory)(content)
+  def default[ElemType <: ReadableProperty[DefaultDropdownItem]](
+    items: seq.ReadableSeqProperty[DefaultDropdownItem, ElemType],
+    dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
+    rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
+    componentId: ComponentId = ComponentId.newId()
+  )(
+    buttonContent: Modifier*
+  ): UdashDropdown[DefaultDropdownItem, ElemType] = {
+    new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(defaultItemFactory, buttonContent)
+  }
 
   @js.native
   private trait UdashDropdownJQuery extends JQuery {

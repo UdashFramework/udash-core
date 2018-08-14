@@ -212,14 +212,17 @@ object BootstrapStyles {
 
   object Dropdown {
     def dropdown = CssStyleName("dropdown")
+    def dropup = CssStyleName("dropup")
+    def dropleft = CssStyleName("dropleft")
+    def dropright = CssStyleName("dropright")
 
     def backdrop = CssStyleName("dropdown-backdrop")
     def caret = CssStyleName("caret")
     def divider = CssStyleName("dropdown-divider")
-    def dropup = CssStyleName("dropup")
     def header = CssStyleName("dropdown-header")
     def item = CssStyleName("dropdown-item")
     def menu = CssStyleName("dropdown-menu")
+    def menuRight = CssStyleName("dropdown-menu-right")
     def toggle = CssStyleName("dropdown-toggle")
   }
 
