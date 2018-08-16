@@ -8,7 +8,7 @@ import scalatags.JsDom.all._
 
 class UdashJumbotronTest extends UdashFrontendTest {
 
-  "UdashInputGroup component" should {
+  "UdashJumbotron component" should {
     "clean up property listeners" in {
       val fluid = Property[Boolean](false)
       val jumbo = UdashJumbotron(fluid)(
