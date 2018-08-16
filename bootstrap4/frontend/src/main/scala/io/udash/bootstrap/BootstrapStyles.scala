@@ -373,6 +373,9 @@ object BootstrapStyles {
     def prepend = CssStyleName("input-group-prepend")
     def text = CssStyleName("input-group-text")
 
+    def customSelect = CssStyleName("custom-select")
+    def customFile = CssStyleName("custom-file")
+
     def size(size: Size) =
       CssStyleName(s"input-group${size.classMarker}")
   }
