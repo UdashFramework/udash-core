@@ -76,7 +76,6 @@ object BootstrapStyles {
   def iconNext = CssStyleName("icon-next")
   def in = CssStyleName("in")
   def item = CssStyleName("item")
-  def jumbotron = CssStyleName("jumbotron")
   def pillPane = CssStyleName("pill-pane")
   def preScrollable = CssStyleName("pre-scrollable")
   def prettyprint = CssStyleName("prettyprint")
@@ -378,6 +377,11 @@ object BootstrapStyles {
 
     def size(size: Size) =
       CssStyleName(s"input-group${size.classMarker}")
+  }
+
+  object Jumbotron {
+    def jumbotron = CssStyleName("jumbotron")
+    def fluid = CssStyleName("jumbotron-fluid")
   }
 
   object List {
