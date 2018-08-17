@@ -456,17 +456,15 @@ object BootstrapStyles {
     def brand = CssStyleName("navbar-brand")
     def btn = CssStyleName("navbar-btn")
     def collapse = CssStyleName("navbar-collapse")
-    def fixedBottom = CssStyleName("navbar-fixed-bottom")
-    def fixedTop = CssStyleName("navbar-fixed-top")
     def header = CssStyleName("navbar-header")
     def inverse = CssStyleName("navbar-inverse")
     def left = CssStyleName("navbar-left")
     def link = CssStyleName("navbar-link")
     def nav = CssStyleName("navbar-nav")
     def right = CssStyleName("navbar-right")
-    def staticTop = CssStyleName("navbar-static-top")
     def text = CssStyleName("navbar-text")
-    def toggle = CssStyleName("navbar-toggler")
+    def toggler = CssStyleName("navbar-toggler")
+    def togglerIcon = CssStyleName("navbar-toggler-icon")
 
     def expand(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"navbar-expand${breakpoint.classMarker}")
@@ -498,7 +496,6 @@ object BootstrapStyles {
 
     def fixedTop = CssStyleName("fixed-top")
     def fixedBottom = CssStyleName("fixed-bottom")
-
     def stickyTop = CssStyleName("sticky-top")
   }
 
