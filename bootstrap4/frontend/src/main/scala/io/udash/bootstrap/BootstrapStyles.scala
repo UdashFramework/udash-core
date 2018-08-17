@@ -436,13 +436,15 @@ object BootstrapStyles {
   object Navigation {
     def nav = CssStyleName("nav")
 
+    def justifyCenter = CssStyleName("justify-content-center")
+    def justifyRight = CssStyleName("justify-content-end")
+
     def breadcrumb = CssStyleName("breadcrumb")
     def divider = CssStyleName("nav-divider")
+    def fill = CssStyleName("nav-fill")
     def justified = CssStyleName("nav-justified")
-    def stacked = CssStyleName("nav-stacked")
     def pills = CssStyleName("nav-pills")
     def tabs = CssStyleName("nav-tabs")
-    def tabsJustified = CssStyleName("nav-tabs-justified")
   }
 
   object NavigationBar {

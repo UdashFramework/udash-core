@@ -1,5 +1,5 @@
 package io.udash.bootstrap
-package navs
+package nav
 
 import io.udash._
 import io.udash.bootstrap.ComponentId
