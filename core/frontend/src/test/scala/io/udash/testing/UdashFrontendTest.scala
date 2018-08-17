@@ -1,10 +1,30 @@
 package io.udash.testing
 
+import org.scalajs.dom.raw.DOMTokenList
+import org.scalatest.enablers.Containing
+
 trait FrontendTestUtils {
   import scalatags.JsDom.all.div
   def emptyComponent() = div().render
 }
 
-trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
+trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils {
+  implicit val DOMTokensListContains: Containing[DOMTokenList] = new Containing[DOMTokenList] {
+    override def contains(container: DOMTokenList, element: Any): Boolean = element match {
+      case s: String => container.contains(s)
+      case _ => false
+    }
+
+    override def containsOneOf(container: DOMTokenList, elements: Seq[Any]): Boolean = elements.exists {
+      case s: String => container.contains(s)
+      case _ => false
+    }
+
+    override def containsNoneOf(container: DOMTokenList, elements: Seq[Any]): Boolean = elements.forall {
+      case s: String => container.contains(s)
+      case _ => false
+    }
+  }
+}
 
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils
