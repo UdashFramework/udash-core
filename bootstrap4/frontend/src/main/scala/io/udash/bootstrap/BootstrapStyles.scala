@@ -565,6 +565,7 @@ object BootstrapStyles {
 
     def active = CssStyleName("table-active")
     def bordered = CssStyleName("table-bordered")
+    def borderless = CssStyleName("table-borderless")
     def hover = CssStyleName("table-hover")
     def dark = CssStyleName("table-dark")
     def light = CssStyleName("table-light")
