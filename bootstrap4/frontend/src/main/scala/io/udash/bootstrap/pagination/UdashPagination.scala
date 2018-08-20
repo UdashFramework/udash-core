@@ -3,72 +3,97 @@ package pagination
 
 import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion}
 import io.udash._
-import io.udash.bootstrap.ComponentId
-import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
+import io.udash.bindings.modifiers.Binding
+import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event
+import scalatags.JsDom.all._
 
-sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType]] extends UdashBootstrapComponent {
-  /** Sequence of pagination elements. Pagination will automatically synchronize with this property changes. */
-  def pages: seq.ReadableSeqProperty[PageType, ElemType]
-
-  /** Index of selected page. */
-  def selectedPage: Property[Int]
-
-  /** Safely set selected page to the provided index. Will change index if it is out of bounds. */
-  def changePage(pageIdx: Int): Unit = {
-    import math._
-    selectedPage.set(min(pages.get.size - 1, max(0, pageIdx)))
-  }
-
-  /** Safely selects the next page. */
-  def next(): Unit = changePage(selectedPage.get + 1)
-
-  /** Safely selects the previous page. */
-  def previous(): Unit = changePage(selectedPage.get - 1)
-}
-
-final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]] private(
-  paginationSize: PaginationSize, showArrows: ReadableProperty[Boolean],
-  highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId
+final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]] private(
+  pages: seq.ReadableSeqProperty[PageType, ElemType],
+  selectedPageIdx: Property[Int],
+  paginationSize: ReadableProperty[Option[BootstrapStyles.Size]],
+  showArrows: ReadableProperty[Boolean],
+  highlightActive: ReadableProperty[Boolean],
+  override val componentId: ComponentId
 )(
-  val pages: seq.ReadableSeqProperty[PageType, ElemType],
-  val selectedPage: Property[Int]
-)(
-  itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element
-)
-  extends PaginationComponent[PageType, ElemType] {
+  itemFactory: (ElemType, UdashPagination.ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier
+) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
+  // keep track of pages sequence changes and update selected page
+  propertyListeners += pages.listenStructure { patch =>
+    if (patch.idx <= selectedPageIdx.get && patch.idx + patch.removed.size > selectedPageIdx.get) {
+      selectedPageIdx.set(math.min(patch.idx, pages.size - 1))
+    } else if (patch.idx <= selectedPageIdx.get && patch.idx + patch.removed.size <= selectedPageIdx.get) {
+      selectedPageIdx.set(selectedPageIdx.get - patch.removed.size + patch.added.size)
+    }
+  }
+
+  val selectedPage: ReadableProperty[PageType] = {
+    selectedPageIdx.combine(pages)((idx, pages) => pages(idx))
+  }
+
+  /** Safely set selected page to the provided index.
+    * It will select first/last index if the provided value is out of bounds. */
+  def changePage(pageIdx: Int): Unit = {
+    selectedPageIdx.set(math.min(pages.get.size - 1, math.max(0, pageIdx)))
+  }
+
+  /** Safely selects the next page. */
+  def next(): Unit = changePage(selectedPageIdx.get + 1)
+
+  /** Safely selects the previous page. */
+  def previous(): Unit = changePage(selectedPageIdx.get - 1)
+
   override val render: dom.Element = {
-    import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
     tags2.nav(
-      ul(id := componentId, BootstrapStyles.Pagination.pagination, paginationSize)(
-        arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage),
-        repeat(pages)(page => {
-          def currentIdx: Int = pages.elemProperties.indexOf(page)
-          val pageIdx = Property[Int](currentIdx)
-          pages.listen(_ => pageIdx.set(currentIdx))
-          li(BootstrapStyles.active.styleIf(selectedPage.combine(pageIdx)(_ == _).combine(highlightActive)(_ && _)))(
-            itemFactory(page, UdashPagination.ButtonType.StandardPage)
-          )(onclick :+= ((_: Event) => { changePage(pageIdx.get); false })).render
-        }),
-        arrow((idx, size) => idx >= size - 1, next _, UdashPagination.ButtonType.NextPage)
+      ul(
+        id := componentId, BootstrapStyles.Pagination.pagination,
+        nestedInterceptor((BootstrapStyles.Pagination.size _).reactiveOptionApply(paginationSize))
+      )(
+        nestedInterceptor(
+          arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage)
+        ),
+        nestedInterceptor(
+          repeatWithIndex(pages) { (page, idx, nested) =>
+            li(nested(
+              BootstrapStyles.active.styleIf(
+                selectedPageIdx.combine(idx)(_ == _).combine(highlightActive)(_ && _)
+              )
+            ))(
+              span(BootstrapStyles.Pagination.link)(
+                itemFactory(page, UdashPagination.ButtonType.StandardPage, idx, nested)
+              )
+            )(onclick :+= ((_: Event) => { changePage(idx.get); false })).render
+          }
+        ),
+        nestedInterceptor(
+          arrow((idx, size) => idx >= size - 1, next _, UdashPagination.ButtonType.NextPage)
+        )
       )
     ).render
   }
 
-  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType) = {
+  protected def arrow(highlightCond: (Int, Int) => Boolean, onClick: () => Any, buttonType: UdashPagination.ButtonType): Binding = {
     import scalatags.JsDom.all._
 
-    produce(showArrows.combine(pages)((_, _))) {
-      case (true, _) =>
+    produceWithNested(showArrows) {
+      case (true, nested) =>
         val elements = pages.elemProperties
-        li(BootstrapStyles.disabled.styleIf(selectedPage.transform((idx: Int) => highlightCond(idx, elements.size))))(
-          produce(selectedPage)(idx => itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType))
+        li(
+          nested(BootstrapStyles.disabled.styleIf(
+            selectedPageIdx.combine(pages)((selected, pages) => highlightCond(selected, pages.size))
+          ))
+        )(
+          nested(produceWithNested(selectedPageIdx) { (idx, nested) =>
+            span(BootstrapStyles.Pagination.link)(
+              itemFactory(elements(math.min(elements.size - 1, idx + 1)), buttonType, (-1).toProperty, nested)
+            ).render
+          })
         )(onclick :+= ((_: Event) => { onClick(); false })).render
       case (false, _) =>
         span().render
@@ -84,51 +109,40 @@ object UdashPagination {
     final val StandardPage, PreviousPage, NextPage: Value = new ButtonType
   }
 
-  /** Default pagination element model. */
-  trait Page {
-    def name: String
-    def url: Url
-  }
-  object Page extends HasModelPropertyCreator[Page]
-
-  case class DefaultPage(override val name: String, override val url: Url) extends Page
-  object DefaultPage extends HasModelPropertyCreator[DefaultPage]
-
-  private def bindHref(page: ModelProperty[Page]) =
-    href.bind(page.subProp(_.url.value))
-
-  /** Creates link for default pagination element model. */
-  val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
-    case (page, UdashPagination.ButtonType.PreviousPage) =>
-      a(aria.label := "Previous", bindHref(page.asModel))(span(aria.hidden := true)("«")).render
-    case (page, UdashPagination.ButtonType.NextPage) =>
-      a(aria.label := "Next", bindHref(page.asModel))(span(aria.hidden := true)("»")).render
-    case (page, _) => // default: UdashPagination.ButtonType.StandardPage
-      a(bindHref(page.asModel))(bind(page.asModel.subProp(_.name))).render
+  /** Creates label based on actual page idx. */
+  def defaultPageFactory[ElemType]: (ElemType, UdashPagination.ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = {
+    case (_, UdashPagination.ButtonType.PreviousPage, _, _) =>
+      span(aria.label := "Previous")(span(aria.hidden := true)("&laquo;"))
+    case (_, UdashPagination.ButtonType.NextPage, _, _) =>
+      span(aria.label := "Next")(span(aria.hidden := true)("&raquo;"))
+    case (_, _, idx, nested) => // default: UdashPagination.ButtonType.StandardPage
+      span(nested(bind(idx.transform(_ + 1))))
   }
 
   /**
-    * Creates default pagination with pages display. More: <a href="http://getbootstrap.com/components/#pagination">Bootstrap Docs</a>.
+    * Creates pagination component. More: <a href="http://getbootstrap.com/components/#pagination">Bootstrap Docs</a>.
     *
-    * @param size            Pagination component size.
+    * @param pages           Sequence of available pages.
+    * @param selectedPageIdx Property containing selected page index.
+    * @param paginationSize  Pagination component size.
     * @param showArrows      If property value is true, shows next/prev page arrows.
     * @param highlightActive If property value is true, highlights selected page.
     * @param componentId     Id of the root DOM node.
-    * @param pages           Sequence of available pages.
-    * @param selectedPage    Property containing selected page index.
     * @param itemFactory     Creates button for element in pagination.
     * @tparam PageType Single element type in `items`.
     * @tparam ElemType Type of the property containing every element in `items` sequence.
     * @return `UdashPagination` component, call render to create DOM element.
     */
-  def apply[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]](
-    size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
-    highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = ComponentId.newId()
-  )(
+  def apply[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]](
     pages: seq.ReadableSeqProperty[PageType, ElemType],
-    selectedPage: Property[Int]
+    selectedPageIdx: Property[Int],
+    paginationSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
+    showArrows: ReadableProperty[Boolean] = UdashBootstrap.True,
+    highlightActive: ReadableProperty[Boolean] = UdashBootstrap.True,
+    componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element
-  ): UdashPagination[PageType, ElemType] =
-    new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
+    itemFactory: (ElemType, ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory
+  ): UdashPagination[PageType, ElemType] = {
+    new UdashPagination(pages, selectedPageIdx, paginationSize, showArrows, highlightActive, componentId)(itemFactory)
+  }
 }
