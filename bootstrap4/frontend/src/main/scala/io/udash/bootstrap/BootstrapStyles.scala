@@ -483,8 +483,8 @@ object BootstrapStyles {
   object Popover {
     def popover = CssStyleName("popover")
 
-    def content = CssStyleName("popover-content")
-    def title = CssStyleName("popover-title")
+    def body = CssStyleName("popover-body")
+    def header = CssStyleName("popover-header")
   }
 
   object Position {

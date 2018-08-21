@@ -43,17 +43,17 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
     new UdashPopover(tp)
   }
 
-  override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(RightPlacement)
+  override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(Placement.Right)
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
     import scalatags.Text.all._
     div(BootstrapStyles.Popover.popover, role := "tooltip")(
       div(BootstrapStyles.arrow),
-      h3(BootstrapStyles.Popover.title),
-      div(BootstrapStyles.Popover.content)
+      h3(BootstrapStyles.Popover.header),
+      div(BootstrapStyles.Popover.body)
     ).render
   }
-  override protected val defaultTrigger: Seq[Trigger] = Seq(ClickTrigger)
+  override protected val defaultTrigger: Seq[Trigger] = Seq(Trigger.Click)
 
   @js.native
   private trait UdashPopoverJQuery extends JQuery {

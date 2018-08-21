@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import org.scalajs.dom
 
@@ -26,21 +27,24 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
 }
 
 abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
-  case class Delay(show: Duration, hide: Duration)
-  case class Viewport(selector: String, padding: Int)
+  case class Delay(show: Duration, hide: Duration) extends AbstractCase
 
-  final class Placement(val name: String)
-  val AutoPlacement = new Placement("auto")
-  val TopPlacement = new Placement("top")
-  val BottomPlacement = new Placement("bottom")
-  val LeftPlacement = new Placement("left")
-  val RightPlacement = new Placement("right")
+  final class Placement(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Placement extends AbstractValueEnumCompanion[Placement] {
+    final val Auto: Value = new Placement("auto")
+    final val Top: Value = new Placement("top")
+    final val Bottom: Value = new Placement("bottom")
+    final val Left: Value = new Placement("left")
+    final val Right: Value = new Placement("right")
+  }
 
-  final class Trigger(val name: String)
-  val ClickTrigger = new Trigger("click")
-  val HoverTrigger = new Trigger("hover")
-  val FocusTrigger = new Trigger("focus")
-  val ManualTrigger = new Trigger("manual")
+  final class Trigger(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Trigger extends AbstractValueEnumCompanion[Trigger] {
+    final val Click: Value = new Trigger("click")
+    final val Hover: Value = new Trigger("hover")
+    final val Focus: Value = new Trigger("focus")
+    final val Manual: Value = new Trigger("manual")
+  }
 
   /**
     * Add tooltip/popover to provided element.
@@ -48,39 +52,44 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     * More: <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap Docs (Popover)</a>.
     *
     * @param animation Apply a CSS fade transition to the popover.
+    * @param boundary  Keeps the popover within the bounds of this element.
     * @param container Appends the popover to a specific element.
     * @param content   Popover content.
     * @param delay     Show/hide delay.
     * @param html      Treat content and title as HTML.
+    * @param offset    Offset of the popover relative to its target.
     * @param placement Tooltip/popover placement.
     * @param template  Tooltip/popover template.
     * @param title     Component title.
     * @param trigger   Triggers to show/hide tooltip.
-    * @param viewport  Keeps the popover within the bounds of this element.
     * @param el        Node which will own the created tooltip/popover.
     */
-  def apply(animation: Boolean = true,
-            container: Option[String] = None,
-            content: (dom.Node) => String = (_) => "",
-            delay: Delay = Delay(0 millis, 0 millis),
-            html: Boolean = false,
-            placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
-            template: Option[String] = None,
-            title: (dom.Node) => String = (_) => "",
-            trigger: Seq[Trigger] = defaultTrigger,
-            viewport: Viewport = Viewport("body", 0))(el: dom.Node): TooltipType =
+  def apply(
+    animation: Boolean = true,
+    boundary: String = "scrollParent",
+    container: Option[String] = None,
+    content: dom.Node => String = _ => "",
+    delay: Delay = Delay(0 millis, 0 millis),
+    html: Boolean = false,
+    offset: String = "0",
+    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    template: Option[String] = None,
+    title: dom.Node => String = _ => "",
+    trigger: Seq[Trigger] = defaultTrigger
+  )(el: dom.Node): TooltipType =
     initTooltip(
       js.Dictionary(
         "animation" -> animation,
+        "boundary" -> boundary,
         "container" -> container.getOrElse(false),
         "content" -> js.ThisFunction.fromFunction1(content),
         "delay" -> js.Dictionary("show" -> delay.show.toMillis, "hide" -> delay.hide.toMillis),
         "html" -> html,
-        "placement" -> scalajs.js.Any.fromFunction2((popover: dom.Node, trigger: dom.Node) => placement(popover, trigger).map(_.name).mkString(" ")),
+        "offset" -> offset,
+        "placement" -> scalajs.js.Any.fromFunction2((popover: dom.Node, trigger: dom.Node) => placement(popover, trigger).map(_.jsValue).mkString(" ")),
         "template" -> template.getOrElse(defaultTemplate),
         "title" -> js.ThisFunction.fromFunction1(title),
-        "trigger" -> trigger.map(_.name).mkString(" "),
-        "viewport" -> js.Dictionary("selector" -> viewport.selector, "padding" -> viewport.padding)
+        "trigger" -> trigger.map(_.jsValue).mkString(" ")
       )
     )(el)
 
@@ -90,31 +99,33 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     * More: <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap Docs (Popover)</a>.
     *
     * @param animation Apply a CSS fade transition to the popover.
+    * @param boundary  Keeps the popover within the bounds of this element.
     * @param container Appends the popover to a specific element.
     * @param content   Popover content.
     * @param delay     Show/hide delay.
     * @param html      Treat content and title as HTML.
+    * @param offset    Offset of the popover relative to its target.
     * @param placement Tooltip/popover placement.
     * @param template  Tooltip/popover template.
     * @param title     Component title.
     * @param trigger   Triggers to show/hide tooltip.
-    * @param viewport  Keeps the popover within the bounds of this element.
     * @param el        Node which will own the created tooltip/popover.
     */
-  def i18n(animation: Boolean = true,
-           container: Option[String] = None,
-           content: (dom.Node) => TranslationKey0 = (_) => TranslationKey.untranslatable(""),
-           delay: Delay = Delay(0 millis, 0 millis),
-           html: Boolean = false,
-           placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
-           template: Option[String] = None,
-           title: (dom.Node) => TranslationKey0 = (_) => TranslationKey.untranslatable(""),
-           trigger: Seq[Trigger] = defaultTrigger,
-           viewport: Viewport = Viewport("body", 0))
-          (el: dom.Node)
-          (implicit langProperty: LangProperty, translationProvider: TranslationProvider): TooltipType = {
+  def i18n(
+    animation: Boolean = true,
+    boundary: String = "scrollParent",
+    container: Option[String] = None,
+    content: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
+    delay: Delay = Delay(0 millis, 0 millis),
+    html: Boolean = false,
+    offset: String = "0",
+    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    template: Option[String] = None,
+    title: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
+    trigger: Seq[Trigger] = defaultTrigger
+  )(el: dom.Node)(implicit langProperty: LangProperty, translationProvider: TranslationProvider): TooltipType = {
 
-    val tp = apply(animation, container, _ => "", delay, html, placement, template, _ => "", trigger, viewport)(el)
+    val tp = apply(animation, boundary, container, _ => "", delay, html, offset, placement, template, _ => "", trigger)(el)
 
     var lastContent = ""
     var lastTitle = ""

@@ -15,7 +15,7 @@ class TooltipTestUtils extends AsyncUdashFrontendTest {
       import scalatags.JsDom.all._
 
       val body = jQ("body")
-      val item = span().render
+      val item = button("btn").render
       body.append(item)
 
       val randMarker = Random.nextInt()
