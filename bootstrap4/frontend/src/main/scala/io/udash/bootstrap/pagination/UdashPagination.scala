@@ -4,6 +4,7 @@ package pagination
 import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion}
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom
 import org.scalajs.dom.Event

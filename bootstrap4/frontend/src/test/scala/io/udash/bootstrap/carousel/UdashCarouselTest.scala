@@ -2,7 +2,7 @@ package io.udash.bootstrap.carousel
 
 import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
-import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
+import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._

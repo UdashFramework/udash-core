@@ -1,4 +1,4 @@
-package io.udash.bootstrap
+package io.udash.bootstrap.utils
 
 import io.udash.bindings.modifiers.Binding
 import org.scalajs.dom

@@ -4,9 +4,9 @@ package button
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
+import io.udash.bootstrap.utils._
 import org.scalajs.dom
 import org.scalajs.dom._
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 

@@ -2,9 +2,8 @@ package io.udash.bootstrap
 package alert
 
 import io.udash._
-import io.udash.bootstrap.ComponentId
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.all._
 
 final class UdashAlert private[alert](

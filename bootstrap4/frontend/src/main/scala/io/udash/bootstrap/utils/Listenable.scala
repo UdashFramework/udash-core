@@ -1,4 +1,4 @@
-package io.udash.bootstrap
+package io.udash.bootstrap.utils
 
 import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.jquery.{JQueryEvent, _}

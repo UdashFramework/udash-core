@@ -2,7 +2,8 @@ package io.udash.bootstrap.list
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.{BootstrapStyles, ComponentId, UdashBootstrap, UdashBootstrapComponent}
+import io.udash.bootstrap.UdashBootstrap
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.seq
 import org.scalajs.dom
 import org.scalajs.dom.Element

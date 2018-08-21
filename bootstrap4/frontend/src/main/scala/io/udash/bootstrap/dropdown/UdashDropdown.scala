@@ -5,14 +5,15 @@ import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils._
 import io.udash.properties.seq
 import io.udash.properties.single.ReadableProperty
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
 import org.scalajs.dom.Event
+import scalatags.JsDom.all._
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
 
 final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   items: seq.ReadableSeqProperty[ItemType, ElemType],
@@ -26,9 +27,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
+  import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
-  import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
 
   /** Dropdown menu list ID. */
   val menuId: ComponentId = ComponentId.newId()
@@ -49,7 +50,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   }
 
   override lazy val render: dom.Element = {
-    import BootstrapTags._
+    import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
       id := componentId, BootstrapStyles.Button.group,
       nestedInterceptor(
@@ -130,8 +131,8 @@ object UdashDropdown {
   def defaultItemFactory(
     item: ReadableProperty[DefaultDropdownItem], nestedInterceptor: Binding.NestedInterceptor
   ): dom.Element = {
-    import io.udash.css.CssView._
     import DefaultDropdownItem._
+    import io.udash.css.CssView._
     def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
       case Text(text) =>
         p(text).render

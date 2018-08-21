@@ -7,6 +7,7 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
+import io.udash.bootstrap.utils._
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom
@@ -27,9 +28,9 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
 ) extends UdashBootstrapComponent with Listenable[UdashCarousel[ItemType, ElemType], CarouselEvent[ItemType, ElemType]] {
 
-  import BootstrapStyles.Carousel
-  import BootstrapTags._
   import UdashCarousel._
+  import io.udash.bootstrap.utils.BootstrapStyles.Carousel
+  import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 

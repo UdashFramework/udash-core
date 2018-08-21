@@ -2,8 +2,8 @@ package io.udash.bootstrap
 package form
 
 import io.udash._
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import org.scalajs.dom
-
 import scalatags.JsDom.all._
 
 final class UdashInputGroup private(

@@ -5,8 +5,7 @@ import java.{util => ju}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.ComponentId
-import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrapComponent}
+import io.udash.bootstrap.utils._
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
@@ -25,7 +24,6 @@ final class UdashDatePicker private[datepicker](
 
   import UdashDatePicker._
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.control).render

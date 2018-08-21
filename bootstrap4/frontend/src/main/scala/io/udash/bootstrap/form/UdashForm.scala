@@ -2,12 +2,11 @@ package io.udash.bootstrap
 package form
 
 import io.udash._
-import io.udash.bootstrap.ComponentId
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.Event
-
 import scalatags.JsDom.all._
 
 final class UdashForm private(

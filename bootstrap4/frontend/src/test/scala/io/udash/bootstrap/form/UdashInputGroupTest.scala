@@ -1,9 +1,8 @@
 package io.udash.bootstrap.form
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
-
 import scalatags.JsDom.all._
 
 class UdashInputGroupTest extends UdashFrontendTest {

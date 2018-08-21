@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import io.udash.bootstrap.utils._
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
@@ -14,8 +15,8 @@ final class UdashCollapse private(
   override val componentId: ComponentId
 )(content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
-  import BootstrapTags._
   import UdashCollapse._
+  import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 

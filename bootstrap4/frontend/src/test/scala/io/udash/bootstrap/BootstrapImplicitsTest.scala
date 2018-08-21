@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 
 import io.udash._
+import io.udash.bootstrap.utils.{BootstrapImplicits, BootstrapStyles}
 import io.udash.css.CssStyleName
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom

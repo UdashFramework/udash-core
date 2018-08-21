@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
@@ -44,8 +45,8 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
 
   override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(Placement.Top)
   override protected val defaultTemplate: String = {
-    import scalatags.Text.all._
     import io.udash.css.CssView._
+    import scalatags.Text.all._
     div(BootstrapStyles.Tooltip.tooltip, role := "tooltip")(
       div(BootstrapStyles.Tooltip.arrow),
       div(BootstrapStyles.Tooltip.inner)

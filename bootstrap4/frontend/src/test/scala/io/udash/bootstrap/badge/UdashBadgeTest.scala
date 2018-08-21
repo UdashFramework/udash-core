@@ -1,7 +1,7 @@
 package io.udash.bootstrap.badge
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 
 class UdashBadgeTest extends UdashFrontendTest {

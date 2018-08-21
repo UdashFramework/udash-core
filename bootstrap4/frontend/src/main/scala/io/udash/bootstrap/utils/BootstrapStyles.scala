@@ -1,4 +1,4 @@
-package io.udash.bootstrap
+package io.udash.bootstrap.utils
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.css.CssStyleName

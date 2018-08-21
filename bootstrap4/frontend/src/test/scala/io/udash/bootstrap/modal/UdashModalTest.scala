@@ -1,7 +1,7 @@
 package io.udash.bootstrap.modal
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._

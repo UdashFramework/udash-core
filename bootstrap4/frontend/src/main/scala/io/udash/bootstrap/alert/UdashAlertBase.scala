@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package alert
 
 import io.udash._
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.css.CssView._
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.TypedTag

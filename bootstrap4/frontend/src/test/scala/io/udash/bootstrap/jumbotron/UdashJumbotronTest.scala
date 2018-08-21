@@ -1,9 +1,8 @@
 package io.udash.bootstrap.jumbotron
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
-
 import scalatags.JsDom.all._
 
 class UdashJumbotronTest extends UdashFrontendTest {

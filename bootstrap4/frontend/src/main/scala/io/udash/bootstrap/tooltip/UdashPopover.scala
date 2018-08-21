@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 

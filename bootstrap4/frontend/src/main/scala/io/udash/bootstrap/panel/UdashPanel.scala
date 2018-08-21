@@ -1,7 +1,7 @@
 //package io.udash.bootstrap
 //package panel
 //
-//import io.udash.bootstrap.ComponentId
+//import io.udash.bootstrap.utils.ComponentId
 //import org.scalajs.dom
 //
 //import scalatags.JsDom.all._

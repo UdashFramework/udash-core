@@ -2,7 +2,7 @@
 //package collapse
 //
 //import io.udash._
-//import io.udash.bootstrap.ComponentId
+//import io.udash.bootstrap.utils.ComponentId
 //import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
 //import io.udash.properties.seq
 //import org.scalajs.dom

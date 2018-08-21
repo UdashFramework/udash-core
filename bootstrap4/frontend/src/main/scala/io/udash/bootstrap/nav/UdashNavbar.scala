@@ -5,6 +5,7 @@ import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion,
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.nav.UdashNavbar.Position
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import org.scalajs.dom
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
@@ -21,7 +22,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
 )
   extends UdashBootstrapComponent {
 
-  import BootstrapTags._
+  import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
 
   private val collapseId = ComponentId.newId()

@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 
 import io.udash._
+import io.udash.bootstrap.utils.BootstrapStyles
 import org.scalajs.dom
 import scalatags.JsDom.all._
 
