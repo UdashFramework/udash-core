@@ -64,11 +64,6 @@ object Dependencies {
 
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
-  ))
-
-  val coreFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "jquery" % jqueryVersion % Test / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
   ))
 
   val rpcCrossTestDeps = Def.setting(Seq(
