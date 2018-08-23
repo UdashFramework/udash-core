@@ -8,6 +8,7 @@ object Dependencies {
   val silencerVersion = "1.2"
 
   val jqueryWrapperVersion = "2.0.0"
+  val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.6"
   val scalaTagsVersion = "0.6.7"
@@ -66,6 +67,10 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
 
+  val coreFrontendJsDeps = Def.setting(Seq(
+    "org.webjars" % "jquery" % jqueryVersion % Test / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+  ))
+
   val rpcCrossTestDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "upickle" % upickleVersion,
     "io.circe" %%% "circe-core" % circeVersion,
@@ -120,7 +125,8 @@ object Dependencies {
     "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
-      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js",
+    "org.webjars" % "jquery" % jqueryVersion % Test / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
   ))
 
   val chartsFrontendDeps = Def.setting(Seq(

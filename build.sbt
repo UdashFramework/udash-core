@@ -136,7 +136,8 @@ lazy val `core-frontend` = project.in(file("core/frontend"))
     commonSettings,
     commonJSSettings,
 
-    libraryDependencies ++= Dependencies.coreFrontendDeps.value
+    libraryDependencies ++= Dependencies.coreFrontendDeps.value,
+    jsDependencies ++= Dependencies.coreFrontendJsDeps.value,
   )
 
 lazy val `rpc-shared` = project.in(file("rpc/shared"))
