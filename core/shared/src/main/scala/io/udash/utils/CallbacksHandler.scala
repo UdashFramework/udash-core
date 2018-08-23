@@ -38,4 +38,7 @@ class CallbacksHandler[ItemType] extends CrossLogging {
       }
     }
   }
+
+  /** Returns current number of registered callbacks. */
+  def size: Int = callbacks.synchronized(callbacks.size)
 }

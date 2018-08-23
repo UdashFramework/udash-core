@@ -44,7 +44,7 @@ val browserCapabilities: DesiredCapabilities = {
   val capabilities = DesiredCapabilities.chrome()
   capabilities.setCapability(ChromeOptions.CAPABILITY, {
     val options = new ChromeOptions()
-    options.addArguments("--headless", "--disable-gpu")
+//    options.addArguments("--headless", "--disable-gpu")
     options
   })
   capabilities

@@ -20,6 +20,10 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
   def listen(onEvent: actions.CallbackType): Registration =
     actions.register(onEvent)
 
+  /** Returns current number of registered listeners. */
+  def listenersCount(): Int =
+    actions.size
+
   protected def fire(event: EventType): Unit =
     actions.fire(event)
 

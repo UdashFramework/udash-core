@@ -56,19 +56,15 @@ object BootstrapStyles {
   }
 
   def active = CssStyleName("active")
-  def container = CssStyleName("container")
-  def containerFluid = CssStyleName("container-fluid")
-  def row = CssStyleName("row")
-  def pullLeft = CssStyleName("pull-left")
-  def pullRight = CssStyleName("pull-right")
-  def centerBlock = CssStyleName("center-block")
   def affix = CssStyleName("affix")
   def arrow = CssStyleName("arrow")
-  def bottom = CssStyleName("bottom")
-  def close = CssStyleName("close")
-  def col = CssStyleName("col")
-  def collapsed = CssStyleName("collapsed")
   def body = container
+  def bottom = CssStyleName("bottom")
+  def centerBlock = CssStyleName("center-block")
+  def close = CssStyleName("close")
+  def collapsed = CssStyleName("collapsed")
+  def container = CssStyleName("container")
+  def containerFluid = CssStyleName("container-fluid")
   def disabled = CssStyleName("disabled")
   def fade = CssStyleName("fade")
   def hide = CssStyleName("hide")
@@ -80,6 +76,8 @@ object BootstrapStyles {
   def preScrollable = CssStyleName("pre-scrollable")
   def prettyprint = CssStyleName("prettyprint")
   def previous = CssStyleName("previous")
+  def pullLeft = CssStyleName("pull-left")
+  def pullRight = CssStyleName("pull-right")
   def show = CssStyleName("show")
   def top = CssStyleName("top")
 
@@ -309,7 +307,7 @@ object BootstrapStyles {
       CssStyleName(s"align-self${breakpoint.classMarker}-stretch")
 
     /** Supported size values: [1,12] */
-    def order(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+    def order(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"order${breakpoint.classMarker}-$size")
   }
 
@@ -340,20 +338,29 @@ object BootstrapStyles {
 
     def hasFeedback = CssStyleName("has-feedback")
     def colFormLabel = CssStyleName("col-form-label")
+
+    def isInvalid = CssStyleName("is-invalid")
+    def isValid = CssStyleName("is-valid")
+    def invalidFeedback = CssStyleName("invalid-feedback")
+    def validFeedback = CssStyleName("valid-feedback")
   }
 
   object Grid {
+    def col = CssStyleName("col")
+    def formRow = CssStyleName("form-row")
+    def row = CssStyleName("row")
+
     /** Supported size values: [1,12] */
-    def col(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+    def col(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"col${breakpoint.classMarker}-$size")
 
     /** Supported size values: [1,12] */
-    def offset(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
+    def offset(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"offset${breakpoint.classMarker}-$size")
 
     /** Supported size values: [1,12] */
-    def order(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: Int) =
-      Flex.order(breakpoint, size)
+    def order(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      Flex.order(size, breakpoint)
   }
 
   object Image {

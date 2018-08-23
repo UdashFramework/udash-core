@@ -6,9 +6,7 @@ import org.scalatest.enablers.Containing
 trait FrontendTestUtils {
   import scalatags.JsDom.all.div
   def emptyComponent() = div().render
-}
 
-trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils {
   implicit val DOMTokensListContains: Containing[DOMTokenList] = new Containing[DOMTokenList] {
     override def contains(container: DOMTokenList, element: Any): Boolean = element match {
       case s: String => container.contains(s)
@@ -26,5 +24,7 @@ trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils {
     }
   }
 }
+
+trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
 
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils
