@@ -339,6 +339,8 @@ object BootstrapStyles {
     def customControlLabel = CssStyleName("custom-control-label")
 
     def customCheckbox = CssStyleName("custom-checkbox")
+    def customFile = CssStyleName("custom-file")
+    def customFileLabel = CssStyleName("custom-file-label")
     def customFileInput = CssStyleName("custom-file-input")
     def customRadio = CssStyleName("custom-radio")
     def customSelect = CssStyleName("custom-select")

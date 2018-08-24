@@ -211,6 +211,56 @@ final class UdashForm private(
       }
 
       /**
+        * Creates a file input with a default bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * It creates the whole input compoennt including a label and validation feedback.
+        *
+        * @param selectedFiles       This property contains information about files selected by a user.
+        * @param acceptMultipleFiles Accepts more than one file if true.
+        * @param validationTrigger   Selects the event updating validation state of the input.
+        * @param inputId             Id of the input DOM element.
+        * @param inputName           Input element name.
+        * @param inputModifier       Modifiers applied directly to the `input` element.
+        * @param labelContent        Required label content.
+        *                            It will be wrapped into `label` element with properly set `for` attribute.
+        * @param validFeedback       Optional content of positive validation feedback.
+        *                            It will be wrapped into `div` element with `valid-feedback` style.
+        * @param invalidFeedback     Optional content of negative validation feedback.
+        *                            It will be wrapped into `div` element with `invalid-feedback` style.
+        */
+      def fileInput(
+        selectedFiles: SeqProperty[File],
+        acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        inputId: ComponentId = ComponentId.newId()
+      )(
+        inputName: String,
+        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        labelContent: Binding.NestedInterceptor => Modifier = _ => "",
+        validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None
+      ): UdashBootstrapComponent = {
+        externalBinding(new UdashBootstrapComponent {
+          private val input = FileInput(selectedFiles, acceptMultipleFiles)(
+            inputName,
+            id := inputId,
+            BootstrapStyles.Form.customFileInput,
+            inputModifier(nestedInterceptor),
+            validationModifier(selectedFiles, validationTrigger, nestedInterceptor)
+          )
+
+          override val componentId: ComponentId = inputId
+
+          override val render: Element = div(BootstrapStyles.Form.customFile)(
+            input.render,
+            label(`for` := inputId, BootstrapStyles.Form.customFileLabel)(labelContent(nestedInterceptor)),
+            validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
+            invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+          ).render
+        })
+      }
+
+      /**
         * Creates a select menu with a default bootstrap styling and an optional validation callback which sets
         * proper bootstrap classes: `is-valid` and `is-invalid`.
         * Use `formGroup` if you want to create an input with a label and validation feedback elements.
