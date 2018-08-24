@@ -64,20 +64,20 @@ final class UdashForm private(
           override val render: Element = horizontal match {
             case None =>
               div(BootstrapStyles.Form.group, id := groupId)(
-                labelContent(nestedInterceptor).map(label(`for` := inputId)(_)),
-                input(nestedInterceptor),
-                validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
-                invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+                labelContent(externalBinding).map(label(`for` := inputId)(_)),
+                input(externalBinding),
+                validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
+                invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
               ).render
             case Some((labelWidth, inputWidth, breakpoint)) =>
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
-                  labelContent(nestedInterceptor).map(label(`for` := inputId)(_))
+                  labelContent(externalBinding).map(label(`for` := inputId)(_))
                 ),
                 div(BootstrapStyles.Grid.col(inputWidth, breakpoint))(
-                  input(nestedInterceptor),
-                  validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
-                  invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+                  input(externalBinding),
+                  validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
+                  invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
                 ),
               ).render
           }
@@ -110,8 +110,8 @@ final class UdashForm private(
             TextInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(nestedInterceptor),
-              validationModifier(property, validationTrigger, nestedInterceptor)
+              inputModifier(externalBinding),
+              validationModifier(property, validationTrigger, externalBinding)
             ), inputId
           )
         )
@@ -141,8 +141,8 @@ final class UdashForm private(
             PasswordInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(nestedInterceptor),
-              validationModifier(property, validationTrigger, nestedInterceptor)
+              inputModifier(externalBinding),
+              validationModifier(property, validationTrigger, externalBinding)
             ), inputId
           )
         )
@@ -172,8 +172,8 @@ final class UdashForm private(
             NumberInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(nestedInterceptor),
-              validationModifier(property, validationTrigger, nestedInterceptor)
+              inputModifier(externalBinding),
+              validationModifier(property, validationTrigger, externalBinding)
             ), inputId
           )
         )
@@ -203,8 +203,76 @@ final class UdashForm private(
             TextArea(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(nestedInterceptor),
-              validationModifier(property, validationTrigger, nestedInterceptor)
+              inputModifier(externalBinding),
+              validationModifier(property, validationTrigger, externalBinding)
+            ), inputId
+          )
+        )
+      }
+
+      /**
+        * Creates a select menu with a default bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+        *
+        * @param selectedItem      Property containing selected element.
+        * @param options           SeqProperty of available options.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param inputId           Id of the input DOM element.
+        * @param itemLabel             Provides options' labels.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        */
+      def select[T : PropertyCreator](
+        selectedItem: Property[T],
+        options: ReadableSeqProperty[T],
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        inputId: ComponentId = ComponentId.newId()
+      )(
+        itemLabel: T => Modifier,
+        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+      ): UdashBootstrapComponent = {
+        externalBinding(
+          new InputComponent(
+            Select(selectedItem, options)(
+              itemLabel,
+              id := inputId,
+              BootstrapStyles.Form.control,
+              inputModifier(externalBinding),
+              validationModifier(selectedItem, validationTrigger, externalBinding)
+            ), inputId
+          )
+        )
+      }
+
+      /**
+        * Creates a multiple select menu with a default bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+        *
+        * @param selectedItems     Property containing selected elements.
+        * @param options           SeqProperty of available options.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param inputId           Id of the input DOM element.
+        * @param itemLabel             Provides options' labels.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        */
+      def multiSelect[T : PropertyCreator, ElemType <: Property[T]](
+        selectedItems: seq.SeqProperty[T, ElemType],
+        options: ReadableSeqProperty[T],
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        inputId: ComponentId = ComponentId.newId()
+      )(
+        itemLabel: T => Modifier,
+        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+      ): UdashBootstrapComponent = {
+        externalBinding(
+          new InputComponent(
+            Select(selectedItems, options)(
+              itemLabel,
+              id := inputId,
+              BootstrapStyles.Form.control,
+              inputModifier(externalBinding),
+              validationModifier(selectedItems, validationTrigger, externalBinding)
             ), inputId
           )
         )
@@ -564,34 +632,6 @@ object UdashForm {
 //    inputGroup(inputId, validation, None)(
 //      FileInput(selectedFiles, acceptMultipleFiles)(name, id := inputId, inputModifiers).render, labelContent
 //    )
-
-//  /**
-//    * Creates selection input for provided `options`.
-//    *
-//    * @param selected Property which will be synchronised with the selected element.
-//    * @param options  List of possible values. Each options has one checkbox.
-//    * @param label    This methods allows you to customize label of each option.
-//    *                 By default it creates a `label` around input with option value as its content.
-//    * @param inputId  Id of the select DOM element.
-//    */
-//  def select(selected: Property[String], options: Seq[String],
-//             label: String => Modifier = Select.defaultLabel,
-//             inputId: ComponentId = ComponentId.newId()): Modifier =
-//    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id).render
-//
-//  /**
-//    * Creates multiple selection input for provided `options`.
-//    *
-//    * @param selected Property which will be synchronised with the selected elements.
-//    * @param options  List of possible values. Each options has one checkbox.
-//    * @param label    This methods allows you to customize label of each option.
-//    *                 By default it creates a `label` around input with option value as its content.
-//    * @param inputId  Id of the select DOM element.
-//    */
-//  def multiselect(selected: SeqProperty[String], options: Seq[String],
-//                  label: String => Modifier = Select.defaultLabel,
-//                  inputId: ComponentId = ComponentId.newId()): Modifier =
-//    Select(selected, options.toSeqProperty)(label, BootstrapStyles.Form.control, id := inputId.id)
 //
 //  /** Creates static control element. */
 //  def staticControl(content: Modifier*): Modifier =

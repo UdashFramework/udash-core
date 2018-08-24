@@ -415,5 +415,134 @@ class UdashFormTest extends AsyncUdashFrontendTest {
         }
       } yield r
     }
+
+    "apply validation on select menu" in {
+      import org.scalajs.dom.html.{Option => JSOption}
+      val singleSelection = Property(1)
+      singleSelection.addValidator { x =>
+        if (x % 2 == 0)  Valid
+        else Invalid("The number is not even")
+      }
+      val multiSelection = SeqProperty(1)
+      multiSelection.addValidator { s =>
+        if (s.exists(_ % 2 == 1)) Invalid("One of the numbers is not even")
+        else Valid
+      }
+
+      val form = UdashForm() { factory => Seq(
+        factory.input.formGroup()(
+          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)),
+          labelContent = nested => Some(span("Single select: ", nested(bind(singleSelection)))),
+          validFeedback = _ => Some(span("Looks good.")),
+          invalidFeedback = _ => Some(span("The number is not even"))
+        ),
+        factory.input.formGroup()(
+          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)),
+          labelContent = nested => Some(span("Multi select: ", nested(bind(multiSelection)))),
+          validFeedback = _ => Some(span("Looks good.")),
+          invalidFeedback = _ => Some(span("One of the numbers is not even"))
+        )
+      )}
+
+      val element = form.render
+      jQ("body").append(element)
+
+      val singleSelect = element.getElementsByTagName("select")(0)
+      val multiSelect = element.getElementsByTagName("select")(1)
+
+      for {
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList shouldNot contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
+          jQ(singleSelect).value("1")
+          jQ(singleSelect).trigger(EventName.change)
+        }
+        _ <- retrying {
+          singleSelect.classList should contain("is-valid")
+          singleSelect.classList shouldNot contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
+          jQ(singleSelect).value("2")
+          jQ(singleSelect).trigger(EventName.change)
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList should contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
+          multiSelect.getElementsByTagName("option")(1).asInstanceOf[JSOption].selected = true
+          jQ(multiSelect).trigger(EventName.change)
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList should contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList should contain("is-invalid")
+        }
+
+        _ <- Future {
+          multiSelect.getElementsByTagName("option")(0).asInstanceOf[JSOption].selected = false
+          jQ(multiSelect).trigger(EventName.change)
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList should contain("is-invalid")
+          multiSelect.classList should contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
+          multiSelect.getElementsByTagName("option")(2).asInstanceOf[JSOption].selected = true
+          jQ(multiSelect).trigger(EventName.change)
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList should contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList should contain("is-invalid")
+        }
+
+        _ <- Future {
+          singleSelection.set(4)
+          multiSelection.set(Seq(2,4))
+        }
+        _ <- retrying {
+          singleSelect.classList should contain("is-valid")
+          singleSelect.classList shouldNot contain("is-invalid")
+          multiSelect.classList should contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
+          singleSelection.set(5)
+          multiSelection.set(Seq(1,2,3))
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList should contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList should contain("is-invalid")
+        }
+
+        _ <- Future {
+          form.kill()
+        }
+        r <- retrying {
+          singleSelection.listenersCount() should be(0)
+          multiSelection.listenersCount() should be(0)
+        }
+      } yield r
+    }
   }
 }
