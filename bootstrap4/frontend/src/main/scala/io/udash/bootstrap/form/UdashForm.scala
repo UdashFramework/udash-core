@@ -10,10 +10,12 @@ import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils._
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
+import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom._
 import org.scalajs.dom.html.Form
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
+import org.scalajs.dom.html.{Input => JSInput}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, DurationLong}
@@ -208,9 +210,157 @@ final class UdashForm private(
         )
       }
 
+      /**
+        * Creates a checkbox with a custom bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * It also creates a label and validation feedback elements for the checkbox.
+        *
+        * @param property          Property which will be synchronised with the checkbox state and validated.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param inputId           Id of the input DOM element.
+        * @param groupId           Id of the root element.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        * @param labelContent      Optional label content.
+        *                          It will be wrapped into `label` element with properly set `for` attribute.
+        * @param validFeedback     Optional content of positive validation feedback.
+        *                          It will be wrapped into `div` element with `valid-feedback` style.
+        * @param invalidFeedback   Optional content of negative validation feedback.
+        *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        */
+      def checkbox(
+        property: Property[Boolean],
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        inline: ReadableProperty[Boolean] = UdashBootstrap.False,
+        inputId: ComponentId = ComponentId.newId(),
+        groupId: ComponentId = ComponentId.newId()
+      )(
+        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        labelContent: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None
+      ): UdashBootstrapComponent = {
+        externalBinding(new UdashBootstrapComponent {
+          private val input = nestedInterceptor(Checkbox(property)(
+            id := inputId,
+            BootstrapStyles.Form.control,
+            inputModifier(nestedInterceptor),
+            validationModifier(property, validationTrigger, nestedInterceptor)
+          ))
+
+          override val componentId: ComponentId = groupId
+
+          override val render: Element = div(
+            id := groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
+            input.render.styles(BootstrapStyles.Form.customControlInput),
+            nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
+            labelContent(nestedInterceptor).map(label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(_)),
+            validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
+            invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+          ).render
+        })
+      }
+
+      /**
+        * Creates a checkboxes with a custom bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * It also creates a label and validation feedback elements for each checkbox.
+        *
+        * @param selectedItems     Property which will be synchronised with the checkbox state and validated.
+        * @param options           Seq of available options, one checkbox will be created for each option.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param groupId           Id of the root element.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        * @param labelContent      Optional label content.
+        *                          It will be wrapped into `label` element with properly set `for` attribute.
+        * @param validFeedback     Optional content of positive validation feedback.
+        *                          It will be wrapped into `div` element with `valid-feedback` style.
+        * @param invalidFeedback   Optional content of negative validation feedback.
+        *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        */
+      def checkButtons[T : PropertyCreator](
+        selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
+        options: ReadableSeqProperty[T],
+        inline: ReadableProperty[Boolean] = UdashBootstrap.False,
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        groupId: ComponentId = ComponentId.newId()
+      )(
+        inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
+      ): UdashBootstrapComponent = {
+        externalBinding(new ButtonsComponent[T](
+          selectedItems, decorator => CheckButtons(selectedItems, options)(decorator),
+          BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
+        )(inputModifier, labelContent, validFeedback, invalidFeedback))
+      }
+
+      /**
+        * Creates radio buttons with a custom bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * It also creates a label and validation feedback elements for each radio button.
+        *
+        * @param selectedItem      Property which will be synchronised with the radio state and validated.
+        * @param options           Seq of available options, one button will be created for each option.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param groupId           Id of the root element.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        * @param labelContent      Optional label content.
+        *                          It will be wrapped into `label` element with properly set `for` attribute.
+        * @param validFeedback     Optional content of positive validation feedback.
+        *                          It will be wrapped into `div` element with `valid-feedback` style.
+        * @param invalidFeedback   Optional content of negative validation feedback.
+        *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        */
+      def radioButtons[T : PropertyCreator](
+        selectedItem: Property[T],
+        options: ReadableSeqProperty[T],
+        inline: ReadableProperty[Boolean] = UdashBootstrap.False,
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        groupId: ComponentId = ComponentId.newId()
+      )(
+        inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+        invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
+      ): UdashBootstrapComponent = {
+        externalBinding(new ButtonsComponent[T](
+          selectedItem, decorator => RadioButtons(selectedItem, options)(decorator),
+          BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
+        )(inputModifier, labelContent, validFeedback, invalidFeedback))
+      }
+
       private def validationModifier(
-        property: ReadableProperty[_], validationTrigger: ValidationTrigger, nested: Binding.NestedInterceptor
+        property: ReadableProperty[_], validationTrigger: ValidationTrigger, nested: Binding.NestedInterceptor,
+        groupValidationTrigger: Option[Property[Int]] = None // value change on this property should trigger validation
       ): Modifier = {
+        def groupTrigger(startValidation: () => Any) = new Binding {
+          override def applyTo(t: Element): Unit = {
+            groupValidationTrigger.foreach { p =>
+              propertyListeners += p.listen { _ =>
+                startValidation()
+              }
+            }
+          }
+        }
+
+        def startValidation(validationResult: Property[Option[ValidationResult]], triggerGroup: Boolean): Unit = {
+          if (triggerGroup) groupValidationTrigger.foreach { p => p.set(p.get + 1) }
+          validationResult.set(None)
+          property.isValid onComplete {
+            case Success(r) => validationResult.set(Some(r))
+            case Failure(ex) =>
+              logger.error("Validation failed.", ex)
+              validationResult.set(None)
+          }
+        }
+
+        def eventBasedModifiers(validationResult: Property[Option[ValidationResult]]): Modifier = Seq(
+          nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
+          nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(v => v.isDefined && !v.contains(Valid)))),
+          nested(groupTrigger(() => startValidation(validationResult, triggerGroup = false)))
+        )
+
         validationTrigger match {
           case ValidationTrigger.None => Seq.empty[Modifier]
           case ValidationTrigger.Instant => Seq(
@@ -221,35 +371,33 @@ final class UdashForm private(
           case ValidationTrigger.OnBlur =>
             val validationResult = Property[Option[ValidationResult]](None)
             Seq(
-              nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
-              nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(v => v.isDefined && !v.contains(Valid)))),
+              eventBasedModifiers(validationResult),
               onblur :+= { _: Event =>
-                validationResult.set(None)
-                property.isValid onComplete {
-                  case Success(r) => validationResult.set(Some(r))
-                  case Failure(ex) =>
-                    logger.error("Validation failed.", ex)
-                    validationResult.set(None)
-                }
+                startValidation(validationResult, triggerGroup = true)
                 false
               }
+            )
+          case ValidationTrigger.OnChange =>
+            val validationResult = Property[Option[ValidationResult]](None)
+            Seq(
+              eventBasedModifiers(validationResult),
+              nested(new Binding {
+                override def applyTo(t: Element): Unit = {
+                  propertyListeners += property.listen { _ =>
+                      startValidation(validationResult, triggerGroup = true)
+                  }
+                }
+              })
             )
           case ValidationTrigger.OnSubmit =>
             val validationResult = Property[Option[ValidationResult]](None)
             Seq(
-              nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
-              nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(v => v.isDefined && !v.contains(Valid)))),
+              eventBasedModifiers(validationResult),
               nested(new Binding {
                 override def applyTo(t: Element): Unit = {
                   propertyListeners += listen {
                     case ev: UdashForm.Event if ev.tpe == UdashForm.Event.EventType.Submit =>
-                      validationResult.set(None)
-                      property.isValid onComplete {
-                        case Success(r) => validationResult.set(Some(r))
-                        case Failure(ex) =>
-                          logger.error("Validation failed.", ex)
-                          validationResult.set(None)
-                      }
+                      startValidation(validationResult, triggerGroup = true)
                   }
                 }
               })
@@ -261,6 +409,43 @@ final class UdashForm private(
         private val input: InputBinding[_ <: Element] = nestedInterceptor(in)
         override val componentId: ComponentId = inputId
         override val render: Element = input.render
+      }
+
+      private class ButtonsComponent[T : PropertyCreator](
+        selected: Property[_],
+        input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
+        inputDecorationClass: CssStyle,
+        inline: ReadableProperty[Boolean],
+        validationTrigger: ValidationTrigger,
+        groupId: ComponentId
+      )(
+        inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
+        labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
+        validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
+        invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier]
+      ) extends UdashBootstrapComponent {
+        private val inputs = nestedInterceptor(input { inputs =>
+          val groupValidationTrigger = Some(Property(0))
+          inputs.zipWithIndex.map { case ((singleInput, item), idx) =>
+            Seq[Modifier](
+              BootstrapStyles.Form.customControlInput,
+              inputModifier(item, idx, nestedInterceptor),
+              validationModifier(selected, validationTrigger, nestedInterceptor, groupValidationTrigger)
+            ).applyTo(singleInput)
+            div(
+              singleInput,
+              BootstrapStyles.Form.customControl, inputDecorationClass,
+              nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
+              labelContent(item, idx, nestedInterceptor).map(label(`for` := singleInput.id, BootstrapStyles.Form.customControlLabel)(_)),
+              validFeedback(item, idx, nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
+              invalidFeedback(item, idx, nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+            ).render
+          }
+        })
+
+        override val componentId: ComponentId = groupId
+
+        override val render: Element = div(id := groupId, inputs.render).render
       }
     }
 
@@ -298,7 +483,7 @@ object UdashForm {
   final class ValidationTrigger(implicit enumCtx: EnumCtx) extends AbstractValueEnum
   object ValidationTrigger extends AbstractValueEnumCompanion[ValidationTrigger] {
     // TODO describe these options
-    final val None, Instant, OnBlur, OnSubmit: Value = new ValidationTrigger
+    final val None, Instant, OnChange, OnBlur, OnSubmit: Value = new ValidationTrigger
   }
 
   // TODO verify these examples
@@ -379,71 +564,7 @@ object UdashForm {
 //    inputGroup(inputId, validation, None)(
 //      FileInput(selectedFiles, acceptMultipleFiles)(name, id := inputId, inputModifiers).render, labelContent
 //    )
-//
-//  /**
-//    * Creates checkbox.
-//    *
-//    * @param inputId        Id of the input DOM element.
-//    * @param validation     Modifier applied to the created form group.
-//    *                       Take a look at `UdashForm.validation` - an example field validation implementation.
-//    * @param labelContent   The content of a label. If empty, the `label` won't be created.
-//    * @param property       Property which will be synchronised with the input content.
-//    * @param inputModifiers Modifiers applied directly to the `input` element.
-//    */
-//  def checkbox(validation: Option[Modifier] = None, inputId: ComponentId = ComponentId.newId())
-//              (labelContent: Modifier*)(property: Property[Boolean], inputModifiers: Modifier*): Modifier =
-//    div(BootstrapStyles.Form.check)(
-//      Checkbox(property)(id := inputId, inputModifiers).render,
-//      label()(labelContent),
-//      validation
-//    )
-//
-//  private def defaultDecorator(checkboxStyle: CssStyle) =
-//    (input: dom.html.Input, id: String) => label(checkboxStyle)(input, id).render
-//
-//  /**
-//    * Creates checkboxes for provided options.
-//    *
-//    * @param checkboxStyle  Style applied to each checkbox by the default decorator.
-//    * @param groupId        Id of created form group.
-//    * @param selected       Property which will be synchronised with the selected elements.
-//    * @param options        List of possible values. Each options has one checkbox.
-//    * @param decorator      This methods allows you to customize DOM structure around each checkbox.
-//    *                       By default it creates a `label` around input with option value as its content.
-//    */
-//  def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.check, groupId: ComponentId = ComponentId.newId())
-//                (selected: SeqProperty[String], options: Seq[String],
-//                 decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
-//    CheckButtons(selected, options.toSeqProperty)(
-//      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.group, id := groupId.id)(
-//        items.map {
-//          case (input, id) => decorator(input, id)
-//        }
-//      ).render
-//    )
-//
-//  /**
-//    * Creates radio buttons for provided options.
-//    *
-//    * @param radioStyle Style applied to each radio button by the default decorator.
-//    * @param groupId    Id of created form group.
-//    * @param selected   Property which will be synchronised with the selected elements.
-//    * @param options    List of possible values. Each options has one checkbox.
-//    * @param decorator  This methods allows you to customize DOM structure around each checkbox.
-//    *                   By default it creates a `label` around input with option value as its content.
-//    */
-//  // TODO radio style BootstrapStyles.Form.radio?
-//  def radio(radioStyle: CssStyle = null, groupId: ComponentId = ComponentId.newId())
-//           (selected: Property[String], options: Seq[String],
-//            decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
-//    RadioButtons(selected, options.toSeqProperty)(
-//      (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.group, id := groupId.id)(
-//        items.map {
-//          case (input, id) => decorator(input, id)
-//        }
-//      ).render
-//    )
-//
+
 //  /**
 //    * Creates selection input for provided `options`.
 //    *

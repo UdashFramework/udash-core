@@ -333,6 +333,16 @@ object BootstrapStyles {
     def control = CssStyleName("form-control")
     def controlPlaintext = CssStyleName("form-control-plaintext")
 
+    def customControl = CssStyleName("custom-control")
+    def customControlInline = CssStyleName("custom-control-inline")
+    def customControlInput = CssStyleName("custom-control-input")
+    def customControlLabel = CssStyleName("custom-control-label")
+
+    def customCheckbox = CssStyleName("custom-checkbox")
+    def customFileInput = CssStyleName("custom-file-input")
+    def customRadio = CssStyleName("custom-radio")
+    def customSelect = CssStyleName("custom-select")
+
     def size(size: Size) =
       CssStyleName(s"form-control${size.classMarker}")
 
