@@ -350,6 +350,7 @@ object BootstrapStyles {
 
     def hasFeedback = CssStyleName("has-feedback")
     def colFormLabel = CssStyleName("col-form-label")
+    def colFormLabelSize(size: Size) = CssStyleName(s"col-form-label${size.classMarker}")
 
     def isInvalid = CssStyleName("is-invalid")
     def isValid = CssStyleName("is-valid")

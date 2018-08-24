@@ -12,10 +12,9 @@ import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom._
-import org.scalajs.dom.html.Form
+import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
-import org.scalajs.dom.html.{Input => JSInput}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, DurationLong}
@@ -33,6 +32,13 @@ final class UdashForm private(
     /** Use this method to bond the external binging's lifecycle with the lifecycle of this form. */
     def externalBinding[T <: Binding](binding: T): T = UdashForm.this.nestedInterceptor(binding)
 
+    /**
+      * Wrapper for disabled elements.
+      * @param disabled Property indicating if elements are disabled. You can change it anytime.
+      */
+    def disabled(disabled: ReadableProperty[Boolean] = UdashBootstrap.True)(content: Modifier*): Modifier =
+      fieldset(externalBinding((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled)))(content)
+
     object input {
       /**
         * Creates a standard form group for the provided input. It contains a label and validation feedback elements.
@@ -49,16 +55,19 @@ final class UdashForm private(
         *                        It will be wrapped into `div` element with `valid-feedback` style.
         * @param invalidFeedback Optional content of negative validation feedback.
         *                        It will be wrapped into `div` element with `invalid-feedback` style.
+        * @param helpText        Optional content of help text block.
+        *                        It will be wrapped into `div` element with `form-text text-muted` style.
         */
       def formGroup(
-        horizontal: Option[(Int, Int, ResponsiveBreakpoint)] = None, // TODO horizontal options case class
+        horizontal: Option[(Int, Int, ResponsiveBreakpoint, ReadableProperty[Option[BootstrapStyles.Size]])] = None, // TODO horizontal options case class
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
       )(
         input: Binding.NestedInterceptor => Modifier,
         labelContent: Binding.NestedInterceptor => Option[Modifier] = _ => None,
         validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        helpText: Binding.NestedInterceptor => Option[Modifier] = _ => None
       ): UdashBootstrapComponent = {
         externalBinding(new UdashBootstrapComponent {
           override val render: Element = horizontal match {
@@ -67,12 +76,15 @@ final class UdashForm private(
                 labelContent(externalBinding).map(label(`for` := inputId)(_)),
                 input(externalBinding),
                 validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
-                invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+                invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_)),
+                helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_)),
               ).render
-            case Some((labelWidth, inputWidth, breakpoint)) =>
+            case Some((labelWidth, inputWidth, breakpoint, labelSize)) =>
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
-                  labelContent(externalBinding).map(label(`for` := inputId)(_))
+                  labelContent(externalBinding).map(
+                    label(`for` := inputId, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(_)
+                  )
                 ),
                 div(BootstrapStyles.Grid.col(inputWidth, breakpoint))(
                   input(externalBinding),
@@ -93,6 +105,7 @@ final class UdashForm private(
         *
         * @param property          Property which will be synchronised with the input content and validated.
         * @param debounce          Property update timeout after input changes.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
@@ -100,6 +113,7 @@ final class UdashForm private(
       def textInput(
         property: Property[String],
         debounce: Duration = 20 millis,
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -111,7 +125,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(property, validationTrigger, externalBinding)
+              validationModifier(property, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -124,6 +139,7 @@ final class UdashForm private(
         *
         * @param property          Property which will be synchronised with the input content and validated.
         * @param debounce          Property update timeout after input changes.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
@@ -131,6 +147,7 @@ final class UdashForm private(
       def passwordInput(
         property: Property[String],
         debounce: Duration = 20 millis,
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -142,7 +159,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(property, validationTrigger, externalBinding)
+              validationModifier(property, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -155,6 +173,7 @@ final class UdashForm private(
         *
         * @param property          Property which will be synchronised with the input content and validated.
         * @param debounce          Property update timeout after input changes.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
@@ -162,6 +181,7 @@ final class UdashForm private(
       def numberInput(
         property: Property[String],
         debounce: Duration = 20 millis,
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -173,7 +193,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(property, validationTrigger, externalBinding)
+              validationModifier(property, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -186,6 +207,7 @@ final class UdashForm private(
         *
         * @param property          Property which will be synchronised with the input content and validated.
         * @param debounce          Property update timeout after input changes.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
@@ -193,6 +215,7 @@ final class UdashForm private(
       def textArea(
         property: Property[String],
         debounce: Duration = 20 millis,
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -204,7 +227,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(property, validationTrigger, externalBinding)
+              validationModifier(property, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -217,6 +241,7 @@ final class UdashForm private(
         *
         * @param selectedFiles       This property contains information about files selected by a user.
         * @param acceptMultipleFiles Accepts more than one file if true.
+        * @param size                Size of the input.
         * @param validationTrigger   Selects the event updating validation state of the input.
         * @param inputId             Id of the input DOM element.
         * @param inputName           Input element name.
@@ -231,6 +256,7 @@ final class UdashForm private(
       def fileInput(
         selectedFiles: SeqProperty[File],
         acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -246,7 +272,8 @@ final class UdashForm private(
             id := inputId,
             BootstrapStyles.Form.customFileInput,
             inputModifier(nestedInterceptor),
-            validationModifier(selectedFiles, validationTrigger, nestedInterceptor)
+            validationModifier(selectedFiles, validationTrigger, nestedInterceptor),
+            (BootstrapStyles.Form.size _).reactiveOptionApply(size)
           )
 
           override val componentId: ComponentId = inputId
@@ -267,14 +294,16 @@ final class UdashForm private(
         *
         * @param selectedItem      Property containing selected element.
         * @param options           SeqProperty of available options.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
-        * @param itemLabel             Provides options' labels.
+        * @param itemLabel         Provides options' labels.
         * @param inputModifier     Modifiers applied directly to the `input` element.
         */
       def select[T : PropertyCreator](
         selectedItem: Property[T],
         options: ReadableSeqProperty[T],
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -288,7 +317,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(selectedItem, validationTrigger, externalBinding)
+              validationModifier(selectedItem, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -301,14 +331,16 @@ final class UdashForm private(
         *
         * @param selectedItems     Property containing selected elements.
         * @param options           SeqProperty of available options.
+        * @param size              Size of the input.
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
-        * @param itemLabel             Provides options' labels.
+        * @param itemLabel         Provides options' labels.
         * @param inputModifier     Modifiers applied directly to the `input` element.
         */
-      def multiSelect[T : PropertyCreator, ElemType <: Property[T]](
+      def multiSelect[T: PropertyCreator, ElemType <: Property[T]](
         selectedItems: seq.SeqProperty[T, ElemType],
         options: ReadableSeqProperty[T],
+        size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
         inputId: ComponentId = ComponentId.newId()
       )(
@@ -322,7 +354,8 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier(externalBinding),
-              validationModifier(selectedItems, validationTrigger, externalBinding)
+              validationModifier(selectedItems, validationTrigger, externalBinding),
+              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
         )
@@ -651,46 +684,4 @@ object UdashForm {
     */
   def inline(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
     new UdashForm(None, componentId)(content)
-
-//  /** Creates from group with provided content. You can put it into `UdashForm`. <br/>
-//    * Example: `UdashForm(UdashForm.group(...)).render` */
-//  def group(content: Modifier*): Modifier =
-//    div(BootstrapStyles.Form.group)(content)
-//
-//  /** Wrapper for inputs in form. */
-//  def input(el: dom.Element): dom.Element = {
-//    BootstrapStyles.Form.control.addTo(el)
-//    el
-//  }
-//
-//  /**
-//    * Creates file input group.
-//    *
-//    * @param inputId             Id of the input DOM element.
-//    * @param validation          Modifier applied to the created form group.
-//    *                            Take a look at `UdashForm.validation` - an example field validation implementation.
-//    * @param labelContent        The content of a label. If empty, the `label` won't be created.
-//    * @param name                Name of the input. This value will be assigned to the `name` attribute of the input.
-//    * @param acceptMultipleFiles If true, input will accept multiple files.
-//    * @param selectedFiles       Property which will be synchronised with the input content.
-//    * @param inputModifiers      Modifiers applied directly to the `input` element.
-//    */
-//  def fileInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
-//               (labelContent: Modifier*)
-//               (name: String, acceptMultipleFiles: ReadableProperty[Boolean],
-//                selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
-//    inputGroup(inputId, validation, None)(
-//      FileInput(selectedFiles, acceptMultipleFiles)(name, id := inputId, inputModifiers).render, labelContent
-//    )
-//
-//  /** Creates static control element. */
-//  def staticControl(content: Modifier*): Modifier =
-//    p(BootstrapStyles.Form.controlPlaintext)(content)
-//
-//  /**
-//    * Wrapper for disabled elements.
-//    * @param disabled Property indicating if elements are disabled. You can change it anytime.
-//    */
-//  def disabled(disabled: ReadableProperty[Boolean] = Property(true))(content: Modifier*): Modifier =
-//    fieldset((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))(content)
 }
