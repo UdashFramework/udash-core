@@ -121,4 +121,16 @@ object UdashCard {
   )(content: UdashCard#CardElementsFactory => Modifier): UdashCard = {
     new UdashCard(backgroundColor, borderColor, textAlignment, textColor, componentId)(content)
   }
+
+  def group(cards: Modifier*): Element = {
+    div(BootstrapStyles.Card.group)(cards).render
+  }
+
+  def deck(cards: Modifier*): Element = {
+    div(BootstrapStyles.Card.deck)(cards).render
+  }
+
+  def columns(cards: Modifier*): Element = {
+    div(BootstrapStyles.Card.columns)(cards).render
+  }
 }
