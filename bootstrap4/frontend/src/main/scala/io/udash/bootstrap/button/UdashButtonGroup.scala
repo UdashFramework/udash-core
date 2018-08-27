@@ -113,8 +113,9 @@ object UdashButtonGroup {
     componentId: ComponentId = ComponentId.newId()
   )(
     btnFactory: (ElemType, ReadableProperty[Boolean], Binding.NestedInterceptor) => UdashButton =
-      (item: ElemType, active: ReadableProperty[Boolean], nested: Binding.NestedInterceptor) =>
-        UdashButton(active = active)(nested(bind(item)))
+      (item: ElemType, active: ReadableProperty[Boolean], nested: Binding.NestedInterceptor) => {
+        UdashButton(active = active)(nested => Seq(nested(bind(item)))).setup(nested)
+      }
   ): UdashButtonGroup[ItemType, ElemType] = {
     new UdashButtonGroup[ItemType, ElemType](
       options, size, vertical, justified, componentId
@@ -156,7 +157,7 @@ object UdashButtonGroup {
   )(
     btnFactory: (ElemType, ReadableProperty[Boolean], Binding.NestedInterceptor) => UdashButton =
       (item: ElemType, active: ReadableProperty[Boolean], nested: Binding.NestedInterceptor) =>
-        UdashButton(active = active)(nested(bind(item)))
+        UdashButton(active = active)(nested => Seq(nested(bind(item)))).setup(nested)
   ): UdashButtonGroup[ItemType, ElemType] = {
     new UdashButtonGroup[ItemType, ElemType](
       options, size, vertical, justified, componentId

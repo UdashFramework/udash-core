@@ -1,6 +1,7 @@
 package io.udash.bootstrap.dropdown
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent.SelectionEvent
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
@@ -8,8 +9,6 @@ import org.scalajs.dom.html.Button
 
 class UdashDropdownTest extends UdashFrontendTest {
   import UdashDropdown._
-
-  import scalatags.JsDom.all._
 
   private val elements: Seq[DefaultDropdownItem] =Seq(
     DefaultDropdownItem.Header("Header"),

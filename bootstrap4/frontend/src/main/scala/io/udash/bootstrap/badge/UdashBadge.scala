@@ -1,6 +1,7 @@
 package io.udash.bootstrap.badge
 
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import org.scalajs.dom.Element
@@ -11,7 +12,9 @@ class UdashBadge private[badge](
   badgeStyle: ReadableProperty[BootstrapStyles.Color],
   pillStyle: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(content: Modifier*) extends UdashBootstrapComponent {
+)(content: Binding.NestedInterceptor => Modifier)
+  extends UdashBootstrapComponent {
+
   import io.udash.css.CssView._
 
   protected def baseTag: TypedTag[Element] = span
@@ -21,7 +24,7 @@ class UdashBadge private[badge](
       id := componentId, BootstrapStyles.Badge.badge,
       nestedInterceptor((BootstrapStyles.Badge.color _).reactiveApply(badgeStyle)),
       nestedInterceptor(BootstrapStyles.Badge.pill.styleIf(pillStyle))
-    )(content).render
+    )(content(nestedInterceptor)).render
   }
 }
 
@@ -30,7 +33,9 @@ private[badge] class UdashBadgeLink(
   badgeStyle: ReadableProperty[BootstrapStyles.Color],
   pillStyle: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(content: Modifier*) extends UdashBadge(badgeStyle, pillStyle, componentId)(content) {
+)(content: Binding.NestedInterceptor => Modifier)
+  extends UdashBadge(badgeStyle, pillStyle, componentId)(content) {
+
   protected override def baseTag: TypedTag[Element] =
     a(nestedInterceptor(href.bind(link)))
 }
@@ -50,7 +55,7 @@ object UdashBadge {
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(content: Modifier*): UdashBadge = {
+  )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadge(badgeStyle, pillStyle, componentId)(content)
   }
 
@@ -70,7 +75,7 @@ object UdashBadge {
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(content: Modifier*): UdashBadge = {
+  )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadgeLink(link, badgeStyle, pillStyle, componentId)(content)
   }
 }

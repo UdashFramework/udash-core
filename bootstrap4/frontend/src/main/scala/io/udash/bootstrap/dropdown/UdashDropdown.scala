@@ -22,7 +22,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   override val componentId: ComponentId
 )(
   itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
-  buttonContent: Modifier*
+  buttonContent: Binding.NestedInterceptor => Modifier
 ) extends UdashBootstrapComponent
   with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
@@ -62,11 +62,11 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         }).reactiveApply(dropDirection)
       )
     )(
-      UdashButton()(
+      UdashButton() { nested => Seq[Modifier](
         BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
         aria.haspopup := true, aria.expanded := false,
-        buttonContent, span(BootstrapStyles.Dropdown.caret)
-      ).render,
+        buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
+      )}.render,
       div(
         BootstrapStyles.Dropdown.menu,
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
@@ -172,7 +172,7 @@ object UdashDropdown {
     componentId: ComponentId = ComponentId.newId()
   )(
     itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
-    buttonContent: Modifier*
+    buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[ItemType, ElemType] = {
     new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(itemFactory, buttonContent)
   }
@@ -193,7 +193,7 @@ object UdashDropdown {
     rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(
-    buttonContent: Modifier*
+    buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[DefaultDropdownItem, ElemType] = {
     new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(defaultItemFactory, buttonContent)
   }

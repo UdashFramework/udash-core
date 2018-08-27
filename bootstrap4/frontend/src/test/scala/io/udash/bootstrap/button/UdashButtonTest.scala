@@ -1,12 +1,12 @@
 package io.udash.bootstrap.button
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 
 class UdashButtonTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
 
   "UdashButton component" should {
     "call listeners on click" in {

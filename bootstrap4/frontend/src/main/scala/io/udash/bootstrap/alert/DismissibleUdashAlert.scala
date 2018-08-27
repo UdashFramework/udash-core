@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package alert
 
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags, ComponentId}
 import org.scalajs.dom.Element
@@ -9,7 +10,7 @@ import scalatags.JsDom.all._
 
 final class DismissibleUdashAlert private[alert](
   alertStyle: ReadableProperty[BootstrapStyles.Color], override val componentId: ComponentId
-)(content: Modifier*) extends UdashAlertBase(alertStyle, componentId) {
+)(content: Binding.NestedInterceptor => Modifier) extends UdashAlertBase(alertStyle, componentId) {
   import io.udash.css.CssView._
 
   private val _dismissed = Property[Boolean](false)
@@ -17,12 +18,12 @@ final class DismissibleUdashAlert private[alert](
   def dismissed: ReadableProperty[Boolean] =
     _dismissed.readable
 
-  private val button = UdashButton()(
+  private val button = UdashButton() { _ => Seq[Modifier](
     id := componentId.subcomponent("close"),
     `type` := "button", BootstrapStyles.close,
     BootstrapTags.dataDismiss := "alert", aria.label := "close",
     span(aria.hidden := "true")("×")
-  )
+  )}
 
   button.listen { case UdashButton.ButtonClickEvent(_, _) =>
     _dismissed.set(true)
@@ -32,7 +33,7 @@ final class DismissibleUdashAlert private[alert](
 
   override val render: Element = template(
     BootstrapStyles.Alert.dismissible,
-    content, buttonRendered
+    content(nestedInterceptor), buttonRendered
   ).render
 
   def dismiss(): Unit =
@@ -41,6 +42,9 @@ final class DismissibleUdashAlert private[alert](
 
 /** Dismissible alert component. */
 object DismissibleUdashAlert extends UdashAlertBaseCompanion[DismissibleUdashAlert] {
-  protected def create(alertStyle: ReadableProperty[BootstrapStyles.Color], componentId: ComponentId)(content: Modifier*): DismissibleUdashAlert =
-    new DismissibleUdashAlert(alertStyle, componentId)(content: _*)
+  protected def create(alertStyle: ReadableProperty[BootstrapStyles.Color], componentId: ComponentId)(
+    content: Binding.NestedInterceptor => Modifier
+  ): DismissibleUdashAlert = {
+    new DismissibleUdashAlert(alertStyle, componentId)(content)
+  }
 }

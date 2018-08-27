@@ -1,9 +1,9 @@
 package io.udash.bootstrap.collapse
 
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
-
 import scalatags.JsDom.all._
 
 class UdashCollapseTest extends AsyncUdashFrontendTest {
@@ -73,7 +73,7 @@ class UdashCollapseTest extends AsyncUdashFrontendTest {
       )
 
       val element = collapse.render
-      val button = UdashButton()("Toggle", collapse.toggleButtonAttrs()).render
+      val button = UdashButton()(_ => Seq[Modifier]("Toggle", collapse.toggleButtonAttrs())).render
       jQ("body").append(button)
       jQ("body").append(element)
 

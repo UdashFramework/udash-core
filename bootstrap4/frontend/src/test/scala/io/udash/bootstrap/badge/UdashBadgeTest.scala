@@ -1,12 +1,11 @@
 package io.udash.bootstrap.badge
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 
 class UdashBadgeTest extends UdashFrontendTest {
-
-  import scalatags.JsDom.all._
 
   "UdashBadge component" should {
     "update styles" in {

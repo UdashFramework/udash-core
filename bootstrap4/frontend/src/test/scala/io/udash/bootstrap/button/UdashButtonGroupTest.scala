@@ -1,12 +1,12 @@
 package io.udash.bootstrap.button
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 
 class UdashButtonGroupTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
 
   "UdashButtonGroup component" should {
     "render static buttons group" in {
@@ -23,7 +23,11 @@ class UdashButtonGroupTest extends UdashFrontendTest {
 
     "render reactive buttons group" in {
       val labels = SeqProperty(Seq("Button 1", "Button 2", "Button 3"))
-      val buttons = UdashButtonGroup.reactive(labels)((label, nested) => UdashButton()(nested(bind(label))).render)
+      val buttons = UdashButtonGroup.reactive(labels) { (label, nested) =>
+        val btn = UdashButton()(n => n(bind(label)))
+        nested(btn)
+        btn.render
+      }
 
       val el = buttons.render
       el.childElementCount should be(3)

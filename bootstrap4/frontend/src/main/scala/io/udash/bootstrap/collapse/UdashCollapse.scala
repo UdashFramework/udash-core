@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils._
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
@@ -13,7 +14,8 @@ import scala.scalajs.js
 final class UdashCollapse private(
   parentSelector: Option[String], toggleOnInit: Boolean,
   override val componentId: ComponentId
-)(content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
+)(content: Binding.NestedInterceptor => Modifier)
+  extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._
@@ -43,7 +45,7 @@ final class UdashCollapse private(
     val el = div(
       parentSelector.map(dataParent := _), dataToggle := toggleOnInit,
       BootstrapStyles.Collapse.collapse, id := componentId
-    )(content).render
+    )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)
     jQEl.on("show.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Show)))
@@ -85,7 +87,7 @@ object UdashCollapse {
     parentSelector: Option[String] = None,
     toggleOnInit: Boolean = true,
     componentId: ComponentId = ComponentId.newId()
-  )(content: Modifier*): UdashCollapse = {
+  )(content: Binding.NestedInterceptor => Modifier): UdashCollapse = {
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
   }
 

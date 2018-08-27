@@ -3,6 +3,7 @@ package button
 
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
 import io.udash.bootstrap.utils._
 import org.scalajs.dom
@@ -18,7 +19,7 @@ final class UdashButton private(
   active: ReadableProperty[Boolean],
   disabled: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(content: Modifier*) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+)(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
 
   import io.udash.css.CssView._
 
@@ -45,7 +46,7 @@ final class UdashButton private(
         fire(ButtonClickEvent(this, me))
         false
       })
-    )(content).render
+    )(content(nestedInterceptor)).render
   }
 }
 
@@ -74,8 +75,8 @@ object UdashButton {
     active: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(content: Modifier*): UdashButton =
-    new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content: _*)
+  )(content: Binding.NestedInterceptor => Modifier): UdashButton =
+    new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content)
 
   /**
     * Creates toggle button component. It will automatically toggle `active` property on click.
@@ -98,8 +99,8 @@ object UdashButton {
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(content: Modifier*): UdashButton = {
-    val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content: _*)
+  )(content: Binding.NestedInterceptor => Modifier): UdashButton = {
+    val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content)
     button.listen { case _ => active.set(!active.get) }
     button
   }

@@ -36,8 +36,13 @@ final class UdashForm private(
       * Wrapper for disabled elements.
       * @param disabled Property indicating if elements are disabled. You can change it anytime.
       */
-    def disabled(disabled: ReadableProperty[Boolean] = UdashBootstrap.True)(content: Modifier*): Modifier =
-      fieldset(externalBinding((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled)))(content)
+    def disabled(disabled: ReadableProperty[Boolean] = UdashBootstrap.True)(
+      content: Binding.NestedInterceptor => Modifier
+    ): Modifier = {
+      fieldset(
+        nestedInterceptor((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))
+      )(content(nestedInterceptor))
+    }
 
     object input {
       /**

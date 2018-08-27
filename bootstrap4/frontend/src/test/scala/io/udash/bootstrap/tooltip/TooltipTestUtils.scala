@@ -11,7 +11,6 @@ class TooltipTestUtils extends AsyncUdashFrontendTest {
   def tooltipTest(companion: TooltipUtils[_ <: Tooltip[_, _]], expectContent: Boolean): Unit = {
     "display translated content" in {
       import io.udash.wrappers.jquery._
-
       import scalatags.JsDom.all._
 
       val body = jQ("body")
