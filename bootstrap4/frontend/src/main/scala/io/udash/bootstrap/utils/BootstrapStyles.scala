@@ -143,9 +143,17 @@ object BootstrapStyles {
     def card = CssStyleName("card")
 
     def body = CssStyleName("card-body")
-    def group = CssStyleName("card-group")
     def footer = CssStyleName("card-footer")
+    def group = CssStyleName("card-group")
     def header = CssStyleName("card-header")
+    def imageBottom = CssStyleName("card-img-bottom")
+    def imageOverlay = CssStyleName("card-img-overlay")
+    def imageTop = CssStyleName("card-img-top")
+    def link = CssStyleName("card-link")
+    def navPills = CssStyleName("card-header-pills")
+    def navTabs = CssStyleName("card-header-tabs")
+    def subtitle = CssStyleName("card-subtitle")
+    def text = CssStyleName("card-text")
     def title = CssStyleName("card-title")
   }
 
