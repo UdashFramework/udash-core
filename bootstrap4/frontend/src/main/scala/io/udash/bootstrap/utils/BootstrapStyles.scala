@@ -107,13 +107,13 @@ object BootstrapStyles {
   }
 
   object Border {
-    def border(side: Side) = CssStyleName(s"border${side.longClassMarker}")
-    def border0(side: Side) = CssStyleName(s"border${side.longClassMarker}-0")
+    def border(side: Side = Side.All) = CssStyleName(s"border${side.longClassMarker}")
+    def border0(side: Side = Side.All) = CssStyleName(s"border${side.longClassMarker}-0")
 
     def color(color: Color = Color.Secondary) =
       CssStyleName(s"border${color.classMarker}")
 
-    def rounded(side: Side) = CssStyleName("rounded")
+    def rounded(side: Side = Side.All) = CssStyleName("rounded")
     def rounded0 = CssStyleName("rounded-0")
     def roundedCircle = CssStyleName("rounded-circle")
   }
@@ -265,7 +265,7 @@ object BootstrapStyles {
     def shrink(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-shrink-1")
 
-    def autoMargin(side: Side) = CssStyleName(s"m${side.classMarker}-auto")
+    def autoMargin(side: Side = Side.All) = CssStyleName(s"m${side.classMarker}-auto")
 
     def nowrap(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-nowrap")
@@ -571,7 +571,7 @@ object BootstrapStyles {
       *
       * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
       */
-    def margin(side: Side, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
+    def margin(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
       CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}-$size")
 
     /**
@@ -588,7 +588,7 @@ object BootstrapStyles {
       *
       * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
       */
-    def padding(side: Side, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
+    def padding(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
       CssStyleName(s"p${side.classMarker}${breakpoint.classMarker}-$size")
   }
 
