@@ -27,9 +27,9 @@ object Context {
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
   import io.udash.rest._
-  private val (restProtocol, restPort) = if (dom.window.location.protocol == "https:") (Protocol.Https, 443) else (Protocol.Http, 80)
+  private val restProtocol = if (dom.window.location.protocol == "https:") Protocol.https else Protocol.http
   val restServer = DefaultServerREST[MainServerREST](
-    restProtocol, dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(restPort), "/rest_api/"
+    restProtocol, dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(restProtocol.defaultPort), "/rest_api/"
   )
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
