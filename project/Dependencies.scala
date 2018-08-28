@@ -131,6 +131,7 @@ object Dependencies {
   val bootstrap4FrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     "org.webjars" % "bootstrap" % bootstrap4Version / "bootstrap.bundle.js" minified "bootstrap.bundle.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "tempusdominus-bootstrap-4" % "5.0.0" / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js"
   ))
 
   val chartsFrontendDeps = Def.setting(Seq(
