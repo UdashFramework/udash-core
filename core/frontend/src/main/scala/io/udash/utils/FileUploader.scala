@@ -9,6 +9,7 @@ import scala.scalajs.js
 
 class FileUploader(url: Url) {
   import FileUploader._
+  import FileUploader.FileUploadState.HttpResponse
 
   /** Uploads files selected in provided `input`. */
   def upload(input: html.Input): ReadableModelProperty[FileUploadModel] =
@@ -18,8 +19,12 @@ class FileUploader(url: Url) {
     )
 
   /** Uploads provided `files` in a field named `fieldName`. */
-  def upload(fieldName: String, files: Seq[File],
-             extraData: Map[js.Any, js.Any] = Map.empty): ReadableModelProperty[FileUploadModel] = {
+  def upload(
+    fieldName: String,
+    files: Seq[File],
+    extraData: Map[js.Any, js.Any] = Map.empty,
+    successfulResponseCallback: Option[HttpResponse => Unit] = None
+  ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
       new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0)
     )
@@ -40,7 +45,9 @@ class FileUploader(url: Url) {
     )
     xhr.addEventListener("load", (ev: Event) =>
       p.subProp(_.state).set(xhr.status / 100 match {
-        case 2 => FileUploadState.Completed
+        case 2 =>
+          successfulResponseCallback.foreach(_.apply(HttpResponse(xhr)))
+          FileUploadState.Completed
         case _ => FileUploadState.Failed
       })
     )
@@ -69,6 +76,20 @@ object FileUploader {
     case object Cancelled extends Done
 
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
+
+    case class HttpResponse(
+      text: Option[String], responseType: Option[String], url: Option[String], xml: Option[Document]
+    )
+
+    object HttpResponse {
+      def apply(xhr: XMLHttpRequest): HttpResponse =
+        new HttpResponse(
+          Option(xhr.responseText),
+          if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None,
+          xhr.responseURL.toOption,
+          Option(xhr.responseXML)
+        )
+    }
   }
 
   class FileUploadModel(
