@@ -9,7 +9,6 @@ import scala.scalajs.js
 
 class FileUploader(url: Url) {
   import FileUploader._
-  import FileUploader.FileUploadState.HttpResponse
 
   /** Uploads files selected in provided `input`. */
   def upload(input: html.Input): ReadableModelProperty[FileUploadModel] =
@@ -76,20 +75,6 @@ object FileUploader {
     case object Cancelled extends Done
 
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
-
-    case class HttpResponse(
-      text: Option[String], responseType: Option[String], url: Option[String], xml: Option[Document]
-    )
-
-    object HttpResponse {
-      def apply(xhr: XMLHttpRequest): HttpResponse =
-        new HttpResponse(
-          Option(xhr.responseText),
-          if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None,
-          xhr.responseURL.toOption,
-          Option(xhr.responseXML)
-        )
-    }
   }
 
   class FileUploadModel(
