@@ -336,16 +336,20 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
       case (select, term) :: _ if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
-        q"""$targetTree.getSubSeq[${select.tpe.typeArgs.head.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
+        val widenTpe = select.tpe.typeArgs.head.widen
+        q"""$targetTree.getSubSeq[$widenTpe](${q"_.$term.asInstanceOf[Seq[$widenTpe]]"}, ${term.decodedName.toString})"""
       case (select, term) :: Nil if hasModelPropertyCreator(select.tpe.widen) =>
+        val widenTpe = select.tpe.widen
         q"""{
             val tmp = $targetTree
-            tmp.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})
+            tmp.getSubModel[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString})
         }"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
-        genTree(tail, q"""$targetTree.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[${select.tpe.widen}]]""")
+        val widenTpe = select.tpe.widen
+        genTree(tail, q"""$targetTree.getSubModel[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[$widenTpe]]""")
       case (select, term) :: _ =>
-        q"""$targetTree.getSubProperty[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
+        val widenTpe = select.tpe.widen
+        q"""$targetTree.getSubProperty[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString})"""
       case Nil => targetTree
     }
 
