@@ -1491,14 +1491,16 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "work with generic wildcard" in {
-      class A[G](val a: G)
-      case class B(x: A[_], y: String)
-      object B extends HasModelPropertyCreator[B]
+      object Test {
+        class A[G](val a: G)
+        case class B(x: A[_], y: String)
+        object B extends HasModelPropertyCreator[B]
+      }
 
-      val t = ModelProperty[B](B(new A("a"), "y"))
+      val t = ModelProperty[Test.B](Test.B(new Test.A("a"), "y"))
       t.subProp(_.x).get.a should be("a")
       t.subProp(_.y).get should be("y")
-      t.subProp(_.x).set(new A("qwe"))
+      t.subProp(_.x).set(new Test.A("qwe"))
       t.subProp(_.x).get.a should be("qwe")
     }
   }

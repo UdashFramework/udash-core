@@ -783,11 +783,13 @@ class PropertyCreatorTest extends UdashSharedTest {
     }
 
     "work with generic subproperties" in {
-      """class A[T](val a: T)
-        |case class Test(x: A[_], y: String)
-        |object Test extends HasModelPropertyCreator[Test]
+      """object Test {
+        |  class A[T](val a: T)
+        |  case class B(x: A[_], y: String)
+        |  object B extends HasModelPropertyCreator[B]
+        |}
         |
-        |val t = ModelProperty[Test](null)
+        |val t = ModelProperty[Test.B](null)
         |println(t.subProp(_.x).get)
         |println(t.subProp(_.y).get)
         |""".stripMargin should compile
