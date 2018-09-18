@@ -688,5 +688,5 @@ object UdashForm {
     * @return `UdashForm` component, call render to create DOM element.
     */
   def inline(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
-    new UdashForm(None, componentId)(content)
+    new UdashForm(Some(BootstrapStyles.Form.inline), componentId)(content)
 }

@@ -5,7 +5,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.seq
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
@@ -18,14 +18,14 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   pills: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  elemFactory: (ElemType, Binding.NestedInterceptor) => Modifier,
+  elemFactory: (ElemType, Binding.NestedInterceptor) => Element,
   isActive: ElemType => ReadableProperty[Boolean],
   isDisabled: ElemType => ReadableProperty[Boolean],
   isDropdown: ElemType => ReadableProperty[Boolean]
 ) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     ul(
       id := componentId,
       BootstrapStyles.Navigation.nav,
@@ -40,10 +40,14 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
       nestedInterceptor(
         repeatWithNested(panels) { case (panel, nested) =>
           li(role := "presentation")(
-            nested(BootstrapStyles.active.styleIf(isActive(panel))),
-            nested(BootstrapStyles.disabled.styleIf(isDisabled(panel))),
+            BootstrapStyles.Navigation.item,
             nested(BootstrapStyles.Dropdown.dropdown.styleIf(isDropdown(panel)))
-          )(elemFactory(panel, nested)).render
+          )({
+            val el = elemFactory(panel, nested).styles(BootstrapStyles.Navigation.link)
+            nested(BootstrapStyles.active.styleIf(isActive(panel))).applyTo(el)
+            nested(BootstrapStyles.disabled.styleIf(isDisabled(panel))).applyTo(el)
+            el
+          }).render
         }
       )
     ).render
@@ -54,10 +58,8 @@ object UdashNav {
   class NavItem(val name: String, val link: String)
 
   /** Default breadcrumb model factory. */
-  val defaultItemFactory: (ReadableProperty[NavItem], Binding.NestedInterceptor) => Modifier = {
-    (item, nested) => nested(produce(item) { item =>
-      a(href := item.link)(item.name).render
-    })
+  val defaultItemFactory: (ReadableProperty[NavItem], Binding.NestedInterceptor) => Element = {
+    (item, nested) =>a(nested(href.bind(item.transform(_.link))), nested(bind(item.transform(_.name)))).render
   }
 
   /**
@@ -89,7 +91,7 @@ object UdashNav {
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(
-    elemFactory: (ElemType, Binding.NestedInterceptor) => Modifier,
+    elemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
     isDisabled: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
     isDropdown: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False
@@ -127,7 +129,7 @@ object UdashNav {
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
   )(
-    elemFactory: (ElemType, Binding.NestedInterceptor) => Modifier = defaultItemFactory,
+    elemFactory: (ElemType, Binding.NestedInterceptor) => Element = defaultItemFactory,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
     isDisabled: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
     isDropdown: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False

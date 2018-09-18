@@ -467,6 +467,8 @@ object BootstrapStyles {
 
   object Navigation {
     def nav = CssStyleName("nav")
+    def item = CssStyleName("nav-item")
+    def link = CssStyleName("nav-link")
 
     def justifyCenter = CssStyleName("justify-content-center")
     def justifyRight = CssStyleName("justify-content-end")

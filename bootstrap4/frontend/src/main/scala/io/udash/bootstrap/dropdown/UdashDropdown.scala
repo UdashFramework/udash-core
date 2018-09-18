@@ -19,6 +19,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   items: seq.ReadableSeqProperty[ItemType, ElemType],
   dropDirection: ReadableProperty[UdashDropdown.Direction],
   rightAlignMenu: ReadableProperty[Boolean],
+  buttonToggle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
   itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
@@ -52,7 +53,8 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   override lazy val render: dom.Element = {
     import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
-      id := componentId, BootstrapStyles.Button.group,
+      id := componentId,
+      nestedInterceptor(BootstrapStyles.Button.group.styleIf(buttonToggle)),
       nestedInterceptor(
         ((direction: Direction) => direction match {
           case Direction.Up => BootstrapStyles.Dropdown.dropup
@@ -62,11 +64,19 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         }).reactiveApply(dropDirection)
       )
     )(
-      UdashButton() { nested => Seq[Modifier](
-        BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
-        aria.haspopup := true, aria.expanded := false,
-        buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
-      )}.render,
+      nestedInterceptor(produceWithNested(buttonToggle) {
+        case (true, _) =>
+          UdashButton() { nested => Seq[Modifier](
+            BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
+            aria.haspopup := true, aria.expanded := false,
+            buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
+          )}.render
+        case (false, nested) =>
+          a(
+            BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
+            aria.haspopup := true, aria.expanded := false, href := "#", buttonContent(nested)
+          ).render
+      }),
       div(
         BootstrapStyles.Dropdown.menu,
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
@@ -159,6 +169,7 @@ object UdashDropdown {
     * @param items          Data items which will be represented as links in dropdown menu.
     * @param dropDirection  Direction of menu expansion.
     * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+    * @param buttonToggle   If false, the toggle button will be replaced with `a` element.
     * @param itemFactory    Creates DOM element which is inserted into dropdown menu.
     * @param buttonContent  Content of the element opening dropdown.
     * @tparam ItemType Single element type in `items`.
@@ -169,12 +180,13 @@ object UdashDropdown {
     items: seq.ReadableSeqProperty[ItemType, ElemType],
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
     rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
+    buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
     itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[ItemType, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(itemFactory, buttonContent)
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemFactory, buttonContent)
   }
 
   /**
@@ -184,6 +196,7 @@ object UdashDropdown {
     * @param items          Data items which will be represented as links in dropdown menu.
     * @param dropDirection  Direction of menu expansion.
     * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+    * @param buttonToggle   If false, the toggle button will be replaced with `a` element.
     * @param buttonContent  Content of the element opening dropdown.
     * @return `UdashDropdown` component, call render to create DOM element.
     */
@@ -191,11 +204,12 @@ object UdashDropdown {
     items: seq.ReadableSeqProperty[DefaultDropdownItem, ElemType],
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
     rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
+    buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[DefaultDropdownItem, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, componentId)(defaultItemFactory, buttonContent)
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(defaultItemFactory, buttonContent)
   }
 
   @js.native

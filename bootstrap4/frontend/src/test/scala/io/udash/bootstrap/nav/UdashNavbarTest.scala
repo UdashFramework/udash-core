@@ -3,6 +3,7 @@ package io.udash.bootstrap.nav
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
+import scalatags.JsDom.all._
 
 class UdashNavbarTest extends UdashFrontendTest {
 
@@ -10,7 +11,7 @@ class UdashNavbarTest extends UdashFrontendTest {
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor" in {
       val items = SeqProperty[String]("a", "b", "c")
       val nav = UdashNav(items)(
-        (item, nested) => nested(bind(item))
+        (item, nested) => span(nested(bind(item))).render
       )
       val navbar = UdashNavbar() { nested =>
         nested(nav)
@@ -38,7 +39,7 @@ class UdashNavbarTest extends UdashFrontendTest {
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor (without wrap)" in {
       val items = SeqProperty[String]("a", "b", "c")
       val nav = UdashNav(items)(
-        (item, nested) => nested(bind(item))
+        (item, nested) => span(nested(bind(item))).render
       )
       val navbar = UdashNavbar()(_ => nav)
       val el = navbar.render
@@ -67,7 +68,7 @@ class UdashNavbarTest extends UdashFrontendTest {
 
     "clean up styling properties listeners" in {
       val items = SeqProperty[String]("a", "b", "c")
-      val nav = UdashNav(items)((item, nested) => nested(bind(item)))
+      val nav = UdashNav(items)((item, nested) => span(nested(bind(item))).render)
 
       val expandBreakpoint: ReadableProperty[BootstrapStyles.ResponsiveBreakpoint] = Property(BootstrapStyles.ResponsiveBreakpoint.Small)
       val darkStyle: ReadableProperty[Boolean] = Property(true)

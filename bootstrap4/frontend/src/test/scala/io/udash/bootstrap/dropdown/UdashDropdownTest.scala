@@ -54,7 +54,7 @@ class UdashDropdownTest extends UdashFrontendTest {
     "call listeners on toggle call" in {
       import DropdownEvent._
 
-      val dropdown = UdashDropdown.default(SeqProperty(elements))("Test")
+      val dropdown = UdashDropdown.default(SeqProperty(elements), buttonToggle = false.toProperty)("Test")
       val el = dropdown.render
       jQ("body").append(el)
 

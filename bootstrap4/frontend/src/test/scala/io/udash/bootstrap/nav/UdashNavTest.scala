@@ -3,6 +3,7 @@ package io.udash.bootstrap.nav
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
+import scalatags.JsDom.all._
 
 class UdashNavTest extends UdashFrontendTest {
 
@@ -10,7 +11,7 @@ class UdashNavTest extends UdashFrontendTest {
     "render provided elements" in {
       val items = SeqProperty[String]("a", "b", "c")
       val nav = UdashNav(items)(
-        (item, nested) => nested(bind(item))
+        (item, nested) => span(nested(bind(item))).render
       )
       val el = nav.render
       el.childNodes.length should be(3)
@@ -47,7 +48,7 @@ class UdashNavTest extends UdashFrontendTest {
       val pills: ReadableProperty[Boolean] = Property(false)
 
       val nav = UdashNav(items, align, vertical, fill, justified, tabs, pills)(
-        (item, nested) => nested(bind(item))
+        (item, nested) => span(nested(bind(item))).render
       )
       val el = nav.render
       el.childNodes.length should be(3)
