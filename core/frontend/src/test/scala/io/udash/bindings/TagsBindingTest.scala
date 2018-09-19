@@ -7,7 +7,6 @@ import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
-import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Node}
 
 import scala.collection.mutable
@@ -125,8 +124,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("ABC")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set("CBA")
       template.textContent should be("CBA")
@@ -243,8 +242,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set(true)
       template.textContent should be("Test")
@@ -383,8 +382,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("Else")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set(true)
       template.textContent should be("Test")
@@ -679,8 +678,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("ABC")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set("CBA")
       template.textContent should be("CBA")
@@ -921,8 +920,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("ABC")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set(Seq("C", "B", "A"))
       template.textContent should be("CBA")
@@ -1651,8 +1650,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template2.textContent should be("ABC")
 
-      jQ(template2).children().remove()
-      jQ(template).append(b)
+      template2.innerHTML = ""
+      template.appendChild(b)
 
       p.set(Seq("C", "B", "A"))
       template.textContent should be("CBA")
