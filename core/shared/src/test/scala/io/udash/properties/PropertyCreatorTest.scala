@@ -794,5 +794,18 @@ class PropertyCreatorTest extends UdashSharedTest {
         |println(t.subProp(_.y).get)
         |""".stripMargin should compile
     }
+
+    "not allow to use Seq[_] in model" in {
+      """object Test {
+        |  class A[T](val a: T)
+        |  case class B(x: A[_], y: String, z: Seq[_])
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.x).get)
+        |println(t.subProp(_.y).get)
+        |""".stripMargin shouldNot compile
+    }
   }
 }

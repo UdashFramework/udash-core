@@ -337,16 +337,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
       case (select, term) :: _ if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
         val widenTpe = select.tpe.typeArgs.head.widen
-        q"""$targetTree.getSubSeq[$widenTpe](${q"_.$term.asInstanceOf[Seq[$widenTpe]]"}, ${term.decodedName.toString})"""
+        q"""$targetTree.getSubSeq[$widenTpe](${q"_.$term"}, ${term.decodedName.toString})"""
       case (select, term) :: Nil if hasModelPropertyCreator(select.tpe.widen) =>
         val widenTpe = select.tpe.widen
-        q"""{
-            val tmp = $targetTree
-            tmp.getSubModel[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString})
-        }"""
+        q"""$targetTree.getSubModel[$widenTpe](${q"_.$term"}, ${term.decodedName.toString})"""
       case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
         val widenTpe = select.tpe.widen
-        genTree(tail, q"""$targetTree.getSubModel[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[$widenTpe]]""")
+        genTree(tail, q"""$targetTree.getSubModel[$widenTpe](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[$widenTpe]]""")
       case (select, term) :: _ =>
         val widenTpe = select.tpe.widen
         q"""$targetTree.getSubProperty[$widenTpe](${q"_.$term.asInstanceOf[$widenTpe]"}, ${term.decodedName.toString})"""
@@ -380,8 +377,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyPropertyCreator[A: c.WeakTypeTag]: c.Tree = {
     val tpe = weakTypeOf[A].dealias
 
-    if (!tpe.typeSymbol.isClass) c.abort(c.enclosingPosition, s"Implicit PropertyCreator[$tpe] not found.")
-    else q"new $SinglePropertyCreatorCls[$tpe]"
+    if (!tpe.typeSymbol.isClass) {
+      c.abort(c.enclosingPosition, s"Implicit PropertyCreator[$tpe] not found.")
+    } else if (tpe =:= SeqTpe) {
+      c.abort(c.enclosingPosition,
+        s"Implicit PropertyCreator[Seq[_]] not found. If you use Seq[_] in your model, replace it with Seq[Any]."
+      )
+    } else q"new $SinglePropertyCreatorCls[$tpe]"
   }
 
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {
