@@ -61,11 +61,12 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
         ),
         nestedInterceptor(
           repeatWithIndex(pages) { (page, idx, nested) =>
-            li(nested(
-              BootstrapStyles.active.styleIf(
+            li(
+              BootstrapStyles.Pagination.item,
+              nested(BootstrapStyles.active.styleIf(
                 selectedPageIdx.combine(idx)(_ == _).combine(highlightActive)(_ && _)
-              )
-            ))(
+              ))
+            )(
               span(BootstrapStyles.Pagination.link)(
                 itemFactory(page, UdashPagination.ButtonType.StandardPage, idx, nested)
               )
@@ -113,9 +114,9 @@ object UdashPagination {
   /** Creates label based on actual page idx. */
   def defaultPageFactory[ElemType]: (ElemType, UdashPagination.ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = {
     case (_, UdashPagination.ButtonType.PreviousPage, _, _) =>
-      span(aria.label := "Previous")(span(aria.hidden := true)("&laquo;"))
+      span(aria.label := "Previous")(span(aria.hidden := true)("«"))
     case (_, UdashPagination.ButtonType.NextPage, _, _) =>
-      span(aria.label := "Next")(span(aria.hidden := true)("&raquo;"))
+      span(aria.label := "Next")(span(aria.hidden := true)("»"))
     case (_, _, idx, nested) => // default: UdashPagination.ButtonType.StandardPage
       span(nested(bind(idx.transform(_ + 1))))
   }

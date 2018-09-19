@@ -25,9 +25,10 @@ final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] p
       ol(BootstrapStyles.Navigation.breadcrumb)(
         nestedInterceptor(
           repeatWithNested(pages) { case (page, nested) =>
-            li(nested(BootstrapStyles.active.styleIf(page.transform(isActive))))(
-              itemFactory(page, nested)
-            ).render
+            li(
+              BootstrapStyles.Navigation.breadcrumbItem,
+              nested(BootstrapStyles.active.styleIf(page.transform(isActive)))
+            )(itemFactory(page, nested)).render
           }
         )
       )

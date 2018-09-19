@@ -474,6 +474,7 @@ object BootstrapStyles {
     def justifyRight = CssStyleName("justify-content-end")
 
     def breadcrumb = CssStyleName("breadcrumb")
+    def breadcrumbItem = CssStyleName("breadcrumb-item")
     def divider = CssStyleName("nav-divider")
     def fill = CssStyleName("nav-fill")
     def justified = CssStyleName("nav-justified")
