@@ -781,5 +781,31 @@ class PropertyCreatorTest extends UdashSharedTest {
         |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator.propertyCreator[Seq[T]]
         |}""".stripMargin should compile
     }
+
+    "work with generic subproperties" in {
+      """object Test {
+        |  class A[T](val a: T)
+        |  case class B(x: A[_], y: String)
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.x).get)
+        |println(t.subProp(_.y).get)
+        |""".stripMargin should compile
+    }
+
+    "not allow to use Seq[_] in model" in {
+      """object Test {
+        |  class A[T](val a: T)
+        |  case class B(x: A[_], y: String, z: Seq[_])
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.x).get)
+        |println(t.subProp(_.y).get)
+        |""".stripMargin shouldNot compile
+    }
   }
 }
