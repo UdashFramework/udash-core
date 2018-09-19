@@ -337,7 +337,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         case head :: tail => (prefix, head) :: mkPath(head.typeSignatureIn(prefix), tail)
       }
       mkPath(weakTypeOf[A], symbolPath(tree).reverse).map {
-        case (prefixTpe, symbol) => (symbol.typeSignatureIn(prefixTpe).resultType, symbol.asTerm.name)
+        case (prefixTpe, symbol) => (symbol.typeSignatureIn(prefixTpe).finalResultType, symbol.asTerm.name)
       }
     }
 
