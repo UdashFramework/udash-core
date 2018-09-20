@@ -16,7 +16,8 @@ class RpcDemosView extends FinalView with CssView {
     new GenCodecsDemoComponent().getTemplate, hr,
     new NotificationsDemoComponent().getTemplate, hr,
     new PingPongCallDemoComponent().getTemplate, hr,
-    new PingPongPushDemoComponent().getTemplate, hr
+    new PingPongPushDemoComponent().getTemplate, hr,
+    new LoggingDemoComponent().getTemplate, hr
   )
 
   override def getTemplate: Modifier = content
