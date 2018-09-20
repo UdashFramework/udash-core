@@ -24,7 +24,8 @@ class FrontendRoutingDemosPresenter(url: Property[String]) extends Presenter[Fro
 class FrontendRoutingDemosView(url: Property[String]) extends FinalView with CssView {
   private val content = div(
     h3("Frontend Routing demos"),
-    new RoutingLinkDemoComponent(url).getTemplate, hr
+    new RoutingLinkDemoComponent(url).getTemplate, hr,
+    new RoutingLoggerDemoComponent().getTemplate, hr
   )
 
   override def getTemplate: Modifier = content

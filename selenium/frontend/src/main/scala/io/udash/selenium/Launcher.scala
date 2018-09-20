@@ -6,7 +6,7 @@ import io.udash.rpc.DefaultServerRPC
 import io.udash.selenium.routing.{RoutingRegistryDef, RoutingState, StatesToViewFactoryDef}
 import io.udash.selenium.rpc.{GuideExceptions, MainClientRPC, MainServerRPC, RPCService}
 import io.udash.selenium.rpc.demos.rest.MainServerREST
-import io.udash.selenium.views.demos.UrlLoggingDemo
+import io.udash.selenium.views.demos.UrlLoggingDemoService
 import io.udash.wrappers.jquery.jQ
 import org.scalajs.dom
 import org.scalajs.dom.Element
@@ -23,7 +23,7 @@ object Launcher {
     routingRegistry, viewFactoryRegistry, WindowUrlPathChangeProvider
   ) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit =
-      UrlLoggingDemo.log(url, referrer)
+      UrlLoggingDemoService.log(url, referrer)
   }
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 

@@ -2,6 +2,7 @@ package io.udash.selenium.frontend
 
 import io.udash.rpc.serialization.URLEncoder
 import io.udash.selenium.SeleniumTest
+import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {
   val url = "/frontend/routing"
@@ -15,6 +16,8 @@ class FrontendRoutingTest extends SeleniumTest {
         driver.findElementById("url-demo-link-orange")
         driver.findElementById("url-demo-link-chocolate")
         driver.findElementById("url-demo-link-pizza")
+
+        driver.findElementById("routing-logger-demo")
 
         link.getText should be("/frontend/routing")
       }
@@ -92,6 +95,38 @@ class FrontendRoutingTest extends SeleniumTest {
 
       init.getText should be("/frontend/routing")
       input.getAttribute("value") should be("It should not disappear... Selenium")
+    }
+
+    "collect url changes" in {
+      driver.get(createUrl(url))
+
+      val demoContainer = driver.findElementById("routing-logger-demo")
+      val enableCheckbox = demoContainer.findElement(By.id("turn-on-logger"))
+      val history = demoContainer.findElement(By.id("routing-history"))
+      val linkChanger = driver.findElementById("url-demo-link-input")
+
+      enableCheckbox.click()
+      history.getText should be("")
+
+      linkChanger.sendKeys("test")
+      history.getText should be(
+        "Some(/frontend/routing) -> /frontend/routing/t" +
+          "Some(/frontend/routing/t) -> /frontend/routing/te" +
+          "Some(/frontend/routing/te) -> /frontend/routing/tes" +
+          "Some(/frontend/routing/tes) -> /frontend/routing/test"
+      )
+      linkChanger.clear()
+      linkChanger.sendKeys("qwe")
+      println(history.getText)
+      history.getText should be(
+        "Some(/frontend/routing) -> /frontend/routing/t" +
+          "Some(/frontend/routing/t) -> /frontend/routing/te" +
+          "Some(/frontend/routing/te) -> /frontend/routing/tes" +
+          "Some(/frontend/routing/tes) -> /frontend/routing/test" +
+          "Some(/frontend/routing/test) -> /frontend/routing/q" +
+          "Some(/frontend/routing/q) -> /frontend/routing/qw" +
+          "Some(/frontend/routing/qw) -> /frontend/routing/qwe"
+      )
     }
   }
 }
