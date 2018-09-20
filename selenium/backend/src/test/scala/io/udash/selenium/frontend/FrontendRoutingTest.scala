@@ -1,5 +1,6 @@
 package io.udash.selenium.frontend
 
+import io.udash.rpc.serialization.URLEncoder
 import io.udash.selenium.SeleniumTest
 
 class FrontendRoutingTest extends SeleniumTest {
@@ -80,7 +81,7 @@ class FrontendRoutingTest extends SeleniumTest {
         linkChanger.clear()
         linkChanger.sendKeys(s)
         eventually {
-          val escaped = s"/frontend/routing/${s.replaceAll(" ", "%20").replaceAll("#", "%23")}"
+          val escaped = s"/frontend/routing/${URLEncoder.encode(s)}"
           val unescaped = s"/frontend/routing/$s"
           init.getText should be("/frontend/routing")
           link.getText should matchPattern {

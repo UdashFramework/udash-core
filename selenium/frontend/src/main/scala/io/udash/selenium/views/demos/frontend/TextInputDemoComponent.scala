@@ -39,7 +39,7 @@ class TextInputDemoComponent extends CssView {
     div(BootstrapStyles.Grid.colMd4)(
       UdashInputGroup()(
         UdashInputGroup.input(
-          NumberInput(age.transform(_.toString, Integer.parseInt))(maxlength := "6").render
+          NumberInput(age.transform(_.toString, Integer.parseInt))().render
         ),
         UdashInputGroup.addon(span(bind(age)))
       ).render

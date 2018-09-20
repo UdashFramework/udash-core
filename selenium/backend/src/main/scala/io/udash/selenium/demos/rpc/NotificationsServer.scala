@@ -36,7 +36,7 @@ object NotificationsService {
             ClientRPC(clientId).demos().notificationsDemo().notify(msg)
           })
         }
-        TimeUnit.SECONDS.sleep(1)
+        TimeUnit.MILLISECONDS.sleep(100)
       }
     }
   })

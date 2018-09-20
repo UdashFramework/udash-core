@@ -37,7 +37,7 @@ class RpcFrontendTest extends SeleniumTest {
         responseText = responseElement.getText
 
         for (_ <- 1 to 2) eventually {
-          TimeUnit.SECONDS.sleep(2)
+          TimeUnit.MILLISECONDS.sleep(500)
           responseElement.getText should be(responseText)
           responseText = responseElement.getText
         }

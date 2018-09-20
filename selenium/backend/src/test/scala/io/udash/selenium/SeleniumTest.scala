@@ -29,7 +29,7 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
 
   override protected def afterAll(): Unit = {
     server.stop()
-    driver.close()
+    driver.quit()
     super.afterAll()
   }
 }

@@ -9,6 +9,6 @@ object PingClient extends PingClientRPC {
     pongListeners.foreach(l => l(id))
   }
 
-  def registerPongListener(listener: Int => Any) = pongListeners += listener
-  def unregisterPongListener(listener: (Int) => Any) = pongListeners -= listener
+  def registerPongListener(listener: Int => Any): Unit = pongListeners += listener
+  def unregisterPongListener(listener: Int => Any): Unit = pongListeners -= listener
 }
