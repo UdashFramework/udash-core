@@ -39,7 +39,6 @@ class FileUploader(url: Url) {
         p.subProp(_.bytesTotal).set(ev.total)
       }
     )
-
     xhr.addEventListener("load", (ev: Event) => {
         p.subProp(_.response).set(Some(new HttpResponse(xhr)))
         p.subProp(_.state).set(xhr.status / 100 match {
@@ -48,7 +47,6 @@ class FileUploader(url: Url) {
         })
       }
     )
-
     xhr.addEventListener("error", (ev: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
     )
@@ -76,7 +74,7 @@ object FileUploader {
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
   }
 
-  class HttpResponse (xhr: XMLHttpRequest) {
+  class HttpResponse(private val xhr: XMLHttpRequest) {
     def text: Option[String] = Option(xhr.responseText)
     def responseHeader(header: String): Option[String] = Option(xhr.getResponseHeader(header))
     def responseType: Option[String] = if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None
@@ -92,6 +90,5 @@ object FileUploader {
     val bytesTotal: Double,
     val response: Option[HttpResponse]
   )
-
   object FileUploadModel extends HasModelPropertyCreator[FileUploadModel]
 }
