@@ -12,7 +12,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
 abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with Eventually {
   override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
+    PatienceConfig(scaled(Span(1, Seconds)), scaled(Span(5, Millis)))
 
 //  val driver: RemoteWebDriver = new ChromeDriver(new ChromeOptions().setHeadless(false))
   val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(false))

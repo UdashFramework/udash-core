@@ -10,7 +10,7 @@ class BindAttributeDemoComponent extends CssView {
 
   val visible: Property[Boolean] = Property[Boolean](true)
 
-  dom.window.setInterval(() => visible.set(!visible.get), 100)
+  dom.window.setInterval(() => visible.set(!visible.get), 250)
 
   def getTemplate: Modifier = div(id := "bind-attr-demo")(
     span("Visible: ", bind(visible), " -> "),
