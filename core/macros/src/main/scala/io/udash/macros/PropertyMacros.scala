@@ -327,25 +327,31 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     checkIfIsValidPath(modelPath)
 
-    def parsePath(tree: Tree, acc: List[(Select, TermName)] = List()): List[(Select, TermName)] = tree match {
-      case s@Select(next, t@TermName(_)) => parsePath(next, (s, t) :: acc)
-      case _ => acc
+    def parsePath(tree: Tree): List[(Type, TermName)] = {
+      def symbolPath(t: Tree): List[Symbol] = t match {
+        case Select(pre, _) => t.symbol :: symbolPath(pre)
+        case _ => Nil
+      }
+      def mkPath(prefix: Type, syms: List[Symbol]): List[(Type, Symbol)] = syms match {
+        case Nil => Nil
+        case head :: tail => (prefix, head) :: mkPath(head.typeSignatureIn(prefix), tail)
+      }
+      mkPath(weakTypeOf[A], symbolPath(tree).reverse).map {
+        case (prefixTpe, symbol) => (symbol.typeSignatureIn(prefixTpe).finalResultType, symbol.asTerm.name)
+      }
     }
 
     val parts = parsePath(modelPath)
 
-    def genTree(source: List[(Select, TermName)], targetTree: Tree): Tree = source match {
-      case (select, term) :: _ if select.tpe.typeConstructor =:= SeqTpe.typeConstructor =>
-        q"""$targetTree.getSubSeq[${select.tpe.typeArgs.head.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
-      case (select, term) :: Nil if hasModelPropertyCreator(select.tpe.widen) =>
-        q"""{
-            val tmp = $targetTree
-            tmp.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})
-        }"""
-      case (select, term) :: tail if hasModelPropertyCreator(select.tpe.widen) =>
-        genTree(tail, q"""$targetTree.getSubModel[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[${select.tpe.widen}]]""")
-      case (select, term) :: _ =>
-        q"""$targetTree.getSubProperty[${select.tpe.widen}](${q"_.$term"}, ${term.decodedName.toString})"""
+    def genTree(source: List[(Type, TermName)], targetTree: Tree): Tree = source match {
+      case (resultType, term) :: _ if resultType.typeConstructor =:= SeqTpe.typeConstructor =>
+        q"""$targetTree.getSubSeq[${resultType.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
+      case (resultType, term) :: Nil if hasModelPropertyCreator(resultType) =>
+        q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""
+      case (resultType, term) :: tail if hasModelPropertyCreator(resultType) =>
+        genTree(tail, q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString}).asInstanceOf[$ModelPropertyMacroApiCls[$resultType]]""")
+      case (resultType, term) :: _ =>
+        q"""$targetTree.getSubProperty[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""
       case Nil => targetTree
     }
 
@@ -376,8 +382,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   def reifyPropertyCreator[A: c.WeakTypeTag]: c.Tree = {
     val tpe = weakTypeOf[A].dealias
 
-    if (!tpe.typeSymbol.isClass) c.abort(c.enclosingPosition, s"Implicit PropertyCreator[$tpe] not found.")
-    else q"new $SinglePropertyCreatorCls[$tpe]"
+    if (!tpe.typeSymbol.isClass) {
+      c.abort(c.enclosingPosition, s"Implicit PropertyCreator[$tpe] not found.")
+    } else if (tpe =:= SeqTpe) {
+      c.abort(c.enclosingPosition,
+        s"Implicit PropertyCreator[Seq[_]] not found. If you use Seq[_] in your model, replace it with Seq[Any]."
+      )
+    } else q"new $SinglePropertyCreatorCls[$tpe]"
   }
 
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {
