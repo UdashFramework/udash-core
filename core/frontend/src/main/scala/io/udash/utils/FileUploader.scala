@@ -19,13 +19,10 @@ class FileUploader(url: Url) {
 
   /** Uploads provided `files` in a field named `fieldName`. */
   def upload(
-    fieldName: String,
-    files: Seq[File],
-    extraData: Map[js.Any, js.Any] = Map.empty,
-    successfulResponseCallback: Option[HttpResponse => Unit] = None
+    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty
   ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
-      new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0)
+      new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
     )
     val data = new FormData()
 
@@ -42,14 +39,16 @@ class FileUploader(url: Url) {
         p.subProp(_.bytesTotal).set(ev.total)
       }
     )
-    xhr.addEventListener("load", (ev: Event) =>
-      p.subProp(_.state).set(xhr.status / 100 match {
-        case 2 =>
-          successfulResponseCallback.foreach(_.apply(HttpResponse(xhr)))
-          FileUploadState.Completed
-        case _ => FileUploadState.Failed
-      })
+
+    xhr.addEventListener("load", (ev: Event) => {
+        p.subProp(_.response).set(Some(new HttpResponse(xhr)))
+        p.subProp(_.state).set(xhr.status / 100 match {
+          case 2 => FileUploadState.Completed
+          case _ => FileUploadState.Failed
+        })
+      }
     )
+
     xhr.addEventListener("error", (ev: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
     )
@@ -77,11 +76,22 @@ object FileUploader {
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
   }
 
+  class HttpResponse (xhr: XMLHttpRequest) {
+    def text: Option[String] = Option(xhr.responseText)
+    def responseHeader(header: String): Option[String] = Option(xhr.getResponseHeader(header))
+    def responseType: Option[String] = if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None
+    def url: Option[String] = xhr.responseURL.toOption
+    def xml: Option[Document] = Option(xhr.responseXML)
+    def statusCode: Int = xhr.status
+  }
+
   class FileUploadModel(
     val files: Seq[File],
     val state: FileUploadState,
     val bytesSent: Double,
-    val bytesTotal: Double
+    val bytesTotal: Double,
+    val response: Option[HttpResponse]
   )
+
   object FileUploadModel extends HasModelPropertyCreator[FileUploadModel]
 }
