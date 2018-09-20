@@ -188,6 +188,8 @@ object BootstrapStyles {
     def collapse = CssStyleName("collapse")
     def collapsing = CssStyleName("collapsing")
     def show = CssStyleName("show")
+
+    def accordion = CssStyleName("accordion")
   }
 
   object Display {
