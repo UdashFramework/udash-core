@@ -1,6 +1,6 @@
 import com.typesafe.sbt.SbtPgp.autoImportImpl.PgpKeys._
+import org.openqa.selenium.Capabilities
 import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 name := "udash"
@@ -40,15 +40,11 @@ val CompileAndTest = "test->test;compile->compile"
 val TestAll = "test->test"
 
 // Settings for JS tests run in browser
-val browserCapabilities: DesiredCapabilities = {
+val browserCapabilities: Capabilities = {
   // requires ChromeDriver: https://sites.google.com/a/chromium.org/chromedriver/
-  val capabilities = DesiredCapabilities.chrome()
-  capabilities.setCapability(ChromeOptions.CAPABILITY, {
     val options = new ChromeOptions()
     options.addArguments("--headless", "--disable-gpu")
     options
-  })
-  capabilities
 }
 
 // Deployment configuration
@@ -180,7 +176,7 @@ lazy val `core-frontend` = project.in(file("core/frontend"))
     commonSettings,
     commonJSSettings,
 
-    libraryDependencies ++= Dependencies.coreFrontendDeps.value
+    libraryDependencies ++= Dependencies.coreFrontendDeps.value,
   )
 
 lazy val `rpc-shared` = project.in(file("rpc/shared"))

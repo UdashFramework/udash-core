@@ -5,24 +5,25 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.6"
-  val silencerVersion = "1.0"
+  val silencerVersion = "1.2"
 
-  val jqueryWrapperVersion = "1.2.0"
+  val jqueryWrapperVersion = "2.0.0"
+  val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.6"
   val scalaTagsVersion = "0.6.7"
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.29.0"
+  val avsCommonsVersion = "1.29.1"
 
-  val atmosphereJSVersion = "2.3.5"
-  val atmosphereVersion = "2.4.24"
+  val atmosphereJSVersion = "2.3.6"
+  val atmosphereVersion = "2.4.30"
 
   val upickleVersion = "0.6.6" // Tests only
   val circeVersion = "0.9.3" // Tests only
 
-  val sttpVersion = "1.3.0-RC4"
+  val sttpVersion = "1.3.0"
 
   val scalaLoggingVersion = "3.9.0"
 
@@ -31,7 +32,7 @@ object Dependencies {
   val scalatestVersion = "3.0.5"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
-  val momentJsVersion = "2.22.0"
+  val momentJsVersion = "2.22.2"
 
   val scalaJsBenchmarkVersion = "0.2.5"
 
@@ -63,7 +64,6 @@ object Dependencies {
 
   val coreFrontendDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion % Test
   ))
 
   val rpcCrossTestDeps = Def.setting(Seq(
@@ -120,7 +120,8 @@ object Dependencies {
     "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
-      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js"
+      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js",
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
   ))
 
   val chartsFrontendDeps = Def.setting(Seq(
