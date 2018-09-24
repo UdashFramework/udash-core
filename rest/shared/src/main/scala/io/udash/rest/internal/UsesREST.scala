@@ -79,20 +79,20 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
       }
     }
 
-    def findRestMethod(inv: framework.RawInvocation, signatures: Map[String, Signature], hasBody: Boolean): RESTConnector.HTTPMethod = {
+    def findRestMethod(inv: framework.RawInvocation, signatures: Map[String, Signature], hasBody: Boolean): RESTConnector.HttpMethod = {
       val rpcMethodName: String = inv.rpcName
       val methodMetadata = signatures(rpcMethodName)
-      val methodAnnotations = methodMetadata.annotations.collect({ case rm: RESTMethod => rm })
+      val methodAnnotations = methodMetadata.annotations.collect { case rm: RESTMethod => rm }
       if (methodAnnotations.lengthCompare(1) > 0) throw new RuntimeException(s"Too many method type annotations! ($methodAnnotations)")
       methodAnnotations.headOption match {
-        case Some(_: GET) => RESTConnector.GET
-        case Some(_: POST) => RESTConnector.POST
-        case Some(_: PATCH) => RESTConnector.PATCH
-        case Some(_: PUT) => RESTConnector.PUT
-        case Some(_: DELETE) => RESTConnector.DELETE
+        case Some(_: GET) => RESTConnector.HttpMethod.GET
+        case Some(_: POST) => RESTConnector.HttpMethod.POST
+        case Some(_: PATCH) => RESTConnector.HttpMethod.PATCH
+        case Some(_: PUT) => RESTConnector.HttpMethod.PUT
+        case Some(_: DELETE) => RESTConnector.HttpMethod.DELETE
         // default GET/POST method
-        case None if hasBody => RESTConnector.POST
-        case None => RESTConnector.GET
+        case None if hasBody => RESTConnector.HttpMethod.POST
+        case None => RESTConnector.HttpMethod.GET
       }
     }
 

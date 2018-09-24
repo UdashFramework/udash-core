@@ -2,7 +2,7 @@ package io.udash.rest
 
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.internal.RESTConnector
-import io.udash.rest.internal.RESTConnector.HTTPMethod
+import io.udash.rest.internal.RESTConnector.HttpMethod
 import io.udash.rpc.serialization.JsonStr
 import io.udash.testing.AsyncUdashSharedTest
 import org.scalatest.Succeeded
@@ -15,14 +15,14 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
 
   class ConnectorMock extends RESTConnector {
     var url: String = null
-    var method: HTTPMethod = null
+    var method: HttpMethod = null
     var queryArguments: Map[String, String] = null
     var headers: Map[String, String] = null
     var body: String = null
 
     var response = "{}"
 
-    override def send(url: String, method: HTTPMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
+    override def send(url: String, method: HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
       this.url = url
       this.method = method
       this.queryArguments = queryArguments
@@ -50,7 +50,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         _ <- retrying {
           responses += restServer.serviceOne().create(r).map(_ should be(r3))
           connector.url should be("/serviceOne/create")
-          connector.method should be(RESTConnector.POST)
+          connector.method should be(RESTConnector.HttpMethod.POST)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
           read[TestRESTRecord](JsonStr(connector.body)) should be(r)
@@ -62,7 +62,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         _ <- retrying {
           responses += restServer.serviceOne().update(r2.id.get)(r2).map(_ should be(r2))
           connector.url should be(s"/serviceOne/update/${r2.id.get}")
-          connector.method should be(RESTConnector.PUT)
+          connector.method should be(RESTConnector.HttpMethod.PUT)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
           read[TestRESTRecord](JsonStr(connector.body)) should be(r2)
@@ -74,7 +74,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         _ <- retrying {
           responses += restServer.serviceOne().modify(r2.id.get)("test", 5).map(_ should be(r3))
           connector.url should be(s"/serviceOne/change/${r2.id.get}")
-          connector.method should be(RESTConnector.PATCH)
+          connector.method should be(RESTConnector.HttpMethod.PATCH)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
           read[Map[String, RawValue]](JsonStr(connector.body)) should
@@ -87,7 +87,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         r <- retrying {
           responses += restServer.serviceOne().delete(r2.id.get).map(_ should be(r))
           connector.url should be(s"/serviceOne/remove/${r2.id.get}")
-          connector.method should be(RESTConnector.DELETE)
+          connector.method should be(RESTConnector.HttpMethod.DELETE)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
           connector.body should be(null)
@@ -100,7 +100,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceOne().deeper().load(r2.id.get)
       retrying {
         connector.url should be(s"/serviceOne/deeper/load/${r2.id.get}")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
       }
@@ -110,7 +110,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceSkip().deeper().load(r2.id.get)
       retrying {
         connector.url should be(s"/deeper/load/${r2.id.get}")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
       }
@@ -122,7 +122,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       val resp = restServer.serviceOne().load()
       retrying {
         connector.url should be(s"/serviceOne/load")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
         connector.body should be(null)
@@ -134,7 +134,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceOne().load(r3.id.get, "trashValue", "thrashValue 123")
       retrying {
         connector.url should be(s"/serviceOne/load/${r3.id.get}")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments("trash") should be("trashValue")
         connector.queryArguments("trash_two") should be("thrashValue 123")
         connector.headers should be(Map.empty)
@@ -146,7 +146,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceTwo("token_123", "pl").create(r)
       retrying {
         connector.url should be("/serviceTwo/create")
-        connector.method should be(RESTConnector.POST)
+        connector.method should be(RESTConnector.HttpMethod.POST)
         connector.queryArguments should be(Map.empty)
         connector.headers("X_AUTH_TOKEN") should be("token_123")
         connector.headers("lang") should be("pl")
@@ -158,7 +158,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceThree("abc").create(r)
       retrying {
         connector.url should be("/service_three/abc/create")
-        connector.method should be(RESTConnector.POST)
+        connector.method should be(RESTConnector.HttpMethod.POST)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
         read[TestRESTRecord](JsonStr(connector.body)) should be(r)
@@ -170,7 +170,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       val resp = restServer.serviceOne().load()
       retrying {
         connector.url should be(s"/serviceOne/load")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
         connector.body should be(null)
@@ -183,7 +183,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       for {
         _ <- retrying {
           connector.url should be(s"/serviceOne/fireAndForget")
-          connector.method should be(RESTConnector.POST)
+          connector.method should be(RESTConnector.HttpMethod.POST)
           connector.queryArguments should be(Map.empty)
           connector.headers should be(Map.empty)
           connector.body should be("123")
@@ -193,7 +193,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
         }
         r <- retrying {
           connector.url should be(s"/serviceTwo/deeper/fire/123")
-          connector.method should be(RESTConnector.GET)
+          connector.method should be(RESTConnector.HttpMethod.GET)
           connector.queryArguments should be(Map.empty)
           connector.headers("X_AUTH_TOKEN") should be("token_123")
           connector.headers("lang") should be("pl")
@@ -206,7 +206,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceThree("a b /? @#$%^&+").fireAndForget(123)
       retrying {
         connector.url should be("/service_three/a%20b%20%2F%3F%20%40%23%24%25%5E%26%2B/fireAndForget")
-        connector.method should be(RESTConnector.POST)
+        connector.method should be(RESTConnector.HttpMethod.POST)
         connector.queryArguments should be(Map.empty)
         connector.headers should be(Map.empty)
         connector.body should be("123")
@@ -217,7 +217,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceOne().load(123, "a b /? @#$%^&+", "a b /? @#$%^&+")
       retrying {
         connector.url should be("/serviceOne/load/123")
-        connector.method should be(RESTConnector.GET)
+        connector.method should be(RESTConnector.HttpMethod.GET)
         connector.queryArguments("trash") should be("a b /? @#$%^&+")
         connector.queryArguments("trash_two") should be("a b /? @#$%^&+")
         connector.headers should be(Map.empty)
@@ -229,7 +229,7 @@ class DefaultServerRESTTest extends AsyncUdashSharedTest {
       restServer.serviceTwo("a b /? @#$%^&+", "a b /? @#$%^&+").create(r)
       retrying {
         connector.url should be("/serviceTwo/create")
-        connector.method should be(RESTConnector.POST)
+        connector.method should be(RESTConnector.HttpMethod.POST)
         connector.queryArguments should be(Map.empty)
         connector.headers("X_AUTH_TOKEN") should be("a b /? @#$%^&+")
         connector.headers("lang") should be("a b /? @#$%^&+")
