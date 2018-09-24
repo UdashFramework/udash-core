@@ -23,7 +23,7 @@ object Dependencies {
   val upickleVersion = "0.6.6" // Tests only
   val circeVersion = "0.9.3" // Tests only
 
-  val sttpVersion = "1.3.0"
+  val sttpVersion = "1.3.4"
 
   val scalaLoggingVersion = "3.9.0"
 
