@@ -7,9 +7,12 @@ import org.openqa.selenium.By.{ByCssSelector, ById}
 class I18nDemosTest extends SeleniumTest {
   val url = "/i18n"
 
-  "I18n view" should {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
     driver.get(createUrl(url))
+  }
 
+  "I18n view" should {
     "contain demo elements" in {
       eventually {
         driver.findElementById("frontend-translations-demo")

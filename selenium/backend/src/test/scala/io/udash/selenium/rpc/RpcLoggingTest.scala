@@ -3,11 +3,14 @@ package io.udash.selenium.rpc
 import io.udash.selenium.SeleniumTest
 
 class RpcLoggingTest extends SeleniumTest {
-  val rpcBackendUrl = "/rpc"
+  val url = "/rpc"
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    driver.get(createUrl(url))
+  }
 
   "Rpcbackend view" should {
-    driver.get(createUrl(rpcBackendUrl))
-
     "contain example button" in {
       eventually {
         driver.findElementById("load-calls-btn")

@@ -9,9 +9,12 @@ import scala.collection.JavaConverters._
 class FrontendBindingsTest extends SeleniumTest {
   val url = "/frontend"
 
-  "FrontendBinding view" should {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
     driver.get(createUrl(url))
+  }
 
+  "FrontendBinding view" should {
     "contain demo elements" in {
       eventually {
         driver.findElementById("bind-demo")

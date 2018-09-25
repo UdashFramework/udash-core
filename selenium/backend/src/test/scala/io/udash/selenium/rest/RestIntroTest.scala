@@ -4,11 +4,14 @@ import io.udash.selenium.SeleniumTest
 import org.openqa.selenium.By.{ById, ByTagName}
 
 class RestIntroTest extends SeleniumTest {
-  val rpcIntroUrl = "/rest"
+  val url = "/rest"
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    driver.get(createUrl(url))
+  }
 
   "RestIntro view" should {
-    driver.get(createUrl(rpcIntroUrl))
-
     "contain REST simple demo" in {
       eventually {
         driver.findElementById("simple-rest-demo")

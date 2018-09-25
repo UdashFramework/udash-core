@@ -6,9 +6,12 @@ import org.openqa.selenium.By.ById
 class FrontendIntroTest extends SeleniumTest {
   val url = "/frontend"
 
-  "FrontendIntro view" should {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
     driver.get(createUrl(url))
+  }
 
+  "FrontendIntro view" should {
     "contain demo element" in {
       eventually {
         driver.findElementById("frontend-intro-demo")

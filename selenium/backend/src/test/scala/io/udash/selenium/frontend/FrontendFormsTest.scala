@@ -9,9 +9,12 @@ import scala.util.Random
 class FrontendFormsTest extends SeleniumTest {
   val url = "/frontend"
 
-  "FrontendForms view" should {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
     driver.get(createUrl(url))
+  }
 
+  "FrontendForms view" should {
     "contain demo elements" in {
       eventually {
         driver.findElementById("checkbox-demo")
@@ -32,9 +35,9 @@ class FrontendFormsTest extends SeleniumTest {
         checkbox.click()
         eventually {
           checkboxes.findElements(new ByCssSelector(s"[data-bind=$propertyName]")).asScala
-            .foreach { el => assert(el.getText == expect) }
+            .foreach { el => el.getText should be(expect) }
           checkboxes.findElements(new ByClassName(s"checkbox-demo-$propertyName")).asScala
-            .foreach { el => assert(el.getAttribute("selected") == checkbox.getAttribute("selected")) }
+            .foreach { el => el.getAttribute("selected") should be(checkbox.getAttribute("selected")) }
         }
       }
 
@@ -58,11 +61,15 @@ class FrontendFormsTest extends SeleniumTest {
           checkButtons.findElements(new ByClassName("check-buttons-demo-fruits")).asScala
             .foreach { el =>
               val contains = el.getText.contains(propertyName)
-              assert(if (checkbox.getAttribute("selected") != null) contains else !contains)
+              val selected = checkbox.getAttribute("selected")
+              if (contains) selected shouldNot be(null)
+              else selected should be(null)
             }
           checkButtons.findElements(new ByCssSelector(s"[data-label=$propertyName]")).asScala
             .foreach { el =>
-              assert(el.findElement(new ByTagName("input")).getAttribute("selected") == checkbox.getAttribute("selected"))
+              val inputSelected = el.findElement(new ByTagName("input")).getAttribute("selected")
+              val checkboxSelected = checkbox.getAttribute("selected")
+              inputSelected should be(checkboxSelected)
             }
         }
       }
@@ -83,11 +90,15 @@ class FrontendFormsTest extends SeleniumTest {
           multiSelect.findElements(new ByClassName("multi-select-demo-fruits")).asScala
             .foreach { el =>
               val contains = el.getText.contains(propertyName)
-              assert(if (option.getAttribute("selected") != null) contains else !contains)
+              val selected = option.getAttribute("selected")
+              if (contains) selected shouldNot be(null)
+              else selected should be(null)
             }
           multiSelect.findElements(new ByTagName("select")).asScala
             .foreach { el =>
-              assert(el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected"))
+              val inputSelected = el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected")
+              val optionSelected = option.getAttribute("selected")
+              inputSelected should be(optionSelected)
             }
         }
       }
@@ -108,12 +119,14 @@ class FrontendFormsTest extends SeleniumTest {
         eventually {
           radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")).asScala
             .foreach { el =>
-              assert(el.getText == propertyName)
+              el.getText should be(propertyName)
             }
           radioButtons.findElements(new ByCssSelector(s"input")).asScala
             .foreach { el =>
-              val eq = el.getAttribute("selected") == radio.getAttribute("selected")
-              assert(if (el.getAttribute("value").toInt == propertyIdx) eq else !eq)
+              val inputSelected = el.getAttribute("selected")
+              val radioSelected = radio.getAttribute("selected")
+              if (el.getAttribute("value").toInt == propertyIdx) inputSelected should be(radioSelected)
+              else inputSelected shouldNot be(radioSelected)
             }
         }
       }
@@ -135,11 +148,13 @@ class FrontendFormsTest extends SeleniumTest {
         eventually {
           selectDemo.findElements(new ByClassName("select-demo-fruits")).asScala
             .foreach { el =>
-              assert(el.getText == propertyName)
+              el.getText should be(propertyName)
             }
           selectDemo.findElements(new ByTagName(s"select")).asScala
             .foreach { el =>
-              assert(el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected"))
+              val inputSelected = el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected")
+              val optionSelected = option.getAttribute("selected")
+              inputSelected should be(optionSelected)
             }
         }
       }
@@ -161,7 +176,7 @@ class FrontendFormsTest extends SeleniumTest {
         eventually {
           textAreaDemo.findElements(new ByTagName(s"textarea")).asScala
             .foreach { el =>
-              assert(el.getAttribute("value") == text)
+              el.getAttribute("value") should be(text)
             }
         }
       }
@@ -181,7 +196,7 @@ class FrontendFormsTest extends SeleniumTest {
         eventually {
           inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")).asScala
             .foreach { el =>
-              assert(el.getAttribute("value") == text)
+              el.getAttribute("value") should be(text)
             }
         }
       }

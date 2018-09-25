@@ -12,13 +12,14 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually {
+class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val firesBuffer = mutable.ArrayBuffer.empty[String]
@@ -132,13 +133,15 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       servlet.throwAuthError = false
     }
     "handle connection refused" in {
+      implicit val patienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(100, Millis)))
+
       val eventualResponse =
         inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, null)
-      intercept[ConnectException](Await.result(eventualResponse, 10 seconds))
+      eventualResponse.failed.futureValue shouldBe a [ConnectException]
 
       val eventualResponse2 =
         inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, "lol")
-      intercept[ConnectException](Await.result(eventualResponse2, 10 seconds))
+      eventualResponse2.failed.futureValue shouldBe a [ConnectException]
     }
   }
 

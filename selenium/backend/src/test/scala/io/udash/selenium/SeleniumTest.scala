@@ -14,22 +14,29 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(5, Millis)))
 
-//  val driver: RemoteWebDriver = new ChromeDriver(new ChromeOptions().setHeadless(false))
-  val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
-  driver.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS)
-  driver.manage().window().setSize(new Dimension(1440, 800))
+  private var _driver: RemoteWebDriver = _
+  def driver: RemoteWebDriver = _driver
 
   private val server: ApplicationServer = new ApplicationServer(9999, "selenium/frontend/target/UdashStatics/WebContent")
-  server.start()
 
   def createUrl(path: String): String = {
     require(path.startsWith("/"))
     s"http://127.0.0.1:${server.port}$path"
   }
 
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+//    _driver = new ChromeDriver(new ChromeOptions().setHeadless(true))
+    _driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
+    _driver.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS)
+    _driver.manage().window().setSize(new Dimension(1440, 800))
+
+    server.start()
+  }
   override protected def afterAll(): Unit = {
     server.stop()
-    driver.quit()
+    _driver.quit()
+    _driver = null
     super.afterAll()
   }
 }

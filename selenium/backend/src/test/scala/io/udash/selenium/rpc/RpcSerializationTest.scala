@@ -3,11 +3,14 @@ package io.udash.selenium.rpc
 import io.udash.selenium.SeleniumTest
 
 class RpcSerializationTest extends SeleniumTest {
-  val rpcFrontendUrl = "/rpc"
+  val url = "/rpc"
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    driver.get(createUrl(url))
+  }
 
   "RpcSerialization view" should {
-    driver.get(createUrl(rpcFrontendUrl))
-
     "contain example button" in {
       eventually {
         driver.findElementById("gencodec-demo")

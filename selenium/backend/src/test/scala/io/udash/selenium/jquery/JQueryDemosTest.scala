@@ -6,9 +6,12 @@ import org.openqa.selenium.By.{ByCssSelector, ById}
 class JQueryDemosTest extends SeleniumTest {
   val url = "/jquery"
 
-  "JQueryExt view" should {
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
     driver.get(createUrl(url))
+  }
 
+  "JQueryExt view" should {
     "contain demo elements" in {
       eventually {
         driver.findElementById("jquery-events-demo")
