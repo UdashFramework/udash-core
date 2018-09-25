@@ -42,7 +42,7 @@ val TestAll = "test->test"
 val browserCapabilities: Capabilities = {
   // requires ChromeDriver: https://sites.google.com/a/chromium.org/chromedriver/
     val options = new ChromeOptions()
-//    options.addArguments("--headless", "--disable-gpu")
+    options.addArguments("--headless", "--disable-gpu")
     options
 }
 
