@@ -11,5 +11,5 @@ object URLEncoder {
       .replaceAll("\\%7E", "~")
 
   def decode(query: String): String =
-    java.net.URLDecoder.decode(query, "UTF-8")
+    java.net.URLDecoder.decode(query.replaceAll("\\+", "%2B"), "UTF-8")
 }
