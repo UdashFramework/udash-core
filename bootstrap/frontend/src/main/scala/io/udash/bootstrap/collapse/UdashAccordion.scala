@@ -5,7 +5,6 @@ import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
 import io.udash.properties.seq
-import org.scalajs.dom
 import org.scalajs.dom._
 
 import scala.collection.mutable
@@ -13,13 +12,12 @@ import scala.collection.mutable
 final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private
                           (panels: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
                           (panelStyleSelector: ItemType => PanelStyle,
-                           heading: (ElemType) => dom.Element,
-                           body: (ElemType) => dom.Element)
+                           heading: (ElemType) => Element,
+                           body: (ElemType) => Element)
   extends UdashBootstrapComponent {
 
   import BootstrapTags._
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]

@@ -6,8 +6,7 @@ import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
 import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
-import org.scalajs.dom
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Element, Event}
 
 sealed trait PaginationComponent[PageType, ElemType <: ReadableProperty[PageType]] extends UdashBootstrapComponent {
   /** Sequence of pagination elements. Pagination will automatically synchronize with this property changes. */
@@ -33,12 +32,12 @@ final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: Readabl
                            (paginationSize: PaginationSize, showArrows: ReadableProperty[Boolean],
                             highlightActive: ReadableProperty[Boolean], override val componentId: ComponentId)
                            (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                           (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
+                           (itemFactory: (ElemType, UdashPagination.ButtonType) => Element)
   extends PaginationComponent[PageType, ElemType] {
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element = {
+  override val render: Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -76,12 +75,12 @@ final class UdashPagination[PageType : ModelPropertyCreator, ElemType <: Readabl
 final class UdashPager[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]] private[pagination]
                       (aligned: Boolean, override val componentId: ComponentId)
                       (val pages: seq.ReadableSeqProperty[PageType, ElemType], val selectedPage: Property[Int])
-                      (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element)
+                      (itemFactory: (ElemType, UdashPagination.ButtonType) => Element)
   extends PaginationComponent[PageType, ElemType] {
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element = {
+  override val render: Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2
 
@@ -130,7 +129,7 @@ object UdashPagination {
     href.bind(page.subProp(_.url.value))
 
   /** Creates link for default pagination element model. */
-  val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => dom.Element = {
+  val defaultPageFactory: (CastableProperty[Page], UdashPagination.ButtonType) => Element = {
     case (page, UdashPagination.ButtonType.PreviousPage) =>
       a(aria.label := "Previous", bindHref(page.asModel))(span(aria.hidden := true)("«")).render
     case (page, UdashPagination.ButtonType.NextPage) =>
@@ -157,7 +156,7 @@ object UdashPagination {
            (size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
             highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
-           (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element): UdashPagination[PageType, ElemType] =
+           (itemFactory: (ElemType, UdashPagination.ButtonType) => Element): UdashPagination[PageType, ElemType] =
     new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
 
   /**
@@ -175,6 +174,6 @@ object UdashPagination {
   def pager[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]]
            (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
-           (itemFactory: (ElemType, UdashPagination.ButtonType) => dom.Element): UdashPager[PageType, ElemType] =
+           (itemFactory: (ElemType, UdashPagination.ButtonType) => Element): UdashPager[PageType, ElemType] =
     new UdashPager(aligned, componentId)(pages, selectedPage)(itemFactory)
 }

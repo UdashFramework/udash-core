@@ -27,7 +27,7 @@ class JQueryCallbacksDemo {
     jQ("#jquery-callbacks-demo #div").append(li(s"$a / $b = ${a / b}").render)
   })
 
-  def getTemplate: dom.Element = {
+  def getTemplate: Element = {
     div(id := "jquery-callbacks-demo")(
       "Plus:",
       ul(id := "plus"),

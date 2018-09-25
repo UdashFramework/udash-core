@@ -6,7 +6,6 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Div
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 

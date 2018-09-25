@@ -4,13 +4,12 @@ package utils
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.{HasModelPropertyCreator, seq}
-import org.scalajs.dom
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Anchor
 
 final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] private
                             (val pages: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                            (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean)
+                            (itemFactory: (ElemType) => Element, isSelected: (ItemType) => Boolean)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
@@ -61,6 +60,6 @@ object UdashBreadcrumbs {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (pages: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
-           (itemFactory: (ElemType) => dom.Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false): UdashBreadcrumbs[ItemType, ElemType] =
+           (itemFactory: (ElemType) => Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)
 }

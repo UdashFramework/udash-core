@@ -5,7 +5,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.seq
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private(
@@ -14,7 +14,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
   vertical: ReadableProperty[Boolean],
   justified: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[dom.Element]) extends UdashBootstrapComponent {
+)(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
 
   private def buttonFullWidth: Binding =
@@ -27,7 +27,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
       nestedInterceptor((BootstrapStyles.Button.groupSize _).reactiveOptionApply(size)) :: Nil
   }
 
-  override val render: dom.Element =
+  override val render: Element =
     div(id := componentId, role := "group", classes)(
       nestedInterceptor(
         repeatWithNested(items) { case (item, nested) =>
@@ -56,9 +56,9 @@ object UdashButtonGroup {
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(buttons: dom.Element*): UdashButtonGroup[dom.Element, Property[dom.Element]] = {
-    reactive[dom.Element, Property[dom.Element]](
-      SeqProperty[dom.Element](buttons),
+  )(buttons: Element*): UdashButtonGroup[Element, Property[Element]] = {
+    reactive[Element, Property[Element]](
+      SeqProperty[Element](buttons),
       size, vertical, justified, componentId
     )((p, _) => p.get)
   }
@@ -83,7 +83,7 @@ object UdashButtonGroup {
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[dom.Element]): UdashButtonGroup[ItemType, ElemType] = {
+  )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]): UdashButtonGroup[ItemType, ElemType] = {
     new UdashButtonGroup[ItemType, ElemType](
       items, size, vertical, justified, componentId
     )(itemFactory)

@@ -3,7 +3,7 @@ package io.udash.i18n.bindings
 import io.udash.bindings.Bindings
 import io.udash.i18n.Translated
 import io.udash.logging.CrossLogging
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -11,11 +11,11 @@ import scalatags.generic.Modifier
 
 private[i18n]
 class AttrTranslationBinding(translation: Future[Translated], attr: String)
-  extends Modifier[dom.Element] with Bindings with CrossLogging {
+  extends Modifier[Element] with Bindings with CrossLogging {
 
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-  override def applyTo(t: dom.Element): Unit =
+  override def applyTo(t: Element): Unit =
     if (translation.isCompleted && translation.value.get.isSuccess) {
       t.setAttribute(attr, translation.value.get.get.string)
     } else {

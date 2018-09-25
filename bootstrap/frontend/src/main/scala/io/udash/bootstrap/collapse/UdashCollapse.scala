@@ -5,10 +5,10 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
-
-import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
+
+import scala.scalajs.js
 
 final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean,
                                   override val componentId: ComponentId)(content: Modifier*)

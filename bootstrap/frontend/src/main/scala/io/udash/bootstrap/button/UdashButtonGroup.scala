@@ -4,15 +4,14 @@ package button
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
                             (val items: seq.ReadableSeqProperty[ItemType, ElemType],
                              size: ButtonSize, vertical: Boolean, justified: Boolean, toggle: Boolean,
                              override val componentId: ComponentId)
-                            (itemFactory: (ElemType) => Seq[dom.Element]) extends UdashBootstrapComponent {
+                            (itemFactory: (ElemType) => Seq[Element]) extends UdashBootstrapComponent {
   import io.udash.bootstrap.BootstrapTags._
   import io.udash.css.CssView._
 
@@ -21,7 +20,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
     BootstrapStyles.Button.btnGroupJustified.styleIf(justified) ::
     size :: Nil
 
-  override val render: dom.Element =
+  override val render: Element =
     div(id := componentId, role := "group", classes, if (toggle) dataToggle := "buttons" else ())(
       repeat(items)(
         // "To use justified button groups with <button> elements, you must wrap each button in a button group.
@@ -64,8 +63,8 @@ object UdashButtonGroup {
     */
   def apply(size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
             componentId: ComponentId = UdashBootstrap.newId())
-           (buttons: dom.Element*): UdashButtonGroup[dom.Element, Property[dom.Element]] =
-    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](buttons), size, vertical, justified, componentId)(_.get)
+           (buttons: Element*): UdashButtonGroup[Element, Property[Element]] =
+    reactive[Element, Property[Element]](SeqProperty[Element](buttons), size, vertical, justified, componentId)(_.get)
 
 
   /**
@@ -85,7 +84,7 @@ object UdashButtonGroup {
               (items: seq.ReadableSeqProperty[ItemType, ElemType],
                size: ButtonSize = ButtonSize.Default, vertical: Boolean = false, justified: Boolean = false,
                componentId: ComponentId = UdashBootstrap.newId())
-              (itemFactory: (ElemType) => Seq[dom.Element]): UdashButtonGroup[ItemType, ElemType] =
+              (itemFactory: (ElemType) => Seq[Element]): UdashButtonGroup[ItemType, ElemType] =
     new UdashButtonGroup[ItemType, ElemType](items, size, vertical, justified, false, componentId)(itemFactory)
 
   /**

@@ -3,14 +3,13 @@ package label
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashLabel private(style: LabelStyle, override val componentId: ComponentId)(mds: Modifier*)
   extends UdashBootstrapComponent {
 
-  override val render: dom.Element =
+  override val render: Element =
     span(id := componentId, style)(mds: _*).render
 }
 

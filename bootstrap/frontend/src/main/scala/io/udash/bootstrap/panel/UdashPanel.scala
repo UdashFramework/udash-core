@@ -2,8 +2,7 @@ package io.udash.bootstrap
 package panel
 
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashPanel private(panelStyle: PanelStyle, override val componentId: ComponentId)(content: Modifier*)
@@ -11,7 +10,7 @@ final class UdashPanel private(panelStyle: PanelStyle, override val componentId:
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(id := componentId, BootstrapStyles.Panel.panel, panelStyle)(
       content
     ).render

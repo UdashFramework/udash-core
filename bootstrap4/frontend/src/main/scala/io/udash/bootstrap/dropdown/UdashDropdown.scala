@@ -9,7 +9,7 @@ import io.udash.bootstrap.utils._
 import io.udash.properties.seq
 import io.udash.properties.single.ReadableProperty
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import org.scalajs.dom.Event
 import scalatags.JsDom.all._
 
@@ -22,7 +22,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   buttonToggle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
+  itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
   buttonContent: Binding.NestedInterceptor => Modifier
 ) extends UdashBootstrapComponent
   with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
@@ -45,12 +45,12 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   def update(): Unit =
     jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("update")
 
-  private def withSelectionListener(elem: dom.Element, item: ElemType): dom.Element = {
+  private def withSelectionListener(elem: Element, item: ElemType): Element = {
     jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, item.get)))
     elem
   }
 
-  override lazy val render: dom.Element = {
+  override lazy val render: Element = {
     import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
       id := componentId,
@@ -140,10 +140,10 @@ object UdashDropdown {
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(
     item: ReadableProperty[DefaultDropdownItem], nestedInterceptor: Binding.NestedInterceptor
-  ): dom.Element = {
+  ): Element = {
     import DefaultDropdownItem._
     import io.udash.css.CssView._
-    def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
+    def itemFactory(item: DefaultDropdownItem): Element = item match {
       case Text(text) =>
         p(text).render
       case Link(title, url) =>
@@ -183,7 +183,7 @@ object UdashDropdown {
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element,
+    itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[ItemType, ElemType] = {
     new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemFactory, buttonContent)

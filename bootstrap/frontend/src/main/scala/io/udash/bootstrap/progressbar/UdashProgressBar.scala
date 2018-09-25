@@ -7,7 +7,6 @@ import io.udash.bootstrap.progressbar.ProgressBarStyle.Default
 import io.udash.bootstrap.progressbar.UdashProgressBar.ValueStringifier
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.all._
 
 sealed abstract class UdashProgressBarBase private[progressbar](val progress: ReadableProperty[Int],

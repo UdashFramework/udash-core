@@ -7,9 +7,9 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
+import scalatags.JsDom.all._
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
 
 class UdashDatePickerTest extends AsyncUdashFrontendTest {
 

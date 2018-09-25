@@ -2,13 +2,13 @@ package io.udash.bindings.modifiers
 
 import com.avsystem.commons.SharedExtensions._
 import io.udash.utils.Registration
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 import scalatags.generic.Modifier
 
 /** Modifier representing data binding. */
-trait Binding extends Modifier[dom.Element] {
+trait Binding extends Modifier[Element] {
   protected final val propertyListeners: js.Array[Registration] = js.Array()
   protected final val nestedBindings: js.Array[Binding] = js.Array()
 

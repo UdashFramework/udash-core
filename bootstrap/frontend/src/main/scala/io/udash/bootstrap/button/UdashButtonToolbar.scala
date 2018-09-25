@@ -4,19 +4,18 @@ package button
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
                               (val items:seq.ReadableSeqProperty[ItemType, ElemType],
                                override val componentId: ComponentId)
-                              (itemFactory: (ElemType) => Seq[dom.Element])
+                              (itemFactory: (ElemType) => Seq[Element])
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(role := "toolbar", BootstrapStyles.Button.btnToolbar)(
       repeat(items)(itemFactory)
     ).render
@@ -30,8 +29,8 @@ object UdashButtonToolbar {
     * @param groups Rendered button groups belonging to the toolbar.
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
-  def apply(groups: dom.Element*): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
-    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](groups), _.get)
+  def apply(groups: Element*): UdashButtonToolbar[Element, Property[Element]] =
+    reactive[Element, Property[Element]](SeqProperty[Element](groups), _.get)
 
   /**
     * Creates static button group.
@@ -41,8 +40,8 @@ object UdashButtonToolbar {
     * @param groups Rendered button groups belonging to the toolbar.
     * @return `UdashButtonToolbar` component, call render to create DOM element representing this toolbar.
     */
-  def apply(componentId: ComponentId, groups: dom.Element*): UdashButtonToolbar[dom.Element, Property[dom.Element]] =
-    reactive[dom.Element, Property[dom.Element]](SeqProperty[dom.Element](groups), _.get, componentId)
+  def apply(componentId: ComponentId, groups: Element*): UdashButtonToolbar[Element, Property[Element]] =
+    reactive[Element, Property[Element]](SeqProperty[Element](groups), _.get, componentId)
 
 
   /**
@@ -58,7 +57,7 @@ object UdashButtonToolbar {
     */
   def reactive[ItemType, ElemType <: ReadableProperty[ItemType]]
               (items: seq.ReadableSeqProperty[ItemType, ElemType],
-               itemFactory: (ElemType) => Seq[dom.Element],
+               itemFactory: (ElemType) => Seq[Element],
                componentId: ComponentId = UdashBootstrap.newId()): UdashButtonToolbar[ItemType, ElemType] =
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
 }

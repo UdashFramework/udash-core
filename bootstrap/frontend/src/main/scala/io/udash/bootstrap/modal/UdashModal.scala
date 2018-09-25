@@ -4,7 +4,6 @@ package modal
 import com.avsystem.commons.misc.AbstractCase
 import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
@@ -12,9 +11,9 @@ import scala.scalajs.js
 final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: String,
                                backdrop: UdashModal.BackdropType, keyboard: Boolean,
                                autoInit: Boolean, override val componentId: ComponentId)
-                              (headerFactory: Option[() => dom.Element],
-                               bodyFactory: Option[() => dom.Element],
-                               footerFactory: Option[() => dom.Element])
+                              (headerFactory: Option[() => Element],
+                               bodyFactory: Option[() => Element],
+                               footerFactory: Option[() => Element])
   extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
   import BootstrapTags._

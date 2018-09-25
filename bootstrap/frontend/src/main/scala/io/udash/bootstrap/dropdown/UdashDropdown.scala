@@ -7,15 +7,15 @@ import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
+import org.scalajs.dom.{Element, Node}
+import scalatags.JsDom.all._
 
 import scala.scalajs.js
-import scalatags.JsDom.all._
 
 final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] private
                          (val items: seq.ReadableSeqProperty[ItemType, ElemType], dropup: Boolean,
                           override val componentId: ComponentId)
-                         (itemFactory: (ElemType) => dom.Element)(content: Modifier*)
+                         (itemFactory: (ElemType) => Element)(content: Modifier*)
   extends UdashBootstrapComponent with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
   import UdashDropdown._
@@ -31,12 +31,12 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   def toggle(): Unit =
     jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
-  private def withSelectionListener(elem: dom.Element, id: Int): dom.Element = {
+  private def withSelectionListener(elem: Element, id: Int): Element = {
     jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, items.get(id))))
     elem
   }
 
-  override lazy val render: dom.Element = {
+  override lazy val render: Element = {
     import BootstrapTags._
     var _id = -1
     def next(): Int = {
@@ -61,7 +61,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     el
   }
 
-  lazy val linkRender: dom.Node = {
+  lazy val linkRender: Node = {
     import BootstrapTags._
     var _id = -1
     def next(): Int = {
@@ -99,9 +99,9 @@ object UdashDropdown {
   case class DropdownDisabled(link: DropdownLink) extends DefaultDropdownItem
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(p: ReadableProperty[DefaultDropdownItem]): dom.Element = {
+  def defaultItemFactory(p: ReadableProperty[DefaultDropdownItem]): Element = {
     import io.udash.css.CssView._
-    def itemFactory(item: DefaultDropdownItem): dom.Element = item match {
+    def itemFactory(item: DefaultDropdownItem): Element = item match {
       case DropdownLink(title, url) => li(a(href := url.value)(produce(p)(_ => span(title).render))).render
       case DropdownHeader(title) => li(BootstrapStyles.Dropdown.dropdownHeader)(produce(p)(_ => span(title).render)).render
       case DropdownDivider => li(BootstrapStyles.divider, role := "separator").render
@@ -124,7 +124,7 @@ object UdashDropdown {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
-           (itemFactory: (ElemType) => dom.Element)
+           (itemFactory: (ElemType) => Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, false, componentId)(itemFactory)(content)
 
@@ -142,7 +142,7 @@ object UdashDropdown {
     */
   def dropup[ItemType, ElemType <: ReadableProperty[ItemType]]
             (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
-            (itemFactory: (ElemType) => dom.Element)
+            (itemFactory: (ElemType) => Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true, componentId)(itemFactory)(content)
 

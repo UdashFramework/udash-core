@@ -15,7 +15,7 @@ class DynamicRemoteTranslationsDemo {
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
-  def getTemplate: dom.Element = {
+  def getTemplate: Element = {
     implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = LangProperty(Lang("en"))
     div(id := "dynamic-rpc-translations-demo")(

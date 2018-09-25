@@ -3,7 +3,7 @@ package form
 
 import io.udash._
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashInputGroup private(
@@ -13,7 +13,7 @@ final class UdashInputGroup private(
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(
       BootstrapStyles.InputGroup.inputGroup,
       nestedInterceptor((BootstrapStyles.InputGroup.size _).reactiveOptionApply(groupSize))
@@ -39,15 +39,15 @@ object UdashInputGroup {
   }
 
   /** Adds `form-control` style to provided element. It's required to properly display input as part of group. */
-  def input(el: dom.Element): dom.Element =
+  def input(el: Element): Element =
     el.styles(BootstrapStyles.Form.control)
 
   /** Adds `custom-select` style to provided element. It's required to properly display select as part of group. */
-  def select(el: dom.Element): dom.Element =
+  def select(el: Element): Element =
     el.styles(BootstrapStyles.InputGroup.customSelect)
 
   /** Adds `custom-file` style to provided element. It's required to properly display file input as part of group. */
-  def file(el: dom.Element): dom.Element =
+  def file(el: Element): Element =
     el.styles(BootstrapStyles.InputGroup.customFile)
 
   /** Creates an element to be prepended to the input of this input group. */

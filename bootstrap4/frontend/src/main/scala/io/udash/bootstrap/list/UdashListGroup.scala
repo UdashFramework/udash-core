@@ -5,16 +5,13 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.seq
-import org.scalajs.dom
 import org.scalajs.dom.Element
 
 final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   items: seq.ReadableSeqProperty[ItemType, ElemType],
   flush: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element) extends UdashBootstrapComponent {
-  // TODO replace all `dom.Element` with `Element`
-
+)(itemFactory: (ElemType, Binding.NestedInterceptor) => Element) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
@@ -48,6 +45,6 @@ object UdashListGroup {
     items: seq.ReadableSeqProperty[ItemType, ElemType],
     flush: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(itemFactory: (ElemType, Binding.NestedInterceptor) => dom.Element): UdashListGroup[ItemType, ElemType] =
+  )(itemFactory: (ElemType, Binding.NestedInterceptor) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, flush, componentId)(itemFactory)
 }

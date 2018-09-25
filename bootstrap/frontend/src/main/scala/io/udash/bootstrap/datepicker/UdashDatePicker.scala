@@ -10,7 +10,7 @@ import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBo
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 import scala.scalajs.js.|
@@ -25,7 +25,6 @@ final class UdashDatePicker private[datepicker](
 
   import UdashDatePicker._
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.formControl).render
@@ -54,7 +53,7 @@ final class UdashDatePicker private[datepicker](
   def disable(): Unit =
     dpData(jQInput).disable()
 
-  val render: dom.Element = {
+  val render: Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
     options.listen(opts => dpData(jQInput).options(optionsToJsDict(opts)))
@@ -62,7 +61,7 @@ final class UdashDatePicker private[datepicker](
     date.get.foreach(d => dpData(jQInput).date(dateToMoment(d)))
     date.listen(op => op.foreach(d => dpData(jQInput).date(dateToMoment(d))))
 
-    jQInput.on("dp.change", (_: dom.Element, ev: JQueryEvent) => {
+    jQInput.on("dp.change", (_: Element, ev: JQueryEvent) => {
       val event = ev.asInstanceOf[DatePickerChangeJQEvent]
       val dateOption = event.option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
       val oldDateOption = date.get
@@ -74,13 +73,13 @@ final class UdashDatePicker private[datepicker](
       }
       fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
     })
-    jQInput.on("dp.hide", (_: dom.Element, ev: JQueryEvent) => {
+    jQInput.on("dp.hide", (_: Element, ev: JQueryEvent) => {
       fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
     })
-    jQInput.on("dp.show", (_: dom.Element, ev: JQueryEvent) =>
+    jQInput.on("dp.show", (_: Element, ev: JQueryEvent) =>
       fire(UdashDatePicker.DatePickerEvent.Show(this))
     )
-    jQInput.on("dp.error", (_: dom.Element, ev: JQueryEvent) => {
+    jQInput.on("dp.error", (_: Element, ev: JQueryEvent) => {
       fire(UdashDatePicker.DatePickerEvent.Error(this, date.get))
     })
 
@@ -223,7 +222,7 @@ object UdashDatePicker {
   }
 
   /** Loads Bootstrap Date Picker styles. */
-  def loadBootstrapDatePickerStyles(): dom.Element =
+  def loadBootstrapDatePickerStyles(): Element =
     link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.42/css/bootstrap-datetimepicker.min.css").render
 
   sealed trait DatePickerEvent extends AbstractCase with ListenableEvent[UdashDatePicker]

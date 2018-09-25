@@ -10,12 +10,12 @@ import org.scalajs.dom.Event
 class JQueryEventsDemo {
   import scalatags.JsDom.all._
 
-  val onCallback = (_: dom.Element, _: JQueryEvent) =>
+  val onCallback = (_: Element, _: JQueryEvent) =>
     jQ("#jquery-events-demo ul").append(li("This will be added on every click").render)
-  val oneCallback = (_: dom.Element, _: JQueryEvent) =>
+  val oneCallback = (_: Element, _: JQueryEvent) =>
     jQ("#jquery-events-demo ul").append(li("This will be added only once").render)
 
-  def getTemplate: dom.Element = {
+  def getTemplate: Element = {
     val content = div(id := "jquery-events-demo")(
       ul(),
       br,

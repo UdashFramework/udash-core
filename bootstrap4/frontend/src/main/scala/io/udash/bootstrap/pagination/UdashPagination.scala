@@ -6,7 +6,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
 import io.udash.properties.{PropertyCreator, seq}
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import org.scalajs.dom.Event
 import scalatags.JsDom.all._
 
@@ -48,7 +48,7 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
   /** Safely selects the previous page. */
   def previous(): Unit = changePage(selectedPageIdx.get - 1)
 
-  override val render: dom.Element = {
+  override val render: Element = {
     import scalatags.JsDom.tags2
 
     tags2.nav(

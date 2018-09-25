@@ -2,7 +2,7 @@ package io.udash.bootstrap
 
 import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 /** Bootstrap component exposing events. */
 trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] {
@@ -24,7 +24,7 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
     onClickActions.fire(event)
 
   protected def jQFire(ev: EventType): JQueryCallback =
-    (_: dom.Element, _: JQueryEvent) => fire(ev)
+    (_: Element, _: JQueryEvent) => fire(ev)
 }
 
 /** Bootstrap component event. */

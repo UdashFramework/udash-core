@@ -10,7 +10,6 @@ import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEven
 import io.udash.bootstrap.utils._
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
 import org.scalajs.dom.{Element, Node}
 import scalatags.JsDom.all._
 
@@ -103,12 +102,12 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
-    jqCarousel.on("slide.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
+    jqCarousel.on("slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       activeSlide.set(idx)
       fire(CarouselEvent(this, idx, dir, changed = false))
     })
-    jqCarousel.on("slid.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
+    jqCarousel.on("slid.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       activeSlide.set(idx)
       fire(CarouselEvent(this, idx, dir, changed = true))

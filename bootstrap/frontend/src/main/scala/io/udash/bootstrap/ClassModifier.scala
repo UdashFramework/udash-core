@@ -2,7 +2,6 @@ package io.udash.bootstrap
 
 import io.udash.css.CssStyle
 import org.scalajs.dom._
-
 import scalatags.JsDom.all._
 
 /** Adds selected classes to provided DOM element. */

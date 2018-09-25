@@ -46,7 +46,6 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
   override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
-
     import scalatags.Text.all._
     div(BootstrapStyles.Popover.popover, role := "tooltip")(
       div(BootstrapStyles.arrow),

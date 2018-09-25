@@ -6,7 +6,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.nav.UdashNavbar.Position
 import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
 
@@ -27,7 +27,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
 
   private val collapseId = ComponentId.newId()
 
-  override val render: dom.Element =
+  override val render: Element =
     tags2.nav(
       id := componentId, BootstrapStyles.NavigationBar.navbar,
       nestedInterceptor(BootstrapStyles.Position.fixedTop.styleIf(position.transform(_ == Position.FixedTop))),

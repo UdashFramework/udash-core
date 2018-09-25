@@ -7,9 +7,9 @@ import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.Event
+import scalatags.JsDom.all._
 
 import scala.util.{Failure, Success}
-import scalatags.JsDom.all._
 
 final class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
                              (content: Modifier*) extends UdashBootstrapComponent {
@@ -29,6 +29,7 @@ object UdashForm {
   def validation(property: ReadableProperty[_]): Modifier =
     property.reactiveApply((el, _) => {
       import BootstrapStyles.Form._
+
       import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
       Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
@@ -121,13 +122,13 @@ object UdashForm {
     div(BootstrapStyles.Form.formGroup)(content)
 
   /** Wrapper for inputs in form. */
-  def input(el: dom.Element): dom.Element = {
+  def input(el: Element): Element = {
     BootstrapStyles.Form.formControl.addTo(el)
     el
   }
 
   private def inputGroup(inputId: ComponentId, validation: Option[Modifier])
-                        (labelContent: Modifier*)(input: dom.Element): Modifier =
+                        (labelContent: Modifier*)(input: Element): Modifier =
     group(
       if (labelContent.nonEmpty) label(`for` := inputId)(labelContent) else (),
       UdashForm.input(input),
@@ -248,7 +249,7 @@ object UdashForm {
     */
   def checkboxes(checkboxStyle: CssStyle = BootstrapStyles.Form.checkbox, groupId: ComponentId = UdashBootstrap.newId())
                 (selected: SeqProperty[String], options: Seq[String],
-                 decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(checkboxStyle)): Modifier =
+                 decorator: (dom.html.Input, String) => Element = defaultDecorator(checkboxStyle)): Modifier =
     CheckButtons(selected, options.toSeqProperty)(
       (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {
@@ -269,7 +270,7 @@ object UdashForm {
     */
   def radio(radioStyle: CssStyle = BootstrapStyles.Form.radio, groupId: ComponentId = UdashBootstrap.newId())
            (selected: Property[String], options: Seq[String],
-            decorator: (dom.html.Input, String) => dom.Element = defaultDecorator(radioStyle)): Modifier =
+            decorator: (dom.html.Input, String) => Element = defaultDecorator(radioStyle)): Modifier =
     RadioButtons(selected, options.toSeqProperty)(
       (items: Seq[(dom.html.Input, String)]) => div(BootstrapStyles.Form.formGroup, id := groupId.id)(
         items.map {

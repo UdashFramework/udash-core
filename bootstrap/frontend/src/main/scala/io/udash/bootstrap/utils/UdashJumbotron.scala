@@ -3,8 +3,7 @@ package utils
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashJumbotron private(override val componentId: ComponentId)(mds: Modifier*)
@@ -12,7 +11,7 @@ final class UdashJumbotron private(override val componentId: ComponentId)(mds: M
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(id := componentId, BootstrapStyles.jumbotron)(mds).render
 }
 

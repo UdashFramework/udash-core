@@ -3,8 +3,7 @@ package io.udash.bootstrap
 import io.udash._
 import io.udash.css.CssStyleName
 import io.udash.testing.UdashFrontendTest
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 
 class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
   import io.udash.css.CssView._
@@ -36,7 +35,7 @@ class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
     }
   }
 
-  implicit class ElemOps(elem: dom.Element) {
+  implicit class ElemOps(elem: Element) {
     def hasStyles(styles: CssStyleName*): Boolean =
       styles
         .map(_.className)

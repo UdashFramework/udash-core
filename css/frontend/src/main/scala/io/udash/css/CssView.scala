@@ -2,7 +2,6 @@ package io.udash.css
 
 import io.udash.ReadableProperty
 import io.udash.bindings.modifiers.{Binding, EmptyModifier}
-import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
@@ -18,7 +17,7 @@ trait CssView {
   implicit def style2TextMod(s: CssStyle): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(js.Array(s))
   implicit def styles2TextMod(s: CssStyle*): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(s.toJSArray)
 
-  implicit def elementOps(element: dom.Element): CssView.ElementOps =
+  implicit def elementOps(element: Element): CssView.ElementOps =
     new CssView.ElementOps(element)
 
   implicit def styleOps(style: CssStyle): CssView.StyleOps =
@@ -38,18 +37,18 @@ object CssView extends CssView {
       }
   }
 
-  implicit class ElementOps(private val element: dom.Element) extends AnyVal {
-    def styles(styles: CssStyle*): dom.Element = {
+  implicit class ElementOps(private val element: Element) extends AnyVal {
+    def styles(styles: CssStyle*): Element = {
       styles.foreach(_.addTo(element))
       element
     }
   }
 
   implicit class StyleOps(private val style: CssStyle) extends AnyVal {
-    def addTo(element: dom.Element): Unit =
+    def addTo(element: Element): Unit =
       style.classNames.foreach(element.classList.add)
 
-    def removeFrom(element: dom.Element): Unit = {
+    def removeFrom(element: Element): Unit = {
       val cl = element.classList
       cl.remove(style.className)
       style.commonPrefixClass.foreach { prefixClass =>

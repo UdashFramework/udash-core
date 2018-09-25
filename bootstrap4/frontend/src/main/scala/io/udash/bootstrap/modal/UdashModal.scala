@@ -5,7 +5,6 @@ import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValue
 import io.udash._
 import io.udash.bootstrap.utils._
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
 import org.scalajs.dom.Element
 
 import scala.scalajs.js
@@ -18,9 +17,9 @@ final class UdashModal private(
   keyboard: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  headerFactory: Option[() => dom.Element],
-  bodyFactory: Option[() => dom.Element],
-  footerFactory: Option[() => dom.Element]
+  headerFactory: Option[() => Element],
+  bodyFactory: Option[() => Element],
+  footerFactory: Option[() => Element]
 ) extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
   import UdashModal._
@@ -120,9 +119,9 @@ object UdashModal {
     keyboard: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    headerFactory: Option[() => dom.Element],
-    bodyFactory: Option[() => dom.Element],
-    footerFactory: Option[() => dom.Element]
+    headerFactory: Option[() => Element],
+    bodyFactory: Option[() => Element],
+    footerFactory: Option[() => Element]
   ): UdashModal = {
     new UdashModal(
       modalSize, fade, labelId, backdrop, keyboard, componentId
