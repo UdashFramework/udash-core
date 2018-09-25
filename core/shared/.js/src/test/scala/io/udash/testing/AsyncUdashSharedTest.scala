@@ -1,5 +1,6 @@
 package io.udash.testing
 
+import org.scalactic.source.Position
 import org.scalajs.dom
 import org.scalatest._
 
@@ -11,7 +12,7 @@ import scala.util.{Failure, Success}
 trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
   override implicit def executionContext: ExecutionContext = JSExecutionContext.queue
 
-  override def retrying(code: => Any)(implicit patienceConfig: PatienceConfig): Future[Assertion] = {
+  override def retrying(code: => Any)(implicit patienceConfig: PatienceConfig, pos: Position): Future[Assertion] = {
     val start = Date.now()
     val p = Promise[Assertion]
     var lastEx: Option[Throwable] = None
