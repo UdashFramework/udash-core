@@ -134,11 +134,11 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     "handle connection refused" in {
       val eventualResponse =
         inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, null)
-      intercept[ConnectException](await(eventualResponse))
+      intercept[ConnectException](Await.result(eventualResponse, 10 seconds))
 
       val eventualResponse2 =
         inexistentServerConnector.send("/non/existing/path", RESTConnector.HttpMethod.POST, Map.empty, Map.empty, "lol")
-      intercept[ConnectException](await(eventualResponse2))
+      intercept[ConnectException](Await.result(eventualResponse2, 10 seconds))
     }
   }
 
