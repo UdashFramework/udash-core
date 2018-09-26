@@ -32,7 +32,7 @@ final class UdashCollapse private(
   def hide(): Unit = jQSelector().collapse("hide")
 
   /** Attributes which should be added to the button toggling this collapse component.
-    * Example: `UdashButton()(collapse.toggleButtonAttrs(), "Toggle...")`*/
+    * Example: `UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))`*/
   def toggleButtonAttrs(): Seq[AttrPair[Element, String]] = {
     import scalatags.JsDom.all._
     Seq(
@@ -73,15 +73,16 @@ object UdashCollapse {
   }
 
   /**
-    * Creates collapsible component.
-    * More: <a href="http://getbootstrap.com/javascript/#collapse">Bootstrap Docs</a>.
+    * Creates a collapsible component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/">Bootstrap Docs</a>.
     *
     * @param parentSelector If a selector is provided, all collapsible elements under the specified parent will be
     *                       closed when this collapsible item is shown.
     * @param toggleOnInit   Toggles the collapsible element on invocation.
-    * @param componentId    Id of the root DOM node.
-    * @param content        Collapse component content
-    * @return `UdashCollapse` component, call render to create DOM element.
+    * @param componentId    An id of the root DOM node.
+    * @param content        A content of the component.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashCollapse` component, call `render` to create a DOM element.
     */
   def apply(
     parentSelector: Option[String] = None,

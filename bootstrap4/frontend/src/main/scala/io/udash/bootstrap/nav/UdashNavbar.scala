@@ -63,19 +63,20 @@ object UdashNavbar {
   }
 
   /**
-    * Creates default responsive navigation bar. More: <a href="http://getbootstrap.com/components/#navbar">Bootstrap Docs</a>.
+    * Creates a default, responsive navigation bar.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/navbar/">Bootstrap Docs</a>.
     *
     * @param expandBreakpoint  Screen size breakpoint to switch between collapsed and expanded menu.
     * @param darkStyle         If true, enables dark navigation bar theme.
     * @param backgroundStyle   Selects navigation bar background style.
     * @param position          Sets bar position.
-    * @param componentId       Id of the root DOM node.
+    * @param componentId       An id of the root DOM node.
     * @param navigationFactory Navigation component factory - if you want to clean up the created navigation on
     *                          the navigation bar cleanup pass it to the provided interceptor.
-    * @param brand             Brand DOM element.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashNavbar` component, call render to create DOM element.
+    * @param brand             A brand DOM element.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashNavbar` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     expandBreakpoint: ReadableProperty[BootstrapStyles.ResponsiveBreakpoint] = BootstrapStyles.ResponsiveBreakpoint.Large.toProperty,

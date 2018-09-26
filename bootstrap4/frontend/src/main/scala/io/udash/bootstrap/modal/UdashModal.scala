@@ -3,6 +3,7 @@ package modal
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils._
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
@@ -17,9 +18,9 @@ final class UdashModal private(
   keyboard: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  headerFactory: Option[() => Element],
-  bodyFactory: Option[() => Element],
-  footerFactory: Option[() => Element]
+  headerFactory: Option[Binding.NestedInterceptor => Element],
+  bodyFactory: Option[Binding.NestedInterceptor => Element],
+  footerFactory: Option[Binding.NestedInterceptor => Element]
 ) extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
   import UdashModal._
@@ -47,7 +48,7 @@ final class UdashModal private(
       (bodyFactory, BootstrapStyles.Modal.body),
       (footerFactory, BootstrapStyles.Modal.footer)
     ).collect { case (Some(factory), styleName) =>
-      factory().styles(styleName)
+      factory(nestedInterceptor).styles(styleName)
     }
 
     val el = div(
@@ -98,18 +99,22 @@ object UdashModal {
   }
 
   /**
-    * Creates modal window. More: <a href="http://getbootstrap.com/javascript/#modals">Bootstrap Docs</a>.
+    * Creates a modal window.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/modal/">Bootstrap Docs</a>.
     *
-    * @param modalSize     Modal window size.
-    * @param fade          If true, show&hide will be animated.
-    * @param labelId       ID of the label describing this modal.
+    * @param modalSize     A window size. One of the standard bootstrap sizes `BootstrapStyles.Size`.
+    * @param fade          If true, show and hide will be animated.
+    * @param labelId       An id of the label describing this modal.
     * @param backdrop      Modal backdrop type.
     * @param keyboard      If true, allows user to close modal with keyboard (Esc button).
-    * @param componentId   Id of the root DOM node.
+    * @param componentId   An id of the root DOM node.
     * @param headerFactory Creates content of modal header. Modal will be rendered without the header if `None`.
+    *                      Use the provided interceptor to properly clean up bindings inside the content.
     * @param bodyFactory   Creates content of modal body. Modal will be rendered without body if `None`.
+    *                      Use the provided interceptor to properly clean up bindings inside the content.
     * @param footerFactory Creates content of modal footer. Modal without footer will be rendered if `None`.
-    * @return `UdashModal` component, call render to create DOM element.
+    *                      Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashModal` component, call `render` to create a DOM element.
     */
   def apply(
     modalSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -119,9 +124,9 @@ object UdashModal {
     keyboard: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    headerFactory: Option[() => Element],
-    bodyFactory: Option[() => Element],
-    footerFactory: Option[() => Element]
+    headerFactory: Option[Binding.NestedInterceptor => Element],
+    bodyFactory: Option[Binding.NestedInterceptor => Element],
+    footerFactory: Option[Binding.NestedInterceptor => Element]
   ): UdashModal = {
     new UdashModal(
       modalSize, fade, labelId, backdrop, keyboard, componentId
@@ -129,7 +134,7 @@ object UdashModal {
   }
 
   /** Attributes which should be added to button closing the modal window.
-    * Example: `UdashButton()(UdashModal.CloseButtonAttr, "Close...")` */
+    * Example: `UdashButton()(_ => Seq[Modifier](UdashModal.CloseButtonAttr, "Close..."))` */
   lazy val CloseButtonAttr: scalatags.generic.AttrPair[Element, String] = {
     import scalatags.JsDom.all._
     BootstrapTags.dataDismiss := "modal"

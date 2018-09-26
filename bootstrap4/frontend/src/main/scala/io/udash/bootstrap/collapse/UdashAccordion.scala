@@ -61,16 +61,18 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
 object UdashAccordion {
   /**
-    * Creates dynamic accordion component. `items` sequence changes will be synchronised with rendered button group.
-    * More: <a href="http://getbootstrap.com/javascript/#collapse-example-accordion">Bootstrap Docs</a>.
+    * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#accordion-example">Bootstrap Docs</a>.
     *
-    * @param elements          Data items which will be represented as panels in accordion.
-    * @param componentId       Id of the root DOM node.
-    * @param heading           Creates panel header.
-    * @param body              Creates panel body.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashAccordion` component, call render to create DOM element.
+    * @param elements    Data items which will be represented as cards in the accordion.
+    * @param componentId An id of the root DOM node.
+    * @param heading     Creates panel header.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @param body        Creates panel body.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashAccordion` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     elements: seq.ReadableSeqProperty[ItemType, ElemType],

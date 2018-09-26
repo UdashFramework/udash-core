@@ -25,13 +25,14 @@ final class UdashJumbotron private(
 
 object UdashJumbotron {
   /**
-    * Creates jumbotron component.
-    * More: <a href="http://getbootstrap.com/javascript/#jumbotron">Bootstrap Docs</a>.
+    * Creates a jumbotron component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/jumbotron/">Bootstrap Docs</a>.
     *
     * @param fluid       If true, applies `jumbotron-fluid` style.
-    * @param componentId Id of the root DOM node.
-    * @param content     Jumbotron content.
-    * @return `UdashJumbotron` component, call render to create DOM element.
+    * @param componentId An id of the root DOM node.
+    * @param content     A jumbotron content.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashJumbotron` component, call `render` to create a DOM element.
     */
   def apply(
     fluid: ReadableProperty[Boolean] = UdashBootstrap.False,

@@ -14,7 +14,6 @@ final class UdashAlert private[alert](
     template(content(nestedInterceptor)).render
 }
 
-/** Standard alert component. */
 object UdashAlert extends UdashAlertBaseCompanion[UdashAlert] {
   protected def create(alertStyle: ReadableProperty[BootstrapStyles.Color], componentId: ComponentId)(
     content: Binding.NestedInterceptor => Modifier

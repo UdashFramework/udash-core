@@ -40,7 +40,6 @@ final class DismissibleUdashAlert private[alert](
     buttonRendered.click()
 }
 
-/** Dismissible alert component. */
 object DismissibleUdashAlert extends UdashAlertBaseCompanion[DismissibleUdashAlert] {
   protected def create(alertStyle: ReadableProperty[BootstrapStyles.Color], componentId: ComponentId)(
     content: Binding.NestedInterceptor => Modifier

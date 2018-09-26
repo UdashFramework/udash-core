@@ -24,12 +24,14 @@ object UdashInputGroup {
   import io.udash.css.CssView._
 
   /**
-    * Creates input group. More: <a href="http://getbootstrap.com/components/#input-groups">Bootstrap Docs</a>.
+    * Creates an inputs group.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/input-group/">Bootstrap Docs</a>.
     *
-    * @param groupSize   Size of the inputs in group.
-    * @param componentId Id of the root DOM node.
-    * @param content     Group content.
-    * @return `UdashInputGroup` component, call render to create DOM element.
+    * @param groupSize   A size of the inputs in group. One of standard bootstrap values: `BootstrapStyles.Size`.
+    * @param componentId An id of the root DOM node.
+    * @param content     The group content. The elements usually need to be wrapped with methods like:
+    *                    `UdashInputGroup.input`, `UdashInputGroup.select`, `UdashInputGroup.prepend`, `UdashInputGroup.append`, etc.
+    * @return A `UdashInputGroup` component, call `render` to create a DOM element.
     */
   def apply(
     groupSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,

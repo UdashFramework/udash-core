@@ -63,7 +63,8 @@ object UdashNav {
   }
 
   /**
-    * Creates navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    * Creates a navigation component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/navs/">Bootstrap Docs</a>.
     *
     * @param panels      Sequence of elements to be converted into navigation.
     * @param align       Alignment of elements in navigation component.
@@ -72,14 +73,15 @@ object UdashNav {
     * @param justified   If true, adjusts items width (all elements with equal width) to fill the whole component space.
     * @param tabs        If true, applies `nav-tabs` style.
     * @param pills       If true, applies `nav-pills` style.
-    * @param componentId Id of root DOM node.
+    * @param componentId An id of the root DOM node.
     * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
     * @param isActive    Creates property indicating if an element is active.
     * @param isDisabled  Creates property indicating if an element is disabled.
     * @param isDropdown  Creates property indicating if an element has a dropdown menu.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashNav` component, call render to create DOM element.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashNav` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     panels: seq.ReadableSeqProperty[ItemType, ElemType],
@@ -102,7 +104,8 @@ object UdashNav {
   }
 
   /**
-    * Creates default navigation. More: <a href="http://getbootstrap.com/components/#nav">Bootstrap Docs</a>.
+    * Creates a navigation component based on the default `NavItem`.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/navs/">Bootstrap Docs</a>.
     *
     * @param panels      Sequence of elements to be converted into navigation.
     * @param align       Alignment of elements in navigation component.
@@ -111,13 +114,14 @@ object UdashNav {
     * @param justified   If true, adjusts items width (all elements with equal width) to fill the whole component space.
     * @param tabs        If true, applies `nav-tabs` style.
     * @param pills       If true, applies `nav-pills` style.
-    * @param componentId Id of root DOM node.
+    * @param componentId An id of the root DOM node.
     * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
     * @param isActive    Creates property indicating if an element is active.
     * @param isDisabled  Creates property indicating if an element is disabled.
     * @param isDropdown  Creates property indicating if an element has a dropdown menu.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashNav` component, call render to create DOM element.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashNav` component, call `render` to create a DOM element.
     */
   def default[ElemType <: ReadableProperty[NavItem]](
     panels: seq.ReadableSeqProperty[NavItem, ElemType],

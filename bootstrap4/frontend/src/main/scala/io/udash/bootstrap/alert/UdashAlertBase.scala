@@ -28,11 +28,13 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
   ): T
 
   /**
-    * Creates an alert with provided style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>.
+    * Creates an alert with provided style.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/alerts/">Bootstrap Docs</a>.
     *
-    * @param alertStyle  Color of the alert.
-    * @param componentId Id of the root DOM node.
-    * @return `UdashAlert` component, call render to create a DOM element.
+    * @param alertStyle  A color of the alert.
+    * @param componentId An id of the root DOM node.
+    * @param content     A content of the alert. Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashAlert` component, call `render` to create a DOM element.
     */
   def apply(
     alertStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,

@@ -22,7 +22,7 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
     selector.tooltip("toggle")
 
   /** Hides and destroys an element's popover.
-    * Check <a href="https://getbootstrap.com/docs/3.3/javascript/#popovers-methods">Bootstrap Docs</a> for more details. */
+    * Check <a href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details. */
   def destroy(): Unit =
     selector.tooltip("destroy")
 

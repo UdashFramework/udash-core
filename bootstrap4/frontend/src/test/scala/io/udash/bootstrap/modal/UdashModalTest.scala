@@ -1,6 +1,7 @@
 package io.udash.bootstrap.modal
 
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
@@ -9,9 +10,9 @@ import scalatags.JsDom.all._
 class UdashModalTest extends UdashFrontendTest {
 
   "UdashModal component" should {
-    val header = () => div("Header ").render
-    val body = () => div("Body ").render
-    val footer = () => div("Footer ").render
+    val header = (_: Binding.NestedInterceptor) => div("Header ").render
+    val body = (_: Binding.NestedInterceptor) => div("Body ").render
+    val footer = (_: Binding.NestedInterceptor) => div("Footer ").render
 
     "call listeners on opening and closing" in {
       import UdashModal._

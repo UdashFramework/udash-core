@@ -44,6 +44,7 @@ final class UdashForm private(
       )(content(nestedInterceptor))
     }
 
+    /** Provides input elements factory methods. */
     object input {
       /**
         * Creates a standard form group for the provided input. It contains a label and validation feedback elements.
@@ -53,15 +54,20 @@ final class UdashForm private(
         * @param horizontal      Optional settings for a horizontal layout. If `None`, the layout will be organized vertically.
         * @param inputId         Id of the `input` form control. This value is used to properly set `for` attribute of the label.
         * @param groupId         Id of the root element.
-        * @param input           The input element. IT can be wrapped into `UdashInputGroup` or any other decoration.
+        * @param input           The input element. It can be wrapped into `UdashInputGroup` or any other decoration.
+        *                        Use the provided interceptor to properly clean up bindings inside the content.
         * @param labelContent    Optional label content.
         *                        It will be wrapped into `label` element with properly set `for` attribute.
+        *                        Use the provided interceptor to properly clean up bindings inside the content.
         * @param validFeedback   Optional content of positive validation feedback.
         *                        It will be wrapped into `div` element with `valid-feedback` style.
+        *                        Use the provided interceptor to properly clean up bindings inside the content.
         * @param invalidFeedback Optional content of negative validation feedback.
         *                        It will be wrapped into `div` element with `invalid-feedback` style.
+        *                        Use the provided interceptor to properly clean up bindings inside the content.
         * @param helpText        Optional content of help text block.
         *                        It will be wrapped into `div` element with `form-text text-muted` style.
+        *                        Use the provided interceptor to properly clean up bindings inside the content.
         */
       def formGroup(
         horizontal: Option[(Int, Int, ResponsiveBreakpoint, ReadableProperty[Option[BootstrapStyles.Size]])] = None, // TODO horizontal options case class
@@ -114,6 +120,7 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def textInput(
         property: Property[String],
@@ -148,6 +155,7 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def passwordInput(
         property: Property[String],
@@ -182,6 +190,7 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def numberInput(
         property: Property[String],
@@ -216,6 +225,7 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param inputId           Id of the input DOM element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def textArea(
         property: Property[String],
@@ -251,12 +261,16 @@ final class UdashForm private(
         * @param inputId             Id of the input DOM element.
         * @param inputName           Input element name.
         * @param inputModifier       Modifiers applied directly to the `input` element.
+        *                            Use the provided interceptor to properly clean up bindings inside the content.
         * @param labelContent        Required label content.
         *                            It will be wrapped into `label` element with properly set `for` attribute.
+        *                            Use the provided interceptor to properly clean up bindings inside the content.
         * @param validFeedback       Optional content of positive validation feedback.
         *                            It will be wrapped into `div` element with `valid-feedback` style.
+        *                            Use the provided interceptor to properly clean up bindings inside the content.
         * @param invalidFeedback     Optional content of negative validation feedback.
         *                            It will be wrapped into `div` element with `invalid-feedback` style.
+        *                            Use the provided interceptor to properly clean up bindings inside the content.
         */
       def fileInput(
         selectedFiles: SeqProperty[File],
@@ -304,6 +318,7 @@ final class UdashForm private(
         * @param inputId           Id of the input DOM element.
         * @param itemLabel         Provides options' labels.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def select[T : PropertyCreator](
         selectedItem: Property[T],
@@ -341,6 +356,7 @@ final class UdashForm private(
         * @param inputId           Id of the input DOM element.
         * @param itemLabel         Provides options' labels.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def multiSelect[T: PropertyCreator, ElemType <: Property[T]](
         selectedItems: seq.SeqProperty[T, ElemType],
@@ -376,12 +392,16 @@ final class UdashForm private(
         * @param inputId           Id of the input DOM element.
         * @param groupId           Id of the root element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param labelContent      Optional label content.
         *                          It will be wrapped into `label` element with properly set `for` attribute.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param validFeedback     Optional content of positive validation feedback.
         *                          It will be wrapped into `div` element with `valid-feedback` style.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param invalidFeedback   Optional content of negative validation feedback.
         *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def checkbox(
         property: Property[Boolean],
@@ -426,12 +446,20 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param groupId           Id of the root element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param labelContent      Optional label content.
         *                          It will be wrapped into `label` element with properly set `for` attribute.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param validFeedback     Optional content of positive validation feedback.
         *                          It will be wrapped into `div` element with `valid-feedback` style.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param invalidFeedback   Optional content of negative validation feedback.
         *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def checkButtons[T : PropertyCreator](
         selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
@@ -461,12 +489,20 @@ final class UdashForm private(
         * @param validationTrigger Selects the event updating validation state of the input.
         * @param groupId           Id of the root element.
         * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param labelContent      Optional label content.
         *                          It will be wrapped into `label` element with properly set `for` attribute.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param validFeedback     Optional content of positive validation feedback.
         *                          It will be wrapped into `div` element with `valid-feedback` style.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         * @param invalidFeedback   Optional content of negative validation feedback.
         *                          It will be wrapped into `div` element with `invalid-feedback` style.
+        *                          The factory takes item value and index as the arguments.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def radioButtons[T : PropertyCreator](
         selectedItem: Property[T],
@@ -605,6 +641,7 @@ final class UdashForm private(
       }
     }
 
+    /** Provides grid elements factory methods. */
     object grid {
       def row(content: Modifier*): Modifier =
         div(BootstrapStyles.Grid.row)(content)
@@ -638,54 +675,62 @@ object UdashForm {
 
   final class ValidationTrigger(implicit enumCtx: EnumCtx) extends AbstractValueEnum
   object ValidationTrigger extends AbstractValueEnumCompanion[ValidationTrigger] {
-    // TODO describe these options
+    // TODO describe these options and other AbstractValueEnums too
     final val None, Instant, OnChange, OnBlur, OnSubmit: Value = new ValidationTrigger
   }
 
-  // TODO verify these examples
   /**
-    * Creates standard form with provided content. <br/>
+    * Creates a standard form with a provided content. <br/>
     * Example: <br/>
     * <pre>
-    * UdashForm(
-    *   UdashForm.textInput()("Email")(user.subProp(_.email)),
-    *   UdashForm.passwordInput()("Password")(user.subProp(_.password))
-    * ).render
-    * </pre>
-    * Grid example: <br/>
-    * <pre>
-    * UdashForm(
-    *   UdashForm.Grid.formRow(
-    *     UdashForm.Grid.col(UdashForm.textInput()("Email")(user.subProp(_.email))),
-    *     UdashForm.Grid.col(UdashForm.passwordInput()("Password")(user.subProp(_.password)))
+    * UdashForm() { factory => Seq(
+    *   factory.input.formGroup()(
+    *     nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
+    *     labelContent = nested => Some(span("Name: ", nested(bind(name)))),
+    *     validFeedback = _ => Some(span("Looks good.")),
+    *     invalidFeedback = _ => Some(span("Name is too short."))
+    *   ),
+    *   factory.input.formGroup()(
+    *     nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
+    *     labelContent = nested => Some(span("Password: ", nested(bind(name)))),
+    *     validFeedback = _ => Some(span("Looks good.")),
+    *     invalidFeedback = _ => Some(span("Name is too short."))
     *   )
-    * ).render
+    * )}.render
     * </pre>
-    * More: <a href="http://getbootstrap.com/css/#forms">Bootstrap Docs</a>.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/">Bootstrap Docs</a>.
     *
-    * @param componentId Id of the root DOM node.
-    * @param content     Form content - usually you should pass controls (automatically wrapped into form groups) here.
-    *                    You can also use the grid system to prepare more complex layout.
-    * @return `UdashForm` component, call render to create DOM element.
+    * @param componentId An id of the root DOM node.
+    * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
+    * @return A `UdashForm` component, call `render` to create a DOM element.
     */
   def apply(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
     new UdashForm(None, componentId)(content)
 
   /**
-    * Creates inline form with provided content. <br/>
+    * Creates an inline form with a provided content. <br/>
     * Example: <br/>
     * <pre>
-    * UdashForm.inline(
-    *   UdashForm.textInput()("Email")(user.subProp(_.email)),
-    *   UdashForm.passwordInput()("Password")(user.subProp(_.password))
-    * ).render
+    * UdashForm.inline() { factory => Seq(
+    *   factory.input.formGroup()(
+    *     nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
+    *     labelContent = nested => Some(span("Name: ", nested(bind(name)))),
+    *     validFeedback = _ => Some(span("Looks good.")),
+    *     invalidFeedback = _ => Some(span("Name is too short."))
+    *   ),
+    *   factory.input.formGroup()(
+    *     nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
+    *     labelContent = nested => Some(span("Password: ", nested(bind(name)))),
+    *     validFeedback = _ => Some(span("Looks good.")),
+    *     invalidFeedback = _ => Some(span("Name is too short."))
+    *   )
+    * )}.render
     * </pre>
-    * More: <a href="http://getbootstrap.com/css/#forms-inline">Bootstrap Docs</a>.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/#inline-forms">Bootstrap Docs</a>.
     *
-    * @param componentId Id of the root DOM node.
-    * @param content     Form content - usually you should pass controls (automatically wrapped into form groups) here.
-    *                    You can also use the grid system to prepare more complex layout.
-    * @return `UdashForm` component, call render to create DOM element.
+    * @param componentId An id of the root DOM node.
+    * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
+    * @return A `UdashForm` component, call `render` to create a DOM element.
     */
   def inline(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
     new UdashForm(Some(BootstrapStyles.Form.inline), componentId)(content)

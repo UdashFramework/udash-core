@@ -15,7 +15,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 import scala.util.Try
 
-/** Wrapper for <a href="http://eonasdan.github.io/bootstrap-datetimepicker/">Bootstrap 3 Datepicker</a>. */
+/** Wrapper for the <a href="https://github.com/tempusdominus/bootstrap-4/">Bootstrap 4 Datepicker</a>. */
 final class UdashDatePicker private[datepicker](
   val date: Property[Option[ju.Date]],
   options: ReadableProperty[UdashDatePicker.DatePickerOptions],
@@ -192,7 +192,14 @@ final class UdashDatePicker private[datepicker](
 object UdashDatePicker {
   import scalatags.JsDom.all._
 
-  /** Creates date picker component. */
+  /** Creates a date picker component.
+    * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
+    *
+    * @param date        A date selected in the input.
+    * @param options     A date picker's behaviour options.
+    * @param componentId The arousel DOM element id.
+    * @return A `UdashDatePicker` component, call `render` to create a DOM element representing this button.
+    */
   def apply(
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
@@ -200,7 +207,13 @@ object UdashDatePicker {
   )(): UdashDatePicker =
     new UdashDatePicker(date, options, componentId)
 
-  /** Creates date range selector from provided date pickers. */
+  /** Combines two date pickers into a date range selector.
+    * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
+    *
+    * @param fromOptions   Options of the `from` picker.
+    * @param toOptions     Options of the `to` picker.
+    * @return Registration cancelling the range selector.
+    */
   def dateRange(from: UdashDatePicker, to: UdashDatePicker)(
     fromOptions: Property[DatePickerOptions],
     toOptions: Property[DatePickerOptions]

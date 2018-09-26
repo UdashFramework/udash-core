@@ -55,17 +55,19 @@ object UdashButton {
     extends AbstractCase with ListenableEvent[UdashButton]
 
   /**
-    * Creates button component, more: <a href="http://getbootstrap.com/css/#buttons">Bootstrap Docs</a>.
+    * Creates a button component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/">Bootstrap Docs</a>.
     *
-    * @param buttonStyle Button style, one of the standard bootstrap colors `BootstrapStyles.Color`.
-    * @param size        Button size, one of the standard bootstrap sizes `BootstrapStyles.Size`.
-    * @param outline     If true, selects outline style for the button.
+    * @param buttonStyle A button style, one of the standard bootstrap colors `BootstrapStyles.Color`.
+    * @param size        A button size, one of the standard bootstrap sizes `BootstrapStyles.Size`.
+    * @param outline     If true, selects the outline style for the button. More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/#outline-buttons">Bootstrap Docs</a>.
     * @param block       If true, rendered button will be a full-width block.
-    * @param active      Property indicating if the button is in the `active` state.
-    * @param disabled    Property indicating if the button is disabled.
-    * @param componentId Id of the root DOM node.
-    * @param content     Button content
-    * @return `UdashButton` component, call render to create DOM element representing this button.
+    * @param active      A property indicating if the button is in the `active` state.
+    * @param disabled    A property indicating if the button is disabled.
+    * @param componentId An id of the root DOM node.
+    * @param content     A content of the button.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashButton` component, call `render` to create a DOM element representing this button.
     */
   def apply(
     buttonStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
@@ -79,17 +81,18 @@ object UdashButton {
     new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content)
 
   /**
-    * Creates toggle button component. It will automatically toggle `active` property on click.
-    * More: <a href="http://getbootstrap.com/css/#buttons">Bootstrap Docs</a>.
+    * Creates a toggle button component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/">Bootstrap Docs</a>.
     *
-    * @param buttonStyle Button style
-    * @param size        Button size
-    * @param block       If true, the rendered button will be a full-width block
-    * @param active      Property indicating if the button is in `active` state.
-    * @param disabled    Property indicating if the button is disabled.
-    * @param componentId Id of the root DOM node.
-    * @param content     Button content
-    * @return `UdashButton` component, call render to create DOM element representing this button.
+    * @param active      A property indicating if the button is in the `active` state.
+    * @param buttonStyle A button style, one of the standard bootstrap colors `BootstrapStyles.Color`.
+    * @param size        A button size, one of the standard bootstrap sizes `BootstrapStyles.Size`.
+    * @param outline     If true, selects the outline style for the button. More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/#outline-buttons">Bootstrap Docs</a>.
+    * @param block       If true, rendered button will be a full-width block.
+    * @param disabled    A property indicating if the button is disabled.
+    * @param componentId An id of the root DOM node.
+    * @param content     A content of the button. Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashButton` component, call `render` to create a DOM element representing this button.
     */
   def toggle(
     active: Property[Boolean],

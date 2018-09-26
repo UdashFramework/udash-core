@@ -21,7 +21,7 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
   def toggle(): Unit
 
   /** Hides and destroys an element's popover.
-    * Check <a href="https://getbootstrap.com/docs/3.3/javascript/#popovers-methods">Bootstrap Docs</a> for more details. */
+    * Check <a href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details. */
   def destroy(): Unit
 
   private[tooltip] def reloadContent(): Unit
@@ -48,9 +48,9 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
   }
 
   /**
-    * Add tooltip/popover to provided element.
-    * More: <a href="http://getbootstrap.com/javascript/#tooltips">Bootstrap Docs (Tooltip)</a>.
-    * More: <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap Docs (Popover)</a>.
+    * Adds tooltip/popover to provided element.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/tooltips/">Bootstrap Docs (Tooltip)</a>.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/popovers/">Bootstrap Docs (Popover)</a>.
     *
     * @param animation Apply a CSS fade transition to the popover.
     * @param boundary  Keeps the popover within the bounds of this element.
@@ -95,9 +95,9 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     )(el)
 
   /**
-    * Add tooltip/popover to provided element with translated content.
-    * More: <a href="http://getbootstrap.com/javascript/#tooltips">Bootstrap Docs (Tooltip)</a>.
-    * More: <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap Docs (Popover)</a>.
+    * Adds tooltip/popover to provided element with translated content.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/tooltips/">Bootstrap Docs (Tooltip)</a>.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/popovers/">Bootstrap Docs (Popover)</a>.
     *
     * @param animation Apply a CSS fade transition to the popover.
     * @param boundary  Keeps the popover within the bounds of this element.

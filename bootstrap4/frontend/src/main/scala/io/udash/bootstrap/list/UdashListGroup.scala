@@ -30,16 +30,17 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
 object UdashListGroup {
   /**
-    * Creates list group component, synchronised with provided [[SeqProperty]].
-    * More: <a href="http://getbootstrap.com/javascript/#list-group">Bootstrap Docs</a>.
+    * Creates a list group component, synchronised with a provided items sequence.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/list-group/">Bootstrap Docs</a>.
     *
-    * @param items SeqProperty containing list element data.
-    * @param flush If true, applies `list-group-flush` style.
-    * @param componentId Id of the root DOM node.
-    * @param itemFactory Creates DOM representation for provided item.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashBreadcrumbs` component, call render to create DOM element.
+    * @param items       Data items which will be represented as DOM elements in this group.
+    * @param flush       If true, applies `list-group-flush` style.
+    * @param componentId An id of the root DOM node.
+    * @param itemFactory Creates DOM representation of the provided element.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashBreadcrumbs` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],

@@ -122,20 +122,23 @@ object UdashPagination {
   }
 
   /**
-    * Creates pagination component. More: <a href="http://getbootstrap.com/components/#pagination">Bootstrap Docs</a>.
+    * Creates pagination component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/pagination/">Bootstrap Docs</a>.
     *
     * @param pages           Sequence of available pages.
-    * @param selectedPageIdx Property containing selected page index.
-    * @param paginationSize  Pagination component size.
+    * @param selectedPageIdx A property containing selected page index.
+    * @param paginationSize  A pagination component size.
     * @param showArrows      If property value is true, shows next/prev page arrows.
     * @param highlightActive If property value is true, highlights selected page.
-    * @param componentId     Id of the root DOM node.
-    * @param itemFactory     Creates button for element in pagination.
-    * @tparam PageType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashPagination` component, call render to create DOM element.
+    * @param componentId     An id of the root DOM node.
+    * @param itemFactory     Creates button for each element in `pages`.
+    *                        The factory gets an element property, type and index as arguments.
+    *                        Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam PageType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashPagination` component, call `render` to create a DOM element.
     */
-  def apply[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]](
+  def apply[PageType: PropertyCreator, ElemType <: ReadableProperty[PageType]](
     pages: seq.ReadableSeqProperty[PageType, ElemType],
     selectedPageIdx: Property[Int],
     paginationSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,

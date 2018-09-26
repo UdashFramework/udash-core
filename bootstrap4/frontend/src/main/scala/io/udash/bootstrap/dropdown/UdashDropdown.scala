@@ -161,20 +161,21 @@ object UdashDropdown {
     span(nestedInterceptor(produce(item)(itemFactory))).render
   }
 
-  // TODO update all Bootstrap docs links
   /**
-    * Creates dropdown component.
-    * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
+    * Creates a dropdown component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
     *
-    * @param items          Data items which will be represented as links in dropdown menu.
-    * @param dropDirection  Direction of menu expansion.
+    * @param items          Data items which will be represented as the elements in this dropdown.
+    * @param dropDirection  A direction of the menu expansion.
     * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-    * @param buttonToggle   If false, the toggle button will be replaced with `a` element.
-    * @param itemFactory    Creates DOM element which is inserted into dropdown menu.
-    * @param buttonContent  Content of the element opening dropdown.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashDropdown` component, call render to create DOM element.
+    * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+    * @param itemFactory    Creates DOM element for each item which is inserted into the dropdown menu.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @param buttonContent  Content of the element opening the dropdown.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashDropdown` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
@@ -190,15 +191,16 @@ object UdashDropdown {
   }
 
   /**
-    * Creates dropdown component.
-    * More: <a href="http://getbootstrap.com/javascript/#dropdowns">Bootstrap Docs</a>.
+    * Creates a dropdown component with [[DefaultDropdownItem]] as items.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
     *
-    * @param items          Data items which will be represented as links in dropdown menu.
-    * @param dropDirection  Direction of menu expansion.
+    * @param items          Data items which will be represented as the elements in this dropdown.
+    * @param dropDirection  A direction of the menu expansion.
     * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-    * @param buttonToggle   If false, the toggle button will be replaced with `a` element.
-    * @param buttonContent  Content of the element opening dropdown.
-    * @return `UdashDropdown` component, call render to create DOM element.
+    * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+    * @param buttonContent  Content of the element opening the dropdown.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashDropdown` component, call `render` to create a DOM element.
     */
   def default[ElemType <: ReadableProperty[DefaultDropdownItem]](
     items: seq.ReadableSeqProperty[DefaultDropdownItem, ElemType],

@@ -56,10 +56,10 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
 object UdashTable {
 
   /**
-    * Creates progress bar component.
-    * More: <a href="http://getbootstrap.com/css/#tables">Bootstrap Docs</a>.
+    * Creates a table component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/content/tables/">Bootstrap Docs</a>.
     *
-    * @param items          Elements which will be rendered as rows.
+    * @param items          Elements which will be rendered as the table rows.
     * @param responsive     If defined, the table will be horizontally scrollable on selected screen size.
     * @param dark           Switch table to the dark theme.
     * @param striped        Turn on zebra-striping.
@@ -67,15 +67,18 @@ object UdashTable {
     * @param borderless     Removes all borders.
     * @param hover          Highlight row on hover.
     * @param small          Makes table more compact.
-    * @param componentId    Id of the root DOM node.
+    * @param componentId    An id of the root DOM node.
     * @param rowFactory     Creates row representation of the table element - it should create the `tr` tag.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
     * @param headerFactory  Creates table header - it should create the `tr` tag.
     *                       Table without header will be rendered if `None` passed.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
     * @param captionFactory Creates table caption - the result will be wrapped into the `caption` tag.
     *                       Table without caption will be rendered if `None` passed.
-    * @tparam ItemType Single element type in `items`.
-    * @tparam ElemType Type of the property containing every element in `items` sequence.
-    * @return `UdashTable` component, call render to create DOM element.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashTable` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],

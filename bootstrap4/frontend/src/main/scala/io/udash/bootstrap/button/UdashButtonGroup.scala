@@ -41,15 +41,15 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
 
 object UdashButtonGroup {
   /**
-    * Creates a static button group.
-    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    * Creates a static buttons group.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/button-group/">Bootstrap Docs</a>.
     *
-    * @param size        Buttons group size.
-    * @param vertical    If true, buttons will be rendered vertically.
-    * @param justified   If true, buttons will be justified.
-    * @param componentId Id of the root DOM node.
-    * @param buttons     Rendered buttons (or groups) belonging to this group.
-    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    * @param size        A buttons group size. It shadows the size of each button.
+    * @param vertical    If true, the buttons will be rendered vertically.
+    * @param justified   If true, the buttons will be justified.
+    * @param componentId An id of the root DOM node.
+    * @param buttons     Rendered buttons belonging to this group.
+    * @return A `UdashButtonGroup` component, call `render` to create a DOM element representing this group.
     */
   def apply(
     size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -65,17 +65,19 @@ object UdashButtonGroup {
 
 
   /**
-    * Creates dynamic button group. `items` sequence changes will be synchronized with rendered button group.
-    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    * Creates a dynamic button group. `items` sequence changes will be synchronized with the rendered button group.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/button-group/">Bootstrap Docs</a>.
     *
-    * @param items       Data items which will be represented as buttons in this group.
-    * @param size        Buttons group size.
-    * @param vertical    If true, buttons will be rendered vertically.
-    * @param justified   If true, buttons will be justified.
+    * @param items       Data items which will be represented as the buttons in this group.
+    * @param size        A buttons group size. It shadows the size of each button.
+    * @param vertical    If true, the buttons will be rendered vertically.
+    * @param justified   If true, the buttons will be justified.
+    * @param componentId An id of the root DOM node.
     * @param itemFactory Creates a button based on an item from the `items` sequence.
-    * @tparam ItemType Single element type in the `items` sequence.
-    * @tparam ElemType Type of the property containing every element in the `items` sequence.
-    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    *                    Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashButtonGroup` component, call `render` to create a DOM element representing this group.
     */
   def reactive[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
@@ -90,19 +92,19 @@ object UdashButtonGroup {
   }
 
   /**
-    * Creates dynamic toggle buttons group. Add/remove element from `items` sequence
-    * and it will be synchronised with presented group.
-    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    * Creates a dynamic toggle buttons group. `items` sequence changes will be synchronized with the rendered button group.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/button-group/">Bootstrap Docs</a>.
     *
-    * @param selectedItems Elements represented by active buttons.
+    * @param selectedItems Elements represented by the active buttons.
     * @param options       Data items which will be represented as buttons in this group.
-    * @param size          button group size
-    * @param vertical      If true, buttons will be rendered vertically
-    * @param justified     If true, buttons will be justified
+    * @param size          A buttons group size. It shadows the size of each button.
+    * @param vertical      If true, the buttons will be rendered vertically.
+    * @param justified     If true, the buttons will be justified.
+    * @param componentId   An id of the root DOM node.
     * @param btnFactory    It should create UdashButton instance based on provided item and active property.
     *                      Don't forget to pass the second argument to created button as `active` arguemnt.
     *                      The default implementation uses `toString` in order to create a button's content.
-    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    * @return A `UdashButtonGroup` component, call `render` to create a DOM element representing this group.
     */
   def checkboxes[ItemType, ElemType <: ReadableProperty[ItemType]](
     selectedItems: SeqProperty[ItemType],
@@ -133,19 +135,19 @@ object UdashButtonGroup {
   }
 
   /**
-    * Creates dynamic radio buttons group. Add/remove element from `items` sequence
-    * and it will be synchronised with presented button group.
-    * More: <a href="http://getbootstrap.com/components/#btn-groups">Bootstrap Docs</a>.
+    * Creates a dynamic radio buttons group. `items` sequence changes will be synchronized with the rendered button group.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/button-group/">Bootstrap Docs</a>.
     *
-    * @param selectedItem  Element represented by active button.
-    * @param options       Data items which will be represented as buttons in this group.
-    * @param size          button group size
-    * @param vertical      If true, buttons will be rendered vertically
-    * @param justified     If true, buttons will be justified
-    * @param btnFactory    It should create UdashButton instance based on provided item and active property.
-    *                      Don't forget to pass the second argument to created button as `active` arguemnt.
-    *                      The default implementation uses `toString` in order to create a button's content.
-    * @return `UdashButtonGroup` component, call render to create DOM element representing this group.
+    * @param selectedItem An element represented by the active buttons.
+    * @param options      Data items which will be represented as buttons in this group.
+    * @param size         A buttons group size. It shadows the size of each button.
+    * @param vertical     If true, the buttons will be rendered vertically.
+    * @param justified    If true, the buttons will be justified.
+    * @param componentId  An id of the root DOM node.
+    * @param btnFactory   It should create UdashButton instance based on provided item and active property.
+    *                     Don't forget to pass the second argument to created button as `active` arguemnt.
+    *                     The default implementation uses `toString` in order to create a button's content.
+    * @return A `UdashButtonGroup` component, call `render` to create a DOM element representing this group.
     */
   def radio[ItemType, ElemType <: ReadableProperty[ItemType]](
     selectedItem: Property[ItemType],

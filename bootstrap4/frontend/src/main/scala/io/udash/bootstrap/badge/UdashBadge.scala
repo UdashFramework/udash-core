@@ -42,14 +42,14 @@ private[badge] class UdashBadgeLink(
 
 object UdashBadge {
   /**
-    * Creates badge component.
-    * More: <a href="http://getbootstrap.com/javascript/#badges">Bootstrap Docs</a>.
+    * Creates a badge component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/badge/">Bootstrap Docs</a>.
     *
-    * @param badgeStyle Color of the badge.
-    * @param pillStyle If true, the `badge-pill` style will be applied.
-    * @param componentId Id of the root DOM node.
-    * @param content Badge content.
-    * @return `UdashBadge` component, call render to create a DOM element.
+    * @param badgeStyle  A color of the badge.
+    * @param pillStyle   If true, the `badge-pill` style will be applied.
+    * @param componentId An id of the root DOM node.
+    * @param content     A badge content. Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashBadge` component, call `render` to create a DOM element.
     */
   def apply(
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
@@ -60,15 +60,15 @@ object UdashBadge {
   }
 
   /**
-    * Creates badge link component.
-    * More: <a href="http://getbootstrap.com/javascript/#badges">Bootstrap Docs</a>.
+    * Creates a badge link component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/badge/">Bootstrap Docs</a>.
     *
-    * @param link Content of `href` parameter in returned component.
-    * @param badgeStyle Color of the badge.
-    * @param pillStyle If true, the `badge-pill` style will be applied.
-    * @param componentId Id of the root DOM node.
-    * @param content Badge content.
-    * @return `UdashBadge` component, call render to create a DOM element.
+    * @param link        A content of the `href` parameter in the returned component.
+    * @param badgeStyle  A color of the badge.
+    * @param pillStyle   If true, the `badge-pill` style will be applied.
+    * @param componentId An id of the root DOM node.
+    * @param content     A badge content. Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashBadge` component, call `render` to create a DOM element.
     */
   def link(
     link: ReadableProperty[String],

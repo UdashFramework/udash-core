@@ -71,20 +71,21 @@ object UdashProgressBar {
   }
 
   /**
-    * Creates progress bar component.
-    * More: <a href="http://getbootstrap.com/components/#progress">Bootstrap Docs</a>.
+    * Creates a progress bar component.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/progress/">Bootstrap Docs</a>.
     *
-    * @param progress       Property containing Integer in range `minValue` to `maxValue`.
+    * @param progress       Property containing Integer in range from `minValue` to `maxValue`.
     * @param showPercentage If true, display progress string.
-    * @param barStyle       Component style.
+    * @param barStyle       A bar color. One of the standard bootstrap colors `BootstrapStyles.Color`.
     * @param stripped       If true, applies striped style to the bar.
     * @param animated       If true, applies animation style to the bar.
-    * @param minValue       Minimum progress value.
-    * @param maxValue       Maximum progress value.
-    * @param minWidth       Minimal width of the progress indicator.
-    * @param componentId    Id of the root DOM node.
-    * @param labelFactory   Creates label content from current progress, min value, max value and nested bindings interceptor.
-    * @return `UdashProgressBar` component, call render to create DOM element.
+    * @param minValue       A minimum progress value.
+    * @param maxValue       A maximum progress value.
+    * @param minWidth       A minimal width of the progress indicator.
+    * @param componentId    An id of the root DOM node.
+    * @param labelFactory   Creates a label content from current progress, min value, max value.
+    *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @return A `UdashProgressBar` component, call `render` to create a DOM element.
     */
   def apply(
     progress: ReadableProperty[Int],
