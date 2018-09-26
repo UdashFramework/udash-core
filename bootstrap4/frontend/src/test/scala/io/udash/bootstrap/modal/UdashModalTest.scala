@@ -60,7 +60,6 @@ class UdashModalTest extends UdashFrontendTest {
       )
 
       modal.render.textContent should be("Header Body Footer ")
-      // TODO replace `contains(...) should be(...)` with `should(Not) contain` everywhere
       modal1.render.textContent.split(" ") shouldNot contain("Header")
       modal1.render.textContent.split(" ") should contain("Body")
       modal1.render.textContent.split(" ") should contain("Footer")

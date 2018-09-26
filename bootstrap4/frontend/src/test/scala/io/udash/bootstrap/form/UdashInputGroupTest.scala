@@ -17,16 +17,16 @@ class UdashInputGroupTest extends UdashFrontendTest {
       val el = group.render
       el.childNodes.length should be(2)
 
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className) should be(true)
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className) should be(false)
+      el.classList should contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className)
+      el.classList shouldNot contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className)
 
       size.set(None)
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className) should be(false)
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className) should be(false)
+      el.classList shouldNot contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className)
+      el.classList shouldNot contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className)
 
       size.set(Some(BootstrapStyles.Size.Small))
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className) should be(false)
-      el.classList.contains(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className) should be(true)
+      el.classList shouldNot contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Large).className)
+      el.classList should contain(BootstrapStyles.InputGroup.size(BootstrapStyles.Size.Small).className)
 
       group.kill()
       size.listenersCount() should be(0)

@@ -83,21 +83,21 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
       firesBuffer.clear()
       restServer.serviceTwo("token123", "en_GB").fireAndForget(321)
       eventually {
-        firesBuffer.contains("two/token123/en_GB/fireAndForget/321") should be(true)
+        firesBuffer should contain("two/token123/en_GB/fireAndForget/321")
       }
     }
     "work with Udash REST client (10)" in {
       firesBuffer.clear()
       restServer.serviceTwo("token123", "en_GB").deeper().fire(123321)
       eventually {
-        firesBuffer.contains("two/token123/en_GB/deeper/fire/123321") should be(true)
+        firesBuffer should contain("two/token123/en_GB/deeper/fire/123321")
       }
     }
     "work with Udash REST client (11)" in {
       firesBuffer.clear()
       restServer.serviceOne().deeper().fire(123321)
       eventually {
-        firesBuffer.contains("one/deeper/fire/123321") should be(true)
+        firesBuffer should contain("one/deeper/fire/123321")
       }
     }
     "report valid HTTP codes (1)" in {

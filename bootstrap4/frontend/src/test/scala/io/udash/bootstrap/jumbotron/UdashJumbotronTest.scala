@@ -18,10 +18,10 @@ class UdashJumbotronTest extends UdashFrontendTest {
       el.childNodes.length should be(1)
       el.textContent should be("Content")
 
-      el.classList.contains(BootstrapStyles.Jumbotron.fluid.className) should be(false)
+      el.classList shouldNot contain(BootstrapStyles.Jumbotron.fluid.className)
 
       fluid.set(true)
-      el.classList.contains(BootstrapStyles.Jumbotron.fluid.className) should be(true)
+      el.classList should contain(BootstrapStyles.Jumbotron.fluid.className)
 
       jumbo.kill()
       fluid.listenersCount() should be(0)

@@ -101,7 +101,7 @@ class UdashDropdownTest extends UdashFrontendTest {
       for (i <- 1 to 5) {
         el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
         elClickCounter should be(i)
-        els.get.contains(selectedItem) should be(true)
+        els.get should contain(selectedItem)
       }
 
       els.elemProperties(1).set(DefaultDropdownItem.Header("Test Header 123"))
@@ -109,7 +109,7 @@ class UdashDropdownTest extends UdashFrontendTest {
       for (i <- 1 to 5) {
         el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
         elClickCounter should be(i + 5)
-        els.get.contains(selectedItem) should be(true)
+        els.get should contain(selectedItem)
       }
     }
 

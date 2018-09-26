@@ -36,13 +36,13 @@ class UdashAlertTest extends UdashFrontendTest {
       val el = alert.render
 
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Alert.alert.className) should be(true)
-      el.classList.contains(BootstrapStyles.Alert.color(BootstrapStyles.Color.Secondary).className) should be(true)
+      el.classList should contain(BootstrapStyles.Alert.alert.className)
+      el.classList should contain(BootstrapStyles.Alert.color(BootstrapStyles.Color.Secondary).className)
 
       style.set(BootstrapStyles.Color.Info)
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Alert.alert.className) should be(true)
-      el.classList.contains(BootstrapStyles.Alert.color(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.Alert.alert.className)
+      el.classList should contain(BootstrapStyles.Alert.color(BootstrapStyles.Color.Info).className)
 
       style.listenersCount() should be(1)
 

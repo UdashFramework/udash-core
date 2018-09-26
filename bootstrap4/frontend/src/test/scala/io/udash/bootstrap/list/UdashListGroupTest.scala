@@ -18,10 +18,10 @@ class UdashListGroupTest extends UdashFrontendTest {
       el.childNodes.length should be(3)
       el.textContent should be("abc")
 
-      el.classList.contains(BootstrapStyles.ListGroup.flush.className) should be(false)
+      el.classList shouldNot contain(BootstrapStyles.ListGroup.flush.className)
 
       flush.set(true)
-      el.classList.contains(BootstrapStyles.ListGroup.flush.className) should be(true)
+      el.classList should contain(BootstrapStyles.ListGroup.flush.className)
 
       items.elemProperties(1).set("x")
       el.childNodes.length should be(3)

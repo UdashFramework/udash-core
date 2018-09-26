@@ -87,64 +87,64 @@ class UdashButtonTest extends UdashFrontendTest {
       val el = btn.render
 
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.color(BootstrapStyles.Color.Secondary).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Secondary).className)
 
       buttonStyle.set(BootstrapStyles.Color.Info)
 
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className)
 
       size.set(Some(BootstrapStyles.Size.Large))
 
       el.classList.length should be(3)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className)
+      el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
 
       size.set(Some(BootstrapStyles.Size.Small))
 
       el.classList.length should be(3)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.size(BootstrapStyles.Size.Small).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className)
+      el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Small).className)
 
       size.set(None)
 
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Info).className)
 
       outline.set(true)
 
       el.classList.length should be(2)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className)
 
       block.set(true)
 
       el.classList.length should be(3)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.block.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className)
 
       active.set(true)
 
       el.classList.length should be(4)
-      el.classList.contains(BootstrapStyles.active.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.block.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.active.className)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className)
 
       disabled.set(true)
 
       el.classList.length should be(5)
-      el.classList.contains(BootstrapStyles.active.className) should be(true)
-      el.classList.contains(BootstrapStyles.disabled.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.btn.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.block.className) should be(true)
-      el.classList.contains(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className) should be(true)
+      el.classList should contain(BootstrapStyles.active.className)
+      el.classList should contain(BootstrapStyles.disabled.className)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Info).className)
 
       btn.kill()
       buttonStyle.listenersCount() should be(0)

@@ -411,7 +411,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         eventually {
           calls.result() should contain("doStuffWithEx")
           response.write should be(true)
-          response.writeData.contains("RPCResponseException") should be(true)
+          response.writeData should include("RPCResponseException")
           response.error should be(false)
         }
 
@@ -551,7 +551,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         eventually {
           config.closed should be(false)
-          out.toString.contains("\"callId\":\"call1\"") should be(true)
+          out.toString should include("\"callId\":\"call1\"")
         }
       }
     }
@@ -578,7 +578,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         eventually {
           config.closed should be(false)
-          out.toString.contains("\"callId\":\"call1\"") should be(true)
+          out.toString should include("\"callId\":\"call1\"")
         }
       }
     }
@@ -606,7 +606,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
         eventually {
           config.closed should be(false)
           resource.resumed should be(true)
-          out.toString.contains("\"callId\":\"call1\"") should be(true)
+          out.toString should include("\"callId\":\"call1\"")
         }
       }
     }
