@@ -1,16 +1,16 @@
 package io.udash.selenium.views.demos.rest
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 class EchoRestDemoComponent extends CssView {
 
@@ -25,7 +25,7 @@ class EchoRestDemoComponent extends CssView {
   }
 
   class SimpleRestDemoPresenter(response: Property[String]) {
-    def sendWithQueryRequest(content: String) =
+    def sendWithQueryRequest(content: String): Unit =
       Launcher.restServer.echo().withQuery(content) onComplete {
         case Success(v) =>
           response.set(v)
@@ -33,7 +33,7 @@ class EchoRestDemoComponent extends CssView {
           response.set(s"Error: $ex!")
       }
 
-    def sendWithHeaderRequest(content: String) =
+    def sendWithHeaderRequest(content: String): Unit =
       Launcher.restServer.echo().withHeader(content) onComplete {
         case Success(v) =>
           response.set(v)
@@ -41,7 +41,7 @@ class EchoRestDemoComponent extends CssView {
           response.set(s"Error: $ex!")
       }
 
-    def sendWithURLRequest(content: String) =
+    def sendWithURLRequest(content: String): Unit =
       Launcher.restServer.echo().withUrlPart(content) onComplete {
         case Success(v) =>
           response.set(v)
@@ -49,7 +49,7 @@ class EchoRestDemoComponent extends CssView {
           response.set(s"Error: $ex!")
       }
 
-    def sendWithBodyRequest(content: String) =
+    def sendWithBodyRequest(content: String): Unit =
       Launcher.restServer.echo().withBody(content) onComplete {
         case Success(v) =>
           response.set(v)
@@ -63,22 +63,22 @@ class EchoRestDemoComponent extends CssView {
 
     val content = Property("a b !@#$%^&*()_+")
 
-    val queryButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    private val queryButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-query-btn")
-    )("Query")
-    val headerButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    )(_ => "Query")
+    private val headerButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-header-btn")
-    )("Header")
-    val urlButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    )(_ => "Header")
+    private val urlButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-url-btn")
-    )("URL")
-    val bodyButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    )(_ => "URL")
+    private val bodyButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-body-btn")
-    )("Body")
+    )(_ => "Body")
 
     queryButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>
@@ -102,7 +102,7 @@ class EchoRestDemoComponent extends CssView {
         UdashInputGroup.input(
           TextInput(content)(id := "echo-rest-demo-input").render
         ),
-        UdashInputGroup.buttons(
+        UdashInputGroup.append(
           queryButton.render,
           headerButton.render,
           urlButton.render,

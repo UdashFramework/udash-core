@@ -3,9 +3,9 @@ package io.udash.selenium.views.demos.frontend
 import java.{lang => jl}
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import io.udash.css.CssView
 import scalatags.JsDom.all._
 
@@ -33,7 +33,7 @@ class IntroFormDemoComponent extends CssView {
       )
 
       // model validation
-      model.addValidator { (element: IntroFormDemoModel) =>
+      model.addValidator { element: IntroFormDemoModel =>
         val errors = mutable.ArrayBuffer[String]()
         if (element.minimum > element.maximum)
           errors += "Minimum is bigger than maximum!"
@@ -84,9 +84,9 @@ class IntroFormDemoComponent extends CssView {
 
     // Button from Udash Bootstrap wrapper
     private val randomizeButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("randomize")
-    )("Randomize")
+    )(_ => "Randomize")
 
     // on button click calls `randomize` method from presenter
     randomizeButton.listen {
@@ -95,27 +95,25 @@ class IntroFormDemoComponent extends CssView {
     }
 
     def getTemplate: Modifier = div(id := "frontend-intro-demo")(
-      // load Bootstrap styles from CDN
-      // UdashBootstrap.loadBootstrapStyles(),
       // another wrapped Bootstrap component
       UdashInputGroup()(
         UdashInputGroup.input(
           // input synchronised with the model
           NumberInput(minimum)(id := "minimum").render
         ),
-        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.appendText(" <= "),
         UdashInputGroup.input(
           NumberInput(between)(id := "between").render
         ),
-        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.appendText(" <= "),
         UdashInputGroup.input(
           NumberInput(maximum)(id := "maximum").render
         ),
-        UdashInputGroup.buttons(
+        UdashInputGroup.append(
           randomizeButton.render
         )
       ).render,
-      h3("Is valid?"),
+      h3("Is valid?", BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Top)),
       p(id := "valid")(
         // validation binding - waits for model changes and updates the view
         valid(model) {

@@ -405,7 +405,7 @@ final class UdashForm private(
         */
       def checkbox(
         property: Property[Boolean],
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange, // TODO default value passed to the form?
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
@@ -429,7 +429,9 @@ final class UdashForm private(
             id := groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
             input.render.styles(BootstrapStyles.Form.customControlInput),
             nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
-            labelContent(nestedInterceptor).map(label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(_)),
+            label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
+              labelContent(nestedInterceptor).getOrElse(span("\u00a0"))
+            ),
             validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
             invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
           ).render

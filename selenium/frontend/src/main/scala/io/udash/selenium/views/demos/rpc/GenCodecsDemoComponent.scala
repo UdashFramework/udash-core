@@ -1,8 +1,8 @@
 package io.udash.selenium.views.demos.rpc
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.selenium.Launcher
@@ -11,8 +11,8 @@ import io.udash.selenium.rpc.demos.rpc.GenCodecServerRPC.{DemoCaseClass, DemoCla
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-import scala.util.{Failure, Random, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Random, Success}
 
 trait GenCodecsDemoModel {
   
@@ -58,8 +58,7 @@ class GenCodecsDemoComponent extends CssView with CrossLogging {
     def randomString(l: Int): String =
       BigInt.probablePrime(32, Random).toString(16)
 
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def onButtonClick(): Unit = {
       val demoRpc: GenCodecServerRPC = Launcher.serverRpc.demos().gencodecsDemo()
       demoRpc.sendInt(Random.nextInt()) onComplete {
         case Success(response) => model.subProp(_.int).set(Some(response))
@@ -102,14 +101,17 @@ class GenCodecsDemoComponent extends CssView with CrossLogging {
   class GenCodecsDemoView(model: ModelProperty[GenCodecsDemoModel], presenter: GenCodecsDemoPresenter) {
     import JsDom.all._
 
-    val loadIdButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    private val disableLoadBtn = Property(false)
+    private val loadIdButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = disableLoadBtn,
       componentId = ComponentId("gencodec-demo")
-    )("Send request")
+    )(_ => "Send request")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        disableLoadBtn.set(true)
+        presenter.onButtonClick()
     }
 
     def render: Modifier = span(

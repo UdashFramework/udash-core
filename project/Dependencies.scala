@@ -135,7 +135,7 @@ object Dependencies {
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js" minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js"
+    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
   ))
 
   val chartsFrontendDeps = Def.setting(Seq(

@@ -2,7 +2,7 @@ package io.udash.selenium.views.demos.i18n
 
 import io.udash.i18n._
 import io.udash.selenium.rpc.demos.i18n.Translations
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 object FrontendTranslationsProvider {
 

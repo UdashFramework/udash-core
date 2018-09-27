@@ -1,8 +1,8 @@
 package io.udash.selenium.views.demos.rpc
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import io.udash.selenium.rpc.demos.activity.Call
@@ -25,7 +25,7 @@ class LoggingDemoComponent extends CssView {
   }
 
   class LoggingDemoPresenter(calls: SeqProperty[Call]) {
-    def onButtonClick() = {
+    def onButtonClick(): Unit = {
       Launcher.serverRpc.demos().call().calls onComplete {
         case Success(data) => calls.set(data)
         case Failure(_) => calls.clear()
@@ -36,10 +36,10 @@ class LoggingDemoComponent extends CssView {
   class LoggingDemoView(model: SeqProperty[Call], presenter: LoggingDemoPresenter) {
     import JsDom.all._
 
-    val loadCallsButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    private val loadCallsButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       componentId = ComponentId("load-calls-btn")
-    )("Load calls list")
+    )(_ => "Load calls list")
 
     loadCallsButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>

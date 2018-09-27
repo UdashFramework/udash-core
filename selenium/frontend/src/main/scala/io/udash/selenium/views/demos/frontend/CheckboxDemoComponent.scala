@@ -1,49 +1,56 @@
 package io.udash.selenium.views.demos.frontend
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
-import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
 import io.udash.css.CssView
 import scalatags.JsDom
 
 class CheckboxDemoComponent extends CssView {
   import JsDom.all._
 
-  val propA: Property[Boolean] = Property(true)
-  val propB: Property[Boolean] = Property(false)
-  val propC: Property[String] = Property("Yes")
-  val propCAsBoolean = propC.transform(
+  private val propA: Property[Boolean] = Property(true)
+  private val propB: Property[Boolean] = Property(false)
+  private val propC: Property[String] = Property("Yes")
+  private val propCAsBoolean = propC.transform(
     (s: String) => s.equalsIgnoreCase("yes"),
     (b: Boolean) => if (b) "Yes" else "No"
   )
 
   def getTemplate: Modifier = div(id := "checkbox-demo")(
-    form(BootstrapStyles.containerFluid)(
-      inputs(), br, inputs()
-    )
+    UdashForm() { factory =>
+      Seq(inputs(factory), inputs(factory))
+    }
   )
 
-  private def inputs = div(BootstrapStyles.row)(
-    div(BootstrapStyles.Grid.colMd4)(
-      UdashInputGroup()(
-        UdashInputGroup.addon("Property A:"),
-        UdashInputGroup.addon(Checkbox(propA)(cls := "checkbox-demo-a").render),
-        UdashInputGroup.addon(bind(propA))
-      ).render
-    ),
-    div(BootstrapStyles.Grid.colMd4)(
-      UdashInputGroup()(
-        UdashInputGroup.addon("Property B:"),
-        UdashInputGroup.addon(Checkbox(propB)(cls := "checkbox-demo-b").render),
-        UdashInputGroup.addon(bind(propB))
-      ).render
-    ),
-    div(BootstrapStyles.Grid.colMd4)(
-      UdashInputGroup()(
-        UdashInputGroup.addon("Property C:"),
-        UdashInputGroup.addon(Checkbox(propCAsBoolean)(cls := "checkbox-demo-c").render),
-        UdashInputGroup.addon(bind(propC))
-      ).render
+  private def inputs(factory: UdashForm#FormElementsFactory): Modifier =
+    div(BootstrapStyles.Grid.row, BootstrapStyles.Spacing.margin())(
+      div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Property A:"),
+          UdashInputGroup.appendCheckbox(
+            factory.input.checkbox(propA, inputId = ComponentId("checkbox-demo-a"))()
+          ),
+          UdashInputGroup.appendText(bind(propA))
+        ).render
+      ),
+      div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Property B:"),
+          UdashInputGroup.appendCheckbox(
+            factory.input.checkbox(propB, inputId = ComponentId("checkbox-demo-b"))()
+          ),
+          UdashInputGroup.appendText(bind(propB))
+        ).render
+      ),
+      div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Property C:"),
+          UdashInputGroup.appendCheckbox(
+            factory.input.checkbox(propCAsBoolean, inputId = ComponentId("checkbox-demo-c"))()
+          ),
+          UdashInputGroup.appendText(bind(propC))
+        ).render
+      )
     )
-  )
 }

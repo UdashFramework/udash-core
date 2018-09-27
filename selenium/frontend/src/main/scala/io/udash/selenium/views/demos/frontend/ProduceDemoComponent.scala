@@ -10,9 +10,9 @@ import scala.util.Random
 class ProduceDemoComponent extends CssView {
   import JsDom.all._
 
-  val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-  val name: Property[String] = Property[String](names.next())
-  val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
+  private val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
+  private val name: Property[String] = Property[String](names.next())
+  private val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
 
   dom.window.setInterval(() => {
     name.set(names.next())

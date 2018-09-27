@@ -2,6 +2,7 @@ package io.udash.selenium.frontend
 
 import com.avsystem.commons._
 import io.udash.selenium.SeleniumTest
+import org.openqa.selenium.By
 import org.openqa.selenium.By.{ByClassName, ByCssSelector, ByTagName}
 
 import scala.util.Random
@@ -31,7 +32,7 @@ class FrontendFormsTest extends SeleniumTest {
       val checkboxes = driver.findElementById("checkbox-demo")
 
       def clickAndCheck(propertyName: String, expect: String) = {
-        val checkbox = checkboxes.findElement(new ByClassName(s"checkbox-demo-$propertyName"))
+        val checkbox = checkboxes.findElement(By.cssSelector(s"""label[for="checkbox-demo-$propertyName"]"""))
         checkbox.click()
         eventually {
           checkboxes.findElements(new ByCssSelector(s"[data-bind=$propertyName]")).asScala
@@ -55,21 +56,15 @@ class FrontendFormsTest extends SeleniumTest {
       val checkButtons = driver.findElementById("check-buttons-demo")
 
       def clickAndCheck(propertyName: String) = {
-        val checkbox = checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
-        checkbox.click()
+        val checkboxLabel = checkButtons.findElement(By.id(s"check-label-$propertyName"))
+        checkboxLabel.click()
         eventually {
           checkButtons.findElements(new ByClassName("check-buttons-demo-fruits")).asScala
             .foreach { el =>
               val contains = el.getText.contains(propertyName)
-              val selected = checkbox.getAttribute("selected")
+              val selected = checkboxLabel.findElement(By.xpath("../input")).getAttribute("selected")
               if (contains) selected shouldNot be(null)
               else selected should be(null)
-            }
-          checkButtons.findElements(new ByCssSelector(s"[data-label=$propertyName]")).asScala
-            .foreach { el =>
-              val inputSelected = el.findElement(new ByTagName("input")).getAttribute("selected")
-              val checkboxSelected = checkbox.getAttribute("selected")
-              inputSelected should be(checkboxSelected)
             }
         }
       }
@@ -114,19 +109,12 @@ class FrontendFormsTest extends SeleniumTest {
       val radioButtons = driver.findElementById("radio-buttons-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
-        val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
-        radio.click()
+        val radioLabel = radioButtons.findElement(By.id(s"radio-label-$propertyName"))
+        radioLabel.click()
         eventually {
           radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")).asScala
             .foreach { el =>
               el.getText should be(propertyName)
-            }
-          radioButtons.findElements(new ByCssSelector(s"input")).asScala
-            .foreach { el =>
-              val inputSelected = el.getAttribute("selected")
-              val radioSelected = radio.getAttribute("selected")
-              if (el.getAttribute("value").toInt == propertyIdx) inputSelected should be(radioSelected)
-              else inputSelected shouldNot be(radioSelected)
             }
         }
       }

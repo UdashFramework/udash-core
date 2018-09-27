@@ -415,7 +415,7 @@ lazy val `selenium-frontend` = project.in(file("selenium/frontend"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(
     `selenium-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest, `rpc-frontend` % CompileAndTest,
-    `css-frontend` % CompileAndTest, `auth-frontend` % CompileAndTest, `bootstrap` % CompileAndTest
+    `css-frontend` % CompileAndTest, `auth-frontend` % CompileAndTest, `bootstrap4` % CompileAndTest
   ).settings(
     commonSettings,
     commonJSSettings,

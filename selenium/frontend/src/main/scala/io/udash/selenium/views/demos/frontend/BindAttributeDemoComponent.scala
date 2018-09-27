@@ -8,7 +8,7 @@ import scalatags.JsDom
 class BindAttributeDemoComponent extends CssView {
   import JsDom.all._
 
-  val visible: Property[Boolean] = Property[Boolean](true)
+  private val visible: Property[Boolean] = Property[Boolean](true)
 
   dom.window.setInterval(() => visible.set(!visible.get), 250)
 
