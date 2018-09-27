@@ -18,7 +18,10 @@ class CheckButtonsDemoComponent extends CssView {
   private val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
 
   def getTemplate: Modifier = div(id := "check-buttons-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       Seq(checkboxes(factory), checkboxes(factory))
     }
   )

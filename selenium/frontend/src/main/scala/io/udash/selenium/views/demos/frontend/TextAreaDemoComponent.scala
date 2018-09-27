@@ -12,7 +12,10 @@ class TextAreaDemoComponent extends CssView {
   private val text: Property[String] = Property("")
 
   def getTemplate: Modifier = div(id := "text-area-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       div(BootstrapStyles.Grid.row)(
         div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
           factory.input.textArea(text)()

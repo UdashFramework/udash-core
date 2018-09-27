@@ -15,7 +15,10 @@ class TextInputDemoComponent extends CssView {
   val age: Property[Int] = Property(1)
 
   def getTemplate: Modifier = div(id := "inputs-demo")(
-    UdashForm() { factory => Seq(
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory => Seq(
       inputs(factory), inputs(factory)
     )}
   )

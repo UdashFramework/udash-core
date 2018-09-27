@@ -18,7 +18,10 @@ class CheckboxDemoComponent extends CssView {
   )
 
   def getTemplate: Modifier = div(id := "checkbox-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       Seq(inputs(factory), inputs(factory))
     }
   )

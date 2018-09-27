@@ -14,7 +14,10 @@ class FileInputDemoComponent extends CssView {
   private val selectedFiles: SeqProperty[File] = SeqProperty(Seq.empty)
 
   def getTemplate: Modifier = div(id := "file-input-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       factory.input.fileInput(selectedFiles, acceptMultipleFiles)(
         "files", labelContent = _ => Some("Select files...")
       )

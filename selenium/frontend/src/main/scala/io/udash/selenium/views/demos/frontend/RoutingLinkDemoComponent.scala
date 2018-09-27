@@ -32,7 +32,10 @@ class RoutingLinkDemoComponent(url: Property[String]) extends CssView {
       a(id := "url-demo-link-chocolate", href := s"${FrontendRoutingDemosState(Some("chocolate")).url}")("Chocolate"), " | ",
       a(id := "url-demo-link-pizza", href := s"${FrontendRoutingDemosState(Some("pizza")).url}")("Pizza")
     ),
-    UdashForm() { factory => Seq[Modifier](
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory => Seq[Modifier](
       factory.input.formGroup()(
         input = _ => factory.input.textInput(Property(""), inputId = ComponentId("url-demo-input"))(
           _ => Some(placeholder := "Type anything in this field, it should not disappear on a state change...")

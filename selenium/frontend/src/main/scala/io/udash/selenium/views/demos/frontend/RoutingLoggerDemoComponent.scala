@@ -11,7 +11,10 @@ class RoutingLoggerDemoComponent extends CssView {
   import JsDom.all._
 
   def getTemplate: Modifier = div(id := "routing-logger-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       factory.input.checkbox(UrlLoggingDemoService.enabled, inline = true.toProperty, inputId = ComponentId("turn-on-logger"))(
         labelContent = _ => Some("Turn on frontend routing logger")
       )

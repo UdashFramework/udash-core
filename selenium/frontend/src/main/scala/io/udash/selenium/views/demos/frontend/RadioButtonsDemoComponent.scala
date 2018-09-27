@@ -18,7 +18,10 @@ class RadioButtonsDemoComponent extends CssView {
   private val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
 
   def getTemplate: Modifier = div(id := "radio-buttons-demo")(
-    UdashForm() { factory =>
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
       Seq(radios(factory), radios(factory))
     }
   )

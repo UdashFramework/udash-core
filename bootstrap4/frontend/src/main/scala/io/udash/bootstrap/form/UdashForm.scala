@@ -22,6 +22,8 @@ import scala.util.{Failure, Success}
 
 final class UdashForm private(
   formStyle: Option[CssStyle],
+  inputValidationTrigger: ValidationTrigger,
+  selectValidationTrigger: ValidationTrigger,
   override val componentId: ComponentId
 )(content: UdashForm#FormElementsFactory => Modifier)
   extends UdashBootstrapComponent with Listenable[UdashForm, UdashForm.Event] with CrossLogging {
@@ -126,7 +128,7 @@ final class UdashForm private(
         property: Property[String],
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
@@ -161,7 +163,7 @@ final class UdashForm private(
         property: Property[String],
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
@@ -196,7 +198,7 @@ final class UdashForm private(
         property: Property[String],
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
@@ -231,7 +233,7 @@ final class UdashForm private(
         property: Property[String],
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
@@ -276,7 +278,7 @@ final class UdashForm private(
         selectedFiles: SeqProperty[File],
         acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+        validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputName: String,
@@ -324,7 +326,7 @@ final class UdashForm private(
         selectedItem: Property[T],
         options: ReadableSeqProperty[T],
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
@@ -362,7 +364,7 @@ final class UdashForm private(
         selectedItems: seq.SeqProperty[T, ElemType],
         options: ReadableSeqProperty[T],
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
@@ -405,7 +407,7 @@ final class UdashForm private(
         */
       def checkbox(
         property: Property[Boolean],
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange, // TODO default value passed to the form?
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
@@ -467,7 +469,7 @@ final class UdashForm private(
         selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
         options: ReadableSeqProperty[T],
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
         groupId: ComponentId = ComponentId.newId()
       )(
         inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -510,7 +512,7 @@ final class UdashForm private(
         selectedItem: Property[T],
         options: ReadableSeqProperty[T],
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
-        validationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
         groupId: ComponentId = ComponentId.newId()
       )(
         inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -706,8 +708,12 @@ object UdashForm {
     * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
     * @return A `UdashForm` component, call `render` to create a DOM element.
     */
-  def apply(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
-    new UdashForm(None, componentId)(content)
+  def apply(
+    inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+    selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+    componentId: ComponentId = ComponentId.newId()
+  )(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
+    new UdashForm(None, inputValidationTrigger, selectValidationTrigger, componentId)(content)
 
   /**
     * Creates an inline form with a provided content. <br/>
@@ -734,6 +740,10 @@ object UdashForm {
     * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
     * @return A `UdashForm` component, call `render` to create a DOM element.
     */
-  def inline(componentId: ComponentId = ComponentId.newId())(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.inline), componentId)(content)
+  def inline(
+    inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
+    selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
+    componentId: ComponentId = ComponentId.newId()
+  )(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
+    new UdashForm(Some(BootstrapStyles.Form.inline), inputValidationTrigger, selectValidationTrigger, componentId)(content)
 }
