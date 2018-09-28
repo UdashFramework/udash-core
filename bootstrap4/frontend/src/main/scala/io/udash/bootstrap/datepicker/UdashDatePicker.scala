@@ -6,7 +6,7 @@ import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.utils._
-import io.udash.css.CssStyle
+import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -26,7 +26,11 @@ final class UdashDatePicker private[datepicker](
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
-  private val inp = input(id := componentId.id, tpe := "text", BootstrapStyles.Form.control).render
+  private val inp = input(
+    id := componentId.id, tpe := "text",
+    BootstrapStyles.Form.control, CssStyleName("datetimepicker-input"),
+    BootstrapTags.dataToggle := "datetimepicker", BootstrapTags.dataTarget := s"#$componentId"
+  ).render
   private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
 
   /** Shows date picker widget. */
@@ -52,7 +56,11 @@ final class UdashDatePicker private[datepicker](
   val render: Element = {
     jQInput.datetimepicker(optionsToJsDict(options.get))
 
-    propertyListeners += options.listen(opts => jQInput.datetimepicker(optionsToJsDict(opts)))
+    propertyListeners += options.listen { opts =>
+      optionsToJsDict(opts).foreach { case (key, value) =>
+        jQInput.datetimepicker(key, value)
+      }
+    }
 
     date.get.foreach(d => jQInput.datetimepicker("date", dateToMoment(d)))
     propertyListeners += date.listen(op => op.foreach(d => jQInput.datetimepicker("date", dateToMoment(d))))
