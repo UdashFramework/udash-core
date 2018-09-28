@@ -50,6 +50,8 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     elem
   }
 
+  propertyListeners += items.listen(_ => update())
+
   override lazy val render: Element = {
     import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
@@ -133,13 +135,14 @@ object UdashDropdown {
     case class Link(title: String, url: Url) extends DefaultDropdownItem
     case class Button(title: String, clickCallback: () => Any) extends DefaultDropdownItem
     case class Header(title: String) extends DefaultDropdownItem
-    case class Disabled(link: Link) extends DefaultDropdownItem
+    case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
     case object Divider extends DefaultDropdownItem
   }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(
-    item: ReadableProperty[DefaultDropdownItem], nestedInterceptor: Binding.NestedInterceptor
+    item: ReadableProperty[DefaultDropdownItem],
+    nestedInterceptor: Binding.NestedInterceptor
   ): Element = {
     import DefaultDropdownItem._
     import io.udash.css.CssView._
@@ -153,7 +156,9 @@ object UdashDropdown {
       case Header(title) =>
         h6(BootstrapStyles.Dropdown.header)(title).render
       case Disabled(item) =>
-        itemFactory(item).styles(BootstrapStyles.disabled)
+        val res = itemFactory(item).styles(BootstrapStyles.disabled)
+        res.addEventListener("click", (ev: Event) => { ev.preventDefault(); ev.stopPropagation() })
+        res
       case Divider =>
         div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
