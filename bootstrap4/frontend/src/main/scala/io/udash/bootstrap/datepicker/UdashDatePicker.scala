@@ -135,8 +135,8 @@ final class UdashDatePicker private[datepicker](
       "buttons" -> js.Dictionary(
         "showTodayButton" -> options.showTodayButton,
         "showClear" -> options.showClear,
-        "showClose" -> options.showClose,
-      ),
+        "showClose" -> options.showClose
+      )
     )
   }
 

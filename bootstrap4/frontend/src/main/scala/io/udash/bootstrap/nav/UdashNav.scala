@@ -35,7 +35,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
       nestedInterceptor(BootstrapStyles.Navigation.tabs.styleIf(tabs)),
       nestedInterceptor(BootstrapStyles.Navigation.pills.styleIf(pills)),
       nestedInterceptor(BootstrapStyles.Navigation.fill.styleIf(fill)),
-      nestedInterceptor(BootstrapStyles.Navigation.justified.styleIf(justified)),
+      nestedInterceptor(BootstrapStyles.Navigation.justified.styleIf(justified))
     )(
       nestedInterceptor(
         repeatWithNested(panels) { case (panel, nested) =>

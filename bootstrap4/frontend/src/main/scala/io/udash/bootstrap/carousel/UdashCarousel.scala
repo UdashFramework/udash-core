@@ -22,7 +22,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   showIndicators: ReadableProperty[Boolean],
   animationOptions: ReadableProperty[AnimationOptions],
   val activeSlide: Property[Int],
-  override val componentId: ComponentId,
+  override val componentId: ComponentId
 )(
   slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
 ) extends UdashBootstrapComponent with Listenable[UdashCarousel[ItemType, ElemType], CarouselEvent[ItemType, ElemType]] {

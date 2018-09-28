@@ -90,7 +90,7 @@ final class UdashForm private(
                 input(externalBinding),
                 validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
                 invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_)),
-                helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_)),
+                helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_))
               ).render
             case Some((labelWidth, inputWidth, breakpoint, labelSize)) =>
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
@@ -103,7 +103,7 @@ final class UdashForm private(
                   input(externalBinding),
                   validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
                   invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
-                ),
+                )
               ).render
           }
 
@@ -562,7 +562,7 @@ final class UdashForm private(
           case ValidationTrigger.Instant => Seq(
             // TODO valid does not clear listener on the original property when it's no longer needed
             nested(BootstrapStyles.Form.isValid.styleIf(property.valid.transform(_ == Valid))),
-            nested(BootstrapStyles.Form.isInvalid.styleIf(property.valid.transform(_ != Valid))),
+            nested(BootstrapStyles.Form.isInvalid.styleIf(property.valid.transform(_ != Valid)))
           )
           case ValidationTrigger.OnBlur =>
             val validationResult = Property[Option[ValidationResult]](None)

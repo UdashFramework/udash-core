@@ -15,7 +15,7 @@ class UdashTableTest extends UdashFrontendTest {
       val items = SeqProperty(
         TestEntity("Adam", 34, "EN"),
         TestEntity("John", 21, "GE"),
-        TestEntity("Alice", 24, "FR"),
+        TestEntity("Alice", 24, "FR")
       )
       val responsive = Property[Option[BootstrapStyles.ResponsiveBreakpoint]](Some(BootstrapStyles.ResponsiveBreakpoint.Small))
       val dark = Property(false)
