@@ -104,7 +104,6 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
     jqCarousel.on("slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
-      activeSlide.set(idx)
       fire(CarouselEvent(this, idx, dir, changed = false))
     })
     jqCarousel.on("slid.bs.carousel", (_: Element, ev: JQueryEvent) => {
@@ -280,7 +279,7 @@ case class UdashCarouselSlide(imgSrc: Url)(caption: Modifier*) {
 
   lazy val render: Node = {
     Seq(
-      img(src := imgSrc.value),
+      img(src := imgSrc.value, BootstrapStyles.Sizing.width100),
       div(BootstrapStyles.Carousel.caption)(
         caption
       )
