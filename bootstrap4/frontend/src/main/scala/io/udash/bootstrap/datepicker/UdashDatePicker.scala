@@ -5,6 +5,7 @@ import java.{util => ju}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
+import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.bootstrap.utils._
 import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.logging.CrossLogging
@@ -345,15 +346,15 @@ object UdashDatePicker {
   object DatePickerOptions extends HasModelPropertyCreator[DatePickerOptions]
 
   class DatePickerIcons(
-    val time: Seq[CssStyle] = Seq.empty,
-    val date: Seq[CssStyle] = Seq.empty,
-    val up: Seq[CssStyle] = Seq.empty,
-    val down: Seq[CssStyle] = Seq.empty,
-    val previous: Seq[CssStyle] = Seq.empty,
-    val next: Seq[CssStyle] = Seq.empty,
-    val today: Seq[CssStyle] = Seq.empty,
-    val clear: Seq[CssStyle] = Seq.empty,
-    val close: Seq[CssStyle] = Seq.empty
+    val time: Seq[CssStyle] = Seq(FontAwesome.Regular.clock),
+    val date: Seq[CssStyle] = Seq(FontAwesome.Regular.calendar),
+    val up: Seq[CssStyle] = Seq(FontAwesome.Solid.angleUp),
+    val down: Seq[CssStyle] = Seq(FontAwesome.Solid.angleDown),
+    val previous: Seq[CssStyle] = Seq(FontAwesome.Solid.angleLeft),
+    val next: Seq[CssStyle] = Seq(FontAwesome.Solid.angleRight),
+    val today: Seq[CssStyle] = Seq(FontAwesome.Regular.calendarCheck),
+    val clear: Seq[CssStyle] = Seq(FontAwesome.Regular.trashAlt),
+    val close: Seq[CssStyle] = Seq(FontAwesome.Solid.times)
   )
 
   class DatePickerTooltips(
