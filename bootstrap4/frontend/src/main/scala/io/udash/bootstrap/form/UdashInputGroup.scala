@@ -84,4 +84,12 @@ object UdashInputGroup {
   @inline def appendRadio(content: Modifier*): Modifier =
     appendText(content)
 
+  /** Alias for `prepend`. */
+  @inline def prependButton(content: Modifier*): Modifier =
+    prepend(content)
+
+  /** Alias for `append`. */
+  @inline def appendButton(content: Modifier*): Modifier =
+    append(content)
+
 }
