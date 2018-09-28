@@ -18,7 +18,8 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
   highlightActive: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  itemFactory: (ElemType, UdashPagination.ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier
+  itemFactory: (ElemType, UdashPagination.ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier,
+  additionalListModifiers: Binding.NestedInterceptor => Modifier
 ) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
@@ -54,7 +55,8 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
     tags2.nav(
       ul(
         id := componentId, BootstrapStyles.Pagination.pagination,
-        nestedInterceptor((BootstrapStyles.Pagination.size _).reactiveOptionApply(paginationSize))
+        nestedInterceptor((BootstrapStyles.Pagination.size _).reactiveOptionApply(paginationSize)),
+        additionalListModifiers(nestedInterceptor)
       )(
         nestedInterceptor(
           arrow((idx, _) => idx <= 0, previous _, UdashPagination.ButtonType.PreviousPage)
@@ -87,6 +89,7 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
       case (true, nested) =>
         val elements = pages.elemProperties
         li(
+          BootstrapStyles.Pagination.item,
           nested(BootstrapStyles.disabled.styleIf(
             selectedPageIdx.combine(pages)((selected, pages) => highlightCond(selected, pages.size))
           ))
@@ -125,15 +128,18 @@ object UdashPagination {
     * Creates pagination component.
     * More: <a href="http://getbootstrap.com/docs/4.1/components/pagination/">Bootstrap Docs</a>.
     *
-    * @param pages           Sequence of available pages.
-    * @param selectedPageIdx A property containing selected page index.
-    * @param paginationSize  A pagination component size.
-    * @param showArrows      If property value is true, shows next/prev page arrows.
-    * @param highlightActive If property value is true, highlights selected page.
-    * @param componentId     An id of the root DOM node.
-    * @param itemFactory     Creates button for each element in `pages`.
-    *                        The factory gets an element property, type and index as arguments.
-    *                        Use the provided interceptor to properly clean up bindings inside the content.
+    * @param pages                   Sequence of available pages.
+    * @param selectedPageIdx         A property containing selected page index.
+    * @param paginationSize          A pagination component size.
+    * @param showArrows              If property value is true, shows next/prev page arrows.
+    * @param highlightActive         If property value is true, highlights selected page.
+    * @param componentId             An id of the root DOM node.
+    * @param itemFactory             Creates button for each element in `pages`.
+    *                                The factory gets an element property, type and index as arguments.
+    *                                Use the provided interceptor to properly clean up bindings inside the content.
+    * @param additionalListModifiers Additional modifiers of the `ul` element.
+    *                                You can pass `BootstrapStyles.Flex.justifyContentCenter()`
+    *                                here to center the pagination component.
     * @tparam PageType A single element's type in the `items` sequence.
     * @tparam ElemType A type of a property containing an element in the `items` sequence.
     * @return A `UdashPagination` component, call `render` to create a DOM element.
@@ -146,8 +152,9 @@ object UdashPagination {
     highlightActive: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: (ElemType, ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory
+    itemFactory: (ElemType, ButtonType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory,
+    additionalListModifiers: Binding.NestedInterceptor => Modifier = _ => ()
   ): UdashPagination[PageType, ElemType] = {
-    new UdashPagination(pages, selectedPageIdx, paginationSize, showArrows, highlightActive, componentId)(itemFactory)
+    new UdashPagination(pages, selectedPageIdx, paginationSize, showArrows, highlightActive, componentId)(itemFactory, additionalListModifiers)
   }
 }
