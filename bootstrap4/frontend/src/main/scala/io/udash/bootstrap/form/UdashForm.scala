@@ -559,11 +559,19 @@ final class UdashForm private(
 
         validationTrigger match {
           case ValidationTrigger.None => Seq.empty[Modifier]
-          case ValidationTrigger.Instant => Seq(
-            // TODO valid does not clear listener on the original property when it's no longer needed
-            nested(BootstrapStyles.Form.isValid.styleIf(property.valid.transform(_ == Valid))),
-            nested(BootstrapStyles.Form.isInvalid.styleIf(property.valid.transform(_ != Valid)))
-          )
+          case ValidationTrigger.Instant =>
+            val validationResult = Property[Option[ValidationResult]](None)
+            Seq(
+              nested(new Binding {
+                override def applyTo(t: Element): Unit = {
+                  propertyListeners += property.listen({ _ =>
+                    startValidation(validationResult, triggerGroup = true)
+                  }, initUpdate = true)
+                }
+              }),
+              nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
+              nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(!_.contains(Valid))))
+            )
           case ValidationTrigger.OnBlur =>
             val validationResult = Property[Option[ValidationResult]](None)
             Seq(

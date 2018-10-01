@@ -244,7 +244,7 @@ class UdashFormTest extends AsyncUdashFrontendTest {
           form.kill()
         }
         r <- Future {
-          name.listenersCount() should be(1) // TODO this is listener from `valid`, it should be 0
+          name.listenersCount() should be(0)
           name.valid.listenersCount() should be(0)
           form.listenersCount() should be(0)
         }
