@@ -5,7 +5,7 @@ import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValue
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.form.UdashForm.ValidationTrigger
+import io.udash.bootstrap.form.UdashForm.{HorizontalLayoutSettings, ValidationTrigger}
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils._
 import io.udash.css.CssStyle
@@ -72,7 +72,7 @@ final class UdashForm private(
         *                        Use the provided interceptor to properly clean up bindings inside the content.
         */
       def formGroup(
-        horizontal: Option[(Int, Int, ResponsiveBreakpoint, ReadableProperty[Option[BootstrapStyles.Size]])] = None, // TODO horizontal options case class
+        horizontal: Option[HorizontalLayoutSettings] = None,
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
       )(
@@ -92,7 +92,7 @@ final class UdashForm private(
                 invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_)),
                 helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_))
               ).render
-            case Some((labelWidth, inputWidth, breakpoint, labelSize)) =>
+            case Some(HorizontalLayoutSettings(labelWidth, inputWidth, breakpoint, labelSize)) =>
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
                   labelContent(externalBinding).map(
@@ -683,6 +683,21 @@ object UdashForm {
     // TODO describe these options and other AbstractValueEnums too
     final val None, Instant, OnChange, OnBlur, OnSubmit: Value = new ValidationTrigger
   }
+
+  /** Settings for the horizontal form layout.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/#horizontal-form">Bootstrap Docs</a>.
+    *
+    * @param labelWidth Width of the label column.
+    * @param inputWidth Width of the input column.
+    * @param breakpoint Breakpoint of the form's grid.
+    * @param labelSize Size of the label text.
+    */
+  case class HorizontalLayoutSettings(
+    labelWidth: Int,
+    inputWidth: Int,
+    breakpoint: ResponsiveBreakpoint,
+    labelSize: ReadableProperty[Option[BootstrapStyles.Size]]
+  )
 
   /**
     * Creates a standard form with a provided content. <br/>
