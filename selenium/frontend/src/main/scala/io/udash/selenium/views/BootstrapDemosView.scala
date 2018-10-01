@@ -21,6 +21,7 @@ class BootstrapDemosView extends FinalView with CssView {
     BootstrapDemos.icons(),
     demoHeader("Date Picker"),
     BootstrapDemos.datePicker(),
+    demoHeader("Date Picker Range"),
     BootstrapDemos.datePickerRange(),
     demoHeader("Tables"),
     BootstrapDemos.tables(),
