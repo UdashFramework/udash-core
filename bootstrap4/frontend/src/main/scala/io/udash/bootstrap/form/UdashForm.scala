@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package form
 
-import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
 import io.udash.bindings.modifiers.Binding
@@ -26,7 +26,7 @@ final class UdashForm private(
   selectValidationTrigger: ValidationTrigger,
   override val componentId: ComponentId
 )(content: UdashForm#FormElementsFactory => Modifier)
-  extends UdashBootstrapComponent with Listenable[UdashForm, UdashForm.Event] with CrossLogging {
+  extends UdashBootstrapComponent with Listenable[UdashForm, UdashForm.FormEvent] with CrossLogging {
 
   import io.udash.css.CssView._
 
@@ -592,7 +592,7 @@ final class UdashForm private(
               nested(new Binding {
                 override def applyTo(t: Element): Unit = {
                   propertyListeners += listen {
-                    case ev: UdashForm.Event if ev.tpe == UdashForm.Event.EventType.Submit =>
+                    case ev: UdashForm.FormEvent if ev.tpe == UdashForm.FormEvent.EventType.Submit =>
                       startValidation(validationResult, triggerGroup = true)
                   }
                 }
@@ -663,14 +663,15 @@ final class UdashForm private(
 
   override val render: Form =
     form(formStyle)(
-      onsubmit :+= { _: Event => fire(new UdashForm.Event(this, UdashForm.Event.EventType.Submit)); true },
+      onsubmit :+= { _: Event => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
       content(new FormElementsFactory)
     ).render
 }
 
 object UdashForm {
-  final class Event(override val source: UdashForm, val tpe: Event.EventType) extends ListenableEvent[UdashForm]
-  object Event {
+  final case class FormEvent(override val source: UdashForm, tpe: FormEvent.EventType)
+    extends AbstractCase with ListenableEvent[UdashForm]
+  object FormEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
       final val Submit: Value = new EventType
@@ -704,46 +705,22 @@ object UdashForm {
     * </pre>
     * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/">Bootstrap Docs</a>.
     *
-    * @param componentId An id of the root DOM node.
-    * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
+    * @param inline                  If true, creates an inline form.
+    * @param inputValidationTrigger  Default validation trigger for text inputs in this form.
+    * @param selectValidationTrigger Default validation trigger for selectors like checkboxes or select inputs.
+    * @param componentId             An id of the root DOM node.
+    * @param content                 A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
     * @return A `UdashForm` component, call `render` to create a DOM element.
     */
   def apply(
+    inline: Boolean = false,
     inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
     selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
     componentId: ComponentId = ComponentId.newId()
-  )(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
-    new UdashForm(None, inputValidationTrigger, selectValidationTrigger, componentId)(content)
-
-  /**
-    * Creates an inline form with a provided content. <br/>
-    * Example: <br/>
-    * <pre>
-    * UdashForm.inline() { factory => Seq(
-    *   factory.input.formGroup()(
-    *     nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
-    *     labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-    *     validFeedback = _ => Some(span("Looks good.")),
-    *     invalidFeedback = _ => Some(span("Name is too short."))
-    *   ),
-    *   factory.input.formGroup()(
-    *     nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
-    *     labelContent = nested => Some(span("Password: ", nested(bind(name)))),
-    *     validFeedback = _ => Some(span("Looks good.")),
-    *     invalidFeedback = _ => Some(span("Name is too short."))
-    *   )
-    * )}.render
-    * </pre>
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/#inline-forms">Bootstrap Docs</a>.
-    *
-    * @param componentId An id of the root DOM node.
-    * @param content     A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
-    * @return A `UdashForm` component, call `render` to create a DOM element.
-    */
-  def inline(
-    inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
-    selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
-    componentId: ComponentId = ComponentId.newId()
-  )(content: UdashForm#FormElementsFactory => Modifier): UdashForm =
-    new UdashForm(Some(BootstrapStyles.Form.inline), inputValidationTrigger, selectValidationTrigger, componentId)(content)
+  )(content: UdashForm#FormElementsFactory => Modifier): UdashForm = {
+    new UdashForm(
+      Some(BootstrapStyles.Form.inline).filter(_ => inline),
+      inputValidationTrigger, selectValidationTrigger, componentId
+    )(content)
+  }
 }

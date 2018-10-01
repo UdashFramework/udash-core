@@ -506,7 +506,8 @@ object BootstrapDemos extends CrossLogging {
     val search = Property.blank[String]
     val something = Property.blank[String]
     div(
-      UdashForm.inline(
+      UdashForm(
+        inline = true,
         inputValidationTrigger = ValidationTrigger.None,
         selectValidationTrigger = ValidationTrigger.None
       )(factory => Seq(
