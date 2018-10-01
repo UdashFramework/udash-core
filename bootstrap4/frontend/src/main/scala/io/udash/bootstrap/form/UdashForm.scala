@@ -674,14 +674,25 @@ object UdashForm {
   object FormEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
+      /** Fired on the form submit. */
       final val Submit: Value = new EventType
     }
   }
 
+  /** Decides when the provided property will be validated in order to highlight the input. */
   final class ValidationTrigger(implicit enumCtx: EnumCtx) extends AbstractValueEnum
   object ValidationTrigger extends AbstractValueEnumCompanion[ValidationTrigger] {
-    // TODO describe these options and other AbstractValueEnums too
-    final val None, Instant, OnChange, OnBlur, OnSubmit: Value = new ValidationTrigger
+    /** The validation is disabled. */
+    final val None: Value = new ValidationTrigger
+    /** The validation will be triggered on initialization and will be retriggered on each property value change. */
+    final val Instant: Value = new ValidationTrigger
+    /** The validation will be triggered on each value change. */
+    final val OnChange: Value = new ValidationTrigger
+    /** The validation will be triggered on `blur` event on the input. */
+    final val OnBlur: Value = new ValidationTrigger
+    /** The validation will be triggered on the form `submit` event.
+      * Notice that the validation won't block the form submit. */
+    final val OnSubmit: Value = new ValidationTrigger
   }
 
   /** Settings for the horizontal form layout.

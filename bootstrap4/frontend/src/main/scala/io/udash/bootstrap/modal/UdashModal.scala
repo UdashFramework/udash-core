@@ -86,6 +86,7 @@ object UdashModal {
     final val None: Value = new BackdropType("false")
   }
 
+  /** More: <a href="http://getbootstrap.com/docs/4.1/components/modal/#events">Bootstrap Docs</a> */
   final case class ModalEvent(
     override val source: UdashModal,
     tpe: ModalEvent.EventType
@@ -94,7 +95,16 @@ object UdashModal {
   object ModalEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
-      final val Show, Shown, Hide, Hidden: Value = new EventType
+      /** This event fires immediately when the show instance method is called.
+        * If caused by a click, the clicked element is available as the relatedTarget property of the event. */
+      final val Show: Value = new EventType
+      /** This event is fired when the modal has been made visible to the user (will wait for CSS transitions to complete).
+        * If caused by a click, the clicked element is available as the relatedTarget property of the event. */
+      final val Shown: Value = new EventType
+      /** This event is fired immediately when the hide instance method has been called. */
+      final val Hide: Value = new EventType
+      /** This event is fired when the modal has finished being hidden from the user (will wait for CSS transitions to complete). */
+      final val Hidden: Value = new EventType
     }
   }
 

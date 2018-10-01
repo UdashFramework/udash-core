@@ -60,6 +60,7 @@ final class UdashCollapse private(
 }
 
 object UdashCollapse {
+  /** More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#events">Bootstrap Docs</a> */
   final case class CollapseEvent(
     override val source: UdashCollapse,
     tpe: CollapseEvent.EventType
@@ -68,7 +69,14 @@ object UdashCollapse {
   object CollapseEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
-      final val Show, Shown, Hide, Hidden: Value = new EventType
+      /** This event fires immediately when the show instance method is called. */
+      final val Show: Value = new EventType
+      /** This event is fired when a collapse element has been made visible to the user (will wait for CSS transitions to complete). */
+      final val Shown: Value = new EventType
+      /** This event is fired immediately when the hide method has been called. */
+      final val Hide: Value = new EventType
+      /** This event is fired when a collapse element has been hidden from the user (will wait for CSS transitions to complete). */
+      final val Hidden: Value = new EventType
     }
   }
 

@@ -102,6 +102,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 }
 
 object UdashDropdown {
+  /** More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/#events">Bootstrap Docs</a> */
   sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
     override val source: UdashDropdown[ItemType, ElemType],
     val tpe: DropdownEvent.EventType
@@ -110,7 +111,16 @@ object UdashDropdown {
   object DropdownEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
-      final val Show, Shown, Hide, Hidden, Selection: Value = new EventType
+      /** This event fires immediately when the show instance method is called. */
+      final val Show: Value = new EventType
+      /** This event is fired when the dropdown has been made visible to the user (will wait for CSS transitions, to complete). */
+      final val Shown: Value = new EventType
+      /** This event is fired immediately when the hide instance method has been called. */
+      final val Hide: Value = new EventType
+      /** This event is fired when the dropdown has finished being hidden from the user (will wait for CSS transitions, to complete). */
+      final val Hidden: Value = new EventType
+      /** This event is fired on selection of any (except disabled ones) element from the dropdown. */
+      final val Selection: Value = new EventType
     }
 
     case class VisibilityChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
