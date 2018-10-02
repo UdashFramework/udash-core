@@ -54,7 +54,6 @@ final class UdashForm private(
         * You can wrap the result into grid elements in order to create more complex form layout.
         *
         * @param horizontal      Optional settings for a horizontal layout. If `None`, the layout will be organized vertically.
-        * @param inputId         Id of the `input` form control. This value is used to properly set `for` attribute of the label.
         * @param groupId         Id of the root element.
         * @param input           The input element. It can be wrapped into `UdashInputGroup` or any other decoration.
         *                        Use the provided interceptor to properly clean up bindings inside the content.
@@ -73,10 +72,9 @@ final class UdashForm private(
         */
       def formGroup(
         horizontal: Option[HorizontalLayoutSettings] = None,
-        inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
       )(
-        input: Binding.NestedInterceptor => Modifier,
+        input: Binding.NestedInterceptor => Element,
         labelContent: Binding.NestedInterceptor => Option[Modifier] = _ => None,
         validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
         invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
@@ -85,22 +83,24 @@ final class UdashForm private(
         externalBinding(new UdashBootstrapComponent {
           override val render: Element = horizontal match {
             case None =>
+              val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, id := groupId)(
-                labelContent(externalBinding).map(label(`for` := inputId)(_)),
-                input(externalBinding),
+                labelContent(externalBinding).map(label(`for` := inputEl.id)(_)),
+                inputEl,
                 validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
                 invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_)),
                 helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_))
               ).render
             case Some(HorizontalLayoutSettings(labelWidth, inputWidth, breakpoint, labelSize)) =>
+              val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
                   labelContent(externalBinding).map(
-                    label(`for` := inputId, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(_)
+                    label(`for` := inputEl.id, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(_)
                   )
                 ),
                 div(BootstrapStyles.Grid.col(inputWidth, breakpoint))(
-                  input(externalBinding),
+                  inputEl,
                   validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
                   invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
                 )

@@ -125,14 +125,14 @@ object BootstrapDemos extends CrossLogging {
         selectValidationTrigger = ValidationTrigger.None
       ) { factory => Seq[Modifier](
         factory.input.formGroup()(
-          input = factory.input.textInput(pickerOptions.subProp(_.format))(),
+          input = _ => factory.input.textInput(pickerOptions.subProp(_.format))().render,
           labelContent = _ => Some("Date format")
         ),
         factory.input.formGroup()(
-          input = factory.input.select(
+          input = _ => factory.input.select(
             pickerOptions.subProp(_.locale).transform[String]((_: Option[String]).get, Some(_: String)),
             Seq("en_GB", "pl", "ru", "af").toSeqProperty
-          )(span(_)),
+          )(span(_)).render,
           labelContent = _ => Some("Locale")
         ),
         factory.input.checkbox(disableWeekends)(
@@ -478,23 +478,23 @@ object BootstrapDemos extends CrossLogging {
     div(
       UdashForm()(factory => Seq(
         factory.input.formGroup()(
-          factory.input.textInput(user.subProp(_.name))(),
+          input = _ => factory.input.textInput(user.subProp(_.name))().render,
           labelContent = _ => Some("User name": Modifier)
         ),
         factory.input.formGroup()(
-          factory.input.numberInput(
+          input = _ => factory.input.numberInput(
             user.subProp(_.age).transform(_.toString, _.toInt),
-          )(),
+          )().render,
           labelContent = _ => Some("Age": Modifier),
           invalidFeedback = _ => Some("Age should be a non-negative integer!")
         ),
         factory.input.formGroup()(
-          input = factory.input.radioButtons(
+          input = _ => factory.input.radioButtons(
             user.subProp(_.shirtSize),
             Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
             inline = true.toProperty,
             validationTrigger = UdashForm.ValidationTrigger.None
-          )(labelContent = (item, _, _) => Some(shirtSizeToLabel(item))),
+          )(labelContent = (item, _, _) => Some(shirtSizeToLabel(item))).render,
           labelContent = _ => Some("Shirt size")
         ),
         factory.disabled()(_ => UdashButton()("Send").render)

@@ -431,13 +431,13 @@ class UdashFormTest extends AsyncUdashFrontendTest {
 
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
-          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)),
+          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
           labelContent = nested => Some(span("Single select: ", nested(bind(singleSelection)))),
           validFeedback = _ => Some(span("Looks good.")),
           invalidFeedback = _ => Some(span("The number is not even"))
         ),
         factory.input.formGroup()(
-          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)),
+          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
           labelContent = nested => Some(span("Multi select: ", nested(bind(multiSelection)))),
           validFeedback = _ => Some(span("Looks good.")),
           invalidFeedback = _ => Some(span("One of the numbers is not even"))
