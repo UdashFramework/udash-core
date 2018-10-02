@@ -186,6 +186,7 @@ object UdashDropdown {
     * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
     * @param itemFactory    Creates DOM element for each item which is inserted into the dropdown menu.
     *                       Use the provided interceptor to properly clean up bindings inside the content.
+    *                       Usually you should add the `BootstrapStyles.Dropdown.item` style to your element.
     * @param buttonContent  Content of the element opening the dropdown.
     *                       Use the provided interceptor to properly clean up bindings inside the content.
     * @tparam ItemType A single element's type in the `items` sequence.

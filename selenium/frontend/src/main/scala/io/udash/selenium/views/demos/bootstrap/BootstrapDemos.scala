@@ -543,7 +543,7 @@ object BootstrapDemos extends CrossLogging {
     div(
       UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
         elemFactory = (panel, nested) => a(
-          href := "",
+          BootstrapStyles.Navigation.link, href := "",
           onclick :+= ((ev: Event) => selected.set(panel.get), true)
         )(nested(bind(panel.asModel.subProp(_.title)))).render,
         isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
@@ -560,29 +560,46 @@ object BootstrapDemos extends CrossLogging {
   }
 
   def navbars(): Element = {
-    trait Panel {
+    trait NavItem {
       def title: String
-      def content: String
     }
-    object Panel extends HasModelPropertyCreator[Panel]
+    object NavItem {
+      case class Single(title: String) extends NavItem
+      case class Dropdown(title: String, items: Seq[Single]) extends NavItem
+    }
 
-    case class DefaultPanel(override val title: String, override val content: String) extends Panel
-
-    val panels = SeqProperty[Panel](
-      DefaultPanel("Title 1", "Content of panel 1..."),
-      DefaultPanel("Title 2", "Content of panel 2..."),
-      DefaultPanel("Title 3", "Content of panel 3..."),
-      DefaultPanel("Title 4", "Content of panel 4...")
+    val panels = SeqProperty[NavItem](
+      NavItem.Single("Item 1"),
+      NavItem.Single("Item 2"),
+      NavItem.Dropdown("Item 3", Seq(
+        NavItem.Single("Subitem 1"),
+        NavItem.Single("Subitem 2"),
+        NavItem.Single("Subitem 3")
+      )),
+      NavItem.Single("Item 4")
     )
-    panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
+
     div(
       UdashNavbar()(
         _ => UdashNav(panels)(
-          elemFactory = (panel, nested) => a(href := "", onclick :+= ((ev: Event) => true))(
-            nested(bind(panel.asModel.subProp(_.title)))
+          elemFactory = (panel, nested) => span(
+            nested(produce(panel) {
+              case NavItem.Single(title) =>
+                a(BootstrapStyles.Navigation.link, href := "", onclick :+= ((_: Event) => true))(title).render
+              case NavItem.Dropdown(title, items) =>
+                UdashDropdown(items.toSeqProperty, buttonToggle = false.toProperty)(
+                  itemFactory = (item: ReadableProperty[NavItem.Single], nested) =>
+                    a(
+                      BootstrapStyles.Dropdown.item,
+                      href := "", onclick :+= ((_: Event) => true)
+                    )(nested(bind(item.transform(_.title)))).render,
+                  buttonContent = _ => Seq[Modifier](span(title, " "), BootstrapStyles.Navigation.link)
+                ).render
+
+            })
           ).render,
           isActive = el => el.transform(_.title.endsWith("1")),
-          isDisabled = el => el.transform(_.title.endsWith("5"))
+          isDisabled = el => el.transform(_.title.endsWith("2"))
         ),
         span("Udash"),
       ).render

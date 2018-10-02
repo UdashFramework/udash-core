@@ -43,7 +43,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
             BootstrapStyles.Navigation.item,
             nested(BootstrapStyles.Dropdown.dropdown.styleIf(isDropdown(panel)))
           )({
-            val el = elemFactory(panel, nested).styles(BootstrapStyles.Navigation.link)
+            val el = elemFactory(panel, nested)
             nested(BootstrapStyles.active.styleIf(isActive(panel))).applyTo(el)
             nested(BootstrapStyles.disabled.styleIf(isDisabled(panel))).applyTo(el)
             el
@@ -54,12 +54,18 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
 }
 
 object UdashNav {
+  import io.udash.css.CssView._
+
   /** Default navigation model. */
   class NavItem(val name: String, val link: String)
 
   /** Default breadcrumb model factory. */
   val defaultItemFactory: (ReadableProperty[NavItem], Binding.NestedInterceptor) => Element = {
-    (item, nested) =>a(nested(href.bind(item.transform(_.link))), nested(bind(item.transform(_.name)))).render
+    (item, nested) => a(
+      nested(href.bind(item.transform(_.link))),
+      nested(bind(item.transform(_.name))),
+      BootstrapStyles.Navigation.link
+    ).render
   }
 
   /**
@@ -76,6 +82,7 @@ object UdashNav {
     * @param componentId An id of the root DOM node.
     * @param elemFactory Creates DOM hierarchy representing an element in the navigation.
     *                    Use the provided interceptor to properly clean up bindings inside the content.
+    *                    Usually you should add the `BootstrapStyles.Navigation.link` style to your links.
     * @param isActive    Creates property indicating if an element is active.
     * @param isDisabled  Creates property indicating if an element is disabled.
     * @param isDropdown  Creates property indicating if an element has a dropdown menu.
