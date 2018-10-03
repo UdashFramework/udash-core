@@ -16,7 +16,7 @@ class RoutingLoggerDemoComponent extends CssView {
       selectValidationTrigger = UdashForm.ValidationTrigger.None
     ) { factory =>
       factory.input.checkbox(UrlLoggingDemoService.enabled, inline = true.toProperty, inputId = ComponentId("turn-on-logger"))(
-        labelContent = _ => Some("Turn on frontend routing logger")
+        labelContent = Some(_ => "Turn on frontend routing logger")
       )
     },
     ul(id := "routing-history")(

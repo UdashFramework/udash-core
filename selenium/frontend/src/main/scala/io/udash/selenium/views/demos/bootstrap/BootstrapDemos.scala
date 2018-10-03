@@ -126,23 +126,23 @@ object BootstrapDemos extends CrossLogging {
       ) { factory => Seq[Modifier](
         factory.input.formGroup()(
           input = _ => factory.input.textInput(pickerOptions.subProp(_.format))().render,
-          labelContent = _ => Some("Date format")
+          labelContent = Some(_ => "Date format")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.select(
             pickerOptions.subProp(_.locale).transform[String]((_: Option[String]).get, Some(_: String)),
             Seq("en_GB", "pl", "ru", "af").toSeqProperty
           )(span(_)).render,
-          labelContent = _ => Some("Locale")
+          labelContent = Some(_ => "Locale")
         ),
         factory.input.checkbox(disableWeekends)(
-          labelContent = _ => Some("Disable weekends")
+          labelContent = Some(_ => "Disable weekends")
         ),
         factory.input.checkbox(pickerOptions.subProp(_.showTodayButton))(
-          labelContent = _ => Some("Show `today` button")
+          labelContent = Some(_ => "Show `today` button")
         ),
         factory.input.checkbox(pickerOptions.subProp(_.showClose))(
-          labelContent = _ => Some("Show `close` button")
+          labelContent = Some(_ => "Show `close` button")
         ),
         UdashButtonGroup()(
           factory.externalBinding(showButton).render,
@@ -479,14 +479,14 @@ object BootstrapDemos extends CrossLogging {
       UdashForm()(factory => Seq(
         factory.input.formGroup()(
           input = _ => factory.input.textInput(user.subProp(_.name))().render,
-          labelContent = _ => Some("User name": Modifier)
+          labelContent = Some(_ => "User name")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
             user.subProp(_.age).transform(_.toString, _.toInt),
           )().render,
-          labelContent = _ => Some("Age": Modifier),
-          invalidFeedback = _ => Some("Age should be a non-negative integer!")
+          labelContent = Some(_ => "Age"),
+          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.radioButtons(
@@ -495,7 +495,7 @@ object BootstrapDemos extends CrossLogging {
             inline = true.toProperty,
             validationTrigger = UdashForm.ValidationTrigger.None
           )(labelContent = (item, _, _) => Some(shirtSizeToLabel(item))).render,
-          labelContent = _ => Some("Shirt size")
+          labelContent = Some(_ => "Shirt size")
         ),
         factory.disabled()(_ => UdashButton()("Send").render)
       )).render

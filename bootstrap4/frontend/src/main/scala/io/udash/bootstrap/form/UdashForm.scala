@@ -75,34 +75,36 @@ final class UdashForm private(
         groupId: ComponentId = ComponentId.newId()
       )(
         input: Binding.NestedInterceptor => Element,
-        labelContent: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        helpText: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
+        validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+        invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+        helpText: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(new UdashBootstrapComponent {
           override val render: Element = horizontal match {
             case None =>
               val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, id := groupId)(
-                labelContent(externalBinding).map(label(`for` := inputEl.id)(_)),
+                labelContent.map(f => label(`for` := inputEl.id)(f(externalBinding))),
                 inputEl,
-                validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
-                invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_)),
-                helpText(externalBinding).map(div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(_))
+                validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(externalBinding))),
+                invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(externalBinding))),
+                helpText.map(f => div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(f(externalBinding)))
               ).render
             case Some(HorizontalLayoutSettings(labelWidth, inputWidth, breakpoint, labelSize)) =>
               val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
-                  labelContent(externalBinding).map(
-                    label(`for` := inputEl.id, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(_)
+                  labelContent.map(f =>
+                    label(`for` := inputEl.id, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(
+                      f(externalBinding)
+                    )
                   )
                 ),
                 div(BootstrapStyles.Grid.col(inputWidth, breakpoint))(
                   inputEl,
-                  validFeedback(externalBinding).map(div(BootstrapStyles.Form.validFeedback)(_)),
-                  invalidFeedback(externalBinding).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+                  validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(externalBinding))),
+                  invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(externalBinding)))
                 )
               ).render
           }
@@ -131,14 +133,14 @@ final class UdashForm private(
         validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             TextInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(property, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -166,14 +168,14 @@ final class UdashForm private(
         validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             PasswordInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(property, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -201,14 +203,14 @@ final class UdashForm private(
         validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             NumberInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(property, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -236,14 +238,14 @@ final class UdashForm private(
         validationTrigger: ValidationTrigger = inputValidationTrigger,
         inputId: ComponentId = ComponentId.newId()
       )(
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             TextArea(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(property, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -282,17 +284,17 @@ final class UdashForm private(
         inputId: ComponentId = ComponentId.newId()
       )(
         inputName: String,
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None,
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
         labelContent: Binding.NestedInterceptor => Modifier = _ => "",
-        validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+        invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(new UdashBootstrapComponent {
           private val input = FileInput(selectedFiles, acceptMultipleFiles)(
             inputName,
             id := inputId,
             BootstrapStyles.Form.customFileInput,
-            inputModifier(nestedInterceptor),
+            inputModifier.map(_.apply(nestedInterceptor)),
             validationModifier(selectedFiles, validationTrigger, nestedInterceptor),
             (BootstrapStyles.Form.size _).reactiveOptionApply(size)
           )
@@ -302,8 +304,8 @@ final class UdashForm private(
           override val render: Element = div(BootstrapStyles.Form.customFile)(
             input.render,
             label(`for` := inputId, BootstrapStyles.Form.customFileLabel)(labelContent(nestedInterceptor)),
-            validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
-            invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+            validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(nestedInterceptor))),
+            invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(nestedInterceptor)))
           ).render
         })
       }
@@ -330,7 +332,7 @@ final class UdashForm private(
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
@@ -338,7 +340,7 @@ final class UdashForm private(
               itemLabel,
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItem, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -368,7 +370,7 @@ final class UdashForm private(
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
@@ -376,7 +378,7 @@ final class UdashForm private(
               itemLabel,
               id := inputId,
               BootstrapStyles.Form.control,
-              inputModifier(externalBinding),
+              inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItems, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
@@ -412,16 +414,16 @@ final class UdashForm private(
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
       )(
-        inputModifier: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        labelContent: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        validFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None,
-        invalidFeedback: Binding.NestedInterceptor => Option[Modifier] = _ => None
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+        labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
+        validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+        invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
       ): UdashBootstrapComponent = {
         externalBinding(new UdashBootstrapComponent {
           private val input = nestedInterceptor(Checkbox(property)(
             id := inputId,
             BootstrapStyles.Form.control,
-            inputModifier(nestedInterceptor),
+            inputModifier.map(_.apply(nestedInterceptor)),
             validationModifier(property, validationTrigger, nestedInterceptor)
           ))
 
@@ -432,10 +434,10 @@ final class UdashForm private(
             input.render.styles(BootstrapStyles.Form.customControlInput),
             nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
             label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
-              labelContent(nestedInterceptor).getOrElse(span("\u00a0"))
+              labelContent.map(_.apply(nestedInterceptor)).getOrElse(span("\u00a0"))
             ),
-            validFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.validFeedback)(_)),
-            invalidFeedback(nestedInterceptor).map(div(BootstrapStyles.Form.invalidFeedback)(_))
+            validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(nestedInterceptor))),
+            invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(nestedInterceptor)))
           ).render
         })
       }

@@ -28,7 +28,7 @@ class TextInputDemoComponent extends CssView {
       div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           UdashInputGroup.input(
-            factory.input.textInput(name)(_ => Some(Seq(placeholder := "Input your name...", maxlength := "6"))).render
+            factory.input.textInput(name)(Some(_ => Seq(placeholder := "Input your name...", maxlength := "6"))).render
           ),
           UdashInputGroup.appendText(span(bind(name)))
         ).render
@@ -36,7 +36,7 @@ class TextInputDemoComponent extends CssView {
       div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           UdashInputGroup.input(
-            factory.input.passwordInput(password)(_ => Some(Seq(placeholder := "Input your password...", maxlength := "6"))).render
+            factory.input.passwordInput(password)(Some(_ => Seq(placeholder := "Input your password...", maxlength := "6"))).render
           ),
           UdashInputGroup.appendText(span(bind(password)))
         ).render

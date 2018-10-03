@@ -38,12 +38,12 @@ class RoutingLinkDemoComponent(url: Property[String]) extends CssView {
     ) { factory => Seq[Modifier](
       factory.input.formGroup()(
         input = _ => factory.input.textInput(Property(""), inputId = ComponentId("url-demo-input"))(
-          _ => Some(placeholder := "Type anything in this field, it should not disappear on a state change...")
+          Some(_ => placeholder := "Type anything in this field, it should not disappear on a state change...")
         ).render
       ),
       factory.input.formGroup()(
         input = _ => factory.input.textInput(urlArg, inputId = ComponentId("url-demo-link-input"))(
-          _ => Some(placeholder := "Type something in this field and look at the URL...")
+          Some(_ => placeholder := "Type something in this field and look at the URL...")
         ).render
       )
     )},

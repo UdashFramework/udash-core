@@ -24,33 +24,33 @@ class UdashFormTest extends AsyncUdashFrontendTest {
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
           nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
-          labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("Name is too short."))
+          labelContent = Some(nested => span("Name: ", nested(bind(name)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
           nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
-          labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("Name is too short."))
+          labelContent = Some(nested => span("Name: ", nested(bind(name)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
           nested => factory.input.textArea(name, validationTrigger = ValidationTrigger.OnSubmit)().render,
-          labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("Name is too short."))
+          labelContent = Some(nested => span("Name: ", nested(bind(name)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
           nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.None)().render,
-          labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("Name is too short."))
+          labelContent = Some(nested => span("Name: ", nested(bind(name)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
           nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnChange)().render,
-          labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("Name is too short."))
+          labelContent = Some(nested => span("Name: ", nested(bind(name)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("Name is too short."))
         )
       )}
       val element: Element = form.render
@@ -432,15 +432,15 @@ class UdashFormTest extends AsyncUdashFrontendTest {
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
           nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
-          labelContent = nested => Some(span("Single select: ", nested(bind(singleSelection)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("The number is not even"))
+          labelContent = Some(nested => span("Single select: ", nested(bind(singleSelection)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("The number is not even"))
         ),
         factory.input.formGroup()(
           nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
-          labelContent = nested => Some(span("Multi select: ", nested(bind(multiSelection)))),
-          validFeedback = _ => Some(span("Looks good.")),
-          invalidFeedback = _ => Some(span("One of the numbers is not even"))
+          labelContent = Some(nested => span("Multi select: ", nested(bind(multiSelection)))),
+          validFeedback = Some(_ => span("Looks good.")),
+          invalidFeedback = Some(_ => span("One of the numbers is not even"))
         )
       )}
 
