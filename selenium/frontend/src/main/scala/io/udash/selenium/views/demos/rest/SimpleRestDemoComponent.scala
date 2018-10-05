@@ -23,7 +23,7 @@ class SimpleRestDemoComponent extends CssView {
 
     val loadingString: Boolean,
     val loadingInt: Boolean,
-    val loadingCls: Boolean,
+    val loadingCls: Boolean
   )
   object ExampleModel extends HasModelPropertyCreator[ExampleModel]
 

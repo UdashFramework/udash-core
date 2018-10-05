@@ -38,7 +38,7 @@ class RangeInputDemoComponent extends CssView {
       factory.input.formGroup(horizontal = Some(UdashForm.HorizontalLayoutSettings()))(
         input = _ => factory.input.rangeInput(value, min, max, step, inputId = ComponentId("range-selector2"))().render,
         labelContent = Some(nested => span(id := "range-label2")("Second selector: ", nested(bind(value))))
-      ),
+      )
     )}
   )
 }

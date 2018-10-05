@@ -74,7 +74,7 @@ object BootstrapDemos extends CrossLogging {
           UdashButton()(i(UdashIcons.FontAwesome.Brands.bitcoin)).render,
           UdashButton()(i(UdashIcons.FontAwesome.Solid.euroSign)).render,
           UdashButton()(i(UdashIcons.FontAwesome.Solid.dollarSign)).render,
-          UdashButton()(i(UdashIcons.FontAwesome.Brands.superpowers)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Brands.superpowers)).render
         ).render
       ).render
     ).render
@@ -292,7 +292,7 @@ object BootstrapDemos extends CrossLogging {
       UdashButton(Color.Link.toProperty, smallBtn, disabled = disabled(6))(_ => Seq[Modifier]("Link")),
       UdashButton(Color.Light.toProperty, smallBtn, disabled = disabled(7))(_ => Seq[Modifier]("Light")),
       UdashButton(Color.Dark.toProperty, smallBtn, disabled = disabled(8))(_ => Seq[Modifier]("Dark")),
-      UdashButton(Color.White.toProperty, smallBtn, disabled = disabled(9))(_ => Seq[Modifier]("White")),
+      UdashButton(Color.White.toProperty, smallBtn, disabled = disabled(9))(_ => Seq[Modifier]("White"))
     )
 
     val clicks = SeqProperty[String](Seq.empty)
@@ -483,7 +483,7 @@ object BootstrapDemos extends CrossLogging {
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toString, _.toInt),
+            user.subProp(_.age).transform(_.toString, _.toInt)
           )().render,
           labelContent = Some(_ => "Age"),
           invalidFeedback = Some(_ => "Age should be a non-negative integer!")
@@ -519,7 +519,7 @@ object BootstrapDemos extends CrossLogging {
         UdashInputGroup()(
           UdashInputGroup.prependText("Something: "),
           UdashInputGroup.input(factory.input.textInput(something)().render)
-        ).render,
+        ).render
       )).render
     ).render
   }
@@ -601,7 +601,7 @@ object BootstrapDemos extends CrossLogging {
           isActive = el => el.transform(_.title.endsWith("1")),
           isDisabled = el => el.transform(_.title.endsWith("2"))
         ),
-        span("Udash"),
+        span("Udash")
       ).render
     ).render
   }
@@ -667,7 +667,7 @@ object BootstrapDemos extends CrossLogging {
         UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render,
         UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render,
         UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render
       ).map(_.styles(BootstrapStyles.Spacing.margin()))
     ).render
   }
