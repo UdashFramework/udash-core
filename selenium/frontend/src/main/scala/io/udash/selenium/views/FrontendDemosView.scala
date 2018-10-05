@@ -25,7 +25,8 @@ class FrontendDemosView extends FinalView with CssView {
     new SelectDemoComponent().getTemplate, hr,
     new ShowIfDemoComponent().getTemplate, hr,
     new TextAreaDemoComponent().getTemplate, hr,
-    new TextInputDemoComponent().getTemplate, hr
+    new TextInputDemoComponent().getTemplate, hr,
+    new RangeInputDemoComponent().getTemplate, hr
   )
 
   override def getTemplate: Modifier = content

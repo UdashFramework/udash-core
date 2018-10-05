@@ -345,6 +345,7 @@ object BootstrapStyles {
     def checkLabel = CssStyleName("form-check-label")
 
     def control = CssStyleName("form-control")
+    def controlRange = CssStyleName("form-control-range")
     def controlPlaintext = CssStyleName("form-control-plaintext")
 
     def customControl = CssStyleName("custom-control")
@@ -358,6 +359,7 @@ object BootstrapStyles {
     def customFileInput = CssStyleName("custom-file-input")
     def customRadio = CssStyleName("custom-radio")
     def customSelect = CssStyleName("custom-select")
+    def customRange = CssStyleName("custom-range")
 
     def size(size: Size) =
       CssStyleName(s"form-control${size.classMarker}")

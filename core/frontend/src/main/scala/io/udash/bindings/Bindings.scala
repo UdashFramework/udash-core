@@ -24,6 +24,7 @@ trait Bindings {
   final val Select = inputs.Select
   final val TextArea = inputs.TextArea
   final val TextInput = inputs.TextInput
+  final val RangeInput = inputs.RangeInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)

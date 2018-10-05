@@ -219,6 +219,43 @@ final class UdashForm private(
       }
 
       /**
+        * Creates a range input with a custom bootstrap styling and an optional validation callback which sets
+        * proper bootstrap classes: `is-valid` and `is-invalid`.
+        * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+        *
+        * @param value             Current value synchronised with the input.
+        * @param minValue          The minimum value for this input, which must not be greater than its maximum (`maxValue` attribute) value.
+        * @param maxValue          The maximum value for the input. Must not be less than its minimum (`minValue` attribute) value.
+        * @param valueStep         Limit the increments at which a numeric value can be set.
+        * @param validationTrigger Selects the event updating validation state of the input.
+        * @param inputId           Id of the input DOM element.
+        * @param inputModifier     Modifiers applied directly to the `input` element.
+        *                          Use the provided interceptor to properly clean up bindings inside the content.
+        */
+      def rangeInput(
+        value: Property[Double],
+        minValue: ReadableProperty[Double] = 0d.toProperty,
+        maxValue: ReadableProperty[Double] = 100d.toProperty,
+        valueStep: ReadableProperty[Double] = 1d.toProperty,
+        validationTrigger: ValidationTrigger = selectValidationTrigger,
+        inputId: ComponentId = ComponentId.newId()
+      )(
+        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      ): UdashBootstrapComponent = {
+        externalBinding(
+          new InputComponent(
+            RangeInput(value, minValue, maxValue, valueStep)(
+              id := inputId,
+              BootstrapStyles.Form.controlRange,
+              BootstrapStyles.Form.customRange,
+              inputModifier.map(_.apply(externalBinding)),
+              validationModifier(value, validationTrigger, externalBinding)
+            ), inputId
+          )
+        )
+      }
+
+      /**
         * Creates a text area with a default bootstrap styling and an optional validation callback which sets
         * proper bootstrap classes: `is-valid` and `is-invalid`.
         * Use `formGroup` if you want to create an input with a label and validation feedback elements.
@@ -714,10 +751,10 @@ object UdashForm {
     * @param labelSize Size of the label text.
     */
   case class HorizontalLayoutSettings(
-    labelWidth: Int,
-    inputWidth: Int,
-    breakpoint: ResponsiveBreakpoint,
-    labelSize: ReadableProperty[Option[BootstrapStyles.Size]]
+    labelWidth: Int = 4,
+    inputWidth: Int = 8,
+    breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.Medium,
+    labelSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None
   )
 
   /**
