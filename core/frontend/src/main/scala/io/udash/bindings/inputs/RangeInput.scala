@@ -30,7 +30,7 @@ object RangeInput {
       ).render
 
       element.onchange = (_: Event) => property.set(element.valueAsNumber)
-      propertyListeners += property.listen(element.valueAsNumber = _)
+      propertyListeners += property.listen(element.valueAsNumber = _, initUpdate = true)
       propertyListeners += minValue.listen(_ => property.set(element.valueAsNumber))
       propertyListeners += maxValue.listen(_ => property.set(element.valueAsNumber))
       propertyListeners += valueStep.listen(_ => property.set(element.valueAsNumber))
