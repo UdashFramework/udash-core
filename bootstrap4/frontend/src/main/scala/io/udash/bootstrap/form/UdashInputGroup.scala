@@ -46,11 +46,11 @@ object UdashInputGroup {
 
   /** Adds `custom-select` style to provided element. It's required to properly display select as part of group. */
   def select(el: Element): Element =
-    el.styles(BootstrapStyles.InputGroup.customSelect)
+    el.styles(BootstrapStyles.Form.control, BootstrapStyles.InputGroup.customSelect)
 
   /** Adds `custom-file` style to provided element. It's required to properly display file input as part of group. */
   def file(el: Element): Element =
-    el.styles(BootstrapStyles.InputGroup.customFile)
+    el.styles(BootstrapStyles.Form.control, BootstrapStyles.InputGroup.customFile)
 
   /** Creates an element to be prepended to the input of this input group. */
   def prepend(content: Modifier*): Modifier =
