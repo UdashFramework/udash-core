@@ -241,12 +241,39 @@ class UdashFormTest extends AsyncUdashFrontendTest {
         }
 
         _ <- Future {
+          form.clearValidationResults()
+        }
+        _ <- retrying {
+          inOnBlur.classList shouldNot contain("is-valid")
+          inOnBlur.classList shouldNot contain("is-invalid")
+          jQ(validFeedbackOnBlur).is(":hidden") should be(true)
+          jQ(invalidFeedbackOnBlur).is(":hidden") should be(true)
+          inInstant.classList shouldNot contain("is-valid")
+          inInstant.classList shouldNot contain("is-invalid")
+          jQ(validFeedbackInstant).is(":hidden") should be(true)
+          jQ(invalidFeedbackInstant).is(":hidden") should be(true)
+          inOnSubmit.classList shouldNot contain("is-valid")
+          inOnSubmit.classList shouldNot contain("is-invalid")
+          jQ(validFeedbackOnSubmit).is(":hidden") should be(true)
+          jQ(invalidFeedbackOnSubmit).is(":hidden") should be(true)
+          inNone.classList shouldNot contain("is-valid")
+          inNone.classList shouldNot contain("is-invalid")
+          jQ(validFeedbackNone).is(":hidden") should be(true)
+          jQ(invalidFeedbackNone).is(":hidden") should be(true)
+          inOnChange.classList shouldNot contain("is-valid")
+          inOnChange.classList shouldNot contain("is-invalid")
+          jQ(validFeedbackOnChange).is(":hidden") should be(true)
+          jQ(invalidFeedbackOnChange).is(":hidden") should be(true)
+        }
+
+        _ <- Future {
           form.kill()
         }
         r <- Future {
           name.listenersCount() should be(0)
           name.valid.listenersCount() should be(0)
           form.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
         }
       } yield r
     }
@@ -406,12 +433,29 @@ class UdashFormTest extends AsyncUdashFrontendTest {
         }
 
         _ <- Future {
+          form.clearValidationResults()
+        }
+        _ <- retrying {
+          for (i <- 0 until 5) {
+            val input = inputs(i)
+            input.classList shouldNot contain("is-valid")
+            input.classList shouldNot contain("is-invalid")
+          }
+          for (i <- 5 until inputs.length) {
+            val input = inputs(i)
+            input.classList shouldNot contain("is-valid")
+            input.classList shouldNot contain("is-invalid")
+          }
+        }
+
+        _ <- Future {
           form.kill()
         }
         r <- retrying {
           radioSelection.listenersCount() should be(0)
           checkboxesSelection.listenersCount() should be(0)
           inline.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
         }
       } yield r
     }
@@ -536,11 +580,22 @@ class UdashFormTest extends AsyncUdashFrontendTest {
         }
 
         _ <- Future {
+          form.clearValidationResults()
+        }
+        _ <- retrying {
+          singleSelect.classList shouldNot contain("is-valid")
+          singleSelect.classList shouldNot contain("is-invalid")
+          multiSelect.classList shouldNot contain("is-valid")
+          multiSelect.classList shouldNot contain("is-invalid")
+        }
+
+        _ <- Future {
           form.kill()
         }
         r <- retrying {
           singleSelection.listenersCount() should be(0)
           multiSelection.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
         }
       } yield r
     }

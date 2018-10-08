@@ -16,6 +16,7 @@ import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, DurationLong}
 import scala.util.{Failure, Success}
@@ -593,7 +594,16 @@ final class UdashForm private(
         def eventBasedModifiers(validationResult: Property[Option[ValidationResult]]): Modifier = Seq(
           nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
           nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(v => v.isDefined && !v.contains(Valid)))),
-          nested(groupTrigger(() => startValidation(validationResult, triggerGroup = false)))
+          nested(groupTrigger(() => startValidation(validationResult, triggerGroup = false))),
+          nested(new Binding {
+            override def applyTo(t: Element): Unit =
+              validationProperties += validationResult
+
+            override def kill(): Unit = {
+              super.kill()
+              validationProperties -= validationResult
+            }
+          })
         )
 
         validationTrigger match {
@@ -606,10 +616,15 @@ final class UdashForm private(
                   propertyListeners += property.listen({ _ =>
                     startValidation(validationResult, triggerGroup = true)
                   }, initUpdate = true)
+                  validationProperties += validationResult
+                }
+                override def kill(): Unit = {
+                  super.kill()
+                  validationProperties -= validationResult
                 }
               }),
               nested(BootstrapStyles.Form.isValid.styleIf(validationResult.transform(_.contains(Valid)))),
-              nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(!_.contains(Valid))))
+              nested(BootstrapStyles.Form.isInvalid.styleIf(validationResult.transform(v => v.isDefined && !v.contains(Valid))))
             )
           case ValidationTrigger.OnBlur =>
             val validationResult = Property[Option[ValidationResult]](None)
@@ -706,6 +721,12 @@ final class UdashForm private(
       def col(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All)(content: Modifier*): Modifier =
         div(BootstrapStyles.Grid.col(size, breakpoint))(content)
     }
+  }
+
+  private[form] val validationProperties: mutable.Set[Property[Option[ValidationResult]]] = mutable.Set.empty
+
+  def clearValidationResults(): Unit = {
+    validationProperties.foreach(_.set(None))
   }
 
   override val render: Form =
