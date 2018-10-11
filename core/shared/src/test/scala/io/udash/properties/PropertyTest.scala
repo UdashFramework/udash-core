@@ -97,16 +97,18 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "toggle value" in {
-      val p = Property[Boolean](true)
-      p.toggle()
-      p.get shouldBe false
-      p.toggle()
-      p.get shouldBe true
+      import io.udash.properties.single.PropertyOps._
+      val booleanProperty = Property[Boolean](true)
+      booleanProperty.toggle()
+      booleanProperty.get shouldBe false
+      booleanProperty.toggle()
+      booleanProperty.get shouldBe true
 
       val blank = Property.blank[Boolean]
       blank.toggle()
       blank.get shouldBe true
 
+      """Property[JBoolean](true).toggle()""" shouldNot typeCheck
       """Property[String]("asd").toggle()""" shouldNot typeCheck
       """Property[AnyVal](true).toggle()""" shouldNot typeCheck
 
