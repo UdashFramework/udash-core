@@ -64,23 +64,25 @@ object Dependencies {
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val coreJsDeps = Def.setting(coreCrossDeps.value ++ Seq(
+  val coreSjsDeps = Def.setting(coreCrossDeps.value ++ Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
-  val rpcCrossTestDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion,
-    "io.circe" %%% "circe-core" % circeVersion,
-    "io.circe" %%% "circe-parser" % circeVersion,
-  ).map(_ % Test))
-
-  val rpcFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
+  val rpcCrossDeps = Def.setting(Seq(
+    "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
+    "io.circe" %%% "circe-core" % circeVersion % Test,
+    "io.circe" %%% "circe-parser" % circeVersion % Test,
   ))
 
-  val rpcBackendDeps = Def.setting(Seq(
+  val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
+  ))
+  
+  val rpcSjsDeps = rpcCrossDeps
+
+  val rpcJsDeps = Def.setting(Seq(
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
   ))
 
   val restCrossDeps = Def.setting(Seq(
