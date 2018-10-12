@@ -60,11 +60,11 @@ object Dependencies {
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
-  val coreCrossJVMDeps = Def.setting(Seq(
+  val coreJvmDeps = Def.setting(coreCrossDeps.value ++ Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val coreFrontendDeps = Def.setting(Seq(
+  val coreJsDeps = Def.setting(coreCrossDeps.value ++ Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
@@ -98,7 +98,7 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
-  
+
   val cssCrossDeps = Def.setting(Seq(
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
   ))
