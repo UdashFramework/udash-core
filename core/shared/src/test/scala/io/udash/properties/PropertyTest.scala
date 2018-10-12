@@ -97,14 +97,15 @@ class PropertyTest extends UdashSharedTest {
     }
 
     "toggle value" in {
-      import io.udash.properties.single.PropertyOps._
       val booleanProperty = Property[Boolean](true)
+      val blank = Property.blank[Boolean]
+
+      import Properties._
       booleanProperty.toggle()
       booleanProperty.get shouldBe false
       booleanProperty.toggle()
       booleanProperty.get shouldBe true
 
-      val blank = Property.blank[Boolean]
       blank.toggle()
       blank.get shouldBe true
 
