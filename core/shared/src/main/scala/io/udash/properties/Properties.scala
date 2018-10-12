@@ -36,6 +36,7 @@ trait Properties {
   implicit def any2ModelProperty[A: ModelPropertyCreator](value: A): Any2ModelProperty[A] = new Any2ModelProperty(value)
   implicit def any2SeqProperty[A](value: Seq[A]): Any2SeqProperty[A] = new Any2SeqProperty(value)
   implicit def propertySeq2SeqProperty[A](value: ISeq[Property[A]]): PropertySeq2SeqProperty[A] = new PropertySeq2SeqProperty(value)
+  implicit def booleanProp2BooleanOpsProperty(value: Property[Boolean]): BooleanPropertyOps = new BooleanPropertyOps(value)
 }
 
 object Properties extends Properties {
@@ -53,5 +54,12 @@ object Properties extends Properties {
 
   class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[Property[A]]) extends AnyVal {
     def combineToSeqProperty: ReadableSeqProperty[A] = new PropertySeqCombinedReadableSeqProperty[A](value)
+  }
+
+  class BooleanPropertyOps private[properties](private val underlying: Property[Boolean]) extends AnyVal {
+    /** Toggles the value of the underlying boolean-backed property.
+      * @param force If true, the value change listeners will be fired even if value didn't change.
+      * */
+    def toggle(force: Boolean = true): Unit = underlying.set(!underlying.get, force)
   }
 }
