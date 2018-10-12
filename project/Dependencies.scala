@@ -90,17 +90,16 @@ object Dependencies {
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
   ))
 
-  val restCrossJvmDeps = Def.setting(Seq(
+  val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
     "com.softwaremill.sttp" %% "async-http-client-backend-future" % sttpVersion,
-  ))
-
-  val restBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
-
+  
+  val restSjsDeps = restCrossDeps
+  
   val cssCrossDeps = Def.setting(Seq(
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
   ))

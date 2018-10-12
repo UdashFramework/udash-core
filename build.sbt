@@ -92,7 +92,7 @@ lazy val udash = project.in(file("."))
     macros, 
     core, `core-js`,
     rpc, `rpc-js`,
-    `rest-shared-JS`, `rest-shared`, `rest-backend`,
+    rest, `rest-js`,
     `i18n-shared-JS`, `i18n-shared`, `i18n-frontend`, `i18n-backend`,
     `auth-shared-JS`, `auth-shared`, `auth-frontend`,
     `css-shared-JS`, `css-shared`, `css-frontend`, `css-backend`,
@@ -153,35 +153,27 @@ lazy val `rpc-js` = project.in(rpc.base / ".js")
     jsDependencies ++= Dependencies.rpcJsDeps.value,
   )
 
-lazy val `rest-shared` = project.in(file("rest/shared"))
+lazy val rest = project
   .dependsOn(rpc % CompileAndTest)
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
 
-    libraryDependencies ++= Dependencies.restCrossDeps.value,
-    libraryDependencies ++= Dependencies.restCrossJvmDeps.value,
+    libraryDependencies ++= Dependencies.restJvmDeps.value,
   )
 
-lazy val `rest-shared-JS` = project.in(`rest-shared`.base / ".js")
+lazy val `rest-js` = project.in(rest.base / ".js")
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(`rpc-js` % CompileAndTest)
-  .configure(p => if (forIdeaImport) p.dependsOn(`rest-shared`) else p)
+  .configure(p => if (forIdeaImport) p.dependsOn(rest) else p)
   .settings(
     commonSettings,
     commonJSSettings,
 
-    name := (`rest-shared` / name).value,
+    moduleName := (rest / moduleName).value,
     sourceDirsSettings(_.getParentFile),
 
-    libraryDependencies ++= Dependencies.restCrossDeps.value,
-  )
-
-lazy val `rest-backend` = project.in(file("rest/backend"))
-  .dependsOn(`rest-shared` % CompileAndTest)
-  .settings(
-    commonSettings,
-    libraryDependencies ++= Dependencies.restBackendDeps.value
+    libraryDependencies ++= Dependencies.restSjsDeps.value,
   )
 
 lazy val `i18n-shared` = project.in(file("i18n/shared"))
@@ -312,7 +304,7 @@ lazy val `benchmarks-frontend` = project.in(file("benchmarks/frontend"))
 
 lazy val `selenium-shared` = project.in(file("selenium/shared"))
   .dependsOn(
-    core % CompileAndTest, rpc % CompileAndTest, `rest-shared` % CompileAndTest,
+    core % CompileAndTest, rpc % CompileAndTest, rest % CompileAndTest,
     `css-shared` % CompileAndTest, `auth-shared` % CompileAndTest, `i18n-shared` % CompileAndTest
   ).settings(
   commonSettings,
@@ -323,7 +315,7 @@ lazy val `selenium-shared` = project.in(file("selenium/shared"))
 lazy val `selenium-shared-JS` = project.in(`selenium-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(
-    core % CompileAndTest, `rpc-js` % CompileAndTest, `rest-shared-JS` % CompileAndTest,
+    core % CompileAndTest, `rpc-js` % CompileAndTest, `rest-js` % CompileAndTest,
     `css-shared-JS` % CompileAndTest, `auth-shared-JS` % CompileAndTest, `i18n-shared-JS` % CompileAndTest
   ).configure(p => if (forIdeaImport) p.dependsOn(`selenium-shared`) else p)
   .settings(
@@ -337,7 +329,7 @@ lazy val `selenium-shared-JS` = project.in(`selenium-shared`.base / ".js")
 
 lazy val `selenium-backend` = project.in(file("selenium/backend"))
   .dependsOn(
-    `selenium-shared` % CompileAndTest, rpc % CompileAndTest, `rest-backend` % CompileAndTest,
+    `selenium-shared` % CompileAndTest, rpc % CompileAndTest, rest % CompileAndTest,
     `css-backend` % CompileAndTest, `i18n-backend` % CompileAndTest
   ).settings(
   commonSettings,
