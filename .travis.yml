@@ -39,3 +39,9 @@ env:
   - TEST_PACKAGE="charts/test"
   - TEST_PACKAGE="benchmarks-frontend/compile"
   - TEST_PACKAGE="selenium-backend/test"
+
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.coursier/cache
+  - $HOME/.sbt/boot/
