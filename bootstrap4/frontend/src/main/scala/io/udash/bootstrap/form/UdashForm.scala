@@ -377,7 +377,7 @@ final class UdashForm private(
             Select(selectedItem, options)(
               itemLabel,
               id := inputId,
-              BootstrapStyles.Form.control,
+              BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItem, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
@@ -415,7 +415,7 @@ final class UdashForm private(
             Select(selectedItems, options)(
               itemLabel,
               id := inputId,
-              BootstrapStyles.Form.control,
+              BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItems, validationTrigger, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)

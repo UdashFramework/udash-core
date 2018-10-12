@@ -247,7 +247,7 @@ object UdashDatePicker {
 
   /** Loads Bootstrap Date Picker styles. */
   def loadBootstrapDatePickerStyles(): Element =
-    link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.42/css/bootstrap-datetimepicker.min.css").render
+    link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css").render
 
   sealed trait DatePickerEvent extends AbstractCase with ListenableEvent[UdashDatePicker]
   object DatePickerEvent {
