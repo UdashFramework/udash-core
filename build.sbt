@@ -24,7 +24,7 @@ inThisBuild(Seq(
     "-Xlint:_",
   ),
   scalacOptions ++= {
-    if (CrossVersion.partialVersion((udash / scalaVersion).value).contains((2, 12))) Seq(
+    if (scalaBinaryVersion.value == "2.12") Seq(
       "-Ywarn-unused:_,-explicits,-implicits",
       "-Ybackend-parallelism", "4",
       "-Ycache-plugin-class-loader:last-modified",
@@ -41,9 +41,9 @@ val TestAll = "test->test"
 // Settings for JS tests run in browser
 val browserCapabilities: Capabilities = {
   // requires ChromeDriver: https://sites.google.com/a/chromium.org/chromedriver/
-    val options = new ChromeOptions()
-    options.addArguments("--headless", "--disable-gpu")
-    options
+  val options = new ChromeOptions()
+  options.addArguments("--headless", "--disable-gpu")
+  options
 }
 
 val commonSettings = Seq(
@@ -89,24 +89,25 @@ def sourceDirsSettings(baseMapper: File => File) = Seq(
 
 lazy val udash = project.in(file("."))
   .aggregate(
-    `core-macros`, `core-shared-JS`, `core-shared`, `core-frontend`,
+    `macros`,
+    `core-shared-JS`, `core-shared`, `core-frontend`,
     `rpc-shared-JS`, `rpc-shared`, `rpc-frontend`, `rpc-backend`,
-    `rest-macros`, `rest-shared-JS`, `rest-shared`, `rest-backend`,
+    `rest-shared-JS`, `rest-shared`, `rest-backend`,
     `i18n-shared-JS`, `i18n-shared`, `i18n-frontend`, `i18n-backend`,
     `auth-shared-JS`, `auth-shared`, `auth-frontend`,
-    `css-macros`, `css-shared-JS`, `css-shared`, `css-frontend`, `css-backend`,
+    `css-shared-JS`, `css-shared`, `css-frontend`, `css-backend`,
     `bootstrap`, `charts`
   )
   .settings(noPublishSettings)
 
-lazy val `core-macros` = project.in(file("core/macros"))
+lazy val `macros` = project.in(file("macros"))
   .settings(
     commonSettings,
-    libraryDependencies ++= Dependencies.coreMacroDeps.value,
+    libraryDependencies ++= Dependencies.macroDeps.value,
   )
 
 lazy val `core-shared` = project.in(file("core/shared"))
-  .dependsOn(`core-macros`)
+  .dependsOn(macros)
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
@@ -117,7 +118,7 @@ lazy val `core-shared` = project.in(file("core/shared"))
 
 lazy val `core-shared-JS` = project.in(`core-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(`core-macros`)
+  .dependsOn(macros)
   .configure(p => if (forIdeaImport) p.dependsOn(`core-shared`) else p)
   .settings(
     commonSettings,
@@ -179,14 +180,8 @@ lazy val `rpc-frontend` = project.in(file("rpc/frontend"))
     jsDependencies ++= Dependencies.rpcFrontendJsDeps.value
   )
 
-lazy val `rest-macros` = project.in(file("rest/macros"))
-  .settings(
-    commonSettings,
-    libraryDependencies ++= Dependencies.restMacroDeps.value
-  )
-
 lazy val `rest-shared` = project.in(file("rest/shared"))
-  .dependsOn(`rest-macros`, `rpc-shared` % CompileAndTest)
+  .dependsOn(`rpc-shared` % CompileAndTest)
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
@@ -197,7 +192,7 @@ lazy val `rest-shared` = project.in(file("rest/shared"))
 
 lazy val `rest-shared-JS` = project.in(`rest-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(`rest-macros`, `rpc-shared-JS` % CompileAndTest)
+  .dependsOn(`rpc-shared-JS` % CompileAndTest)
   .configure(p => if (forIdeaImport) p.dependsOn(`rest-shared`) else p)
   .settings(
     commonSettings,
@@ -274,24 +269,18 @@ lazy val `auth-frontend` = project.in(file("auth/frontend"))
     commonJSSettings
   )
 
-lazy val `css-macros` = project.in(file("css/macros"))
-  .settings(
-    commonSettings,
-    libraryDependencies ++= Dependencies.cssMacroDeps.value
-  )
-
 lazy val `css-shared` = project.in(file("css/shared"))
-  .dependsOn(`css-macros`, `core-shared` % CompileAndTest)
+  .dependsOn(`core-shared` % CompileAndTest)
   .settings(
     commonSettings,
     sourceDirsSettings(_ / ".jvm"),
 
-    libraryDependencies ++= Dependencies.cssMacroDeps.value,
+    libraryDependencies ++= Dependencies.cssCrossDeps.value,
   )
 
 lazy val `css-shared-JS` = project.in(`css-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(`css-macros`, `core-shared-JS` % CompileAndTest)
+  .dependsOn(`core-shared-JS` % CompileAndTest)
   .configure(p => if (forIdeaImport) p.dependsOn(`css-shared`) else p)
   .settings(
     commonSettings,
@@ -300,7 +289,7 @@ lazy val `css-shared-JS` = project.in(`css-shared`.base / ".js")
     name := (`css-shared` / name).value,
     sourceDirsSettings(_.getParentFile),
 
-    libraryDependencies ++= Dependencies.cssMacroDeps.value,
+    libraryDependencies ++= Dependencies.cssCrossDeps.value,
   )
 
 lazy val `css-backend` = project.in(file("css/backend"))
@@ -353,10 +342,10 @@ lazy val `selenium-shared` = project.in(file("selenium/shared"))
     `core-shared` % CompileAndTest, `rpc-shared` % CompileAndTest, `rest-shared` % CompileAndTest,
     `css-shared` % CompileAndTest, `auth-shared` % CompileAndTest, `i18n-shared` % CompileAndTest
   ).settings(
-    commonSettings,
+  commonSettings,
   noPublishSettings,
-    sourceDirsSettings(_ / ".jvm"),
-  )
+  sourceDirsSettings(_ / ".jvm"),
+)
 
 lazy val `selenium-shared-JS` = project.in(`selenium-shared`.base / ".js")
   .enablePlugins(ScalaJSPlugin)
@@ -378,15 +367,15 @@ lazy val `selenium-backend` = project.in(file("selenium/backend"))
     `selenium-shared` % CompileAndTest, `rpc-backend` % CompileAndTest, `rest-backend` % CompileAndTest,
     `css-backend` % CompileAndTest, `i18n-backend` % CompileAndTest
   ).settings(
-    commonSettings,
-    noPublishSettings,
+  commonSettings,
+  noPublishSettings,
 
-    Test / parallelExecution := false,
-    Test / compile := (Test / compile).dependsOn(`selenium-frontend` / compileAndOptimizeStatics).value,
+  Test / parallelExecution := false,
+  Test / compile := (Test / compile).dependsOn(`selenium-frontend` / compileAndOptimizeStatics).value,
 
-    libraryDependencies ++= Dependencies.seleniumBackendDeps.value,
-    libraryDependencies ++= Dependencies.seleniumTestingDeps.value
-  )
+  libraryDependencies ++= Dependencies.seleniumBackendDeps.value,
+  libraryDependencies ++= Dependencies.seleniumTestingDeps.value
+)
 
 // Custom SBT tasks
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")
@@ -406,51 +395,51 @@ lazy val `selenium-frontend` = project.in(file("selenium/frontend"))
     `selenium-shared-JS` % CompileAndTest, `core-frontend` % CompileAndTest, `rpc-frontend` % CompileAndTest,
     `css-frontend` % CompileAndTest, `auth-frontend` % CompileAndTest, `bootstrap` % CompileAndTest
   ).settings(
-    commonSettings,
-    commonJSSettings,
-    noPublishSettings,
+  commonSettings,
+  commonJSSettings,
+  noPublishSettings,
 
-    Compile / emitSourceMaps  := true,
-    Compile / scalaJSUseMainModuleInitializer := true,
+  Compile / emitSourceMaps := true,
+  Compile / scalaJSUseMainModuleInitializer := true,
 
-    Compile / copyAssets := {
-      IO.copyDirectory(
-        sourceDirectory.value / "main/assets",
-        target.value / s"$seleniumStaticsRoot/assets"
-      )
-      IO.copyFile(
-        sourceDirectory.value / "main/assets/index.html",
-        target.value / s"$seleniumStaticsRoot/index.html"
-      )
-    },
+  Compile / copyAssets := {
+    IO.copyDirectory(
+      sourceDirectory.value / "main/assets",
+      target.value / s"$seleniumStaticsRoot/assets"
+    )
+    IO.copyFile(
+      sourceDirectory.value / "main/assets/index.html",
+      target.value / s"$seleniumStaticsRoot/index.html"
+    )
+  },
 
-    // Compiles JS files without full optimizations
-    compileStatics := {
-      (Compile / fastOptJS / target).value / "UdashStatics"
-    },
-    compileStatics := compileStatics.dependsOn(
-      Compile / fastOptJS, Compile / copyAssets
-    ).value,
+  // Compiles JS files without full optimizations
+  compileStatics := {
+    (Compile / fastOptJS / target).value / "UdashStatics"
+  },
+  compileStatics := compileStatics.dependsOn(
+    Compile / fastOptJS, Compile / copyAssets
+  ).value,
 
-    // Compiles JS files with full optimizations
-    compileAndOptimizeStatics := {
-      (Compile / fullOptJS / target).value / "UdashStatics"
-    },
-    compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-      Compile / fullOptJS, Compile / copyAssets
-    ).value,
+  // Compiles JS files with full optimizations
+  compileAndOptimizeStatics := {
+    (Compile / fullOptJS / target).value / "UdashStatics"
+  },
+  compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
+    Compile / fullOptJS, Compile / copyAssets
+  ).value,
 
-    // Target files for Scala.js plugin
-    Compile / fastOptJS / artifactPath :=
-      (Compile / fastOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / fullOptJS / artifactPath :=
-      (Compile / fullOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / packageJSDependencies / artifactPath :=
-      (Compile / packageJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js",
-    Compile / packageMinifiedJSDependencies / artifactPath :=
-      (Compile / packageMinifiedJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js"
-  )
+  // Target files for Scala.js plugin
+  Compile / fastOptJS / artifactPath :=
+    (Compile / fastOptJS / target).value /
+      seleniumStaticsRoot / "scripts" / "frontend.js",
+  Compile / fullOptJS / artifactPath :=
+    (Compile / fullOptJS / target).value /
+      seleniumStaticsRoot / "scripts" / "frontend.js",
+  Compile / packageJSDependencies / artifactPath :=
+    (Compile / packageJSDependencies / target).value /
+      seleniumStaticsRoot / "scripts" / "frontend-deps.js",
+  Compile / packageMinifiedJSDependencies / artifactPath :=
+    (Compile / packageMinifiedJSDependencies / target).value /
+      seleniumStaticsRoot / "scripts" / "frontend-deps.js"
+)

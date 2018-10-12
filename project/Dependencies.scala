@@ -51,8 +51,9 @@ object Dependencies {
     "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
 
-  val coreMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  val macroDeps = Def.setting(Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
 
   val coreCrossDeps = Def.setting(Seq(
@@ -82,11 +83,6 @@ object Dependencies {
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
-  val restMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
-  ))
-
   val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
@@ -102,14 +98,13 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
-
-  val cssMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion
+  
+  val cssCrossDeps = Def.setting(Seq(
+    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
   ))
 
   val cssFrontendDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion,
   ))
 
   val bootstrapFrontendDeps = Def.setting(Seq(
