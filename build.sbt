@@ -10,6 +10,20 @@ inThisBuild(Seq(
   crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
   organization := "io.udash",
   cancelable := true,
+  resolvers += Resolver.defaultLocal
+))
+
+val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
+val CompileAndTest = "test->test;compile->compile"
+val TestAll = "test->test"
+
+// Settings for JS tests run in browser
+val browserCapabilities: Capabilities = {
+  // requires gecko driver, see https://github.com/mozilla/geckodriver
+  new FirefoxOptions().setHeadless(true)
+}
+
+val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -31,20 +45,6 @@ inThisBuild(Seq(
       "-Ycache-macro-class-loader:last-modified"
     ) else Seq.empty
   },
-  resolvers += Resolver.defaultLocal
-))
-
-val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
-val CompileAndTest = "test->test;compile->compile"
-val TestAll = "test->test"
-
-// Settings for JS tests run in browser
-val browserCapabilities: Capabilities = {
-  // requires gecko driver, see https://github.com/mozilla/geckodriver
-  new FirefoxOptions().setHeadless(true)
-}
-
-val commonSettings = Seq(
   moduleName := "udash-" + moduleName.value,
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
