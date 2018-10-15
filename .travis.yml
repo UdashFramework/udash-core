@@ -33,7 +33,7 @@ env:
   - TEST_PACKAGE="rpc/test rpc-js/test"
   - TEST_PACKAGE="rest/test rest-js/test"
   - TEST_PACKAGE="i18n/test i18n-js/test"
-  - TEST_PACKAGE="auth/test auth-JS/test"
+  - TEST_PACKAGE="auth/test auth-js/test"
   - TEST_PACKAGE="css/test css-js/test"
   - TEST_PACKAGE="bootstrap/test"
   - TEST_PACKAGE="charts/test"
