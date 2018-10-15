@@ -3,7 +3,7 @@ package io.udash.selenium
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.selenium.server.ApplicationServer
 
-object Launcher extends LazyLogging {
+object ServerLauncher extends LazyLogging {
   def main(args: Array[String]): Unit = {
     val startTime = System.nanoTime
 

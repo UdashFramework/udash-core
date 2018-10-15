@@ -26,7 +26,6 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-//    _driver = new ChromeDriver(new ChromeOptions().setHeadless(true))
     _driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
     _driver.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS)
     _driver.manage().window().setSize(new Dimension(1440, 800))
