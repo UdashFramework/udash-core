@@ -6,8 +6,6 @@ name := "udash"
 
 inThisBuild(Seq(
   version := "0.8.0-SNAPSHOT",
-  scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
@@ -24,6 +22,8 @@ val browserCapabilities: Capabilities = {
 }
 
 val commonSettings = Seq(
+  scalaVersion := Dependencies.versionOfScala,
+  crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
