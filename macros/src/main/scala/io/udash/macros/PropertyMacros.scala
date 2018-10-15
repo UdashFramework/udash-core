@@ -5,6 +5,7 @@ import com.avsystem.commons.macros.AbstractMacroCommons
 import scala.reflect.macros.blackbox
 
 class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
+
   import c.universe._
 
   val Package = q"_root_.io.udash.properties"
@@ -159,7 +160,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     if (isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait) {
       q"""null"""
     } else if (isValidModelClass) {
-        q"""null """
+      q"""null """
     } else {
       val isCC = !(isTrait && isNotSealedTrait && isNotSeq && isImplementableTrait)
       c.abort(c.enclosingPosition,
@@ -174,31 +175,31 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
            |  * isNotSeq: $isNotSeq
            |  * doesNotContainVars: $doesNotContainVars
            |  * unimplementableTraitMembers: ${
-                  if (isTrait && isNotSealedTrait && isNotSeq)
-                    unimplementableTraitMembers
-                      .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType}")
-                      .map(s => s"\n    - $s").mkString("")
-                  else "Visible only for traits."
-                }
+          if (isTrait && isNotSealedTrait && isNotSeq)
+            unimplementableTraitMembers
+              .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType}")
+              .map(s => s"\n    - $s").mkString("")
+          else "Visible only for traits."
+        }
            |* for case class:
            |  * isClass: ${valueType.typeSymbol.isClass}
            |  * isNotAbstract: ${!valueType.typeSymbol.isAbstract}
            |  * hasOneParamsListInPrimaryConstructor: ${
-                isCC && findPrimaryConstructor(valueType).paramLists.size == 1
-              }
+          isCC && findPrimaryConstructor(valueType).paramLists.size == 1
+        }
            |  * primaryConstructorIsPublic: ${
-                isCC && findPrimaryConstructor(valueType).isPublic
-              }
+          isCC && findPrimaryConstructor(valueType).isPublic
+        }
            |  * members: ${
-                  if (isCC)
-                    if (propertyElementsToTypeCheck.nonEmpty) {
-                      propertyElementsToTypeCheck
-                        .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType} " +
-                          s"-> isCaseAccessor: ${m.isMethod && m.asMethod.isCaseAccessor};"
-                        ).map(s => s"\n    - $s").mkString("")
-                    } else "No members found."
-                  else "Visible only for case classes."
-                }
+          if (isCC)
+            if (propertyElementsToTypeCheck.nonEmpty) {
+              propertyElementsToTypeCheck
+                .map(m => s"${m.name}: ${m.typeSignatureIn(valueType).resultType} " +
+                  s"-> isCaseAccessor: ${m.isMethod && m.asMethod.isCaseAccessor};"
+                ).map(s => s"\n    - $s").mkString("")
+            } else "No members found."
+          else "Visible only for case classes."
+        }
            |
            |Use ModelValue.isModelValue[${propertyElementsToTypeCheck.headOption.getOrElse("T")}] to get more details about `isModelValue` check.
            |
@@ -213,11 +214,11 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()) {
           override protected def initialize(): Unit = {
             ..${
-              members.map {
-                case (name, returnTpe) =>
-                  q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(null.asInstanceOf[$returnTpe], this)"""
-              }
-            }
+        members.map {
+          case (name, returnTpe) =>
+            q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$returnTpe]].newProperty(null.asInstanceOf[$returnTpe], this)"""
+        }
+      }
           }
 
           protected def internalGet: $tpe =
@@ -225,16 +226,16 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
           protected def internalSet(newValue: $tpe, withCallbacks: Boolean, force: Boolean): Unit = {
             ..${
-              members.map { case (name, returnTpe) =>
-                q"""
+        members.map { case (name, returnTpe) =>
+          q"""
                   setSubProp(
                     getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}),
                     if (newValue != null) newValue.$name else null.asInstanceOf[$returnTpe],
                     withCallbacks, force
                   )
                 """
-              }
-            }
+        }
+      }
           }
         }
        """
@@ -249,11 +250,11 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         q"""
           new ${tpe.typeSymbol}(
             ..${
-              order.map { case name =>
-                val returnTpe = members(name)
-                q"""getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
-              }
-            }
+          order.map { case name =>
+            val returnTpe = members(name)
+            q"""getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+          }
+        }
           )
          """
       )
@@ -263,49 +264,49 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         q"""
           new $tpe {
             ..${
-              members.map { case (name, returnTpe) =>
-                q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
-              }
-            }
+          members.map { case (name, returnTpe) =>
+            q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+          }
+        }
           }
         """
       )
     }
   }
 
-  def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifySubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$PropertyCls[$resultType]]"
   }
 
-  def reifySubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifySubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$ModelPropertyCls[$resultType]]"
   }
 
-  def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$SeqPropertyCls[$resultType, $PropertyCls[$resultType] with $CastablePropertyCls[$resultType]]]"
   }
 
-  def reifyRoSubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifyRoSubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadablePropertyCls[$resultType]]"
   }
 
-  def reifyRoSubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifyRoSubModel[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadableModelPropertyCls[$resultType]]"
   }
 
-  def reifyRoSubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B])(ev: c.Tree): c.Tree = {
+  def reifyRoSubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadableSeqPropertyCls[$resultType, $CastableReadablePropertyCls[$resultType]]]"
   }
 
-  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Expr[A => B]): c.Tree = {
+  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree): c.Tree = {
     val model = c.prefix
-    val modelPath = getModelPath(f.tree)
+    val modelPath = getModelPath(f)
 
     def checkIfIsValidPath(tree: Tree): Boolean = tree match {
       case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>

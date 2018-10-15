@@ -44,8 +44,8 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     style(q"$fullName", impl: _*)
   }
 
-  def namedStyle(className: Expr[String], impl: Tree*): Tree =
-    style(className.tree, impl: _*)
+  def namedStyle(className: Tree, impl: Tree*): Tree =
+    style(className, impl: _*)
 
   private def keyframes(name: Tree, impl: Tree*): Tree =
     handleScalaJs(name,
@@ -66,8 +66,8 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     keyframes(q"$fullName", impl: _*)
   }
 
-  def namedKeyframes(className: Expr[String], impl: Tree*): Tree =
-    keyframes(className.tree, impl: _*)
+  def namedKeyframes(className: Tree, impl: Tree*): Tree =
+    keyframes(className, impl: _*)
 
   private def fontFace(name: Tree, font: Tree): Tree =
     handleScalaJs(name,
@@ -84,6 +84,6 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     fontFace(q"$fullName", font)
   }
 
-  def nameFontFace(className: Expr[String], font: Tree): Tree =
-    fontFace(className.tree, font)
+  def nameFontFace(className: Tree, font: Tree): Tree =
+    fontFace(className, font)
 }
