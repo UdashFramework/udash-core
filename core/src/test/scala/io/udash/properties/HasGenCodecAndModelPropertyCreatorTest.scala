@@ -1,4 +1,4 @@
-package io.udash.rpc
+package io.udash.properties
 
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.properties.model.ModelProperty

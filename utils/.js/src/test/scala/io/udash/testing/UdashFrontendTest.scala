@@ -1,8 +1,10 @@
 package io.udash.testing
 
+import org.scalajs.dom
+import org.scalajs.dom.Element
+
 trait FrontendTestUtils {
-  import scalatags.JsDom.all.div
-  def emptyComponent() = div().render
+  def emptyComponent(): Element = dom.document.createElement("div")
 }
 
 trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils

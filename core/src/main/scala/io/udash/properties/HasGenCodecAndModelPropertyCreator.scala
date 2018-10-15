@@ -1,8 +1,7 @@
-package io.udash.rpc
+package io.udash.properties
 
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.serialization.GenCodec
-import io.udash.properties.ModelPropertyCreator
 
 trait GenCodecAndModelPropertyCreator[T] {
   def codec: GenCodec[T]

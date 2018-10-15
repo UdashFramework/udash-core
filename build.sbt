@@ -143,26 +143,38 @@ lazy val macros = project
     libraryDependencies ++= Dependencies.macroDeps.value,
   )
 
-lazy val core = jvmProject(project)
+lazy val utils = jvmProject(project)
   .dependsOn(macros)
+  .settings(
+    libraryDependencies ++= Dependencies.utilsJvmDeps.value,
+  )
+
+lazy val `utils-js` = jsProjectFor(project, utils)
+  .dependsOn(macros)
+  .settings(
+    libraryDependencies ++= Dependencies.utilsSjsDeps.value,
+  )
+
+lazy val core = jvmProject(project)
+  .dependsOn(utils % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.coreJvmDeps.value,
   )
 
 lazy val `core-js` = jsProjectFor(project, core)
-  .dependsOn(macros)
+  .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.coreSjsDeps.value,
   )
 
 lazy val rpc = jvmProject(project)
-  .dependsOn(core % CompileAndTest)
+  .dependsOn(utils % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcJvmDeps.value,
   )
 
 lazy val `rpc-js` = jsProjectFor(project, rpc)
-  .dependsOn(`core-js` % CompileAndTest)
+  .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
     jsDependencies ++= Dependencies.rpcJsDeps.value,
@@ -181,16 +193,16 @@ lazy val `rest-js` = jsProjectFor(project, rest)
   )
 
 lazy val i18n = jvmProject(project)
-  .dependsOn(rpc % CompileAndTest)
+  .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
 
 lazy val `i18n-js` = jsProjectFor(project, i18n)
-  .dependsOn(`rpc-js` % CompileAndTest)
+  .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
 
 lazy val auth = jvmProject(project)
-  .dependsOn(rpc % CompileAndTest)
+  .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
 
 lazy val `auth-js` = jsProjectFor(project, auth)
-  .dependsOn(`rpc-js` % CompileAndTest)
+  .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
 
 lazy val css = jvmProject(project)
   .dependsOn(core % CompileAndTest)

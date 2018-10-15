@@ -2,7 +2,7 @@ package io.udash.testing
 
 import org.scalactic.source.Position
 import org.scalajs.dom
-import org.scalatest._
+import org.scalatest.{Assertion, Succeeded}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext
