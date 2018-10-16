@@ -26,7 +26,7 @@ import io.udash.bootstrap.pagination.UdashPagination
 import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
-import io.udash.bootstrap.utils.BootstrapStyles.{Color, ResponsiveBreakpoint, Size}
+import io.udash.bootstrap.utils.BootstrapStyles.{Color, FlexContentJustification, ResponsiveBreakpoint, Size}
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
@@ -638,7 +638,7 @@ object BootstrapDemos extends CrossLogging {
     val pagination = UdashPagination(
       pages, selected,
       showArrows = showArrows, highlightActive = highlightActive
-    )(defaultPageFactory, _ => BootstrapStyles.Flex.justifyContentCenter())
+    )(defaultPageFactory, _ => BootstrapStyles.Flex.justifyContent(FlexContentJustification.Center))
     div(
       div(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom))(
         UdashButtonGroup()(

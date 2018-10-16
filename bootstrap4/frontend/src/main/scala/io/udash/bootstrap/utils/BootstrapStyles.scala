@@ -65,6 +65,24 @@ object BootstrapStyles {
     final val Large: Value = new Size("-lg")
   }
 
+  final class FlexContentJustification(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object FlexContentJustification extends AbstractValueEnumCompanion[FlexContentJustification] {
+    final val Around: Value = new FlexContentJustification("-around")
+    final val Between: Value = new FlexContentJustification("-between")
+    final val Center: Value = new FlexContentJustification("-center")
+    final val End: Value = new FlexContentJustification("-end")
+    final val Start: Value = new FlexContentJustification("-start")
+  }
+
+  final class FlexAlign(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object FlexAlign extends AbstractValueEnumCompanion[FlexAlign] {
+    final val Baseline: Value = new FlexAlign("-baseline")
+    final val Center: Value = new FlexAlign("-center")
+    final val End: Value = new FlexAlign("-end")
+    final val Start: Value = new FlexAlign("-start")
+    final val Stretch: Value = new FlexAlign("-stretch")
+  }
+
   def active = CssStyleName("active")
   def affix = CssStyleName("affix")
   def arrow = CssStyleName("arrow")
@@ -286,49 +304,17 @@ object BootstrapStyles {
     def wrapReverse(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-wrap-reverse")
 
-    def justifyContentStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"justify-content${breakpoint.classMarker}-start")
-    def justifyContentEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"justify-content${breakpoint.classMarker}-end")
-    def justifyContentCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"justify-content${breakpoint.classMarker}-center")
-    def justifyContentBetween(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"justify-content${breakpoint.classMarker}-between")
-    def justifyContentAround(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"justify-content${breakpoint.classMarker}-around")
+    def justifyContent(justification: FlexContentJustification, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"justify-content${breakpoint.classMarker}${justification.classMarker}")
 
-    def alignItemsStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-items${breakpoint.classMarker}-start")
-    def alignItemsEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-items${breakpoint.classMarker}-end")
-    def alignItemsCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-items${breakpoint.classMarker}-center")
-    def alignItemsBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-items${breakpoint.classMarker}-baseline")
-    def alignItemsStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-items${breakpoint.classMarker}-stretch")
+    def alignItems(align: FlexAlign, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-items${breakpoint.classMarker}${align.classMarker}")
 
-    def alignContentStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-content${breakpoint.classMarker}-start")
-    def alignContentEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-content${breakpoint.classMarker}-end")
-    def alignContentCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-content${breakpoint.classMarker}-center")
-    def alignContentBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-content${breakpoint.classMarker}-baseline")
-    def alignContentStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-content${breakpoint.classMarker}-stretch")
+    def alignContent(align: FlexAlign, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-content${breakpoint.classMarker}${align.classMarker}")
 
-    def alignSelfStart(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-self${breakpoint.classMarker}-start")
-    def alignSelfEnd(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-self${breakpoint.classMarker}-end")
-    def alignSelfCenter(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-self${breakpoint.classMarker}-center")
-    def alignSelfBaseline(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-self${breakpoint.classMarker}-baseline")
-    def alignSelfStretch(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
-      CssStyleName(s"align-self${breakpoint.classMarker}-stretch")
+    def alignSelf(align: FlexAlign, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"align-self${breakpoint.classMarker}${align.classMarker}")
 
     /** Supported size values: [1,12] */
     def order(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
