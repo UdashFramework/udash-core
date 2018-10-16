@@ -3,6 +3,7 @@ package io.udash
 import io.udash.bindings.modifiers.Binding
 import io.udash.i18n.bindings.{AttrTranslationBinding, DynamicAttrTranslationBinding, DynamicTranslationBinding, TranslationBinding}
 import org.scalajs.dom.Element
+import scalatags.JsDom.Modifier
 
 import scala.concurrent.Future
 
@@ -17,7 +18,7 @@ package object i18n {
     * @param translation Future containing translated string or error.
     * @param placeholder Placeholder, if `None` passed it will be empty text node.
     */
-  def translated(translation: Future[Translated], placeholder: Option[Element] = None): Binding =
+  def translated(translation: Future[Translated], placeholder: Option[Element] = None): Modifier =
     new TranslationBinding(translation, placeholder)
 
   /**
@@ -36,7 +37,7 @@ package object i18n {
     * @param translation Future containing translated string or error.
     * @param attr Attribute name which gonna be updated when `translation` text become ready.
     */
-  def translatedAttr(translation: Future[Translated], attr: String): Binding =
+  def translatedAttr(translation: Future[Translated], attr: String): Modifier =
     new AttrTranslationBinding(translation, attr)
 
   /**

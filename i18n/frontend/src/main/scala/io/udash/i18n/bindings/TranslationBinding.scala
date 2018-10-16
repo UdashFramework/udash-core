@@ -1,18 +1,18 @@
 package io.udash.i18n.bindings
 
 import io.udash.bindings.Bindings
-import io.udash.bindings.modifiers.Binding
 import io.udash.i18n.Translated
 import io.udash.logging.CrossLogging
 import org.scalajs.dom._
 import scalatags.JsDom
+import scalatags.JsDom.Modifier
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 private[i18n]
 class TranslationBinding(translation: Future[Translated], placeholder: Option[Element])
-  extends Binding with Bindings with CrossLogging {
+  extends Modifier with Bindings with CrossLogging {
 
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
