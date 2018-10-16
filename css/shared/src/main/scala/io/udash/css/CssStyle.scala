@@ -1,5 +1,7 @@
 package io.udash.css
 
+import io.udash.properties.Blank
+import io.udash.properties.Blank.Simple
 import scalacss.internal.{FontFace, StyleS}
 
 /** Representation of stylesheet elements. In JS it's always `CssStyleName`. */
@@ -9,6 +11,11 @@ sealed trait CssStyle {
   def commonPrefixClass: Option[String] = None
   final def classNames: Seq[String] = commonPrefixClass.toList :+ className
 }
+
+object CssStyle {
+  implicit val blank: Blank[CssStyle] = Simple(CssStyleName(""))
+}
+
 case class CssStyleName(className: String) extends CssStyle
 case class CssPrefixedStyleName(prefixClass: String, actualClassSuffix: String) extends CssStyle {
   val className = s"$prefixClass-$actualClassSuffix"
