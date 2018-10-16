@@ -1,12 +1,10 @@
 package io.udash.bootstrap.utils
 
-import com.avsystem.commons.misc.AbstractCase
-
-case class ComponentId(id: String) extends AbstractCase {
+case class ComponentId(id: String) extends AnyVal {
   override def toString: String = id
 
   def subcomponent(subId: String): ComponentId =
-    ComponentId(s"$id.$subId")
+    ComponentId(s"$id-$subId")
 }
 
 object ComponentId {
@@ -15,7 +13,7 @@ object ComponentId {
   /** Generates unique element ID */
   def newId(): ComponentId = {
     cid += 1
-    ComponentId(s"bs-$cid")
+    ComponentId(s"bs$cid")
   }
 
 }
