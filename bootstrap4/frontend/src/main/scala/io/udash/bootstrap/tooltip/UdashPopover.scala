@@ -4,6 +4,7 @@ package tooltip
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
@@ -30,11 +31,11 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.popover("setContent")
 
-  selector.on("show.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Show)))
-  selector.on("shown.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
-  selector.on("hide.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
-  selector.on("hidden.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
-  selector.on("inserted.bs.popover", jQFire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
+  selector.on("show.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Show)))
+  selector.on("shown.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
+  selector.on("hide.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
+  selector.on("hidden.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
+  selector.on("inserted.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
 }
 
 object UdashPopover extends TooltipUtils[UdashPopover] {

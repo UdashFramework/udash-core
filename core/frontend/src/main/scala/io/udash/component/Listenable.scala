@@ -1,10 +1,8 @@
-package io.udash.bootstrap.utils
+package io.udash.component
 
 import io.udash.utils.{CallbacksHandler, Registration}
-import io.udash.wrappers.jquery.{JQueryEvent, _}
-import org.scalajs.dom.Element
 
-/** Bootstrap component exposing events. */
+/** A component exposing events. */
 trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] {
   private val actions = new CallbacksHandler[EventType]
 
@@ -26,12 +24,4 @@ trait Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: Lis
 
   protected def fire(event: EventType): Unit =
     actions.fire(event)
-
-  protected def jQFire(ev: => EventType): JQueryCallback =
-    (_: Element, _: JQueryEvent) => fire(ev)
-}
-
-/** Bootstrap component event. */
-trait ListenableEvent[ComponentType <: Listenable[ComponentType, _]] {
-  def source: ComponentType
 }

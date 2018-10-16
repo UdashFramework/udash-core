@@ -1,5 +1,6 @@
-package io.udash.bootstrap.utils
+package io.udash.component
 
+/** General usage class for carrying id of component. */
 case class ComponentId(id: String) extends AnyVal {
   override def toString: String = id
 

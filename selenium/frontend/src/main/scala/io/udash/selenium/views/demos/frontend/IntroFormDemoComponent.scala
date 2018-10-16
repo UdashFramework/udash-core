@@ -5,7 +5,8 @@ import java.{lang => jl}
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.component.ComponentId
 import io.udash.css.CssView
 import scalatags.JsDom.all._
 

@@ -4,7 +4,7 @@ import java.{util => ju}
 
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.ComponentId
+import io.udash.component.ComponentId
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._

@@ -4,6 +4,7 @@ package collapse
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils._
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
@@ -48,10 +49,10 @@ final class UdashCollapse private(
     )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Show)))
-    jQEl.on("shown.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Shown)))
-    jQEl.on("hide.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Hide)))
-    jQEl.on("hidden.bs.collapse", jQFire(CollapseEvent(this, CollapseEvent.EventType.Hidden)))
+    jQEl.on("show.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Show)))
+    jQEl.on("shown.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Shown)))
+    jQEl.on("hide.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hide)))
+    jQEl.on("hidden.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hidden)))
     el
   }
 

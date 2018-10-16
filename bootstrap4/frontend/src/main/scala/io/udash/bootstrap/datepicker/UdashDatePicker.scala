@@ -7,6 +7,7 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.bootstrap.utils._
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._

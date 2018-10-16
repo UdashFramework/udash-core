@@ -3,7 +3,8 @@ package table
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.component.ComponentId
 import io.udash.properties.seq
 import org.scalajs.dom._
 import scalatags.JsDom.all._

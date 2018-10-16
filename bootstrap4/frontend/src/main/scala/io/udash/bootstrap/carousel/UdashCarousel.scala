@@ -8,6 +8,7 @@ import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils._
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.{Element, Node}

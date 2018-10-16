@@ -5,6 +5,7 @@ import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValue
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils._
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 
@@ -70,10 +71,10 @@ final class UdashModal private(
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Show)))
-    jQEl.on("shown.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Shown)))
-    jQEl.on("hide.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Hide)))
-    jQEl.on("hidden.bs.modal", jQFire(ModalEvent(this, ModalEvent.EventType.Hidden)))
+    jQEl.on("show.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Show)))
+    jQEl.on("shown.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Shown)))
+    jQEl.on("hide.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hide)))
+    jQEl.on("hidden.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hidden)))
     el
   }
 }

@@ -6,6 +6,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils._
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.properties.seq
 import io.udash.properties.single.ReadableProperty
 import io.udash.wrappers.jquery.JQuery
@@ -46,7 +47,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("update")
 
   private def withSelectionListener(elem: Element, item: ElemType): Element = {
-    jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, item.get)))
+    jQ(elem).on(EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item.get)))
     elem
   }
 
@@ -93,10 +94,10 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Show)))
-    jQEl.on("shown.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Shown)))
-    jQEl.on("hide.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hide)))
-    jQEl.on("hidden.bs.dropdown", jQFire(VisibilityChangeEvent(this, EventType.Hidden)))
+    jQEl.on("show.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Show)))
+    jQEl.on("shown.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Shown)))
+    jQEl.on("hide.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hide)))
+    jQEl.on("hidden.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hidden)))
     el
   }
 }

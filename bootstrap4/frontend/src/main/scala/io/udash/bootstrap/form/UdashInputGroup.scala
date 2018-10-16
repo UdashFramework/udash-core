@@ -2,7 +2,8 @@ package io.udash.bootstrap
 package form
 
 import io.udash._
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.component.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 

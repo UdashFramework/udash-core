@@ -5,7 +5,8 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.nav.UdashNav
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId, UdashBootstrapComponent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.component.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 import io.udash.css.CssView._

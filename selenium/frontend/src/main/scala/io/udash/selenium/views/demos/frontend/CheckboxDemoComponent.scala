@@ -2,7 +2,8 @@ package io.udash.selenium.views.demos.frontend
 
 import io.udash._
 import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.component.ComponentId
 import io.udash.css.CssView
 import scalatags.JsDom
 

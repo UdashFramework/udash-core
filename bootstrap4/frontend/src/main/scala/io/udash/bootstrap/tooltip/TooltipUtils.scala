@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package tooltip
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import io.udash.bootstrap.utils.{Listenable, ListenableEvent}
+import io.udash.component.{Listenable, ListenableEvent}
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import org.scalajs.dom
 

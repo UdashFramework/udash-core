@@ -1,7 +1,8 @@
 package io.udash.selenium.views.demos.i18n
 
 import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.{BootstrapStyles, ComponentId}
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.component.ComponentId
 import io.udash.i18n._
 import io.udash.selenium.Launcher
 import io.udash.selenium.rpc.demos.i18n.Translations

@@ -1,16 +1,9 @@
 package io.udash.bootstrap.utils
 
-import io.udash.bindings.modifiers.Binding
+import io.udash.component.Component
 import org.scalajs.dom.Element
 
 /** Base trait for Bootstrap components. */
-trait UdashBootstrapComponent extends Binding {
-  /** Component root DOM element ID. */
-  val componentId: ComponentId
-
-  /** Creates component DOM hierarchy. */
-  val render: Element
-
-  override def applyTo(t: Element): Unit =
-    t.appendChild(render)
+trait UdashBootstrapComponent extends Component {
+  override val render: Element
 }
