@@ -21,9 +21,19 @@ object BootstrapStyles {
     final val Bottom: Value = new Side("b", "-bottom")
     final val Left: Value = new Side("l", "-left")
     final val Right: Value = new Side("r", "-right")
-    /** This value is not always supported by Bootstrap. */
+    /**
+      * This value is not always supported by Bootstrap.
+      * It works with spacing, but you cannot use it with borders methods. <br/>
+      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
+      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+      */
     final val X: Value = new Side("x", "")
-    /** This value is not always supported by Bootstrap. */
+    /**
+      * This value is not always supported by Bootstrap.
+      * It works with spacing, but you cannot use it with borders methods. <br/>
+      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
+      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+      */
     final val Y: Value = new Side("y", "")
   }
 
