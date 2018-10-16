@@ -17,7 +17,7 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
   private var _driver: RemoteWebDriver = _
   def driver: RemoteWebDriver = _driver
 
-  private val server: ApplicationServer = new ApplicationServer(9999, "selenium/frontend/target/UdashStatics/WebContent")
+  private val server: ApplicationServer = new ApplicationServer(9999, "selenium/.js/target/UdashStatics/WebContent")
 
   def createUrl(path: String): String = {
     require(path.startsWith("/"))

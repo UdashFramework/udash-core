@@ -7,7 +7,7 @@ object ServerLauncher extends LazyLogging {
   def main(args: Array[String]): Unit = {
     val startTime = System.nanoTime
 
-    new ApplicationServer(8888, "selenium/frontend/target/UdashStatics/WebContent").start()
+    new ApplicationServer(8888, "selenium/.js/target/UdashStatics/WebContent").start()
     
     val duration: Long = (System.nanoTime - startTime) / 1000000000
     logger.info(s"Selenium Demos started in ${duration}s.")
