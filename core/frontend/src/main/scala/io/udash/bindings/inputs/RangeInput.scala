@@ -9,6 +9,7 @@ import scalatags.JsDom.all._
 object RangeInput {
   /**
     * @param property Current value synchronised with the input.
+    *                 The value should be between `minValue` and `maxValue`. It should be also divisible by `valueStep`.
     * @param minValue The minimum value for this input, which must not be greater than its maximum (`maxValue` attribute) value.
     * @param maxValue The maximum value for the input. Must not be less than its minimum (`minValue` attribute) value.
     * @param valueStep Limit the increments at which a numeric value can be set.
