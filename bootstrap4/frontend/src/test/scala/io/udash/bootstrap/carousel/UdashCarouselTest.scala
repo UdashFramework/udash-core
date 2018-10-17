@@ -54,6 +54,25 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       activeIndicatorIdx(carousel) shouldBe 3
     }
 
+    "clean up listeners" in {
+      val sl = slides()
+      val activeSlide = Property(3)
+      val options = UdashCarousel.AnimationOptions(active = false).toProperty
+      val carousel = UdashCarousel.default(
+        sl,
+        activeSlide = activeSlide,
+        animationOptions = options
+      )()
+      jQ("body").append(carousel.render)
+
+      carousel.kill()
+      sl.listenersCount() should be(0)
+      sl.structureListenersCount() should be(0)
+      sl.elemProperties.foreach(_.listenersCount() should be(0))
+      activeSlide.listenersCount() should be(0)
+      options.listenersCount() should be(0)
+    }
+
     //For some reason, the 3 tests below have to be independent (can't first goTo() then nextSlide() without timeout)
     //This does not seem to cause any problems with carousels in the wild (outside tests).
 

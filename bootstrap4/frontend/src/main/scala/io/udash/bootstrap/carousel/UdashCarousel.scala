@@ -52,7 +52,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     def indicators(): Binding = {
       def indicator(index: Int) = li(
         dataTarget := s"#$componentId", dataSlideTo := index,
-        BootstrapStyles.active.styleIf(activeSlide.transform(_ == index))
+        nestedInterceptor(BootstrapStyles.active.styleIf(activeSlide.transform(_ == index)))
       )
 
       val indices = slides.transform((slides: Seq[_]) => slides.length)
@@ -67,7 +67,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       nestedInterceptor(repeatWithIndex(slides) { (slide, idx, nested) =>
         div(
           BootstrapStyles.Carousel.item,
-          BootstrapStyles.active.styleIf(idx.combine(activeSlide)(_ == _))
+          nested(BootstrapStyles.active.styleIf(idx.combine(activeSlide)(_ == _)))
         )(
           slideContentFactory(slide, nested)
         ).render
