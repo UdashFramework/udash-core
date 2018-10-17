@@ -40,11 +40,11 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
-    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
+    jQSelector().dropdown("toggle")
 
   /** Updates the position of an element’s dropdown. */
   def update(): Unit =
-    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery].dropdown("update")
+    jQSelector().dropdown("update")
 
   private def withSelectionListener(elem: Element, item: ElemType): Element = {
     jQ(elem).on(EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item.get)))
@@ -100,6 +100,14 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQEl.on("hidden.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hidden)))
     el
   }
+
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().dropdown("dispose")
+  }
+
+  private def jQSelector(): UdashDropdownJQuery =
+    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery]
 }
 
 object UdashDropdown {

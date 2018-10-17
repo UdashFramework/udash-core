@@ -56,6 +56,12 @@ final class UdashCollapse private(
     el
   }
 
+  override def kill(): Unit = {
+    super.kill()
+    hide()
+    jQSelector().collapse("dispose")
+  }
+
   private def jQSelector(): UdashCollapseJQuery =
     jQ(s"#$componentId").asInstanceOf[UdashCollapseJQuery]
 }

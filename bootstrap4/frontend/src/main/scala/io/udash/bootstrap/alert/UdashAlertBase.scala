@@ -6,9 +6,12 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.component.ComponentId
 import io.udash.css.CssView._
+import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+
+import scala.scalajs.js
 
 private[alert] abstract class UdashAlertBase(
   alertStyle: ReadableProperty[BootstrapStyles.Color], override val componentId: ComponentId
@@ -21,6 +24,14 @@ private[alert] abstract class UdashAlertBase(
       nestedInterceptor((BootstrapStyles.Alert.color _).reactiveApply(alertStyle))
     )
   }
+
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().alert("dispose")
+  }
+
+  protected def jQSelector(): UdashAlertJQuery =
+    jQ(s"#$componentId").asInstanceOf[UdashAlertJQuery]
 }
 
 private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
@@ -46,4 +57,9 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
 
   def link(link: Url)(content: Modifier*): Modifier =
     a(href := link, BootstrapStyles.Alert.link)(content)
+}
+
+@js.native
+private trait UdashAlertJQuery extends JQuery {
+  def alert(cmd: String): UdashAlertJQuery = js.native
 }

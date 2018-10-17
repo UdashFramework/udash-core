@@ -92,6 +92,11 @@ final class UdashDatePicker private[datepicker](
     inp
   }
 
+  override def kill(): Unit = {
+    super.kill()
+    jQInput.datetimepicker("dispose")
+  }
+
   private def optionsToJsDict(options: UdashDatePicker.DatePickerOptions): js.Dictionary[js.Any] = {
     import scalajs.js.JSConverters._
 

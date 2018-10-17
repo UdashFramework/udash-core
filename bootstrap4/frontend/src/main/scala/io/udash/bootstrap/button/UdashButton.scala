@@ -4,13 +4,16 @@ package button
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
+import io.udash.bootstrap.button.UdashButton.{ButtonClickEvent, UdashButtonJQuery}
 import io.udash.bootstrap.utils._
 import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom
 import org.scalajs.dom._
 import scalatags.JsDom
 import scalatags.JsDom.all._
+
+import scala.scalajs.js
 
 final class UdashButton private(
   buttonStyle: ReadableProperty[BootstrapStyles.Color],
@@ -21,7 +24,6 @@ final class UdashButton private(
   disabled: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
-
   import io.udash.css.CssView._
 
   private val classes: List[Modifier] = {
@@ -49,6 +51,14 @@ final class UdashButton private(
       })
     )(content(nestedInterceptor)).render
   }
+
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().button("dispose")
+  }
+
+  private def jQSelector(): UdashButtonJQuery =
+    jQ(s"#$componentId").asInstanceOf[UdashButtonJQuery]
 }
 
 object UdashButton {
@@ -109,4 +119,8 @@ object UdashButton {
     button
   }
 
+  @js.native
+  private trait UdashButtonJQuery extends JQuery {
+    def button(cmd: String): UdashButtonJQuery = js.native
+  }
 }

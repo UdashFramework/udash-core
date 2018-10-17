@@ -3,11 +3,15 @@ package nav
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap.nav.UdashNav.UdashTabJQuery
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.component.ComponentId
 import io.udash.properties.seq
+import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
+
+import scala.scalajs.js
 
 final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   panels: seq.ReadableSeqProperty[ItemType, ElemType],
@@ -26,7 +30,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
 ) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
 
-  override val render: Element =
+  override val render: Element = {
     ul(
       id := componentId,
       BootstrapStyles.Navigation.nav,
@@ -52,6 +56,15 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
         }
       )
     ).render
+  }
+
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().tab("dispose")
+  }
+
+  private def jQSelector(): UdashTabJQuery =
+    jQ(s"#$componentId").asInstanceOf[UdashTabJQuery]
 }
 
 object UdashNav {
@@ -149,5 +162,10 @@ object UdashNav {
     new UdashNav(
       panels, align, vertical, fill, justified, tabs, pills, componentId
     )(elemFactory, isActive, isDisabled, isDropdown)
+  }
+
+  @js.native
+  private trait UdashTabJQuery extends JQuery {
+    def tab(cmd: String): UdashTabJQuery = js.native
   }
 }

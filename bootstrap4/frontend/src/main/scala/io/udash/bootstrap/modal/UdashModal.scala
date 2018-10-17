@@ -29,10 +29,6 @@ final class UdashModal private(
   import io.udash.wrappers.jquery._
   import scalatags.JsDom.all._
 
-
-  private def jQSelector(): UdashModalJQuery =
-    jQ(s"#$componentId").asInstanceOf[UdashModalJQuery]
-
   /** Toggles modal visibility. */
   def toggle(): Unit = jQSelector().modal("toggle")
   /** Shows modal window. */
@@ -77,6 +73,14 @@ final class UdashModal private(
     jQEl.on("hidden.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hidden)))
     el
   }
+
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().modal("dispose")
+  }
+
+  private def jQSelector(): UdashModalJQuery =
+    jQ(s"#$componentId").asInstanceOf[UdashModalJQuery]
 }
 
 object UdashModal {

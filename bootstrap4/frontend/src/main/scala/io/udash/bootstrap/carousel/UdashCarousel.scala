@@ -158,7 +158,13 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   /** Change active slide to the previous one (index order). */
   def previousSlide(): Unit = jQSelector().carousel("prev")
 
-  private def jQSelector(): UdashCarouselJQuery = jQ(render).asInstanceOf[UdashCarouselJQuery]
+  override def kill(): Unit = {
+    super.kill()
+    jQSelector().carousel("dispose")
+  }
+
+  private def jQSelector(): UdashCarouselJQuery =
+    jQ(render).asInstanceOf[UdashCarouselJQuery]
 }
 
 object UdashCarousel {
