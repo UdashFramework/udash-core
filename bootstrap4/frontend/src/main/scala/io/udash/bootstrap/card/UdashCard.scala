@@ -132,7 +132,7 @@ object UdashCard {
     *
     * @param backgroundColor A card style, one of the standard bootstrap colors `BootstrapStyles.Color`.
     * @param borderColor     A color of the borders. One of the standard bootstrap colors `BootstrapStyles.Color`.
-    * @param textAlignment   Aligment of a content of tthe card. One of the `BootstrapStyles.Align` values.
+    * @param textAlignment   Alignment of a content of tthe card. One of the `BootstrapStyles.Align` values.
     * @param textColor       A color of the texts inside the card. One of the standard bootstrap colors `BootstrapStyles.Color`.
     * @param componentId     An id of the root DOM node.
     * @param content         A factory of the card elements. All elements created with the factory will be cleaned up on the card cleanup.
