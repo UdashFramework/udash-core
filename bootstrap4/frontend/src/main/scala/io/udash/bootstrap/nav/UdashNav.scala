@@ -58,12 +58,12 @@ object UdashNav {
   import io.udash.css.CssView._
 
   /** Default navigation model. */
-  class NavItem(val name: String, val link: String)
+  class NavItem(val name: String, val link: Url)
 
   /** Default breadcrumb model factory. */
   val defaultItemFactory: (ReadableProperty[NavItem], Binding.NestedInterceptor) => Element = {
     (item, nested) => a(
-      nested(href.bind(item.transform(_.link))),
+      nested(href.bind(item.transform(_.link.value))),
       nested(bind(item.transform(_.name))),
       BootstrapStyles.Navigation.link
     ).render

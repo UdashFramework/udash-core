@@ -38,10 +38,11 @@ final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] p
 }
 
 object UdashBreadcrumbs {
+  import io.udash.bootstrap.utils.BootstrapImplicits.urlAttrValue
   import scalatags.JsDom.all._
 
   /** A default breadcrumb model. */
-  class Breadcrumb(val name: String, val link: String)
+  class Breadcrumb(val name: String, val link: Url)
 
   /** A default breadcrumb component factory. */
   val defaultPageFactory: (ReadableProperty[Breadcrumb], Binding.NestedInterceptor) => Modifier = {

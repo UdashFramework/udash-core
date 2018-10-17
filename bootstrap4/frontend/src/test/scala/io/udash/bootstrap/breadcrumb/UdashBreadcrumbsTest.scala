@@ -55,9 +55,9 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
 
     "work with default elements" in {
       val pages = SeqProperty(
-        new UdashBreadcrumbs.Breadcrumb("Home", "https://udash.io/"),
-        new UdashBreadcrumbs.Breadcrumb("Guide", "https://guide.udash.io/"),
-        new UdashBreadcrumbs.Breadcrumb("RPC", "https://guide.udash.io/rpc")
+        new UdashBreadcrumbs.Breadcrumb("Home", Url("https://udash.io/")),
+        new UdashBreadcrumbs.Breadcrumb("Guide", Url("https://guide.udash.io/")),
+        new UdashBreadcrumbs.Breadcrumb("RPC", Url("https://guide.udash.io/rpc"))
       )
       val breadcrumbs = UdashBreadcrumbs.default(pages)()
       val el = breadcrumbs.render
@@ -65,7 +65,7 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
       el.getElementsByTagName("a").length should be(3)
       el.textContent should be("HomeGuideRPC")
 
-      pages.append(new UdashBreadcrumbs.Breadcrumb("Frontend", "https://guide.udash.io/rpc/frontend"))
+      pages.append(new UdashBreadcrumbs.Breadcrumb("Frontend", Url("https://guide.udash.io/rpc/frontend")))
 
       el.getElementsByTagName("a").length should be(4)
       el.textContent should be("HomeGuideRPCFrontend")
@@ -75,7 +75,7 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
       el.getElementsByTagName("a").length should be(3)
       el.textContent should be("HomeRPCFrontend")
 
-      pages.elemProperties(1).set(new UdashBreadcrumbs.Breadcrumb("X", "http://google.com"))
+      pages.elemProperties(1).set(new UdashBreadcrumbs.Breadcrumb("X", Url("http://google.com")))
 
       el.getElementsByTagName("a").length should be(3)
       el.textContent should be("HomeXFrontend")

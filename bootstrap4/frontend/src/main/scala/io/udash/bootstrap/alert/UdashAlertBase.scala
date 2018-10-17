@@ -44,6 +44,6 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
     create(alertStyle, componentId)(content)
   }
 
-  def link(link: String)(content: Modifier*): Modifier =
+  def link(link: Url)(content: Modifier*): Modifier =
     a(href := link, BootstrapStyles.Alert.link)(content)
 }

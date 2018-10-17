@@ -610,10 +610,10 @@ object BootstrapDemos extends CrossLogging {
     import UdashBreadcrumbs._
 
     val pages = SeqProperty[Breadcrumb](
-      new Breadcrumb("Udash", "http://udash.io/"),
-      new Breadcrumb("Dev's Guide", "http://guide.udash.io/"),
-      new Breadcrumb("Extensions", "http://guide.udash.io/"),
-      new Breadcrumb("Bootstrap wrapper", "http://guide.udash.io/ext/bootstrap")
+      new Breadcrumb("Udash", Url("http://udash.io/")),
+      new Breadcrumb("Dev's Guide", Url("http://guide.udash.io/")),
+      new Breadcrumb("Extensions", Url("http://guide.udash.io/")),
+      new Breadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
     )
 
     val breadcrumbs = UdashBreadcrumbs(pages)(
