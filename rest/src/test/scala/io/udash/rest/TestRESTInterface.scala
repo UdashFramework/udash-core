@@ -17,9 +17,7 @@ trait TestRESTInterface {
 object TestRESTInterface extends DefaultRESTFramework.RPCCompanion[TestRESTInterface]
 
 trait TestRESTInternalInterface {
-  @GET
-  @RESTName("load")
-  @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
   @GET def load(
     @URLPart id: Int,
     @Query trash: String,
@@ -27,10 +25,8 @@ trait TestRESTInternalInterface {
   ): Future[TestRESTRecord] // trash2 uses default @Query
   @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-  @PATCH
-  @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-  @DELETE
-  @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
+  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
   def fireAndForget(@Body id: Int): Unit
   def deeper(): TestRESTDeepInterface
 }
