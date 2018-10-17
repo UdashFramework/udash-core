@@ -9,6 +9,7 @@ import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils._
 import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.{Element, Node}
@@ -22,6 +23,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   slides: seq.ReadableSeqProperty[ItemType, ElemType],
   showIndicators: ReadableProperty[Boolean],
   animationOptions: ReadableProperty[AnimationOptions],
+  srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)],
   val activeSlide: Property[Int],
   override val componentId: ComponentId
 )(
@@ -94,11 +96,27 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       slidesComponent,
       a(Carousel.controlPrev, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "prev")(
         span(Carousel.controlPrevIcon),
-        span(cls := "sr-only", "Previous")
+        span(
+          cls := "sr-only",
+          srTexts.map { case (previous, _, lang, provider) =>
+            import io.udash.i18n._
+            nestedInterceptor(
+              translatedDynamic(previous)(_.apply()(provider, lang.get))(lang)
+            ): Modifier
+          }.getOrElse("Previous")
+        )
       ),
       a(Carousel.controlNext, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "next")(
         span(Carousel.controlNextIcon),
-        span(cls := "sr-only", "Next")
+        span(
+          cls := "sr-only",
+          srTexts.map { case (_, next, lang, provider) =>
+            import io.udash.i18n._
+            nestedInterceptor(
+              translatedDynamic(next)(_.apply()(provider, lang.get))(lang)
+            ): Modifier
+          }.getOrElse("Next")
+        )
       )
     ).render
 
@@ -151,6 +169,7 @@ object UdashCarousel {
     * @param slides              A SeqProperty of carousel slides.
     * @param showIndicators      If true, the component shows carousel slide indicators.
     * @param animationOptions    A carousel animation options.
+    * @param srTexts             Translation keys for previous and next arrows' sr-only texts.
     * @param activeSlide         An active carousel slide index.
     * @param componentId         The arousel DOM element id.
     * @param slideContentFactory Creates content of a slide.
@@ -163,12 +182,13 @@ object UdashCarousel {
     slides: seq.ReadableSeqProperty[ItemType, ElemType],
     showIndicators: ReadableProperty[Boolean] = UdashBootstrap.True,
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
+    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
     activeSlide: Property[Int] = Property(0),
     componentId: ComponentId = ComponentId.newId()
   )(
     slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
   ): UdashCarousel[ItemType, ElemType] = {
-    new UdashCarousel(slides, showIndicators, animationOptions, activeSlide, componentId)(slideContentFactory)
+    new UdashCarousel(slides, showIndicators, animationOptions, srTexts, activeSlide, componentId)(slideContentFactory)
   }
 
   /**
@@ -178,6 +198,7 @@ object UdashCarousel {
     * @param slides              A SeqProperty of carousel slides.
     * @param showIndicators      If true, the component shows carousel slide indicators.
     * @param animationOptions    A carousel animation options.
+    * @param srTexts             Translation keys for previous and next arrows' sr-only texts.
     * @param activeSlide         An active carousel slide index.
     * @param componentId         The arousel DOM element id.
     * @param slideContentFactory Creates content of a slide.
@@ -188,13 +209,14 @@ object UdashCarousel {
     slides: ReadableSeqProperty[UdashCarouselSlide],
     showIndicators: ReadableProperty[Boolean] = UdashBootstrap.True,
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
+    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
     activeSlide: Property[Int] = Property(0),
     componentId: ComponentId = ComponentId.newId()
   )(
     slideContentFactory: (ReadableProperty[UdashCarouselSlide], Binding.NestedInterceptor) => Modifier =
       (slide, nested) => nested(produce(slide)(_.render))
   ): UdashCarousel[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = {
-    new UdashCarousel(slides, showIndicators, animationOptions, activeSlide, componentId)(slideContentFactory)
+    new UdashCarousel(slides, showIndicators, animationOptions, srTexts, activeSlide, componentId)(slideContentFactory)
   }
 
   /**

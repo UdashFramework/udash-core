@@ -3,11 +3,13 @@ package io.udash.bootstrap.carousel
 import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
+import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
+import scala.concurrent.Future
 import scala.util.Random
 
 class UdashCarouselTest extends AsyncUdashFrontendTest {
@@ -156,6 +158,42 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       retrying(carousel.activeSlide.get shouldBe 4)
     }
 
+    "translate sr-only arrow descriptions" in {
+      val tp = new LocalTranslationProvider(
+        Map(
+          Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
+          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
+        )
+      )
+      val lang = Property(Lang("test"))
+
+      val sl = slides()
+      val carousel = UdashCarousel.default(
+        sl,
+        srTexts = Some((
+          TranslationKey.key("prev"),
+          TranslationKey.key("next"),
+          lang, tp
+        )),
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+      )()
+      val el = carousel.render
+      jQ("body").append(el)
+
+      for {
+        _ <- retrying {
+          el.textContent should include("Poprzedni")
+          el.textContent should include("Następny")
+        }
+        _ <- Future {
+          lang.set(Lang("test2"))
+        }
+        r <- retrying {
+          el.textContent should include("Prev")
+          el.textContent should include("next")
+        }
+      } yield r
+    }
   }
 
   private def activeIdx(carousel: UdashCarousel[_, _]): Int = {
