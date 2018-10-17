@@ -1,7 +1,7 @@
 package io.udash.rest
 
 import com.avsystem.commons.rpc.StandardRPCFramework
-import io.udash.rpc.serialization.JsonStr
+import io.udash.rpc.JsonStr
 
 trait UdashRESTFramework extends StandardRPCFramework {
   type RawValue = JsonStr

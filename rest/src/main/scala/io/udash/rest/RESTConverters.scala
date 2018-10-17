@@ -1,6 +1,7 @@
 package io.udash.rest
 
-import io.udash.rpc.serialization.{JsonStr, URLEncoder}
+import io.udash.rpc.JsonStr
+import io.udash.rpc.serialization.URLEncoder
 
 trait RESTConverters {
   val framework: UdashRESTFramework

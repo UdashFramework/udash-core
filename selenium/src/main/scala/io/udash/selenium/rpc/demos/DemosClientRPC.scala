@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos
 
-import io.udash.rpc._
+import io.udash.rpc.DefaultClientRpcCompanion
 import io.udash.selenium.rpc.demos.rpc.{NotificationsClientRPC, PingClientRPC}
 
 trait DemosClientRPC {
@@ -8,4 +8,4 @@ trait DemosClientRPC {
   def notificationsDemo(): NotificationsClientRPC
 }
 
-object DemosClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[DemosClientRPC]
+object DemosClientRPC extends DefaultClientRpcCompanion[DemosClientRPC]

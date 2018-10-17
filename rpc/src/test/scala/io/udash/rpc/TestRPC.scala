@@ -4,7 +4,6 @@ import com.avsystem.commons.rpc.rpcName
 import com.avsystem.commons.serialization.HasGenCodec
 import com.github.ghik.silencer.silent
 import io.udash.rpc.utils.Logged
-import io.udash.rpc.{DefaultClientUdashRPCFramework => CF, DefaultServerUdashRPCFramework => SF}
 
 import scala.concurrent.Future
 
@@ -38,19 +37,13 @@ trait InnerRPC {
   @Logged
   def func(arg: Int): Future[String]
 }
-object InnerRPC extends SF.RPCCompanion[InnerRPC] {
-  implicit val serverUpickleAsRawReal: ServerUPickleUdashRPCFramework.AsRawRealRPC[InnerRPC] =
-    ServerUPickleUdashRPCFramework.materializeAsRawReal
-}
+object InnerRPC extends DefaultServerRpcCompanion[InnerRPC]
 
 /** Inner Client RPC interface */
 trait InnerClientRPC {
   def proc(): Unit
 }
-object InnerClientRPC extends CF.RPCCompanion[InnerClientRPC] {
-  implicit val clientUpickleAsRawReal: ClientUPickleUdashRPCFramework.AsRawRealRPC[InnerClientRPC] =
-    ClientUPickleUdashRPCFramework.materializeAsRawReal
-}
+object InnerClientRPC extends DefaultClientRpcCompanion[InnerClientRPC]
 
 /** Main Server side RPC interface */
 trait TestRPC extends RPCMethods {
@@ -128,70 +121,66 @@ trait RPCMethodsImpl extends RPCMethods {
 }
 
 @silent
-object TestRPC extends SF.RPCCompanion[TestRPC] {
-  implicit val serverUpickleAsRawReal: ServerUPickleUdashRPCFramework.AsRawRealRPC[TestRPC] =
-    ServerUPickleUdashRPCFramework.materializeAsRawReal
-
+object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
   /** Returns implementation of server side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestRPC with RPCMethodsImpl {
-    override def doStuff(yes: Boolean): Future[String] =
-      onCall("doStuff", List(List(yes)), "doStuffResult")
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
+    new TestRPC with RPCMethodsImpl {
+      override def doStuff(yes: Boolean): Future[String] =
+        onCall("doStuff", List(List(yes)), "doStuffResult")
 
-    override def doStuffWithFail(no: Boolean): Future[String] =
-      onFailingCall("doStuffWithFail", List(List(no)), new Exception)
+      override def doStuffWithFail(no: Boolean): Future[String] =
+        onFailingCall("doStuffWithFail", List(List(no)), new Exception)
 
-    override def doStuffWithEx(): Future[String] =
-      onFailingCall("doStuffWithEx", List(List()), CustomRPCException(5))
+      override def doStuffWithEx(): Future[String] =
+        onFailingCall("doStuffWithEx", List(List()), CustomRPCException(5))
 
-    override def doStuffInt(yes: Boolean): Future[Int] =
-      onCall("doStuffInt", List(List(yes)), 5)
+      override def doStuffInt(yes: Boolean): Future[Int] =
+        onCall("doStuffInt", List(List(yes)), 5)
 
-    def doStuffUnit(): Future[Unit] =
-      onCall("doStuffUnit", List(Nil), ())
+      def doStuffUnit(): Future[Unit] =
+        onCall("doStuffUnit", List(Nil), ())
 
-    override def fireSomething(arg: Int): Unit =
-      onFire("fireSomething", List(List(arg)))
+      override def fireSomething(arg: Int): Unit =
+        onFire("fireSomething", List(List(arg)))
 
-    override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
+      override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
 
-    override def innerRpc(name: String): InnerRPC = {
-      onInvocationInternal("innerRpc", List(List(name)), None)
-      new InnerRPC {
-        def func(arg: Int): Future[String] =
-          onCall("innerRpc.func", List(List(arg)), "innerRpc.funcResult")
+      override def innerRpc(name: String): InnerRPC = {
+        onInvocationInternal("innerRpc", List(List(name)), None)
+        new InnerRPC {
+          def func(arg: Int): Future[String] =
+            onCall("innerRpc.func", List(List(arg)), "innerRpc.funcResult")
 
-        def proc(): Unit =
-          onFire("innerRpc.proc", List(Nil))
+          def proc(): Unit =
+            onFire("innerRpc.proc", List(Nil))
+        }
+      }
+
+      override def throwingGetter(): InnerRPC = {
+        onInvocationInternal("throwingGetter", List(List()), None)
+        throw new NullPointerException
+      }
+
+      override def nullGetter(): InnerRPC = {
+        onInvocationInternal("nullGetter", List(List()), None)
+        null
       }
     }
-
-    override def throwingGetter(): InnerRPC = {
-      onInvocationInternal("throwingGetter", List(List()), None)
-      throw new NullPointerException
-    }
-
-    override def nullGetter(): InnerRPC = {
-      onInvocationInternal("nullGetter", List(List()), None)
-      null
-    }
-  }
 }
 
 @silent
-object TestClientRPC extends CF.RPCCompanion[TestClientRPC] {
-  implicit val clientUpickleAsRawReal: ClientUPickleUdashRPCFramework.AsRawRealRPC[TestClientRPC] =
-    ClientUPickleUdashRPCFramework.materializeAsRawReal
-
+object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
   /** Returns implementation of client side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any) = new TestClientRPC with RPCMethodsImpl {
-    override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestClientRPC =
+    new TestClientRPC with RPCMethodsImpl {
+      override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
 
-    override def innerRpc(name: String): InnerClientRPC = {
-      onInvocationInternal("innerRpc", List(List(name)), None)
-      new InnerClientRPC {
-        def proc(): Unit =
-          onFire("innerRpc.proc", List(Nil))
+      override def innerRpc(name: String): InnerClientRPC = {
+        onInvocationInternal("innerRpc", List(List(name)), None)
+        new InnerClientRPC {
+          def proc(): Unit =
+            onFire("innerRpc.proc", List(Nil))
+        }
       }
     }
-  }
 }

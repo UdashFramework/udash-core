@@ -1,8 +1,8 @@
 package io.udash.rpc.utils
 
-import com.avsystem.commons.rpc.MetadataAnnotation
+import scala.annotation.StaticAnnotation
 
 /**
   * Marks RPC method for CallLogging
   */
-class Logged extends MetadataAnnotation
+class Logged extends StaticAnnotation

@@ -14,31 +14,30 @@ trait TestRESTInterface {
   @RESTName("service_three") def serviceThree(@URLPart arg: String): TestRESTInternalInterface
   @SkipRESTName def serviceSkip(): TestRESTInternalInterface
 }
-object TestRESTInterface {
-  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTInterface] = DefaultRESTFramework.materializeAsReal
-  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTInterface] = DefaultRESTFramework.materializeMetadata
-}
+object TestRESTInterface extends DefaultRESTFramework.RPCCompanion[TestRESTInterface]
 
 trait TestRESTInternalInterface {
-  @GET @RESTName("load") @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
-  @GET def load(@URLPart id: Int, @Query trash: String, /*@Query */ @RESTParamName("trash_two") trash2: String): Future[TestRESTRecord] // trash2 uses default @Query
+  @GET
+  @RESTName("load")
+  @rpcName("loadAll") def load(): Future[Seq[TestRESTRecord]]
+  @GET def load(
+    @URLPart id: Int,
+    @Query trash: String,
+    /*@Query */ @RESTParamName("trash_two") trash2: String
+  ): Future[TestRESTRecord] // trash2 uses default @Query
   @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
-  @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
-  @DELETE @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
+  @PATCH
+  @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
+  @DELETE
+  @rpcName("remove") def delete(@URLPart id: Int): Future[TestRESTRecord]
   def fireAndForget(@Body id: Int): Unit
   def deeper(): TestRESTDeepInterface
 }
-object TestRESTInternalInterface {
-  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTInternalInterface] = DefaultRESTFramework.materializeAsReal
-  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTInternalInterface] = DefaultRESTFramework.materializeMetadata
-}
+object TestRESTInternalInterface extends DefaultRESTFramework.RPCCompanion[TestRESTInternalInterface]
 
 trait TestRESTDeepInterface {
   @GET def load(@URLPart id: Int): Future[TestRESTRecord]
   @GET def fire(@URLPart id: Int): Unit
 }
-object TestRESTDeepInterface {
-  implicit val restAsReal: DefaultRESTFramework.AsRealRPC[TestRESTDeepInterface] = DefaultRESTFramework.materializeAsReal
-  implicit val restMetadata: DefaultRESTFramework.RPCMetadata[TestRESTDeepInterface] = DefaultRESTFramework.materializeMetadata
-}
+object TestRESTDeepInterface extends DefaultRESTFramework.RPCCompanion[TestRESTDeepInterface]

@@ -1,11 +1,14 @@
 package io.udash.i18n
 
-import io.udash.rpc.DefaultServerUdashRPCFramework
+import com.avsystem.commons.serialization.GenCodec
+import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
+import io.udash.rpc.JsonStr
 import io.udash.testing.UdashSharedTest
 
 import scala.concurrent.Future
 
 class TranslationKeyTest extends UdashSharedTest {
+
   import Utils._
 
   implicit val lang = Lang("en")
@@ -21,6 +24,12 @@ class TranslationKeyTest extends UdashSharedTest {
 
     override protected def handleMixedPlaceholders(template: String): Unit = ()
   }
+
+  def write[T: GenCodec](value: T): JsonStr =
+    JsonStr(JsonStringOutput.write(value))
+
+  def read[T: GenCodec](jsonStr: JsonStr): T =
+    JsonStringInput.read[T](jsonStr.json)
 
   val testKey0 = TranslationKey.key("test0")
   val testKey1 = TranslationKey.key1[Int]("test1")
@@ -72,28 +81,28 @@ class TranslationKeyTest extends UdashSharedTest {
     }
 
     "serialize and deserialize TranslationKey0" in {
-      val serialized = DefaultServerUdashRPCFramework.write(testKey0)
-      val deserialized = DefaultServerUdashRPCFramework.read[TranslationKey0](serialized)
+      val serialized = write(testKey0)
+      val deserialized = read[TranslationKey0](serialized)
       getTranslatedString(deserialized()) should be(getTranslatedString(testKey0()))
     }
 
     "serialize and deserialize Untranslatable" in {
-      val serialized = DefaultServerUdashRPCFramework.write(testKeyU)
-      val deserialized = DefaultServerUdashRPCFramework.read[TranslationKey0](serialized)
+      val serialized = write(testKeyU)
+      val deserialized = read[TranslationKey0](serialized)
       getTranslatedString(deserialized()) should be(getTranslatedString(testKeyU()))
     }
 
     "serialize and deserialize reduced keys" in {
-      val serialized = DefaultServerUdashRPCFramework.write(testKey1.reduce(5))
-      val deserialized = DefaultServerUdashRPCFramework.read[TranslationKey0](serialized)
+      val serialized = write(testKey1.reduce(5))
+      val deserialized = read[TranslationKey0](serialized)
       getTranslatedString(deserialized()) should be(getTranslatedString(testKey1(5)))
 
-      val serialized2 = DefaultServerUdashRPCFramework.write(testKey5.reduce(1, "2", 3, "4", 5))
-      val deserialized2 = DefaultServerUdashRPCFramework.read[TranslationKey0](serialized2)
+      val serialized2 = write(testKey5.reduce(1, "2", 3, "4", 5))
+      val deserialized2 = read[TranslationKey0](serialized2)
       getTranslatedString(deserialized2()) should be(getTranslatedString(testKey5(1, "2", 3, "4", 5)))
 
-      val serializedX = DefaultServerUdashRPCFramework.write(testKeyX.reduce((1, 2, "3", 4.5)))
-      val deserializedX = DefaultServerUdashRPCFramework.read[TranslationKey0](serializedX)
+      val serializedX = write(testKeyX.reduce((1, 2, "3", 4.5)))
+      val deserializedX = read[TranslationKey0](serializedX)
       getTranslatedString(deserializedX()) should be(getTranslatedString(testKeyX((1, 2, "3", 4.5))))
     }
   }

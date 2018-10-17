@@ -3,9 +3,10 @@ package io.udash.rpc
 import java.util.UUID
 
 import com.avsystem.commons._
+import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.typesafe.scalalogging.{Logger, StrictLogging}
 import io.udash.rpc.internals._
-import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
+import io.udash.rpc.serialization.ExceptionCodecRegistry
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletResponse
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
@@ -113,7 +114,6 @@ class AtmosphereService[ServerRPCType](
 
   private def handleRequest(resource: AtmosphereResource, onCall: JsonStr => Unit, onFire: () => Unit): Unit = {
     val rpc = config.resolveRpc(resource)
-    import rpc.localFramework._
 
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
@@ -121,23 +121,23 @@ class AtmosphereService[ServerRPCType](
     if (input.json.nonEmpty) {
       val rpcRequest = readRequest(input, rpc)
       (rpcRequest, handleRpcRequest(rpc)(resource, rpcRequest)) match {
-        case (call: RPCCall, Some(response)) =>
+        case (call: RpcCall, Some(response)) =>
           response.onCompleteNow {
             case Success(r) =>
-              onCall(write[RPCResponse](RPCResponseSuccess(r, call.callId)))
+              onCall(JsonStr(JsonStringOutput.write[RpcServerMessage](RpcResponseSuccess(r, call.callId))))
             case Failure(ex) =>
               onRequestHandlingFailure(ex, logger)
               val exceptionName = exceptionsRegistry.name(ex)
-              onCall(write[RPCResponse](
+              onCall(JsonStr(JsonStringOutput.write[RpcServerMessage](
                 if (exceptionsRegistry.contains(exceptionName)) {
-                  RPCResponseException(exceptionName, ex, call.callId)
+                  RpcResponseException(exceptionName, ex, call.callId)
                 } else {
                   val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
-                  RPCResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
+                  RpcResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
                 }
-              ))
+              )))
           }
-        case (_, _) => onFire()
+        case _ => onFire()
       }
     }
   }
@@ -166,40 +166,35 @@ class AtmosphereService[ServerRPCType](
 
   override def destroy(): Unit = {}
 
-  private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])
-    (resource: AtmosphereResource,
-      request: rpc.localFramework.RPCRequest): Option[Future[rpc.localFramework.RawValue]] = {
+  private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])(
+    resource: AtmosphereResource, request: RpcRequest
+  ): Option[Future[JsonStr]] = {
 
     val filterResult = config.filters.foldLeft[Try[Unit]](Success(()))((result, filter) => result match {
       case Success(_) => filter.apply(resource)
       case failure: Failure[_] => failure
     })
-
-    import rpc.localFramework._
     filterResult match {
       case Success(_) =>
         request match {
-          case call: RPCCall =>
+          case call: RpcCall =>
             Some(rpc.handleRpcCall(call))
-          case fire: RPCFire =>
+          case fire: RpcFire =>
             rpc.handleRpcFire(fire)
             None
         }
       case Failure(ex) => request match {
-        case _: RPCCall =>
+        case _: RpcCall =>
           Some(Future.failed(ex))
-        case _: RPCFire =>
+        case _: RpcFire =>
           None
       }
     }
   }
 
-  private def readRequest(input: JsonStr, rpc: ExposesServerRPC[ServerRPCType]): rpc.localFramework.RPCRequest = {
-    import rpc.localFramework._
-    read[RPCRequest](input)
-  }
+  private def readRequest(input: JsonStr, rpc: ExposesServerRPC[ServerRPCType]): RpcRequest =
+    JsonStringInput.read[RpcRequest](input.json)
 
-  private def readInput(inputStream: ServletInputStream): JsonStr = {
+  private def readInput(inputStream: ServletInputStream): JsonStr =
     JsonStr(scala.io.Source.fromInputStream(inputStream).mkString)
-  }
 }

@@ -1,8 +1,9 @@
 package io.udash.rpc.internals
 
+import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import io.udash.logging.CrossLogging
 import io.udash.rpc._
-import io.udash.rpc.serialization.{ExceptionCodecRegistry, JsonStr}
+import io.udash.rpc.serialization.ExceptionCodecRegistry
 import io.udash.utils.{CallbacksHandler, Registration}
 import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
@@ -10,29 +11,25 @@ import org.scalajs.dom
 
 import scala.collection.mutable
 import scala.scalajs.js
+import scala.util.control.NonFatal
 
-trait ServerConnector[RPCRequest] {
+trait ServerConnector {
   /** Sends RPCRequest to server. */
-  def sendRPCRequest(request: RPCRequest): Unit
+  def sendRpcRequest(request: RpcRequest): Unit
 }
 
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
-abstract class AtmosphereServerConnector[RPCRequest](
+abstract class AtmosphereServerConnector(
   private val serverUrl: String,
   val exceptionsRegistry: ExceptionCodecRegistry
-) extends ServerConnector[RPCRequest] with CrossLogging {
+) extends ServerConnector with CrossLogging {
 
   protected val clientRpc: ExposesClientRPC[_]
 
-  val remoteFramework: ServerUdashRPCFramework
-  val localFramework: ClientUdashRPCFramework
+  def handleResponse(response: RpcResponse): Any
+  def handleRpcFire(fire: RpcFire): Any
 
-  def requestToString(request: RPCRequest): String
-
-  def handleResponse(response: remoteFramework.RPCResponse): Any
-  def handleRpcFire(fire: localFramework.RPCFire): Any
-
-  private val waitingRequests = new mutable.ArrayBuffer[RPCRequest]()
+  private val waitingRequests = new mutable.ArrayBuffer[RpcRequest]()
   private var isReady: ConnectionStatus = ConnectionStatus.Closed
   private val websocketSupport: Boolean = scala.scalajs.js.Dynamic.global.WebSocket != null
 
@@ -68,29 +65,20 @@ abstract class AtmosphereServerConnector[RPCRequest](
     Atmosphere.subscribe(atmRequest)
   }
 
-  override def sendRPCRequest(request: RPCRequest): Unit = {
-    val msg = requestToString(request)
+  override def sendRpcRequest(request: RpcRequest): Unit = {
+    val msg = JsonStringOutput.write[RpcRequest](request)
     if (isReady == ConnectionStatus.Open) socket.push(msg)
     else waitingRequests += request
   }
 
-  private def handleMessage(msg: String) = {
-    import localFramework.RPCRequestCodec
-    import remoteFramework.RPCResponse
+  private def handleMessage(msg: String): Unit = {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
-    try handleResponse(remoteFramework.read[RPCResponse](JsonStr(msg))) catch {
-      case _: Exception =>
-        try {
-          localFramework.read[localFramework.RPCRequest](JsonStr(msg)) match {
-            case fire: localFramework.RPCFire =>
-              handleRpcFire(fire)
-            case unhandled =>
-              logger.error(s"Unhandled RPCRequest: $unhandled")
-          }
-        } catch {
-          case _: Exception =>
-            logger.error(s"Unhandled message: $msg")
-        }
+    try JsonStringInput.read[RpcServerMessage](msg) match {
+      case fire: RpcFire => handleRpcFire(fire)
+      case response: RpcResponse => handleResponse(response)
+    } catch {
+      case NonFatal(e) =>
+        logger.error(s"Failure reading server message: $msg", e)
     }
   }
 
@@ -105,11 +93,11 @@ abstract class AtmosphereServerConnector[RPCRequest](
   private def ready(isReady: ConnectionStatus): Unit = {
     this.isReady = isReady
     if (isReady == ConnectionStatus.Open) {
-      val queue = new mutable.ArrayBuffer[RPCRequest]()
+      val queue = new mutable.ArrayBuffer[RpcRequest]()
       waitingRequests.copyToBuffer(queue)
       waitingRequests.clear()
 
-      queue foreach { req => sendRPCRequest(req) }
+      queue foreach { req => sendRpcRequest(req) }
     }
 
     connectionStatusCallbacks.fire(isReady)
@@ -145,22 +133,16 @@ abstract class AtmosphereServerConnector[RPCRequest](
   }
 }
 
-class DefaultAtmosphereServerConnector(override protected val clientRpc: DefaultExposesClientRPC[_],
-  responseHandler: DefaultServerUdashRPCFramework.RPCResponse => Any,
+class DefaultAtmosphereServerConnector(
+  override protected val clientRpc: DefaultExposesClientRPC[_],
+  responseHandler: RpcResponse => Any,
   serverUrl: String,
-  override val exceptionsRegistry: ExceptionCodecRegistry)
-  extends AtmosphereServerConnector[DefaultServerUdashRPCFramework.RPCRequest](serverUrl, exceptionsRegistry) {
+  override val exceptionsRegistry: ExceptionCodecRegistry
+) extends AtmosphereServerConnector(serverUrl, exceptionsRegistry) {
 
-  override val remoteFramework: DefaultServerUdashRPCFramework.type = DefaultServerUdashRPCFramework
-  override val localFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework
-
-  override def requestToString(request: remoteFramework.RPCRequest): String =
-    remoteFramework.write(request).json
-
-  override def handleResponse(response: remoteFramework.RPCResponse): Any =
+  override def handleResponse(response: RpcResponse): Any =
     responseHandler(response)
 
-  override def handleRpcFire(fire: localFramework.RPCFire): Any =
+  override def handleRpcFire(fire: RpcFire): Any =
     clientRpc.handleRpcFire(fire)
-
 }
