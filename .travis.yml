@@ -29,6 +29,7 @@ scala:
   - 2.12.7
 
 env:
+  - TEST_PACKAGE="utils/test utils-js/test"
   - TEST_PACKAGE="core/test core-js/test"
   - TEST_PACKAGE="rpc/test rpc-js/test"
   - TEST_PACKAGE="rest/test rest-js/test"
