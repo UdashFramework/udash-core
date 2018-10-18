@@ -74,10 +74,9 @@ final class UdashDatePicker private[datepicker](
       val dateOption = event.option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
       val oldDateOption = date.get
       dateOption match {
-        case Some(d) =>
-          date.set(Option(d))
-        case None =>
-          date.set(None)
+        case Some(null) => date.set(None)
+        case Some(d) => date.set(Option(d))
+        case None => date.set(None)
       }
       fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
     })
@@ -135,11 +134,10 @@ final class UdashDatePicker private[datepicker](
       "minDate" -> (if (options.minDate.nonEmpty) dateToMoment(options.minDate.get) else false),
       "maxDate" -> (if (options.maxDate.nonEmpty) dateToMoment(options.maxDate.get) else false),
       "defaultDate" -> (if (options.defaultDate.nonEmpty) dateToMoment(options.defaultDate.get) else false),
-      "toolbarPlacement" -> (if (options.toolbarPlacement.nonEmpty) options.toolbarPlacement.get.name else UdashDatePicker.Placement.DefaultPlacement.name),
-      "widgetPositioning" -> js.Dictionary(
-        "horizontal" -> options.widgetPositioning.map(_._1).getOrElse(UdashDatePicker.Placement.AutoPlacement).name,
-        "vertical" -> options.widgetPositioning.map(_._2).getOrElse(UdashDatePicker.Placement.AutoPlacement).name
-      ),
+      "toolbarPlacement" -> (if (options.toolbarPlacement.nonEmpty) options.toolbarPlacement.get.name else Placement.DefaultPlacement.name),
+      "widgetPositioning" -> options.widgetPositioning.map {
+        case (horizontal, vertical) => js.Dictionary("horizontal" -> horizontal.name, "vertical" -> vertical.name)
+      }.getOrElse(js.Dictionary("horizontal" -> Placement.AutoPlacement.name, "vertical" -> Placement.AutoPlacement.name)),
       "buttons" -> js.Dictionary(
         "showTodayButton" -> options.showTodayButton,
         "showClear" -> options.showClear,
@@ -161,9 +159,11 @@ final class UdashDatePicker private[datepicker](
       ("today", icons.today),
       ("clear", icons.clear),
       ("close", icons.close)
-    ).filter(_._2.nonEmpty).foreach(item =>
-      dict.update(item._1, item._2.flatMap(_.classNames).distinct.toJSArray)
-    )
+    ).foreach { case (icon, style) =>
+      if (style.nonEmpty) {
+        dict.update(icon, style.flatMap(_.classNames).distinct.toJSArray)
+      }
+    }
     dict
   }
 
