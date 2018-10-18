@@ -132,16 +132,16 @@ object ServerRawRpc extends RawRpcCompanion[ServerRawRpc]
 case class ServerRpcMetadata[T](
   @reifyName name: String,
   @multi @rpcMethodMetadata getters: Map[String, GetterMethod[_]],
-  @multi @rpcMethodMetadata @annotated[Logged] loggedMethods: Map[String, LoggedMethod[_]],
+  @multi @rpcMethodMetadata @annotated[Logged] loggedMethods: Map[String, LoggedMethod[_]]
 )
 object ServerRpcMetadata extends RpcMetadataCompanion[ServerRpcMetadata]
 
 @allowIncomplete
 case class GetterMethod[T](
-  @infer @checked resultMetadata: ServerRpcMetadata.Lazy[T],
+  @infer @checked resultMetadata: ServerRpcMetadata.Lazy[T]
 ) extends TypedMetadata[T]
 
 @allowIncomplete
 case class LoggedMethod[T](
-  @reifyName name: String,
+  @reifyName name: String
 ) extends TypedMetadata[T]
