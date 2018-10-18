@@ -43,7 +43,7 @@ object Dependencies {
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-lib" % silencerVersion,
+    "com.github.ghik" %% "silencer-lib" % silencerVersion % Provided,
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
   ))
 
@@ -51,85 +51,86 @@ object Dependencies {
     "org.scalatest" %%% "scalatest" % scalatestVersion
   ).map(_ % Test))
 
-  val coreMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  val macroDeps = Def.setting(Seq(
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
 
-  val coreCrossDeps = Def.setting(Seq(
+  private val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
-  val coreCrossJVMDeps = Def.setting(Seq(
+  val coreJvmDeps = Def.setting(coreCrossDeps.value ++ Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val coreFrontendDeps = Def.setting(Seq(
+  val coreSjsDeps = Def.setting(coreCrossDeps.value ++ Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
-  val rpcCrossTestDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion,
-    "io.circe" %%% "circe-core" % circeVersion,
-    "io.circe" %%% "circe-parser" % circeVersion,
-  ).map(_ % Test))
-
-  val rpcFrontendJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
+  private val rpcCrossDeps = Def.setting(Seq(
+    "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
+    "io.circe" %%% "circe-core" % circeVersion % Test,
+    "io.circe" %%% "circe-parser" % circeVersion % Test,
   ))
 
-  val rpcBackendDeps = Def.setting(Seq(
+  val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
-  val restMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion
+  val rpcSjsDeps = rpcCrossDeps
+
+  val rpcJsDeps = Def.setting(Seq(
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
   ))
 
-  val restCrossDeps = Def.setting(Seq(
+  private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
   ))
 
-  val restCrossJvmDeps = Def.setting(Seq(
+  val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
     "com.softwaremill.sttp" %% "async-http-client-backend-future" % sttpVersion,
-  ))
-
-  val restBackendDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
   ))
 
-  val cssMacroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion
+  val restSjsDeps = restCrossDeps
+
+  private val cssCrossDeps = Def.setting(Seq(
+    "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
   ))
 
-  val cssFrontendDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+  val cssJvmDeps = cssCrossDeps
+
+  val cssSjsDeps = Def.setting(cssCrossDeps.value ++ Seq(
+    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion,
   ))
 
-  val bootstrapFrontendDeps = Def.setting(Seq(
+  val bootstrapSjsDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion exclude("org.webjars", "momentjs")
   ))
 
-  val bootstrapFrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+  val bootstrapJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion / s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
-      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js" dependsOn "bootstrap.js" dependsOn "moment-with-locales.js",
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+
+    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion /
+      s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
+      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js"
+      dependsOn "bootstrap.js" dependsOn s"$momentJsVersion/min/moment-with-locales.js",
   ))
 
-  val chartsFrontendDeps = Def.setting(Seq(
+  val chartsSjsDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
   ))
 
-  val benchmarksFrontendDeps = Def.setting(Seq(
+  val benchmarksSjsDeps = Def.setting(Seq(
     "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,
     "io.circe" %%% "circe-core" % circeVersion,
     "io.circe" %%% "circe-generic" % circeVersion,
@@ -137,15 +138,12 @@ object Dependencies {
     "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 
-  val seleniumBackendDeps = Def.setting(Seq(
+  val seleniumJvmDeps = Def.setting(Seq(
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
-  ))
-
-  val seleniumTestingDeps = Def.setting(Seq(
     "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test
+    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
 }

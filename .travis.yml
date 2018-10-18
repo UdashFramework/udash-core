@@ -8,11 +8,11 @@ addons:
   chrome: stable
 
 before_script:
-  # Instal google-chrome-driver
+  # Install google-chrome-driver
   - wget http://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip -d chromedriver
   - export PATH=$PWD/chromedriver:$PATH
-  # Instal firefox-driver
+  # Install firefox-driver
   - wget https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
   - mkdir geckodriver
   - tar -xzf geckodriver-v0.21.0-linux64.tar.gz -C geckodriver
@@ -29,13 +29,20 @@ scala:
   - 2.12.7
 
 env:
-  - TEST_PACKAGE="core-macros/test core-shared/test core-shared-JS/test core-frontend/test"
-  - TEST_PACKAGE="rpc-shared/test rpc-shared-JS/test rpc-backend/test rpc-frontend/test"
-  - TEST_PACKAGE="rest-macros/test rest-shared/test rest-shared-JS/test rest-backend/test"
-  - TEST_PACKAGE="i18n-shared/test i18n-shared-JS/test i18n-backend/test i18n-frontend/test"
-  - TEST_PACKAGE="auth-shared/test auth-shared-JS/test auth-frontend/test"
-  - TEST_PACKAGE="css-macros/test css-shared/test css-shared-JS/test css-backend/test css-frontend/test"
+  - TEST_PACKAGE="core/test core-js/test"
+  - TEST_PACKAGE="rpc/test rpc-js/test"
+  - TEST_PACKAGE="rest/test rest-js/test"
+  - TEST_PACKAGE="i18n/test i18n-js/test"
+  - TEST_PACKAGE="auth/test auth-js/test"
+  - TEST_PACKAGE="css/test css-js/test"
   - TEST_PACKAGE="bootstrap/test"
   - TEST_PACKAGE="charts/test"
-  - TEST_PACKAGE="benchmarks-frontend/compile"
-  - TEST_PACKAGE="selenium-backend/test"
+  - TEST_PACKAGE="benchmarks/compile"
+  - TEST_PACKAGE="selenium/test"
+
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.coursier/cache
+  - $HOME/.sbt/boot/
+  - $HOME/.sbt/launchers/
