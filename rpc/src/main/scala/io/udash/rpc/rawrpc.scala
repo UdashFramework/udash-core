@@ -105,7 +105,7 @@ object RpcResponseException {
 
 trait RawRpc[Self <: RawRpc[Self]] { this: Self =>
   @multi def get(@composite invocation: RpcInvocation): Self
-  @multi def fire(@composite invocation: RpcInvocation): Unit
+  @multi @verbatim def fire(@composite invocation: RpcInvocation): Unit
 
   final def resolveGetterChain(getterInvocations: List[RpcInvocation]): Self =
     getterInvocations.foldRight[Self](this)((inv, rpc) => rpc.get(inv))
@@ -117,7 +117,15 @@ trait RawRpc[Self <: RawRpc[Self]] { this: Self =>
 trait ClientRawRpc extends RawRpc[ClientRawRpc] {
   type Self = ClientRawRpc
 }
-object ClientRawRpc extends RawRpcCompanion[ClientRawRpc]
+object ClientRawRpc extends RawRpcCompanion[ClientRawRpc] {
+  @implicitNotFound("${T} is not a valid client RPC trait, " +
+    "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?")
+  implicit def asRealNotFound[T]: ImplicitNotFound[AsReal[ClientRawRpc, T]] = ImplicitNotFound()
+
+  @implicitNotFound("${T} is not a valid client RPC trait, " +
+    "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?")
+  implicit def asRawNotFound[T]: ImplicitNotFound[AsRaw[ClientRawRpc, T]] = ImplicitNotFound()
+}
 
 trait ServerRawRpc extends RawRpc[ServerRawRpc] {
   type Self = ServerRawRpc
@@ -126,7 +134,15 @@ trait ServerRawRpc extends RawRpc[ServerRawRpc] {
   final def handleCall(rpcCall: RpcCall): Future[JsonStr] =
     resolveGetterChain(rpcCall.gettersChain).call(rpcCall.invocation).catchFailures
 }
-object ServerRawRpc extends RawRpcCompanion[ServerRawRpc]
+object ServerRawRpc extends RawRpcCompanion[ServerRawRpc] {
+  @implicitNotFound("${T} is not a valid server RPC trait, " +
+    "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?")
+  implicit def asRealNotFound[T]: ImplicitNotFound[AsReal[ServerRawRpc, T]] = ImplicitNotFound()
+
+  @implicitNotFound("${T} is not a valid server RPC trait, " +
+    "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?")
+  implicit def asRawNotFound[T]: ImplicitNotFound[AsRaw[ServerRawRpc, T]] = ImplicitNotFound()
+}
 
 @allowIncomplete
 case class ServerRpcMetadata[T](
