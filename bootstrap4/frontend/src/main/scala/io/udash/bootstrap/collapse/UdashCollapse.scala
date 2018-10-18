@@ -13,10 +13,12 @@ import scalatags.generic.AttrPair
 import scala.scalajs.js
 
 final class UdashCollapse private(
-  parentSelector: Option[String], toggleOnInit: Boolean,
+  parentSelector: Option[String],
+  toggleOnInit: Boolean,
   override val componentId: ComponentId
-)(content: Binding.NestedInterceptor => Modifier)
-  extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
+)(
+  content: Binding.NestedInterceptor => Modifier
+) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._

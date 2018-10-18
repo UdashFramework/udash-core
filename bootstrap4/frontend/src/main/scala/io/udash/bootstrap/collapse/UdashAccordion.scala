@@ -1,11 +1,12 @@
 package io.udash.bootstrap
 package collapse
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.component.ComponentId
+import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.properties.seq
 import org.scalajs.dom._
 
@@ -17,13 +18,22 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 )(
   heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
   body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
-) extends UdashBootstrapComponent {
+) extends UdashBootstrapComponent
+  with Listenable[UdashAccordion[ItemType, ElemType], UdashAccordion.AccordionEvent[ItemType, ElemType]] {
 
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
+  propertyListeners += elements.listenStructure { patch =>
+    patch.removed.foreach(collapses.remove)
+  }
+
+  override def kill(): Unit = {
+    super.kill()
+    collapses.clear()
+  }
 
   /** Returns [[io.udash.bootstrap.collapse.UdashCollapse]] component created for selected item. */
   def collapseOf(panel: ElemType): Option[UdashCollapse] =
@@ -32,14 +42,16 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
   override val render: Element =
     div(BootstrapStyles.Collapse.accordion, id := componentId)(
       nestedInterceptor(
-        repeatWithNested(elements) { case (item, nested) =>
+        repeatWithIndex(elements) { case (item, idx, nested) =>
           val headingId = ComponentId.newId()
           val card = UdashCard() { factory =>
             val collapse = UdashCollapse()(_ => Seq(
               aria.labelledby := headingId, dataParent := s"#$componentId",
               factory.body(nested => body(item, nested))
             ))
+
             collapses(item) = collapse
+
             val header = factory.header { nested => Seq(
               id := headingId,
               h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = "0"))(
@@ -51,7 +63,18 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
               )
             )}
             nested(collapse)
-            Seq[Modifier](header, collapse.render)
+            Seq[Modifier](
+              header, collapse.render,
+              nested(
+                new Binding {
+                  override def applyTo(t: Element): Unit = {
+                    propertyListeners += collapse.listen { case ev =>
+                      fire(UdashAccordion.AccordionEvent(UdashAccordion.this, item.get, idx.get, ev))
+                    }
+                  }
+                }
+              )
+            )
           }
           nested(card)
           card.render
@@ -61,6 +84,13 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 }
 
 object UdashAccordion {
+  final case class AccordionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    override val source: UdashAccordion[ItemType, ElemType],
+    item: ItemType,
+    idx: Int,
+    collapseEvent: UdashCollapse.CollapseEvent
+  ) extends AbstractCase with ListenableEvent[UdashAccordion[ItemType, ElemType]]
+
   /**
     * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
     * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#accordion-example">Bootstrap Docs</a>.
