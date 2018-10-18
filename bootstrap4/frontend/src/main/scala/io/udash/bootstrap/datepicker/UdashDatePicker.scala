@@ -5,10 +5,12 @@ import java.{util => ju}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.bootstrap.utils._
 import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.css.{CssStyle, CssStyleName}
+import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -94,7 +96,7 @@ final class UdashDatePicker private[datepicker](
 
   override def kill(): Unit = {
     super.kill()
-    jQInput.datetimepicker("dispose")
+    jQInput.datetimepicker("destroy")
   }
 
   private def optionsToJsDict(options: UdashDatePicker.DatePickerOptions): js.Dictionary[js.Any] = {
@@ -165,7 +167,7 @@ final class UdashDatePicker private[datepicker](
     dict
   }
 
-  private def tooltipsOptionToJSDict(tooltips: UdashDatePicker.DatePickerTooltips): js.Dictionary[js.Any] = {
+  private def tooltipsOptionToJSDict(tooltips: UdashDatePicker.DatePickerTooltips[String]): js.Dictionary[js.Any] = {
     js.Dictionary[js.Any](
       "today" -> tooltips.today,
       "clear" -> tooltips.clear,
@@ -219,8 +221,73 @@ object UdashDatePicker {
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
     componentId: ComponentId = ComponentId.newId()
-  )(): UdashDatePicker =
+  )(): UdashDatePicker = {
     new UdashDatePicker(date, options, componentId)
+  }
+
+  /** Creates a date picker component with translated tooltips.
+    * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
+    *
+    * @param date               A date selected in the input.
+    * @param options            A date picker's behaviour options.
+    * @param translatedTooltips Translation keys for the picker's tooltips. Translated values will replace the initial values from `options`.
+    * @param componentId        The arousel DOM element id.
+    * @return A `UdashDatePicker` component, call `render` to create a DOM element representing this button.
+    */
+  def i18n(
+    date: Property[Option[ju.Date]],
+    options: ReadableProperty[DatePickerOptions],
+    translatedTooltips: DatePickerTooltips[TranslationKey0],
+    componentId: ComponentId = ComponentId.newId()
+  )()(implicit lang: LangProperty, provider: TranslationProvider): UdashDatePicker = {
+    val optionsWithTranslation = Property(options.get)
+
+    val registration = options.combine(lang)((_, _)).listen({ case (originalProperties, lang) =>
+      import scala.concurrent.ExecutionContext.Implicits.global
+      val tooltips = for {
+        today <- translatedTooltips.today.apply()(provider, lang).mapNow(_.string)
+        clear <- translatedTooltips.clear.apply()(provider, lang).mapNow(_.string)
+        close <- translatedTooltips.close.apply()(provider, lang).mapNow(_.string)
+        selectMonth <- translatedTooltips.selectMonth.apply()(provider, lang).mapNow(_.string)
+        prevMonth <- translatedTooltips.prevMonth.apply()(provider, lang).mapNow(_.string)
+        nextMonth <- translatedTooltips.nextMonth.apply()(provider, lang).mapNow(_.string)
+        selectYear <- translatedTooltips.selectYear.apply()(provider, lang).mapNow(_.string)
+        prevYear <- translatedTooltips.prevYear.apply()(provider, lang).mapNow(_.string)
+        nextYear <- translatedTooltips.nextYear.apply()(provider, lang).mapNow(_.string)
+        selectDecade <- translatedTooltips.selectDecade.apply()(provider, lang).mapNow(_.string)
+        prevDecade <- translatedTooltips.prevDecade.apply()(provider, lang).mapNow(_.string)
+        nextDecade <- translatedTooltips.nextDecade.apply()(provider, lang).mapNow(_.string)
+        prevCentury <- translatedTooltips.prevCentury.apply()(provider, lang).mapNow(_.string)
+        nextCentury <- translatedTooltips.nextCentury.apply()(provider, lang).mapNow(_.string)
+      } yield new DatePickerTooltips[String](
+        today = today,
+        clear = clear,
+        close = close,
+        selectMonth = selectMonth,
+        prevMonth = prevMonth,
+        nextMonth = nextMonth,
+        selectYear = selectYear,
+        prevYear = prevYear,
+        nextYear = nextYear,
+        selectDecade = selectDecade,
+        prevDecade = prevDecade,
+        nextDecade = nextDecade,
+        prevCentury = prevCentury,
+        nextCentury = nextCentury
+      )
+
+      tooltips.foreachNow { tooltips =>
+        optionsWithTranslation.set(originalProperties.copy(tooltips = tooltips))
+      }
+    }, initUpdate = true)
+
+    new UdashDatePicker(date, optionsWithTranslation, componentId).setup {
+      _.nestedInterceptor(new Binding {
+        propertyListeners += registration
+        override def applyTo(t: Element): Unit = ()
+      })
+    }
+  }
 
   /** Combines two date pickers into a date range selector.
     * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
@@ -275,7 +342,7 @@ object UdashDatePicker {
     * @param maxDate             Prevents date/time selections after this date.
     * @param useCurrent          On show, will set the picker to the current date/time.
     * @param collapse            Using a Bootstraps collapse to switch between date/time pickers.
-    * @param locale              See <a href="http://momentjs.com/docs/#/displaying/format/">momentjs'</a> docs for valid locales.
+    * @param locale              See <a href="http://momentjs.com/docs/#/i18n/">momentjs'</a> docs for valid locales.
     * @param defaultDate         Sets the picker default date/time. Overrides `useCurrent`.
     * @param disabledDates       Disables selection of dates in the array, e.g. holidays.
     * @param enabledDates        Disables selection of dates NOT in the array, e.g. holidays.
@@ -337,9 +404,28 @@ object UdashDatePicker {
     val enabledHours: Seq[Int] = Seq.empty,
     val disabledHours: Seq[Int] = Seq.empty,
     val viewDate: Boolean = false,
-    val tooltips: DatePickerTooltips = new DatePickerTooltips()
+    val tooltips: DatePickerTooltips[String] = new DatePickerTooltips(
+      today = "Go to today",
+      clear = "Clear selection",
+      close = "Close the picker",
+      selectMonth = "Select Month",
+      prevMonth = "Previous Month",
+      nextMonth = "Next Month",
+      selectYear = "Select Year",
+      prevYear = "Previous Year",
+      nextYear = "Next Year",
+      selectDecade = "Select Decade",
+      prevDecade = "Previous Decade",
+      nextDecade = "Next Decade",
+      prevCentury = "Previous Century",
+      nextCentury = "Next Century"
+    )
   ) {
-    private[udash] def copy(minDate: Option[ju.Date] = minDate, maxDate: Option[ju.Date] = maxDate): DatePickerOptions = {
+    private[udash] def copy(
+      minDate: Option[ju.Date] = minDate,
+      maxDate: Option[ju.Date] = maxDate,
+      tooltips: DatePickerTooltips[String] = tooltips
+    ): DatePickerOptions = {
       new DatePickerOptions(
         format, dayViewHeaderFormat, extraFormats, stepping, minDate, maxDate, useCurrent, collapse, locale,
         defaultDate, disabledDates, enabledDates, icons, useStrict, sideBySide, daysOfWeekDisabled, calendarWeeks,
@@ -363,21 +449,21 @@ object UdashDatePicker {
     val close: Seq[CssStyle] = Seq(FontAwesome.Solid.times)
   )
 
-  class DatePickerTooltips(
-    val today: String = "Go to today",
-    val clear: String = "Clear selection",
-    val close: String = "Close the picker",
-    val selectMonth: String = "Select Month",
-    val prevMonth: String = "Previous Month",
-    val nextMonth: String = "Next Month",
-    val selectYear: String = "Select Year",
-    val prevYear: String = "Previous Year",
-    val nextYear: String = "Next Year",
-    val selectDecade: String = "Select Decade",
-    val prevDecade: String = "Previous Decade",
-    val nextDecade: String = "Next Decade",
-    val prevCentury: String = "Previous Century",
-    val nextCentury: String = "Next Century"
+  class DatePickerTooltips[LabelTypes](
+    val today: LabelTypes,
+    val clear: LabelTypes,
+    val close: LabelTypes,
+    val selectMonth: LabelTypes,
+    val prevMonth: LabelTypes,
+    val nextMonth: LabelTypes,
+    val selectYear: LabelTypes,
+    val prevYear: LabelTypes,
+    val nextYear: LabelTypes,
+    val selectDecade: LabelTypes,
+    val prevDecade: LabelTypes,
+    val nextDecade: LabelTypes,
+    val prevCentury: LabelTypes,
+    val nextCentury: LabelTypes
   )
 
   final class DayOfWeek(val id: Int)

@@ -5,10 +5,12 @@ import java.{util => ju}
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.component.ComponentId
+import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
+import scala.concurrent.Future
 import scala.scalajs.js
 
 class UdashDatePickerTest extends AsyncUdashFrontendTest {
@@ -201,13 +203,63 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
         }
       } yield r
     }
+
+    "translate tooltips in options" in {
+      val tp = new LocalTranslationProvider(
+        Map(
+          Lang("test") -> Bundle(BundleHash("h"), Map("today" -> "Dzisiaj", "clear" -> "Wyczyść")),
+          Lang("test2") -> Bundle(BundleHash("h"), Map("today" -> "Today", "clear" -> "Clear"))
+        )
+      )
+      val lang = Property(Lang("test"))
+
+      val date = Property[Option[ju.Date]](Some(new ju.Date()))
+      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
+        format = "MMMM Do YYYY, hh:mm a",
+        locale = Some("en_GB")
+      ))
+      val emptyTk = TranslationKey.untranslatable("")
+      val tooltips = new UdashDatePicker.DatePickerTooltips[TranslationKey0](
+        TranslationKey.key("today"), TranslationKey.key("clear"), TranslationKey.untranslatable("close 123"),
+        emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk
+      )
+      val picker: UdashDatePicker = UdashDatePicker.i18n(date, pickerOptions, tooltips)()(lang, tp)
+      jQ("body").append(picker.render)
+
+      val pickerJQ = jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt]
+
+      for {
+        _ <- retrying {
+          val tooltips = pickerJQ.datetimepicker("tooltips").asInstanceOf[js.Dictionary[js.Any]]
+          tooltips("today") should be("Dzisiaj")
+          tooltips("clear") should be("Wyczyść")
+          tooltips("close") should be("close 123")
+        }
+        _ <- Future {
+          lang.set(Lang("test2"))
+        }
+        _ <- retrying {
+          val tooltips = pickerJQ.datetimepicker("tooltips").asInstanceOf[js.Dictionary[js.Any]]
+          tooltips("today") should be("Today")
+          tooltips("clear") should be("Clear")
+          tooltips("close") should be("close 123")
+        }
+        _ <- Future {
+          picker.kill()
+        }
+        r <- {
+          lang.listenersCount() should be(0)
+          pickerOptions.listenersCount() should be(0)
+        }
+      } yield r
+    }
   }
 }
 
 @js.native
 private trait JQueryDatePickerExt extends JQuery {
   def datetimepicker(settings: js.Dictionary[js.Any]): JQueryDatePickerExt = js.native
-  def datetimepicker(function: String): JQueryDatePickerExt = js.native
+  def datetimepicker(function: String): js.Any = js.native
   def datetimepicker(option: String, value: js.Any): JQueryDatePickerExt = js.native
 }
 
