@@ -34,7 +34,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       rpc.doStuff(true)
       connectorMock.requests.exists(req => req.invocation.rpcName == "doStuff") should be(true)
 
-      rpc.innerRpc("bla").proc()
+      rpc.innerRpc("bla").recInner("arg").proc()
       connectorMock.requests.exists(req => req.invocation.rpcName == "proc") should be(true)
     }
 
@@ -43,7 +43,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
-      val f2 = rpc.innerRpc("bla").func(123)
+      val f2 = rpc.innerRpc("bla").recInner("arg").func(123)
       val f3 = rpc.doStuffInt(true)
       val f4 = rpc.doStuff(true)
       val f5 = rpc.doStuffUnit()
@@ -70,7 +70,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
-      val f2 = rpc.innerRpc("bla").func(123)
+      val f2 = rpc.innerRpc("bla").recInner("arg").func(123)
       val f3 = rpc.doStuffInt(true)
 
       serverRPC.handleResponse(RpcResponseFailure("cause1", "msg1", "1"))
@@ -92,7 +92,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
       val rpc = serverRPC.remoteRpc
 
       val f1 = rpc.doStuff(true)
-      val f2 = rpc.innerRpc("bla").func(123)
+      val f2 = rpc.innerRpc("bla").recInner("arg").func(123)
       val f3 = rpc.doStuffInt(true)
 
       serverRPC.handleResponse(RpcResponseException(exName, Ex(1), "1"))

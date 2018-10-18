@@ -108,7 +108,7 @@ trait RawRpc[Self <: RawRpc[Self]] { this: Self =>
   @multi def fire(@composite invocation: RpcInvocation): Unit
 
   final def resolveGetterChain(getterInvocations: List[RpcInvocation]): Self =
-    getterInvocations.foldLeft[Self](this)(_ get _)
+    getterInvocations.foldRight[Self](this)((inv, rpc) => rpc.get(inv))
 
   final def handleFire(rpcFire: RpcFire): Unit =
     resolveGetterChain(rpcFire.gettersChain).fire(rpcFire.invocation)

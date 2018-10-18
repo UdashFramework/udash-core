@@ -36,6 +36,8 @@ trait InnerRPC {
 
   @Logged
   def func(arg: Int): Future[String]
+
+  def recInner(arg: String): InnerRPC
 }
 object InnerRPC extends DefaultServerRpcCompanion[InnerRPC]
 
@@ -153,6 +155,9 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
 
           def proc(): Unit =
             onFire("innerRpc.proc", List(Nil))
+
+          def recInner(arg: String): InnerRPC =
+            this
         }
       }
 
