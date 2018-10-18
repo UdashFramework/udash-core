@@ -51,10 +51,10 @@ final class UdashCollapse private(
     )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Show)))
-    jQEl.on("shown.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Shown)))
-    jQEl.on("hide.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hide)))
-    jQEl.on("hidden.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hidden)))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "show.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Show))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "shown.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Shown))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hide.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hide))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hidden.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hidden))))
     el
   }
 

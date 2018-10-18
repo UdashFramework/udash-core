@@ -4,8 +4,10 @@ package tooltip
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.component.{Listenable, ListenableEvent}
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
+import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
@@ -24,6 +26,19 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
     * Check <a href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details. */
   def destroy(): Unit
 
+  private[tooltip] def on(selector: JQuery, event: EventName, callback: JQueryCallback): Unit = {
+    selector.on(event, callback)
+    jqueryCallbacks.+=((event, callback))
+  }
+
+  private[tooltip] def off(selector: JQuery): Unit = {
+    jqueryCallbacks.foreach { case (event, callback) =>
+      selector.off(event, callback)
+    }
+    jqueryCallbacks.clear()
+  }
+
+  private[tooltip] val jqueryCallbacks: mutable.ArrayBuffer[(EventName, JQueryCallback)] = mutable.ArrayBuffer.empty
   private[tooltip] def reloadContent(): Unit
 }
 

@@ -24,17 +24,19 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
 
   /** Hides and destroys an element's popover.
     * Check <a href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details. */
-  def destroy(): Unit =
+  def destroy(): Unit = {
+    off(selector)
     selector.tooltip("dispose")
+  }
 
   private[tooltip] def reloadContent(): Unit =
     selector.tooltip("setContent")
 
-  selector.on("show.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Show)))
-  selector.on("shown.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
-  selector.on("hide.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
-  selector.on("hidden.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
-  selector.on("inserted.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
+  on(selector,"show.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Show)))
+  on(selector,"shown.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Shown)))
+  on(selector,"hide.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hide)))
+  on(selector,"hidden.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Hidden)))
+  on(selector,"inserted.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent(this, TooltipEvent.EventType.Inserted)))
 }
 
 object UdashTooltip extends TooltipUtils[UdashTooltip] {

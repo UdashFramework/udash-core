@@ -67,10 +67,10 @@ final class UdashModal private(
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Show)))
-    jQEl.on("shown.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Shown)))
-    jQEl.on("hide.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hide)))
-    jQEl.on("hidden.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hidden)))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "show.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Show))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "shown.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Shown))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hide.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hide))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hidden.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalEvent(this, ModalEvent.EventType.Hidden))))
     el
   }
 

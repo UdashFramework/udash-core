@@ -47,7 +47,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQSelector().dropdown("update")
 
   private def withSelectionListener(elem: Element, item: ElemType): Element = {
-    jQ(elem).on(EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item.get)))
+    nestedInterceptor(new JQueryOnBinding(jQ(elem), EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item.get))))
     elem
   }
 
@@ -94,10 +94,10 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Show)))
-    jQEl.on("shown.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Shown)))
-    jQEl.on("hide.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hide)))
-    jQEl.on("hidden.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hidden)))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "show.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Show))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "shown.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Shown))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hide.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hide))))
+    nestedInterceptor(new JQueryOnBinding(jQEl, "hidden.bs.dropdown", (_: Element, _: JQueryEvent) => fire(VisibilityChangeEvent(this, EventType.Hidden))))
     el
   }
 

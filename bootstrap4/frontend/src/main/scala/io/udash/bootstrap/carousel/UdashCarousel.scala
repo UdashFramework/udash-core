@@ -121,15 +121,15 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
-    jqCarousel.on("slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
+    nestedInterceptor(new JQueryOnBinding(jqCarousel, "slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       fire(CarouselEvent(this, idx, dir, changed = false))
-    })
-    jqCarousel.on("slid.bs.carousel", (_: Element, ev: JQueryEvent) => {
+    }))
+    nestedInterceptor(new JQueryOnBinding(jqCarousel, "slid.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       activeSlide.set(idx)
       fire(CarouselEvent(this, idx, dir, changed = true))
-    })
+    }))
 
     propertyListeners += animationOptions.listen { animationOptions =>
       jqCarousel.carousel(animationOptions.native)
