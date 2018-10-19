@@ -22,7 +22,7 @@ sealed trait RestValue extends Any {
   * Value used as encoding of [[Path]] parameters.
   */
 case class PathValue(value: String) extends AnyVal with RestValue
-object PathValue {
+object PathValue extends (String => PathValue) {
   def splitDecode(path: String): List[PathValue] =
     path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s))).toList match {
       case PathValue("") :: tail => tail
@@ -42,7 +42,7 @@ case class HeaderValue(value: String) extends AnyVal with RestValue
   * Value used as encoding of [[Query]] parameters and [[BodyField]] parameters of [[FormBody]] methods.
   */
 case class QueryValue(value: String) extends AnyVal with RestValue
-object QueryValue {
+object QueryValue extends (String => QueryValue) {
   final val FormKVSep = "="
   final val FormKVPairSep = "&"
 
@@ -90,6 +90,11 @@ object JsonValue {
 sealed trait HttpBody {
   final def contentOpt: Opt[String] = this match {
     case HttpBody(content, _) => Opt(content)
+    case HttpBody.Empty => Opt.Empty
+  }
+
+  final def mimeTypeOpt: Opt[String] = this match {
+    case HttpBody(_, mimeType) => Opt(mimeType)
     case HttpBody.Empty => Opt.Empty
   }
 

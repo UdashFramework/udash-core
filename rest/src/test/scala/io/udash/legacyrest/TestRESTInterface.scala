@@ -1,12 +1,12 @@
 package io.udash.legacyrest
 
 import com.avsystem.commons.rpc.rpcName
-import com.avsystem.commons.serialization.HasGenCodec
+import io.udash.rest.RestDataCompanion
 
 import scala.concurrent.Future
 
 case class TestRESTRecord(id: Option[Int], s: String)
-object TestRESTRecord extends HasGenCodec[TestRESTRecord]
+object TestRESTRecord extends RestDataCompanion[TestRESTRecord]
 
 trait TestRESTInterface {
   def serviceOne(): TestRESTInternalInterface
