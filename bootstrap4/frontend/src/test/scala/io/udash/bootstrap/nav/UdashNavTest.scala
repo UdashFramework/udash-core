@@ -32,9 +32,7 @@ class UdashNavTest extends UdashFrontendTest {
       removed.listenersCount() should be(0)
 
       nav.kill()
-      items.listenersCount() should be(0)
-      items.structureListenersCount() should be(0)
-      items.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(items)
     }
 
     "clean up styling properties listeners" in {

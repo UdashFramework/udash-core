@@ -69,9 +69,7 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       jQ("body").append(carousel.render)
 
       carousel.kill()
-      sl.listenersCount() should be(0)
-      sl.structureListenersCount() should be(0)
-      sl.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(sl)
       activeSlide.listenersCount() should be(0)
       options.listenersCount() should be(0)
     }

@@ -37,9 +37,7 @@ class UdashAccordionTest extends AsyncUdashFrontendTest {
 
       val firstCollapse = accordion.collapseOf(news.elemProperties.head)
       accordion.kill()
-      news.listenersCount() should be(0)
-      news.structureListenersCount() should be(0)
-      news.elemProperties.map(_.listenersCount()).sum should be(0)
+      ensureNoListeners(news)
       firstCollapse.get.listenersCount() should be(0)
     }
 
@@ -91,9 +89,7 @@ class UdashAccordionTest extends AsyncUdashFrontendTest {
         }
         r <- retrying {
           accordion.kill()
-          news.listenersCount() should be(0)
-          news.structureListenersCount() should be(0)
-          news.elemProperties.map(_.listenersCount()).sum should be(0)
+          ensureNoListeners(news)
         }
       } yield r
     }

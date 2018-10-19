@@ -7,7 +7,7 @@ import org.scalatest.time.{Millis, Span}
 
 import scala.concurrent.Future
 
-trait AsyncUdashSharedTestBase extends AsyncWordSpec with Matchers with BeforeAndAfterAll with PatienceConfiguration {
+trait AsyncUdashSharedTestBase extends AsyncWordSpec with Matchers with BeforeAndAfterAll with PatienceConfiguration with SharedTestsUtils{
   case class RetryingTimeout() extends Exception
 
   override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))

@@ -32,9 +32,7 @@ class UdashNavbarTest extends UdashFrontendTest {
       removed.listenersCount() should be(0)
 
       navbar.kill()
-      items.listenersCount() should be(0)
-      items.structureListenersCount() should be(0)
-      items.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(items)
     }
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor (without wrap)" in {
       val items = SeqProperty[String]("a", "b", "c")
@@ -61,9 +59,7 @@ class UdashNavbarTest extends UdashFrontendTest {
       items.elemProperties.foreach(_.listenersCount() shouldNot be(0))
 
       nav.kill()
-      items.listenersCount() should be(0)
-      items.structureListenersCount() should be(0)
-      items.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(items)
     }
 
     "clean up styling properties listeners" in {

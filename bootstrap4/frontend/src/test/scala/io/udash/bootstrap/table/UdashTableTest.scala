@@ -50,9 +50,7 @@ class UdashTableTest extends UdashFrontendTest {
       el.textContent should be("NameAgeLanguageAdam34ENAlice24FRTest21GE")
 
       table.kill()
-      items.listenersCount() should be(0)
-      items.structureListenersCount() should be(0)
-      items.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(items)
       items.elemProperties.foreach(_.asModel.subProp(_.name).listenersCount() should be(0))
       responsive.listenersCount() should be(0)
       dark.listenersCount() should be(0)

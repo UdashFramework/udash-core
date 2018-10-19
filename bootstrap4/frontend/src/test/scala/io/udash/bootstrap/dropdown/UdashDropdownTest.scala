@@ -158,9 +158,7 @@ class UdashDropdownTest extends UdashFrontendTest {
 
       dropdown.kill()
 
-      els.listenersCount() should be(0)
-      els.structureListenersCount() should be(0)
-      els.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(els)
       direction.listenersCount() should be(0)
       rightAlign.listenersCount() should be(0)
     }

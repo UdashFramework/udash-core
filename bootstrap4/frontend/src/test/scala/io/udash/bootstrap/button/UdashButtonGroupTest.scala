@@ -38,9 +38,7 @@ class UdashButtonGroupTest extends UdashFrontendTest {
       el.textContent should be("Button 1Button 2Button 3Button 4")
 
       buttons.kill()
-      labels.listenersCount() should be(0)
-      labels.structureListenersCount() should be(0)
-      labels.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(labels)
     }
 
     "render checkbox buttons group" in {
@@ -83,12 +81,8 @@ class UdashButtonGroupTest extends UdashFrontendTest {
       children4.at(3).hasClass(BootstrapStyles.active.className) should be(true)
 
       group.kill()
-      buttons.listenersCount() should be(0)
-      buttons.structureListenersCount() should be(0)
-      buttons.elemProperties.foreach(_.listenersCount() should be(0))
-      selected.listenersCount() should be(0)
-      selected.structureListenersCount() should be(0)
-      selected.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(buttons)
+      ensureNoListeners(selected)
     }
 
     "render radio buttons group" in {
@@ -130,9 +124,7 @@ class UdashButtonGroupTest extends UdashFrontendTest {
       children4.at(3).hasClass(BootstrapStyles.active.className) should be(true)
 
       group.kill()
-      buttons.listenersCount() should be(0)
-      buttons.structureListenersCount() should be(0)
-      buttons.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(buttons)
       selected.listenersCount() should be(0)
     }
   }

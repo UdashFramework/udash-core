@@ -224,9 +224,7 @@ class UdashPaginationTest extends AsyncUdashFrontendTest {
       paginationElement.textContent should be("01267")
 
       pagination.kill()
-      pages.listenersCount() should be(0)
-      pages.structureListenersCount() should be(0)
-      pages.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(pages)
       selected.listenersCount() should be(0)
     }
   }

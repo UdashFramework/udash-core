@@ -1934,8 +1934,7 @@ class PropertyTest extends UdashSharedTest {
       val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]: @silent
 
-      p.listenersCount() should be(0)
-      p.structureListenersCount() should be(0)
+      ensureNoListeners(p)
 
       val r1 = f.listen(v => states += v)
       val r2 = f.listenStructure(p => patches += p)
@@ -2116,8 +2115,7 @@ class PropertyTest extends UdashSharedTest {
       r1.cancel()
       r2.cancel()
 
-      p.listenersCount() should be(0)
-      p.structureListenersCount() should be(0)
+      ensureNoListeners(p)
     }
 
     "be able to modify after transformation" in {
@@ -2200,10 +2198,8 @@ class PropertyTest extends UdashSharedTest {
 
       r1.cancel()
 
-      doubles.listenersCount() should be(0)
-      doubles.structureListenersCount() should be(0)
-      ints.listenersCount() should be(0)
-      ints.structureListenersCount() should be(0)
+      ensureNoListeners(doubles)
+      ensureNoListeners(ints)
 
       doubles.set(Seq(3.2, 4.7, 5.2))
       ints.get should be(Seq(3, 4, 5))
@@ -2219,8 +2215,7 @@ class PropertyTest extends UdashSharedTest {
       val p = Property(2)
 
       val c = s.combine(p)(_ * _)
-      s.listenersCount() should be(0)
-      s.structureListenersCount() should be(0)
+      ensureNoListeners(s)
       p.listenersCount() should be(0)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null
@@ -2306,8 +2301,7 @@ class PropertyTest extends UdashSharedTest {
       p.listenersCount() should be(0)
 
       r2.cancel()
-      s.listenersCount() should be(0)
-      s.structureListenersCount() should be(0)
+      ensureNoListeners(s)
       p.listenersCount() should be(0)
     }
 
@@ -2460,12 +2454,9 @@ class PropertyTest extends UdashSharedTest {
 
       val pairs = odds.zip(evens)((_, _))
 
-      numbers.listenersCount() should be(0)
-      odds.listenersCount() should be(0)
-      evens.listenersCount() should be(0)
-      numbers.structureListenersCount() should be(0)
-      odds.structureListenersCount() should be(0)
-      evens.structureListenersCount() should be(0)
+      ensureNoListeners(numbers)
+      ensureNoListeners(odds)
+      ensureNoListeners(evens)
 
       numbers.append(20, 21)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
@@ -2599,12 +2590,9 @@ class PropertyTest extends UdashSharedTest {
 
       r1.cancel()
 
-      numbers.listenersCount() should be(0)
-      odds.listenersCount() should be(0)
-      evens.listenersCount() should be(0)
-      numbers.structureListenersCount() should be(0)
-      odds.structureListenersCount() should be(0)
-      evens.structureListenersCount() should be(0)
+      ensureNoListeners(numbers)
+      ensureNoListeners(odds)
+      ensureNoListeners(evens)
 
       numbers.append(20, 21)
       pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
@@ -2626,12 +2614,9 @@ class PropertyTest extends UdashSharedTest {
 
       val pairs = odds.zipAll(evens)((x, y) => (x, y), defaultA, defaultB)
 
-      numbers.listenersCount() should be(0)
-      odds.listenersCount() should be(0)
-      evens.listenersCount() should be(0)
-      numbers.structureListenersCount() should be(0)
-      odds.structureListenersCount() should be(0)
-      evens.structureListenersCount() should be(0)
+      ensureNoListeners(numbers)
+      ensureNoListeners(odds)
+      ensureNoListeners(evens)
 
       numbers.append(20, 21)
       pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20), (21, -2)))
@@ -2784,12 +2769,9 @@ class PropertyTest extends UdashSharedTest {
 
       r1.cancel()
 
-      numbers.listenersCount() should be(0)
-      odds.listenersCount() should be(0)
-      evens.listenersCount() should be(0)
-      numbers.structureListenersCount() should be(0)
-      odds.structureListenersCount() should be(0)
-      evens.structureListenersCount() should be(0)
+      ensureNoListeners(numbers)
+      ensureNoListeners(odds)
+      ensureNoListeners(evens)
 
       numbers.append(20, 21)
       pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
@@ -2880,8 +2862,7 @@ class PropertyTest extends UdashSharedTest {
 
       r1.cancel()
 
-      numbers.listenersCount() should be(0)
-      numbers.structureListenersCount() should be(0)
+      ensureNoListeners(numbers)
 
       indexed.get should be(numbers.get.zipWithIndex)
 
@@ -2916,8 +2897,7 @@ class PropertyTest extends UdashSharedTest {
       val combined = propertySeq.combineToSeqProperty
 
       propertySeq.map(_.listenersCount()) should be(Seq(0, 0, 0))
-      combined.listenersCount() should be(0)
-      combined.structureListenersCount() should be(0)
+      ensureNoListeners(combined)
 
       propertySeq.foreach(_.listen(listener))
       propertySeq.foreach(_.listenOnce(oneTimeListener))

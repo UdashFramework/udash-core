@@ -35,9 +35,7 @@ class UdashListGroupTest extends UdashFrontendTest {
 
       group.kill()
       flush.listenersCount() should be(0)
-      items.listenersCount() should be(0)
-      items.structureListenersCount() should be(0)
-      items.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(items)
     }
   }
 }

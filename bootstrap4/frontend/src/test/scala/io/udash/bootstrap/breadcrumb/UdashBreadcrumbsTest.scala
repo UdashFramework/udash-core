@@ -48,9 +48,7 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
       el.textContent should be("AXD")
 
       breadcrumbs.kill()
-      pages.listenersCount() should be(0)
-      pages.structureListenersCount() should be(0)
-      pages.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(pages)
     }
 
     "work with default elements" in {
@@ -81,9 +79,7 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
       el.textContent should be("HomeXFrontend")
 
       breadcrumbs.kill()
-      pages.listenersCount() should be(0)
-      pages.structureListenersCount() should be(0)
-      pages.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(pages)
     }
 
     "work with strings" in {
@@ -103,9 +99,7 @@ class UdashBreadcrumbsTest extends UdashFrontendTest {
       el.textContent should be("AXD")
 
       breadcrumbs.kill()
-      pages.listenersCount() should be(0)
-      pages.structureListenersCount() should be(0)
-      pages.elemProperties.foreach(_.listenersCount() should be(0))
+      ensureNoListeners(pages)
     }
   }
 }

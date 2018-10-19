@@ -1,11 +1,12 @@
 package io.udash.testing
 
+import org.scalajs.dom.html.Div
 import org.scalajs.dom.raw.DOMTokenList
 import org.scalatest.enablers.Containing
 
 trait FrontendTestUtils {
   import scalatags.JsDom.all.div
-  def emptyComponent() = div().render
+  def emptyComponent(): Div = div().render
 
   implicit val DOMTokensListContains: Containing[DOMTokenList] = new Containing[DOMTokenList] {
     override def contains(container: DOMTokenList, element: Any): Boolean = element match {
