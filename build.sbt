@@ -32,6 +32,7 @@ val commonSettings = Seq(
     "-language:existentials",
     "-language:dynamics",
     "-language:postfixOps",
+    "-language:higherKinds",
     "-language:experimental.macros",
     "-Xfuture",
     "-Xfatal-warnings",
@@ -46,6 +47,7 @@ val commonSettings = Seq(
     ) else Seq.empty
   },
   moduleName := "udash-" + moduleName.value,
+  ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
