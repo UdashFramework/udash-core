@@ -5,7 +5,6 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.component.ComponentId
-import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
@@ -26,11 +25,11 @@ final class UdashProgressBar private[progressbar](
   protected def barModifiers: Seq[Modifier] = Seq[Modifier](
     role := "progressbar", BootstrapStyles.ProgressBar.progressBar,
     nestedInterceptor(
-      progress.combine(minValue.combine(maxValue)((_, _)))((_, _)).reactiveApply {
-        case (el, (current, (min, max))) =>
-          val width = 100 * (current - min) / (max - min)
-          jQ(el).width(s"$width%")
-      }
+      width.bind(
+        progress.combine(minValue.combine(maxValue)((_, _)))((_, _)).transform {
+          case (current, (min, max)) => s"${100 * (current - min) / (max - min)}%"
+        }
+      )
     ),
     nestedInterceptor(aria.valuenow.bind(progress.transform(_.toString))),
     nestedInterceptor(aria.valuemin.bind(minValue.transform(_.toString))),
@@ -60,7 +59,7 @@ object UdashProgressBar {
     (p, _, _, nested) => nested(bind(p.transform(_.toString)))
 
   /** Default method of converting progress to string. */
-  val percentValueStringifier: (ReadableProperty[Int], ReadableProperty[Int], ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = {
+  val PercentValueStringifier: (ReadableProperty[Int], ReadableProperty[Int], ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = {
     (progress, min, max, nested) =>
       nested(bind(
         progress.combine(min.combine(max)((_, _)))((_, _)).transform {
@@ -100,7 +99,7 @@ object UdashProgressBar {
     componentId: ComponentId = ComponentId.newId()
   )(
     labelFactory: (ReadableProperty[Int], ReadableProperty[Int], ReadableProperty[Int], Binding.NestedInterceptor) => Modifier =
-      percentValueStringifier
+      PercentValueStringifier
   ): UdashProgressBar = {
     new UdashProgressBar(
       progress, showPercentage, barStyle, stripped, animated,
