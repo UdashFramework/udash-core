@@ -1,8 +1,6 @@
 package io.udash
 package rest
 
-import io.udash.legacyrest.TestRESTRecord
-
 import scala.concurrent.Future
 
 trait TestServerRESTInterface {

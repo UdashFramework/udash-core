@@ -4,7 +4,6 @@ package rest
 import java.net.ConnectException
 
 import com.avsystem.commons.meta.Mapping
-import io.udash.legacyrest._
 import io.udash.testing.UdashSharedTest
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler

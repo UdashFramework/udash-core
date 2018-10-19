@@ -183,13 +183,13 @@ lazy val `rpc-js` = jsProjectFor(project, rpc)
   )
 
 lazy val rest = jvmProject(project)
-  .dependsOn(rpc % CompileAndTest)
+  .dependsOn(utils % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restJvmDeps.value,
   )
 
 lazy val `rest-js` = jsProjectFor(project, rest)
-  .dependsOn(`rpc-js` % CompileAndTest)
+  .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restSjsDeps.value,
   )

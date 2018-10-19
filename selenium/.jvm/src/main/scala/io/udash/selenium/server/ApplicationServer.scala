@@ -1,7 +1,7 @@
 package io.udash.selenium.server
 
 
-import io.udash.legacyrest.server.{DefaultExposesREST, DefaultRestServlet}
+import io.udash.rest.RestServlet
 import io.udash.rpc._
 import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
 import io.udash.selenium.demos.activity.CallLogger
@@ -51,8 +51,7 @@ class ApplicationServer(val port: Int, resourceBase: String) {
     }
     ctx.addServlet(atmosphereHolder, "/atm/*")
 
-    val restHolder = new ServletHolder(
-      new DefaultRestServlet(new DefaultExposesREST[MainServerREST](new ExposedRestInterfaces)))
+    val restHolder = new ServletHolder(RestServlet[MainServerREST](new ExposedRestInterfaces))
     restHolder.setAsyncSupported(true)
     ctx.addServlet(restHolder, "/rest_api/*")
     ctx

@@ -1,9 +1,9 @@
 package io.udash.selenium.rpc.demos.rest
 
-import com.avsystem.commons.serialization.GenCodec
+import io.udash.rest.RestDataCompanion
 
-case class RestExampleClass(i: Int, s: String, tuple: (Double, String))
+case class RestTuple(double: Double, string: String)
+object RestTuple extends RestDataCompanion[RestTuple]
 
-object RestExampleClass {
-  implicit val phoneBookInfoGenCodec: GenCodec[RestExampleClass] = GenCodec.materialize
-}
+case class RestExampleClass(i: Int, s: String, tuple: RestTuple)
+object RestExampleClass extends RestDataCompanion[RestExampleClass]
