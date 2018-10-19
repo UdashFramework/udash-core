@@ -41,7 +41,7 @@ class RestIntroTest extends SeleniumTest {
         responses.size should be(4)
         responses.get(1).getText should be("String: OK")
         responses.get(2).getText should be("Int: 123")
-        responses.get(3).getText should be("Class: Some(RestExampleClass(42,Udash,(321.123,REST Support)))")
+        responses.get(3).getText should be("Class: Some(RestExampleClass(42,Udash,RestTuple(321.123,REST Support)))")
       }
     }
   }
