@@ -1,4 +1,4 @@
-package io.udash.rpc.serialization
+package io.udash.utils
 
 object URLEncoder {
   def encode(query: String): String =

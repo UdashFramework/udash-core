@@ -1,4 +1,4 @@
-package io.udash.rpc.serialization
+package io.udash.utils
 
 import scala.scalajs.js
 

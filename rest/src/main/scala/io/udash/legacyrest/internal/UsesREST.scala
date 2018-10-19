@@ -3,7 +3,7 @@ package io.udash.legacyrest.internal
 import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.legacyrest._
 import io.udash.rpc.JsonStr
-import io.udash.rpc.serialization.URLEncoder
+import io.udash.utils.URLEncoder
 
 import scala.concurrent.{ExecutionContext, Future}
 

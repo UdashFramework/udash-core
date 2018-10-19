@@ -1,6 +1,6 @@
-package io.udash.rpc
+package io.udash
+package utils
 
-import io.udash.rpc.serialization.URLEncoder
 import io.udash.testing.UdashSharedTest
 
 class URLEncoderTest extends UdashSharedTest {
