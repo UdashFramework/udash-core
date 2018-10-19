@@ -16,7 +16,7 @@ class UdashPaginationTest extends UdashFrontendTest {
 
       val pagination = UdashPagination(
         pages, selected, showArrows = showArrows, highlightActive = highlightActive
-      )(UdashPagination.defaultPageFactory)
+      )()
 
       val paginationElement = pagination.render
 
@@ -35,7 +35,7 @@ class UdashPaginationTest extends UdashFrontendTest {
 
       val pagination = UdashPagination(
         pages, selected, showArrows = showArrows, highlightActive = highlightActive
-      )(UdashPagination.defaultPageFactory)
+      )()
 
       val paginationElement = pagination.render
 
@@ -107,7 +107,7 @@ class UdashPaginationTest extends UdashFrontendTest {
 
       val pagination = UdashPagination(
         pages, selected, showArrows = showArrows, highlightActive = highlightActive
-      )(UdashPagination.defaultPageFactory)
+      )()
 
       val paginationElement = pagination.render
 
@@ -133,7 +133,7 @@ class UdashPaginationTest extends UdashFrontendTest {
 
       val pagination = UdashPagination(
         pages, selected, showArrows = showArrows, highlightActive = highlightActive
-      )(UdashPagination.defaultPageFactory)
+      )()
 
       val paginationElement = pagination.render
 
@@ -150,9 +150,10 @@ class UdashPaginationTest extends UdashFrontendTest {
       val selected = Property(0)
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
-      val pagination = UdashPagination(pages, selected, showArrows = false.toProperty) { (v, _, _, nested) =>
-        import scalatags.JsDom.all._
-        span(nested(bind(v)))
+      val pagination = UdashPagination(pages, selected, showArrows = false.toProperty) {
+        (v, _, nested) =>
+          import scalatags.JsDom.all._
+          span(nested(bind(v)))
       }
       val paginationElement = pagination.render
 
