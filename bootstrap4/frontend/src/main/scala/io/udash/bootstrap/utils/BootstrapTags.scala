@@ -5,10 +5,12 @@ object BootstrapTags {
 
   val dataBackdrop = data("backdrop")
   val dataBind = data("bind")
+  val dataContent = data("content")
   val dataDismiss = data("dismiss")
   val dataKeyboard = data("keyboard")
   val dataLabel = data("label")
   val dataParent = data("parent")
+  val dataOriginalTitle = data("original-title")
   val dataRide = data("ride")
   val dataShow = data("show")
   val dataSlide = data("slide")

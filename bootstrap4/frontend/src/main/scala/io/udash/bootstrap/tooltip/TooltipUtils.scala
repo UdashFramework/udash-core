@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package tooltip
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import io.udash.bootstrap.utils.BootstrapTags
 import io.udash.component.{Listenable, ListenableEvent}
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import io.udash.wrappers.jquery._
@@ -153,8 +154,8 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
       } yield if (lastTitle != titleTxt.string || lastContent != contentTxt.string) {
         import io.udash.wrappers.jquery._
         jQ(el)
-          .attr("data-content", contentTxt.string)
-          .attr("data-original-title", titleTxt.string)
+          .attr(BootstrapTags.dataContent.name, contentTxt.string)
+          .attr(BootstrapTags.dataOriginalTitle.name, titleTxt.string)
 
         lastTitle = titleTxt.string
         lastContent = contentTxt.string
