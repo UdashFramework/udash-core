@@ -2,6 +2,7 @@ package io.udash.bootstrap.form
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -473,15 +474,16 @@ class UdashFormTest extends AsyncUdashFrontendTest {
         else Valid
       }
 
+      val sizeProperty: ReadableProperty[Option[BootstrapStyles.Size]] = Property(Some(BootstrapStyles.Size.Small))
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
-          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
+          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty, sizeProperty)(span(_)).render,
           labelContent = Some(nested => span("Single select: ", nested(bind(singleSelection)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("The number is not even"))
         ),
         factory.input.formGroup()(
-          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty)(span(_)).render,
+          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty, sizeProperty)(span(_)).render,
           labelContent = Some(nested => span("Multi select: ", nested(bind(multiSelection)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("One of the numbers is not even"))
@@ -596,6 +598,7 @@ class UdashFormTest extends AsyncUdashFrontendTest {
           singleSelection.listenersCount() should be(0)
           multiSelection.listenersCount() should be(0)
           form.validationProperties.size should be(0)
+          sizeProperty.listenersCount() should be(0)
         }
       } yield r
     }

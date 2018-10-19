@@ -382,7 +382,7 @@ final class UdashForm private(
               BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItem, validationTrigger, externalBinding),
-              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
+              nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
             ), inputId
           )
         )
@@ -420,7 +420,7 @@ final class UdashForm private(
               BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
               validationModifier(selectedItems, validationTrigger, externalBinding),
-              (BootstrapStyles.Form.size _).reactiveOptionApply(size)
+              nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
             ), inputId
           )
         )
