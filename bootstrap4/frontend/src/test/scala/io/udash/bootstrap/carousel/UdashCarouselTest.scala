@@ -2,6 +2,7 @@ package io.udash.bootstrap.carousel
 
 import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
+import io.udash.bootstrap.utils.BootstrapStyles.Carousel
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.properties.seq.SeqProperty
@@ -158,7 +159,7 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
       retrying(carousel.activeSlide.get shouldBe 4)
     }
 
-    "translate sr-only arrow descriptions" in {
+    "translate aria.label arrow descriptions" in {
       val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
@@ -182,15 +183,15 @@ class UdashCarouselTest extends AsyncUdashFrontendTest {
 
       for {
         _ <- retrying {
-          el.textContent should include("Poprzedni")
-          el.textContent should include("Następny")
+          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Poprzedni")
+          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("Następny")
         }
         _ <- Future {
           lang.set(Lang("test2"))
         }
         r <- retrying {
-          el.textContent should include("Prev")
-          el.textContent should include("next")
+          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Prev")
+          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("next")
         }
       } yield r
     }

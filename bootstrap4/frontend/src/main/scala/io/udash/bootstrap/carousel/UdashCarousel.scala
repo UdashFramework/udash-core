@@ -95,28 +95,24 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       }),
       slidesComponent,
       a(Carousel.controlPrev, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "prev")(
-        span(Carousel.controlPrevIcon),
         span(
-          cls := "sr-only",
           srTexts.map { case (previous, _, lang, provider) =>
             import io.udash.i18n._
             nestedInterceptor(
-              translatedDynamic(previous)(_.apply()(provider, lang.get))(lang)
+              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
             ): Modifier
-          }.getOrElse("Previous")
-        )
+          }.getOrElse(aria.label := "Previous")
+        )(Carousel.controlPrevIcon)
       ),
       a(Carousel.controlNext, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "next")(
-        span(Carousel.controlNextIcon),
         span(
-          cls := "sr-only",
           srTexts.map { case (_, next, lang, provider) =>
             import io.udash.i18n._
             nestedInterceptor(
-              translatedDynamic(next)(_.apply()(provider, lang.get))(lang)
+              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
             ): Modifier
-          }.getOrElse("Next")
-        )
+          }.getOrElse(aria.label := "Next")
+        )(Carousel.controlNextIcon)
       )
     ).render
 
@@ -175,7 +171,7 @@ object UdashCarousel {
     * @param slides              A SeqProperty of carousel slides.
     * @param showIndicators      If true, the component shows carousel slide indicators.
     * @param animationOptions    A carousel animation options.
-    * @param srTexts             Translation keys for previous and next arrows' sr-only texts.
+    * @param srTexts             Translation keys for previous and next arrows aria.label texts.
     * @param activeSlide         An active carousel slide index.
     * @param componentId         The arousel DOM element id.
     * @param slideContentFactory Creates content of a slide.
@@ -204,7 +200,7 @@ object UdashCarousel {
     * @param slides              A SeqProperty of carousel slides.
     * @param showIndicators      If true, the component shows carousel slide indicators.
     * @param animationOptions    A carousel animation options.
-    * @param srTexts             Translation keys for previous and next arrows' sr-only texts.
+    * @param srTexts             Translation keys for previous and next arrows aria.label texts.
     * @param activeSlide         An active carousel slide index.
     * @param componentId         The arousel DOM element id.
     * @param slideContentFactory Creates content of a slide.
