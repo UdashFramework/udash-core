@@ -20,7 +20,7 @@ class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: I
 
   override def send(url: String, method: HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
     import com.softwaremill.sttp._
-    import io.udash.legacyrest.DefaultSttpBackend.backend
+    import io.udash.rest.DefaultSttpBackend.backend
 
     val sttpMethod = method match {
       case RESTConnector.HttpMethod.GET => Method.GET

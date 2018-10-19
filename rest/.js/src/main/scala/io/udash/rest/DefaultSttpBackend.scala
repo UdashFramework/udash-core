@@ -1,9 +1,10 @@
-package io.udash.legacyrest
+package io.udash
+package rest
 
 import com.softwaremill.sttp.{FetchBackend, SttpBackend}
 
 import scala.concurrent.Future
 
-private[legacyrest] object DefaultSttpBackend {
+private[rest] object DefaultSttpBackend {
   implicit val backend: SttpBackend[Future, Nothing] = FetchBackend()
 }
