@@ -1,7 +1,7 @@
 package io.udash.selenium.server
 
 
-import io.udash.rest.server.{DefaultExposesREST, DefaultRestServlet}
+import io.udash.legacyrest.server.{DefaultExposesREST, DefaultRestServlet}
 import io.udash.rpc._
 import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
 import io.udash.selenium.demos.activity.CallLogger

@@ -27,7 +27,7 @@ object Launcher {
   }
   val serverRpc = DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
-  import io.udash.rest._
+  import io.udash.legacyrest._
   private val restProtocol = if (dom.window.location.protocol == "https:") Protocol.https else Protocol.http
   val restServer = DefaultServerREST[MainServerREST](
     restProtocol, dom.window.location.hostname, Try(dom.window.location.port.toInt).getOrElse(restProtocol.defaultPort), "/rest_api/"

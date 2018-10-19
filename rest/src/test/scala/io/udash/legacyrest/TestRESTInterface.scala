@@ -1,4 +1,4 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 import com.avsystem.commons.rpc.rpcName
 import com.avsystem.commons.serialization.HasGenCodec

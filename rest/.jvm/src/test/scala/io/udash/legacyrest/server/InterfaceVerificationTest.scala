@@ -1,4 +1,4 @@
-package io.udash.rest.server
+package io.udash.legacyrest.server
 
 import io.udash.testing.UdashSharedTest
 
@@ -6,7 +6,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
   "Endpoint interface" should {
     "not use @RESTName annotation" in {
       """import io.udash.rpc._
-         |import io.udash.rest._
+         |import io.udash.legacyrest._
          |import scala.concurrent.Future
          |import com.avsystem.commons.rpc.rpcName
          |
@@ -32,7 +32,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
        """.stripMargin should compile
 
       """import io.udash.rpc._
-         |import io.udash.rest._
+         |import io.udash.legacyrest._
          |import scala.concurrent.Future
          |import com.avsystem.commons.rpc.rpcName
          |
@@ -58,7 +58,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
        """.stripMargin shouldNot typeCheck
 
       """import io.udash.rpc._
-         |import io.udash.rest._
+         |import io.udash.legacyrest._
          |import scala.concurrent.Future
          |import com.avsystem.commons.rpc.rpcName
          |
@@ -86,7 +86,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
 
     "not mix @Body and @BodyValue" in {
       """import io.udash.rpc._
-        |import io.udash.rest._
+        |import io.udash.legacyrest._
         |import scala.concurrent.Future
         |import com.avsystem.commons.rpc.rpcName
         |
@@ -112,7 +112,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """.stripMargin should compile
 
       """import io.udash.rpc._
-        |import io.udash.rest._
+        |import io.udash.legacyrest._
         |import scala.concurrent.Future
         |import com.avsystem.commons.rpc.rpcName
         |
@@ -138,7 +138,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """.stripMargin shouldNot typeCheck
 
       """import io.udash.rpc._
-        |import io.udash.rest._
+        |import io.udash.legacyrest._
         |import scala.concurrent.Future
         |import com.avsystem.commons.rpc.rpcName
         |
@@ -164,7 +164,7 @@ class InterfaceVerificationTest extends UdashSharedTest {
       """.stripMargin shouldNot typeCheck
 
       """import io.udash.rpc._
-        |import io.udash.rest._
+        |import io.udash.legacyrest._
         |import scala.concurrent.Future
         |import com.avsystem.commons.rpc.rpcName
         |

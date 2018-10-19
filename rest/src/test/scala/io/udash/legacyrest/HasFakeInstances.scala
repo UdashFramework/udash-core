@@ -1,4 +1,4 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 trait HasFakeInstances
 object HasFakeInstances {

@@ -1,7 +1,7 @@
-package io.udash.rest.internal
+package io.udash.legacyrest.internal
 
 import com.avsystem.commons.rpc.MetadataAnnotation
-import io.udash.rest._
+import io.udash.legacyrest._
 import io.udash.rpc.JsonStr
 import io.udash.rpc.serialization.URLEncoder
 

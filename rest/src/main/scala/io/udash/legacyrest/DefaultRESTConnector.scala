@@ -1,10 +1,10 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 import com.avsystem.commons.concurrent.RunNowEC
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, Opt}
 import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
-import io.udash.rest.internal.RESTConnector
-import io.udash.rest.internal.RESTConnector.HttpMethod
+import io.udash.legacyrest.internal.RESTConnector
+import io.udash.legacyrest.internal.RESTConnector.HttpMethod
 
 import scala.concurrent.Future
 
@@ -15,12 +15,12 @@ object Protocol extends AbstractValueEnumCompanion[Protocol] {
   final val https: Value = new Protocol(443)
 }
 
-/** Default implementation of [[io.udash.rest.internal.RESTConnector]] for Udash REST. */
+/** Default implementation of [[io.udash.legacyrest.internal.RESTConnector]] for Udash REST. */
 class DefaultRESTConnector(val protocol: Protocol, val host: String, val port: Int, val pathPrefix: String) extends RESTConnector {
 
   override def send(url: String, method: HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String] = {
     import com.softwaremill.sttp._
-    import io.udash.rest.DefaultSttpBackend.backend
+    import io.udash.legacyrest.DefaultSttpBackend.backend
 
     val sttpMethod = method match {
       case RESTConnector.HttpMethod.GET => Method.GET

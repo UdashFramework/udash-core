@@ -1,10 +1,10 @@
-package io.udash.rest.server
+package io.udash.legacyrest.server
 
 import java.net.ConnectException
 
-import io.udash.rest._
-import io.udash.rest.internal.RESTConnector
-import io.udash.rest.internal.RESTConnector.ClientException
+import io.udash.legacyrest._
+import io.udash.legacyrest.internal.RESTConnector
+import io.udash.legacyrest.internal.RESTConnector.ClientException
 import io.udash.testing.UdashSharedTest
 import javax.servlet.http.HttpServletRequest
 import org.eclipse.jetty.server.Server

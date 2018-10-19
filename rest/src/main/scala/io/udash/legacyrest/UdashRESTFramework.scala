@@ -1,4 +1,4 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 import com.avsystem.commons.rpc.StandardRPCFramework
 import io.udash.rpc.JsonStr

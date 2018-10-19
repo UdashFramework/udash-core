@@ -1,4 +1,4 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 import com.avsystem.commons.serialization.GenCodec
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}

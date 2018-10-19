@@ -1,9 +1,9 @@
-package io.udash.rest.server
+package io.udash.legacyrest.server
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.avsystem.commons.SharedExtensions._
-import io.udash.rest._
+import io.udash.legacyrest._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}

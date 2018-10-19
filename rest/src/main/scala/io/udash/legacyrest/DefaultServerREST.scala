@@ -1,10 +1,10 @@
-package io.udash.rest
+package io.udash.legacyrest
 
-import io.udash.rest.internal.{RESTConnector, UsesREST}
+import io.udash.legacyrest.internal.{RESTConnector, UsesREST}
 
 import scala.concurrent.ExecutionContext
 
-/** Default REST usage mechanism using [[io.udash.rest.DefaultRESTFramework]]. */
+/** Default REST usage mechanism using [[io.udash.legacyrest.DefaultRESTFramework]]. */
 class DefaultServerREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : DefaultRESTFramework.RPCMetadata : DefaultRESTFramework.ValidREST]
                        (override protected val connector: RESTConnector)(implicit ec: ExecutionContext)
   extends UsesREST[ServerRPCType] with RESTConverters {
@@ -16,7 +16,7 @@ class DefaultServerREST[ServerRPCType : DefaultRESTFramework.AsRealRPC : Default
 }
 
 object DefaultServerREST {
-  /** Creates [[io.udash.rest.DefaultServerREST]] with [[io.udash.rest.DefaultRESTConnector]] for provided REST interfaces. */
+  /** Creates [[io.udash.legacyrest.DefaultServerREST]] with [[io.udash.legacyrest.DefaultRESTConnector]] for provided REST interfaces. */
   def apply[ServerRPCType : DefaultRESTFramework.AsRealRPC : DefaultRESTFramework.RPCMetadata : DefaultRESTFramework.ValidREST]
            (protocol: Protocol, host: String, port: Int, pathPrefix: String = "")(implicit ec: ExecutionContext): ServerRPCType = {
     val serverConnector = new DefaultRESTConnector(protocol, host, port, pathPrefix)

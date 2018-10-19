@@ -1,4 +1,4 @@
-package io.udash.rest.internal
+package io.udash.legacyrest.internal
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 
@@ -7,7 +7,7 @@ import scala.concurrent.Future
 /** Provides connection to REST server. */
 trait RESTConnector {
   /** Sends HTTP request to REST server.
-    * It should fail with [[io.udash.rest.internal.RESTConnector.RequestException]] if server returned code different than 2xx. */
+    * It should fail with [[io.udash.legacyrest.internal.RESTConnector.RequestException]] if server returned code different than 2xx. */
   def send(url: String, method: RESTConnector.HttpMethod, queryArguments: Map[String, String], headers: Map[String, String], body: String): Future[String]
 }
 

@@ -1,8 +1,8 @@
-package io.udash.rest.server
+package io.udash.legacyrest.server
 
 import com.avsystem.commons.rpc.rpcName
-import io.udash.rest.DefaultRESTFramework._
-import io.udash.rest._
+import io.udash.legacyrest.DefaultRESTFramework._
+import io.udash.legacyrest._
 
 import scala.concurrent.Future
 

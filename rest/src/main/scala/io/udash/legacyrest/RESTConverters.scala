@@ -1,4 +1,4 @@
-package io.udash.rest
+package io.udash.legacyrest
 
 import io.udash.rpc.JsonStr
 import io.udash.rpc.serialization.URLEncoder

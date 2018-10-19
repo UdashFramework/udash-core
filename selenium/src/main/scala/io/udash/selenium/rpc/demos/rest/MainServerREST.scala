@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos.rest
 
-import io.udash.rest._
+import io.udash.legacyrest._
 
 import scala.concurrent.Future
 

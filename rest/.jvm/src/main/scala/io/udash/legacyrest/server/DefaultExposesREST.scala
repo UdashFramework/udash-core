@@ -1,6 +1,6 @@
-package io.udash.rest.server
+package io.udash.legacyrest.server
 
-import io.udash.rest.{DefaultRESTFramework, RESTConverters}
+import io.udash.legacyrest.{DefaultRESTFramework, RESTConverters}
 
 class DefaultExposesREST[ServerRPCType : DefaultRESTFramework.ValidServerREST : DefaultRESTFramework.RPCMetadata](localRest: ServerRPCType)(
   implicit protected val localRpcAsRaw: DefaultRESTFramework.AsRawRPC[ServerRPCType]

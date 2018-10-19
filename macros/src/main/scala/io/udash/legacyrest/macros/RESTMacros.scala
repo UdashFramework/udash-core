@@ -1,4 +1,4 @@
-package io.udash.rest.macros
+package io.udash.legacyrest.macros
 
 import com.avsystem.commons.macros.rpc.RpcMacros
 
@@ -16,7 +16,7 @@ class RESTMacros(val ctx: blackbox.Context) extends RpcMacros(ctx) {
   }
 
   val FrameworkObj: Tree = c.prefix.tree
-  val RestPackage = q"_root_.io.udash.rest"
+  val RestPackage = q"_root_.io.udash.legacyrest"
 
   val RESTFrameworkType = getType(tq"$RestPackage.UdashRESTFramework")
   val ValidRESTCls = tq"$FrameworkObj.ValidREST"
