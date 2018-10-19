@@ -87,26 +87,26 @@ final class UdashForm private(
             case None =>
               val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, id := groupId)(
-                labelContent.map(f => label(`for` := inputEl.id)(f(externalBinding))),
+                labelContent.map(content => label(`for` := inputEl.id)(content(externalBinding))),
                 inputEl,
-                validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(externalBinding))),
-                invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(externalBinding))),
-                helpText.map(f => div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(f(externalBinding)))
+                validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(externalBinding))),
+                invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(externalBinding))),
+                helpText.map(content => div(BootstrapStyles.Form.text, BootstrapStyles.Text.muted)(content(externalBinding)))
               ).render
             case Some(HorizontalLayoutSettings(labelWidth, inputWidth, breakpoint, labelSize)) =>
               val inputEl = input(externalBinding)
               div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
                 div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
-                  labelContent.map(f =>
+                  labelContent.map { content =>
                     label(`for` := inputEl.id, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(
-                      f(externalBinding)
+                      content(externalBinding)
                     )
-                  )
+                  }
                 ),
                 div(BootstrapStyles.Grid.col(inputWidth, breakpoint))(
                   inputEl,
-                  validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(externalBinding))),
-                  invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(externalBinding)))
+                  validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(externalBinding))),
+                  invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(externalBinding)))
                 )
               ).render
           }
@@ -344,8 +344,8 @@ final class UdashForm private(
           override val render: Element = div(BootstrapStyles.Form.customFile)(
             input.render,
             label(`for` := inputId, BootstrapStyles.Form.customFileLabel)(labelContent(nestedInterceptor)),
-            validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(nestedInterceptor))),
-            invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(nestedInterceptor)))
+            validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(nestedInterceptor))),
+            invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(nestedInterceptor)))
           ).render
         })
       }
@@ -476,8 +476,8 @@ final class UdashForm private(
             label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
               labelContent.map(_.apply(nestedInterceptor)).getOrElse(span("\u00a0"))
             ),
-            validFeedback.map(f => div(BootstrapStyles.Form.validFeedback)(f(nestedInterceptor))),
-            invalidFeedback.map(f => div(BootstrapStyles.Form.invalidFeedback)(f(nestedInterceptor)))
+            validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(nestedInterceptor))),
+            invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(nestedInterceptor)))
           ).render
         })
       }

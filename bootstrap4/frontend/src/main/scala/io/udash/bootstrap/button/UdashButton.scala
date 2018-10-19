@@ -45,10 +45,7 @@ final class UdashButton private(
 
   override val render: dom.html.Button = {
     button(id := componentId, tpe := "button")(classes: _*)(
-      onclick :+= ((me: MouseEvent) => {
-        fire(ButtonClickEvent(this, me))
-        false
-      })
+      onclick :+= ((me: MouseEvent) => fire(ButtonClickEvent(this, me)))
     )(content(nestedInterceptor)).render
   }
 

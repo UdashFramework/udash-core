@@ -47,12 +47,12 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
           li(role := "presentation")(
             BootstrapStyles.Navigation.item,
             nested(BootstrapStyles.Dropdown.dropdown.styleIf(isDropdown(panel)))
-          )({
+          ) {
             val el = elemFactory(panel, nested)
             nested(BootstrapStyles.active.styleIf(isActive(panel))).applyTo(el)
             nested(BootstrapStyles.disabled.styleIf(isDisabled(panel))).applyTo(el)
             el
-          }).render
+          }.render
         }
       )
     ).render

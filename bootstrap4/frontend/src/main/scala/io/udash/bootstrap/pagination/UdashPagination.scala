@@ -73,7 +73,7 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
               span(BootstrapStyles.Pagination.link)(
                 itemFactory(page, UdashPagination.ButtonType.StandardPage, idx, nested)
               )
-            )(onclick :+= ((_: Event) => { changePage(idx.get); false })).render
+            )(onclick :+= ((_: Event) => changePage(idx.get))).render
           }
         ),
         nestedInterceptor(
