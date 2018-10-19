@@ -1,11 +1,14 @@
 package io.udash.bootstrap.pagination
 
 import io.udash._
-import io.udash.testing.UdashFrontendTest
+import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
+import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 
-class UdashPaginationTest extends UdashFrontendTest {
+import scala.concurrent.Future
+
+class UdashPaginationTest extends AsyncUdashFrontendTest {
   "UdashPagination component" should {
     "show and hide arrows on property change" in {
       val showArrows = Property(true)
@@ -111,17 +114,27 @@ class UdashPaginationTest extends UdashFrontendTest {
 
       val paginationElement = pagination.render
 
-      showArrows.set(false)
-      highlightActive.set(true)
-      for (i <- pages.get.indices) {
-        selected.set(i)
-        jQ(paginationElement).find("li").at(i).hasClass("active") should be(true)
-      }
-      highlightActive.set(false)
-      for (i <- pages.get.indices) {
-        selected.set(i)
-        jQ(paginationElement).find("li").hasClass("active") should be(false)
-      }
+      for {
+        _ <- Future {
+          showArrows.set(false)
+          highlightActive.set(true)
+        }
+        _ <- retrying {
+          for (i <- pages.get.indices) {
+            selected.set(i)
+            jQ(paginationElement).find("li").at(i).hasClass("active") should be(true)
+          }
+        }
+        _ <- Future {
+          highlightActive.set(false)
+        }
+        r <- retrying {
+          for (i <- pages.get.indices) {
+            selected.set(i)
+            jQ(paginationElement).find("li").hasClass("active") should be(false)
+          }
+        }
+      } yield r
     }
 
     "update highlight on pages property changes" in {
@@ -144,6 +157,48 @@ class UdashPaginationTest extends UdashFrontendTest {
       pages.insert(pages.get.size - 1, 123)
       jQ(paginationElement).find("li").at(pages.get.size - 2).hasClass("active") should be(false)
       jQ(paginationElement).find("li").at(pages.get.size - 1).hasClass("active") should be(true)
+    }
+
+    "translate aria labels of arrows" in {
+      val tp = new LocalTranslationProvider(
+        Map(
+          Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
+          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
+        )
+      )
+      val lang = Property(Lang("test"))
+      val selected = Property(0)
+      val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
+
+      val pagination = UdashPagination(pages, selected)(
+        arrowFactory = UdashPagination.defaultArrowFactory(Some((
+          TranslationKey.key("prev"),
+          TranslationKey.key("next"),
+          lang, tp
+        )))
+      )
+      val el = pagination.render
+
+      import scalatags.JsDom.all._
+      for {
+        _ <- retrying {
+          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Poprzedni")
+          el.getElementsByTagName("li")(pages.size + 1).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Następny")
+        }
+        _ <- Future {
+          lang.set(Lang("test2"))
+        }
+        _ <- retrying {
+          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Prev")
+          el.getElementsByTagName("li")(pages.size + 1).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("next")
+        }
+        _ <- Future {
+          pagination.kill()
+        }
+        r <- retrying {
+          lang.listenersCount() should be(0)
+        }
+      } yield r
     }
 
     "update on data properties update and clean up listeners properly" in {

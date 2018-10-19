@@ -6,6 +6,7 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.component.ComponentId
+import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom.Element
 import org.scalajs.dom.Event
@@ -120,13 +121,33 @@ object UdashPagination {
   def defaultPageFactory[ElemType]: (ElemType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier =
     (_, idx, nested) => span(nested(bind(idx.transform(_ + 1))))
 
-  /** Creates standard arrows. */
-  def defaultArrowFactory[ElemType]: (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier =
-    (_, arrowType, _) => {
+  /**
+    * Creates standard arrows.
+    *
+    * @param srTexts Translation keys for previous and next arrows aria.label texts.
+    */
+  def defaultArrowFactory[ElemType](
+    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
+  ): (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier =
+    (_, arrowType, nested) => {
       if (arrowType == UdashPagination.ArrowType.PreviousPage) {
-        span(aria.label := "Previous")(span(aria.hidden := true)("«"))
+        span(
+          srTexts.map { case (previous, _, lang, provider) =>
+            import io.udash.i18n._
+            nested(
+              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
+            ): Modifier
+          }.getOrElse(aria.label := "Previous")
+        )(span(aria.hidden := true)("«"))
       } else {
-        span(aria.label := "Next")(span(aria.hidden := true)("»"))
+        span(
+          srTexts.map { case (_, next, lang, provider) =>
+            import io.udash.i18n._
+            nested(
+              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
+            ): Modifier
+          }.getOrElse(aria.label := "Next")
+        )(span(aria.hidden := true)("»"))
       }
     }
 
@@ -162,7 +183,7 @@ object UdashPagination {
     componentId: ComponentId = ComponentId.newId()
   )(
     itemFactory: (ElemType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory,
-    arrowFactory: (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier = defaultArrowFactory,
+    arrowFactory: (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier = defaultArrowFactory(),
     additionalListModifiers: Binding.NestedInterceptor => Modifier = _ => ()
   ): UdashPagination[PageType, ElemType] = {
     new UdashPagination(
