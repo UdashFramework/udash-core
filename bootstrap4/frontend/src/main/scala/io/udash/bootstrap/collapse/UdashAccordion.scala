@@ -54,7 +54,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
             val header = factory.header { nested => Seq(
               id := headingId,
-              h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = "0"))(
+              h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
                 button(
                   BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
                   tpe := "button", dataToggle:= "collapse", href := s"#${collapse.componentId}",

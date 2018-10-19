@@ -83,6 +83,16 @@ object BootstrapStyles {
     final val Stretch: Value = new FlexAlign("-stretch")
   }
 
+  final class SpacingSize(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object SpacingSize extends AbstractValueEnumCompanion[SpacingSize] {
+    final val None: Value = new SpacingSize("-0")
+    final val ExtraSmall: Value = new SpacingSize("-1")
+    final val Small: Value = new SpacingSize("-2")
+    final val Normal: Value = new SpacingSize("-3")
+    final val Large: Value = new SpacingSize("-4")
+    final val ExtraLarge: Value = new SpacingSize("-5")
+  }
+
   def active = CssStyleName("active")
   def affix = CssStyleName("affix")
   def arrow = CssStyleName("arrow")
@@ -560,39 +570,11 @@ object BootstrapStyles {
   }
 
   object Spacing {
-    /**
-      * Possible sizes:
-      * <ul>
-      *   <li>0 - for classes that eliminate the margin or padding by setting it to 0</li>
-      *   <li>1 - (by default) for classes that set the margin or padding to spacer * .25</li>
-      *   <li>2 - (by default) for classes that set the margin or padding to spacer * .5</li>
-      *   <li>3 - (by default) for classes that set the margin or padding to spacer</li>
-      *   <li>4 - (by default) for classes that set the margin or padding to spacer * 1.5</li>
-      *   <li>5 - (by default) for classes that set the margin or padding to spacer * 3</li>
-      *   <li>auto - for classes that set the margin to auto</li>
-      * </ul>
-      *
-      * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
-      */
-    def margin(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
-      CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}-$size")
+    def margin(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: SpacingSize = SpacingSize.Normal) =
+      CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}${size.classMarker}")
 
-    /**
-      * Possible sizes:
-      * <ul>
-      *   <li>0 - for classes that eliminate the margin or padding by setting it to 0</li>
-      *   <li>1 - (by default) for classes that set the margin or padding to spacer * .25</li>
-      *   <li>2 - (by default) for classes that set the margin or padding to spacer * .5</li>
-      *   <li>3 - (by default) for classes that set the margin or padding to spacer</li>
-      *   <li>4 - (by default) for classes that set the margin or padding to spacer * 1.5</li>
-      *   <li>5 - (by default) for classes that set the margin or padding to spacer * 3</li>
-      *   <li>auto - for classes that set the margin to auto</li>
-      * </ul>
-      *
-      * See more: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/#notation">Bootstrap docs</a>
-      */
-    def padding(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: String = "3") =
-      CssStyleName(s"p${side.classMarker}${breakpoint.classMarker}-$size")
+    def padding(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: SpacingSize = SpacingSize.Normal) =
+      CssStyleName(s"p${side.classMarker}${breakpoint.classMarker}${size.classMarker}")
   }
 
   object Table {
