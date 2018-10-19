@@ -6,6 +6,7 @@ import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent.SelectionEvent
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.html.Button
+import scalatags.JsDom.all._
 
 class UdashDropdownTest extends UdashFrontendTest {
   import UdashDropdown._
@@ -151,7 +152,7 @@ class UdashDropdownTest extends UdashFrontendTest {
       val rightAlign = Property[Boolean](true)
       val dropdown = UdashDropdown.default(
         els, direction, rightAlign
-      )("Test")
+      )(nested => Seq[Modifier]("Test", nested(bind(direction))))
       val el = dropdown.render
       jQ("body").append(el)
 

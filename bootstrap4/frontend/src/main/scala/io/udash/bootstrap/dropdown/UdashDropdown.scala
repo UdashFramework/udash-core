@@ -68,12 +68,14 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       )
     )(
       nestedInterceptor(produceWithNested(buttonToggle) {
-        case (true, _) =>
-          UdashButton() { nested => Seq[Modifier](
+        case (true, nested) =>
+          val btn = UdashButton() { nested => Seq[Modifier](
             BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
             aria.haspopup := true, aria.expanded := false,
             buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
-          )}.render
+          )}
+          nested(btn)
+          btn.render
         case (false, nested) =>
           a(
             BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
