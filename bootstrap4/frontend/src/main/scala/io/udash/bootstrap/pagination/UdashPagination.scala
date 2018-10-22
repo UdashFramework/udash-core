@@ -127,7 +127,7 @@ object UdashPagination {
     * @param srTexts Translation keys for previous and next arrows aria.label texts.
     */
   def defaultArrowFactory[ElemType](
-    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
+    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None
   ): (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier =
     (_, arrowType, nested) => {
       if (arrowType == UdashPagination.ArrowType.PreviousPage) {
