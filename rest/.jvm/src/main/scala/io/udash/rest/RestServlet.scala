@@ -28,7 +28,7 @@ object RestServlet {
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
     val path = PathValue.splitDecode(request.getRequestURI.stripPrefix(pathPrefix))
     val query = request.getQueryString.opt.map(QueryValue.decode).getOrElse(Mapping.empty)
-    val headersBuilder = Mapping.newBuilder[HeaderValue]
+    val headersBuilder = Mapping.newBuilder[HeaderValue](caseInsensitive = true)
     request.getHeaderNames.asScala.foreach { headerName =>
       headersBuilder += headerName -> HeaderValue(request.getHeader(headerName))
     }
