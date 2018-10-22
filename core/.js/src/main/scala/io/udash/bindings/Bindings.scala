@@ -56,7 +56,7 @@ trait Bindings {
     * @return Modifier for bound property.
     */
   def bind[T](property: ReadableProperty[T]): Binding =
-    new SimplePropertyModifier[T](property, true)
+    new SimplePropertyModifier[T](property)
 
   /**
     * Shows provided DOM elements only if property value is `true`.
