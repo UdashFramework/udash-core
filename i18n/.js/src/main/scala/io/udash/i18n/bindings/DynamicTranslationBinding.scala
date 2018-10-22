@@ -33,7 +33,6 @@ private[i18n] class DynamicTranslationBinding[Key <: TranslationKey](key: Key, t
       }
     }
 
-    lang.listen(_ => rebuild())
-    rebuild()
+    lang.listen(_ => rebuild(), initUpdate = true)
   }
 }
