@@ -15,6 +15,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +35,12 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
-    rawHandle.andThen(FutureRestImplicits.futureFromAsyncResp.asReal).andThen(_.fold(Future.failed, identity))
+    rawHandle.andThen { async =>
+      FutureRestImplicits.futureFromAsyncResp.asReal(async) match {
+        case Success(f) => f
+        case Failure(t) => Future.failed(t)
+      }
+    }
 
   def mkRequest(
     url: String,
