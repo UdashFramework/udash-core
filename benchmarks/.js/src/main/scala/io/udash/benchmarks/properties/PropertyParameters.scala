@@ -41,6 +41,10 @@ object PropertyParameters {
     for (_ <- 1 until 1000) div(bind(Property("asd"))).render
   }
 
+  private val renderNullProperty = Benchmark("render a null property") {
+    for (_ <- 1 until 1000) div(bind(Property(null.asInstanceOf[String]))).render
+  }
+
   private val listenImmutableProperty = Benchmark("listen to an immutable property") {
     for (_ <- 1 until 1000) listenProperty("asd".toProperty)
   }
@@ -67,6 +71,7 @@ object PropertyParameters {
       listenStandardProperty,
       renderDiv,
       renderStandardProperty,
+      renderNullProperty,
       listenImmutableProperty,
       listenStandardModelProperty,
       listenImmutableModelProperty,

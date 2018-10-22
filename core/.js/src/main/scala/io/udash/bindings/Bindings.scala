@@ -33,7 +33,7 @@ trait Bindings {
 
   /** Creates empty text node, which is useful as placeholder. */
   def emptyStringNode(): Node =
-    JsDom.StringFrag("").render
+    document.createTextNode("")
 
   /**
     * Renders component with provided timeout.
