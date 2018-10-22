@@ -1,5 +1,6 @@
 package io.udash.bindings.modifiers
 
+import com.avsystem.commons._
 import io.udash.bindings.Bindings._
 import io.udash.logging.CrossLogging
 import io.udash.properties._
@@ -9,8 +10,7 @@ import org.scalajs.dom._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[bindings]
-class ValidationValueModifier[T](property: ReadableProperty[T],
+private[bindings] class ValidationValueModifier[T](property: ReadableProperty[T],
                                  initBuilder: Option[(Future[ValidationResult], Binding => Binding) => Seq[Node]],
                                  completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
                                  errorBuilder: Option[(Throwable, Binding => Binding) => Seq[Node]],
@@ -41,10 +41,9 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
     }
 
     val listener = (_: T) => {
-      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
       val valid: Future[ValidationResult] = property.isValid
       initBuilder.foreach(b => rebuild(valid, b))
-      valid onComplete {
+      valid.onCompleteNow {
         case Success(result) => rebuild(result, completeBuilder)
         case Failure(error) =>
           logger.error("Validation failed!")

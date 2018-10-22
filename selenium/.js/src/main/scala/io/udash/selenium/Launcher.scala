@@ -4,18 +4,19 @@ import io.udash.Application
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
 import io.udash.rpc.DefaultServerRPC
 import io.udash.selenium.routing.{RoutingRegistryDef, RoutingState, StatesToViewFactoryDef}
-import io.udash.selenium.rpc.{GuideExceptions, MainClientRPC, MainServerRPC, RPCService}
 import io.udash.selenium.rpc.demos.rest.MainServerREST
+import io.udash.selenium.rpc.{GuideExceptions, MainClientRPC, MainServerRPC, RPCService}
 import io.udash.selenium.views.demos.UrlLoggingDemoService
 import io.udash.wrappers.jquery.jQ
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
+import scala.concurrent.ExecutionContext
 import scala.scalajs.js.annotation.JSExport
 import scala.util.Try
 
 object Launcher {
-  implicit val executionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
+  implicit val executionContext: ExecutionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
   private lazy val routingRegistry = new RoutingRegistryDef
   private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
 
