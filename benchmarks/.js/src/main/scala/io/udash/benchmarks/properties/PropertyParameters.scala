@@ -3,59 +3,75 @@ package io.udash.benchmarks.properties
 import io.udash._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
+import scalatags.JsDom.all._
 
 object PropertyParameters {
   case class Entity(i: Int, s: String, r: Entity)
   object Entity extends HasModelPropertyCreator[Entity]
 
-  private def renderProperty(p: ReadableProperty[String]) = {
+  private def listenProperty(p: ReadableProperty[String]) = {
     val r = p.listen(_ => ())
     p.get + r.isActive.toString
   }
 
-  private def renderModelProperty(p: ReadableModelProperty[Entity]) = {
+  private def listenModelProperty(p: ReadableModelProperty[Entity]) = {
     val r = p.listen(_ => ())
     p.roSubProp(_.r.r.s).get + r.isActive.toString
   }
 
-  private def renderSeqProperty(p: ReadableSeqProperty[String]) = {
+  private def listenSeqProperty(p: ReadableSeqProperty[String]) = {
     val r = p.listen(_ => ())
     val r2 = p.listenStructure(_ => ())
     p.elemProperties(2).get + r.isActive.toString + r2.isActive.toString
   }
 
-  val bindStandardProperty = Benchmark("bind to a standard property") {
-    for (_ <- 1 until 1000) renderProperty(Property("asd"))
+  private val createStandardProperty = Benchmark("create a standard property") {
+    for (_ <- 1 until 1000) Property("asd")
   }
 
-  val bindImmutableProperty = Benchmark("bind to an immutable property") {
-    for (_ <- 1 until 1000) renderProperty("asd".toProperty)
+  private val listenStandardProperty = Benchmark("listen to a standard property") {
+    for (_ <- 1 until 1000) listenProperty(Property("asd"))
   }
 
-  val bindStandardModelProperty = Benchmark("bind to a standard model property") {
-    for (_ <- 1 until 1000) renderModelProperty(ModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null)))))
+  private val renderDiv = Benchmark("render a div") {
+    for (_ <- 1 until 1000) div().render
   }
 
-  val bindImmutableModelProperty = Benchmark("bind to an immutable model property") {
-    for (_ <- 1 until 1000) renderModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null))).toModelProperty)
+  private val renderStandardProperty = Benchmark("render a standard property") {
+    for (_ <- 1 until 1000) div(bind(Property("asd"))).render
   }
 
-  val bindStandardSeqProperty = Benchmark("bind to a standard seq property") {
-    for (_ <- 1 until 1000) renderSeqProperty(SeqProperty("A", "B", "C"))
+  private val listenImmutableProperty = Benchmark("listen to an immutable property") {
+    for (_ <- 1 until 1000) listenProperty("asd".toProperty)
   }
 
-  val bindImmutableSeqProperty = Benchmark("bind to an immutable seq property") {
-    for (_ <- 1 until 1000) renderSeqProperty(Seq("A", "B", "C").toSeqProperty)
+  private val listenStandardModelProperty = Benchmark("listen to a standard model property") {
+    for (_ <- 1 until 1000) listenModelProperty(ModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null)))))
+  }
+
+  private val listenImmutableModelProperty = Benchmark("listen to an immutable model property") {
+    for (_ <- 1 until 1000) listenModelProperty(Entity(5, "asd", Entity(5, "asd", Entity(5, "asd", null))).toModelProperty)
+  }
+
+  private val listenStandardSeqProperty = Benchmark("listen to a standard seq property") {
+    for (_ <- 1 until 1000) listenSeqProperty(SeqProperty("A", "B", "C"))
+  }
+
+  private val listenImmutableSeqProperty = Benchmark("listen to an immutable seq property") {
+    for (_ <- 1 until 1000) listenSeqProperty(Seq("A", "B", "C").toSeqProperty)
   }
 
   val suite = GuiSuite(
     Suite("PropertyParameters")(
-      bindStandardProperty,
-      bindImmutableProperty,
-      bindStandardModelProperty,
-      bindImmutableModelProperty,
-      bindStandardSeqProperty,
-      bindImmutableSeqProperty
+      createStandardProperty,
+      listenStandardProperty,
+      renderDiv,
+      renderStandardProperty,
+      listenImmutableProperty,
+      listenStandardModelProperty,
+      listenImmutableModelProperty,
+      listenStandardSeqProperty,
+      listenImmutableSeqProperty
     )
   )
 }
