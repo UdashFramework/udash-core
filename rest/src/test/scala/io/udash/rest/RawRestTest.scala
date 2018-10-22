@@ -36,6 +36,8 @@ trait UserApi {
   def autopost(bodyarg: String): Future[String]
   def singleBodyAutopost(@Body body: String): Future[String]
   @FormBody def formpost(@Query qarg: String, sarg: String, iarg: Int): Future[String]
+
+  def eatHeader(@Header("X-Stuff") stuff: String): Future[String]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
 
@@ -78,6 +80,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def formpost(qarg: String, sarg: String, iarg: Int): Future[String] = Future.successful(s"$qarg-$sarg-$iarg")
     def fail: Future[Unit] = Future.failed(HttpErrorException(400, "zuo"))
     def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
+    def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
   }
 
   var trafficLog: String = _
@@ -195,6 +198,18 @@ class RawRestTest extends FunSuite with ScalaFutures {
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, Mapping.empty, HttpBody.empty)
 
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
+  test("header case insensitivity") {
+    val params = RestParameters(
+      path = List(PathValue("eatHeader")),
+      headers = Mapping(List("x-sTuFf" -> HeaderValue("StUfF")), caseInsensitive = true)
+    )
+    val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
+    val response = RestResponse(200, Mapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)
