@@ -813,5 +813,34 @@ class PropertyCreatorTest extends UdashCoreTest {
         |println(t.subProp(_.y).get)
         |""".stripMargin shouldNot compile
     }
+
+    "require Seq for subSeq" in {
+      """object Test {
+        |  case class A(a: Int, s: Seq[Int])
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |
+        |val t = ModelProperty[Test.A](Test.A(1, Vector(5,6,7)))
+        |println(t.subSeq(_.s).get)
+        |""".stripMargin should compile
+
+      """object Test {
+        |  case class A(a: Int, s: Vector[Int])
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |
+        |val t = ModelProperty[Test.A](Test.A(1, Vector(5,6,7)))
+        |println(t.subSeq(_.s).get)
+        |""".stripMargin shouldNot compile
+
+      """object Test {
+        |  case class A(a: Int, s: Vector[Int])
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |
+        |val t = ModelProperty[Test.A](Test.A(1, Vector(5,6,7)))
+        |println(t.subProp(_.a).get)
+        |""".stripMargin should compile
+    }
   }
 }

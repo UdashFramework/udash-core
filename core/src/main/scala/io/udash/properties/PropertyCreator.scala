@@ -33,7 +33,8 @@ class SinglePropertyCreator[T] extends PropertyCreator[T] {
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
-class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
+@implicitNotFound("Class ${S} cannot be used as SeqProperty. Use Seq[${T}] instead.")
+class SeqPropertyCreator[T : PropertyCreator, S](implicit sev: S =:= Seq[T]) extends PropertyCreator[Seq[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
     new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
 }

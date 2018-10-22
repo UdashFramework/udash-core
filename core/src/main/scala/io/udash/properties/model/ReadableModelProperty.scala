@@ -7,6 +7,8 @@ import io.udash.utils.CrossCollections
 
 import scala.concurrent.Future
 
+import scala.language.higherKinds
+
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
   /** Returns child ModelProperty[B]. */
@@ -18,7 +20,7 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
+  def roSubSeq[B, S[_]](f: A => S[B])(implicit ev: SeqPropertyCreator[B, S[B]]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
 
   /** Ensures read-only access to this property. */

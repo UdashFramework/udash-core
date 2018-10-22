@@ -4,6 +4,8 @@ import io.udash.properties._
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single._
 
+import scala.language.higherKinds
+
 object ModelProperty {
   /** Creates a blank ModelProperty[T].  */
   def blank[T: ModelPropertyCreator : Blank]: ModelProperty[T] =
@@ -25,7 +27,7 @@ trait ModelProperty[A] extends AbstractReadableModelProperty[A] with AbstractPro
     macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def subSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): SeqProperty[B, CastableProperty[B]] =
+  def subSeq[B, S[_]](f: A => S[B])(implicit ev: SeqPropertyCreator[B, S[B]]): SeqProperty[B, CastableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifySubSeq[A, B]
 }
 

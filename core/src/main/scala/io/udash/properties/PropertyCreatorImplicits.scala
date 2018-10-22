@@ -6,8 +6,8 @@ trait PropertyCreatorImplicitsLow {
 }
 
 trait PropertyCreatorImplicits extends PropertyCreatorImplicitsLow {
-  implicit def materializeSeq[T : PropertyCreator]: SeqPropertyCreator[T] =
-    new SeqPropertyCreator[T]
+  implicit def materializeSeq[T : PropertyCreator, S](implicit ev: S =:= Seq[T]): SeqPropertyCreator[T, S] =
+    new SeqPropertyCreator[T, S]
 
   private type PC[T] = PropertyCreator[T]
   implicit def tuple1[T : PC]: ModelPropertyCreator[Tuple1[T]] =
