@@ -638,7 +638,7 @@ object BootstrapDemos extends CrossLogging {
     val pagination = UdashPagination(
       pages, selected,
       showArrows = showArrows, highlightActive = highlightActive
-    )(defaultPageFactory, _ => BootstrapStyles.Flex.justifyContent(FlexContentJustification.Center))
+    )(defaultPageFactory, defaultArrowFactory(), _ => BootstrapStyles.Flex.justifyContent(FlexContentJustification.Center))
     div(
       div(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom))(
         UdashButtonGroup()(
