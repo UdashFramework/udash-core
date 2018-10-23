@@ -21,8 +21,8 @@ trait TestRESTInternalInterface {
   @GET def load(
     @URLPart id: Int,
     @Query trash: String,
-    /*@Query */ @RESTParamName("trash_two") trash2: String
-  ): Future[TestRESTRecord] // trash2 uses default @Query
+    /*@Query */ @RESTParamName("trash_two") trash2: String // trash2 uses default @Query
+  ): Future[TestRESTRecord]
   @POST def create(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PUT def update(@URLPart id: Int)(@Body record: TestRESTRecord): Future[TestRESTRecord]
   @PATCH @RESTName("change") def modify(@URLPart id: Int)(@BodyValue s: String, @BodyValue i: Int): Future[TestRESTRecord]
