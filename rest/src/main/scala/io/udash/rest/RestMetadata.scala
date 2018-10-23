@@ -36,17 +36,19 @@ case class RestMetadata[T](
     def ensureUniqueParams(methodName: String, method: RestMethodMetadata[_]): Unit = {
       for {
         (prefixName, prefix) <- prefixes
-        headerParam <- method.parametersMetadata.headers.keys
-        if prefix.parametersMetadata.headers.contains(headerParam)
+        prefixHeaders = new Mapping(prefix.parametersMetadata.headers, caseInsensitive = true)
+        headerParam <- method.parametersMetadata.headers.keys if prefixHeaders.contains(headerParam)
       } throw new InvalidRestApiException(
-        s"Header parameter $headerParam of $methodName collides with header parameter of the same name in prefix $prefixName")
+        s"Header parameter $headerParam of $methodName collides with header parameter of the same " +
+          s"(case insensitive) name in prefix $prefixName")
 
       for {
         (prefixName, prefix) <- prefixes
         queryParam <- method.parametersMetadata.query.keys
         if prefix.parametersMetadata.query.contains(queryParam)
       } throw new InvalidRestApiException(
-        s"Query parameter $queryParam of $methodName collides with query parameter of the same name in prefix $prefixName")
+        s"Query parameter $queryParam of $methodName collides with query parameter of the same " +
+          s"name in prefix $prefixName")
     }
 
     prefixMethods.foreach {

@@ -42,7 +42,7 @@ class RestValidationTest extends FunSuite with DefaultRestImplicits {
     def prefix(@Header("X-Lol") lol: String): SuffixApi1
   }
   trait SuffixApi1 {
-    def post(@Header("X-Lol") lol: String): Future[String]
+    def post(@Header("x-lol") lol: String): Future[String]
   }
   object SuffixApi1 {
     implicit val metadata: RestMetadata[SuffixApi1] = RestMetadata.materialize
@@ -53,7 +53,7 @@ class RestValidationTest extends FunSuite with DefaultRestImplicits {
       RestMetadata.materialize[PrefixApi1].ensureValid()
     }
     assert(failure.getMessage ==
-      "Header parameter X-Lol of post collides with header parameter of the same name in prefix prefix")
+      "Header parameter x-lol of post collides with header parameter of the same (case insensitive) name in prefix prefix")
   }
 
   trait PrefixApi2 {
