@@ -14,11 +14,6 @@ import scala.scalajs.js.Dictionary
   * Base trait for client-side components which use some RPC exposed by server-side.
   */
 private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCType] {
-  override val localFramework: ClientUdashRPCFramework
-  override val remoteFramework: ServerUdashRPCFramework
-
-  import remoteFramework._
-
   /**
     * Proxy for remote RPC implementation. Use this to perform RPC calls.
     */
@@ -28,12 +23,12 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
     * This allows for generation of proxy which translates RPC calls into raw calls that
     * can be sent through the network.
     */
-  protected def remoteRpcAsReal: AsRealRPC[ServerRPCType]
+  protected def remoteRpcAsReal: ServerRawRpc.AsRealRpc[ServerRPCType]
 
-  protected val connector: ServerConnector[RPCRequest]
+  protected val connector: ServerConnector
 
   protected def callTimeout: Duration = 30 seconds
-  private val pendingCalls: Dictionary[(RPCRequest, Promise[RawValue])] = js.Dictionary.empty
+  private val pendingCalls: Dictionary[Promise[JsonStr]] = js.Dictionary.empty
   private val exceptionCallbacks = new CallbacksHandler[Throwable]
 
   private var cid: Int = 0
@@ -54,49 +49,48 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
   private def handleException(ex: Throwable): Unit =
     exceptionCallbacks.fire(ex)
 
-  def handleResponse(response: RPCResponse): Unit = {
+  def handleResponse(response: RpcResponse): Unit = {
     pendingCalls.remove(response.callId)
-      .foreach { case (_, promise) =>
+      .foreach { promise =>
         response match {
-          case RPCResponseSuccess(r, _) =>
+          case RpcResponseSuccess(r, _) =>
             promise.success(r)
-          case RPCResponseException(_, exception, _) =>
+          case RpcResponseException(_, exception, _) =>
             handleException(exception)
             promise.failure(exception)
-          case RPCResponseFailure(cause, error, _) =>
-            val exception = RPCFailure(cause, error)
+          case RpcResponseFailure(cause, error, _) =>
+            val exception = RpcFailure(cause, error)
             handleException(exception)
             promise.failure(exception)
         }
       }
   }
 
-  override protected[rpc] def fireRemote(getterChain: List[RawInvocation], invocation: RawInvocation): Unit =
-    sendRPCRequest(RPCFire(invocation, getterChain))
+  override protected[rpc] def fireRemote(getterChain: List[RpcInvocation], invocation: RpcInvocation): Unit =
+    sendRpcRequest(RpcFire(invocation, getterChain))
 
-  protected[rpc] def callRemote(callId: String, getterChain: List[RawInvocation], invocation: RawInvocation): RPCCall =
-    RPCCall(invocation, getterChain, callId).setup(sendRPCRequest)
+  protected[rpc] def callRemote(callId: String, getterChain: List[RpcInvocation], invocation: RpcInvocation): Unit =
+    sendRpcRequest(RpcCall(invocation, getterChain, callId))
 
-  private def sendRPCRequest(request: RPCRequest): Unit =
-    connector.sendRPCRequest(request)
+  private def sendRpcRequest(request: RpcRequest): Unit =
+    connector.sendRpcRequest(request)
 
-  protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {
-    def fire(invocation: RawInvocation): Unit =
+  protected class RawRemoteRPC(getterChain: List[RpcInvocation]) extends ServerRawRpc {
+    def fire(invocation: RpcInvocation): Unit =
       fireRemote(getterChain, invocation)
 
-    def call(invocation: RawInvocation): Future[RawValue] = {
-      val callId = newCallId()
-      Promise[RawValue]().setup { promise =>
-        val request = callRemote(callId, getterChain, invocation)
-        pendingCalls.put(callId, (request, promise))
+    def call(invocation: RpcInvocation): Future[JsonStr] =
+      Promise[JsonStr]().setup { promise =>
+        val callId = newCallId()
+        callRemote(callId, getterChain, invocation)
+        pendingCalls.put(callId, promise)
         dom.window.setTimeout(
-          () => handleResponse(RPCResponseException("Request timeout", UsesServerRPC.CallTimeout(callTimeout), callId)),
+          () => handleResponse(RpcResponseException("Request timeout", UsesServerRPC.CallTimeout(callTimeout), callId)),
           callTimeout.toMillis
         )
       }.future
-    }
 
-    def get(invocation: RawInvocation): RawRPC =
+    def get(invocation: RpcInvocation): ServerRawRpc =
       new RawRemoteRPC(invocation :: getterChain)
   }
 }

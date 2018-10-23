@@ -9,7 +9,7 @@ import scala.util.Random
 class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
   val repeats = 1000
 
-  def tests(writer: UdashRPCFramework, reader: UdashRPCFramework)(implicit pos: Position): Unit = {
+  def tests(implicit pos: Position): Unit = {
     "serialize and deserialize all types" in {
       for (i <- 1 to repeats) {
         def cc() = TestCC(Random.nextInt(), Random.nextLong(), 123, Random.nextBoolean(), Random.nextString(200), List.fill(Random.nextInt(200))('a'))
@@ -19,8 +19,8 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
           else DeepNestedTestCC(ncc(), null)
 
         val test: DeepNestedTestCC = dncc()
-        val serialized = writer.write(test)
-        val deserialized = reader.read[DeepNestedTestCC](serialized)
+        val serialized = write(test)
+        val deserialized = read[DeepNestedTestCC](serialized)
 
         deserialized should be(test)
       }
@@ -51,11 +51,10 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
       )
 
       testOpts.foreach(opt => {
-        val serialized = writer.write(opt)
-        val deserialized = reader.read[Option[Long]](serialized)
+        val serialized = write(opt)
+        val deserialized = read[Option[Long]](serialized)
         deserialized should be(opt)
       })
     }
   }
 }
-

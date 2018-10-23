@@ -3,41 +3,26 @@ package io.udash.rpc
 import scala.concurrent.Future
 
 abstract class ExposesServerRPC[ServerRPCType](local: ServerRPCType) extends ExposesLocalRPC[ServerRPCType] {
-  override val localFramework: ServerUdashRPCFramework
-
-  import localFramework._
-
   /**
     * This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
     * into calls on actual RPC implementation.
     */
-  protected def localRpcAsRaw: AsRawRPC[ServerRPCType]
+  protected def localRpcAsRaw: ServerRawRpc.AsRawRpc[ServerRPCType]
 
-  protected lazy val rawLocalRpc = localRpcAsRaw.asRaw(localRpc)
+  protected lazy val rawLocalRpc: ServerRawRpc =
+    localRpcAsRaw.asRaw(localRpc)
 
   override protected def localRpc: ServerRPCType = local
 
   /** Handles RPCCall and returns Future with call result. */
-  def handleRpcCall(call: RPCCall): Future[RawValue] = {
-    try {
-      val receiver = rawLocalRpc.resolveGetterChain(call.gettersChain)
-      receiver.call(call.invocation)
-    } catch {
-      case ex: Exception =>
-        Future.failed(ex)
-    }
-  }
+  def handleRpcCall(call: RpcCall): Future[JsonStr] =
+    rawLocalRpc.handleCall(call)
 
   /** Handles RPCFire */
-  def handleRpcFire(fire: RPCFire): Unit = {
-    val receiver = rawLocalRpc.resolveGetterChain(fire.gettersChain)
-    receiver.fire(fire.invocation)
-  }
+  def handleRpcFire(fire: RpcFire): Unit =
+    rawLocalRpc.handleFire(fire)
 }
 
-class DefaultExposesServerRPC[ServerRPCType](local: ServerRPCType)
-  (implicit protected val localRpcAsRaw: DefaultServerUdashRPCFramework.AsRawRPC[ServerRPCType])
-  extends ExposesServerRPC(local) {
-
-  override val localFramework = DefaultServerUdashRPCFramework
-}
+class DefaultExposesServerRPC[ServerRPCType](local: ServerRPCType)(
+  implicit protected val localRpcAsRaw: ServerRawRpc.AsRawRpc[ServerRPCType]
+) extends ExposesServerRPC(local)

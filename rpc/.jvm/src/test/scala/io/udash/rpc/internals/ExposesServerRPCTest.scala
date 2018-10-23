@@ -9,15 +9,14 @@ import scala.collection.mutable.ListBuffer
 
 class ExposesServerRPCTest extends UdashRpcBackendTest {
 
-  def tests[T <: ExposesServerRPC[TestRPC]](createRpc: (mutable.Builder[String, Seq[String]]) => T) = {
+  def tests[T <: ExposesServerRPC[TestRPC]](createRpc: mutable.Builder[String, Seq[String]] => T) = {
     "handle RPC fires" in {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.localFramework._
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("handle", List()),
+        RpcFire(
+          RpcInvocation("handle", List()),
           List()
         )
       )
@@ -25,9 +24,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
 
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("proc", Nil),
-          List(RawInvocation("innerRpc", List(write[String]("arg0"))))
+        RpcFire(
+          RpcInvocation("proc", Nil),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0"))))
         )
       )
       calls.result() should contain("innerRpc.proc")
@@ -37,10 +36,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.localFramework._
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("doStuff", List(write[Boolean](true))),
+        RpcCall(
+          RpcInvocation("doStuff", List(write[Boolean](true))),
           List(),
           "callId1"
         )
@@ -48,9 +46,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       calls.result() should contain("doStuff")
 
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("func", List(write[Int](5))),
-          List(RawInvocation("innerRpc", List(write[String]("arg0")))),
+        RpcCall(
+          RpcInvocation("func", List(write[Int](5))),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0")))),
           "callId2"
         )
       )
@@ -61,10 +59,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.localFramework._
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("handle", List()),
+        RpcFire(
+          RpcInvocation("handle", List()),
           List()
         )
       )
@@ -72,9 +69,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
 
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("proc", Nil),
-          List(RawInvocation("innerRpc", List(write[String]("arg0"))))
+        RpcFire(
+          RpcInvocation("proc", Nil),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0"))))
         )
       )
       calls.result() should contain("innerRpc.proc")
@@ -84,11 +81,10 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       val calls = Seq.newBuilder[String]
       val rpc: T = createRpc(calls)
 
-      import rpc.localFramework._
       val resp1 = rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("proc", Nil),
-          List(RawInvocation("throwingGetter", Nil)),
+        RpcCall(
+          RpcInvocation("proc", Nil),
+          List(RpcInvocation("throwingGetter", Nil)),
           "callId1"
         )
       )
@@ -96,9 +92,9 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       calls.result() shouldNot contain("proc")
 
       val resp2 = rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("proc", Nil),
-          List(RawInvocation("nullGetter", Nil)),
+        RpcCall(
+          RpcInvocation("proc", Nil),
+          List(RpcInvocation("nullGetter", Nil)),
           "callId2"
         )
       )
@@ -120,10 +116,8 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
   }
 
   final class UPickleExposesServerRPC[ServerRPCType]
-  (local: ServerRPCType)(implicit protected val localRpcAsRaw: ServerUPickleUdashRPCFramework.AsRawRPC[ServerRPCType])
+  (local: ServerRPCType)(implicit protected val localRpcAsRaw: ServerRawRpc.AsRawRpc[ServerRPCType])
     extends ExposesServerRPC(local) {
-
-    override val localFramework = ServerUPickleUdashRPCFramework
   }
 
   def createCustomRpc(calls: mutable.Builder[String, Seq[String]]): UPickleExposesServerRPC[TestRPC] = {
@@ -140,12 +134,10 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
       calls += method
     })
     new DefaultExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
+      override protected val metadata: ServerRpcMetadata[TestRPC] = TestRPC.metadata
 
-      import localFramework.RPCMetadata
-
-      override protected val metadata: RPCMetadata[TestRPC] = RPCMetadata.materializeForRpc
-
-      override def log(rpcName: String, methodName: String, args: Seq[String]): Unit = loggedCalls += s"$rpcName $methodName $args"
+      override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
+        loggedCalls += s"$rpcName $methodName $args"
     }
   }
 
@@ -156,27 +148,26 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
     import io.udash.rpc.InnerRPC
     val calls = Seq.newBuilder[String]
     val rpc: ExposesServerRPC[TestRPC] = createLoggingRpc(calls)
-    import rpc.localFramework._
 
     "not log calls of regular RPC methods" in {
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("doStuff", List(write[Boolean](true))),
+        RpcCall(
+          RpcInvocation("doStuff", List(write[Boolean](true))),
           List(),
           "callId1"
         )
       )
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("doStuff", List(write[Boolean](false))),
+        RpcCall(
+          RpcInvocation("doStuff", List(write[Boolean](false))),
           List(),
           "callId1"
         )
       )
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("proc", List()),
-          List(RawInvocation("innerRpc", List(write[String]("arg0"))))
+        RpcFire(
+          RpcInvocation("proc", List()),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0"))))
         )
       )
       loggedCalls shouldBe empty
@@ -184,22 +175,22 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
     "log calls of annotated RPC methods" in {
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("func", List(write[Int](5))),
-          List(RawInvocation("innerRpc", List(write[String]("arg0")))),
+        RpcCall(
+          RpcInvocation("func", List(write[Int](5))),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0")))),
           "callId2"
         )
       )
       rpc.handleRpcCall(
-        RPCCall(
-          RawInvocation("func", List(write[Int](10))),
-          List(RawInvocation("innerRpc", List(write[String]("arg0")))),
+        RpcCall(
+          RpcInvocation("func", List(write[Int](10))),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0")))),
           "callId2"
         )
       )
       rpc.handleRpcFire(
-        RPCFire(
-          RawInvocation("fireSomething", List(write[Int](13))),
+        RpcFire(
+          RpcInvocation("fireSomething", List(write[Int](13))),
           List()
         )
       )

@@ -1,5 +1,7 @@
 package io.udash.rpc
 
+import com.avsystem.commons.rpc.AsReal
+import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.rpc.internals.{BroadcastManager, UsesClientRPC}
 
 import scala.concurrent.ExecutionContext
@@ -14,15 +16,15 @@ case object AllClients extends ClientRPCTarget
 case class ClientId(id: String) extends ClientRPCTarget
 
 abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
-                                       (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
-  override protected def fireRemote(getterChain: List[remoteFramework.RawInvocation], invocation: remoteFramework.RawInvocation): Unit = {
-    import remoteFramework._
-    val msg: RawValue = write[RPCRequest](RPCFire(invocation, getterChain))
+  (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
+
+  override protected def fireRemote(getterChain: List[RpcInvocation], invocation: RpcInvocation): Unit = {
+    val json = JsonStringOutput.write[RpcRequest](RpcFire(invocation, getterChain))
     target match {
       case AllClients =>
-        BroadcastManager.broadcast(msg.json)
+        BroadcastManager.broadcast(json)
       case ClientId(clientId) =>
-        BroadcastManager.sendToClient(clientId, msg.json)
+        BroadcastManager.sendToClient(clientId, json)
     }
   }
 
@@ -30,9 +32,9 @@ abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
 }
 
 /** Default implementation of [[io.udash.rpc.ClientRPC]] for server to client communication. */
-class DefaultClientRPC[ClientRPCType : DefaultClientUdashRPCFramework.AsRealRPC]
-                      (target: ClientRPCTarget)(implicit ec: ExecutionContext) extends ClientRPC[ClientRPCType](target) {
-  override val localFramework: DefaultServerUdashRPCFramework.type = DefaultServerUdashRPCFramework
-  override val remoteFramework: DefaultClientUdashRPCFramework.type = DefaultClientUdashRPCFramework
-  protected val remoteRpcAsReal: DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType] = implicitly[DefaultClientUdashRPCFramework.AsRealRPC[ClientRPCType]]
+class DefaultClientRPC[ClientRPCType: ClientRawRpc.AsRealRpc](target: ClientRPCTarget)(implicit ec: ExecutionContext)
+  extends ClientRPC[ClientRPCType](target) {
+
+  protected val remoteRpcAsReal: ClientRawRpc.AsRealRpc[ClientRPCType] =
+    AsReal[ClientRawRpc, ClientRPCType]
 }

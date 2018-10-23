@@ -1,23 +1,29 @@
 package io.udash.rpc.serialization
 
-import com.avsystem.commons.rpc.RPCFramework
+import com.avsystem.commons.meta.Fallback
+import com.avsystem.commons.misc.ImplicitNotFound
+import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.GenCodec
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
+import io.udash.rpc.JsonStr
 
-trait DefaultUdashSerialization { this: RPCFramework =>
-  override type RawValue = JsonStr
+import scala.annotation.implicitNotFound
 
-  implicit val rawValueCodec: GenCodec[JsonStr] = GenCodec.create(
-    {
-      case jsi: JsonStringInput => JsonStr(jsi.readRawJson())
-      case in => JsonStr(in.readString())
-    },
-    {
-      case (jso: JsonStringOutput, v) => jso.writeRawJson(v.json)
-      case (out, v) => out.writeString(v.json)
-    }
-  )
+trait DefaultUdashSerialization {
+  implicit def genCodecBasedAsReal[T: GenCodec]: Fallback[AsReal[JsonStr, T]] =
+    Fallback(AsReal.create(jsonStr => JsonStringInput.read[T](jsonStr.json)))
 
-  def read[T: GenCodec](value: RawValue): T = JsonStringInput.read[T](value.json)
-  def write[T: GenCodec](value: T): RawValue = JsonStr(JsonStringOutput.write(value))
+  implicit def genCodecBasedAsRaw[T: GenCodec]: Fallback[AsRaw[JsonStr, T]] =
+    Fallback(AsRaw.create(value => JsonStr(JsonStringOutput.write[T](value))))
+
+  @implicitNotFound("#{forGenCodec}")
+  implicit def asRealNotFound[T](
+    implicit forGenCodec: ImplicitNotFound[GenCodec[T]]
+  ): ImplicitNotFound[AsReal[JsonStr, T]] = ImplicitNotFound()
+
+  @implicitNotFound("#{forGenCodec}")
+  implicit def asRawNotFound[T](
+    implicit forGenCodec: ImplicitNotFound[GenCodec[T]]
+  ): ImplicitNotFound[AsRaw[JsonStr, T]] = ImplicitNotFound()
 }
+object DefaultUdashSerialization extends DefaultUdashSerialization

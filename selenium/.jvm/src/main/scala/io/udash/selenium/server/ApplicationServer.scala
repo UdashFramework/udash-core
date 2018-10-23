@@ -15,6 +15,7 @@ import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
 class ApplicationServer(val port: Int, resourceBase: String) {
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   private val server = new Server(port)
@@ -36,8 +37,7 @@ class ApplicationServer(val port: Int, resourceBase: String) {
       val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
         val callLogger = new CallLogger
         new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId, implicitly)) with CallLogging[MainServerRPC] {
-          import localFramework.RPCMetadata
-          override protected val metadata: RPCMetadata[MainServerRPC] = MainServerRPC.metadata
+          override protected val metadata: ServerRpcMetadata[MainServerRPC] = MainServerRPC.metadata
 
           override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
             callLogger.append(Call(rpcName, methodName, args))

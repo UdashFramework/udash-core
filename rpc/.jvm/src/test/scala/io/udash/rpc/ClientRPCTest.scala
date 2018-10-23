@@ -5,12 +5,11 @@ import io.udash.rpc.internals.BroadcastManager
 import io.udash.testing.UdashRpcBackendTest
 import org.atmosphere.cpr._
 
-import scala.concurrent.ExecutionContext
-
 class ClientRPCTest extends UdashRpcBackendTest {
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
 
-  def tests(createClientRpc: (ClientRPCTarget) => ClientRPC[TestClientRPC]) = {
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def tests(createClientRpc: ClientRPCTarget => ClientRPC[TestClientRPC]): Unit = {
     "gain access to RPC methods of concrete client" in {
       BroadcastManager.synchronized {
         BroadcastManager.init(null, null)
@@ -81,20 +80,5 @@ class ClientRPCTest extends UdashRpcBackendTest {
     r
   }
 
-  class UPickleClientRPC[ClientRPCType : ClientUPickleUdashRPCFramework.AsRealRPC](target: ClientRPCTarget)
-                                       (implicit ec: ExecutionContext)
-    extends ClientRPC[ClientRPCType](target) {
-    override val localFramework = ServerUPickleUdashRPCFramework
-    override val remoteFramework = ClientUPickleUdashRPCFramework
-    protected val remoteRpcAsReal: ClientUPickleUdashRPCFramework.AsRealRPC[ClientRPCType] = implicitly[ClientUPickleUdashRPCFramework.AsRealRPC[ClientRPCType]]
-  }
-
-  def createCustomClientRPC(target: ClientRPCTarget): UPickleClientRPC[TestClientRPC] = {
-    @silent
-    val r = new UPickleClientRPC[TestClientRPC](target)
-    r
-  }
-
   "DefaultClientRPC" should tests(createDefaultClientRPC)
-  "CustomClientRPC" should tests(createCustomClientRPC)
 }

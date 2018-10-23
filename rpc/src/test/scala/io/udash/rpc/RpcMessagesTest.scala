@@ -2,7 +2,7 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry, JsonStr}
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
 import io.udash.testing.UdashSharedTest
 
 import scala.util.Random
@@ -18,81 +18,79 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   exceptionsRegistry.register(GenCodec.materialize[CustomException])
   exceptionsRegistry.register(GenCodec.materialize[SealedExceptions])
 
-  def tests(RPC: UdashRPCFramework) = {
-    import RPC._
-
+  def tests(): Unit = {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
-    val inv = RawInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
-    val getter1 = RawInvocation("g{}[]\",\"etter1",
+    val inv = RpcInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
+    val getter1 = RpcInvocation("g{}[]\",\"etter1",
       List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\""), JsonStr("\"xy,z\"")))
-    val getter2 = RawInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
-    val req = RPCCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
-    val success = RPCResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
-    val failure = RPCResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
-    val exception = RPCResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
-    val runtimeException = RPCResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
-    val sealedException = RPCResponseException(classOf[SealedExceptions].getName, SealedExceptionsA(2), "\"ca{[]}ll1\"")
-    val rpcFail = RPCFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
+    val getter2 = RpcInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
+    val req = RpcCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
+    val success = RpcResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
+    val failure = RpcResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
+    val exception = RpcResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
+    val runtimeException = RpcResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
+    val sealedException = RpcResponseException(classOf[SealedExceptions].getName, SealedExceptionsA(2), "\"ca{[]}ll1\"")
+    val rpcFail = RpcFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
 
     "serialize and deserialize call request" in {
-      val serialized = write[RPCRequest](req)
-      val deserialized = read[RPCRequest](serialized)
+      val serialized = write[RpcRequest](req)
+      val deserialized = read[RpcRequest](serialized)
       deserialized should be(req)
     }
 
     "serialize and deserialize fire request" in {
-      val serialized = write[RPCRequest](req)
-      val deserialized = read[RPCRequest](serialized)
+      val serialized = write[RpcRequest](req)
+      val deserialized = read[RpcRequest](serialized)
       deserialized should be(req)
     }
 
     "serialize and deserialize success response" in {
-      val serialized = write[RPCResponse](success)
-      val deserialized = read[RPCResponse](serialized)
+      val serialized = write[RpcResponse](success)
+      val deserialized = read[RpcResponse](serialized)
       deserialized should be(success)
     }
 
     "serialize and deserialize failure response" in {
-      val serialized = write[RPCResponse](failure)
-      val deserialized = read[RPCResponse](serialized)
+      val serialized = write[RpcResponse](failure)
+      val deserialized = read[RpcResponse](serialized)
       deserialized should be(failure)
     }
 
     "serialize and deserialize exception response" in {
-      val serialized = write[RPCResponse](exception)
-      val deserialized = read[RPCResponse](serialized)
+      val serialized = write[RpcResponse](exception)
+      val deserialized = read[RpcResponse](serialized)
       deserialized should be(exception)
 
-      val serialized2 = write[RPCResponse](runtimeException)
-      val deserialized2 = read[RPCResponse](serialized2)
-      (deserialized2.asInstanceOf[RPCResponseException].exception match {
+      val serialized2 = write[RpcResponse](runtimeException)
+      val deserialized2 = read[RpcResponse](serialized2)
+      (deserialized2.asInstanceOf[RpcResponseException].exception match {
         case _: RuntimeException => true
         case _ => false
       }) should be(true)
 
-      val serialized3 = write[RPCResponse](sealedException)
-      val deserialized3 = read[RPCResponse](serialized3)
+      val serialized3 = write[RpcResponse](sealedException)
+      val deserialized3 = read[RpcResponse](serialized3)
       deserialized3 should be(sealedException)
     }
 
     //    "serialize and deserialize exception stacktrace" in {
-    //      val serialized = write[RPCResponse](exception)
-    //      val deserialized = read[RPCResponse](serialized)
-    //      deserialized.asInstanceOf[RPCResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
+    //      val serialized = write[RpcResponse](exception)
+    //      val deserialized = read[RpcResponse](serialized)
+    //      deserialized.asInstanceOf[RpcResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
     //
-    //      val serialized2 = write[RPCResponse](runtimeException)
-    //      val deserialized2 = read[RPCResponse](serialized2)
-    //      deserialized2.asInstanceOf[RPCResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
+    //      val serialized2 = write[RpcResponse](runtimeException)
+    //      val deserialized2 = read[RpcResponse](serialized2)
+    //      deserialized2.asInstanceOf[RpcResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
     //
-    //      val serialized3 = write[RPCResponse](sealedException)
-    //      val deserialized3 = read[RPCResponse](serialized3)
-    //      deserialized3.asInstanceOf[RPCResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
+    //      val serialized3 = write[RpcResponse](sealedException)
+    //      val deserialized3 = read[RpcResponse](serialized3)
+    //      deserialized3.asInstanceOf[RpcResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
     //    }
 
     "serialize and deserialize rpc failure msg" in {
-      val serialized = write[RPCFailure](rpcFail)
-      val deserialized = read[RPCFailure](serialized)
+      val serialized = write[RpcFailure](rpcFail)
+      val deserialized = read[RpcFailure](serialized)
 
       deserialized should be(rpcFail)
     }
@@ -163,25 +161,25 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
     "handle plain numbers in JSON as Int, Long and Double" in {
       val json = JsonStr("123")
-      RPC.read[Int](json) should be(123)
-      RPC.read[Long](json) should be(123)
-      RPC.read[Double](json) should be(123)
+      read[Int](json) should be(123)
+      read[Long](json) should be(123)
+      read[Double](json) should be(123)
 
       val maxIntPlusOne: Long = Int.MaxValue.toLong + 1
       val jsonLong = JsonStr(maxIntPlusOne.toString)
-      intercept[ReadFailure](RPC.read[Int](jsonLong))
-      RPC.read[Long](jsonLong) should be(maxIntPlusOne)
-      RPC.read[Double](jsonLong) should be(maxIntPlusOne)
+      intercept[ReadFailure](read[Int](jsonLong))
+      read[Long](jsonLong) should be(maxIntPlusOne)
+      read[Double](jsonLong) should be(maxIntPlusOne)
 
       val jsonLongMax = JsonStr(Long.MaxValue.toString)
-      intercept[ReadFailure](RPC.read[Int](jsonLong))
-      RPC.read[Long](jsonLongMax) should be(Long.MaxValue)
-      RPC.read[Double](jsonLongMax) should be(Long.MaxValue)
+      intercept[ReadFailure](read[Int](jsonLong))
+      read[Long](jsonLongMax) should be(Long.MaxValue)
+      read[Double](jsonLongMax) should be(Long.MaxValue)
 
       val jsonDouble = JsonStr(Double.MaxValue.toString)
-      intercept[ReadFailure](RPC.read[Int](jsonDouble))
-      intercept[ReadFailure](RPC.read[Long](jsonDouble))
-      RPC.read[Double](jsonDouble) should be(Double.MaxValue)
+      intercept[ReadFailure](read[Int](jsonDouble))
+      intercept[ReadFailure](read[Long](jsonDouble))
+      read[Double](jsonDouble) should be(Double.MaxValue)
     }
 
     "work with skipping" in {
@@ -226,8 +224,7 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
   }
 
-  def hugeTests(RPC: UdashRPCFramework) = {
-    import RPC._
+  def hugeTests(): Unit = {
     "serialize and deserialize huge case classes" in {
       def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
       def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())

@@ -35,7 +35,7 @@ val commonSettings = Seq(
     "-language:experimental.macros",
     "-Xfuture",
     "-Xfatal-warnings",
-    "-Xlint:_",
+    "-Xlint:_,-missing-interpolator",
   ),
   scalacOptions ++= {
     if (scalaBinaryVersion.value == "2.12") Seq(

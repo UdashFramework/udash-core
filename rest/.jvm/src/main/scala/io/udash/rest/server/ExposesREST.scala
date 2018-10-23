@@ -3,7 +3,7 @@ package io.udash.rest.server
 import com.avsystem.commons.concurrent.RunNowEC
 import com.avsystem.commons.misc.Opt
 import io.udash.rest.{UdashRESTFramework, _}
-import io.udash.rpc.serialization.JsonStr
+import io.udash.rpc.JsonStr
 import javax.servlet.http.HttpServletRequest
 
 import scala.concurrent.{ExecutionContext, Future}

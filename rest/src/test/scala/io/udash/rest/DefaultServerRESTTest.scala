@@ -3,7 +3,7 @@ package io.udash.rest
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.internal.RESTConnector
 import io.udash.rest.internal.RESTConnector.HttpMethod
-import io.udash.rpc.serialization.JsonStr
+import io.udash.rpc.JsonStr
 import io.udash.testing.AsyncUdashSharedTest
 import org.scalatest.Succeeded
 

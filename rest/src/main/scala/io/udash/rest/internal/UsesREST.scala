@@ -2,7 +2,8 @@ package io.udash.rest.internal
 
 import com.avsystem.commons.rpc.MetadataAnnotation
 import io.udash.rest._
-import io.udash.rpc.serialization.{JsonStr, URLEncoder}
+import io.udash.rpc.JsonStr
+import io.udash.rpc.serialization.URLEncoder
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -117,7 +118,7 @@ abstract class UsesREST[ServerRPCType: UdashRESTFramework#AsRealRPC : UdashRESTF
       queryArguments = queryArgsBuilder.result(),
       headers = headersArgsBuilder.result(),
       body = body
-    ).mapNow(JsonStr)
+    ).mapNow(JsonStr(_))
   }
 
   protected class RawRemoteRPC(getterChain: List[RawInvocation]) extends RawRPC {

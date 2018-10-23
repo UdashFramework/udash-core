@@ -1,11 +1,11 @@
 package io.udash.selenium.rpc.demos.rpc
 
 import com.avsystem.commons.serialization.{GenCodec, HasGenCodec, Input, Output}
-import io.udash.rpc.DefaultServerUdashRPCFramework
+import io.udash.rpc.DefaultServerRpcCompanion
 
 import scala.concurrent.Future
 
-object GenCodecServerRPC {
+object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
   case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
   object DemoCaseClass extends HasGenCodec[DemoCaseClass]
 
@@ -43,16 +43,10 @@ object GenCodecServerRPC {
       }
     }
   }
-
-  final def fullRpcInfo: DefaultServerUdashRPCFramework.FullRPCInfo[GenCodecServerRPC] =
-    DefaultServerUdashRPCFramework.materializeFullInfo
-
-  implicit def asRealRPC: DefaultServerUdashRPCFramework.AsRealRPC[GenCodecServerRPC] = fullRpcInfo.asRealRPC
-  implicit def asRawRPC: DefaultServerUdashRPCFramework.AsRawRPC[GenCodecServerRPC] = fullRpcInfo.asRawRPC
-  implicit def metadata: DefaultServerUdashRPCFramework.RPCMetadata[GenCodecServerRPC] = fullRpcInfo.metadata
 }
 
 trait GenCodecServerRPC {
+
   import GenCodecServerRPC._
 
   def sendInt(el: Int): Future[Int]

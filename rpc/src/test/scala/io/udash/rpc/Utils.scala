@@ -1,6 +1,7 @@
 package io.udash.rpc
 
 import com.avsystem.commons.serialization._
+import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 
 import scala.util.Random
 
@@ -56,4 +57,10 @@ trait Utils {
     }
   }
   implicit val codecCI: GenCodec[CompleteItem] = GenCodec.materialize[CompleteItem]
+
+  def write[T: GenCodec](value: T): JsonStr =
+    JsonStr(JsonStringOutput.write(value))
+
+  def read[T: GenCodec](jsonStr: JsonStr): T =
+    JsonStringInput.read[T](jsonStr.json)
 }
