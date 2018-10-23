@@ -4,6 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
+import io.udash.rest.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
 
@@ -12,18 +13,29 @@ import scala.annotation.implicitNotFound
 case class RestMetadata[T](
   @multi @tagged[Prefix](whenUntagged = new Prefix)
   @paramTag[RestParamTag](defaultTag = new Path)
-  @rpcMethodMetadata prefixMethods: Mapping[PrefixMetadata[_]],
+  @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
 
   @multi @tagged[GET]
   @paramTag[RestParamTag](defaultTag = new Query)
-  @rpcMethodMetadata httpGetMethods: Mapping[HttpMethodMetadata[_]],
+  @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
 
   @multi @tagged[BodyMethodTag](whenUntagged = new POST)
   @paramTag[RestParamTag](defaultTag = new BodyField)
-  @rpcMethodMetadata httpBodyMethods: Mapping[HttpMethodMetadata[_]]
+  @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]]
 ) {
-  val httpMethods: Mapping[HttpMethodMetadata[_]] =
+  val httpMethods: List[HttpMethodMetadata[_]] =
     httpGetMethods ++ httpBodyMethods
+
+  val prefixesByName: Map[String, PrefixMetadata[_]] =
+    prefixMethods.toMapBy(_.name)
+
+  val httpMethodsByName: Map[String, HttpMethodMetadata[_]] =
+    httpMethods.toMapBy(_.name)
+
+  private lazy val resolutionTrie = {
+    val allMethods = (prefixMethods.iterator: Iterator[RestMethodMetadata[_]]) ++ httpMethods.iterator
+    new ResolutionTrie(allMethods.map(m => (m.pathPattern, m)).toList)
+  }
 
   private[this] lazy val valid: Unit = {
     ensureUnambiguousPaths()
@@ -32,37 +44,35 @@ case class RestMetadata[T](
 
   def ensureValid(): Unit = valid
 
-  private def ensureUniqueParams(prefixes: List[(String, PrefixMetadata[_])]): Unit = {
-    def ensureUniqueParams(methodName: String, method: RestMethodMetadata[_]): Unit = {
+  private def ensureUniqueParams(prefixes: List[PrefixMetadata[_]]): Unit = {
+    def ensureUniqueParams(method: RestMethodMetadata[_]): Unit = {
       for {
-        (prefixName, prefix) <- prefixes
+        prefix <- prefixes
         prefixHeaders = new Mapping(prefix.parametersMetadata.headers, caseInsensitive = true)
         headerParam <- method.parametersMetadata.headers.keys if prefixHeaders.contains(headerParam)
       } throw new InvalidRestApiException(
-        s"Header parameter $headerParam of $methodName collides with header parameter of the same " +
-          s"(case insensitive) name in prefix $prefixName")
+        s"Header parameter $headerParam of ${method.name} collides with header parameter of the same " +
+          s"(case insensitive) name in prefix ${prefix.name}")
 
       for {
-        (prefixName, prefix) <- prefixes
+        prefix <- prefixes
         queryParam <- method.parametersMetadata.query.keys
         if prefix.parametersMetadata.query.contains(queryParam)
       } throw new InvalidRestApiException(
-        s"Query parameter $queryParam of $methodName collides with query parameter of the same " +
-          s"name in prefix $prefixName")
+        s"Query parameter $queryParam of ${method.name} collides with query parameter of the same " +
+          s"name in prefix ${prefix.name}")
     }
 
     prefixMethods.foreach {
-      case (name, prefix) =>
-        ensureUniqueParams(name, prefix)
-        prefix.result.value.ensureUniqueParams((name, prefix) :: prefixes)
+      prefix =>
+        ensureUniqueParams(prefix)
+        prefix.result.value.ensureUniqueParams(prefix :: prefixes)
     }
-    (httpGetMethods ++ httpBodyMethods).foreach {
-      case (name, method) => ensureUniqueParams(name, method)
-    }
+    httpMethods.foreach(ensureUniqueParams)
   }
 
   private def ensureUnambiguousPaths(): Unit = {
-    val trie = new RestMetadata.Trie
+    val trie = new RestMetadata.ValidationTrie
     trie.fillWith(this)
     trie.mergeWildcardToNamed()
     val ambiguities = new MListBuffer[(String, List[String])]
@@ -75,64 +85,90 @@ case class RestMetadata[T](
     }
   }
 
-  def resolvePath(path: List[PathValue]): List[ResolvedCall] = {
-    def resolve(metadata: RestMetadata[_], path: List[PathValue]): Iterator[ResolvedCall] = {
-      val asFinalCall = for {
-        (rpcName, methodMeta) <- metadata.httpMethods.iterator
-        (pathParams, Nil) <- methodMeta.extractPathParams(path)
-      } yield ResolvedCall(this, Nil, HttpCall(rpcName, pathParams, methodMeta))
-
-      val usingPrefix = for {
-        (rpcName, prefix) <- metadata.prefixMethods.iterator
-        (pathParams, pathTail) <- prefix.extractPathParams(path).iterator
-        suffixPath <- resolve(prefix.result.value, pathTail)
-      } yield suffixPath.copy(prefixes = PrefixCall(rpcName, pathParams, prefix) :: suffixPath.prefixes)
-
-      asFinalCall ++ usingPrefix
-    }
-    resolve(this, path).toList
-  }
+  def resolvePath(path: List[PathValue]): List[ResolvedCall] =
+    resolutionTrie.resolvePath(this, Nil, Nil, path).toList
 }
 object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
-  private class Trie {
+  private class ResolutionTrie(methods: List[(List[PathPatternElement], RestMethodMetadata[_])]) {
+    private val named: Map[PathValue, ResolutionTrie] = methods.iterator
+      .collect { case (PathName(pv) :: tail, method) => (pv, (tail, method)) }
+      .groupToMap(_._1, _._2).iterator
+      .map { case (pv, submethods) => (pv, new ResolutionTrie(submethods.toList)) }
+      .toMap
+
+    private val wildcard: Opt[ResolutionTrie] =
+      methods.collect { case (PathParam(_) :: tail, method) => (tail, method) }
+        .opt.filter(_.nonEmpty).map(new ResolutionTrie(_))
+
+    private val httpMethods: List[HttpMethodMetadata[_]] = methods
+      .collect { case (Nil, hmm: HttpMethodMetadata[_]) => hmm }
+
+    private val prefixes: List[PrefixMetadata[_]] = methods
+      .collect { case (Nil, pm: PrefixMetadata[_]) => pm }
+
+    def resolvePath(
+      root: RestMetadata[_], prefixCalls: List[PrefixCall], pathParams: List[PathValue], path: List[PathValue]
+    ): Iterator[ResolvedCall] = {
+
+      val fromPrefixes = prefixes.iterator.flatMap { prefix =>
+        val prefixCall = PrefixCall(pathParams.reverse, prefix)
+        prefix.result.value.resolutionTrie.resolvePath(root, prefixCall :: prefixCalls, Nil, path)
+      }
+
+      val fromSelf = path match {
+        case Nil =>
+          httpMethods.iterator.map(hm => ResolvedCall(root, prefixCalls.reverse, HttpCall(pathParams.reverse, hm)))
+        case head :: tail =>
+          val fromWildcard =
+            wildcard.iterator.flatMap(_.resolvePath(root, prefixCalls, head :: pathParams, tail))
+          val fromNamed =
+            named.getOpt(head).iterator.flatMap(_.resolvePath(root, prefixCalls, pathParams, tail))
+          fromWildcard ++ fromNamed
+      }
+
+      fromPrefixes ++ fromSelf
+    }
+  }
+
+  private class ValidationTrie {
     val rpcChains: Map[HttpMethod, MBuffer[String]] =
       HttpMethod.values.mkMap(identity, _ => new MArrayBuffer[String])
 
-    val byName: MMap[String, Trie] = new MHashMap
-    var wildcard: Opt[Trie] = Opt.Empty
+    val byName: MMap[String, ValidationTrie] = new MHashMap
+    var wildcard: Opt[ValidationTrie] = Opt.Empty
 
-    def forPattern(pattern: List[PathPatternElement]): Trie = pattern match {
+    def forPattern(pattern: List[PathPatternElement]): ValidationTrie = pattern match {
       case Nil => this
       case PathName(PathValue(pathName)) :: tail =>
-        byName.getOrElseUpdate(pathName, new Trie).forPattern(tail)
+        byName.getOrElseUpdate(pathName, new ValidationTrie).forPattern(tail)
       case PathParam(_) :: tail =>
-        wildcard.getOrElse(new Trie().setup(t => wildcard = Opt(t))).forPattern(tail)
+        wildcard.getOrElse(new ValidationTrie().setup(t => wildcard = Opt(t))).forPattern(tail)
     }
 
-    def fillWith(metadata: RestMetadata[_], prefixStack: List[(String, PrefixMetadata[_])] = Nil): Unit = {
+    def fillWith(metadata: RestMetadata[_], prefixStack: List[PrefixMetadata[_]] = Nil): Unit = {
       def prefixChain: String =
-        prefixStack.reverseIterator.map({ case (k, _) => k }).mkStringOrEmpty("", "->", "->")
+        prefixStack.reverseIterator.map(_.name).mkStringOrEmpty("", "->", "->")
 
-      metadata.prefixMethods.foreach { case entry@(rpcName, pm) =>
-        if (prefixStack.contains(entry)) {
+      metadata.prefixMethods.foreach { pm =>
+        if (prefixStack.contains(pm)) {
           throw new InvalidRestApiException(
-            s"call chain $prefixChain$rpcName is recursive, recursively defined server APIs are forbidden")
+            s"call chain $prefixChain${pm.name} is recursive, recursively defined server APIs are forbidden")
         }
-        forPattern(pm.pathPattern).fillWith(pm.result.value, entry :: prefixStack)
+        forPattern(pm.pathPattern).fillWith(pm.result.value, pm :: prefixStack)
       }
-      metadata.httpMethods.foreach { case (rpcName, hm) =>
-        forPattern(hm.pathPattern).rpcChains(hm.method) += s"$prefixChain$rpcName"
+      metadata.httpMethods.foreach { hm =>
+        forPattern(hm.pathPattern).rpcChains(hm.method) += s"$prefixChain${hm.name}"
       }
     }
 
-    private def merge(other: Trie): Unit = {
+    private def merge(other: ValidationTrie): Unit = {
       HttpMethod.values.foreach { meth =>
         rpcChains(meth) ++= other.rpcChains(meth)
       }
       for (w <- wildcard; ow <- other.wildcard) w.merge(ow)
       wildcard = wildcard orElse other.wildcard
       other.byName.foreach { case (name, trie) =>
-        byName.getOrElseUpdate(name, new Trie).merge(trie)
+        byName.getOrElseUpdate(name, new ValidationTrie).merge(trie)
       }
     }
 
@@ -164,6 +200,7 @@ case class PathName(value: PathValue) extends PathPatternElement
 case class PathParam(param: PathParamMetadata[_]) extends PathPatternElement
 
 sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
+  def name: String
   def methodPath: List[PathValue]
   def parametersMetadata: RestParametersMetadata
 
@@ -197,6 +234,7 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
 }
 
 case class PrefixMetadata[T](
+  @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: Prefix,
   @composite parametersMetadata: RestParametersMetadata,
   @infer @checked result: RestMetadata.Lazy[T]
@@ -205,6 +243,7 @@ case class PrefixMetadata[T](
 }
 
 case class HttpMethodMetadata[T](
+  @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: HttpMethodTag,
   @composite parametersMetadata: RestParametersMetadata,
   @multi @tagged[BodyField] @rpcParamMetadata bodyFields: Mapping[ParamMetadata[_]],

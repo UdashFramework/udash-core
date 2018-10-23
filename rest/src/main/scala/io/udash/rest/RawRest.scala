@@ -8,12 +8,12 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 
 sealed abstract class RestMethodCall {
-  val rpcName: String
   val pathParams: List[PathValue]
   val metadata: RestMethodMetadata[_]
+  def rpcName: String = metadata.name
 }
-case class PrefixCall(rpcName: String, pathParams: List[PathValue], metadata: PrefixMetadata[_]) extends RestMethodCall
-case class HttpCall(rpcName: String, pathParams: List[PathValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
+case class PrefixCall(pathParams: List[PathValue], metadata: PrefixMetadata[_]) extends RestMethodCall
+case class HttpCall(pathParams: List[PathValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
 
 case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], finalCall: HttpCall) {
   lazy val pathPattern: List[PathPatternElement] =
@@ -68,11 +68,11 @@ trait RawRest {
   def handleResolved(request: RestRequest, resolved: ResolvedCall): Async[RestResponse] = {
     val RestRequest(method, parameters, body) = request
     val ResolvedCall(_, prefixes, finalCall) = resolved
-    val HttpCall(finalRpcName, finalPathParams, finalMetadata) = finalCall
+    val HttpCall(finalPathParams, finalMetadata) = finalCall
 
     def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
-      case PrefixCall(rpcName, pathParams, _) :: tail =>
-        rawRest.prefix(rpcName, parameters.copy(path = pathParams)) match {
+      case PrefixCall(pathParams, pm) :: tail =>
+        rawRest.prefix(pm.name, parameters.copy(path = pathParams)) match {
           case Success(nextRawRest) => resolveCall(nextRawRest, tail)
           case Failure(e: HttpErrorException) => RawRest.successfulAsync(e.toResponse)
           case Failure(cause) => RawRest.failingAsync(cause)
@@ -80,13 +80,13 @@ trait RawRest {
       case Nil =>
         val finalParameters = parameters.copy(path = finalPathParams)
         if (method == HttpMethod.GET)
-          rawRest.get(finalRpcName, finalParameters)
+          rawRest.get(finalMetadata.name, finalParameters)
         else if (finalMetadata.singleBody)
-          rawRest.handleSingle(finalRpcName, finalParameters, body)
+          rawRest.handleSingle(finalMetadata.name, finalParameters, body)
         else if (finalMetadata.formBody)
-          rawRest.handleForm(finalRpcName, finalParameters, HttpBody.parseFormBody(body))
+          rawRest.handleForm(finalMetadata.name, finalParameters, HttpBody.parseFormBody(body))
         else
-          rawRest.handle(finalRpcName, finalParameters, HttpBody.parseJsonBody(body))
+          rawRest.handle(finalMetadata.name, finalParameters, HttpBody.parseJsonBody(body))
     }
     try resolveCall(this, prefixes) catch {
       case e: InvalidRpcCall =>
@@ -213,7 +213,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
     extends RawRest {
 
     def prefix(name: String, parameters: RestParameters): Try[RawRest] =
-      metadata.prefixMethods.get(name).map { prefixMeta =>
+      metadata.prefixesByName.get(name).map { prefixMeta =>
         val newHeaders = prefixHeaders.append(prefixMeta, parameters)
         Success(new DefaultRawRest(prefixMeta.result.value, newHeaders, handleRequest))
       } getOrElse Failure(new RestException(s"no such prefix method: $name"))
@@ -228,7 +228,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
       handleSingle(name, parameters, HttpBody.createFormBody(body))
 
     def handleSingle(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
-      metadata.httpMethods.get(name).map { methodMeta =>
+      metadata.httpMethodsByName.get(name).map { methodMeta =>
         val newHeaders = prefixHeaders.append(methodMeta, parameters)
         handleRequest(RestRequest(methodMeta.method, newHeaders, body))
       } getOrElse RawRest.failingAsync(new RestException(s"no such HTTP method: $name"))
