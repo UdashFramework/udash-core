@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package utils
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
 import org.scalajs.dom.Element
 
@@ -37,7 +36,7 @@ object UdashListGroup {
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
            (body: (ElemType) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, componentId)(body)
 }

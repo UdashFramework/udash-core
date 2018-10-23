@@ -4,7 +4,6 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.component.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._

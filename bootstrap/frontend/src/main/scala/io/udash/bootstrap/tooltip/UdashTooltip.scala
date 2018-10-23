@@ -3,6 +3,7 @@ package tooltip
 
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
@@ -28,11 +29,11 @@ final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.tooltip("setContent")
 
-  selector.on("show.bs.tooltip", jQFire(TooltipEvent.ShowEvent(this)))
-  selector.on("shown.bs.tooltip", jQFire(TooltipEvent.ShownEvent(this)))
-  selector.on("hide.bs.tooltip", jQFire(TooltipEvent.HideEvent(this)))
-  selector.on("hidden.bs.tooltip", jQFire(TooltipEvent.HiddenEvent(this)))
-  selector.on("inserted.bs.tooltip", jQFire(TooltipEvent.InsertedEvent(this)))
+  selector.on("show.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent.ShowEvent(this)))
+  selector.on("shown.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent.ShownEvent(this)))
+  selector.on("hide.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent.HideEvent(this)))
+  selector.on("hidden.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent.HiddenEvent(this)))
+  selector.on("inserted.bs.tooltip", (_: Element, _: JQueryEvent) => fire(TooltipEvent.InsertedEvent(this)))
 }
 
 object UdashTooltip extends TooltipUtils[UdashTooltip] {

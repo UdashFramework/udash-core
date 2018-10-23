@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package label
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
@@ -22,7 +21,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Default, componentId)(bind(content))
 
   /**
@@ -44,7 +43,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def primary(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def primary(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Primary, componentId)(bind(content))
 
   /**
@@ -66,7 +65,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def success(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def success(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Success, componentId)(bind(content))
 
   /**
@@ -88,7 +87,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def info(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def info(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Info, componentId)(bind(content))
 
   /**
@@ -110,7 +109,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def warning(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def warning(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Warning, componentId)(bind(content))
 
   /**
@@ -132,7 +131,7 @@ object UdashLabel {
     * @param componentId Id of the root DOM node.
     * @return `UdashLabel` component, call render to create DOM element.
     */
-  def danger(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashLabel =
+  def danger(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashLabel =
     new UdashLabel(LabelStyle.Danger, componentId)(bind(content))
 
   /**

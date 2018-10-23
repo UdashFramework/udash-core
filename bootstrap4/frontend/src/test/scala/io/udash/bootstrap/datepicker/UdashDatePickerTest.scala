@@ -4,7 +4,6 @@ import java.{util => ju}
 
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.component.ComponentId
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._

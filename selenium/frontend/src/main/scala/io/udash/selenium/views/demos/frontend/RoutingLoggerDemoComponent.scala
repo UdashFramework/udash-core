@@ -2,7 +2,6 @@ package io.udash.selenium.views.demos.frontend
 
 import io.udash._
 import io.udash.bootstrap.form.UdashForm
-import io.udash.component.ComponentId
 import io.udash.css.CssView
 import io.udash.selenium.views.demos.UrlLoggingDemoService
 import scalatags.JsDom

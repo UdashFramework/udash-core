@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package button
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
@@ -58,6 +57,6 @@ object UdashButtonToolbar {
   def reactive[ItemType, ElemType <: ReadableProperty[ItemType]]
               (items: seq.ReadableSeqProperty[ItemType, ElemType],
                itemFactory: (ElemType) => Seq[Element],
-               componentId: ComponentId = UdashBootstrap.newId()): UdashButtonToolbar[ItemType, ElemType] =
+               componentId: ComponentId = ComponentId.newId()): UdashButtonToolbar[ItemType, ElemType] =
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
 }

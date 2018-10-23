@@ -5,8 +5,7 @@ import java.{util => ju}
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.{BootstrapStyles, Listenable, ListenableEvent, UdashBootstrap, UdashBootstrapComponent}
+import io.udash.bootstrap.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
@@ -195,7 +194,7 @@ object UdashDatePicker {
   import scalatags.JsDom.all._
 
   /** Creates date picker component. */
-  def apply(componentId: ComponentId = UdashBootstrap.newId())
+  def apply(componentId: ComponentId = ComponentId.newId())
            (date: Property[Option[ju.Date]], options: ReadableProperty[UdashDatePicker.DatePickerOptions]): UdashDatePicker =
     new UdashDatePicker(date, options, componentId)
 

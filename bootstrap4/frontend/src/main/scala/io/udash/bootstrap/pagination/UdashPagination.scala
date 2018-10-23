@@ -5,7 +5,6 @@ import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.component.ComponentId
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.{PropertyCreator, seq}
 import org.scalajs.dom.Element

@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package progressbar
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.progressbar.ProgressBarStyle.Default
 import io.udash.bootstrap.progressbar.UdashProgressBar.ValueStringifier
 import io.udash.wrappers.jquery._
@@ -83,7 +82,7 @@ object UdashProgressBar {
     */
   def apply(progress: ReadableProperty[Int] = Property(0), showPercentage: ReadableProperty[Boolean] = Property(true),
             barStyle: ProgressBarStyle = Default, minValue: Int = 0, maxValue: Int = 100, minWidth: Int = 2,
-            componentId: ComponentId = UdashBootstrap.newId())
+            componentId: ComponentId = ComponentId.newId())
            (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue)): UdashProgressBar =
     new UdashProgressBar(progress, showPercentage, barStyle, minValue, maxValue, minWidth, valueStringifier, componentId)
 
@@ -104,7 +103,7 @@ object UdashProgressBar {
     */
   def animated(progress: ReadableProperty[Int] = Property(0), showPercentage: ReadableProperty[Boolean] = Property(true),
                animate: ReadableProperty[Boolean] = Property(true), barStyle: ProgressBarStyle = Default, minValue: Int = 0,
-               maxValue: Int = 100, minWidth: Int = 2, componentId: ComponentId = UdashBootstrap.newId())
+               maxValue: Int = 100, minWidth: Int = 2, componentId: ComponentId = ComponentId.newId())
               (valueStringifier: ValueStringifier = percentValueStringifier(minValue, maxValue)): AnimatedUdashProgressBar =
     new AnimatedUdashProgressBar(progress, showPercentage, animate, barStyle, minValue, maxValue, minWidth, valueStringifier, componentId)
 

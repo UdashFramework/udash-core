@@ -2,14 +2,13 @@ package io.udash.bootstrap.utils
 
 import io.udash.Url
 import io.udash.bindings.modifiers.Binding
-import io.udash.component.Components
 import org.scalajs.dom.Element
 import scalatags.JsDom
 import scalatags.JsDom.GenericAttr
 import scalatags.JsDom.all._
 
 
-trait BootstrapImplicits extends Components {
+trait BootstrapImplicits {
   implicit val urlAttrValue: AttrValue[Url] = new AttrValue[Url] {
     def apply(t: Element, a: JsDom.Attr, v: Url): Unit =
       new GenericAttr[String].apply(t, a, v.value)

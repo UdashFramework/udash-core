@@ -4,7 +4,6 @@ package alert
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.component.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 

@@ -3,7 +3,6 @@ package io.udash.bootstrap.datepicker
 import java.{util => ju}
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._

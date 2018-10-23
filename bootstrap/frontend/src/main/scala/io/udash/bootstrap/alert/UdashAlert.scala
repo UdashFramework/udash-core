@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package alert
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Div
@@ -57,7 +56,7 @@ trait AlertCompanion[T <: UdashAlertBase] {
 
   /** Creates an alert with `Success` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def success(content: Modifier*): T =
-    create(Success, UdashBootstrap.newId())(content: _*)
+    create(Success, ComponentId.newId())(content: _*)
 
   /** Creates an alert with `Success` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def success(componentId: ComponentId, content: Modifier*): T =
@@ -65,7 +64,7 @@ trait AlertCompanion[T <: UdashAlertBase] {
 
   /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def info(content: Modifier*): T =
-    create(Info, UdashBootstrap.newId())(content: _*)
+    create(Info, ComponentId.newId())(content: _*)
 
   /** Creates an alert with `Info` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def info(componentId: ComponentId, content: Modifier*): T =
@@ -73,7 +72,7 @@ trait AlertCompanion[T <: UdashAlertBase] {
 
   /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def warning(content: Modifier*): T =
-    create(Warning, UdashBootstrap.newId())(content: _*)
+    create(Warning, ComponentId.newId())(content: _*)
 
   /** Creates an alert with `Warning` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def warning(componentId: ComponentId, content: Modifier*): T =
@@ -81,7 +80,7 @@ trait AlertCompanion[T <: UdashAlertBase] {
 
   /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def danger(content: Modifier*): T =
-    create(Danger, UdashBootstrap.newId())(content: _*)
+    create(Danger, ComponentId.newId())(content: _*)
 
   /** Creates an alert with `Danger` style, more: <a href="http://getbootstrap.com/javascript/#alerts">Bootstrap Docs</a>. */
   def danger(componentId: ComponentId, content: Modifier*): T =

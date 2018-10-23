@@ -3,7 +3,6 @@ package pagination
 
 import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion}
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
 import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
 import org.scalajs.dom.{Element, Event}
@@ -154,7 +153,7 @@ object UdashPagination {
     */
   def apply[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]]
            (size: PaginationSize = PaginationSize.Default, showArrows: ReadableProperty[Boolean] = Property(true),
-            highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = UdashBootstrap.newId())
+            highlightActive: ReadableProperty[Boolean] = Property(true), componentId: ComponentId = ComponentId.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => Element): UdashPagination[PageType, ElemType] =
     new UdashPagination(size, showArrows, highlightActive, componentId)(pages, selectedPage)(itemFactory)
@@ -172,7 +171,7 @@ object UdashPagination {
     * @return `UdashPagination` component, call render to create DOM element.
     */
   def pager[PageType : ModelPropertyCreator, ElemType <: ReadableProperty[PageType]]
-           (aligned: Boolean = false, componentId: ComponentId = UdashBootstrap.newId())
+           (aligned: Boolean = false, componentId: ComponentId = ComponentId.newId())
            (pages: seq.ReadableSeqProperty[PageType, ElemType], selectedPage: Property[Int])
            (itemFactory: (ElemType, UdashPagination.ButtonType) => Element): UdashPager[PageType, ElemType] =
     new UdashPager(aligned, componentId)(pages, selectedPage)(itemFactory)

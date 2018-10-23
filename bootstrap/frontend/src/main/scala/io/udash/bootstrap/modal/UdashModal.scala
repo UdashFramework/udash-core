@@ -2,9 +2,9 @@ package io.udash.bootstrap
 package modal
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
+import io.udash._
 
 import scala.scalajs.js
 
@@ -69,10 +69,10 @@ final class UdashModal private(modalSize: ModalSize, fade: Boolean, labelId: Str
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.modal", jQFire(ModalShowEvent(this)))
-    jQEl.on("shown.bs.modal", jQFire(ModalShownEvent(this)))
-    jQEl.on("hide.bs.modal", jQFire(ModalHideEvent(this)))
-    jQEl.on("hidden.bs.modal", jQFire(ModalHiddenEvent(this)))
+    jQEl.on("show.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalShowEvent(this)))
+    jQEl.on("shown.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalShownEvent(this)))
+    jQEl.on("hide.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalHideEvent(this)))
+    jQEl.on("hidden.bs.modal", (_: Element, _: JQueryEvent) => fire(ModalHiddenEvent(this)))
     el
   }
 }
@@ -106,7 +106,7 @@ object UdashModal {
     */
   def apply(modalSize: ModalSize = ModalSize.Default, fade: Boolean = true, labelId: String = "",
             backdrop: BackdropType = ActiveBackdrop, keyboard: Boolean = true, autoInit: Boolean = true,
-            componentId: ComponentId = UdashBootstrap.newId())
+            componentId: ComponentId = ComponentId.newId())
            (headerFactory: Option[() => Element] = None,
             bodyFactory: Option[() => Element] = None,
             footerFactory: Option[() => Element] = None): UdashModal =

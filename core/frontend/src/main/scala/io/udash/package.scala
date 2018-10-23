@@ -4,7 +4,7 @@ package object udash
   extends io.udash.bindings.Bindings
   with io.udash.properties.Properties
   with io.udash.routing.Routing
-  with io.udash .component.Components {
+  with io.udash.component.Components {
 
   // Defaults
   @deprecated("Renamed to `StaticViewFactory`.", "0.6.0")

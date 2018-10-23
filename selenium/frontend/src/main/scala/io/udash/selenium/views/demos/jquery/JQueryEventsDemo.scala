@@ -2,7 +2,6 @@ package io.udash.selenium.views.demos.jquery
 
 import io.udash._
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.component.ComponentId
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Event}
 

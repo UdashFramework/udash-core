@@ -2,7 +2,6 @@ package io.udash.bootstrap
 package utils
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Anchor
@@ -59,7 +58,7 @@ object UdashBreadcrumbs {
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (pages: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (pages: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
            (itemFactory: (ElemType) => Element, isSelected: (ItemType) => Boolean = (_: ItemType) => false): UdashBreadcrumbs[ItemType, ElemType] =
     new UdashBreadcrumbs(pages, componentId)(itemFactory, isSelected)
 }

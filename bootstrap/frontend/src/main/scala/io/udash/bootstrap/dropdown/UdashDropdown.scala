@@ -3,7 +3,6 @@ package dropdown
 
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
@@ -23,16 +22,16 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import io.udash.wrappers.jquery._
 
   /** Dropdown menu list ID. */
-  val menuId: ComponentId = UdashBootstrap.newId()
+  val menuId: ComponentId = ComponentId.newId()
   /** Dropdown button ID. */
-  val buttonId: ComponentId = UdashBootstrap.newId()
+  val buttonId: ComponentId = ComponentId.newId()
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
     jQ(s"#$buttonId").asInstanceOf[UdashDropdownJQuery].dropdown("toggle")
 
   private def withSelectionListener(elem: Element, id: Int): Element = {
-    jQ(elem).on(EventName.click, jQFire(SelectionEvent(this, items.get(id))))
+    jQ(elem).on(EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, items.get(id))))
     elem
   }
 
@@ -54,10 +53,10 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     ).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.dropdown", jQFire(DropdownShowEvent(this)))
-    jQEl.on("shown.bs.dropdown", jQFire(DropdownShownEvent(this)))
-    jQEl.on("hide.bs.dropdown", jQFire(DropdownHideEvent(this)))
-    jQEl.on("hidden.bs.dropdown", jQFire(DropdownHiddenEvent(this)))
+    jQEl.on("show.bs.dropdown", (_: Element, _: JQueryEvent) => fire(DropdownShowEvent(this)))
+    jQEl.on("shown.bs.dropdown", (_: Element, _: JQueryEvent) => fire(DropdownShownEvent(this)))
+    jQEl.on("hide.bs.dropdown", (_: Element, _: JQueryEvent) => fire(DropdownHideEvent(this)))
+    jQEl.on("hidden.bs.dropdown", (_: Element, _: JQueryEvent) => fire(DropdownHiddenEvent(this)))
     el
   }
 
@@ -123,7 +122,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
            (itemFactory: (ElemType) => Element)
            (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, false, componentId)(itemFactory)(content)
@@ -141,7 +140,7 @@ object UdashDropdown {
     * @return `UdashDropdown` component, call render to create DOM element.
     */
   def dropup[ItemType, ElemType <: ReadableProperty[ItemType]]
-            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+            (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
             (itemFactory: (ElemType) => Element)
             (content: Modifier*): UdashDropdown[ItemType, ElemType] =
     new UdashDropdown(items, true, componentId)(itemFactory)(content)

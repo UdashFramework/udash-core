@@ -4,7 +4,6 @@ import com.avsystem.commons._
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.component.ComponentId
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import scalatags.JsDom

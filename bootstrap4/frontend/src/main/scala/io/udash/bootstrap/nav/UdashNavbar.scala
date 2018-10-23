@@ -6,7 +6,6 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.nav.UdashNavbar.Position
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.component.ComponentId
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
