@@ -148,10 +148,10 @@ object RestResponses {
   * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
   * In such situation, [[RestResponses]] must be provided for `T` while [[RestResultType]] is provided
   * for `Future[T]` (or whatever async wrapper is used), based on the [[RestResponses]] instance of `T`.
-  * You can see an example of this in [[com.avsystem.commons.rest.FutureRestImplicits FutureRestImplicits]].
+  * You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
   *
   * [[RestResultType]] for [[OpenApiMetadata]] is analogous to [[HttpResponseType]]
-  * for [[com.avsystem.commons.rest.RestMetadata RestMetadata]].
+  * for [[io.udash.rest.RestMetadata RestMetadata]].
   */
 case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
