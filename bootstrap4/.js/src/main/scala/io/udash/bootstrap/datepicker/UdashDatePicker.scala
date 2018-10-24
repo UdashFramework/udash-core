@@ -73,12 +73,14 @@ final class UdashDatePicker private[datepicker](
       val event = ev.asInstanceOf[DatePickerChangeJQEvent]
       val dateOption = event.option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
       val oldDateOption = date.get
-      dateOption match {
-        case Some(null) => date.set(None)
-        case Some(d) => date.set(Option(d))
-        case None => date.set(None)
+      if (dateOption != oldDateOption) {
+        dateOption match {
+          case Some(null) => date.set(None)
+          case Some(d) => date.set(Option(d))
+          case None => date.set(None)
+        }
+        fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
       }
-      fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
     }))
     nestedInterceptor(new JQueryOnBinding(jQInput, "hide.datetimepicker", (_: Element, ev: JQueryEvent) => {
       fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
