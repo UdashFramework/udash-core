@@ -1,6 +1,5 @@
 package io.udash.selenium
 
-import com.softwaremill.sttp.Uri
 import io.udash.Application
 import io.udash.rest.DefaultRestClient
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
@@ -34,7 +33,7 @@ object Launcher {
     val (scheme, defaultPort) =
       if (dom.window.location.protocol == "https:") ("https", 443) else ("http", 80)
     val port = Try(dom.window.location.port.toInt).getOrElse(defaultPort)
-    SttpRestClient[MainServerREST](Uri(scheme, dom.window.location.hostname, port, List("rest_api")))
+    DefaultRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
   }
 
   @JSExport

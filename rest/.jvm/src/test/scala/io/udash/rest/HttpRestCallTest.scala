@@ -1,8 +1,7 @@
 package io.udash
 package rest
 
-import com.softwaremill.sttp._
-import io.udash.rest.RawRest.HandleRequest
+import io.udash.rest.raw.RawRest.HandleRequest
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletHandler, ServletHolder}
 
@@ -20,5 +19,5 @@ class HttpRestCallTest extends AbstractRestCallTest with UsesHttpServer {
   }
 
   def clientHandle: HandleRequest =
-    DefaultRestClient.asHandleRequest(uri"$baseUrl/api")
+    DefaultRestClient.asHandleRequest(s"$baseUrl/api")
 }

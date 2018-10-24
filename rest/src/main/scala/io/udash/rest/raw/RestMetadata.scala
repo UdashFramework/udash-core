@@ -1,10 +1,11 @@
 package io.udash
 package rest
+package raw
 
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
-import io.udash.rest.RestMetadata.ResolutionTrie
+import io.udash.rest.raw.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
 

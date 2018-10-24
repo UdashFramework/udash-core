@@ -12,6 +12,7 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
+import io.udash.rest.raw._
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}

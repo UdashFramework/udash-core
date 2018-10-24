@@ -6,6 +6,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.{Header => HeaderAnnot, _}
+import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
 import scala.collection.mutable

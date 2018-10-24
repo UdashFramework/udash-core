@@ -1,5 +1,6 @@
 package io.udash
 package rest
+package raw
 
 import java.util.concurrent.atomic.AtomicBoolean
 

@@ -7,6 +7,7 @@ import com.avsystem.commons.rpc.AsRawReal
 import com.avsystem.commons.serialization.{flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
+import io.udash.rest.raw._
 
 sealed trait BaseEntity
 object BaseEntity extends RestDataCompanion[BaseEntity]

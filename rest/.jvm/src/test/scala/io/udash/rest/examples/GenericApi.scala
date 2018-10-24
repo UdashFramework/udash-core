@@ -2,6 +2,7 @@ package io.udash
 package rest.examples
 
 import io.udash.rest._
+import io.udash.rest.raw._
 import com.avsystem.commons.serialization.GenCodec
 
 import scala.concurrent.Future

@@ -1,5 +1,6 @@
 package io.udash
 package rest
+package raw
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate

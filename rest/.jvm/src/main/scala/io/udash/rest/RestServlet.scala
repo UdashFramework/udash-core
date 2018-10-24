@@ -5,6 +5,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.meta.Mapping
 import io.udash.rest.RestServlet.DefaultHandleTimeout
+import io.udash.rest.raw._
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import scala.concurrent.duration._

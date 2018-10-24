@@ -5,7 +5,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.meta.{TypedMetadata, infer, reifyAnnot}
 import com.avsystem.commons.rpc.AsRaw
 import com.avsystem.commons.serialization.whenAbsent
-import io.udash.rest.JsonValue
+import io.udash.rest.raw.JsonValue
 
 import scala.util.Try
 

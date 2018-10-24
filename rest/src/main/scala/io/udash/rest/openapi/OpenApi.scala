@@ -3,9 +3,9 @@ package rest.openapi
 
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import io.udash.rest.JsonValue
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{transientDefault => td, _}
+import io.udash.rest.raw._
 
 /**
   * Representation of

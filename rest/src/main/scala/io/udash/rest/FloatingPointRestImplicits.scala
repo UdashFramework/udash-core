@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.rpc.AsRawReal
+import io.udash.rest.raw._
 
 trait FloatingPointRestImplicits {
   implicit final val floatPathValueAsRealRaw: AsRawReal[PathValue, Float] =

@@ -6,7 +6,7 @@ import java.util.UUID
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
 import io.udash.rest.openapi.adjusters.SchemaAdjuster
-import io.udash.rest.{HttpBody, HttpResponseType}
+import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
@@ -151,7 +151,7 @@ object RestResponses {
   * You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
   *
   * [[RestResultType]] for [[OpenApiMetadata]] is analogous to [[HttpResponseType]]
-  * for [[io.udash.rest.RestMetadata RestMetadata]].
+  * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
   */
 case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {

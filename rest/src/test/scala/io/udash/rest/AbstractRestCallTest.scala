@@ -2,7 +2,8 @@ package io.udash
 package rest
 
 import com.avsystem.commons._
-import io.udash.rest.RawRest.HandleRequest
+import io.udash.rest.raw.RawRest
+import io.udash.rest.raw.RawRest.HandleRequest
 import org.scalactic.source.Position
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures

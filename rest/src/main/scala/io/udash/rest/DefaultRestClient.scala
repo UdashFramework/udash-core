@@ -8,6 +8,7 @@ import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
 import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
 import io.udash.rest.DefaultSttpBackend.backend
+import io.udash.rest.raw._
 
 object DefaultRestClient {
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String): RestApi =

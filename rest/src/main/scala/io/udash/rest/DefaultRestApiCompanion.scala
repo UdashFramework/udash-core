@@ -9,6 +9,7 @@ import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.avsystem.commons.serialization.{GenCodec, GenKeyCodec}
 import io.udash.rest.openapi._
+import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
 

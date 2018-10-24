@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons._
+import io.udash.rest.raw.RestMetadata
 import org.scalatest.FunSuite
 
 class RestValidationTest extends FunSuite with DefaultRestImplicits {

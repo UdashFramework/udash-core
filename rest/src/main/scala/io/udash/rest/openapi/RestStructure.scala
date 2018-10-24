@@ -7,8 +7,8 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.AsRaw
 import com.avsystem.commons.serialization._
-import io.udash.rest.JsonValue
 import io.udash.rest.openapi.adjusters._
+import io.udash.rest.raw._
 
 sealed trait RestStructure[T] extends TypedMetadata[T] {
   def schemaAdjusters: List[SchemaAdjuster]

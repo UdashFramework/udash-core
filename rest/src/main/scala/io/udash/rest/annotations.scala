@@ -3,6 +3,7 @@ package rest
 
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.rpc._
+import io.udash.rest.raw._
 
 import scala.annotation.StaticAnnotation
 
