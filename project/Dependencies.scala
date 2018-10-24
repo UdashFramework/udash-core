@@ -128,11 +128,11 @@ object Dependencies {
       dependsOn "bootstrap.js" dependsOn s"$momentJsVersion/min/moment-with-locales.js",
   ))
 
-  val bootstrap4FrontendDeps = Def.setting(Seq(
+  val bootstrap4SjsDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  val bootstrap4FrontendJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+  val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js" minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
     "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",

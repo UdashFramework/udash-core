@@ -133,7 +133,7 @@ lazy val udash = project.in(file("."))
     i18n, `i18n-js`,
     auth, `auth-js`,
     css, `css-js`,
-    bootstrap, charts
+    bootstrap, bootstrap4, charts
   )
   .settings(noPublishSettings)
 
@@ -214,8 +214,8 @@ lazy val bootstrap = jsProject(project)
 lazy val bootstrap4 = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.bootstrap4FrontendDeps.value,
-    jsDependencies ++= Dependencies.bootstrap4FrontendDeps.value
+    libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
+    jsDependencies ++= Dependencies.bootstrap4JsDeps.value
   )
 
 lazy val charts = jsProject(project)
