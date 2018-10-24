@@ -7,6 +7,8 @@ import scalatags.JsDom.Modifier
 
 import scala.concurrent.Future
 
+import scala.concurrent.Future
+
 package object i18n {
   type LangProperty = Property[Lang]
 
@@ -29,7 +31,9 @@ package object i18n {
     */
   def translatedDynamic[Key <: TranslationKey](
     key: Key, placeholder: Option[Element] = None
-  )(translator: Key => Future[Translated])(implicit lang: LangProperty): Binding =
+  )(
+    translator: Key => Future[Translated]
+  )(implicit lang: LangProperty): Binding =
     new DynamicTranslationBinding(key, translator, placeholder)
 
   /**

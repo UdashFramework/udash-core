@@ -1,5 +1,6 @@
 package io.udash.bindings.modifiers
 
+import com.avsystem.commons._
 import io.udash.bindings.Bindings._
 import io.udash.logging.CrossLogging
 import io.udash.properties._
@@ -9,13 +10,13 @@ import org.scalajs.dom._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[bindings]
-class ValidationValueModifier[T](property: ReadableProperty[T],
-                                 initBuilder: Option[(Future[ValidationResult], Binding.NestedInterceptor) => Seq[Node]],
-                                 completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
-                                 errorBuilder: Option[(Throwable, Binding.NestedInterceptor) => Seq[Node]],
-                                 override val customElementsReplace: DOMManipulator.ReplaceMethod)
-  extends Binding with DOMManipulator with CrossLogging {
+private[bindings] class ValidationValueModifier[T](
+  property: ReadableProperty[T],
+ initBuilder: Option[(Future[ValidationResult], Binding.NestedInterceptor) => Seq[Node]],
+ completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
+ errorBuilder: Option[(Throwable, Binding.NestedInterceptor) => Seq[Node]],
+ override val customElementsReplace: DOMManipulator.ReplaceMethod
+) extends Binding with DOMManipulator with CrossLogging {
 
   def this(property: ReadableProperty[T], initBuilder: Option[Future[ValidationResult] => Seq[Node]],
            completeBuilder: ValidationResult => Seq[Node], errorBuilder: Option[Throwable => Seq[Node]]) = {
@@ -41,10 +42,9 @@ class ValidationValueModifier[T](property: ReadableProperty[T],
     }
 
     val listener = (_: T) => {
-      import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
       val valid: Future[ValidationResult] = property.isValid
       initBuilder.foreach(b => rebuild(valid, b))
-      valid onComplete {
+      valid.onCompleteNow {
         case Success(result) => rebuild(result, completeBuilder)
         case Failure(error) =>
           logger.error("Validation failed!")

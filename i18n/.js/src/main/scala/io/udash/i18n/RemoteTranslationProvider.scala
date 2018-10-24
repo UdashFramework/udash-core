@@ -2,6 +2,7 @@ package io.udash.i18n
 
 import java.{util => ju}
 
+import com.avsystem.commons._
 import org.scalajs.dom.ext.Storage
 
 import scala.concurrent.Future
@@ -22,28 +23,26 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
                                 missingTranslationError: String = "Missing translation")
   extends FrontendTranslationProvider {
 
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-
   protected def storageKey(key: String)(implicit lang: Lang) = s"udash-i18n_${lang.lang}_$key"
   protected val cacheHashKey = "udash-i18n-cache-hash"
   protected val cacheTTLKey = "udash-i18n-cache-ttl"
 
-  private var reloading: Future[Option[Bundle]] = null
+  private var reloading: Future[Option[Bundle]] = _
 
   if (cache.isEmpty) logger.warn("RemoteTranslationProvider has no cache, so it will request server for every translation.")
 
   def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] =
     fromCache(key)
-      .recoverWith { case _ => translationsEndpoint.loadTemplate(key) }
-      .recoverWith { case _ => Future.successful(missingTranslationError) }
-      .map(template => putArgs(template, argv: _*))
+      .recoverWithNow { case _ => translationsEndpoint.loadTemplate(key) }
+      .recoverWithNow { case _ => Future.successful(missingTranslationError) }
+      .mapNow(template => putArgs(template, argv: _*))
 
   private def fromCache(key: String)(implicit lang: Lang): Future[String] =
     cache match {
       case Some(storage) =>
         reloadCache(storage)
-          .map(_ => storage(storageKey(key)))
-          .flatMap {
+          .mapNow(_ => storage(storageKey(key)))
+          .flatMapNow {
             case Some(translationString) =>
               Future.successful(translationString)
             case None =>
@@ -63,10 +62,10 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
       case Some(value) if isCacheValid(value) =>
         Future.successful(false)
       case _ if reloading != null =>
-        reloading.map(_ => true)
+        reloading.mapNow(_ => true)
       case _ =>
         reloading = translationsEndpoint.loadTranslations(BundleHash(storage(storageKey(cacheHashKey)).getOrElse("")))
-        reloading.map {
+        reloading.mapNow {
           case Some(Bundle(hash, translations)) =>
             translations.foreach {
               case (key, value) =>
