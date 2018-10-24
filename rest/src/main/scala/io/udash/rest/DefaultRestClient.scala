@@ -9,14 +9,14 @@ import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
 import io.udash.rest.DefaultSttpBackend.backend
 
-object SttpRestClient {
-  def apply[@explicitGenerics RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String): RestApi =
-    apply(uri"$baseUri")
-
-  def apply[@explicitGenerics RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: Uri): RestApi =
+object DefaultRestClient {
+  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri))
 
-  def toSttpRequest(baseUri: Uri, request: RestRequest): Request[String, Nothing] = {
+  def asHandleRequest(baseUri: String): RawRest.HandleRequest =
+    asHandleRequest(uri"$baseUri")
+
+  private def toSttpRequest(baseUri: Uri, request: RestRequest): Request[String, Nothing] = {
     val uri = baseUri |>
       (u => u.copy(path = u.path ++
         request.parameters.path.map(_.value))) |>
@@ -41,13 +41,14 @@ object SttpRestClient {
     )
   }
 
-  def fromSttpResponse(sttpResp: Response[String]): RestResponse =
+  private def fromSttpResponse(sttpResp: Response[String]): RestResponse =
     RestResponse(
       sttpResp.code,
       Mapping(
         sttpResp.headers.iterator.map {
           case (n, v) => (n, HeaderValue(v))
-        }.toList
+        }.toList,
+        caseInsensitive = true
       ),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
         val mimeType = contentType.split(";", 2).head
@@ -55,10 +56,7 @@ object SttpRestClient {
       }
     )
 
-  def asHandleRequest(baseUri: String): RawRest.HandleRequest =
-    asHandleRequest(uri"$baseUri")
-
-  def asHandleRequest(baseUri: Uri): RawRest.HandleRequest =
+  private def asHandleRequest(baseUri: Uri): RawRest.HandleRequest =
     RawRest.safeHandle(request => {
       val sttpReq = toSttpRequest(baseUri, request)
       callback =>

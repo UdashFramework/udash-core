@@ -4,13 +4,14 @@ package rest.openapi
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
-import io.udash.rest.{Header => HeaderAnnot, _}
 import io.udash.rest.openapi.adjusters._
+import io.udash.rest.{Header => HeaderAnnot, _}
 
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
 
-@implicitNotFound("OpenApiMetadata for ${T} not found, does it have a correctly defined companion?")
+@implicitNotFound("OpenApiMetadata for ${T} not found, does it have a correctly defined companion object, " +
+  "e.g. one that extends DefaultRestApiCompanion or other companion base?")
 @methodTag[RestMethodTag]
 case class OpenApiMetadata[T](
   @multi @rpcMethodMetadata

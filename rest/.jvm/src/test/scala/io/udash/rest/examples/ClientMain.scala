@@ -1,7 +1,7 @@
 package io.udash
 package rest.examples
 
-import io.udash.rest.SttpRestClient
+import io.udash.rest.DefaultRestClient
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -9,7 +9,7 @@ import scala.util.{Failure, Success}
 
 object ClientMain {
   def main(args: Array[String]): Unit = {
-    val proxy = SttpRestClient[UserApi]("http://localhost:9090/")
+    val proxy = DefaultRestClient[UserApi]("http://localhost:9090/")
 
     // just for this example, normally it's not recommended
     import scala.concurrent.ExecutionContext.Implicits.global

@@ -20,5 +20,5 @@ class HttpRestCallTest extends AbstractRestCallTest with UsesHttpServer {
   }
 
   def clientHandle: HandleRequest =
-    SttpRestClient.asHandleRequest(uri"$baseUrl/api")
+    DefaultRestClient.asHandleRequest(uri"$baseUrl/api")
 }

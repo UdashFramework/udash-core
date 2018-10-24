@@ -8,7 +8,8 @@ import io.udash.rest.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
 
-@implicitNotFound("RestMetadata for ${T} not found, does it have a correctly defined companion?")
+@implicitNotFound("RestMetadata for ${T} not found, does it have a correctly defined companion object, " +
+  "e.g. one that extends DefaultRestApiCompanion or other companion base?")
 @methodTag[RestMethodTag]
 case class RestMetadata[T](
   @multi @tagged[Prefix](whenUntagged = new Prefix)
@@ -285,5 +286,3 @@ case class PathParamMetadata[T](
 ) extends TypedMetadata[T] {
   val pathSuffix: List[PathValue] = PathValue.splitDecode(pathAnnot.pathSuffix)
 }
-
-class InvalidRestApiException(msg: String) extends RestException(msg)

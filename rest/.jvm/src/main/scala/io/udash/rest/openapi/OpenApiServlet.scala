@@ -7,7 +7,7 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 object OpenApiServlet {
-  def apply[@explicitGenerics RestApi: OpenApiMetadata](
+  @explicitGenerics def apply[RestApi: OpenApiMetadata](
     info: Info,
     components: Components = Components(),
     servers: List[Server] = Nil,

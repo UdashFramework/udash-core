@@ -9,21 +9,30 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import scala.concurrent.duration._
 
-class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDuration = DefaultHandleTimeout)
-  extends HttpServlet {
-
-  override def service(req: HttpServletRequest, resp: HttpServletResponse): Unit =
-    RestServlet.handle(handleRequest, req, resp, handleTimeout)
-}
-
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
 
-  def apply[@explicitGenerics RestApi: RawRest.AsRawRpc : RestMetadata](
+  @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
+}
 
-  def readParameters(request: HttpServletRequest): RestParameters = {
+class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDuration = DefaultHandleTimeout)
+  extends HttpServlet {
+
+  override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+    val asyncContext = request.startAsync().setup(_.setTimeout(handleTimeout.toMillis))
+    RawRest.safeAsync(handleRequest(readRequest(request))) {
+      case Success(restResponse) =>
+        writeResponse(response, restResponse)
+        asyncContext.complete()
+      case Failure(e) =>
+        writeFailure(response, e.getMessage.opt)
+        asyncContext.complete()
+    }
+  }
+
+  private def readParameters(request: HttpServletRequest): RestParameters = {
     // can't use request.getPathInfo because it decodes the URL before we can split it
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
     val path = PathValue.splitDecode(request.getRequestURI.stripPrefix(pathPrefix))
@@ -36,7 +45,7 @@ object RestServlet {
     RestParameters(path, headers, query)
   }
 
-  def readBody(request: HttpServletRequest): HttpBody = {
+  private def readBody(request: HttpServletRequest): HttpBody = {
     val mimeType = request.getContentType.opt.map(_.split(";", 2).head)
     mimeType.fold(HttpBody.empty) { mimeType =>
       val bodyReader = request.getReader
@@ -47,47 +56,29 @@ object RestServlet {
     }
   }
 
-  def readRequest(request: HttpServletRequest): RestRequest = {
+  private def readRequest(request: HttpServletRequest): RestRequest = {
     val method = HttpMethod.byName(request.getMethod)
     val parameters = readParameters(request)
     val body = readBody(request)
     RestRequest(method, parameters, body)
   }
 
-  def writeResponse(response: HttpServletResponse, restResponse: RestResponse, charset: String = "utf-8"): Unit = {
+  private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
     response.setStatus(restResponse.code)
     restResponse.headers.foreach {
       case (name, HeaderValue(value)) => response.addHeader(name, value)
     }
     restResponse.body.forNonEmpty { (content, mimeType) =>
-      response.setContentType(s"$mimeType;charset=$charset")
+      response.setContentType(s"$mimeType;charset=utf-8")
       response.getWriter.write(content)
     }
   }
 
-  def writeFailure(response: HttpServletResponse, message: Opt[String], charset: String = "utf-8"): Unit = {
+  private def writeFailure(response: HttpServletResponse, message: Opt[String]): Unit = {
     response.setStatus(500)
     message.foreach { msg =>
-      response.setContentType(s"text/plain;charset=$charset")
+      response.setContentType(s"text/plain;charset=utf-8")
       response.getWriter.write(msg)
-    }
-  }
-
-  def handle(
-    handleRequest: RawRest.HandleRequest,
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    handleTimeout: FiniteDuration = DefaultHandleTimeout,
-    charset: String = "utf-8"
-  ): Unit = {
-    val asyncContext = request.startAsync().setup(_.setTimeout(handleTimeout.toMillis))
-    RawRest.safeAsync(handleRequest(readRequest(request))) {
-      case Success(restResponse) =>
-        writeResponse(response, restResponse, charset)
-        asyncContext.complete()
-      case Failure(e) =>
-        writeFailure(response, e.getMessage.opt, charset)
-        asyncContext.complete()
     }
   }
 }

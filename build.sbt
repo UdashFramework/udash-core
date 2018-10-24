@@ -129,6 +129,7 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
 lazy val udash = project.in(file("."))
   .aggregate(
     macros,
+    utils, `utils-js`,
     core, `core-js`,
     rpc, `rpc-js`,
     rest, `rest-js`,

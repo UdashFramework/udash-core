@@ -216,23 +216,24 @@ object RawRest extends RawRpcCompanion[RawRest] {
       metadata.prefixesByName.get(name).map { prefixMeta =>
         val newHeaders = prefixHeaders.append(prefixMeta, parameters)
         Success(new DefaultRawRest(prefixMeta.result.value, newHeaders, handleRequest))
-      } getOrElse Failure(new RestException(s"no such prefix method: $name"))
+      } getOrElse Failure(new UnknownRpc(name, "prefix"))
 
     def get(name: String, parameters: RestParameters): Async[RestResponse] =
-      handleSingle(name, parameters, HttpBody.Empty)
+      doHandle("get", name, parameters, HttpBody.Empty)
 
     def handle(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
-      handleSingle(name, parameters, HttpBody.createJsonBody(body))
+      doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
     def handleForm(name: String, parameters: RestParameters, body: Mapping[QueryValue]): Async[RestResponse] =
-      handleSingle(name, parameters, HttpBody.createFormBody(body))
+      doHandle("handleForm", name, parameters, HttpBody.createFormBody(body))
 
     def handleSingle(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
+      doHandle("handleSingle", name, parameters, body)
+
+    private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
       metadata.httpMethodsByName.get(name).map { methodMeta =>
         val newHeaders = prefixHeaders.append(methodMeta, parameters)
         handleRequest(RestRequest(methodMeta.method, newHeaders, body))
-      } getOrElse RawRest.failingAsync(new RestException(s"no such HTTP method: $name"))
+      } getOrElse RawRest.failingAsync(new UnknownRpc(name, rawName))
   }
 }
-
-class RestException(msg: String, cause: Throwable = null) extends InvalidRpcCall(msg, cause)

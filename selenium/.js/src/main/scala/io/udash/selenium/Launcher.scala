@@ -2,7 +2,7 @@ package io.udash.selenium
 
 import com.softwaremill.sttp.Uri
 import io.udash.Application
-import io.udash.rest.SttpRestClient
+import io.udash.rest.DefaultRestClient
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
 import io.udash.rpc.DefaultServerRPC
 import io.udash.selenium.routing.{RoutingRegistryDef, RoutingState, StatesToViewFactoryDef}
