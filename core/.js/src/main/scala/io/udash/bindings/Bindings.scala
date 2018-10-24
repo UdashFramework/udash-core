@@ -25,24 +25,23 @@ trait Bindings {
   final val TextArea = inputs.TextArea
   final val TextInput = inputs.TextInput
 
-  implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
-  implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
+  implicit def seqFromNode(el: Node): Seq[Node] = js.Array(el)
+  implicit def seqFromElement(el: Element): Seq[Element] = js.Array(el)
   implicit def seqNodeFromOpt[T](el: Opt[T])(implicit ev: T => Modifier[Element]): Modifier[Element] = {
     new JsDom.all.SeqNode(el.toSeq)
   }
 
   /** Creates empty text node, which is useful as placeholder. */
   def emptyStringNode(): Node =
-    JsDom.StringFrag("").render
+    document.createTextNode("")
 
   /**
     * Renders component with provided timeout.
     * It's useful to render heavy components after displaying the main view.
     */
   def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = new Modifier[Element] {
-    import scalatags.JsDom.all.div
     override def applyTo(t: Element): Unit = {
-      val el = div().render
+      val el = document.createElement("div")
       t.appendChild(el)
       window.setTimeout(() => t.replaceChildren(el, component), timeout)
     }
@@ -56,7 +55,7 @@ trait Bindings {
     * @return Modifier for bound property.
     */
   def bind[T](property: ReadableProperty[T]): Binding =
-    new SimplePropertyModifier[T](property, true)
+    new SimplePropertyModifier[T](property)
 
   /**
     * Shows provided DOM elements only if property value is `true`.

@@ -2,8 +2,8 @@ package io.udash.bindings.modifiers
 
 import org.scalajs.dom.Node
 
-private[bindings]
-trait DOMManipulator {
+private[bindings] trait DOMManipulator {
+
   import DOMManipulator._
 
   /**
@@ -35,8 +35,7 @@ trait DOMManipulator {
     }
 }
 
-private[bindings]
-object DOMManipulator {
+private[bindings] object DOMManipulator {
   type ReplaceMethod = (Node, Seq[Node], Seq[Node]) => Boolean
   type InsertMethod = (Node, Node, Seq[Node]) => Boolean
 
