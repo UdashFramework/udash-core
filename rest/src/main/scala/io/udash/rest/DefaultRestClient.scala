@@ -14,6 +14,10 @@ object DefaultRestClient {
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri))
 
+  /**
+    * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
+    * a specified base URI using default HTTP client implementation (sttp).
+    */
   def asHandleRequest(baseUri: String): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri")
 
