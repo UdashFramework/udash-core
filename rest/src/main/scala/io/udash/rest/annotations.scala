@@ -10,19 +10,22 @@ import scala.annotation.StaticAnnotation
 /**
   * Base trait for tag annotations that determine how a REST method is translated into actual HTTP request.
   * A REST method may be annotated with one of HTTP method tags ([[GET]], [[PUT]], [[POST]], [[PATCH]], [[DELETE]])
-  * which means that this method represents actual HTTP call and is expected to return a `Future[Result]` where
-  * `Result` is encodable as [[RestResponse]].
+  * which means that this method represents actual HTTP call and is expected to return a `AsyncWrapper[Result]` where
+  * `Result` is encodable as [[RestResponse]] and `AsyncWrapper` represents some abstraction over asynchronous
+  * computations (`Future` by default - see [[DefaultRestApiCompanion]]).
   *
-  * If a REST method is not annotated with any of HTTP method tags, [[Prefix]] is assumed by default which means
-  * that this method only contributes to URL path, HTTP headers and query parameters but does not yet represent an
-  * actual HTTP request. Instead, it is expected to return some other REST API trait.
+  * If a REST method is not annotated with any of HTTP method tags, then either [[POST]] is assumed (if result type
+  * is a valid result type for HTTP method) or [[Prefix]] is assumed (if result type is another REST trait).
+  * [[Prefix]] means that this method only contributes to URL path, HTTP headers and query parameters but does not yet
+  * represent an actual HTTP request. Instead, it is expected to return instance of some other REST API trait
+  * which will ultimately determine the actual HTTP call.
   */
 sealed trait RestMethodTag extends RpcTag {
   /**
     * HTTP URL path segment associated with REST method annotated with this tag. This path may be multipart
     * (i.e. contain slashes). It may also be empty which means that this particular REST method does not contribute
-    * anything to URL path. Any special characters will be URL-encoded when creating HTTP request.
-    * If path is not specified explicitly, method name is used (the actual method name, not `rpcName`).
+    * anything to URL path. Any special characters must already be URL-encoded. If path is not specified explicitly,
+    * method name is used (the actual method name, not `rpcName`).
     *
     * @example
     * {{{
@@ -43,6 +46,9 @@ object RestMethodTag {
   def methodName: String = throw new NotImplementedError("stub")
 }
 
+/**
+  * Base class for [[RestMethodTag]]s representing actual HTTP methods, as opposed to [[Prefix]] methods.
+  */
 sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTag with AnnotationAggregate
 
 /**
@@ -80,7 +86,11 @@ class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(Htt
   @rpcNamePrefix("get_", overloadedOnly = true) type Implied
 }
 
-/** See [[BodyMethodTag]] */
+/**
+  * See [[BodyMethodTag]].
+  * This is the default tag for untagged methods which are not recognized as [[Prefix]] methods
+  * (i.e. their result type is not another REST trait).
+  */
 class POST(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.POST) {
   @rpcNamePrefix("post_", overloadedOnly = true) type Implied
 }

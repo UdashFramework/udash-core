@@ -5,7 +5,8 @@ import com.avsystem.commons.meta.MacroInstances
 
 /**
   * Base class for companions of REST API traits used only for REST clients to external services.
-  * Injects `GenCodec` and `GenKeyCodec` based serialization.
+  * Injects `Future` as the wrapper for asynchronous responses and `GenCodec`/`GenKeyCodec` based serialization
+  * for parameters and responses.
   */
 abstract class DefaultRestClientApiCompanion[Real](implicit
   inst: MacroInstances[DefaultRestImplicits, ClientInstances[Real]]
@@ -13,8 +14,9 @@ abstract class DefaultRestClientApiCompanion[Real](implicit
 
 /**
   * Base class for companions of REST API traits used only for REST servers exposed to external world.
-  * Injects `GenCodec` and `GenKeyCodec` based serialization and forces derivation of
-  * [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
+  * Injects `Future` as the wrapper for asynchronous responses and `GenCodec`/`GenKeyCodec` based serialization
+  * for parameters and responses.
+  * Also, forces derivation of [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
   */
 abstract class DefaultRestServerApiCompanion[Real](implicit
   inst: MacroInstances[DefaultRestImplicits, OpenApiServerInstances[Real]]
@@ -22,8 +24,9 @@ abstract class DefaultRestServerApiCompanion[Real](implicit
 
 /**
   * Base class for companions of REST API traits used for both REST clients and servers.
-  * Injects `GenCodec` and `GenKeyCodec` based serialization and forces derivation of
-  * [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
+  * Injects `Future` as the wrapper for asynchronous responses and `GenCodec`/`GenKeyCodec` based serialization
+  * for parameters and responses.
+  * Also, forces derivation of [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
   */
 abstract class DefaultRestApiCompanion[Real](implicit
   inst: MacroInstances[DefaultRestImplicits, OpenApiFullInstances[Real]]
