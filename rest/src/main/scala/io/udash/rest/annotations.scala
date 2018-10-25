@@ -122,6 +122,14 @@ class FormBody extends StaticAnnotation
 class Prefix(val path: String = RestMethodTag.methodName) extends RestMethodTag
 
 sealed trait RestParamTag extends RpcTag
+object RestParamTag {
+  /**
+    * Used as fake default value for `name` parameter. Replaced with actual param name by annotation processing
+    * in RPC macro engine.
+    */
+  def paramName: String = throw new NotImplementedError("stub")
+}
+
 sealed trait NonBodyTag extends RestParamTag {
   def isPath: Boolean = this match {
     case _: Path => true
@@ -155,7 +163,7 @@ class Header(override val name: String)
   * REST method parameters annotated as [[Query]] will be encoded as [[QueryValue]] and added to URL query
   * parameters. Parameters of [[GET]] REST methods are interpreted as [[Query]] parameters by default.
   */
-class Query(@defaultsToName override val name: String = null)
+class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with NonBodyTag
 
 /**
@@ -164,7 +172,7 @@ class Query(@defaultsToName override val name: String = null)
   * [[POST]], [[PATCH]], [[PUT]] or [[DELETE]]. Actually, parameters of these methods are interpreted as
   * [[BodyField]] by default which means that this annotation rarely needs to be applied explicitly.
   */
-class BodyField(@defaultsToName override val name: String = null)
+class BodyField(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with BodyTag
 
 /**
