@@ -35,6 +35,13 @@ sealed trait RestMethodTag extends RpcTag {
     */
   @defaultsToName def path: String
 }
+object RestMethodTag {
+  /**
+    * Used as fake default value for `path` parameter. Replaced with actual method name by annotation processing
+    * in RPC macro engine.
+    */
+  def methodName: String = throw new NotImplementedError("stub")
+}
 
 sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTag with AnnotationAggregate
 
@@ -69,24 +76,24 @@ sealed abstract class BodyMethodTag(method: HttpMethod) extends HttpMethodTag(me
   *
   * @param path see [[RestMethodTag.path]]
   */
-class GET(val path: String = null) extends HttpMethodTag(HttpMethod.GET) {
+class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(HttpMethod.GET) {
   @rpcNamePrefix("get_", overloadedOnly = true) type Implied
 }
 
 /** See [[BodyMethodTag]] */
-class POST(val path: String = null) extends BodyMethodTag(HttpMethod.POST) {
+class POST(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.POST) {
   @rpcNamePrefix("post_", overloadedOnly = true) type Implied
 }
 /** See [[BodyMethodTag]] */
-class PATCH(val path: String = null) extends BodyMethodTag(HttpMethod.PATCH) {
+class PATCH(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PATCH) {
   @rpcNamePrefix("patch_", overloadedOnly = true) type Implied
 }
 /** See [[BodyMethodTag]] */
-class PUT(val path: String = null) extends BodyMethodTag(HttpMethod.PUT) {
+class PUT(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PUT) {
   @rpcNamePrefix("put_", overloadedOnly = true) type Implied
 }
 /** See [[BodyMethodTag]] */
-class DELETE(val path: String = null) extends BodyMethodTag(HttpMethod.DELETE) {
+class DELETE(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.DELETE) {
   @rpcNamePrefix("delete_", overloadedOnly = true) type Implied
 }
 
@@ -112,7 +119,7 @@ class FormBody extends StaticAnnotation
   *
   * @param path see [[RestMethodTag.path]]
   */
-class Prefix(val path: String = null) extends RestMethodTag
+class Prefix(val path: String = RestMethodTag.methodName) extends RestMethodTag
 
 sealed trait RestParamTag extends RpcTag
 sealed trait NonBodyTag extends RestParamTag {
