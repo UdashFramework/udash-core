@@ -1,7 +1,7 @@
 package io.udash.selenium.frontend
 
-import io.udash.rpc.serialization.URLEncoder
 import io.udash.selenium.SeleniumTest
+import io.udash.utils.URLEncoder
 import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {

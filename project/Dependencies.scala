@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.33.1"
+  val avsCommonsVersion = "1.33.2"
 
   val atmosphereJSVersion = "2.3.6"
   val atmosphereVersion = "2.4.30"
@@ -58,17 +58,21 @@ object Dependencies {
     "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
 
-  private val coreCrossDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
-  ))
-
-  val coreJvmDeps = Def.setting(coreCrossDeps.value ++ Seq(
+  val utilsJvmDeps = Def.setting(Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val coreSjsDeps = Def.setting(coreCrossDeps.value ++ Seq(
+  val utilsSjsDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
+
+  private val coreCrossDeps = Def.setting(Seq(
+    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
+  ))
+  
+  val coreJvmDeps = coreCrossDeps
+  
+  val coreSjsDeps = coreCrossDeps
 
   private val rpcCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "upickle" % upickleVersion % Test,

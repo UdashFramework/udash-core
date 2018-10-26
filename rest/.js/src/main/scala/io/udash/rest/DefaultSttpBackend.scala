@@ -1,4 +1,5 @@
-package io.udash.rest
+package io.udash
+package rest
 
 import com.softwaremill.sttp.{FetchBackend, SttpBackend}
 
