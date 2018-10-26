@@ -259,16 +259,16 @@ case class HttpMethodMetadata[T](
 }
 
 /**
-  * Typeclass used during [[RestMetadata]] materialization to determine whether a real method is a valid HTTP
+  * Typeclass used during [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization to determine whether a real method is a valid HTTP
   * method. Usually this means that the result must be a type wrapped into something that captures asynchronous
   * computation, e.g. `Future`. Because REST framework core tries to be agnostic about this
-  * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for [[HttpResponseType]].
+  * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for [[io.udash.rest.raw.HttpResponseType HttpResponseType]].
   * They must be provided externally.
   *
-  * For example, [[FutureRestImplicits]] introduces an instance of [[HttpResponseType]] for `Future[T]`,
-  * for arbitrary type `T`. For [[RestMetadata]] materialization this means that every method which returns a
-  * `Future` is considered a valid HTTP method. [[FutureRestImplicits]] is injected into materialization of
-  * [[RestMetadata]] through one of the base companion classes, e.g. [[DefaultRestApiCompanion]].
+  * For example, [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] introduces an instance of [[io.udash.rest.raw.HttpResponseType HttpResponseType]] for `Future[T]`,
+  * for arbitrary type `T`. For [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
+  * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected into materialization of
+  * [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
   * See [[com.avsystem.commons.meta.MacroInstances MacroInstances]] for more information on injection of implicits.
   */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")

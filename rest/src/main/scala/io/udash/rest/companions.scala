@@ -21,7 +21,7 @@ trait OpenApiInstances[Real] {
 trait OpenApiServerInstances[Real] extends ServerInstances[Real] with OpenApiInstances[Real]
 trait OpenApiFullInstances[Real] extends FullInstances[Real] with OpenApiInstances[Real]
 
-/** @see [[RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
 abstract class RestClientApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, ClientInstances[Real]]
 ) {
@@ -32,7 +32,7 @@ abstract class RestClientApiCompanion[Implicits, Real](protected val implicits: 
     RawRest.fromHandleRequest(handleRequest)
 }
 
-/** @see [[RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
 abstract class RestServerApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, ServerInstances[Real]]
 ) {
@@ -43,7 +43,7 @@ abstract class RestServerApiCompanion[Implicits, Real](protected val implicits: 
     RawRest.asHandleRequest(real)
 }
 
-/** @see [[RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
 abstract class RestServerOpenApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiServerInstances[Real]]
 ) {
@@ -58,9 +58,9 @@ abstract class RestServerOpenApiCompanion[Implicits, Real](protected val implici
 /**
   * Base class for REST trait companions. Reduces boilerplate needed in order to define appropriate instances
   * of `AsRawReal` and `RestMetadata` for given trait. The `Implicits` type parameter lets you inject additional implicits
-  * into macro materialization of these instances, e.g. [[DefaultRestImplicits]].
+  * into macro materialization of these instances, e.g. [[io.udash.rest.DefaultRestImplicits DefaultRestImplicits]].
   * Usually, for even less boilerplate, this base class is extended by yet another abstract class which fixes
-  * the `Implicits` type, e.g. [[DefaultRestApiCompanion]].
+  * the `Implicits` type, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
   */
 abstract class RestApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, FullInstances[Real]]
@@ -75,7 +75,7 @@ abstract class RestApiCompanion[Implicits, Real](protected val implicits: Implic
     RawRest.asHandleRequest(real)
 }
 
-/** @see [[RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
 abstract class RestOpenApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiFullInstances[Real]]
 ) {

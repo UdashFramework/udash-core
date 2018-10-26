@@ -20,7 +20,7 @@ sealed trait RestValue extends Any {
 }
 
 /**
-  * Value used as encoding of [[Path]] parameters.
+  * Value used as encoding of [[io.udash.rest.Path Path]] parameters.
   */
 case class PathValue(value: String) extends AnyVal with RestValue
 object PathValue extends (String => PathValue) {
@@ -35,12 +35,12 @@ object PathValue extends (String => PathValue) {
 }
 
 /**
-  * Value used as encoding of [[Header]] parameters.
+  * Value used as encoding of [[io.udash.rest.Header Header]] parameters.
   */
 case class HeaderValue(value: String) extends AnyVal with RestValue
 
 /**
-  * Value used as encoding of [[Query]] parameters and [[BodyField]] parameters of [[FormBody]] methods.
+  * Value used as encoding of [[io.udash.rest.Query Query]] parameters and [[io.udash.rest.BodyField BodyField]] parameters of [[io.udash.rest.FormBody FormBody]] methods.
   */
 case class QueryValue(value: String) extends AnyVal with RestValue
 object QueryValue extends (String => QueryValue) {
@@ -63,7 +63,7 @@ object QueryValue extends (String => QueryValue) {
 }
 
 /**
-  * Value used as encoding of [[BodyField]] parameters of non-[[FormBody]] methods.
+  * Value used as encoding of [[io.udash.rest.BodyField BodyField]] parameters of non-[[io.udash.rest.FormBody FormBody]] methods.
   * Wrapped value MUST be a valid JSON.
   */
 case class JsonValue(value: String) extends AnyVal with RestValue
@@ -83,8 +83,8 @@ object JsonValue {
 }
 
 /**
-  * Value used to represent HTTP body. Also used as direct encoding of [[Body]] parameters. Types that have
-  * encoding to [[JsonValue]] automatically have encoding to [[HttpBody]] which uses application/json MIME type.
+  * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameters. Types that have
+  * encoding to [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to [[io.udash.rest.raw.HttpBody HttpBody]] which uses application/json MIME type.
   * There is also a specialized encoding provided for `Unit` which returns empty HTTP body when writing and ignores
   * the body when reading.
   */

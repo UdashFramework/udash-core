@@ -76,8 +76,7 @@ trait FutureRestImplicits {
 object FutureRestImplicits extends FutureRestImplicits
 
 /**
-  * Defines [[com.avsystem.commons.serialization.GenCodec GenCodec]] and
-  * [[com.avsystem.commons.serialization.GenKeyCodec GenKeyCodec]] based serialization for REST API traits.
+  * Defines `GenCodec` and `GenKeyCodec` based serialization for REST API traits.
   */
 trait GenCodecRestImplicits extends FloatingPointRestImplicits {
   protected final def handleReadFailure[T](expr: => T): T =
