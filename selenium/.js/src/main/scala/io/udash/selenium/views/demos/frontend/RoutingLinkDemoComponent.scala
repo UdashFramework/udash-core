@@ -4,9 +4,9 @@ import io.udash._
 import io.udash.bootstrap.form.UdashForm
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
-import io.udash.rpc.serialization.URLEncoder
 import io.udash.selenium.Launcher
 import io.udash.selenium.routing.FrontendRoutingDemosState
+import io.udash.utils.URLEncoder
 import scalatags.JsDom
 
 class RoutingLinkDemoComponent(url: Property[String]) extends CssView {
