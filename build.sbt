@@ -53,6 +53,7 @@ val commonSettings = Seq(
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonDeps.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
+  autoAPIMappings := true
 )
 
 val commonJSSettings = Seq(

@@ -61,7 +61,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   object Case extends AdtMetadataCompanion[Case]
 
   /**
-    * Will be inferred for case types that already have [[RestSchema]] defined directly.
+    * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
     */
   @positioned(positioned.here) case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],

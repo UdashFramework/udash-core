@@ -13,8 +13,7 @@ trait CodecWithStructure[T] {
 /**
   * Base class for companion objects of ADTs (case classes, objects, sealed hierarchies) which are used as
   * parameter or result types in REST API traits. Automatically provides instances of
-  * [[com.avsystem.commons.serialization.GenCodec GenCodec]] and
-  * [[io.udash.rest.openapi.RestSchema RestSchema]].
+  * `GenCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]].
   *
   * @example
   * {{{
