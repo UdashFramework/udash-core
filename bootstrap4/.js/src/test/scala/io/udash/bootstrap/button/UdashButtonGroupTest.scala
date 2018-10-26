@@ -3,10 +3,10 @@ package io.udash.bootstrap.button
 import io.udash._
 import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 
-class UdashButtonGroupTest extends UdashFrontendTest {
+class UdashButtonGroupTest extends UdashCoreFrontendTest {
 
   "UdashButtonGroup component" should {
     "render static buttons group" in {

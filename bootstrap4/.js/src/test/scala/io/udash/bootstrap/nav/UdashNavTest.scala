@@ -2,10 +2,10 @@ package io.udash.bootstrap.nav
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashNavTest extends UdashFrontendTest {
+class UdashNavTest extends UdashCoreFrontendTest {
 
   "UdashNav component" should {
     "render provided elements" in {

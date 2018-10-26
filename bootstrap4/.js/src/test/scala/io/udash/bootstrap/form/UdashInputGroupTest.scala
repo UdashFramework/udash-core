@@ -2,10 +2,10 @@ package io.udash.bootstrap.form
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashInputGroupTest extends UdashFrontendTest {
+class UdashInputGroupTest extends UdashCoreFrontendTest {
 
   "UdashInputGroup component" should {
     "clean up property listeners" in {

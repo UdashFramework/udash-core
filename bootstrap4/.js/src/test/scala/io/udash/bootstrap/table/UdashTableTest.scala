@@ -2,10 +2,10 @@ package io.udash.bootstrap.table
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashTableTest extends UdashFrontendTest {
+class UdashTableTest extends UdashCoreFrontendTest {
 
   case class TestEntity(name: String, age: Int, language: String)
   object TestEntity extends HasModelPropertyCreator[TestEntity]

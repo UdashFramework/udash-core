@@ -3,12 +3,12 @@ package io.udash.bootstrap.dropdown
 import io.udash._
 import io.udash.bootstrap._
 import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent.SelectionEvent
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.html.Button
 import scalatags.JsDom.all._
 
-class UdashDropdownTest extends UdashFrontendTest {
+class UdashDropdownTest extends UdashCoreFrontendTest {
   import UdashDropdown._
 
   private val elements: Seq[DefaultDropdownItem] =Seq(

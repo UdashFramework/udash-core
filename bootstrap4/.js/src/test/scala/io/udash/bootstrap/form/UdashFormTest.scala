@@ -3,14 +3,14 @@ package io.udash.bootstrap.form
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 import scala.concurrent.Future
 
-class UdashFormTest extends AsyncUdashFrontendTest {
+class UdashFormTest extends AsyncUdashCoreFrontendTest {
   import UdashForm._
 
   "UdashForm component" should {

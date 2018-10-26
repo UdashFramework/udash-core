@@ -5,14 +5,14 @@ import java.{util => ju}
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class UdashDatePickerTest extends AsyncUdashFrontendTest {
+class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
   "UdashDatePicker component" should {
     "show/hide on method call and emit events" ignore {

@@ -2,10 +2,10 @@ package io.udash.bootstrap.nav
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashNavbarTest extends UdashFrontendTest {
+class UdashNavbarTest extends UdashCoreFrontendTest {
 
   "UdashNavbar component" should {
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor" in {

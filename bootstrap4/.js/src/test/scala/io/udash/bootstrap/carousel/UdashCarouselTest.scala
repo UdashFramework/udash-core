@@ -6,14 +6,14 @@ import io.udash.bootstrap.utils.BootstrapStyles.Carousel
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.properties.seq.SeqProperty
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
 import scala.concurrent.Future
 import scala.util.Random
 
-class UdashCarouselTest extends AsyncUdashFrontendTest {
+class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
 
   "UdashCarousel component" should {
     val omitUrl = Url("//:0")

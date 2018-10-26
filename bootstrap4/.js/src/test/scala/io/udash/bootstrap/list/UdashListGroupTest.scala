@@ -2,10 +2,10 @@ package io.udash.bootstrap.list
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashListGroupTest extends UdashFrontendTest {
+class UdashListGroupTest extends UdashCoreFrontendTest {
 
   "UdashListGroup component" should {
     "update items list and clean up listeners properly" in {

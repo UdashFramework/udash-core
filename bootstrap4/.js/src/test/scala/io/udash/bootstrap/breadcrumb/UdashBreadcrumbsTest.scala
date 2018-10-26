@@ -2,10 +2,10 @@ package io.udash.bootstrap.breadcrumb
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashBreadcrumbsTest extends UdashFrontendTest {
+class UdashBreadcrumbsTest extends UdashCoreFrontendTest {
 
   "UdashBreadcrumbs component" should {
     "work with custom elements" in {

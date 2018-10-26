@@ -2,9 +2,9 @@ package io.udash.bootstrap.progressbar
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 
-class UdashProgressBarTest extends UdashFrontendTest {
+class UdashProgressBarTest extends UdashCoreFrontendTest {
 
   "UdashProgressBar component" should {
     "update progress value and clean up property listeners" in {

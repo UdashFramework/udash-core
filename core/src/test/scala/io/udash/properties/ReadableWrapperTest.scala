@@ -3,9 +3,9 @@ package io.udash.properties
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 
-class ReadableWrapperTest extends UdashSharedTest {
+class ReadableWrapperTest extends UdashCoreTest {
   "ReadableWrapper" should {
     "not allow access to the mutable API of Property" in {
       val p = Property[Int](7)

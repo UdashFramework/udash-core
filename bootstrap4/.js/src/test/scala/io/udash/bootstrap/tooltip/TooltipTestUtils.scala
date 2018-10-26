@@ -2,12 +2,12 @@ package io.udash.bootstrap.tooltip
 
 import io.udash._
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 
 import scala.concurrent.Future
 import scala.util.Random
 
-class TooltipTestUtils extends AsyncUdashFrontendTest {
+class TooltipTestUtils extends AsyncUdashCoreFrontendTest {
   def tooltipTest(companion: TooltipUtils[_ <: Tooltip[_, _]], expectContent: Boolean): Unit = {
     "display translated content" in {
       import io.udash.wrappers.jquery._

@@ -1,11 +1,11 @@
 package io.udash.properties
 
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 
 import scala.collection.mutable
 import scala.util.Random
 
-class CallbackSequencerTest extends UdashSharedTest {
+class CallbackSequencerTest extends UdashCoreTest {
   "CallbackSequencer" should {
     "fire listeners immediately without sequencing" in {
       val fires = mutable.ArrayBuffer[String]()

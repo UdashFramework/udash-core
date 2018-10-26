@@ -2,10 +2,10 @@ package io.udash.bootstrap.card
 
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashCardTest extends UdashFrontendTest {
+class UdashCardTest extends UdashCoreFrontendTest {
 
   "UdashCard component" should {
     "clean up property listeners" in {

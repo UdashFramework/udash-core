@@ -3,11 +3,11 @@ package io.udash.bootstrap.alert
 import io.udash._
 import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.html.Button
 
-class UdashAlertTest extends UdashFrontendTest {
+class UdashAlertTest extends UdashCoreFrontendTest {
 
   import scalatags.JsDom.all._
 

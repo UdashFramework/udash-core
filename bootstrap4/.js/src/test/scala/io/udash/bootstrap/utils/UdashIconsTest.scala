@@ -2,10 +2,10 @@ package io.udash.bootstrap.utils
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 
 
-class UdashIconsTest extends UdashFrontendTest with CssView {
+class UdashIconsTest extends UdashCoreFrontendTest with CssView {
 
   import scalatags.JsDom.all._
 

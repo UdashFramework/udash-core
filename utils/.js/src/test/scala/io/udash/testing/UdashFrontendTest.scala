@@ -1,5 +1,6 @@
 package io.udash.testing
 
+import org.scalajs.dom
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.DOMTokenList
 import org.scalatest.enablers.Containing

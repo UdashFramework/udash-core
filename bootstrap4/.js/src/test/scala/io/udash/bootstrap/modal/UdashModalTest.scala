@@ -3,11 +3,11 @@ package io.udash.bootstrap.modal
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
-class UdashModalTest extends UdashFrontendTest {
+class UdashModalTest extends UdashCoreFrontendTest {
 
   "UdashModal component" should {
     val header = (_: Binding.NestedInterceptor) => div("Header ").render

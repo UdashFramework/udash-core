@@ -5,13 +5,13 @@ import com.github.ghik.silencer.silent
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.util.{Random, Try}
 
-class PropertyTest extends UdashSharedTest {
+class PropertyTest extends UdashCoreTest {
   class C(val i: Int, val s: String) {
     var variable: Int = 7
     override def equals(obj: Any): Boolean = obj match {

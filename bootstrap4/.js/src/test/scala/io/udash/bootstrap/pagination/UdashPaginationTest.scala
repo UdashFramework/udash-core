@@ -2,13 +2,13 @@ package io.udash.bootstrap.pagination
 
 import io.udash._
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 
 import scala.concurrent.Future
 
-class UdashPaginationTest extends AsyncUdashFrontendTest {
+class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
   "UdashPagination component" should {
     "show and hide arrows on property change" in {
       val showArrows = Property(true)

@@ -2,11 +2,11 @@ package io.udash.bootstrap.collapse
 
 import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
-class UdashCollapseTest extends AsyncUdashFrontendTest {
+class UdashCollapseTest extends AsyncUdashCoreFrontendTest {
   import UdashCollapse._
 
   "UdashCollapse component" should {

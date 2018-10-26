@@ -3,10 +3,10 @@ package io.udash.bootstrap.jumbotron
 import io.udash._
 import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 import scalatags.JsDom.all._
 
-class UdashJumbotronTest extends UdashFrontendTest {
+class UdashJumbotronTest extends UdashCoreFrontendTest {
 
   "UdashJumbotron component" should {
     "clean up property listeners" in {

@@ -3,9 +3,9 @@ package io.udash.bootstrap.badge
 import io.udash._
 import io.udash.bootstrap._
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.UdashCoreFrontendTest
 
-class UdashBadgeTest extends UdashFrontendTest {
+class UdashBadgeTest extends UdashCoreFrontendTest {
 
   "UdashBadge component" should {
     "update styles" in {

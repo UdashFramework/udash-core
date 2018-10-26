@@ -1,14 +1,14 @@
 package io.udash.bootstrap.collapse
 
 import io.udash._
-import io.udash.testing.AsyncUdashFrontendTest
+import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
 
 import scala.collection.mutable
 import scala.concurrent.Future
 
-class UdashAccordionTest extends AsyncUdashFrontendTest {
+class UdashAccordionTest extends AsyncUdashCoreFrontendTest {
 
   "UdashAccordion component" should {
     "grant access to created UdashCollapse instances" in {
