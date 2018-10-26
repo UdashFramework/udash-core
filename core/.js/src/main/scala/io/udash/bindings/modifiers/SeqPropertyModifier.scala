@@ -6,7 +6,7 @@ import org.scalajs.dom._
 
 private[bindings]
 class SeqPropertyModifier[T, E <: ReadableProperty[T]](override val property: ReadableSeqProperty[T, E],
-                                                       builder: (E, Binding => Binding) => Seq[Node],
+                                                       builder: (E, Binding.NestedInterceptor) => Seq[Node],
                                                        override val customElementsReplace: DOMManipulator.ReplaceMethod,
                                                        override val customElementsInsert: DOMManipulator.InsertMethod)
   extends SeqPropertyModifierUtils[T, E] {

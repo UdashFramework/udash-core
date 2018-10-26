@@ -11,7 +11,6 @@ class TooltipTestUtils extends AsyncUdashFrontendTest {
   def tooltipTest(companion: TooltipUtils[_ <: Tooltip[_, _]], expectContent: Boolean): Unit = {
     "display translated content" in {
       import io.udash.wrappers.jquery._
-
       import scalatags.JsDom.all._
 
       val body = jQ("body")
@@ -40,34 +39,34 @@ class TooltipTestUtils extends AsyncUdashFrontendTest {
         if (expectContent) s"$randMarker:ccc$randMarker:ddd"
         else s"$randMarker:ccc"
 
-      body.text().contains(expectedText()) should be(false)
-      body.text().contains(secondExpectedText()) should be(false)
+      body.text() shouldNot include(expectedText())
+      body.text() shouldNot include(secondExpectedText())
 
       for {
         _ <- Future(tooltip.show())
         _ <- retrying {
-          body.text().contains(expectedText()) should be(true)
-          body.text().contains(secondExpectedText()) should be(false)
+          body.text() should include(expectedText())
+          body.text() shouldNot include(secondExpectedText())
         }
 
         _ <- Future(tooltip.hide())
         _ <- retrying {
-          body.text().contains(expectedText()) should be(false)
-          body.text().contains(secondExpectedText()) should be(false)
+          body.text() shouldNot include(expectedText())
+          body.text() shouldNot include(secondExpectedText())
         }
 
         _ <- Future(lang.set(Lang("test2")))
 
         _ <- Future(tooltip.show())
         _ <- retrying {
-          body.text().contains(expectedText()) should be(false)
-          body.text().contains(secondExpectedText()) should be(true)
+          body.text() shouldNot include(expectedText())
+          body.text() should include(secondExpectedText())
         }
 
         _ <- Future(tooltip.hide())
         r <- retrying {
-          body.text().contains(expectedText()) should be(false)
-          body.text().contains(secondExpectedText()) should be(false)
+          body.text() shouldNot include(expectedText())
+          body.text() shouldNot include(secondExpectedText())
         }
       } yield r
     }

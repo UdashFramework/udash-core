@@ -36,6 +36,7 @@ env:
   - TEST_PACKAGE="auth/test auth-js/test"
   - TEST_PACKAGE="css/test css-js/test"
   - TEST_PACKAGE="bootstrap/test"
+  - TEST_PACKAGE="bootstrap4/test"
   - TEST_PACKAGE="charts/test"
   - TEST_PACKAGE="benchmarks/compile"
   - TEST_PACKAGE="selenium/test"

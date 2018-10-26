@@ -2,9 +2,9 @@ package io.udash.properties
 
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.properties.model.ModelProperty
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 
-class HasGenCodecAndModelPropertyCreatorTest extends UdashSharedTest {
+class HasGenCodecAndModelPropertyCreatorTest extends UdashCoreTest {
   import HasGenCodecAndModelPropertyCreatorTest._
 
   "HasGenCodecAndModelPropertyCreator class" should {

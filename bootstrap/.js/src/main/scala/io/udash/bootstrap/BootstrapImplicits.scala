@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-
+import io.udash.ComponentId
 import scalatags.JsDom.GenericAttr
 
 

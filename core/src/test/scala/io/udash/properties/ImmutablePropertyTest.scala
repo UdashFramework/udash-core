@@ -3,9 +3,9 @@ package io.udash.properties
 import io.udash.properties.model.ReadableModelProperty
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{Property, ReadableProperty}
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 
-class ImmutablePropertyTest extends UdashSharedTest {
+class ImmutablePropertyTest extends UdashCoreTest {
   import ImmutablePropertyTest._
 
   "ImmutableProperty" should {

@@ -2,17 +2,15 @@ package io.udash.bootstrap
 package table
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
-import org.scalajs.dom
 import org.scalajs.dom._
 
 final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
                       (striped: ReadableProperty[Boolean], bordered: ReadableProperty[Boolean], hover: ReadableProperty[Boolean],
                        condensed: ReadableProperty[Boolean], override val componentId: ComponentId)
                       (val items: seq.ReadableSeqProperty[ItemType, ElemType])
-                      (headerFactory: Option[() => dom.Element],
-                       rowFactory: (ElemType) => dom.Element)
+                      (headerFactory: Option[() => Element],
+                       rowFactory: (ElemType) => Element)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
@@ -59,9 +57,9 @@ object UdashTable {
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
            (striped: ReadableProperty[Boolean] = Property(false), bordered: ReadableProperty[Boolean] = Property(false),
             hover: ReadableProperty[Boolean] = Property(false), condensed: ReadableProperty[Boolean] = Property(false),
-            componentId: ComponentId = UdashBootstrap.newId())
+            componentId: ComponentId = ComponentId.newId())
            (items: seq.ReadableSeqProperty[ItemType, ElemType])
-           (rowFactory: (ElemType) => dom.Element,
-            headerFactory: Option[() => dom.Element] = None): UdashTable[ItemType, ElemType] =
+           (rowFactory: (ElemType) => Element,
+            headerFactory: Option[() => Element] = None): UdashTable[ItemType, ElemType] =
     new UdashTable(striped, bordered, hover, condensed, componentId)(items)(headerFactory, rowFactory)
 }

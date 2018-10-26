@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
+import io.udash.ComponentId
+import org.scalajs.dom.Element
 
 /** Base trait for Bootstrap components. */
 trait UdashBootstrapComponent {
@@ -9,5 +9,5 @@ trait UdashBootstrapComponent {
   val componentId: ComponentId
 
   /** Creates component DOM hierarchy. */
-  val render: dom.Element
+  val render: Element
 }

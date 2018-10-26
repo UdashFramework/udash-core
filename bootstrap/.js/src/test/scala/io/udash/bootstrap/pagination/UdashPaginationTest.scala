@@ -3,7 +3,7 @@ package io.udash.bootstrap.pagination
 import io.udash._
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 class UdashPaginationTest extends UdashFrontendTest {
   "UdashPagination component" should {
@@ -79,7 +79,7 @@ class UdashPaginationTest extends UdashFrontendTest {
     }
   }
 
-  def checkDisabled(els: dom.Element*)(expectFirst: Boolean, expectLast: Boolean) = {
+  def checkDisabled(els: Element*)(expectFirst: Boolean, expectLast: Boolean) = {
     els.foreach(el => {
       jQ(el).find("li").first().hasClass("disabled") should be(expectFirst)
       jQ(el).find("li").last().hasClass("disabled") should be(expectLast)

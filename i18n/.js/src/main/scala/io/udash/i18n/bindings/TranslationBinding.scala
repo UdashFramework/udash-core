@@ -5,13 +5,13 @@ import io.udash.bindings.Bindings
 import io.udash.i18n.Translated
 import io.udash.logging.CrossLogging
 import org.scalajs.dom._
-import scalatags.generic.Modifier
+import scalatags.JsDom.Modifier
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 private[i18n] class TranslationBinding(translation: Future[Translated], placeholder: Option[Element])
-  extends Modifier[Element] with Bindings with CrossLogging {
+  extends Modifier with Bindings with CrossLogging {
 
   override def applyTo(t: Element): Unit =
     if (translation.isCompleted && translation.value.get.isSuccess) {

@@ -7,7 +7,6 @@ import org.scalajs.dom.html.Button
 
 class UdashDropdownTest extends UdashFrontendTest {
   import UdashDropdown._
-
   import scalatags.JsDom.all._
 
   "UdashDropdown component" should {

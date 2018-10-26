@@ -8,8 +8,8 @@ import scalatags.JsDom
 class BindDemoComponent extends CssView {
   import JsDom.all._
 
-  val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-  val name: Property[String] = Property[String](names.next())
+  private val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
+  private val name: Property[String] = Property[String](names.next())
 
   dom.window.setInterval(() => name.set(names.next()), 250)
 

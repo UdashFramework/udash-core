@@ -14,7 +14,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case RestDemosState => RestDemosViewFactory
       case I18nDemosState => I18nDemosViewFactory
       case JQueryDemosState => JQueryDemosViewFactory
-//      case UserActivityDemosState => UserActivityExtViewFactory
+      case BootstrapDemosState => BootstrapDemosViewFactory
       case _ => RootViewFactory
     }
 }

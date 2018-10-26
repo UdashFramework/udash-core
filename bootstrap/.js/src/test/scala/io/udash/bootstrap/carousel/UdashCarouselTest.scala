@@ -6,9 +6,9 @@ import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
+import scalatags.JsDom.all._
 
 import scala.util.Random
-import scalatags.JsDom.all._
 
 class UdashCarouselTest extends AsyncUdashFrontendTest {
 

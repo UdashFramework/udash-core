@@ -2,24 +2,22 @@ package io.udash.bootstrap
 package navs
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.css.CssStyle
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
 
 final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] private
                        (navbarStyle: CssStyle, override val componentId: ComponentId)
-                       (brand: dom.Element, nav: UdashNav[ItemType, ElemType])
+                       (brand: Element, nav: UdashNav[ItemType, ElemType])
   extends UdashBootstrapComponent {
 
   import BootstrapTags._
   import io.udash.css.CssView._
 
-  private val collapseId = UdashBootstrap.newId()
+  private val collapseId = ComponentId.newId()
 
-  override val render: dom.Element =
+  override val render: Element =
     tags2.nav(id := componentId, BootstrapStyles.Navigation.navbar, navbarStyle)(
       div(BootstrapStyles.containerFluid)(
         div(BootstrapStyles.Navigation.navbarHeader)(
@@ -49,7 +47,7 @@ object UdashNavbar {
     * @return `UdashNavbar` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
+           (brand: Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.Navigation.navbarDefault, componentId)(brand, nav)
 
   /**
@@ -63,6 +61,6 @@ object UdashNavbar {
     * @return `UdashNavbar` component, call render to create DOM element.
     */
   def inverted[ItemType, ElemType <: ReadableProperty[ItemType]]
-              (brand: dom.Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId()): UdashNavbar[ItemType, ElemType] =
+              (brand: Element, nav: UdashNav[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()): UdashNavbar[ItemType, ElemType] =
     new UdashNavbar(BootstrapStyles.Navigation.navbarInverse, componentId)(brand, nav)
 }

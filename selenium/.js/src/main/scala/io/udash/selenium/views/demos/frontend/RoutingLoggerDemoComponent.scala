@@ -1,6 +1,7 @@
 package io.udash.selenium.views.demos.frontend
 
 import io.udash._
+import io.udash.bootstrap.form.UdashForm
 import io.udash.css.CssView
 import io.udash.selenium.views.demos.UrlLoggingDemoService
 import scalatags.JsDom
@@ -9,10 +10,17 @@ class RoutingLoggerDemoComponent extends CssView {
   import JsDom.all._
 
   def getTemplate: Modifier = div(id := "routing-logger-demo")(
-    span("Turn on logging:"), Checkbox(UrlLoggingDemoService.enabled)(id := "turn-on-logger"),
-    div(id := "routing-history")(
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
+      factory.input.checkbox(UrlLoggingDemoService.enabled, inline = true.toProperty, inputId = ComponentId("turn-on-logger"))(
+        labelContent = Some(_ => "Turn on frontend routing logger")
+      )
+    },
+    ul(id := "routing-history")(
       repeatWithNested(UrlLoggingDemoService.loadHistory) { case (item, nested) =>
-        span(nested(bind(item.transform(_._2))), " -> ", nested(bind(item.transform(_._1)))).render
+        li(nested(bind(item.transform(_._2))), " -> ", nested(bind(item.transform(_._1)))).render
       }
     )
   )

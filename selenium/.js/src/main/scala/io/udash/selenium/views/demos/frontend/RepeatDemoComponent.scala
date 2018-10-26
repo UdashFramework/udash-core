@@ -10,7 +10,7 @@ import scala.util.Random
 class RepeatDemoComponent extends CssView {
   import JsDom.all._
 
-  val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
+  private val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
 
   dom.window.setInterval(() => {
     val s: Int = integers.get.size

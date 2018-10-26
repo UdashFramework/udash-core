@@ -3,11 +3,9 @@ package button
 
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.UdashButton.ButtonClickEvent
 import org.scalajs.dom
 import org.scalajs.dom._
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -29,8 +27,8 @@ final class UdashButton private(buttonStyle: ButtonStyle, size: ButtonSize, bloc
       })
     )(content: _*).render
 
-  private[bootstrap] def radio(radioId: ComponentId, selected: Property[String]): dom.Element = {
-    val inputId = UdashBootstrap.newId()
+  private[bootstrap] def radio(radioId: ComponentId, selected: Property[String]): Element = {
+    val inputId = ComponentId.newId()
     val in = input(tpe := "radio", name := radioId, id := inputId)
     selected.listen(v => active.set(v == inputId.id))
     active.listen(v => if (v) selected.set(inputId.id))
@@ -63,7 +61,7 @@ object UdashButton {
     */
   def apply(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
             active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton =
+            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashButton =
     new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
 
   /**
@@ -81,7 +79,7 @@ object UdashButton {
     */
   def toggle(buttonStyle: ButtonStyle = ButtonStyle.Default, size: ButtonSize = ButtonSize.Default, block: Boolean = false,
              active: Property[Boolean] = Property(false), disabled: Property[Boolean] = Property(false),
-             componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashButton = {
+             componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashButton = {
     val button = new UdashButton(buttonStyle, size, block, active, disabled, componentId)(content: _*)
     button.listen { case _ => active.set(!active.get) }
     button

@@ -1,9 +1,9 @@
 package io.udash.selenium.views.demos.rpc
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.i18n._
 import io.udash.selenium.Launcher
@@ -12,10 +12,10 @@ import org.scalajs.dom.ext.LocalStorage
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class ExceptionsDemoModel(
   exception: String,
@@ -78,60 +78,72 @@ class ExceptionsDemoComponent extends CssView {
     )
     implicit val lang: Lang = Lang("en")
 
+    private val disableExceptionBtn = Property(false)
     private val exceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = disableExceptionBtn,
       componentId = ComponentId("exception-demo")
-    )("Call registered exception!")
+    )(_ => "Call registered exception!")
 
+    private val disableTranslatableExceptionBtn = Property(false)
     private val translatableExceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = disableTranslatableExceptionBtn,
       componentId = ComponentId("translatable-exception-demo")
-    )("Call registered translatable exception!")
+    )(_ => "Call registered translatable exception!")
 
+    private val disableUnknownExceptionBtn = Property(false)
     private val unknownExceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = disableUnknownExceptionBtn,
       componentId = ComponentId("unknown-exception-demo")
-    )("Call unknown exception!")
+    )(_ => "Call unknown exception!")
 
     exceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        disableExceptionBtn.set(true)
         presenter.exceptionCall()
     }
 
     translatableExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        disableTranslatableExceptionBtn.set(true)
         presenter.translatableExceptionCall()
     }
 
     unknownExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        disableUnknownExceptionBtn.set(true)
         presenter.unknownExceptionCall()
     }
 
     def render: Modifier = span(
       UdashInputGroup()(
-        UdashInputGroup.addon(
-          "Result: ",
+        UdashInputGroup.prependText(
+          span(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Right))("Result: "),
           produce(model.subProp(_.exception))(v => span(id := "exception-demo-response", v).render)
         ),
-        UdashInputGroup.buttons(exceptionButton.render)
+        UdashInputGroup.append(
+          exceptionButton.render
+        )
       ).render, br,
       UdashInputGroup()(
-        UdashInputGroup.addon(
-          "Result: ",
+        UdashInputGroup.prependText(
+          span(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Right))("Result: "),
           produce(model.subProp(_.translatableException))(v => span(id := "translatable-exception-demo-response")(translated(v())).render)
         ),
-        UdashInputGroup.buttons(translatableExceptionButton.render)
+        UdashInputGroup.append(
+          translatableExceptionButton.render
+        )
       ).render, br,
       UdashInputGroup()(
-        UdashInputGroup.addon(
-          "Result: ",
+        UdashInputGroup.prependText(
+          span(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Right))("Result: "),
           produce(model.subProp(_.unknownException))(v => span(id := "unknown-exception-demo-response", v).render)
         ),
-        UdashInputGroup.buttons(unknownExceptionButton.render)
+        UdashInputGroup.append(
+          unknownExceptionButton.render
+        )
       ).render
     )
   }

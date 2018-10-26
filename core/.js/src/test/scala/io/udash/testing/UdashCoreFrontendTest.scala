@@ -1,0 +1,5 @@
+package io.udash
+package testing
+
+trait UdashCoreFrontendTest extends UdashCoreTest with UdashFrontendTest
+trait AsyncUdashCoreFrontendTest extends AsyncUdashCoreTest with AsyncUdashFrontendTest
