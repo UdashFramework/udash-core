@@ -3,7 +3,7 @@ package io.udash.selenium.views.demos.i18n
 import io.udash.i18n._
 import io.udash.selenium.Launcher
 import io.udash.selenium.rpc.demos.i18n.Translations
-import org.scalajs.dom
+import org.scalajs.dom.Element
 import org.scalajs.dom.ext.LocalStorage
 
 import scala.concurrent.duration.DurationInt
@@ -12,7 +12,7 @@ import scala.language.postfixOps
 class RemoteTranslationsDemo {
   import scalatags.JsDom.all._
 
-  def getTemplate: dom.Element = {
+  def getTemplate: Element = {
     implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = Lang("pl")
     div(id := "rpc-translations-demo")(

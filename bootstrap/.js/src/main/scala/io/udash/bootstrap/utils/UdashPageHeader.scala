@@ -2,9 +2,7 @@ package io.udash.bootstrap
 package utils
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 final class UdashPageHeader private(override val componentId: ComponentId, mds: Modifier*)
@@ -12,7 +10,7 @@ final class UdashPageHeader private(override val componentId: ComponentId, mds: 
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     span(id := componentId, BootstrapStyles.Typography.pageHeader)(mds).render
 }
 
@@ -25,7 +23,7 @@ object UdashPageHeader {
     * @param componentId Id of the root DOM node.
     * @return `UdashPageHeader` component, call render to create DOM element.
     */
-  def apply(content: ReadableProperty[_], componentId: ComponentId = UdashBootstrap.newId()): UdashPageHeader =
+  def apply(content: ReadableProperty[_], componentId: ComponentId = ComponentId.newId()): UdashPageHeader =
     new UdashPageHeader(componentId, bind(content))
 
   /**
@@ -36,7 +34,7 @@ object UdashPageHeader {
     * @return `UdashPageHeader` component, call render to create DOM element.
     */
   def apply(content: Modifier*): UdashPageHeader =
-    new UdashPageHeader(UdashBootstrap.newId(), content)
+    new UdashPageHeader(ComponentId.newId(), content)
 
   /**
     * Creates page header component with default style.

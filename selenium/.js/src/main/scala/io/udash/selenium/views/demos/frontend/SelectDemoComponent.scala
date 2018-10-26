@@ -1,9 +1,10 @@
 package io.udash.selenium.views.demos.frontend
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
-import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
+import org.scalajs.dom.Element
 import scalatags.JsDom
 
 class SelectDemoComponent extends CssView {
@@ -15,37 +16,28 @@ class SelectDemoComponent extends CssView {
   case object Banana extends Fruit
 
   val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
-  val favoriteFruitString = favoriteFruit.transform(
-    (f: Fruit) => f.toString,
-    (s: String) => s match {
-      case "Apple" => Apple
-      case "Orange" => Orange
-      case "Banana" => Banana
+
+  def getTemplate: Modifier = div(id := "select-demo")(
+    UdashForm(
+      inputValidationTrigger = UdashForm.ValidationTrigger.None,
+      selectValidationTrigger = UdashForm.ValidationTrigger.None
+    ) { factory =>
+      Seq(radios(factory), radios(factory))
     }
   )
 
-  def getTemplate: Modifier = div(id := "select-demo")(
-    form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.row)(
-        div(
-          selector()
-        ),
-        br(),
-        div(
-          selector()
+  def radios(factory: UdashForm#FormElementsFactory): Element =
+    div(BootstrapStyles.Grid.row, BootstrapStyles.Spacing.margin())(
+      div(BootstrapStyles.Grid.col(12))(
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Fruits:"),
+          UdashInputGroup.select(
+            factory.input.select(
+              favoriteFruit, Seq[Fruit](Apple, Orange, Banana).toSeqProperty
+            )(itemLabel = item => item.toString).render
+          ),
+          UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
         )
       )
-    )
-  )
-
-  def selector() =
-    UdashInputGroup()(
-      UdashInputGroup.addon("Fruits:"),
-      UdashInputGroup.addon(
-        Select(
-          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )(Select.defaultLabel, BootstrapStyles.Form.formControl).render
-      ),
-      UdashInputGroup.addon(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
     ).render
 }

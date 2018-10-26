@@ -18,6 +18,6 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/rest" => RestDemosState
     case "/i18n" => I18nDemosState
     case "/jquery" => JQueryDemosState
-    case "/activity" => UserActivityDemosState
+    case "/bootstrap" => BootstrapDemosState
   }
 }

@@ -6,6 +6,8 @@ import org.scalajs.dom.html.{Div, Input => JSInput}
 import org.scalajs.dom.{Event, Node}
 import scalatags.JsDom.all._
 
+import scala.util.Random
+
 private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
   options: ReadableSeqProperty[T], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
 )(
@@ -14,6 +16,8 @@ private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
   refreshSelection: Seq[T] => Unit,
   onChange: (JSInput, T) => Event => Unit
 ) extends InputBinding[Div] {
+  private val groupIdPrefix: Long = Random.nextLong
+
   private val buttons = div(
     produce(options) { opts =>
       kill()
@@ -21,7 +25,10 @@ private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
 
       decorator(
         opts.zipWithIndex.map { case (opt, idx) =>
-          val in = input(inputModifiers, tpe := inputTpe, value := idx.toString).render
+          val in = input(
+            id := s"$groupIdPrefix-$idx", // default id, can be replaced by `inputModifiers`
+            inputModifiers, tpe := inputTpe, value := idx.toString
+          ).render
 
           val selected = checkedIf(opt)
           propertyListeners += selected.listen(in.checked = _, initUpdate = true)

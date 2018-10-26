@@ -3,7 +3,6 @@ package io.udash.bootstrap.collapse
 import io.udash.bootstrap.button.UdashButton
 import io.udash.testing.AsyncUdashFrontendTest
 import io.udash.wrappers.jquery._
-
 import scalatags.JsDom.all._
 
 class UdashCollapseTest extends AsyncUdashFrontendTest {

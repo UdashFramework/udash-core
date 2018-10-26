@@ -1,7 +1,7 @@
 package io.udash.selenium.views
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.selenium.routing.RootState
 

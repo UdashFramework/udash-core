@@ -3,13 +3,13 @@ package io.udash.properties
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
-import io.udash.testing.{AsyncUdashSharedTest, AsyncUdashSharedTestBase}
+import io.udash.testing.{AsyncUdashCoreTest, AsyncUdashSharedTestBase}
 
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.util.Random
 
-class PropertyValidationTest extends AsyncUdashSharedTest with AsyncUdashSharedTestBase {
+class PropertyValidationTest extends AsyncUdashCoreTest with AsyncUdashSharedTestBase {
   case class C(i: Int, s: String)
   object C extends HasModelPropertyCreator[C]
 

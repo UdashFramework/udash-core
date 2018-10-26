@@ -2,13 +2,13 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.UdashBootstrap.ComponentId
+import io.udash._
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
-
-import scala.scalajs.js
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
+
+import scala.scalajs.js
 
 final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: Boolean,
                                   override val componentId: ComponentId)(content: Modifier*)
@@ -45,10 +45,10 @@ final class UdashCollapse private(parentSelector: Option[String], toggleOnInit: 
     )(content).render
 
     val jQEl = jQ(el)
-    jQEl.on("show.bs.collapse", jQFire(CollapseShowEvent(this)))
-    jQEl.on("shown.bs.collapse", jQFire(CollapseShownEvent(this)))
-    jQEl.on("hide.bs.collapse", jQFire(CollapseHideEvent(this)))
-    jQEl.on("hidden.bs.collapse", jQFire(CollapseHiddenEvent(this)))
+    jQEl.on("show.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseShowEvent(this)))
+    jQEl.on("shown.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseShownEvent(this)))
+    jQEl.on("hide.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseHideEvent(this)))
+    jQEl.on("hidden.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseHiddenEvent(this)))
     el
   }
 
@@ -74,7 +74,7 @@ object UdashCollapse {
     * @return `UdashCollapse` component, call render to create DOM element.
     */
   def apply(parentSelector: Option[String] = None, toggleOnInit: Boolean = true,
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashCollapse =
+            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashCollapse =
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
 
   @js.native

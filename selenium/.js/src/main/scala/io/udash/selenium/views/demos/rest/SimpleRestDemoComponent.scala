@@ -1,16 +1,16 @@
 package io.udash.selenium.views.demos.rest
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton, UdashButtonGroup}
+import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import io.udash.selenium.rpc.demos.rest.RestExampleClass
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 class SimpleRestDemoComponent extends CssView {
 
@@ -19,21 +19,24 @@ class SimpleRestDemoComponent extends CssView {
   class ExampleModel(
     val string: String,
     val int: Int,
-    val cls: Option[RestExampleClass]
+    val cls: Option[RestExampleClass],
+
+    val loadingString: Boolean,
+    val loadingInt: Boolean,
+    val loadingCls: Boolean
   )
   object ExampleModel extends HasModelPropertyCreator[ExampleModel]
 
   object SimpleRestDemoViewFactory {
     def apply(): Modifier = {
-      val responsesModel = ModelProperty(new ExampleModel("-", 0, None))
+      val responsesModel = ModelProperty(new ExampleModel("-", 0, None, false, false, false))
       val presenter = new SimpleRestDemoPresenter(responsesModel)
       new SimpleRestDemoView(responsesModel, presenter).render
     }
   }
 
   class SimpleRestDemoPresenter(model: ModelProperty[ExampleModel]) {
-    def sendStringRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendStringRequest(): Unit = {
       Launcher.restServer.simple().string() onComplete {
         case Success(response) =>
           model.subProp(_.string).set(response)
@@ -42,8 +45,7 @@ class SimpleRestDemoComponent extends CssView {
       }
     }
 
-    def sendIntRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendIntRequest(): Unit = {
       Launcher.restServer.simple().int() onComplete {
         case Success(response) =>
           model.subProp(_.int).set(response)
@@ -52,8 +54,7 @@ class SimpleRestDemoComponent extends CssView {
       }
     }
 
-    def sendClassRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendClassRequest(): Unit = {
       Launcher.restServer.simple().cls() onComplete {
         case Success(response) =>
           model.subProp(_.cls).set(Some(response))
@@ -66,27 +67,36 @@ class SimpleRestDemoComponent extends CssView {
   class SimpleRestDemoView(model: ModelProperty[ExampleModel], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
 
-    val loadStringButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    private val loadStringButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = model.subProp(_.loadingString),
       componentId = ComponentId("simple-rest-demo-string-btn")
-    )("Get string")
-    val loadIntButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    )(_ => "Get string")
+    private val loadIntButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = model.subProp(_.loadingInt),
       componentId = ComponentId("simple-rest-demo-int-btn")
-    )("Get integer")
-    val loadClassButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    )(_ => "Get integer")
+    private val loadClassButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = model.subProp(_.loadingCls),
       componentId = ComponentId("simple-rest-demo-class-btn")
-    )("Get class")
+    )(_ => "Get class")
 
     loadStringButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendStringRequest(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        model.subProp(_.loadingString).set(true)
+        presenter.sendStringRequest()
     }
     loadIntButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendIntRequest(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        model.subProp(_.loadingInt).set(true)
+        presenter.sendIntRequest()
     }
     loadClassButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendClassRequest(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        model.subProp(_.loadingCls).set(true)
+        presenter.sendClassRequest()
     }
 
     def render: Modifier = span(id := "simple-rest-demo")(

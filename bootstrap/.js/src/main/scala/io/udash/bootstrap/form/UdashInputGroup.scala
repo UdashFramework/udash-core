@@ -1,17 +1,16 @@
 package io.udash.bootstrap
 package form
 
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
+import io.udash._
 
 final class UdashInputGroup private(groupSize: InputGroupSize, override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(BootstrapStyles.Form.inputGroup, groupSize)(
       content
     ).render
@@ -29,7 +28,7 @@ object UdashInputGroup {
     * @return `UdashInputGroup` component, call render to create DOM element.
     */
   def apply(groupSize: InputGroupSize = InputGroupSize.Default,
-            componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashInputGroup =
+            componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashInputGroup =
     new UdashInputGroup(groupSize, componentId)(content)
 
   /** Creates addon element for input group. */
@@ -41,7 +40,7 @@ object UdashInputGroup {
     div(BootstrapStyles.Form.inputGroupBtn)(content)
 
   /** Wraps input for input group. */
-  def input(el: dom.Element): dom.Element = {
+  def input(el: Element): Element = {
     BootstrapStyles.Form.formControl.addTo(el)
     el
   }

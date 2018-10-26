@@ -3,6 +3,7 @@ package tooltip
 
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
@@ -29,11 +30,11 @@ final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
   private[tooltip] def reloadContent(): Unit =
     selector.popover("setContent")
 
-  selector.on("show.bs.popover", jQFire(TooltipEvent.ShowEvent(this)))
-  selector.on("shown.bs.popover", jQFire(TooltipEvent.ShownEvent(this)))
-  selector.on("hide.bs.popover", jQFire(TooltipEvent.HideEvent(this)))
-  selector.on("hidden.bs.popover", jQFire(TooltipEvent.HiddenEvent(this)))
-  selector.on("inserted.bs.popover", jQFire(TooltipEvent.InsertedEvent(this)))
+  selector.on("show.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent.ShowEvent(this)))
+  selector.on("shown.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent.ShownEvent(this)))
+  selector.on("hide.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent.HideEvent(this)))
+  selector.on("hidden.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent.HiddenEvent(this)))
+  selector.on("inserted.bs.popover", (_: Element, _: JQueryEvent) => fire(TooltipEvent.InsertedEvent(this)))
 }
 
 object UdashPopover extends TooltipUtils[UdashPopover] {
@@ -46,7 +47,6 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
   override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(RightPlacement)
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
-
     import scalatags.Text.all._
     div(BootstrapStyles.Popover.popover, role := "tooltip")(
       div(BootstrapStyles.arrow),

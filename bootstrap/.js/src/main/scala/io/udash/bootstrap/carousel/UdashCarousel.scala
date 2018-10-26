@@ -3,19 +3,17 @@ package carousel
 
 import com.avsystem.commons.misc._
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.UdashIcons
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom
 import org.scalajs.dom.Element
+import scalatags.JsDom.all._
 
 import scala.scalajs.js
 import scala.scalajs.js.Dictionary
 import scala.util.Try
-import scalatags.JsDom.all._
 
 final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlide], val componentId: ComponentId,
                                   showIndicators: Boolean, activeSlide: Int, animationOptions: AnimationOptions)
@@ -84,12 +82,12 @@ final class UdashCarousel private(content: ReadableSeqProperty[UdashCarouselSlid
       )
     ).render
     val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
-    jqCarousel.on("slide.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
+    jqCarousel.on("slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       _activeIndex.set(idx)
       fire(SlideChangeEvent(this, idx, dir))
     })
-    jqCarousel.on("slid.bs.carousel", (_: dom.Element, ev: JQueryEvent) => {
+    jqCarousel.on("slid.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       _activeIndex.set(idx)
       fire(SlideChangedEvent(this, idx, dir))
@@ -160,7 +158,7 @@ object UdashCarousel {
     * @param animationOptions Carousel animation options.
     * @return `UdashCarousel` component
     */
-  def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = UdashBootstrap.newId(),
+  def apply(content: ReadableSeqProperty[UdashCarouselSlide], componentId: ComponentId = ComponentId.newId(),
             showIndicators: Boolean = true, activeSlide: Int = 0, animationOptions: AnimationOptions = AnimationOptions())
            : UdashCarousel =
     new UdashCarousel(content, componentId, showIndicators, activeSlide, animationOptions)
@@ -269,7 +267,7 @@ object UdashCarousel {
   * @param imgSrc  Slide image source url.
   * @param content Slide content.
   */
-case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*) extends UdashBootstrapComponent {
+case class UdashCarouselSlide(imgSrc: Url, override val componentId: ComponentId = ComponentId.newId())(content: Modifier*) extends UdashBootstrapComponent {
   import io.udash.css.CssView._
   override lazy val render: Element =
     div(id := componentId, BootstrapStyles.item)(

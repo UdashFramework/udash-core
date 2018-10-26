@@ -3,7 +3,6 @@ package io.udash.bootstrap.collapse
 import io.udash._
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery.jQ
-
 import scalatags.JsDom.all._
 
 class UdashAccordionTest extends UdashFrontendTest {

@@ -18,7 +18,8 @@ class IntroView extends FinalView with CssView {
       li(a(href := RpcDemosState.url)("RPC")),
       li(a(href := RestDemosState.url)("REST")),
       li(a(href := I18nDemosState.url)("i18n")),
-      li(a(href := JQueryDemosState.url)("jQuery"))
+      li(a(href := JQueryDemosState.url)("jQuery")),
+      li(a(href := BootstrapDemosState.url)("Bootstrap"))
     )
   )
 

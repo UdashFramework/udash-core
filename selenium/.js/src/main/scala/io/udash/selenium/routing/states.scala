@@ -27,4 +27,4 @@ case object JQueryDemosState extends FinalRoutingState(Some(RootState))
 
 case object I18nDemosState extends FinalRoutingState(Some(RootState))
 
-case object UserActivityDemosState extends FinalRoutingState(Some(RootState))
+case object BootstrapDemosState extends FinalRoutingState(Some(RootState))

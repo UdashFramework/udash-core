@@ -2,7 +2,7 @@ package io.udash.selenium.views.demos.i18n
 
 import io.udash.i18n._
 import io.udash.selenium.rpc.demos.i18n.Translations
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 object FrontendTranslationsProvider {
 
@@ -24,7 +24,7 @@ object FrontendTranslationsProvider {
 class FrontendTranslationsDemo {
   import scalatags.JsDom.all._
 
-  def getTemplate: dom.Element = {
+  def getTemplate: Element = {
     implicit val translationProvider = FrontendTranslationsProvider()
     implicit val lang = Lang("en")
     div(id := "frontend-translations-demo")(

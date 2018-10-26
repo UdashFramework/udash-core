@@ -32,6 +32,8 @@ object Dependencies {
   val scalatestVersion = "3.0.5"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
+  val bootstrap4Version = "4.1.3"
+  val bootstrap4DatepickerVersion = "5.1.2"
   val momentJsVersion = "2.22.2"
 
   val seleniumVersion = "3.12.0"
@@ -128,6 +130,17 @@ object Dependencies {
       s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
       minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js"
       dependsOn "bootstrap.js" dependsOn s"$momentJsVersion/min/moment-with-locales.js",
+  ))
+
+  val bootstrap4SjsDeps = Def.setting(Seq(
+    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
+  ))
+
+  val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+    "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js" minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
   ))
 
   val chartsSjsDeps = Def.setting(Seq(

@@ -10,7 +10,7 @@ import scala.util.Random
 class BindValidationDemoComponent extends CssView {
   import JsDom.all._
 
-  val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
+  private val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
   integers.addValidator((element: Seq[Int]) => {
     val zipped = element.toStream
       .slice(0, element.size-1)

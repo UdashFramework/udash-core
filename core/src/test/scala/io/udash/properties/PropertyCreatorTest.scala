@@ -1,8 +1,8 @@
 package io.udash.properties
 
-import io.udash.testing.UdashSharedTest
+import io.udash.testing.UdashCoreTest
 
-class PropertyCreatorTest extends UdashSharedTest {
+class PropertyCreatorTest extends UdashCoreTest {
   // DO NOT REMOVE THIS IMPORT!
   import io.udash.properties.Properties._
 

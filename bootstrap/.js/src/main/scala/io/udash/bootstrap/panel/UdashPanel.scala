@@ -1,17 +1,16 @@
 package io.udash.bootstrap
 package panel
 
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import org.scalajs.dom
-
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
+import io.udash._
 
 final class UdashPanel private(panelStyle: PanelStyle, override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
-  override val render: dom.Element =
+  override val render: Element =
     div(id := componentId, BootstrapStyles.Panel.panel, panelStyle)(
       content
     ).render
@@ -29,7 +28,7 @@ object UdashPanel {
     * @param content    Panel content.
     * @return `UdashPanel` component, call render to create DOM element.
     */
-  def apply(panelStyle: PanelStyle = PanelStyle.Default, componentId: ComponentId = UdashBootstrap.newId())(content: Modifier*): UdashPanel =
+  def apply(panelStyle: PanelStyle = PanelStyle.Default, componentId: ComponentId = ComponentId.newId())(content: Modifier*): UdashPanel =
     new UdashPanel(panelStyle, componentId)(content)
 
   /** Creates panel header with provided content. You can use it as panel component content. */

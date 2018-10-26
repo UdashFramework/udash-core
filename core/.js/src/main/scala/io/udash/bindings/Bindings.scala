@@ -24,6 +24,7 @@ trait Bindings {
   final val Select = inputs.Select
   final val TextArea = inputs.TextArea
   final val TextInput = inputs.TextInput
+  final val RangeInput = inputs.RangeInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = js.Array(el)
   implicit def seqFromElement(el: Element): Seq[Element] = js.Array(el)
@@ -147,7 +148,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
-                          (builder: (T, Binding => Binding) => Seq[Node]): Binding =
+                          (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, DOMManipulator.DefaultElementReplace)
 
   /**
@@ -176,7 +177,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
-                          (builder: (T, Binding => Binding) => Seq[Node]): Binding =
+                          (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
@@ -219,7 +220,7 @@ trait Bindings {
     * @return Modifier for bounded property.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-                          (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
+                          (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
@@ -238,7 +239,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
                            customElementsReplace: DOMManipulator.ReplaceMethod)
-                          (builder: (Seq[T], Binding => Binding) => Seq[Node]): Binding =
+                          (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
@@ -287,7 +288,7 @@ trait Bindings {
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
                                                     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
                                                     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
-                                                   (builder: (E, Binding => Binding) => Seq[Node]): Binding =
+                                                   (builder: (E, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
@@ -313,7 +314,7 @@ trait Bindings {
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
                                                    customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
                                                    customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
-                                                  (builder: (E, ReadableProperty[Int], Binding => Binding) => Seq[Node]): Binding =
+                                                  (builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
@@ -369,9 +370,9 @@ trait Bindings {
     * @return Modifier for validation logic.
     */
   def validWithNested[A](property: ReadableProperty[A])
-                        (completeBuilder: (ValidationResult, Binding => Binding) => Seq[Node],
-                         progressBuilder: (Future[ValidationResult], Binding => Binding) => Seq[Node] = null,
-                         errorBuilder: (Throwable, Binding => Binding) => Seq[Node] = null,
+                        (completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
+                         progressBuilder: (Future[ValidationResult], Binding.NestedInterceptor) => Seq[Node] = null,
+                         errorBuilder: (Throwable, Binding.NestedInterceptor) => Seq[Node] = null,
                          customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
 

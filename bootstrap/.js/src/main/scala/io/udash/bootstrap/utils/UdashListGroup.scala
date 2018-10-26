@@ -2,18 +2,15 @@ package io.udash.bootstrap
 package utils
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.properties.seq
-import org.scalajs.dom
 import org.scalajs.dom.Element
 
 final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] private
                           (items: seq.ReadableSeqProperty[ItemType, ElemType], override val componentId: ComponentId)
-                          (body: (ElemType) => dom.Element)
+                          (body: (ElemType) => Element)
   extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   override val render: Element =
@@ -39,7 +36,7 @@ object UdashListGroup {
     * @return `UdashBreadcrumbs` component, call render to create DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]]
-           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = UdashBootstrap.newId())
+           (items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId())
            (body: (ElemType) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, componentId)(body)
 }

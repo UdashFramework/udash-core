@@ -177,7 +177,7 @@ lazy val udash = project.in(file("."))
     i18n, `i18n-js`,
     auth, `auth-js`,
     css, `css-js`,
-    bootstrap, charts
+    bootstrap, bootstrap4, charts
   )
   .settings(noPublishSettings)
 
@@ -267,6 +267,13 @@ lazy val bootstrap = jsProject(project)
     jsDependencies ++= Dependencies.bootstrapJsDeps.value
   )
 
+lazy val bootstrap4 = jsProject(project)
+  .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
+  .settings(
+    libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
+    jsDependencies ++= Dependencies.bootstrap4JsDeps.value
+  )
+
 lazy val charts = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest)
   .settings(
@@ -314,7 +321,7 @@ lazy val `selenium-js` = jsProjectFor(project, selenium)
   .dependsOn(
     `core-js` % CompileAndTest, `rpc-js` % CompileAndTest, `rest-js` % CompileAndTest,
     `css-js` % CompileAndTest, `auth-js` % CompileAndTest, `i18n-js` % CompileAndTest,
-    bootstrap % CompileAndTest
+    bootstrap4 % CompileAndTest
   )
   .settings(
     noPublishSettings,

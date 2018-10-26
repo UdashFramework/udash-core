@@ -1,15 +1,17 @@
 package io.udash.selenium.views.demos.rpc
 
+import com.avsystem.commons._
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class PingPongCallDemoComponent extends CssView {
 
@@ -24,29 +26,32 @@ class PingPongCallDemoComponent extends CssView {
   }
 
   class PingPongCallDemoPresenter(model: Property[Int]) {
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
-      Launcher.serverRpc.demos().pingDemo().fPing(model.get) onComplete {
-        case Success(response) =>
-          model.set(response + 1)
-          btn.disabled.set(false)
-        case Failure(_) =>
-          model.set(-1)
-      }
+    def onButtonClick(): Future[Unit] = {
+      Launcher.serverRpc.demos().pingDemo().fPing(model.get).setup {
+        _.onComplete {
+          case Success(response) =>
+            model.set(response + 1)
+          case Failure(_) =>
+            model.set(-1)
+        }
+      }.toUnit
     }
   }
 
   class PingPongCallDemoView(model: Property[Int], presenter: PingPongCallDemoPresenter) {
     import JsDom.all._
 
-    val pingButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+    private val disablePingBtn = Property(false)
+    private val pingButton = UdashButton(
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
+      disabled = disablePingBtn,
       componentId = ComponentId("ping-pong-call-demo")
-    )("Ping(", bind(model), ")")
+    )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
     pingButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        disablePingBtn.set(true)
+        presenter.onButtonClick().onComplete(_ => disablePingBtn.set(false))
     }
 
     def render: Modifier = span(pingButton.render)

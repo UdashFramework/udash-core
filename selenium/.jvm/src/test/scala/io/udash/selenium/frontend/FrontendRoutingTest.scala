@@ -101,7 +101,7 @@ class FrontendRoutingTest extends SeleniumTest {
       driver.get(createUrl(url))
 
       val demoContainer = driver.findElementById("routing-logger-demo")
-      val enableCheckbox = demoContainer.findElement(By.id("turn-on-logger"))
+      val enableCheckbox = demoContainer.findElement(By.cssSelector("label[for=\"turn-on-logger\"]"))
       val history = demoContainer.findElement(By.id("routing-history"))
       val linkChanger = driver.findElementById("url-demo-link-input")
 
@@ -109,24 +109,21 @@ class FrontendRoutingTest extends SeleniumTest {
       history.getText should be("")
 
       linkChanger.sendKeys("test")
-      history.getText should be(
-        "Some(/frontend/routing) -> /frontend/routing/t" +
-          "Some(/frontend/routing/t) -> /frontend/routing/te" +
-          "Some(/frontend/routing/te) -> /frontend/routing/tes" +
-          "Some(/frontend/routing/tes) -> /frontend/routing/test"
-      )
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test"
+        )
+      }
+
       linkChanger.clear()
       linkChanger.sendKeys("qwe")
-      println(history.getText)
-      history.getText should be(
-        "Some(/frontend/routing) -> /frontend/routing/t" +
-          "Some(/frontend/routing/t) -> /frontend/routing/te" +
-          "Some(/frontend/routing/te) -> /frontend/routing/tes" +
-          "Some(/frontend/routing/tes) -> /frontend/routing/test" +
-          "Some(/frontend/routing/test) -> /frontend/routing/q" +
-          "Some(/frontend/routing/q) -> /frontend/routing/qw" +
-          "Some(/frontend/routing/qw) -> /frontend/routing/qwe"
-      )
+
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test\n" +
+            "Some(/frontend/routing/test) -> /frontend/routing/qwe"
+        )
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 package io.udash.bootstrap.tooltip
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash.bootstrap.ListenableEvent
+import io.udash._
 
 sealed trait TooltipEvent[TooltipType <: Tooltip[_, TooltipType]] extends AbstractCase with ListenableEvent[TooltipType]
 object TooltipEvent {

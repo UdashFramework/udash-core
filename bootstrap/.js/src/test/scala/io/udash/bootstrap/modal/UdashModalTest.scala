@@ -2,7 +2,6 @@ package io.udash.bootstrap.modal
 
 import io.udash.testing.UdashFrontendTest
 import io.udash.wrappers.jquery._
-
 import scalatags.JsDom.all._
 
 class UdashModalTest extends UdashFrontendTest {

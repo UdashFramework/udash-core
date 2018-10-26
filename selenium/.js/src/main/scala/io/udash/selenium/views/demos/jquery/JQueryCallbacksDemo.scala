@@ -1,8 +1,9 @@
 package io.udash.selenium.views.demos.jquery
 
+import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.wrappers.jquery._
-import org.scalajs.dom
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
@@ -27,7 +28,17 @@ class JQueryCallbacksDemo {
     jQ("#jquery-callbacks-demo #div").append(li(s"$a / $b = ${a / b}").render)
   })
 
-  def getTemplate: dom.Element = {
+  private val fireBtn = UdashButton(componentId = ComponentId("fire"))(_ => "Fire")
+
+  fireBtn.listen { case UdashButton.ButtonClickEvent(_, _) =>
+    callbacks.fire((1, 1))
+    callbacks.fire((3, 3))
+    callbacks.fire((7, 4))
+    callbacks.disable()
+    callbacks.fire((1, 2))
+  }
+
+  def getTemplate: Element = {
     div(id := "jquery-callbacks-demo")(
       "Plus:",
       ul(id := "plus"),
@@ -38,13 +49,7 @@ class JQueryCallbacksDemo {
       "Divide:",
       ul(id := "div"),
       br,
-      UdashButton()(id := "fire", onclick := (() => {
-        callbacks.fire((1, 1))
-        callbacks.fire((3, 3))
-        callbacks.fire((7, 4))
-        callbacks.disable()
-        callbacks.fire((1, 2))
-      }), "Fire").render
+      fireBtn.render
     ).render
   }
 }
