@@ -116,8 +116,8 @@ object RestSchema {
 }
 
 /**
-  * Typeclass which defines how an OpenAPI [[Responses]] Object will look like for a given type.
-  * By default, [[RestResponses]] is derived based on [[RestSchema]] for that type.
+  * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a given type.
+  * By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
   */
 @implicitNotFound("RestResponses for ${T} not found")
 case class RestResponses[T](responses: SchemaResolver => Responses)
@@ -142,15 +142,15 @@ object RestResponses {
 }
 
 /**
-  * Just like [[RestResponses]], [[RestResultType]] is a typeclass that defines how an OpenAPI
+  * Just like [[io.udash.rest.openapi.RestResponses RestResponses]], [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
   * Responses Object will look like for a HTTP method which returns given type. The difference between
-  * [[RestResultType]] and [[RestResponses]] is that [[RestResultType]] is defined for full result
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]] is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
   * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
-  * In such situation, [[RestResponses]] must be provided for `T` while [[RestResultType]] is provided
-  * for `Future[T]` (or whatever async wrapper is used), based on the [[RestResponses]] instance of `T`.
+  * In such situation, [[io.udash.rest.openapi.RestResponses RestResponses]] must be provided for `T` while [[io.udash.rest.openapi.RestResultType RestResultType]] is provided
+  * for `Future[T]` (or whatever async wrapper is used), based on the [[io.udash.rest.openapi.RestResponses RestResponses]] instance of `T`.
   * You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
   *
-  * [[RestResultType]] for [[OpenApiMetadata]] is analogous to [[HttpResponseType]]
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] for [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]] is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
   * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
   */
 case class RestResultType[T](responses: SchemaResolver => Responses)

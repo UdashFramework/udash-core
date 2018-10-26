@@ -118,16 +118,16 @@ object RawRest extends RawRpcCompanion[RawRest] {
   type Async[T] = Callback[T] => Unit
 
   /**
-    * Raw type of an operation that executes a [[RestRequest]]. The operation should be run every time the
+    * Raw type of an operation that executes a [[io.udash.rest.raw.RestRequest RestRequest]]. The operation should be run every time the
     * resulting `Async` value is passed a callback. It should not be run before that. Each run may involve side
     * effects, network communication, etc. Runs may be concurrent.
     * Request handlers should never throw exceptions but rather convert them into failing implementation of
-    * `Async`. One way to do this is by wrapping the handler with [[safeHandle]].
+    * `Async`. One way to do this is by wrapping the handler with [[io.udash.rest.raw.RawRest.safeHandle safeHandle]].
     */
   type HandleRequest = RestRequest => Async[RestResponse]
 
   /**
-    * Similar to [[HandleRequest]] but accepts already resolved path as a second argument.
+    * Similar to [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] but accepts already resolved path as a second argument.
     */
   type HandleResolvedRequest = (RestRequest, ResolvedCall) => Async[RestResponse]
 
