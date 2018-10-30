@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.testing.UdashFrontendTest
 import org.scalactic.source.Position
@@ -8,48 +7,11 @@ import org.scalajs.dom.Element
 import org.scalajs.dom.html.{Input => JSInput}
 
 class RadioButtonsTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
 
   "RadioButtons" should {
     def checkSelected(select: Element, selected: Seq[Boolean])(implicit pos: Position): Unit = {
       selected.zipWithIndex.foreach {
         case (value, idx) => select.childNodes(idx).asInstanceOf[JSInput].checked should be(value)
-      }
-    }
-
-    "synchronise state with property changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = Property[String]("B")
-
-      val buttons = (RadioButtons(p, options, s => div(s.map(t => t._1))): @silent).render
-
-      buttons.childElementCount should be(5)
-      checkSelected(buttons, List(false, true, false, false, false))
-
-      for ((opt, idx) <- options.zipWithIndex) {
-        p.set(opt)
-        checkSelected(buttons, List(false, false, false, false, false).updated(idx, true))
-      }
-    }
-
-    "synchronise property with state changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = Property[String]("X")
-
-      val buttons = (RadioButtons(p, options, s => div(s.map(t => t._1))): @silent).render
-
-      buttons.childElementCount should be(5)
-
-      for (i <- options.indices) {
-        buttons.childNodes(i).asInstanceOf[JSInput].click()
-        buttons.childNodes(i).asInstanceOf[JSInput].onchange(null)
-        p.get should be(options(i))
-      }
-
-      for (i <- options.indices.reverse) {
-        buttons.childNodes(i).asInstanceOf[JSInput].click()
-        buttons.childNodes(i).asInstanceOf[JSInput].onchange(null)
-        p.get should be(options(i))
       }
     }
 
