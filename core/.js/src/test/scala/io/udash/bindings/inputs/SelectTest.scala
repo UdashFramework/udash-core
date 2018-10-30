@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
@@ -10,37 +9,6 @@ import scalatags.JsDom.all.StringFrag
 
 class SelectTest extends UdashFrontendTest {
   "Select" should {
-    "synchronise state with property changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = Property[String]("B")
-
-      val select = (Select(p, options, Select.defaultLabel)(): @silent).render
-
-      select.childElementCount should be(5)
-      select.value should be("B")
-
-      for (o <- options) {
-        p.set(o)
-        select.value should be(o)
-      }
-    }
-
-    "synchronise property with state changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = Property[String]("B")
-
-      val select = (Select(p, options, Select.defaultLabel)(): @silent).render
-
-      select.childElementCount should be(5)
-
-      for (i <- options.indices) {
-        val o = options(i)
-        select.value = o
-        select.onchange(null)
-        p.get should be(o)
-      }
-    }
-
     "synchronise state with property changes" in {
       val options = Seq("A", "B", "C", "D", "E")
       val p = Property[String]("B")
@@ -170,55 +138,6 @@ class SelectTest extends UdashFrontendTest {
       selected.zipWithIndex.foreach {
         case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected = value
       }
-    }
-
-    "synchronise state with property changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String]("B")
-
-      val select = (Select(p, options, Select.defaultLabel)(): @silent).render
-
-      select.childElementCount should be(5)
-      checkSelected(select, List(false, true, false, false, false))
-
-      for ((opt, idx) <- options.zipWithIndex) {
-        p.set(Seq(opt))
-        checkSelected(select, List.fill(5)(false).updated(idx, true))
-      }
-
-      p.set(Seq("A", "B", "C", "D", "E"))
-      checkSelected(select, List(true, true, true, true, true))
-
-      p.clear()
-      checkSelected(select, List(false, false, false, false, false))
-    }
-
-    "synchronise property with state changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String]("B")
-
-      val select = (Select(p, options, Select.defaultLabel)(): @silent).render
-
-      select.childElementCount should be(5)
-
-      for ((opt, idx) <- options.zipWithIndex) {
-        setSelected(select, List.fill(5)(false).updated(idx, true))
-        select.onchange(null)
-        p.get should be(Seq(opt))
-      }
-
-      setSelected(select, List(false, true, false, true, false))
-      select.onchange(null)
-      p.get.size should be(2)
-      p.get should contain("B")
-      p.get should contain("D")
-
-      setSelected(select, List(true, false, true, false, true))
-      select.onchange(null)
-      p.get.size should be(3)
-      p.get should contain("A")
-      p.get should contain("C")
-      p.get should contain("E")
     }
 
     "synchronise state with property changes" in {

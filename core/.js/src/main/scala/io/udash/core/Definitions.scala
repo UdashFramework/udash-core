@@ -69,9 +69,6 @@ trait View {
     * @return DOM representation of view
     */
   def getTemplate: Modifier[Element]
-
-  @deprecated("Use `getTemplate` instead.", "0.6.0")
-  def apply(): Modifier[Element] = getTemplate
 }
 
 /** A [[io.udash.core.View]] which can render child view. */

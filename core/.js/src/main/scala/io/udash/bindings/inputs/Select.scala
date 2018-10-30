@@ -3,10 +3,9 @@ package io.udash.bindings.inputs
 import io.udash._
 import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
-import org.scalajs.dom.html.{Option, Select}
+import org.scalajs.dom.Event
+import org.scalajs.dom.html.Select
 import org.scalajs.dom.raw.HTMLOptionElement
-import org.scalajs.dom.{Element, Event}
-import scalatags.JsDom
 import scalatags.JsDom.all._
 
 /**
@@ -59,84 +58,4 @@ object Select {
       }
     )
   }
-
-  /**
-    * Single select for ValueProperty.
-    *
-    * @param property Property to bind.
-    * @param options Seq of available options.
-    * @param label Provides element label.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
-    * @return HTML select tag with bound ValueProperty, applied modifiers and nested options.
-    */
-  @deprecated("Use the constructor with dynamic options set and generic element type.", "0.7.0")
-  def apply(
-    property: Property[String], options: Seq[String], label: String => Modifier
-  )(xs: Modifier*): JsDom.TypedTag[Select] = {
-    val htmlOptions = prepareHtmlOptions(options, label)
-
-    def refreshSelectedItems(): Unit = {
-      htmlOptions.foreach { option =>
-        option.selected = property.get == option.value
-      }
-    }
-
-    val bind = new JsDom.Modifier {
-      override def applyTo(t: Element): Unit = {
-        val element = t.asInstanceOf[Select]
-
-        refreshSelectedItems()
-        property.listen(_ => refreshSelectedItems())
-        element.onchange = (_: Event) => {
-          property.set(htmlOptions.find(o => o.selected).get.value)
-        }
-      }
-    }
-
-    select(bind, xs)(htmlOptions)
-  }
-
-  /**
-    * Multi selection for SeqProperty. Bound SeqProperty will contain selected options.
-    *
-    * @param property Property to bind.
-    * @param options Seq of available options.
-    * @param label Provides element label.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
-    * @return HTML select tag with bound SeqProperty, applied modifiers and nested options.
-    */
-  @deprecated("Use the constructor with dynamic options set and generic element type.", "0.7.0")
-  def apply(
-    property: SeqProperty[String, _ <: ReadableProperty[String]], options: Seq[String], label: String => Modifier
-  )(xs: Modifier*): JsDom.TypedTag[Select] = {
-    val htmlOptions = prepareHtmlOptions(options, label)
-
-    def refreshSelectedItems(): Unit = {
-      val selection = property.get
-      htmlOptions.foreach { option =>
-        option.selected = selection.contains(option.value)
-      }
-    }
-
-    def collectSelectedItems: Seq[String] = {
-      htmlOptions.filter(option => option.selected).map(option => option.value)
-    }
-
-    val bind = new JsDom.Modifier {
-      override def applyTo(t: Element): Unit = {
-        val element = t.asInstanceOf[Select]
-
-        refreshSelectedItems()
-        property.listen(_ => refreshSelectedItems())
-        element.onchange = (event: Event) => property.set(collectSelectedItems)
-      }
-    }
-
-    select(multiple := true, bind, xs)(htmlOptions)
-  }
-
-  private def prepareHtmlOptions(options: Seq[String], label: String => Modifier): Seq[Option] =
-    options.map { opt =>
-      option(value := opt)(label(opt)).render
-    }
 }
