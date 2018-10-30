@@ -55,11 +55,14 @@ class PropertyCreatorTest extends UdashCoreTest {
       """case class A(s: String, i: Int)
         |val p = Property[A]("bla")""".stripMargin shouldNot typeCheck
 
-      """case class A(s: String, i: Int)(x: Int)
-        |object A {
-        |  implicit val blank: Blank[A] = null
+      """object Model {
+        |  case class A(s: String, i: Int)(x: Int)
+        |  object A {
+        |    implicit val blank: Blank[A] = null
+        |  }
         |}
-        |val p = Property.blank[A]""".stripMargin should compile
+        |
+        |val p = Property.blank[Model.A]""".stripMargin should compile
     }
 
     "create Property for sealed trait" in {
