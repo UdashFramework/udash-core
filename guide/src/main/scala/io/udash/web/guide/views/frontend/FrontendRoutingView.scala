@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
@@ -65,7 +65,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
         a(id := "url-demo-link-chocolate", href := s"${FrontendRoutingState(Some("chocolate")).url}")("Chocolate"), " | ",
         a(id := "url-demo-link-pizza", href := s"${FrontendRoutingState(Some("pizza")).url}")("Pizza"),
         br(), br(),
-        input(GlobalStyles.inline, BootstrapStyles.Form.formControl, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
+        input(GlobalStyles.inline, BootstrapStyles.Form.control, id := "url-demo-input", placeholder := "Type anything in this field, it should not disappear on a state change...")
       )
     ),
     p(
@@ -183,7 +183,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     ForceBootstrap(
       div(GuideStyles.frame, GuideStyles.useBootstrap)(
         input(
-          BootstrapStyles.Form.formControl, id := "url-demo-link-input", value := "",
+          BootstrapStyles.Form.control, id := "url-demo-link-input", value := "",
           placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
             applicationInstance.goTo(FrontendRoutingState(
               Some(js.Dynamic.global

@@ -1,7 +1,8 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 
@@ -21,31 +22,31 @@ object UrlLoggingDemo {
   def apply(): dom.Element =
     span(GuideStyles.frame, GuideStyles.useBootstrap)(
       form(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.row)(
-          div(BootstrapStyles.Grid.colMd4)(
-            div(BootstrapStyles.Form.inputGroup)(
-              div(BootstrapStyles.Form.inputGroupAddon)("Turn on logging:"),
-              div(BootstrapStyles.Form.inputGroupAddon)(Checkbox(UrlLoggingDemo.enabled)(cls := "checkbox-demo-a"))
+        div(BootstrapStyles.Grid.row)(
+          div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+            div(BootstrapStyles.InputGroup.inputGroup)(
+              div(BootstrapStyles.InputGroup.prepend)("Turn on logging:"),
+              div(BootstrapStyles.InputGroup.append)(Checkbox(UrlLoggingDemo.enabled)(cls := "checkbox-demo-a"))
             )
           )
         )
       ), br,
       form(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.row)(
-          div(BootstrapStyles.Grid.colMd4)(
+        div(BootstrapStyles.Grid.row)(
+          div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
             b("Url")
           ),
-          div(BootstrapStyles.Grid.colMd4)(
+          div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
             b("Referrer")
           )
         ),
         produce(UrlLoggingDemo.history)(seq =>
           div()(seq.map { case (url, refOpt) =>
-            div(BootstrapStyles.row)(
-              div(BootstrapStyles.Grid.colMd4)(
+            div(BootstrapStyles.Grid.row)(
+              div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
                 url
               ),
-              div(BootstrapStyles.Grid.colMd4)(
+              div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
                 refOpt
               )
             )

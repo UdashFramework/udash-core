@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -25,12 +25,12 @@ class PingPongCallDemoComponent extends Component {
   }
 
   class PingPongCallDemoPresenter(model: Property[Int]) {
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def onButtonClick(disabled: Property[Boolean]) = {
+      disabled.set(true)
       Context.serverRpc.demos().pingDemo().fPing(model.get) onComplete {
         case Success(response) =>
           model.set(response + 1)
-          btn.disabled.set(false)
+          disabled.set(false)
         case Failure(ex) =>
           model.set(-1)
       }
@@ -40,14 +40,16 @@ class PingPongCallDemoComponent extends Component {
   class PingPongCallDemoView(model: Property[Int], presenter: PingPongCallDemoPresenter) {
     import JsDom.all._
 
+    val pingDisabled = Property(false)
     val pingButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = pingDisabled,
       componentId = ComponentId("ping-pong-call-demo")
-    )("Ping(", bind(model), ")")
+    )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
     pingButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        presenter.onButtonClick(pingDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(

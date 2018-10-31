@@ -3,37 +3,38 @@ package io.udash.web.guide.views.ext.demo
 import java.util.concurrent.TimeUnit
 
 import io.udash._
+import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap._
 import io.udash.bootstrap.alert.{DismissibleUdashAlert, UdashAlert}
+import io.udash.bootstrap.badge.UdashBadge
+import io.udash.bootstrap.breadcrumb.UdashBreadcrumbs
 import io.udash.bootstrap.button._
-import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
-import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
+import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.datepicker.UdashDatePicker
 import io.udash.bootstrap.dropdown.UdashDropdown
 import io.udash.bootstrap.dropdown.UdashDropdown.{DefaultDropdownItem, DropdownEvent}
-import io.udash.bootstrap.form.{InputGroupSize, UdashForm, UdashInputGroup}
-import io.udash.bootstrap.label.UdashLabel
-import io.udash.bootstrap.modal.{ModalSize, UdashModal}
-import io.udash.bootstrap.navs.{UdashNav, UdashNavbar}
+import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+import io.udash.bootstrap.jumbotron.UdashJumbotron
+import io.udash.bootstrap.list.UdashListGroup
+import io.udash.bootstrap.modal.UdashModal
+import io.udash.bootstrap.nav.{UdashNav, UdashNavbar}
 import io.udash.bootstrap.pagination.UdashPagination
-import io.udash.bootstrap.panel.{PanelStyle, UdashPanel}
-import io.udash.bootstrap.progressbar.ProgressBarStyle.{Danger, Striped, Success}
 import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
+import io.udash.bootstrap.utils.BootstrapStyles.{Color, ResponsiveBreakpoint, Size}
 import io.udash.bootstrap.utils._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrap}
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.{BootstrapExtState, Context, IntroState}
+import io.udash.web.guide.{BootstrapExtState, IntroState}
 import org.scalajs.dom
 import scalatags.JsDom
 
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
@@ -45,16 +46,16 @@ object BootstrapDemos extends CrossLogging with CssView {
   import org.scalajs.dom._
 
   def statics(): dom.Element =
-    div(BootstrapStyles.row, GuideStyles.frame)(
-      div(BootstrapStyles.Grid.colXs9, BootstrapStyles.Well.well)(
+    div(BootstrapStyles.Grid.row, GuideStyles.frame)(
+      div(BootstrapStyles.Grid.col(9), BootstrapStyles.Border.border())(
         ".col-xs-9"
       ),
-      div(BootstrapStyles.Grid.colXs4, BootstrapStyles.Well.well)(
+      div(BootstrapStyles.Grid.col(4), BootstrapStyles.Border.border())(
         ".col-xs-4", br,
         "Since 9 + 4 = 13 > 12, this 4-column-wide div",
         "gets wrapped onto a new line as one contiguous unit."
       ),
-      div(BootstrapStyles.Grid.colXs6, BootstrapStyles.Well.well)(
+      div(BootstrapStyles.Grid.col(6), BootstrapStyles.Border.border())(
         ".col-xs-6", br,
         "Subsequent columns continue along the new line."
       )
@@ -62,18 +63,18 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def icons(): dom.Element =
     div(GuideStyles.frame)(
-      UdashButtonToolbar(
+      UdashButtonToolbar()(
         UdashButtonGroup()(
-          UdashButton()(i(UdashIcons.Glyphicon.alignLeft)).render,
-          UdashButton()(i(UdashIcons.Glyphicon.alignCenter)).render,
-          UdashButton()(i(UdashIcons.Glyphicon.alignRight)).render,
-          UdashButton()(i(UdashIcons.Glyphicon.alignJustify)).render
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.alignLeft)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.alignCenter)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.alignRight)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.alignJustify)).render
         ).render,
         UdashButtonGroup()(
-          UdashButton()(i(UdashIcons.FontAwesome.bitcoin)).render,
-          UdashButton()(i(UdashIcons.FontAwesome.euro)).render,
-          UdashButton()(i(UdashIcons.FontAwesome.dollar)).render,
-          UdashButton()(i(UdashIcons.FontAwesome.superpowers)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Brands.bitcoin)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.euroSign)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Solid.dollarSign)).render,
+          UdashButton()(i(UdashIcons.FontAwesome.Brands.superpowers)).render,
         ).render
       ).render
     ).render
@@ -94,7 +95,7 @@ object BootstrapDemos extends CrossLogging with CssView {
       case false => Seq.empty
     }
 
-    val picker: UdashDatePicker = UdashDatePicker()(date, pickerOptions)
+    val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)()
 
     val showButton = UdashButton()("Show")
     val hideButton = UdashButton()("Hide")
@@ -116,27 +117,39 @@ object BootstrapDemos extends CrossLogging with CssView {
       UdashDatePicker.loadBootstrapDatePickerStyles(),
       UdashInputGroup()(
         UdashInputGroup.input(picker.render),
-        UdashInputGroup.addon(bind(date.transform(_.toString)))
+        UdashInputGroup.appendText(bind(date.transform(_.toString)))
       ).render,
       hr,
-      UdashForm(
-        UdashForm.textInput()("Date format")(pickerOptions.subProp(_.format)),
-        UdashForm.group(
-          label("Locale"),
-          UdashForm.select(pickerOptions.subProp(_.locale).transform(_.get, Some(_)), Seq("en_GB", "pl", "ru", "af"))
+      UdashForm() { factory => Seq[Modifier](
+        factory.input.formGroup()(
+          input = _ => factory.input.textInput(pickerOptions.subProp(_.format))().render,
+          labelContent = Some(_ => "Date format")
         ),
-        UdashForm.checkbox()("Disable weekends")(disableWeekends),
-        UdashForm.checkbox()("Show `today` button")(pickerOptions.subProp(_.showTodayButton)),
-        UdashForm.checkbox()("Show `close` button")(pickerOptions.subProp(_.showClose)),
+        factory.input.formGroup()(
+          input = _ => factory.input.select(
+            pickerOptions.subProp(_.locale).transform[String]((_: Option[String]).get, Some(_: String)),
+            Seq("en_GB", "pl", "ru", "af").toSeqProperty
+          )(span(_)).render,
+          labelContent = Some(_ => "Locale")
+        ),
+        factory.input.checkbox(disableWeekends)(
+          labelContent = Some(_ => "Disable weekends")
+        ),
+        factory.input.checkbox(pickerOptions.subProp(_.showTodayButton))(
+          labelContent = Some(_ => "Show `today` button")
+        ),
+        factory.input.checkbox(pickerOptions.subProp(_.showClose))(
+          labelContent = Some(_ => "Show `close` button")
+        ),
         UdashButtonGroup()(
-          showButton.render,
-          hideButton.render,
-          enableButton.render,
-          disableButton.render
+          factory.externalBinding(showButton).render,
+          factory.externalBinding(hideButton).render,
+            factory.externalBinding(enableButton).render,
+              factory.externalBinding(disableButton).render
         ).render
-      ).render,
+      )}.render,
       hr,
-      div(BootstrapStyles.Well.well)(
+      div(BootstrapStyles.Border.border())(
         repeat(events)(ev => Seq(i(ev.get).render, br.render))
       )
     ).render
@@ -159,51 +172,61 @@ object BootstrapDemos extends CrossLogging with CssView {
       locale = Some("pl")
     ))
 
-    val fromPicker: UdashDatePicker = UdashDatePicker()(from, fromPickerOptions)
-    val toPicker: UdashDatePicker = UdashDatePicker()(to, toPickerOptions)
+    val fromPicker: UdashDatePicker = UdashDatePicker(from, fromPickerOptions)()
+    val toPicker: UdashDatePicker = UdashDatePicker(to, toPickerOptions)()
 
     UdashDatePicker.dateRange(fromPicker, toPicker)(fromPickerOptions, toPickerOptions)
 
     div(GuideStyles.frame)(
       UdashDatePicker.loadBootstrapDatePickerStyles(),
       UdashInputGroup()(
-        UdashInputGroup.addon("From"),
+        UdashInputGroup.prependText("From"),
         UdashInputGroup.input(fromPicker.render),
-        UdashInputGroup.addon("to"),
+        UdashInputGroup.appendText("to"),
         UdashInputGroup.input(toPicker.render)
       ).render
     ).render
   }
 
   def tables(): dom.Element = {
+    val responsive = Property[Option[ResponsiveBreakpoint]](Some(ResponsiveBreakpoint.All))
+    val dark = Property(false)
     val striped = Property(true)
     val bordered = Property(true)
     val hover = Property(true)
-    val condensed = Property(false)
+    val small = Property(false)
 
+    val darkButton = UdashButton.toggle(active = dark)("Dark theme")
     val stripedButton = UdashButton.toggle(active = striped)("Striped")
     val borderedButton = UdashButton.toggle(active = bordered)("Bordered")
     val hoverButton = UdashButton.toggle(active = hover)("Hover")
-    val condensedButton = UdashButton.toggle(active = condensed)("Condensed")
+    val smallButton = UdashButton.toggle(active = small)("Small")
 
     val items = SeqProperty(
       Seq.fill(7)((Random.nextDouble(), Random.nextDouble(), Random.nextDouble()))
     )
-    val table = UdashTable(striped, bordered, hover, condensed)(items)(
-      headerFactory = Some(() => tr(th(b("x")), th(b("y")), th(b("z"))).render),
-      rowFactory = (el) => tr(
-        td(produce(el)(v => span(v._1).render)),
-        td(produce(el)(v => span(v._2).render)),
-        td(produce(el)(v => span(v._3).render))
+    val table = UdashTable(
+      items, responsive, dark,
+      striped = striped,
+      bordered = bordered,
+      hover = hover,
+      small = small
+    )(
+      headerFactory = Some(_ => tr(th(b("x")), th(b("y")), th(b("z"))).render),
+      rowFactory = (el, nested) => tr(
+        td(nested(produce(el)(v => span(v._1).render))),
+        td(nested(produce(el)(v => span(v._2).render))),
+        td(nested(produce(el)(v => span(v._3).render)))
       ).render
     )
 
     div(GuideStyles.frame)(
-      UdashButtonGroup(justified = true)(
+      UdashButtonGroup(justified = true.toProperty)(
+        darkButton.render,
         stripedButton.render,
         borderedButton.render,
         hoverButton.render,
-        condensedButton.render
+        smallButton.render
       ).render,
       table.render
     ).render
@@ -212,25 +235,28 @@ object BootstrapDemos extends CrossLogging with CssView {
   def dropdown(): dom.Element = {
     val url = Url(BootstrapExtState.url)
     val items = SeqProperty[UdashDropdown.DefaultDropdownItem](Seq(
-      UdashDropdown.DropdownHeader("Start"),
-      UdashDropdown.DropdownLink("Intro", Url(IntroState.url)),
-      UdashDropdown.DropdownDisabled(UdashDropdown.DropdownLink("Test Disabled", url)),
-      UdashDropdown.DropdownDivider,
-      UdashDropdown.DropdownHeader("Dynamic")
+      UdashDropdown.DefaultDropdownItem.Header("Start"),
+      UdashDropdown.DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
+      UdashDropdown.DefaultDropdownItem.Disabled(UdashDropdown.DefaultDropdownItem.Link("Test Disabled", url)),
+      UdashDropdown.DefaultDropdownItem.Divider,
+      UdashDropdown.DefaultDropdownItem.Header("Dynamic")
     ))
 
     val clicks = SeqProperty[String](Seq.empty)
     var i = 1
     val appendHandler = window.setInterval(() => {
-      items.append(UdashDropdown.DropdownLink(s"Test $i", url))
+      items.append(UdashDropdown.DefaultDropdownItem.Link(s"Test $i", url))
       i += 1
     }, 5000)
     window.setTimeout(() => window.clearInterval(appendHandler), 60000)
 
-    val dropdown = UdashDropdown(items)(UdashDropdown.defaultItemFactory)("Dropdown ", BootstrapStyles.Button.btnPrimary)
-    val dropup = UdashDropdown.dropup(items)(UdashDropdown.defaultItemFactory)("Dropup ")
+    val dropdown = UdashDropdown(items)(
+      UdashDropdown.defaultItemFactory,
+      _ => Seq[Modifier]("Dropdown ", BootstrapStyles.Button.color(Color.Primary))
+    )
+    val dropup = UdashDropdown(items, UdashDropdown.Direction.Up.toProperty)(UdashDropdown.defaultItemFactory, _ => "Dropup ")
     val listener: PartialFunction[UdashDropdown.DropdownEvent[DefaultDropdownItem, CastableProperty[DefaultDropdownItem]], Unit] = {
-      case UdashDropdown.SelectionEvent(_, item) => clicks.append(item.toString)
+      case UdashDropdown.DropdownEvent.SelectionEvent(_, item) => clicks.append(item.toString)
       case ev: DropdownEvent[_, _] => logger.info(ev.toString)
     }
 
@@ -238,76 +264,78 @@ object BootstrapDemos extends CrossLogging with CssView {
     dropup.listen(listener)
 
     div(GuideStyles.frame)(
-      div(BootstrapStyles.row)(
-        div(BootstrapStyles.Grid.colXs6)(dropdown.render),
-        div(BootstrapStyles.Grid.colXs6)(dropup.render)
+      div(BootstrapStyles.Grid.row)(
+        div(BootstrapStyles.Grid.col(6))(dropdown.render),
+        div(BootstrapStyles.Grid.col(6))(dropup.render)
       ),
       h4("Clicks: "),
       produce(clicks)(seq =>
-        ul(BootstrapStyles.Well.well)(seq.map(click =>
+        ul(BootstrapStyles.Border.border())(seq.map(click =>
           li(click)
         ): _*).render
       )
     ).render
   }
 
-  def button(): dom.Element = {
+  def buttonsDemo(): dom.Element = {
+    val smallBtn = Some(Size.Small).toProperty[Option[Size]]
+    val disabledButtons = Property(Set.empty[Int])
+    def disabled(idx: Int): ReadableProperty[Boolean] = disabledButtons.transform(_.contains(idx))
     val buttons = Seq(
-      UdashButton(size = ButtonSize.Small)("Default", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Primary, ButtonSize.Small)("Primary", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Success, ButtonSize.Small)("Success", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Info, ButtonSize.Small)("Info", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Warning, ButtonSize.Small)("Warning", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Danger, ButtonSize.Small)("Danger", GlobalStyles.smallMargin),
-      UdashButton(ButtonStyle.Link, ButtonSize.Small)("Link", GlobalStyles.smallMargin)
+      UdashButton(Color.Primary.toProperty, smallBtn, disabled = disabled(0))(_ => Seq[Modifier]("Primary", GlobalStyles.smallMargin)),
+      UdashButton(Color.Secondary.toProperty, smallBtn, disabled = disabled(1))(_ => Seq[Modifier]("Secondary", GlobalStyles.smallMargin)),
+      UdashButton(Color.Success.toProperty, smallBtn, disabled = disabled(2))(_ => Seq[Modifier]("Success", GlobalStyles.smallMargin)),
+      UdashButton(Color.Info.toProperty, smallBtn, disabled = disabled(3))(_ => Seq[Modifier]("Info", GlobalStyles.smallMargin)),
+      UdashButton(Color.Warning.toProperty, smallBtn, disabled = disabled(4))(_ => Seq[Modifier]("Warning", GlobalStyles.smallMargin)),
+      UdashButton(Color.Danger.toProperty, smallBtn, disabled = disabled(5))(_ => Seq[Modifier]("Danger", GlobalStyles.smallMargin)),
+      UdashButton(Color.Link.toProperty, smallBtn, disabled = disabled(6))(_ => Seq[Modifier]("Link", GlobalStyles.smallMargin)),
+      UdashButton(Color.Light.toProperty, smallBtn, disabled = disabled(7))(_ => Seq[Modifier]("Light", GlobalStyles.smallMargin)),
+      UdashButton(Color.Dark.toProperty, smallBtn, disabled = disabled(8))(_ => Seq[Modifier]("Dark", GlobalStyles.smallMargin)),
+      UdashButton(Color.White.toProperty, smallBtn, disabled = disabled(9))(_ => Seq[Modifier]("White", GlobalStyles.smallMargin)),
     )
 
     val clicks = SeqProperty[String](Seq.empty)
     buttons.foreach(_.listen {
-      case ev => clicks.append(ev.source.render.textContent)
+      case UdashButton.ButtonClickEvent(source, _) => clicks.append(source.render.textContent)
     })
 
-    val push = UdashButton(size = ButtonSize.Large, block = true)("Push the button!")
-    push.listen { case _ =>
+    val push = UdashButton(size = Some(Size.Large).toProperty[Option[Size]], block = true.toProperty)("Disable random buttons!")
+    push.listen { case UdashButton.ButtonClickEvent(_, _) =>
       clicks.set(Seq.empty)
-      buttons.foreach { button =>
-        button.disabled.set(Random.nextBoolean())
-      }
+
+      val disabledCount = Random.nextInt(buttons.size + 1)
+      disabledButtons.set(Seq.fill(disabledCount)(Random.nextInt(buttons.size)).toSet)
     }
 
     div(GuideStyles.frame)(
       push.render,
       div(GlobalStyles.centerBlock)(
-        buttons.map(b => b.render)
+        buttons.map(_.render)
       ),
       h4("Clicks: "),
       produce(clicks)(seq =>
-        ul(BootstrapStyles.Well.well)(seq.map(click =>
-          li(click)
-        ): _*).render
+        ul(BootstrapStyles.Border.border())(seq.map(li(_))).render
       )
     ).render
   }
 
   def toggleButton(): dom.Element = {
-    val buttons = mutable.LinkedHashMap[String, UdashButton](
-      "Default" -> UdashButton.toggle()("Default", GlobalStyles.smallMargin),
-      "Primary" -> UdashButton.toggle(ButtonStyle.Primary)("Primary", GlobalStyles.smallMargin),
-      "Success" -> UdashButton.toggle(ButtonStyle.Success)("Success", GlobalStyles.smallMargin),
-      "Info" -> UdashButton.toggle(ButtonStyle.Info)("Info", GlobalStyles.smallMargin),
-      "Warning" -> UdashButton.toggle(ButtonStyle.Warning)("Warning", GlobalStyles.smallMargin),
-      "Danger" -> UdashButton.toggle(ButtonStyle.Danger)("Danger", GlobalStyles.smallMargin),
-      "Link" -> UdashButton.toggle(ButtonStyle.Link)("Link", GlobalStyles.smallMargin)
-    )
+    val buttons = Color.values.map { color =>
+      color.name -> {
+        val active = Property(false)
+        val btn = UdashButton.toggle(active, color.toProperty[Color])(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
+        (active, btn)
+      }
+    }
 
     div(GuideStyles.frame)(
       div(GlobalStyles.centerBlock)(
-        buttons.values.map(_.render).toSeq
+        buttons.map { case (_, (_, btn)) => btn.render }
       ),
       h4("Is active: "),
-      div(BootstrapStyles.Well.well)(
-        buttons.map({ case (name, button) =>
-          span(s"$name: ", bind(button.active), br)
+      div(BootstrapStyles.Border.border())(
+        buttons.map({ case (name, (active, _)) =>
+          span(s"$name: ", bind(active), br)
         }).toSeq
       )
     ).render
@@ -315,8 +343,8 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def staticButtonsGroup(): dom.Element = {
     div(GuideStyles.frame)(
-      UdashButtonGroup(vertical = true)(
-        UdashButton(buttonStyle = ButtonStyle.Primary)("Button 1").render,
+      UdashButtonGroup(vertical = true.toProperty)(
+        UdashButton(buttonStyle = Color.Primary.toProperty)("Button 1").render,
         UdashButton()("Button 2").render,
         UdashButton()("Button 3").render
       ).render
@@ -326,74 +354,67 @@ object BootstrapDemos extends CrossLogging with CssView {
   def buttonToolbar(): dom.Element = {
     val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
     div(GuideStyles.frame)(
-      UdashButtonToolbar.reactive(groups, (p: CastableProperty[Seq[Int]]) => {
+      UdashButtonToolbar.reactive(groups)((p: CastableProperty[Seq[Int]], nested) => {
         val range = p.asSeq[Int]
-        UdashButtonGroup.reactive(range, size = ButtonSize.Large)(element =>
-          UdashButton()(element.get).render
-        ).render
+        val group = UdashButtonGroup.reactive(range, size = Some(Size.Large).toProperty[Option[Size]]) {
+          case (element, nested) =>
+            val btn = UdashButton()(_ => nested(bind(element)))
+            nested(btn)
+            btn.render
+        }
+        nested(group)
+        group.render
       }).render
     ).render
   }
 
   def checkboxButtons(): dom.Element = {
-    import UdashButtonGroup._
-    val options = SeqProperty[CheckboxModel](
-      DefaultCheckboxModel("Checkbox 1 (pre-checked)", true),
-      DefaultCheckboxModel("Checkbox 2", false),
-      DefaultCheckboxModel("Checkbox 3", false)
-    )
+    val selected = SeqProperty[String]("Checkbox 1")
+    val options = SeqProperty[String]("Checkbox 1", "Checkbox 2", "Checkbox 3")
     div(GuideStyles.frame)(
-      UdashButtonGroup.checkboxes(options).render,
+      UdashButtonGroup.checkboxes(selected, options)().render,
       h4("Is active: "),
-      div(BootstrapStyles.Well.well)(
-        repeat(options)(option => {
-          val model = option.asModel
-          val name = model.subProp(_.text)
-          val checked = model.subProp(_.checked)
-          div(bind(name), ": ", bind(checked)).render
-        })
+      div(BootstrapStyles.Border.border())(
+        repeatWithNested(options) { (option, nested) =>
+          val checked = selected.transform((_: Seq[String]).contains(option.get))
+          div(bind(option), ": ", bind(checked)).render
+        }
       )
     ).render
   }
 
   def radioButtons(): dom.Element = {
-    import UdashButtonGroup._
-    val options = SeqProperty[CheckboxModel](
-      DefaultCheckboxModel("Radio 1 (preselected)", true),
-      DefaultCheckboxModel("Radio 2", false),
-      DefaultCheckboxModel("Radio 3", false)
-    )
+    val selected = Property[String]("Radio 1")
+    val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
     div(GuideStyles.frame)(
-      UdashButtonGroup.radio(options, justified = true).render,
+      UdashButtonGroup.radio(selected, options)().render,
       h4("Is active: "),
-      div(BootstrapStyles.Well.well)(
-        repeat(options)(option => {
-          val model = option.asModel
-          val name = model.subProp(_.text)
-          val checked = model.subProp(_.checked)
-          div(bind(name), ": ", bind(checked)).render
-        })
+      div(BootstrapStyles.Border.border())(
+        repeatWithNested(options) { (option, nested) =>
+          val checked = selected.transform(_ == option.get)
+          div(bind(option), ": ", bind(checked)).render
+        }
       )
     ).render
   }
 
   def buttonDropdown(): dom.Element = {
     val items = SeqProperty[DefaultDropdownItem](
-      UdashDropdown.DropdownHeader("Start"),
-      UdashDropdown.DropdownLink("Intro", Url("#")),
-      UdashDropdown.DropdownDisabled(UdashDropdown.DropdownLink("Test Disabled", Url("#"))),
-      UdashDropdown.DropdownDivider,
-      UdashDropdown.DropdownHeader("End"),
-      UdashDropdown.DropdownLink("Intro", Url("#"))
+      UdashDropdown.DefaultDropdownItem.Header("Start"),
+      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#")),
+      UdashDropdown.DefaultDropdownItem.Disabled(UdashDropdown.DefaultDropdownItem.Link("Test Disabled", Url("#"))),
+      UdashDropdown.DefaultDropdownItem.Divider,
+      UdashDropdown.DefaultDropdownItem.Header("End"),
+      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#"))
     )
     div(GuideStyles.frame)(
-      UdashButtonToolbar(
+      UdashButtonToolbar()(
         UdashButtonGroup()(
           UdashButton()("Button").render,
-          UdashDropdown(items)(UdashDropdown.defaultItemFactory)().render,
-          UdashDropdown.dropup(items)(UdashDropdown.defaultItemFactory)().render
+          UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "").render,
+          UdashDropdown(items, dropDirection = UdashDropdown.Direction.Up.toProperty)(UdashDropdown.defaultItemFactory, _ => "").render
         ).render,
-        UdashDropdown(items)(UdashDropdown.defaultItemFactory)("Dropdown ").render
+        UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "Dropdown ").render
       ).render
     ).render
   }
@@ -406,13 +427,11 @@ object BootstrapDemos extends CrossLogging with CssView {
     button.listen { case _ => vanityUrl.set("") }
     div(GuideStyles.frame)(
       label("Your URL"),
-      UdashInputGroup(InputGroupSize.Large)(
-        UdashInputGroup.addon("https://example.com/users/", bind(vanityUrl)),
+      UdashInputGroup(groupSize = Some(BootstrapStyles.Size.Large).toProperty)(
+        UdashInputGroup.prependText("https://example.com/users/", bind(vanityUrl)),
         UdashInputGroup.input(TextInput(vanityUrl)().render),
-        UdashInputGroup.buttons(
-          UdashButton(
-            disabled = buttonDisabled
-          )("Go!").render,
+        UdashInputGroup.append(
+          UdashButton(disabled = buttonDisabled)("Go!").render,
           button.render
         )
       ).render
@@ -429,12 +448,6 @@ object BootstrapDemos extends CrossLogging with CssView {
       case Small => "S"
       case Medium => "M"
       case Large => "L"
-    }
-
-    def labelToShirtSize(label: String): ShirtSize = label match {
-      case "S" => Small
-      case "M" => Medium
-      case "L" => Large
     }
 
     trait UserModel {
@@ -460,21 +473,26 @@ object BootstrapDemos extends CrossLogging with CssView {
     })
 
     div(GuideStyles.frame)(
-      UdashForm(
-        UdashForm.textInput()("User name")(user.subProp(_.name)),
-        UdashForm.numberInput(
-          validation = Some(UdashForm.validation(user.subProp(_.age)))
-        )("Age")(user.subProp(_.age).transform(_.toString, _.toInt)),
-        UdashForm.group(
-          label("Shirt size"),
-          UdashForm.radio(radioStyle = BootstrapStyles.Form.radioInline)(
-            user.subProp(_.shirtSize)
-              .transform(shirtSizeToLabel, labelToShirtSize),
-            Seq(Small, Medium, Large).map(shirtSizeToLabel)
-          )
+      UdashForm()(factory => Seq(
+        factory.input.formGroup()(
+          input = _ => factory.input.textInput(user.subProp(_.name))().render,
+          labelContent = Some(_ => "User name": Modifier)
         ),
-        UdashForm.disabled()(UdashButton()("Send").render)
-      ).render
+        factory.input.formGroup()(
+          input = _ => factory.input.numberInput(
+            user.subProp(_.age).transform(_.toString, _.toInt),
+          )().render,
+          labelContent = Some(_ => "Age": Modifier),
+          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
+        ),
+        factory.input.radioButtons(
+          user.subProp(_.shirtSize),
+          Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
+          inline = true.toProperty,
+          validationTrigger = UdashForm.ValidationTrigger.None
+        )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
+        factory.disabled()(_ => UdashButton()("Send").render)
+      )).render
     ).render
   }
 
@@ -482,20 +500,16 @@ object BootstrapDemos extends CrossLogging with CssView {
     val search = Property.blank[String]
     val something = Property.blank[String]
     div(GuideStyles.frame)(
-      UdashForm.inline(
-        UdashForm.group(
-          UdashInputGroup()(
-            UdashInputGroup.addon("Search: "),
-            UdashInputGroup.input(TextInput(search)().render)
-          ).render
-        ),
-        UdashForm.group(
-          UdashInputGroup()(
-            UdashInputGroup.addon("Something: "),
-            UdashInputGroup.input(TextInput(something)().render)
-          ).render
-        )
-      ).render
+      UdashForm(inline = true)(factory => Seq(
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Search: "),
+          UdashInputGroup.input(factory.input.textInput(search)().render)
+        ).render,
+        UdashInputGroup()(
+          UdashInputGroup.prependText("Something: "),
+          UdashInputGroup.input(factory.input.textInput(something)().render)
+        ).render,
+      )).render
     ).render
   }
 
@@ -516,14 +530,19 @@ object BootstrapDemos extends CrossLogging with CssView {
     val selected = Property[Panel](panels.elemProperties.head.get)
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
     div(GuideStyles.frame)(
-      UdashNav.tabs(justified = true)(panels)(
-        elemFactory = (panel) => a(
+      UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
+        elemFactory = (panel, nested) => a(
           href := "",
           onclick :+= ((ev: Event) => selected.set(panel.get), true)
-        )(bind(panel.asModel.subProp(_.title))).render,
-        isActive = (panel) => panel.combine(selected)((panel, selected) => panel.title == selected.title)
+        )(nested(bind(panel.asModel.subProp(_.title)))).render,
+        isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
       ).render,
-      div(BootstrapStyles.Well.well)(
+      div(
+        BootstrapStyles.Border.border(BootstrapStyles.Side.Left),
+        BootstrapStyles.Border.border(BootstrapStyles.Side.Right),
+        BootstrapStyles.Border.border(BootstrapStyles.Side.Bottom),
+        BootstrapStyles.Spacing.padding()
+      )(
         bind(selected.asModel.subProp(_.content))
       )
     ).render
@@ -546,60 +565,59 @@ object BootstrapDemos extends CrossLogging with CssView {
     )
     panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
     div(GuideStyles.frame)(
-      UdashNavbar(
-        div(BootstrapStyles.Navigation.navbarBrand)("Udash").render,
-        UdashNav.navbar(panels)(
-          elemFactory = (panel) => a(href := "", onclick :+= ((ev: Event) => true))(
-            bind(panel.asModel.subProp(_.title))
+      UdashNavbar()(
+        _ => UdashNav(panels)(
+          elemFactory = (panel, nested) => a(href := "", onclick :+= ((ev: Event) => true))(
+            nested(bind(panel.asModel.subProp(_.title)))
           ).render,
-          isActive = (el) => el.transform(_.title.endsWith("1")),
-          isDisabled = (el) => el.transform(_.title.endsWith("5"))
-        )
+          isActive = el => el.transform(_.title.endsWith("1")),
+          isDisabled = el => el.transform(_.title.endsWith("5"))
+        ),
+        span("Udash"),
       ).render
     ).render
   }
 
   def udashNavigation(): dom.Element = {
     def linkFactory(l: MenuLink) =
-      a(href := l.state.url)(span(l.name)).render
+      a(href := l.state.url, BootstrapStyles.Dropdown.item)(span(l.name)).render
 
     val panels = SeqProperty[MenuEntry](mainMenuEntries.slice(0, 4))
     div(GuideStyles.frame)(
-      UdashNavbar.inverted(
-        div(BootstrapStyles.Navigation.navbarBrand)("Udash").render,
-        UdashNav.navbar(panels)(
-          elemFactory = (panel) => panel.get match {
+      UdashNavbar(darkStyle = true.toProperty, backgroundStyle = BootstrapStyles.Color.Dark.toProperty)(
+        _ => UdashNav(panels)(
+          elemFactory = (panel, _) => panel.get match {
             case MenuContainer(name, children) =>
               val childrenProperty = SeqProperty(children)
-              UdashDropdown(childrenProperty)(
-                (item: Property[MenuLink]) => li(linkFactory(item.get)).render)(
-                name, " "
-              ).linkRender
-            case link: MenuLink =>
-              linkFactory(link)
+              UdashDropdown(childrenProperty, buttonToggle = false.toProperty)(
+                (item: Property[MenuLink], _) => linkFactory(item.get),
+                _ => span(name, " ")
+              ).render
+            case link: MenuLink => linkFactory(link)
           },
-          isDropdown = (panel) => panel.transform {
-            case MenuContainer(name, children) => true
-            case MenuLink(name, state) => false
+          isDropdown = _.transform {
+            case MenuContainer(_, _) => true
+            case MenuLink(_, _) => false
           }
-        )
+        ),
+        span("Udash"),
       ).render
     ).render
   }
 
   def breadcrumbs(): dom.Element = {
-    import io.udash.bootstrap.utils.UdashBreadcrumbs._
+    import UdashBreadcrumbs._
 
     val pages = SeqProperty[Breadcrumb](
-      DefaultBreadcrumb("Udash", Url("http://udash.io/")),
-      DefaultBreadcrumb("Dev's Guide", Url("http://guide.udash.io/")),
-      DefaultBreadcrumb("Extensions", Url("http://guide.udash.io/")),
-      DefaultBreadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
+      new Breadcrumb("Udash", Url("http://udash.io/")),
+      new Breadcrumb("Dev's Guide", Url("http://guide.udash.io/")),
+      new Breadcrumb("Extensions", Url("http://guide.udash.io/")),
+      new Breadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
     )
 
     val breadcrumbs = UdashBreadcrumbs(pages)(
       defaultPageFactory,
-      (item) => pages.get.last == item
+      pages.get.last == _
     )
     div(GuideStyles.frame)(
       breadcrumbs.render
@@ -607,7 +625,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def pagination(): dom.Element = {
-    import Context._
     import UdashPagination._
 
     val showArrows = Property(true)
@@ -615,14 +632,12 @@ object BootstrapDemos extends CrossLogging with CssView {
     val toggleArrows = UdashButton.toggle(active = showArrows)("Toggle arrows")
     val toggleHighlight = UdashButton.toggle(active = highlightActive)("Toggle highlight")
 
-    val pages = SeqProperty(Seq.tabulate[Page](7)(idx =>
-      DefaultPage((idx + 1).toString, Url(BootstrapExtState.url))
-    ))
+    val pages = SeqProperty(0 to 7)
     val selected = Property(0)
     val pagination = UdashPagination(
+      pages, selected,
       showArrows = showArrows, highlightActive = highlightActive
-    )(pages, selected)(defaultPageFactory)
-    val pager = UdashPagination.pager()(pages, selected)(defaultPageFactory)
+    )(defaultPageFactory)
     div(GuideStyles.frame)(
       div(
         UdashButtonGroup()(
@@ -631,22 +646,21 @@ object BootstrapDemos extends CrossLogging with CssView {
         ).render
       ),
       div("Selected page index: ", bind(selected)),
-      div(
-        div(GlobalStyles.centerBlock)(pagination.render),
-        pager.render
-      )
+      div(GlobalStyles.centerBlock)(pagination.render)
     ).render
   }
 
   def labels(): dom.Element = {
     div(GuideStyles.frame)(
       div(
-        UdashLabel(UdashBootstrap.newId(), "Default", GlobalStyles.smallMargin).render,
-        UdashLabel.primary(UdashBootstrap.newId(), "Primary", GlobalStyles.smallMargin).render,
-        UdashLabel.success(UdashBootstrap.newId(), "Success", GlobalStyles.smallMargin).render,
-        UdashLabel.info(UdashBootstrap.newId(), "Info", GlobalStyles.smallMargin).render,
-        UdashLabel.warning(UdashBootstrap.newId(), "Warning", GlobalStyles.smallMargin).render,
-        UdashLabel.danger(UdashBootstrap.newId(), "Danger", GlobalStyles.smallMargin).render
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill").render,
+        UdashBadge.link(Property("https://udash.io/"), badgeStyle = BootstrapStyles.Color.Success.toProperty)(_ => "Success Link").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Danger.toProperty)(_ => "Danger").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render,
       )
     ).render
   }
@@ -656,141 +670,38 @@ object BootstrapDemos extends CrossLogging with CssView {
     window.setInterval(() => counter.set(counter.get + 1), 3000)
     div(GuideStyles.frame)(
       div(
-        UdashButton(buttonStyle = ButtonStyle.Primary, size = ButtonSize.Large)("Button ", UdashBadge(counter).render).render
+        UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty, size = Some(BootstrapStyles.Size.Large).toProperty)(
+          _ => Seq[Modifier]("Button ", UdashBadge()(nested => nested(bind(counter))).render)
+        ).render
       )
     ).render
   }
 
   def alerts(): dom.Element = {
-    val styles = Seq[(String) => DismissibleUdashAlert](
-      (title) => DismissibleUdashAlert.info(title),
-      (title) => DismissibleUdashAlert.danger(title),
-      (title) => DismissibleUdashAlert.success(title),
-      (title) => DismissibleUdashAlert.warning(title)
-    )
     val dismissed = SeqProperty[String](Seq.empty)
     def randomDismissible(): dom.Element = {
       val title = randomString()
-      val alert = styles(Random.nextInt(styles.size))(title)
+      val alert = DismissibleUdashAlert(
+        alertStyle = BootstrapStyles.Color.values(Random.nextInt(BootstrapStyles.Color.values.size)).toProperty
+      )(title)
       alert.dismissed.listen(_ => dismissed.append(title))
       alert.render
     }
-    val alerts = div(BootstrapStyles.Well.well, GlobalStyles.centerBlock)(
-      UdashAlert.info("info").render,
-      UdashAlert.success("success").render,
-      UdashAlert.warning("warning").render,
-      UdashAlert.danger("danger").render
+    val alerts = div(GlobalStyles.centerBlock)(
+      UdashAlert(alertStyle = BootstrapStyles.Color.Info.toProperty)("info").render,
+      UdashAlert(alertStyle = BootstrapStyles.Color.Success.toProperty)("success").render,
+      UdashAlert(alertStyle = BootstrapStyles.Color.Warning.toProperty)("warning").render,
+      UdashAlert(alertStyle = BootstrapStyles.Color.Danger.toProperty)("danger").render
     ).render
-    val create = UdashButton(
-      size = ButtonSize.Large,
-      block = true
-    )("Create dismissible alert")
+    val create = UdashButton()("Create dismissible alert")
     create.listen { case _ => alerts.appendChild(randomDismissible()) }
     div(GuideStyles.frame)(
-      create.render,
       alerts,
+      create.render,
       h4("Dismissed: "),
       produce(dismissed)(seq =>
-        ul(BootstrapStyles.Well.well)(seq.map(click =>
-          li(click)
-        ): _*).render
+        ul(seq.map(click => li(click))).render
       )
-    ).render
-  }
-
-  def listGroup(): dom.Element = {
-    val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
-    val listGroup = UdashListGroup(news)((news) =>
-      li(
-        BootstrapStyles.active.styleIf(news.transform(_.endsWith("1"))),
-        BootstrapStyles.disabled.styleIf(news.transform(_.endsWith("2"))),
-        BootstrapStyles.List.listItemSuccess.styleIf(news.transform(_.endsWith("3"))),
-        BootstrapStyles.List.listItemDanger.styleIf(news.transform(_.endsWith("4"))),
-        BootstrapStyles.List.listItemInfo.styleIf(news.transform(_.endsWith("5"))),
-        BootstrapStyles.List.listItemWarning.styleIf(news.transform(_.endsWith("6")))
-      )(bind(news)).render
-    )
-
-    var i = 1
-    val appendHandler = window.setInterval(() => {
-      news.append(s"Dynamic $i")
-      i += 1
-    }, 2000)
-    window.setTimeout(() => window.clearInterval(appendHandler), 20000)
-
-    div(GuideStyles.frame)(
-        listGroup.render
-    ).render
-  }
-
-  def panels(): dom.Element = {
-    val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
-    div(GuideStyles.frame)(
-      UdashPanel(PanelStyle.Success)(
-        UdashPanel.heading("Panel heading"),
-        UdashPanel.body("Some default panel content here. Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam id dolor id nibh ultricies vehicula ut id elit."),
-        UdashListGroup(news)((news) =>
-          li(bind(news)).render
-        ).render,
-        UdashPanel.footer("Panel footer")
-      ).render
-    ).render
-  }
-
-  def responsiveEmbed(): dom.Element = {
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.EmbedResponsive.embed, BootstrapStyles.EmbedResponsive.embed16by9, GlobalStyles.smallMargin)(
-        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
-      ),
-      div(BootstrapStyles.EmbedResponsive.embed, BootstrapStyles.EmbedResponsive.embed4by3, GlobalStyles.smallMargin)(
-        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
-      )
-    ).render
-  }
-
-  def wells(): dom.Element = {
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellSm)("Small well..."),
-      div(BootstrapStyles.Well.well)("Standard well..."),
-      div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellLg)("Large well...")
-    ).render
-  }
-
-  def simpleModal(): dom.Element = {
-    val events = SeqProperty.blank[UdashModal.ModalEvent]
-    val header = () => div(
-      "Modal events",
-      UdashButton()(UdashModal.CloseButtonAttr, BootstrapStyles.close, "×").render
-    ).render
-    val body = () => div(
-      div(BootstrapStyles.Well.well)(
-        ul(repeat(events)(event => li(event.get.toString).render))
-      )
-    ).render
-    val footer = () => div(
-      UdashButton()(UdashModal.CloseButtonAttr, "Close").render,
-      UdashButton(buttonStyle = ButtonStyle.Primary)("Something...").render
-    ).render
-
-    val modal = UdashModal(modalSize = ModalSize.Large)(
-      headerFactory = Some(header),
-      bodyFactory = Some(body),
-      footerFactory = Some(footer)
-    )
-    modal.listen { case ev => events.append(ev) }
-
-    val openModalButton = UdashButton(buttonStyle = ButtonStyle.Primary)(modal.openButtonAttrs(), "Show modal...")
-    val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-    openAndCloseButton.listen { case _ =>
-      modal.show()
-      window.setTimeout(() => modal.hide(), 2000)
-    }
-    div(GuideStyles.frame)(
-      modal.render,
-      UdashButtonGroup()(
-        openModalButton.render,
-        openAndCloseButton.render
-      ).render
     ).render
   }
 
@@ -805,36 +716,130 @@ object BootstrapDemos extends CrossLogging with CssView {
           UdashButton.toggle(active = animate)("Animate").render
         ).render
       ), br,
-      UdashProgressBar(value, showPercentage, Success)().render,
-      UdashProgressBar(value, showPercentage, Striped)(value => value + " percent").render,
-      UdashProgressBar.animated(value, showPercentage, animate, Danger)().render,
+      UdashProgressBar(value, showPercentage, barStyle = Some(BootstrapStyles.Color.Success).toProperty)().render,
+      UdashProgressBar(value, showPercentage, stripped = true.toProperty)(
+        (value, min, max, nested) => Seq[Modifier](
+          nested(bind(value.combine(min)(_ - _).combine(max.combine(min)(_ - _))(_ * 100 / _))),
+          " percent"
+        )
+      ).render,
+      UdashProgressBar(value, showPercentage, stripped = true.toProperty, animated = animate, barStyle = Some(BootstrapStyles.Color.Danger).toProperty)().render,
       NumberInput(value.transform(_.toString, Integer.parseInt))(
-        BootstrapStyles.Form.formControl, placeholder := "Percentage"
+        BootstrapStyles.Form.control, placeholder := "Percentage"
       )
+    ).render
+  }
+
+  def listGroup(): dom.Element = {
+    val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
+    val listGroup = UdashListGroup(news)((news, nested) =>
+      li(
+        nested(BootstrapStyles.active.styleIf(news.transform(_.endsWith("1")))),
+        nested(BootstrapStyles.disabled.styleIf(news.transform(_.endsWith("2")))),
+        nested(BootstrapStyles.List.color(BootstrapStyles.Color.Success).styleIf(news.transform(_.endsWith("3")))),
+        nested(BootstrapStyles.List.color(BootstrapStyles.Color.Danger).styleIf(news.transform(_.endsWith("4")))),
+        nested(BootstrapStyles.List.color(BootstrapStyles.Color.Info).styleIf(news.transform(_.endsWith("5")))),
+        nested(BootstrapStyles.List.color(BootstrapStyles.Color.Warning).styleIf(news.transform(_.endsWith("6"))))
+      )(nested(bind(news))).render
+    )
+
+    var i = 1
+    val appendHandler = window.setInterval(() => {
+      news.append(s"Dynamic $i")
+      i += 1
+    }, 2000)
+    window.setTimeout(() => window.clearInterval(appendHandler), 20000)
+
+    div(GuideStyles.frame)(
+      listGroup.render
+    ).render
+  }
+
+  def cards(): dom.Element = {
+    val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
+    div(GuideStyles.frame)(
+      UdashCard(
+        borderColor = Some(BootstrapStyles.Color.Success).toProperty,
+        textColor = Some(BootstrapStyles.Color.Primary).toProperty,
+      )(factory => Seq(
+        factory.header("Card heading"),
+        factory.body("Some default panel content here. Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam id dolor id nibh ultricies vehicula ut id elit."),
+        factory.listGroup(nested => {
+          val group = UdashListGroup(news)((news, nested) => li(nested(bind(news))).render)
+          nested(group)
+          group
+        }),
+        factory.footer("Card footer")
+      )).render
+    ).render
+  }
+
+  def responsiveEmbed(): dom.Element = {
+    div(GuideStyles.frame)(
+      div(BootstrapStyles.EmbedResponsive.responsive, BootstrapStyles.EmbedResponsive.embed16by9, GlobalStyles.smallMargin)(
+        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
+      ),
+      div(BootstrapStyles.EmbedResponsive.responsive, BootstrapStyles.EmbedResponsive.embed4by3, GlobalStyles.smallMargin)(
+        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
+      )
+    ).render
+  }
+
+  def simpleModal(): dom.Element = {
+    val events = SeqProperty.blank[UdashModal.ModalEvent]
+    val header = (_: Binding.NestedInterceptor) => div("Modal events").render
+    val body = (nested: Binding.NestedInterceptor) => div(ul(nested(repeat(events)(event => li(event.get.toString).render)))).render
+    val footer = (_: Binding.NestedInterceptor) => div(
+      UdashButton()(_ => Seq[Modifier](UdashModal.CloseButtonAttr, "Close")).render,
+      UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Something...").render
+    ).render
+
+    val modal = UdashModal(modalSize = Some(BootstrapStyles.Size.Large).toProperty)(
+      headerFactory = Some(header),
+      bodyFactory = Some(body),
+      footerFactory = Some(footer)
+    )
+    modal.listen { case ev => events.append(ev) }
+
+    val openModalButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Show modal...")
+    openModalButton.listen { case _ =>
+      modal.show()
+    }
+    val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
+    openAndCloseButton.listen { case _ =>
+      modal.show()
+      window.setTimeout(() => modal.hide(), 2000)
+    }
+    div(GuideStyles.frame)(
+      modal.render,
+      UdashButtonGroup()(
+        openModalButton.render,
+        openAndCloseButton.render
+      ).render
     ).render
   }
 
   def tooltips(): dom.Element = {
     import scala.concurrent.duration.DurationInt
-    val label1 = UdashLabel(UdashBootstrap.newId(), "Tooltip on hover with delay", GlobalStyles.smallMargin).render
+    val label1 = UdashBadge()(_ => Seq[Modifier]("Tooltip on hover with delay", GlobalStyles.smallMargin)).render
     UdashTooltip(
-      trigger = Seq(UdashTooltip.HoverTrigger),
+      trigger = Seq(UdashTooltip.Trigger.Hover),
       delay = UdashTooltip.Delay(500 millis, 250 millis),
       title = (_) => "Tooltip..."
     )(label1)
 
-    val label2 = UdashLabel(UdashBootstrap.newId(), "Tooltip on click", GlobalStyles.smallMargin).render
+    val label2 = UdashBadge()(_ => Seq[Modifier]("Tooltip on click", GlobalStyles.smallMargin)).render
     UdashTooltip(
-      trigger = Seq(UdashTooltip.ClickTrigger),
+      trigger = Seq(UdashTooltip.Trigger.Click),
       delay = UdashTooltip.Delay(0 millis, 250 millis),
-      placement = (_, _) => Seq(UdashTooltip.BottomPlacement),
+      placement = (_, _) => Seq(UdashTooltip.Placement.Bottom),
       title = (_) => "Tooltip 2..."
     )(label2)
 
-    val label3 = UdashLabel(UdashBootstrap.newId(), "Tooltip with JS toggler", GlobalStyles.smallMargin).render
+    val label3 = UdashBadge()(_ => Seq[Modifier]("Tooltip with JS toggler", GlobalStyles.smallMargin)).render
     val label3Tooltip = UdashTooltip(
-      trigger = Seq(UdashTooltip.ManualTrigger),
-      placement = (_, _) => Seq(UdashTooltip.RightPlacement),
+      trigger = Seq(UdashTooltip.Trigger.Manual),
+      placement = (_, _) => Seq(UdashTooltip.Placement.Right),
       title = (_) => "Tooltip 3..."
     )(label3)
 
@@ -848,27 +853,27 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def popovers(): dom.Element = {
     import scala.concurrent.duration.DurationInt
-    val label1 = UdashLabel(UdashBootstrap.newId(), "Popover on hover with delay", GlobalStyles.smallMargin).render
+    val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", GlobalStyles.smallMargin)).render
     UdashPopover(
-      trigger = Seq(UdashPopover.HoverTrigger),
+      trigger = Seq(UdashPopover.Trigger.Hover),
       delay = UdashPopover.Delay(500 millis, 250 millis),
       title = (_) => "Popover...",
       content = (_) => "Content..."
     )(label1)
 
-    val label2 = UdashLabel(UdashBootstrap.newId(), "Popover on click", GlobalStyles.smallMargin).render
+    val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.smallMargin)).render
     UdashPopover(
-      trigger = Seq(UdashPopover.ClickTrigger),
+      trigger = Seq(UdashPopover.Trigger.Click),
       delay = UdashPopover.Delay(0 millis, 250 millis),
-      placement = (_, _) => Seq(UdashPopover.BottomPlacement),
+      placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
       title = (_) => "Popover 2...",
       content = (_) => "Content..."
     )(label2)
 
-    val label3 = UdashLabel(UdashBootstrap.newId(), "Popover with JS toggler", GlobalStyles.smallMargin).render
+    val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalStyles.smallMargin)).render
     val label3Tooltip = UdashPopover(
-      trigger = Seq(UdashPopover.ManualTrigger),
-      placement = (_, _) => Seq(UdashPopover.LeftPlacement),
+      trigger = Seq(UdashPopover.Trigger.Manual),
+      placement = (_, _) => Seq(UdashPopover.Placement.Left),
       html = true,
       title = (_) => "Popover 3...",
       content = (_) => {
@@ -891,20 +896,23 @@ object BootstrapDemos extends CrossLogging with CssView {
   def simpleCollapse(): dom.Element = {
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
-      div(BootstrapStyles.Well.well)(
+      div(BootstrapStyles.Border.border())(
         ul(repeat(events)(event => li(event.get.toString).render))
       )
     )
     collapse.listen { case ev => events.append(ev) }
 
-    val toggleButton = UdashButton(buttonStyle = ButtonStyle.Primary)(collapse.toggleButtonAttrs(), "Toggle...")
+    val toggleButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)(
+      _ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle...")
+    )
     val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
     openAndCloseButton.listen { case _ =>
       collapse.show()
       window.setTimeout(() => collapse.hide(), 2000)
     }
+
     div(GuideStyles.frame)(
-      UdashButtonGroup(justified = true)(
+      UdashButtonGroup(justified = true.toProperty)(
         toggleButton.render,
         openAndCloseButton.render
       ).render,
@@ -919,73 +927,66 @@ object BootstrapDemos extends CrossLogging with CssView {
     )
 
     val accordion = UdashAccordion(news)(
-      (news) => span(news.get).render,
-      (_) => div(BootstrapStyles.Panel.panelBody)(
-        div(BootstrapStyles.Well.well)(
-          ul(repeat(events)(event => li(event.get.toString).render))
-        )
-      ).render
+      (news, _) => span(news.get).render,
+      (_, _) => ul(repeat(events)(event => li(event.get.toString).render)).render
     )
 
     val accordionElement = accordion.render
-    news.elemProperties.map(news => {
-      accordion.collapseOf(news)
-    }).filter(_.isDefined)
+    news.elemProperties.map(accordion.collapseOf)
+      .filter(_.isDefined)
       .foreach(_.get.listen { case ev => events.append(ev) })
 
-    div(GuideStyles.frame)(
-        accordionElement
-    ).render
+    div(GuideStyles.frame)(accordionElement).render
   }
 
   def carousel(): dom.Element = {
-    def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-      Url("/assets/images/ext/bootstrap/carousel.jpg")
-    )(
-      h3(randomString()),
-      p(randomString())
-    )
-    val slides = SeqProperty[UdashCarouselSlide]((1 to 5).map(_ => newSlide()))
-    val active = Property(true)
-    import scala.concurrent.duration._
-    val carousel = UdashCarousel(slides, activeSlide = 1,
-      animationOptions = AnimationOptions(interval = 2 seconds, keyboard = false, active = active.get)
-    )
-    val prevButton = UdashButton()("Prev")
-    val nextButton = UdashButton()("Next")
-    val prependButton = UdashButton()("Prepend")
-    val appendButton = UdashButton()("Append")
-    prevButton.listen { case _ => carousel.previousSlide() }
-    nextButton.listen { case _ => carousel.nextSlide() }
-    prependButton.listen { case _ => slides.prepend(newSlide()) }
-    appendButton.listen { case _ => slides.append(newSlide()) }
-    active.listen(b => if (b) carousel.cycle() else carousel.pause())
+//    def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
+//      Url("/assets/images/ext/bootstrap/carousel.jpg")
+//    )(
+//      h3(randomString()),
+//      p(randomString())
+//    )
+//    val slides = SeqProperty[UdashCarouselSlide]((1 to 5).map(_ => newSlide()))
+//    val active = Property(true)
+//    import scala.concurrent.duration._
+//    val carousel = UdashCarousel(slides, activeSlide = 1,
+//      animationOptions = AnimationOptions(interval = 2 seconds, keyboard = false, active = active.get)
+//    )
+//    val prevButton = UdashButton()("Prev")
+//    val nextButton = UdashButton()("Next")
+//    val prependButton = UdashButton()("Prepend")
+//    val appendButton = UdashButton()("Append")
+//    prevButton.listen { case _ => carousel.previousSlide() }
+//    nextButton.listen { case _ => carousel.nextSlide() }
+//    prependButton.listen { case _ => slides.prepend(newSlide()) }
+//    appendButton.listen { case _ => slides.append(newSlide()) }
+//    active.listen(b => if (b) carousel.cycle() else carousel.pause())
     div(
-      div(GuideStyles.frame)(
-        UdashButtonToolbar(
-          UdashButton.toggle(active = active)("Run animation").render,
-          UdashButtonGroup()(
-            prevButton.render,
-            nextButton.render
-          ).render,
-          UdashButtonGroup()(
-            prependButton.render,
-            appendButton.render
-          ).render
-        ).render
-      ),
-      div(
-        carousel.render
-      )
+//      div(GuideStyles.frame)(
+//        UdashButtonToolbar(
+//          UdashButton.toggle(active = active)("Run animation").render,
+//          UdashButtonGroup()(
+//            prevButton.render,
+//            nextButton.render
+//          ).render,
+//          UdashButtonGroup()(
+//            prependButton.render,
+//            appendButton.render
+//          ).render
+//        ).render
+//      ),
+//      div(
+//        carousel.render
+//      )
     ).render
   }
 
   def jumbotron(): dom.Element =
-    UdashJumbotron(
+    UdashJumbotron()( _ => Seq[Modifier](
       h1("Jumbo poem!"),
       p("One component to rule them all, one component to find them, one component to bring them all and in the darkness bind them."),
-      UdashButton(ButtonStyle.Info, size = ButtonSize.Large)("Click").render
-    ).render
+      UdashButton(buttonStyle = Color.Info.toProperty, size = Some(Size.Large).toProperty[Option[Size]])(_ => "Click").render
+    )).render
 
   private def randomString(): String = Random.nextLong().toString
 }

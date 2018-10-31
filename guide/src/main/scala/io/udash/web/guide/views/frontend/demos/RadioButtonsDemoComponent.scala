@@ -2,11 +2,10 @@ package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.{BootstrapStyles, BootstrapTags}
+import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom.html.Input
-
 import scalatags.JsDom
 
 class RadioButtonsDemoComponent extends Component {
@@ -29,7 +28,7 @@ class RadioButtonsDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.row)(
+      div(BootstrapStyles.Grid.row)(
         div(
           checkboxes()
         ),
@@ -43,14 +42,14 @@ class RadioButtonsDemoComponent extends Component {
 
   def checkboxes() =
     UdashInputGroup()(
-      UdashInputGroup.addon("Fruits:"),
-      UdashInputGroup.addon(
+      UdashInputGroup.prependText("Fruits:"),
+      UdashInputGroup.appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
           (els: Seq[(Input, String)]) => span(els.map {
-            case (i: Input, l: String) => label(BootstrapStyles.Form.radioInline, BootstrapTags.dataLabel := l)(i, l)
+            case (i: Input, l: String) => label(BootstrapStyles.Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
           }).render
         ).render
       ),
-      UdashInputGroup.addon(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
+      UdashInputGroup.appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
     ).render
 }

@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.ext.demo
 
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.i18n._
 import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -21,9 +22,9 @@ object DynamicRemoteTranslationsDemo {
     implicit val translationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = LangProperty(Lang("en"))
     div(id := "dynamic-rpc-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      button(BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
-      button(BootstrapStyles.Button.btn, BootstrapStyles.Button.btnPrimary)(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
-      ul(BootstrapStyles.Well.well)(
+      button(BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary))(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
+      button(BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary))(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
+      ul(BootstrapStyles.Border.border())(
         li("auth.loginLabel: ", translatedDynamic(Translations.auth.loginLabel)(_.apply())),
         li("auth.passwordLabel: ", translatedDynamic(Translations.auth.passwordLabel)(_.apply())),
         li("auth.login.buttonLabel: ", translatedDynamic(Translations.auth.login.buttonLabel)(_.apply())),

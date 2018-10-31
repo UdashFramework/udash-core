@@ -1,13 +1,12 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rpc.PingClient
 import io.udash.web.guide.styles.partials.GuideStyles
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -27,16 +26,16 @@ class PingPongPushDemoComponent extends Component {
   class PingPongPushDemoPresenter(model: Property[Int]) {
     private var registered = false
 
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
-      registerCallback(btn)
+    def onButtonClick(disabled: Property[Boolean]) = {
+      disabled.set(true)
+      registerCallback(disabled)
       Context.serverRpc.demos().pingDemo().ping(model.get)
     }
 
-    private def registerCallback(btn: UdashButton) = if (!registered) {
+    private def registerCallback(disabled: Property[Boolean]) = if (!registered) {
       val listener: Int => Any = (id: Int) => {
         model.set(id + 1)
-        btn.disabled.set(false)
+        disabled.set(false)
       }
       PingClient.registerPongListener(listener)
       registered = true
@@ -46,14 +45,16 @@ class PingPongPushDemoComponent extends Component {
   class PingPongPushDemoView(model: Property[Int], presenter: PingPongPushDemoPresenter) {
     import JsDom.all._
 
+    val pingDisabled = Property(false)
     val pingButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = pingDisabled,
       componentId = ComponentId("ping-pong-push-demo")
-    )("Ping(", bind(model), ")")
+    )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
     pingButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+        presenter.onButtonClick(pingDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(

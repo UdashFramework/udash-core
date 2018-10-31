@@ -41,7 +41,7 @@ class ErrorView extends FinalView with CssView {
 
   private def onResize(): Unit = {
     if (window.width <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
-      val h = window.height - jQ(s".${FooterStyles.footer.className}").outerHeight()
+      val h = window.height - jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d)
       jqTemplate.css("min-height", s"${h}px")
     }
   }

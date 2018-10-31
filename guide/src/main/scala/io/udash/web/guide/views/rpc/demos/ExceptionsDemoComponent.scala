@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.i18n._
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -76,60 +76,65 @@ class ExceptionsDemoComponent extends Component {
     implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
 
+    private val exceptionButtonDisabled = Property(false)
     private val exceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = exceptionButtonDisabled,
       componentId = ComponentId("exception-demo")
-    )("Call registered exception!")
+    )(_ => "Call registered exception!")
 
     private val translatableExceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = exceptionButtonDisabled,
       componentId = ComponentId("translatable-exception-demo")
-    )("Call registered translatable exception!")
+    )(_ => "Call registered translatable exception!")
 
+    private val unknownExceptionButtonDisabled = Property(false)
     private val unknownExceptionButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = unknownExceptionButtonDisabled,
       componentId = ComponentId("unknown-exception-demo")
-    )("Call unknown exception!")
+    )(_ => "Call unknown exception!")
 
     exceptionButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+        exceptionButtonDisabled.set(true)
         presenter.exceptionCall()
     }
 
     translatableExceptionButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+        exceptionButtonDisabled.set(true)
         presenter.translatableExceptionCall()
     }
 
     unknownExceptionButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+        unknownExceptionButtonDisabled.set(true)
         presenter.unknownExceptionCall()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
-        UdashInputGroup.addon(
+        UdashInputGroup.prependText(
           "Result: ",
           produce(model.subProp(_.exception))(v => span(id := "exception-demo-response", v).render)
         ),
-        UdashInputGroup.buttons(exceptionButton.render)
+        exceptionButton.render
       ).render, br,
       UdashInputGroup()(
-        UdashInputGroup.addon(
+        UdashInputGroup.prependText(
           "Result: ",
           produce(model.subProp(_.translatableException))(v => span(id := "translatable-exception-demo-response")(translated(v())).render)
         ),
-        UdashInputGroup.buttons(translatableExceptionButton.render)
+        translatableExceptionButton.render
       ).render, br,
       UdashInputGroup()(
-        UdashInputGroup.addon(
+        UdashInputGroup.prependText(
           "Result: ",
           produce(model.subProp(_.unknownException))(v => span(id := "unknown-exception-demo-response", v).render)
         ),
-        UdashInputGroup.buttons(unknownExceptionButton.render)
+        unknownExceptionButton.render
       ).render
     )
   }

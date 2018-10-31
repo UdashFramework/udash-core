@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.demos.rpc.NotificationsClient
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -39,26 +39,26 @@ class NotificationsDemoComponent extends Component {
   class NotificationsDemoPresenter(model: ModelProperty[NotificationsDemoModel]) {
     private val demoListener = (msg: String) => model.subProp(_.lastMessage).set(msg)
 
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def onButtonClick(disabled: Property[Boolean]) = {
+      disabled.set(true)
       model.subProp(_.registered).get match {
         case false =>
           NotificationsClient.registerListener(demoListener) onComplete {
             case Success(_) =>
               model.subProp(_.registered).set(true)
-              btn.disabled.set(false)
+              disabled.set(false)
             case Failure(_) =>
               model.subProp(_.registered).set(false)
-              btn.disabled.set(false)
+              disabled.set(false)
           }
         case true =>
           NotificationsClient.unregisterListener(demoListener) onComplete {
             case Success(_) =>
               model.subProp(_.registered).set(false)
-              btn.disabled.set(false)
+              disabled.set(false)
             case Failure(_) =>
               model.subProp(_.registered).set(true)
-              btn.disabled.set(false)
+              disabled.set(false)
           }
       }
     }
@@ -67,27 +67,29 @@ class NotificationsDemoComponent extends Component {
   class NotificationsDemoView(model: ModelProperty[NotificationsDemoModel], presenter: NotificationsDemoPresenter) {
     import JsDom.all._
 
+    val registerDisabled = Property(false)
     val registerButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = registerDisabled,
       componentId = ComponentId("notifications-demo")
-    )(produce(model.subProp(_.registered))(
+    )(nested => nested(produce(model.subProp(_.registered))(
       p => span(if (!p) "Register for notifications" else "Unregister").render
-    ))
+    )))
 
     registerButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        presenter.onButtonClick(registerDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
-        UdashInputGroup.addon(
+        UdashInputGroup.prependText(
           span(id := "notifications-demo-response")(
             "Last message: ",
             bind(model.subProp(_.lastMessage))
           )
         ),
-        UdashInputGroup.buttons(registerButton.render)
+        registerButton.render
       ).render
     )
   }

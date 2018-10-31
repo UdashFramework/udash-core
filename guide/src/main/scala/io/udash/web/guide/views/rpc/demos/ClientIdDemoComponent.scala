@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -37,24 +37,26 @@ class ClientIdDemoComponent extends Component {
   class ClientIdDemoView(model: Property[String], presenter: ClientIdDemoPresenter) {
     import JsDom.all._
 
+    val loadIdButtonDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = loadIdButtonDisabled,
       componentId = ComponentId("client-id-demo")
-    )("Load client id")
+    )(_ => "Load client id")
 
     loadIdButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
-        btn.disabled.set(true)
+        loadIdButtonDisabled.set(true)
         presenter.onButtonClick()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
-        UdashInputGroup.addon(
+        UdashInputGroup.prependText(
           "Your client id: ",
           produce(model)(cid => span(id := "client-id-demo-response", cid).render)
         ),
-        UdashInputGroup.buttons(loadIdButton.render)
+        loadIdButton.render
       ).render
     )
   }

@@ -31,7 +31,7 @@ object Dependencies {
 
   val frontendDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
-    "io.udash" %%% "udash-bootstrap" % udashVersion,
+    "io.udash" %%% "udash-bootstrap4" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
   ))
 

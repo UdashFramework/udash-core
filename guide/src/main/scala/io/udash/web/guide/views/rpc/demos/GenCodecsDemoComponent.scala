@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.logging.CrossLogging
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
@@ -60,8 +60,7 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
     def randomString(l: Int): String =
       BigInt.probablePrime(32, Random).toString(16)
 
-    def onButtonClick(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def onButtonClick() = {
       val demoRpc: GenCodecServerRPC = Context.serverRpc.demos().gencodecsDemo()
       demoRpc.sendInt(Random.nextInt()) onComplete {
         case Success(response) => model.subProp(_.int).set(Some(response))
@@ -104,14 +103,17 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
   class GenCodecsDemoView(model: ModelProperty[GenCodecsDemoModel], presenter: GenCodecsDemoPresenter) {
     import JsDom.all._
 
+    val loadDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = loadDisabled,
       componentId = ComponentId("gencodec-demo")
-    )("Send request")
+    )(_ => "Send request")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
-        presenter.onButtonClick(btn)
+      case UdashButton.ButtonClickEvent(_, _) =>
+        loadDisabled.set(true)
+        presenter.onButtonClick()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(

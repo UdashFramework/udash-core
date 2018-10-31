@@ -1,7 +1,6 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
@@ -10,7 +9,6 @@ import org.scalajs.dom.Event
 
 object JQueryEventsDemo {
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   val onCallback = (_: dom.Element, _: JQueryEvent) =>
@@ -23,14 +21,15 @@ object JQueryEventsDemo {
       ul(),
       br,
       UdashButtonGroup()(
-        UdashButton(componentId = ComponentId("click"))("Click me").render,
-        UdashButton(componentId = ComponentId("off"))(
+        UdashButton(componentId = ComponentId("click"))(_ => "Click me").render,
+        UdashButton(componentId = ComponentId("off"))(_ => Seq[Modifier](
           onclick :+= ((_: Event) =>
             jQ("#jquery-events-demo #click")
               .off("click", onCallback)
               .off("click", oneCallback)
-          ), "Off"
-        ).render
+          ),
+          "Off"
+        )).render
       ).render
     ).render
 

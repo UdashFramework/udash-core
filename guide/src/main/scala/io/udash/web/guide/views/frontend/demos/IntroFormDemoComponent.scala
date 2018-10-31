@@ -3,15 +3,15 @@ package io.udash.web.guide.views.frontend.demos
 import java.{lang => jl}
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
+import scalatags.JsDom.all._
 
 import scala.collection.mutable
 import scala.util.Random
-import scalatags.JsDom.all._
 
 /** The form's model structure. */
 case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
@@ -85,9 +85,9 @@ class IntroFormDemoComponent extends Component {
 
     // Button from Udash Bootstrap wrapper
     private val randomizeButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
       componentId = ComponentId("randomize")
-    )("Randomize")
+    )(_ => "Randomize")
 
     // on button click calls `randomize` method from presenter
     randomizeButton.listen {
@@ -104,17 +104,15 @@ class IntroFormDemoComponent extends Component {
           // input synchronised with the model
           NumberInput(minimum)(id := "minimum").render
         ),
-        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.appendText(" <= "),
         UdashInputGroup.input(
           NumberInput(between)(id := "between").render
         ),
-        UdashInputGroup.addon(" <= "),
+        UdashInputGroup.appendText(" <= "),
         UdashInputGroup.input(
           NumberInput(maximum)(id := "maximum").render
         ),
-        UdashInputGroup.buttons(
-          randomizeButton.render
-        )
+        randomizeButton.render
       ).render,
       h3("Is valid?"),
       p(id := "valid")(

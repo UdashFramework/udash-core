@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -28,7 +28,7 @@ class MultiSelectDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "multi-select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.row)(
+      div(BootstrapStyles.Grid.row)(
         div(
           selector()
         ),
@@ -42,12 +42,12 @@ class MultiSelectDemoComponent extends Component {
 
   def selector() =
     UdashInputGroup()(
-      UdashInputGroup.addon("Fruits:"),
-      UdashInputGroup.addon(
+      UdashInputGroup.prependText("Fruits:"),
+      UdashInputGroup.select(
         Select(
           favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )(Select.defaultLabel, BootstrapStyles.Form.formControl).render
+        )(Select.defaultLabel, BootstrapStyles.Form.control).render
       ),
-      UdashInputGroup.addon(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
+      UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
     ).render
 }

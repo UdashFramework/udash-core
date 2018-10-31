@@ -1,8 +1,8 @@
 package io.udash.web.guide.views.rest.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton, UdashButtonGroup}
+import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.demos.rest.RestExampleClass
@@ -33,8 +33,8 @@ class SimpleRestDemoComponent extends Component {
   }
 
   class SimpleRestDemoPresenter(model: ModelProperty[ExampleModel]) {
-    def sendStringRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendStringRequest(btn: UdashButton, disabled: Property[Boolean]) = {
+      disabled.set(true)
       Context.restServer.simple().string() onComplete {
         case Success(response) =>
           model.subProp(_.string).set(response)
@@ -43,8 +43,8 @@ class SimpleRestDemoComponent extends Component {
       }
     }
 
-    def sendIntRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendIntRequest(btn: UdashButton, disabled: Property[Boolean]) = {
+      disabled.set(true)
       Context.restServer.simple().int() onComplete {
         case Success(response) =>
           model.subProp(_.int).set(response)
@@ -53,8 +53,8 @@ class SimpleRestDemoComponent extends Component {
       }
     }
 
-    def sendClassRequest(btn: UdashButton) = {
-      btn.disabled.set(true)
+    def sendClassRequest(btn: UdashButton, disabled: Property[Boolean]) = {
+      disabled.set(true)
       Context.restServer.simple().cls() onComplete {
         case Success(response) =>
           model.subProp(_.cls).set(Some(response))
@@ -67,27 +67,33 @@ class SimpleRestDemoComponent extends Component {
   class SimpleRestDemoView(model: ModelProperty[ExampleModel], presenter: SimpleRestDemoPresenter) {
     import JsDom.all._
 
+    val loadStringButtonDisabled = Property(false)
     val loadStringButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = loadStringButtonDisabled,
       componentId = ComponentId("simple-rest-demo-string-btn")
-    )("Get string")
+    )(_ => "Get string")
+    val loadIntButtonDisabled = Property(false)
     val loadIntButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = loadIntButtonDisabled,
       componentId = ComponentId("simple-rest-demo-int-btn")
-    )("Get integer")
+    )(_ => "Get integer")
+    val loadClassButtonDisabled = Property(false)
     val loadClassButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
+      disabled = loadClassButtonDisabled,
       componentId = ComponentId("simple-rest-demo-class-btn")
-    )("Get class")
+    )(_ => "Get class")
 
     loadStringButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendStringRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendStringRequest(btn, loadStringButtonDisabled)
     }
     loadIntButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendIntRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendIntRequest(btn, loadIntButtonDisabled)
     }
     loadClassButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendClassRequest(btn)
+      case UdashButton.ButtonClickEvent(btn, _) => presenter.sendClassRequest(btn, loadClassButtonDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap, id := "simple-rest-demo")(

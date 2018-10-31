@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rest.demos
 
 import io.udash._
-import io.udash.bootstrap.UdashBootstrap.ComponentId
-import io.udash.bootstrap.button.{ButtonStyle, UdashButton}
+import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -65,21 +65,21 @@ class EchoRestDemoComponent extends Component {
     val content = Property("a b !@#$%^&*()_+")
 
     val queryButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-query-btn")
-    )("Query")
+    )(_ => "Query")
     val headerButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-header-btn")
-    )("Header")
+    )(_ => "Header")
     val urlButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-url-btn")
-    )("URL")
+    )(_ => "URL")
     val bodyButton = UdashButton(
-      buttonStyle = ButtonStyle.Primary,
+      buttonStyle = Color.Primary.toProperty,
       componentId = ComponentId("echo-rest-demo-body-btn")
-    )("Body")
+    )(_ => "Body")
 
     queryButton.listen {
       case UdashButton.ButtonClickEvent(btn, _) =>
@@ -103,12 +103,10 @@ class EchoRestDemoComponent extends Component {
         UdashInputGroup.input(
           TextInput(content)(id := "echo-rest-demo-input").render
         ),
-        UdashInputGroup.buttons(
-          queryButton.render,
-          headerButton.render,
-          urlButton.render,
-          bodyButton.render
-        )
+        UdashInputGroup.appendButton(queryButton.render),
+        UdashInputGroup.appendButton(headerButton.render),
+        UdashInputGroup.appendButton(urlButton.render),
+        UdashInputGroup.appendButton(bodyButton.render)
       ).render,
       div(id := "echo-rest-demo-response")(
         h3("Response: "),

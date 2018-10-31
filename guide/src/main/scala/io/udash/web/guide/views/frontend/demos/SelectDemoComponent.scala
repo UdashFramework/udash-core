@@ -1,7 +1,7 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -29,7 +29,7 @@ class SelectDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.row)(
+      div(BootstrapStyles.Grid.row)(
         div(
           selector()
         ),
@@ -43,12 +43,12 @@ class SelectDemoComponent extends Component {
 
   def selector() =
     UdashInputGroup()(
-      UdashInputGroup.addon("Fruits:"),
-      UdashInputGroup.addon(
+      UdashInputGroup.prependText("Fruits:"),
+      UdashInputGroup.select(
         Select(
           favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )(Select.defaultLabel, BootstrapStyles.Form.formControl).render
+        )(Select.defaultLabel, BootstrapStyles.Form.control).render
       ),
-      UdashInputGroup.addon(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
+      UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
     ).render
 }

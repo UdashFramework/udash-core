@@ -265,7 +265,7 @@ class BootstrapExtView extends FinalView {
           |).render""".stripMargin
     )(GuideStyles),
     ForceBootstrap(
-      BootstrapDemos.button()
+      BootstrapDemos.buttonsDemo()
     ),
     p("The example below presents helper method for creating toggle buttons."),
     CodeBlock(
@@ -664,10 +664,6 @@ class BootstrapExtView extends FinalView {
     div(cls := "bootstrap")(
       BootstrapDemos.jumbotron()
     ),
-    h3("Page header"),
-    CodeBlock(
-      s"""UdashPageHeader(h1("Header ", small("Subtext"))).render""".stripMargin
-    )(GuideStyles),
     h3("Alerts"),
     p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with type-safe styling and ",
     i("Property"),"-based dismissal mechanism."),
@@ -756,7 +752,7 @@ class BootstrapExtView extends FinalView {
     div(cls := "bootstrap")( //force Boostrap styles
       BootstrapDemos.listGroup()
     ),
-    h3("Panels"),
+    h3("Card"),
     CodeBlock(
       s"""val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
          |UdashPanel(PanelStyle.Success)(
@@ -769,7 +765,7 @@ class BootstrapExtView extends FinalView {
          |).render""".stripMargin
     )(GuideStyles),
     ForceBootstrap(
-      BootstrapDemos.panels()
+      BootstrapDemos.cards()
     ),
     h3("Responsive embed"),
     CodeBlock(
@@ -786,23 +782,6 @@ class BootstrapExtView extends FinalView {
     )(GuideStyles),
     ForceBootstrap(
       BootstrapDemos.responsiveEmbed()
-    ),
-    h3("Wells"),
-    CodeBlock(
-      s"""div(
-         |  div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellSm)(
-         |    "Small well..."
-         |  ),
-         |  div(BootstrapStyles.Well.well)(
-         |    "Standard well..."
-         |  ),
-         |  div(BootstrapStyles.Well.well, BootstrapStyles.Well.wellLg)(
-         |    "Large well..."
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.wells()
     ),
     h3("Modals"),
     p(

@@ -1,10 +1,10 @@
 package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
-import io.udash.bootstrap.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles
+import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
-
 import scalatags.JsDom
 
 class TextAreaDemoComponent extends Component {
@@ -14,15 +14,15 @@ class TextAreaDemoComponent extends Component {
 
   override def getTemplate: Modifier = div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.row)(
-        div(BootstrapStyles.Grid.colMd4)(
-          TextArea(text)(BootstrapStyles.Form.formControl)
+      div(BootstrapStyles.Grid.row)(
+        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(BootstrapStyles.Form.control)
         ),
-        div(BootstrapStyles.Grid.colMd4)(
-          TextArea(text)(BootstrapStyles.Form.formControl)
+        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(BootstrapStyles.Form.control)
         ),
-        div(BootstrapStyles.Grid.colMd4)(
-          TextArea(text)(BootstrapStyles.Form.formControl)
+        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(BootstrapStyles.Form.control)
         )
       )
     )
