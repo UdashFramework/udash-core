@@ -1,4 +1,5 @@
 package io.udash.web.guide.demos.rpc
+
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.web.guide.demos.rpc.GenCodecServerRPC.{DemoCaseClass, DemoClass, Fruit}
 

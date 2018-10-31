@@ -204,6 +204,11 @@ trait DefaultStyles extends CssBase {
       fontWeight._600
     ),
 
+    unsafeRoot("em")(
+      fontStyle.italic,
+      fontWeight._600
+    ),
+
     unsafeRoot("*") (
       boxSizing.borderBox,
 

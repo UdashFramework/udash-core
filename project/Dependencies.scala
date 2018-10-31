@@ -18,6 +18,8 @@ object Dependencies {
   val typesafeConfigVersion = "1.3.1"
   val springVersion = "4.3.17.RELEASE"
 
+  val FlexmarkVersion = "0.34.48"
+
   val seleniumVersion = "3.12.0"
   val scalatestVersion = "3.0.5"
 
@@ -66,7 +68,9 @@ object Dependencies {
 
     "com.typesafe" % "config" % typesafeConfigVersion,
     "org.springframework" % "spring-beans" % springVersion,
-    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion
+    "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
+
+    "com.vladsch.flexmark" % "flexmark-all" % FlexmarkVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(
