@@ -7,4 +7,4 @@ trait MainServerRPC {
   def demos(): DemosServerRPC
 }
 
-object MainServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[MainServerRPC]
+object MainServerRPC extends DefaultServerRpcCompanion[MainServerRPC]

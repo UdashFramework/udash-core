@@ -12,4 +12,4 @@ trait PingServerRPC {
   def fPing(id: Int): Future[Int]
 }
 
-object PingServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[PingServerRPC]
+object PingServerRPC extends DefaultServerRpcCompanion[PingServerRPC]

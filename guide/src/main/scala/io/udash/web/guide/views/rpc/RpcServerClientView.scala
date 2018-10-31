@@ -85,7 +85,7 @@ class RpcServerClientView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultClientUdashRPCFramework
         |object NotificationsClientRPC
-        |  extends DefaultClientUdashRPCFramework.RPCCompanion[NotificationsClientRPC]
+        |  extends DefaultClientRpcCompanion[NotificationsClientRPC]
         |
         |trait NotificationsServerRPC {
         |  def register(): Future[Unit]
@@ -94,7 +94,7 @@ class RpcServerClientView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultServerUdashRPCFramework
         |object NotificationsServerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[NotificationsServerRPC]""".stripMargin
+        |  extends DefaultServerRpcCompanion[NotificationsServerRPC]""".stripMargin
     )(GuideStyles),
     CodeBlock (
       """/** Client implementation */

@@ -1,13 +1,13 @@
 package io.udash.web.guide.rest
 
-import io.udash.web.guide.demos.rest.{EchoServerREST, MainServerREST, RestExampleClass, SimpleServerREST}
+import io.udash.web.guide.demos.rest._
 
 import scala.concurrent.Future
 
 class ExposedRestInterfaces extends MainServerREST {
   override def simple(): SimpleServerREST = new SimpleServerREST {
     override def string(): Future[String] = Future.successful("OK")
-    override def cls(): Future[RestExampleClass] = Future.successful(RestExampleClass(42, "Udash", (321.123, "REST Support")))
+    override def cls(): Future[RestExampleClass] = Future.successful(RestExampleClass(42, "Udash", InnerClass(321.123, "REST Support")))
     override def int(): Future[Int] = Future.successful(123)
   }
   override def echo(): EchoServerREST = new EchoServerREST {

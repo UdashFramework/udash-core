@@ -1,6 +1,6 @@
 package io.udash.web.guide.demos.rpc
 
-import io.udash.rpc.DefaultServerUdashRPCFramework
+import io.udash.rpc._
 
 import scala.concurrent.Future
 
@@ -10,4 +10,4 @@ trait ExceptionsRPC {
   def unknownError(): Future[Unit]
 }
 
-object ExceptionsRPC extends DefaultServerUdashRPCFramework.RPCCompanion[ExceptionsRPC]
+object ExceptionsRPC extends DefaultServerRpcCompanion[ExceptionsRPC]

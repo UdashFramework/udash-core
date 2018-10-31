@@ -10,4 +10,4 @@ trait ClientIdServerRPC {
   def clientId(): Future[String]
 }
 
-object ClientIdServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[ClientIdServerRPC]
+object ClientIdServerRPC extends DefaultServerRpcCompanion[ClientIdServerRPC]

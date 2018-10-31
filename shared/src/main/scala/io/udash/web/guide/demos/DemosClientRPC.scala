@@ -8,4 +8,4 @@ trait DemosClientRPC {
   def notificationsDemo(): NotificationsClientRPC
 }
 
-object DemosClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[DemosClientRPC]
+object DemosClientRPC extends DefaultClientRpcCompanion[DemosClientRPC]

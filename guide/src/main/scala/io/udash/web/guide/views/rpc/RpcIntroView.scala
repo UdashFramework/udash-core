@@ -52,7 +52,7 @@ class RpcIntroView extends FinalView with CssView {
         |}
         |
         |object PingPongServerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[PingPongServerRPC]""".stripMargin
+        |  extends DefaultServerRpcCompanion[PingPongServerRPC]""".stripMargin
     )(GuideStyles),
     p("and implement this method in your server code:"),
     CodeBlock(
@@ -94,7 +94,7 @@ class RpcIntroView extends FinalView with CssView {
         |}
         |
         |object PingPongServerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[PingPongServerRPC]""".stripMargin
+        |  extends DefaultServerRpcCompanion[PingPongServerRPC]""".stripMargin
     )(GuideStyles),
     p("In the client RPC interface:"),
     CodeBlock(
@@ -105,7 +105,7 @@ class RpcIntroView extends FinalView with CssView {
         |}
         |
         |object PingPongServerRPC
-        |  extends DefaultClientUdashRPCFramework.RPCCompanion[PingPongClientRPC]""".stripMargin
+        |  extends DefaultClientRpcCompanion[PingPongClientRPC]""".stripMargin
     )(GuideStyles),
     p("As you can see, now the server-side method does not return any value. We want it to call the client-side method."),
     CodeBlock(

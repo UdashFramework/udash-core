@@ -6,4 +6,4 @@ trait NotificationsClientRPC {
   def notify(msg: String): Unit
 }
 
-object NotificationsClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[NotificationsClientRPC]
+object NotificationsClientRPC extends DefaultClientRpcCompanion[NotificationsClientRPC]

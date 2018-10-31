@@ -7,7 +7,7 @@ object Dependencies {
   val versionOfScala = "2.12.6"
   val jettyVersion = "9.4.10.v20180503"
 
-  val udashVersion = "0.7.1"
+  val udashVersion = "0.8.0-M5"
   val udashJQueryVersion = "1.2.0"
   val highchartsVersion = "5.0.10"
 
@@ -22,21 +22,17 @@ object Dependencies {
   val scalatestVersion = "3.0.5"
 
   val crossDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-shared" % udashVersion,
-    "io.udash" %%% "udash-rest-shared" % udashVersion,
-    "io.udash" %%% "udash-rpc-shared" % udashVersion,
-    "io.udash" %%% "udash-i18n-shared" % udashVersion,
-    "io.udash" %%% "udash-css-shared" % udashVersion
+    "io.udash" %%% "udash-core" % udashVersion,
+    "io.udash" %%% "udash-rest" % udashVersion,
+    "io.udash" %%% "udash-rpc" % udashVersion,
+    "io.udash" %%% "udash-i18n" % udashVersion,
+    "io.udash" %%% "udash-css" % udashVersion
   ))
 
   val frontendDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-core-frontend" % udashVersion,
-    "io.udash" %%% "udash-rpc-frontend" % udashVersion,
-    "io.udash" %%% "udash-i18n-frontend" % udashVersion,
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
-    "io.udash" %%% "udash-css-frontend" % udashVersion
   ))
 
   val frontendJsDeps = Def.setting(Seq(
@@ -61,11 +57,6 @@ object Dependencies {
   ))
 
   val backendDeps = Def.setting(Seq(
-    "io.udash" %% "udash-rpc-backend" % udashVersion,
-    "io.udash" %% "udash-rest-backend" % udashVersion,
-    "io.udash" %% "udash-i18n-backend" % udashVersion,
-    "io.udash" %% "udash-css-backend" % udashVersion,
-
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
 

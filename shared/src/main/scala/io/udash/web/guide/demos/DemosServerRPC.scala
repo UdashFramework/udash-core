@@ -17,4 +17,4 @@ trait DemosServerRPC {
   def call(): CallServerRPC
 }
 
-object DemosServerRPC extends DefaultServerUdashRPCFramework.RPCCompanion[DemosServerRPC]
+object DemosServerRPC extends DefaultServerRpcCompanion[DemosServerRPC]

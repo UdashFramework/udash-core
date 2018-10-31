@@ -6,4 +6,4 @@ trait PingClientRPC {
   def pong(id: Int): Unit
 }
 
-object PingClientRPC extends DefaultClientUdashRPCFramework.RPCCompanion[PingClientRPC]
+object PingClientRPC extends DefaultClientRpcCompanion[PingClientRPC]

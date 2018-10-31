@@ -1,6 +1,6 @@
 package io.udash.web.server
 
-import io.udash.rest.server.{DefaultExposesREST, DefaultRestServlet}
+import io.udash.rest._
 import io.udash.rpc._
 import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
@@ -15,7 +15,6 @@ import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 
 class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String) {
-  import io.udash.web.Implicits._
   private val server = new Server(port)
 
   def start(): Unit = {
@@ -41,8 +40,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
       val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
         val callLogger = new CallLogger
         new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
-          import localFramework.RPCMetadata
-          override protected val metadata: RPCMetadata[MainServerRPC] = MainServerRPC.metadata
+          override protected val metadata: ServerRpcMetadata[MainServerRPC] = MainServerRPC.metadata
 
           override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
             callLogger.append(Call(rpcName, methodName, args))
@@ -57,7 +55,8 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     ctx.addServlet(atmosphereHolder, "/atm/*")
 
     val restHolder = new ServletHolder(
-      new DefaultRestServlet(new DefaultExposesREST[MainServerREST](new ExposedRestInterfaces)))
+      RestServlet[MainServerREST](new ExposedRestInterfaces)
+    )
     restHolder.setAsyncSupported(true)
     ctx.addServlet(restHolder, "/rest_api/*")
     ctx

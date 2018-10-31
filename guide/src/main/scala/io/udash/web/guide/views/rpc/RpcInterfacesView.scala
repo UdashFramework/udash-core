@@ -58,7 +58,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultServerUdashRPCFramework
         |object ServerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[ServerRPC]
+        |  extends DefaultServerRpcCompanion[ServerRPC]
         |
         |trait InnerRPC {
         |  def innerFire(): Unit
@@ -67,7 +67,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultServerUdashRPCFramework
         |object InnerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[InnerRPC]""".stripMargin
+        |  extends DefaultServerRpcCompanion[InnerRPC]""".stripMargin
     )(GuideStyles),
     p(
       "Inside ", i("ServerRPC"), " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
@@ -120,7 +120,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultClientUdashRPCFramework
         |object ClientRPC
-        |  extends DefaultClientUdashRPCFramework.RPCCompanion[ClientRPC]
+        |  extends DefaultClientRpcCompanion[ClientRPC]
         |
         |trait ClientInnerRPC {
         |  def innerFire(): Unit
@@ -128,7 +128,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |
         |// generate RPC metadata for DefaultClientUdashRPCFramework
         |object ClientInnerRPC
-        |  extends DefaultClientUdashRPCFramework.RPCCompanion[ClientInnerRPC]""".stripMargin
+        |  extends DefaultClientRpcCompanion[ClientInnerRPC]""".stripMargin
     )(GuideStyles),
     p(
       "Notice that ", i("ClientInnerRPC"), " is also a client RPC interface. It is impossible to return a standard RPC ",

@@ -73,7 +73,7 @@ class BootstrappingRpcView extends FinalView with CssView {
         |}
         |
         |object MainClientRPC
-        |  extends DefaultClientUdashRPCFramework.RPCCompanion[MainClientRPC]""".stripMargin)(GuideStyles),
+        |  extends DefaultClientRpcCompanion[MainClientRPC]""".stripMargin)(GuideStyles),
     CodeBlock(
       """import io.udash.rpc._
         |import scala.concurrent.Future
@@ -84,7 +84,7 @@ class BootstrappingRpcView extends FinalView with CssView {
         |}
         |
         |object MainServerRPC
-        |  extends DefaultServerUdashRPCFramework.RPCCompanion[MainServerRPC]""".stripMargin)(GuideStyles),
+        |  extends DefaultServerRpcCompanion[MainServerRPC]""".stripMargin)(GuideStyles),
     h2("What's next?"),
     p(
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),
