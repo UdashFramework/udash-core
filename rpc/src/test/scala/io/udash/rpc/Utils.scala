@@ -30,7 +30,7 @@ trait Utils {
   implicit val codecDN: GenCodec[DeepNestedTestCC] = new GenCodec[DeepNestedTestCC] {
     override def read(input: Input): DeepNestedTestCC = {
       def _read(acc: List[NestedTestCC])(next: Input): DeepNestedTestCC =
-        if (next.isNull) {
+        if (next.readNull()) {
           acc.foldLeft(null: DeepNestedTestCC)((acc: DeepNestedTestCC, n: NestedTestCC) => DeepNestedTestCC(n, acc))
         } else {
           val obj = next.readObject()

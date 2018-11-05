@@ -147,27 +147,27 @@ object TranslationKey0 {
     (input: Input) => {
       Try(input.readList()).toOption match {
         case Some(list) =>
-          val key = list.nextElement().readString()
-          val items = list.iterator(item => item.readString()).toList
+          val key = list.nextElement().readSimple().readString()
+          val items = list.iterator(_.readSimple().readString()).toList
           list.skipRemaining()
           if (items.nonEmpty) new TranslationKey.ReducedTranslationKey(key, items: _*)
           else TranslationKey.key(key)
         case None =>
-          TranslationKey.untranslatable(input.readString())
+          TranslationKey.untranslatable(input.readSimple().readString())
       }
     },
     (output: Output, value: TranslationKey0) => {
       value match {
         case reduced: TranslationKey.ReducedTranslationKey =>
           val data = output.writeList()
-          data.writeElement().writeString(value.key)
-          reduced.argv.foreach(item => data.writeElement().writeString(item.toString))
+          data.writeElement().writeSimple().writeString(value.key)
+          reduced.argv.foreach(item => data.writeElement().writeSimple().writeString(item.toString))
           data.finish()
         case untranslatable: TranslationKey.Untranslatable =>
-          output.writeString(untranslatable.key)
+          output.writeSimple().writeString(untranslatable.key)
         case std: TranslationKey =>
           val data = output.writeList()
-          data.writeElement().writeString(std.key)
+          data.writeElement().writeSimple().writeString(std.key)
           data.finish()
       }
     }
