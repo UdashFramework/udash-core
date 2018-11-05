@@ -12,8 +12,7 @@ import io.udash.rest.raw._
   * Representation of
   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#openapi-object OpenAPI Object]]
   * from [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md OpenAPI 3.0 specification]].
-  * It may be serialized to OpenAPI 3.0 compliant JSON using
-  * [[com.avsystem.commons.serialization.json.JsonStringOutput JsonStringOutput]].
+  * It may be serialized to OpenAPI 3.0 compliant JSON using `JsonStringOutput`.
   * This JSON can then be consumed by tools that support OpenAPI 3.0, e.g.
   * [[https://swagger.io/tools/swagger-ui/ Swagger UI]].
   */

@@ -269,7 +269,7 @@ case class HttpMethodMetadata[T](
   * for arbitrary type `T`. For [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
   * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected into materialization of
   * [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
-  * See [[com.avsystem.commons.meta.MacroInstances MacroInstances]] for more information on injection of implicits.
+  * See `MacroInstances` for more information on injection of implicits.
   */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
 case class HttpResponseType[T]()

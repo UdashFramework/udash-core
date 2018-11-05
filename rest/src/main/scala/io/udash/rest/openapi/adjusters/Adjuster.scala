@@ -223,7 +223,7 @@ class nullable extends SchemaAdjuster with ParameterSchemaAdjuster {
 /**
   * Allows setting custom `operationId` for [[io.udash.rest.openapi.Operation Operation]] objects generated for REST HTTP methods.
   *
-  * By default, `operationId` is set to method's [[com.avsystem.commons.rpc.rpcName rpcName]] which in turn
+  * By default, `operationId` is set to method's `rpcName` which in turn
   * defaults to method's regular name. If method is overloaded, method name may be prepended with lowercased
   * HTTP method followed by underscore (e.g. "post_")
   */
