@@ -25,13 +25,13 @@ sealed trait RestValue extends Any {
 case class PathValue(value: String) extends AnyVal with RestValue
 object PathValue extends (String => PathValue) {
   def splitDecode(path: String): List[PathValue] =
-    path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s))).toList match {
+    path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s, plusAsSpace = false))).toList match {
       case PathValue("") :: tail => tail
       case res => res
     }
 
   def encodeJoin(path: List[PathValue]): String =
-    path.iterator.map(pv => URLEncoder.encode(pv.value)).mkString("/", "/", "")
+    path.iterator.map(pv => URLEncoder.encode(pv.value, spaceAsPlus = false)).mkString("/", "/", "")
 }
 
 /**
@@ -49,13 +49,14 @@ object QueryValue extends (String => QueryValue) {
 
   def encode(query: Mapping[QueryValue]): String =
     query.iterator.map { case (name, QueryValue(value)) =>
-      s"${URLEncoder.encode(name)}$FormKVSep${URLEncoder.encode(value)}"
+      s"${URLEncoder.encode(name, spaceAsPlus = true)}$FormKVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
     }.mkString(FormKVPairSep)
 
   def decode(queryString: String): Mapping[QueryValue] = {
     val builder = Mapping.newBuilder[QueryValue]()
     queryString.split(FormKVPairSep).iterator.filter(_.nonEmpty).map(_.split(FormKVSep, 2)).foreach {
-      case Array(name, value) => builder += URLEncoder.decode(name) -> QueryValue(URLEncoder.decode(value))
+      case Array(name, value) => builder +=
+        URLEncoder.decode(name, plusAsSpace = true) -> QueryValue(URLEncoder.decode(value, plusAsSpace = true))
       case _ => throw new IllegalArgumentException(s"invalid query string $queryString")
     }
     builder.result()
