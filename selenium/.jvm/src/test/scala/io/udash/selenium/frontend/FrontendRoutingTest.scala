@@ -84,7 +84,7 @@ class FrontendRoutingTest extends SeleniumTest {
         linkChanger.clear()
         linkChanger.sendKeys(s)
         eventually {
-          val escaped = s"/frontend/routing/${URLEncoder.encode(s)}"
+          val escaped = s"/frontend/routing/${URLEncoder.encode(s, spaceAsPlus = false)}"
           val unescaped = s"/frontend/routing/$s"
           init.getText should be("/frontend/routing")
           link.getText should matchPattern {

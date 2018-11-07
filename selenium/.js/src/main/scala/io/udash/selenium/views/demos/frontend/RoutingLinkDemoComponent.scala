@@ -16,7 +16,7 @@ class RoutingLinkDemoComponent(url: Property[String]) extends CssView {
   private val urlArg = Property("")
   urlArg.listen { value =>
     applicationInstance.goTo(FrontendRoutingDemosState(
-      Some(URLEncoder.encode(value))
+      Some(URLEncoder.encode(value, spaceAsPlus = false))
     ))
   }
 
