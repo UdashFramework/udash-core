@@ -60,7 +60,9 @@ val commonJSSettings = Seq(
   Compile / emitSourceMaps := true,
   Test / parallelExecution := false,
   Test / scalaJSStage := FastOptStage,
-  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
+//  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),,
+  Test / requireJsDomEnv := true,
+  Test / installJsdom / version := "12.0.0",
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -106,7 +108,7 @@ def jvmProject(proj: Project): Project =
 
 def jsProject(proj: Project): Project =
   proj.in(proj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSBundlerPlugin)
     .settings(
       commonSettings,
       commonJSSettings
@@ -114,7 +116,7 @@ def jsProject(proj: Project): Project =
 
 def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
   jsProj.in(jvmProj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSBundlerPlugin)
     .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
     .settings(
       commonSettings,
@@ -181,7 +183,7 @@ lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
-    jsDependencies ++= Dependencies.rpcJsDeps.value,
+    Compile / npmDependencies ++= Dependencies.rpcJsDeps.value,
   )
 
 lazy val rest = jvmProject(project)
@@ -224,14 +226,16 @@ lazy val bootstrap = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrapJsDeps.value
+    Compile / npmDependencies ++= Dependencies.bootstrapJsDeps.value,
+    webpackConfigFile := Some(baseDirectory.value / "custom.webpack.config.js")
   )
 
 lazy val bootstrap4 = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrap4JsDeps.value
+    Compile / npmDependencies ++= Dependencies.bootstrap4JsDeps.value,
+    webpackConfigFile := Some(baseDirectory.value / "custom.webpack.config.js"),
   )
 
 lazy val charts = jsProject(project)
@@ -268,10 +272,10 @@ lazy val selenium = jvmProject(project)
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")
 val cssDir = settingKey[File]("Target for `compileCss` task.")
 val compileCss = taskKey[Unit]("Compiles CSS files.")
-val compileStatics = taskKey[File](
+val compileStatics = taskKey[Unit](
   "Compiles JavaScript files and copies all assets to the target directory."
 )
-val compileAndOptimizeStatics = taskKey[File](
+val compileAndOptimizeStatics = taskKey[Unit](
   "Compiles and optimizes JavaScript files and copies all assets to the target directory."
 )
 
@@ -289,6 +293,8 @@ lazy val `selenium-js` = jsProjectFor(project, selenium)
     Compile / emitSourceMaps := true,
     Compile / scalaJSUseMainModuleInitializer := true,
 
+    webpackConfigFile := Some(baseDirectory.value / "custom.webpack.config.js"),
+
     Compile / copyAssets := {
       IO.copyDirectory(
         sourceDirectory.value / "main/assets",
@@ -302,31 +308,33 @@ lazy val `selenium-js` = jsProjectFor(project, selenium)
 
     // Compiles JS files without full optimizations
     compileStatics := {
-      (Compile / fastOptJS / target).value / "UdashStatics"
+      val sjsFileName = (Compile / fastOptJS).value.data.name.stripSuffix(".js")
+      IO.copyFile(
+        (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js",
+        target.value / s"$seleniumStaticsRoot/scripts/frontend.js"
+      )
+      IO.copyFile(
+        (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js.map",
+        target.value / s"$seleniumStaticsRoot/scripts/frontend.js.map"
+      )
     },
     compileStatics := compileStatics.dependsOn(
-      Compile / fastOptJS, Compile / copyAssets
+      Compile / fastOptJS / webpack, Compile / copyAssets
     ).value,
 
     // Compiles JS files with full optimizations
     compileAndOptimizeStatics := {
-      (Compile / fullOptJS / target).value / "UdashStatics"
+      val sjsFileName = (Compile / fullOptJS).value.data.name.stripSuffix(".js")
+      IO.copyFile(
+        (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js",
+        target.value / s"$seleniumStaticsRoot/scripts/frontend.js"
+      )
+      IO.copyFile(
+        (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js.map",
+        target.value / s"$seleniumStaticsRoot/scripts/frontend.js.map"
+      )
     },
     compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-      Compile / fullOptJS, Compile / copyAssets
-    ).value,
-
-    // Target files for Scala.js plugin
-    Compile / fastOptJS / artifactPath :=
-      (Compile / fastOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / fullOptJS / artifactPath :=
-      (Compile / fullOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / packageJSDependencies / artifactPath :=
-      (Compile / packageJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js",
-    Compile / packageMinifiedJSDependencies / artifactPath :=
-      (Compile / packageMinifiedJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js"
+      Compile / fullOptJS / webpack, Compile / copyAssets
+    ).value
   )

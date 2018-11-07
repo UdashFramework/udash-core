@@ -76,8 +76,6 @@ class RestSchemaTest extends FunSuite {
   object GenCC extends RestDataCompanion[GenCC[String]]
 
   test("generic case class") {
-    println(GenCC.restStructure.asInstanceOf[RestStructure.Record[_]].fields.head.fallbackValue)
-
     assert(schemaStr[GenCC[String]] ==
       """{
         |  "type": "object",

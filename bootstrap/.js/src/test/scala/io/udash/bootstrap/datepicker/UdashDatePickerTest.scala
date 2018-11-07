@@ -11,7 +11,6 @@ import scalatags.JsDom.all._
 import scala.scalajs.js
 
 class UdashDatePickerTest extends AsyncUdashFrontendTest {
-
   "UdashDatePicker component" should {
     "show/hide on method call and emit events" in {
       val contentId = "datepicker-test-content"

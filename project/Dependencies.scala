@@ -7,7 +7,7 @@ object Dependencies {
   val versionOfScala = "2.12.7"
   val silencerVersion = "1.2.1"
 
-  val jqueryWrapperVersion = "2.0.0"
+  val jqueryWrapperVersion = "3.0.0"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.6"
@@ -30,7 +30,7 @@ object Dependencies {
   val jettyVersion = "9.4.11.v20180605" // Tests only
 
   val scalatestVersion = "3.0.5"
-  val bootstrapVersion = "3.3.7-1"
+  val bootstrapVersion = "3.3.7"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
@@ -87,8 +87,8 @@ object Dependencies {
 
   val rpcSjsDeps = rpcCrossDeps
 
-  val rpcJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
+  val rpcJsDeps = Def.setting(Seq[(String, String)](
+    "@mach25/atmosphere-javascript" -> atmosphereJSVersion
   ))
 
   private val restCrossDeps = Def.setting(Seq(
@@ -121,26 +121,18 @@ object Dependencies {
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion exclude("org.webjars", "momentjs")
   ))
 
-  val bootstrapJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion /
-      s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
-      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js"
-      dependsOn "bootstrap.js" dependsOn s"$momentJsVersion/min/moment-with-locales.js",
+  val bootstrapJsDeps = Def.setting(Seq[(String, String)](
+    "bootstrap" -> bootstrapVersion,
+    "eonasdan-bootstrap-datetimepicker" -> bootstrapDatepickerVersion,
   ))
 
   val bootstrap4SjsDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js" minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
+  val bootstrap4JsDeps = Def.setting(Seq[(String, String)](
+    "bootstrap" -> bootstrap4Version,
+    "tempusdominus-bootstrap-4" -> bootstrap4DatepickerVersion,
   ))
 
   val chartsSjsDeps = Def.setting(Seq(

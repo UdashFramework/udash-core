@@ -5,6 +5,8 @@ import org.scalajs.dom.Element
 
 /** Base trait for Bootstrap components. */
 trait UdashBootstrapComponent {
+  val bootstrapJsContext: BootstrapJsContext.type = BootstrapJsContext
+
   /** Component root DOM element ID. */
   val componentId: ComponentId
 
