@@ -3,7 +3,8 @@ package rest.openapi
 
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import com.avsystem.commons.serialization.json.JsonStringOutput
+import com.avsystem.commons.serialization.GenCodec.ReadFailure
+import com.avsystem.commons.serialization.json.{JsonStringOutput, JsonType}
 import com.avsystem.commons.serialization.{transientDefault => td, _}
 import io.udash.rest.raw._
 
@@ -25,7 +26,7 @@ case class OpenApi(
   @td tags: List[Tag] = Nil,
   @td externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
 )
-object OpenApi extends HasGenCodec[OpenApi] {
+object OpenApi extends HasGenObjectCodec[OpenApi] {
   final val Version = "3.0.1"
 }
 
@@ -41,7 +42,7 @@ case class Info(
   @td termsOfService: OptArg[String] = OptArg.Empty,
   @td contact: OptArg[Contact] = OptArg.Empty
 )
-object Info extends HasGenCodec[Info]
+object Info extends HasGenObjectCodec[Info]
 
 /**
   * Representation of
@@ -52,7 +53,7 @@ case class Contact(
   @td url: OptArg[String] = OptArg.Empty,
   @td email: OptArg[String] = OptArg.Empty
 )
-object Contact extends HasGenCodec[Contact]
+object Contact extends HasGenObjectCodec[Contact]
 
 /**
   * Representation of
@@ -62,7 +63,7 @@ case class License(
   name: String,
   @td url: OptArg[String] = OptArg.Empty
 )
-object License extends HasGenCodec[License]
+object License extends HasGenObjectCodec[License]
 
 /**
   * Representation of
@@ -73,7 +74,7 @@ case class Server(
   @td description: OptArg[String] = OptArg.Empty,
   @td serverVariables: Map[String, ServerVariable] = Map.empty
 )
-object Server extends HasGenCodec[Server]
+object Server extends HasGenObjectCodec[Server]
 
 /**
   * Representation of
@@ -84,14 +85,14 @@ case class ServerVariable(
   @td enum: List[String] = Nil,
   @td description: OptArg[String] = OptArg.Empty
 )
-object ServerVariable extends HasGenCodec[ServerVariable]
+object ServerVariable extends HasGenObjectCodec[ServerVariable]
 
 /**
   * Representation of
   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#pathsObject Paths Object]]
   */
 @transparent case class Paths(paths: Map[String, RefOr[PathItem]])
-object Paths extends HasGenCodec[Paths]
+object Paths extends HasGenObjectCodec[Paths]
 
 /**
   * Representation of
@@ -111,7 +112,7 @@ case class PathItem(
   @td servers: List[Server] = Nil,
   @td parameters: List[RefOr[Parameter]] = Nil
 )
-object PathItem extends HasGenCodec[PathItem]
+object PathItem extends HasGenObjectCodec[PathItem]
 
 /**
   * Representation of
@@ -131,7 +132,7 @@ case class Operation(
   @td security: List[SecurityRequirement] = Nil,
   @td servers: List[Server] = Nil
 )
-object Operation extends HasGenCodec[Operation]
+object Operation extends HasGenObjectCodec[Operation]
 
 /**
   * Representation of
@@ -144,7 +145,7 @@ case class Responses(
 object Responses {
   final val DefaultField = "default"
 
-  implicit val codec: GenCodec[Responses] = GenCodec.createNullableObject(
+  implicit val codec: GenObjectCodec[Responses] = GenCodec.nullableObject(
     oi => {
       var default = OptArg.empty[RefOr[Response]]
       val byStatusCode = Map.newBuilder[Int, RefOr[Response]]
@@ -184,14 +185,14 @@ case class Components(
   @td links: Map[String, RefOr[Link]] = Map.empty,
   @td callbacks: Map[String, RefOr[Callback]] = Map.empty
 )
-object Components extends HasGenCodec[Components]
+object Components extends HasGenObjectCodec[Components]
 
 /**
   * Representation of
   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#securityRequirementObject Security Requirement Object]]
   */
 @transparent case class SecurityRequirement(schemes: Map[String, List[String]])
-object SecurityRequirement extends HasGenCodec[SecurityRequirement]
+object SecurityRequirement extends HasGenObjectCodec[SecurityRequirement]
 
 /**
   * Representation of
@@ -202,7 +203,7 @@ case class Tag(
   @td description: OptArg[String] = OptArg.Empty,
   @td externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
 )
-object Tag extends HasGenCodec[Tag]
+object Tag extends HasGenObjectCodec[Tag]
 
 /**
   * Representation of
@@ -212,7 +213,7 @@ case class ExternalDocumentation(
   url: String,
   @td description: OptArg[String] = OptArg.Empty
 )
-object ExternalDocumentation extends HasGenCodec[ExternalDocumentation]
+object ExternalDocumentation extends HasGenObjectCodec[ExternalDocumentation]
 
 /**
   * Representation of
@@ -246,7 +247,7 @@ case class Schema(
   @td uniqueItems: Boolean = false,
 
   @td properties: Map[String, RefOr[Schema]] = Map.empty,
-  @td additionalProperties: OptArg[RefOr[Schema]] = OptArg.Empty, //TODO: boolean value support
+  @td additionalProperties: AdditionalProperties = AdditionalProperties.Flag(true),
   @td maxProperties: OptArg[Int] = OptArg.Empty,
   @td minProperties: OptArg[Int] = OptArg.Empty,
   @td required: List[String] = Nil,
@@ -261,7 +262,7 @@ case class Schema(
   @td default: OptArg[JsonValue] = OptArg.Empty,
   @td example: OptArg[JsonValue] = OptArg.Empty
 )
-object Schema extends HasGenCodec[Schema] {
+object Schema extends HasGenObjectCodec[Schema] {
   final val Boolean = Schema(`type` = DataType.Boolean)
   final val Char = Schema(`type` = DataType.String, minLength = 1, maxLength = 1)
   final val Byte = Schema(`type` = DataType.Integer, format = Format.Int32,
@@ -286,7 +287,7 @@ object Schema extends HasGenCodec[Schema] {
     Schema(`type` = DataType.Array, items = items, uniqueItems = uniqueItems)
 
   def mapOf(properties: RefOr[Schema]): Schema =
-    Schema(`type` = DataType.Object, additionalProperties = properties)
+    Schema(`type` = DataType.Object, additionalProperties = AdditionalProperties.SchemaObj(properties))
 
   def enumOf(values: List[String]): Schema =
     Schema(`type` = DataType.String, enum = values.map(s => JsonValue(JsonStringOutput.write(s))))
@@ -296,7 +297,7 @@ object Schema extends HasGenCodec[Schema] {
 
   implicit class RefOrOps(private val refOrSchema: RefOr[Schema]) extends AnyVal {
     /**
-      * Transforms a potential schema reference into an actual [[io.udash.rest.openapi.Schema Schema]] by wrapping the reference into
+      * Transforms a potential schema reference into an actual [[Schema]] by wrapping the reference into
       * `allOf` property of the new schema, e.g. `{"$$ref": "#/components/schemas/Entity"}` becomes
       * `{"allOf": [{"$$ref": "#/components/schemas/Entity"}]}`.
       */
@@ -316,6 +317,28 @@ object Schema extends HasGenCodec[Schema] {
         if (mapped == wrapped) ref else RefOr(mapped)
     }
   }
+}
+
+sealed trait AdditionalProperties
+object AdditionalProperties {
+  case class Flag(value: Boolean) extends AdditionalProperties
+  case class SchemaObj(schema: RefOr[Schema]) extends AdditionalProperties
+
+  private val escapedCodec: GenCodec[AdditionalProperties] = GenCodec.materialize
+
+  implicit val codec: GenCodec[AdditionalProperties] = GenCodec.create(
+    input => input.readMetadata(JsonType).fold(escapedCodec.read(input)) {
+      case JsonType.`object` => SchemaObj(GenCodec.read[RefOr[Schema]](input))
+      case JsonType.boolean => Flag(input.readSimple().readBoolean())
+      case t => throw new ReadFailure(s"expected JSON object or boolean, got $t")
+    },
+    (output, value) =>
+      if (!output.keepsMetadata(JsonType)) escapedCodec.write(output, value)
+      else value match {
+        case Flag(flag) => output.writeSimple().writeBoolean(flag)
+        case SchemaObj(schema) => GenCodec.write[RefOr[Schema]](output, schema)
+      }
+  )
 }
 
 object Format {
@@ -347,7 +370,7 @@ case class Discriminator(
   propertyName: String,
   @td mapping: Map[String, String] = Map.empty
 )
-object Discriminator extends HasGenCodec[Discriminator]
+object Discriminator extends HasGenObjectCodec[Discriminator]
 
 /**
   * Representation of
@@ -360,7 +383,7 @@ case class Xml(
   @td attribute: Boolean = false,
   @td wrapped: Boolean = false
 )
-object Xml extends HasGenCodec[Xml]
+object Xml extends HasGenObjectCodec[Xml]
 
 /**
   * Representation of
@@ -372,7 +395,7 @@ case class Response(
   @td content: Map[String, MediaType] = Map.empty,
   @td links: Map[String, RefOr[Link]] = Map.empty
 )
-object Response extends HasGenCodec[Response]
+object Response extends HasGenObjectCodec[Response]
 
 /**
   * Representation of
@@ -393,12 +416,12 @@ case class Parameter(
   @td examples: Map[String, RefOr[Example]] = Map.empty,
   @td content: OptArg[Entry[String, MediaType]] = OptArg.Empty
 )
-object Parameter extends HasGenCodec[Parameter]
+object Parameter extends HasGenObjectCodec[Parameter]
 
 case class Entry[K, V](key: K, value: V)
 object Entry {
-  implicit def codec[K: GenKeyCodec, V: GenCodec]: GenCodec[Entry[K, V]] =
-    GenCodec.createNullableObject(
+  implicit def codec[K: GenKeyCodec, V: GenCodec]: GenObjectCodec[Entry[K, V]] =
+    GenCodec.nullableObject(
       oi => {
         val fi = oi.nextField()
         Entry(GenKeyCodec.read[K](fi.fieldName), GenCodec.read[V](fi))
@@ -436,7 +459,7 @@ case class MediaType(
   @td examples: Map[String, RefOr[Example]] = Map.empty,
   @td encoding: Map[String, Encoding] = Map.empty
 )
-object MediaType extends HasGenCodec[MediaType]
+object MediaType extends HasGenObjectCodec[MediaType]
 
 /**
   * Representation of
@@ -449,7 +472,7 @@ case class Encoding(
   @td explode: OptArg[Boolean] = OptArg.Empty,
   @td allowReserved: Boolean = false
 )
-object Encoding extends HasGenCodec[Encoding]
+object Encoding extends HasGenObjectCodec[Encoding]
 
 case class Example(
   @td summary: OptArg[String] = OptArg.Empty,
@@ -457,7 +480,7 @@ case class Example(
   @td value: OptArg[JsonValue] = OptArg.Empty,
   @td externalValue: OptArg[String] = OptArg.Empty
 )
-object Example extends HasGenCodec[Example]
+object Example extends HasGenObjectCodec[Example]
 
 /**
   * Representation of
@@ -468,7 +491,7 @@ case class RequestBody(
   content: Map[String, MediaType],
   @td required: Boolean = false
 )
-object RequestBody extends HasGenCodec[RequestBody]
+object RequestBody extends HasGenObjectCodec[RequestBody]
 
 /**
   * Representation of
@@ -487,7 +510,7 @@ case class Header(
   @td examples: Map[String, RefOr[Example]] = Map.empty,
   @td content: OptArg[Entry[String, MediaType]] = OptArg.Empty
 )
-object Header extends HasGenCodec[Header]
+object Header extends HasGenObjectCodec[Header]
 
 /**
   * Representation of
@@ -519,7 +542,7 @@ object SecurityScheme {
     @td description: OptArg[String] = OptArg.Empty
   ) extends SecurityScheme
 
-  implicit val codec: GenCodec[SecurityScheme] = GenCodec.materialize
+  implicit val codec: GenObjectCodec[SecurityScheme] = GenObjectCodec.materialize
 }
 
 /**
@@ -532,7 +555,7 @@ case class OAuthFlows(
   @td clientCredentials: OptArg[OAuthFlow] = OptArg.Empty,
   @td authorizationCode: OptArg[OAuthFlow] = OptArg.Empty
 )
-object OAuthFlows extends HasGenCodec[OAuthFlows]
+object OAuthFlows extends HasGenObjectCodec[OAuthFlows]
 
 /**
   * Representation of
@@ -544,7 +567,7 @@ case class OAuthFlow(
   @td tokenUrl: OptArg[String] = OptArg.Empty,
   @td refreshUrl: OptArg[String] = OptArg.Empty
 )
-object OAuthFlow extends HasGenCodec[OAuthFlow]
+object OAuthFlow extends HasGenObjectCodec[OAuthFlow]
 
 /**
   * Representation of
@@ -558,14 +581,14 @@ case class Link(
   @td description: OptArg[String] = OptArg.Empty,
   @td server: OptArg[Server] = OptArg.Empty
 )
-object Link extends HasGenCodec[Link]
+object Link extends HasGenObjectCodec[Link]
 
 /**
   * Representation of
   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#callbackObject Callback Object]]
   */
 @transparent case class Callback(byExpression: Map[String, PathItem])
-object Callback extends HasGenCodec[Callback]
+object Callback extends HasGenObjectCodec[Callback]
 
 sealed trait RefOr[+A]
 object RefOr {
@@ -577,22 +600,22 @@ object RefOr {
   def apply[A](value: A): RefOr[A] = Value(value)
   def ref[A](ref: String): RefOr[A] = Ref(ref)
 
-  implicit def codec[A: GenCodec]: GenCodec[RefOr[A]] =
-    GenCodec.createNullableObject(
+  implicit def codec[A: GenObjectCodec]: GenObjectCodec[RefOr[A]] =
+    GenCodec.nullableObject(
       oi => {
         val poi = new PeekingObjectInput(oi)
         val refFieldInput = poi.peekField(RefField).orElse {
           if (poi.peekNextFieldName.contains(RefField)) poi.nextField().opt
           else Opt.Empty
         }
-        val res = refFieldInput.map(fi => Ref(fi.readString()))
-          .getOrElse(Value(GenCodec.read[A](new ObjectInputAsInput(poi))))
+        val res = refFieldInput.map(fi => Ref(fi.readSimple().readString()))
+          .getOrElse(Value(GenObjectCodec.readObject[A](poi)))
         poi.skipRemaining()
         res
       },
       (oo, value) => value match {
-        case Ref(refstr) => oo.writeField(RefField).writeString(refstr)
-        case Value(v) => GenCodec.write[A](new ObjectOutputAsOutput(oo, forwardFinish = false), v)
+        case Ref(refstr) => oo.writeField(RefField).writeSimple().writeString(refstr)
+        case Value(v) => GenObjectCodec.writeObject[A](oo, v)
       }
     )
 }

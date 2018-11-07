@@ -23,10 +23,11 @@ abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
   protected final val codecs: mutable.Map[String, GenCodec[_]] = mutable.Map.empty
 
   protected final val exceptionWriter: (Output, Throwable) => Unit =
-    (output: Output, ex: Throwable) => if (ex.getMessage == null) output.writeNull() else output.writeString(ex.getMessage)
+    (output: Output, ex: Throwable) =>
+      if (ex.getMessage == null) output.writeNull() else output.writeSimple().writeString(ex.getMessage)
 
   protected final val exceptionReader: Input => String =
-    (input: Input) => if (input.isNull) input.readNull() else input.readString()
+    (input: Input) => if (input.readNull()) null else input.readSimple().readString()
 
   register(GenCodec.create(input => new NullPointerException(exceptionReader(input)), exceptionWriter))
   register(GenCodec.create(input => new ClassCastException(exceptionReader(input)), exceptionWriter))

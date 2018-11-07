@@ -36,12 +36,8 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
             }
 
           override def read(input: Input): Option[T] =
-            if (input.isNull) {
-              input.readNull()
-              None
-            } else {
-              Some(implicitly[GenCodec[T]].read(input))
-            }
+            if (input.readNull()) None
+            else Some(implicitly[GenCodec[T]].read(input))
         }
 
       val testOpts = Seq(
