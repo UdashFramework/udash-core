@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.UdashFrontendTest
@@ -9,89 +8,12 @@ import org.scalajs.dom.Element
 import org.scalajs.dom.html.{Input => JSInput}
 
 class CheckButtonsTest extends UdashFrontendTest {
-  import scalatags.JsDom.all._
 
   "CheckButtons" should {
     def checkSelected(select: Element, selected: Seq[Boolean])(implicit pos: Position): Unit = {
       selected.zipWithIndex.foreach {
         case (value, idx) => select.childNodes(idx).asInstanceOf[JSInput].checked should be(value)
       }
-    }
-
-    "synchronise state with property changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String]("A", "C")
-
-      val buttons = (CheckButtons(p, options, s => div(s.map(t => t._1))): @silent).render
-
-      buttons.childElementCount should be(5)
-      checkSelected(buttons, List(true, false, true, false, false))
-
-      p.set(Seq("A", "D", "E"))
-      checkSelected(buttons, List(true, false, false, true, true))
-
-      p.set(Seq())
-      checkSelected(buttons, List(false, false, false, false, false))
-
-      p.set(Seq("A", "B", "C", "D", "E"))
-      checkSelected(buttons, List(true, true, true, true, true))
-    }
-
-    "synchronise property with state changes (deprecated)" in {
-      val options = Seq("A", "B", "C", "D", "E")
-      val p = SeqProperty[String]("A", "C")
-
-      val buttons = (CheckButtons(p, options, s => div(s.map(t => t._1))): @silent).render
-
-      buttons.childElementCount should be(5)
-
-      buttons.childNodes(0).asInstanceOf[JSInput].checked = false
-      buttons.childNodes(0).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(1)
-      p.get should contain("C")
-
-      buttons.childNodes(4).asInstanceOf[JSInput].checked = true
-      buttons.childNodes(4).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(2)
-      p.get should contain("C")
-      p.get should contain("E")
-
-      buttons.childNodes(1).asInstanceOf[JSInput].checked = true
-      buttons.childNodes(1).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(3)
-      p.get should contain("B")
-      p.get should contain("C")
-      p.get should contain("E")
-
-      buttons.childNodes(1).asInstanceOf[JSInput].checked = false
-      buttons.childNodes(1).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(2)
-      p.get should contain("C")
-      p.get should contain("E")
-
-      buttons.childNodes(0).asInstanceOf[JSInput].checked = true
-      buttons.childNodes(0).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(3)
-      p.get should contain("A")
-      p.get should contain("C")
-      p.get should contain("E")
-
-      buttons.childNodes(1).asInstanceOf[JSInput].checked = true
-      buttons.childNodes(1).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(4)
-      p.get should contain("A")
-      p.get should contain("B")
-      p.get should contain("C")
-      p.get should contain("E")
-
-      buttons.childNodes(3).asInstanceOf[JSInput].checked = true
-      buttons.childNodes(3).asInstanceOf[JSInput].onchange(null)
-      p.get.size should be(5)
-      p.get should contain("A")
-      p.get should contain("B")
-      p.get should contain("C")
-      p.get should contain("D")
-      p.get should contain("E")
     }
 
     "synchronise state with property changes" in {

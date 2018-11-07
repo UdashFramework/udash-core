@@ -8,16 +8,12 @@ import scala.scalajs.js
 import scala.scalajs.js.JSON
 
 //todo move to scala-commons
-class NativeJsonInput(value: js.Any) extends Input { self =>
+class NativeJsonInput(value: js.Any) extends InputAndSimpleInput { self =>
   private def read[T](expected: String)(matcher: PartialFunction[Any, T]): T =
     matcher.applyOrElse(value, (_: Any) => throw new ReadFailure(s"$expected expected."))
 
-  override def isNull: Boolean = value == null
-
-  override def readNull(): Null =
-    read("Null") {
-      case null => null
-    }
+  override def readNull(): Boolean =
+    value == null
 
   override def readString(): String =
     read("String") {
@@ -88,7 +84,7 @@ class NativeJsonInput(value: js.Any) extends Input { self =>
   override def skip(): Unit = ()
 
   override def readBinary(): Array[Byte] = {
-    readList().iterator(i => i.readInt().toByte).toArray
+    readList().iterator(_.readSimple().readInt().toByte).toArray
   }
 
   def readRaw(): Any = value

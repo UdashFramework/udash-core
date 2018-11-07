@@ -8,7 +8,7 @@ import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion,
 import com.avsystem.commons.rpc._
 import com.avsystem.commons.serialization.GenCodec
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
-import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput, JsonStringOutput}
+import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput, JsonStringOutput, RawJson}
 import io.udash.utils.URLEncoder
 
 import scala.annotation.implicitNotFound
@@ -25,13 +25,13 @@ sealed trait RestValue extends Any {
 case class PathValue(value: String) extends AnyVal with RestValue
 object PathValue extends (String => PathValue) {
   def splitDecode(path: String): List[PathValue] =
-    path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s))).toList match {
+    path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s, plusAsSpace = false))).toList match {
       case PathValue("") :: tail => tail
       case res => res
     }
 
   def encodeJoin(path: List[PathValue]): String =
-    path.iterator.map(pv => URLEncoder.encode(pv.value)).mkString("/", "/", "")
+    path.iterator.map(pv => URLEncoder.encode(pv.value, spaceAsPlus = false)).mkString("/", "/", "")
 }
 
 /**
@@ -49,13 +49,14 @@ object QueryValue extends (String => QueryValue) {
 
   def encode(query: Mapping[QueryValue]): String =
     query.iterator.map { case (name, QueryValue(value)) =>
-      s"${URLEncoder.encode(name)}$FormKVSep${URLEncoder.encode(value)}"
+      s"${URLEncoder.encode(name, spaceAsPlus = true)}$FormKVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
     }.mkString(FormKVPairSep)
 
   def decode(queryString: String): Mapping[QueryValue] = {
     val builder = Mapping.newBuilder[QueryValue]()
     queryString.split(FormKVPairSep).iterator.filter(_.nonEmpty).map(_.split(FormKVSep, 2)).foreach {
-      case Array(name, value) => builder += URLEncoder.decode(name) -> QueryValue(URLEncoder.decode(value))
+      case Array(name, value) => builder +=
+        URLEncoder.decode(name, plusAsSpace = true) -> QueryValue(URLEncoder.decode(value, plusAsSpace = true))
       case _ => throw new IllegalArgumentException(s"invalid query string $queryString")
     }
     builder.result()
@@ -68,18 +69,10 @@ object QueryValue extends (String => QueryValue) {
   */
 case class JsonValue(value: String) extends AnyVal with RestValue
 object JsonValue {
-  // TODO: this is terrible, but GenCodec in general just can't embed arbitrary JSON at this point...
-  private[rest] implicit val codec: GenCodec[JsonValue] =
-    GenCodec.create(
-      {
-        case ji: JsonStringInput => JsonValue(ji.readRawJson())
-        case i => JsonValue(i.readString())
-      },
-      {
-        case (jo: JsonStringOutput, JsonValue(json)) => jo.writeRawJson(json)
-        case (o, JsonValue(json)) => o.writeString(json)
-      }
-    )
+  implicit val codec: GenCodec[JsonValue] = GenCodec.create(
+    i => JsonValue(i.readCustom(RawJson).getOrElse(i.readSimple().readString())),
+    (o, v) => if (!o.writeCustom(RawJson, v.value)) o.writeSimple().writeString(v.value)
+  )
 }
 
 /**

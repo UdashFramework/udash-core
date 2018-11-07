@@ -4,7 +4,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
-import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
+import com.avsystem.commons.serialization.json.RawJson
 import com.avsystem.commons.serialization.{GenCodec, HasGenCodec}
 import io.udash.rpc.serialization.ExceptionCodecRegistry
 import io.udash.rpc.utils.Logged
@@ -15,14 +15,8 @@ import scala.concurrent.Future
 case class JsonStr(json: String) extends AnyVal
 object JsonStr {
   implicit val codec: GenCodec[JsonStr] = GenCodec.create(
-    {
-      case jsi: JsonStringInput => JsonStr(jsi.readRawJson())
-      case in => JsonStr(in.readString())
-    },
-    {
-      case (jso: JsonStringOutput, v) => jso.writeRawJson(v.json)
-      case (out, v) => out.writeString(v.json)
-    }
+    i => JsonStr(i.readCustom(RawJson).getOrElse(i.readSimple().readString())),
+    (o, v) => if (!o.writeCustom(RawJson, v.json)) o.writeSimple().writeString(v.json)
   )
 
   implicit def futureAsReal[T](implicit asReal: AsReal[JsonStr, T]): AsReal[Future[JsonStr], Future[T]] =
@@ -87,18 +81,18 @@ case class RpcResponseFailure(cause: String, errorMsg: String, callId: String) e
 case class RpcResponseException(name: String, exception: Throwable, callId: String) extends RpcResponse
 object RpcResponseException {
   implicit def codec(implicit ecr: ExceptionCodecRegistry): GenCodec[RpcResponseException] =
-    GenCodec.createNullableObject(
+    GenCodec.nullableObject(
       in => {
-        val name = in.getNextNamedField("name").readString()
+        val name = in.getNextNamedField("name").readSimple().readString()
         val exception = ecr.get[Throwable](name).read(in.getNextNamedField("exception"))
-        val callId = in.getNextNamedField("callId").readString()
+        val callId = in.getNextNamedField("callId").readSimple().readString()
         RpcResponseException(name, exception, callId)
       },
       {
         case (out, RpcResponseException(name, exception, callId)) =>
-          out.writeField("name").writeString(name)
+          out.writeField("name").writeSimple().writeString(name)
           ecr.get[Throwable](name).write(out.writeField("exception"), exception)
-          out.writeField("callId").writeString(callId)
+          out.writeField("callId").writeSimple().writeString(callId)
       }
     )
 }

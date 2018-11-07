@@ -1030,7 +1030,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fire transform on empty property" in {
-      val p = Property.empty[String]: @silent
+      val p = Property(null: String)
       val t = p.transform(_ == null)
 
       t.get should be(true)
@@ -1133,7 +1133,7 @@ class PropertyTest extends UdashCoreTest {
 
   "ModelProperty" should {
     "update value and provide access to subproperties" in {
-      val p = ModelProperty.empty[TT]: @silent
+      val p = ModelProperty(null: TT)
 
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
@@ -1167,7 +1167,7 @@ class PropertyTest extends UdashCoreTest {
       val oneTimeValues = mutable.ArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
-      val p = ModelProperty.empty[TT]: @silent
+      val p = ModelProperty(null: TT)
       p.listen(listener, initUpdate = true)
       p.listenOnce(oneTimeListener)
 
@@ -1239,7 +1239,7 @@ class PropertyTest extends UdashCoreTest {
       val values = mutable.ArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
-      val p = ModelProperty.empty[TT]: @silent
+      val p = ModelProperty(null: TT)
       val t = p.transform[Int](
         (p: TT) => p.i + p.t.c.i,
         (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
@@ -1391,8 +1391,8 @@ class PropertyTest extends UdashCoreTest {
       }
       implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
 
-      val p1 = ModelProperty.empty[ModelWithImplDef]: @silent
-      val p2 = ModelProperty.empty[ModelWithImplVal]: @silent
+      val p1 = ModelProperty(null: ModelWithImplDef)
+      val p2 = ModelProperty(null: ModelWithImplVal)
 
       p1.subProp(_.x).set(12)
       p1.subProp(_.x).get should be(12)
@@ -1436,7 +1436,7 @@ class PropertyTest extends UdashCoreTest {
       case class Test(a: SubTest, s: SubTest)
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
-      val p = ModelProperty.empty[Test]: @silent
+      val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
 
       p.get should be(null)
@@ -1459,7 +1459,7 @@ class PropertyTest extends UdashCoreTest {
       }
       implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
 
-      val p = ModelProperty.empty[Test]: @silent
+      val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
 
       p.get should be(null)
@@ -1498,7 +1498,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "cache subproperties" in {
-      val p = ModelProperty.empty[TT]: @silent
+      val p = ModelProperty(null: TT)
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
       p.subProp(_.i) should be theSameInstanceAs p.subProp(_.i)
@@ -1728,7 +1728,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fire value listeners on every child change" in {
-      val p = SeqProperty.empty[Int]: @silent
+      val p = SeqProperty.blank[Int]
 
       val values = mutable.ArrayBuffer[Seq[Int]]()
       val listener = (s: Seq[Int]) => values += s
@@ -1757,7 +1757,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fire structure listeners on structure change" in {
-      val p = SeqProperty.empty[Int]: @silent
+      val p = SeqProperty.blank[Int]
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
@@ -1819,7 +1819,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "not fire structure listeners on child change" in {
-      val p = SeqProperty.empty[Int]: @silent
+      val p = SeqProperty.blank[Int]
 
       val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s

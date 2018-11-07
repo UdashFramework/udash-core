@@ -3,11 +3,10 @@ package io.udash.bindings
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.avsystem.commons.misc.Opt
-import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
-import org.scalajs.dom.{Element, Node}
+import org.scalajs.dom.Node
 
 import scala.collection.mutable
 
@@ -52,7 +51,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           s"C($i)"
       }
 
-      val p = Property.empty[C]: @silent
+      val p = Property(null: C)
       val template = div(bind(p)).render
       val template2 = div(bind(p)).render
 
@@ -547,7 +546,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Model.Test]: @silent
+      val p = ModelProperty(null: Model.Test)
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -578,7 +577,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         object SubTest extends HasModelPropertyCreator[SubTest]
       }
 
-      val p = ModelProperty.empty[Model.Test]: @silent
+      val p = ModelProperty(null: Model.Test)
       val sub = p.subProp(_.subType)
       val template = div(
         produce(p) { t =>
@@ -1402,11 +1401,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property.empty[NumbersFilter]: @silent
-      val numbers = seq.SeqProperty.empty[Int]: @silent
-
-      filter.set(OddsFilter)
-      numbers.set(Seq(1, 2, 3, 4, 5))
+      val filter = Property[NumbersFilter](OddsFilter)
+      val numbers = SeqProperty(1, 2, 3, 4, 5)
 
       val dom = div(
         produce(filter)(f => ul(
@@ -1481,11 +1477,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
       case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
 
-      val filter = Property.empty[NumbersFilter]: @silent
-      val numbers = seq.SeqProperty.empty[Int]: @silent
-
-      filter.set(OddsFilter)
-      numbers.set(Seq(1, 2, 3, 4, 5))
+      val filter = Property[NumbersFilter](OddsFilter)
+      val numbers = SeqProperty(1, 2, 3, 4, 5)
 
       val dom = div(
         produce(filter)(f => ul(
@@ -1536,15 +1529,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       case class Todo(override val name: String,
                       override val completed: Boolean) extends TodoElement
 
-      val filter = Property.empty[TodosFilter]: @silent
-      val todos = seq.SeqProperty.empty[TodoElement]: @silent
+      val filter = Property[TodosFilter](AllTodosFilter)
+      val todos = SeqProperty.blank[TodoElement]
 
       val done = todos.filter(CompletedTodosFilter.matcher)
       val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]
       done.listenStructure(p => patches += p)
 
-
-      filter.set(AllTodosFilter)
       todos.set(Seq(
         Todo("A", false),
         Todo("B", false),
@@ -1782,33 +1773,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.replace(1, 2, "a", "B")
       el.textContent should be("0x1a2B")
-    }
-  }
-
-  "bindAttribute" should {
-    "update element on property change" in {
-      val p = Property[Int](5)
-
-      @silent
-      val binding = bindAttribute(p)((i: Int, el: Element) => {
-        el.setAttribute("class", s"c$i")
-      })
-      val template = div(
-        id := "someId",
-        binding
-      ).render
-
-      template.getAttribute("class") should be("c5")
-
-      p.set(-8)
-      template.getAttribute("class") should be("c-8")
-
-      p.set(0)
-      template.getAttribute("class") should be("c0")
-
-      binding.kill()
-      p.set(12)
-      template.getAttribute("class") should be("c0")
     }
   }
 

@@ -1,9 +1,8 @@
 package io.udash.bindings.inputs
 
 import io.udash._
-import org.scalajs.dom.{Element, Event, KeyboardEvent}
 import org.scalajs.dom.html.{Input => JSInput}
-import scalatags.JsDom
+import org.scalajs.dom.{Element, Event, KeyboardEvent}
 import scalatags.JsDom.all._
 
 import scala.concurrent.duration.{Duration, DurationInt}
@@ -25,26 +24,6 @@ private[bindings] abstract class Input(inputType: String) {
 
       override def render: JSInput = element
     }
-
-  /**
-    * @param property Property to bind.
-    * @param debounce Property update timeout after input changes.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
-    * @return HTML textarea with bound Property, applied modifiers and nested options.
-    */
-  @deprecated("Use `apply` returning `InputBinding` instead.", "0.7.0")
-  def apply(property: Property[String], debounce: Option[Duration], xs: Modifier*): JsDom.TypedTag[JSInput] = {
-    input(tpe := inputType, new InputModifier(property, debounce), xs)
-  }
-
-  /**
-    * @param property Property to bind.
-    * @param xs Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
-    * @return HTML textarea with bound Property, applied modifiers and nested options.
-    */
-  @deprecated("Use `apply` returning `InputBinding` instead.", "0.7.0")
-  def debounced(property: Property[String], xs: Modifier*): JsDom.TypedTag[JSInput] =
-    apply(property, Some(20 millis), xs: _*)
 
   private class InputModifier(property: Property[String], debounce: Option[Duration])
     extends TextInputsModifier(property, debounce)  {

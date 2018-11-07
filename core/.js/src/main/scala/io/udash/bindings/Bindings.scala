@@ -322,24 +322,6 @@ trait Bindings {
     * to customize what HTML elements should be shown.
     *
     * @param property        Property to bind.
-    * @param initBuilder     Builder which is called when validation process is started. It will also give you an access to future of
-    *                        validation results.
-    * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
-    * @param errorBuilder    Builder which is called, when validation process fails.
-    * @return Modifier for validation logic.
-    */
-  @deprecated("Use `valid` instead.", "0.4.0")
-  def bindValidation[A](property: ReadableProperty[A],
-                        initBuilder: Future[ValidationResult] => Seq[Element],
-                        completeBuilder: ValidationResult => Seq[Element],
-                        errorBuilder: Throwable => Seq[Element]): Binding =
-    new ValidationValueModifier(property, Some(initBuilder), completeBuilder, Some(errorBuilder))
-
-  /**
-    * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
-    * to customize what HTML elements should be shown.
-    *
-    * @param property        Property to bind.
     * @param progressBuilder     Builder which is called when validation process is started. It will also give you an access to future of
     *                        validation results.
     * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
@@ -375,17 +357,6 @@ trait Bindings {
                          errorBuilder: (Throwable, Binding.NestedInterceptor) => Seq[Node] = null,
                          customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace): Binding =
     new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
-
-  /**
-    * Use it to update DOM elements, on every `property` change.
-    *
-    * @param property Property to listen.
-    * @param updater  Element attribute updater.
-    * @return Modifier for bounded property.
-    */
-  @deprecated("Use `Attr.bind`, `AttrPair.attrIf` or `Property.reactiveApply` instead.", "0.4.0")
-  def bindAttribute[T](property: ReadableProperty[T])(updater: (T, Element) => Any): Binding =
-    new AttrModifier[T](property, updater)
 
   implicit def toAttrOps(attr: Attr): AttrOps =
     new AttrOps(attr)
