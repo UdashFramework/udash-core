@@ -3,7 +3,7 @@ package seq
 
 import com.avsystem.commons.misc.Opt
 import io.udash.properties.single._
-import io.udash.utils.Registration
+import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 

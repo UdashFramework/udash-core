@@ -3,7 +3,7 @@ package io.udash.properties.single
 import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
-import io.udash.utils.Registration
+import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
