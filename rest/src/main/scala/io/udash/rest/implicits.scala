@@ -4,7 +4,6 @@ package rest
 import com.avsystem.commons.meta.Fallback
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal, InvalidRpcCall}
-import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.avsystem.commons.serialization.{GenCodec, GenKeyCodec}
 import com.avsystem.commons.{Future, Promise, Success, Try, _}
@@ -79,9 +78,12 @@ object FutureRestImplicits extends FutureRestImplicits
   * Defines `GenCodec` and `GenKeyCodec` based serialization for REST API traits.
   */
 trait GenCodecRestImplicits extends FloatingPointRestImplicits {
+  // read failure handling is now baked into macro-generated RPC `AsRaw` implementations but this
+  // method is left for backwards compatibility - for instances materialized with previous version of macro
   protected final def handleReadFailure[T](expr: => T): T =
     try expr catch {
-      case rf: ReadFailure => throw new InvalidRpcCall(rf.getMessage, rf)
+      case e: InvalidRpcCall => throw e
+      case NonFatal(cause) => throw new InvalidRpcCall(cause.getMessage, cause)
     }
 
   // Implicits wrapped into `Fallback` so that they don't get higher priority just because they're imported

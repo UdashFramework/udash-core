@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.34.0"
+  val avsCommonsVersion = "1.34.1"
 
   val atmosphereJSVersion = "2.3.6"
   val atmosphereVersion = "2.4.30"
@@ -69,9 +69,9 @@ object Dependencies {
   private val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
-  
+
   val coreJvmDeps = coreCrossDeps
-  
+
   val coreSjsDeps = coreCrossDeps
 
   private val rpcCrossDeps = Def.setting(Seq(
