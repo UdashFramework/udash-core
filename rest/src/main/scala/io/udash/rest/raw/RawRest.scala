@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
-import com.avsystem.commons.serialization.GenCodec.ReadFailure
 
 sealed abstract class RestMethodCall {
   val pathParams: List[PathValue]
@@ -73,7 +72,7 @@ trait RawRest {
     val HttpCall(finalPathParams, finalMetadata) = finalCall
 
     def handleBadBody[T](expr: => T): T = try expr catch {
-      case rf: ReadFailure => throw new InvalidRpcCall(s"Invalid HTTP body: ${rf.getMessage}", rf)
+      case NonFatal(cause) => throw new InvalidRpcCall(s"Invalid HTTP body: ${cause.getMessage}", cause)
     }
 
     def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
