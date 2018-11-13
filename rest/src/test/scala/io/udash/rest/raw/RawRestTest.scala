@@ -215,4 +215,45 @@ class RawRestTest extends FunSuite with ScalaFutures {
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)
   }
+
+  test("bad body") {
+    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PathValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
+    val response = RestResponse(400, Mapping.empty, HttpBody.plain(
+      "Invalid HTTP body: Unexpected EOF (line 3, column 2) (line content: {)"))
+
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
+  test("bad argument") {
+    val body = HttpBody.json(JsonValue("{\"user\": {}}"))
+    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PathValue("user"))), body)
+    val response = RestResponse(400, Mapping.empty, HttpBody.plain(
+      "Argument user of RPC put_user is invalid: " +
+        "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
+    ))
+
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
+  test("missing argument") {
+    val request = RestRequest(HttpMethod.GET, RestParameters(List(PathValue("user"))), HttpBody.Empty)
+    val response = RestResponse(400, Mapping.empty, HttpBody.plain("Argument userId of RPC user is missing"))
+
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
+  test("missing argument in prefix") {
+    val request = RestRequest(HttpMethod.GET, RestParameters(PathValue.splitDecode("subApi/42/user")), HttpBody.Empty)
+    val response = RestResponse(400, Mapping.empty, HttpBody.plain("Argument query of RPC subApi is missing"))
+
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
 }
