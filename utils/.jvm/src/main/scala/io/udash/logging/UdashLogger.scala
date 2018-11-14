@@ -3,8 +3,8 @@ package io.udash.logging
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
-class UdashLogger extends CrossLogger {
-  private val internalLogger = Logger(LoggerFactory.getLogger(getClass.getName))
+class UdashLogger(clazz: Class[_]) extends CrossLogger {
+  private val internalLogger = Logger(LoggerFactory.getLogger(clazz.getName))
 
   override def debug(message: String, params: Any*): Unit =
     internalLogger.debug(message, params)
