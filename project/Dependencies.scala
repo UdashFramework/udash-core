@@ -46,7 +46,6 @@ object Dependencies {
 
   val commonDeps = Def.setting(Seq(
     "com.github.ghik" %% "silencer-lib" % silencerVersion % Provided,
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -57,12 +56,16 @@ object Dependencies {
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
+  
+  val utilsCrossDeps = Def.setting(Seq(
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
+  ))
 
-  val utilsJvmDeps = Def.setting(Seq(
+  val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val utilsSjsDeps = Def.setting(Seq(
+  val utilsSjsDeps = Def.setting(utilsCrossDeps.value ++ Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
