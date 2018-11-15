@@ -13,7 +13,20 @@ import scala.collection.mutable
 
 @implicitNotFound("RestSchema for ${T} not found")
 trait RestSchema[T] { self =>
+  /**
+    * Creates a [[Schema]] object or external schema reference.
+    * May use [[SchemaResolver]] to resolve any dependent `RestSchema` instances.
+    */
   def createSchema(resolver: SchemaResolver): RefOr[Schema]
+
+  /**
+    * Optional name of the schema. When `RestSchema` is named, schema created by [[createSchema]] will be registered
+    * under that name in [[SchemaRegistry]] and ultimately included into [[Components]] of the [[OpenApi]] document.
+    * All direct usages of the schema in OpenAPI document will be replaced by a reference to
+    * the registered schema, i.e. `{"$ref": "#/components/schemas/<schema-name>"}`.
+    *
+    * If schema is unnamed, it will be always inlined instead of being replaced by a reference.
+    */
   def name: Opt[String]
 
   def map[S](fun: RefOr[Schema] => Schema, newName: OptArg[String] = OptArg.Empty): RestSchema[S] =
@@ -108,6 +121,16 @@ object RestSchema {
     RestSchema[T].map(Schema.nullable)
   implicit def nOptSchema[T: RestSchema]: RestSchema[NOpt[T]] =
     RestSchema[T].map(Schema.nullable)
+
+  implicit def eitherSchema[A: RestSchema, B: RestSchema]: RestSchema[Either[A, B]] =
+    RestSchema.create { resolver =>
+      RefOr(Schema(oneOf = List(
+        RefOr(Schema(`type` = DataType.Object, properties =
+          Map("Left" -> resolver.resolve(RestSchema[A])), required = List("Left"))),
+        RefOr(Schema(`type` = DataType.Object, properties =
+          Map("Right" -> resolver.resolve(RestSchema[B])), required = List("Right")))
+      )))
+    }
 
   implicit def namedEnumSchema[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): RestSchema[E] =
     RestSchema.plain(Schema.enumOf(comp.values.iterator.map(_.name).toList))
