@@ -23,7 +23,7 @@ trait RestSchema[T] { self =>
     * Optional name of the schema. When `RestSchema` is named, schema created by [[createSchema]] will be registered
     * under that name in [[SchemaRegistry]] and ultimately included into [[Components]] of the [[OpenApi]] document.
     * All direct usages of the schema in OpenAPI document will be replaced by a reference to
-    * the registered schema, i.e. `{"$ref": "#/components/schemas/<schema-name>"}`.
+    * the registered schema, i.e. `{"$$ref": "#/components/schemas/<schema-name>"}`.
     *
     * If schema is unnamed, it will be always inlined instead of being replaced by a reference.
     */
