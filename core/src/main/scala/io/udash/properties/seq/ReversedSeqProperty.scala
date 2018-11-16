@@ -1,7 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
+import io.udash.utils.CrossCollections
 
 private[properties] abstract class BaseReversedSeqProperty[A, ElemType <: ReadableProperty[A], OriginType <: ReadableSeqProperty[A, ElemType]](
   override protected val origin: OriginType

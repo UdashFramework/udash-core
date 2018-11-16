@@ -1,7 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.CrossCollections
 import io.udash.properties.single.{Property, ReadableProperty}
+import io.udash.utils.CrossCollections
 
 private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B

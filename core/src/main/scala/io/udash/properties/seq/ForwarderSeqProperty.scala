@@ -1,8 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.CrossCollections
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
-import io.udash.utils.Registration
+import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {

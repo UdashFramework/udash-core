@@ -1,5 +1,7 @@
 package io.udash.properties
 
+import io.udash.utils.CrossCollections
+
 import scala.collection.mutable
 
 /**

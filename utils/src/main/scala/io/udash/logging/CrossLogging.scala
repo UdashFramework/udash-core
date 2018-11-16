@@ -1,5 +1,5 @@
 package io.udash.logging
 
 trait CrossLogging {
-  def logger: CrossLogger = new UdashLogger
+  protected def logger: CrossLogger = new UdashLogger(this.getClass)
 }

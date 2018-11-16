@@ -5,7 +5,7 @@ import org.scalajs.dom.Console
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.global
 
-class UdashLogger extends CrossLogger {
+class UdashLogger(clazz: Class[_]) extends CrossLogger {
   private val console: Console = global.console.asInstanceOf[Console]
 
   private def printWithParams(method: (js.Any, Seq[js.Any]) => Unit)(message: String, params: Any*): Unit =
