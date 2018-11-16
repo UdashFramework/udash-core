@@ -1,8 +1,9 @@
-package io.udash.properties
+package io.udash
+package utils
 
 import scala.collection.mutable
 
-private[properties]
+private[udash]
 object CrossCollections {
   def toCrossArray[T](t: Traversable[T]): mutable.Buffer[T] = t.to[mutable.ArrayBuffer]
   def createArray[T]: mutable.Buffer[T] = new mutable.ArrayBuffer[T]

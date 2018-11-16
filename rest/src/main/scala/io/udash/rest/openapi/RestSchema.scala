@@ -13,7 +13,20 @@ import scala.collection.mutable
 
 @implicitNotFound("RestSchema for ${T} not found")
 trait RestSchema[T] { self =>
+  /**
+    * Creates a [[Schema]] object or external schema reference.
+    * May use [[SchemaResolver]] to resolve any dependent `RestSchema` instances.
+    */
   def createSchema(resolver: SchemaResolver): RefOr[Schema]
+
+  /**
+    * Optional name of the schema. When `RestSchema` is named, schema created by [[createSchema]] will be registered
+    * under that name in [[SchemaRegistry]] and ultimately included into [[Components]] of the [[OpenApi]] document.
+    * All direct usages of the schema in OpenAPI document will be replaced by a reference to
+    * the registered schema, i.e. `{"$$ref": "#/components/schemas/<schema-name>"}`.
+    *
+    * If schema is unnamed, it will be always inlined instead of being replaced by a reference.
+    */
   def name: Opt[String]
 
   def map[S](fun: RefOr[Schema] => Schema, newName: OptArg[String] = OptArg.Empty): RestSchema[S] =
@@ -109,6 +122,16 @@ object RestSchema {
   implicit def nOptSchema[T: RestSchema]: RestSchema[NOpt[T]] =
     RestSchema[T].map(Schema.nullable)
 
+  implicit def eitherSchema[A: RestSchema, B: RestSchema]: RestSchema[Either[A, B]] =
+    RestSchema.create { resolver =>
+      RefOr(Schema(oneOf = List(
+        RefOr(Schema(`type` = DataType.Object, properties =
+          Map("Left" -> resolver.resolve(RestSchema[A])), required = List("Left"))),
+        RefOr(Schema(`type` = DataType.Object, properties =
+          Map("Right" -> resolver.resolve(RestSchema[B])), required = List("Right")))
+      )))
+    }
+
   implicit def namedEnumSchema[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): RestSchema[E] =
     RestSchema.plain(Schema.enumOf(comp.values.iterator.map(_.name).toList))
   implicit def jEnumSchema[E <: Enum[E]](implicit ct: ClassTag[E]): RestSchema[E] =
@@ -142,15 +165,19 @@ object RestResponses {
 }
 
 /**
-  * Just like [[io.udash.rest.openapi.RestResponses RestResponses]], [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
+  * Just like [[io.udash.rest.openapi.RestResponses RestResponses]],
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
   * Responses Object will look like for a HTTP method which returns given type. The difference between
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]] is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]]
+  * is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
   * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
-  * In such situation, [[io.udash.rest.openapi.RestResponses RestResponses]] must be provided for `T` while [[io.udash.rest.openapi.RestResultType RestResultType]] is provided
-  * for `Future[T]` (or whatever async wrapper is used), based on the [[io.udash.rest.openapi.RestResponses RestResponses]] instance of `T`.
-  * You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
+  * In such situation, [[io.udash.rest.openapi.RestResponses RestResponses]] must be provided for `T` while
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] is provided
+  * for `Future[T]` (or whatever async wrapper is used), based on the [[io.udash.rest.openapi.RestResponses RestResponses]]
+  * instance of `T`. You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
   *
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] for [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]] is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
+  * [[io.udash.rest.openapi.RestResultType RestResultType]] for [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]]
+  * is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
   * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
   */
 case class RestResultType[T](responses: SchemaResolver => Responses)

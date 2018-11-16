@@ -1,8 +1,8 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
-import io.udash.properties.{CrossCollections, PropertyCreator}
-import io.udash.utils.Registration
+import io.udash.properties.PropertyCreator
+import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 

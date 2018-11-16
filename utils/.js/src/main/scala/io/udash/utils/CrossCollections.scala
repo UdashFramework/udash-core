@@ -1,9 +1,10 @@
-package io.udash.properties
+package io.udash
+package utils
 
 import scala.collection.mutable
 import scala.scalajs.js
 
-private[properties]
+private[udash]
 object CrossCollections {
   import scala.scalajs.js.JSConverters._
 

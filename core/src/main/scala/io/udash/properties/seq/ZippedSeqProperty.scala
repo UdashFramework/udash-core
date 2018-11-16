@@ -2,7 +2,7 @@ package io.udash.properties.seq
 
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.Registration
+import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 

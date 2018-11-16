@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.34.0"
+  val avsCommonsVersion = "1.34.1"
 
   val atmosphereJSVersion = "2.3.6"
   val atmosphereVersion = "2.4.30"
@@ -46,7 +46,6 @@ object Dependencies {
 
   val commonDeps = Def.setting(Seq(
     "com.github.ghik" %% "silencer-lib" % silencerVersion % Provided,
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -57,21 +56,25 @@ object Dependencies {
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
+  
+  val utilsCrossDeps = Def.setting(Seq(
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
+  ))
 
-  val utilsJvmDeps = Def.setting(Seq(
+  val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   ))
 
-  val utilsSjsDeps = Def.setting(Seq(
+  val utilsSjsDeps = Def.setting(utilsCrossDeps.value ++ Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
   private val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
-  
+
   val coreJvmDeps = coreCrossDeps
-  
+
   val coreSjsDeps = coreCrossDeps
 
   private val rpcCrossDeps = Def.setting(Seq(

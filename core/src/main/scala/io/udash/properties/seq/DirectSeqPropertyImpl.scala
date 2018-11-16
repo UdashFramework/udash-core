@@ -1,7 +1,8 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.properties.{CrossCollections, PropertyCreator, PropertyId}
+import io.udash.properties.{PropertyCreator, PropertyId}
+import io.udash.utils.CrossCollections
 
 private[properties] class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_], override val id: PropertyId)
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
