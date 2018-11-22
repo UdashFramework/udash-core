@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos.rpc
 
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 import io.udash.rpc.utils.Logged
 
 import scala.concurrent.Future
@@ -12,4 +12,4 @@ trait PingServerRPC {
   def fPing(id: Int): Future[Int]
 }
 
-object PingServerRPC extends DefaultServerRpcCompanion[PingServerRPC]
+object PingServerRPC extends DefaultRpcCompanion[PingServerRPC]

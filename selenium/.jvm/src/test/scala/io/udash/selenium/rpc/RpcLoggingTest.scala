@@ -19,7 +19,10 @@ class RpcLoggingTest extends SeleniumTest {
 
     "receive ClientId in demo" in {
       val callDemo = driver.findElementById("ping-pong-call-demo")
-      for (i <- 0 to 2) callDemo.click()
+      for (_ <- 0 to 2) {
+        callDemo.click()
+        eventually(callDemo.isEnabled should be(true))
+      }
 
       val triggerBtn = driver.findElementById("load-calls-btn")
       def results = driver.findElementById("calls-list")
@@ -34,6 +37,7 @@ class RpcLoggingTest extends SeleniumTest {
       }
 
       callDemo.click()
+      eventually(callDemo.isEnabled should be(true))
       triggerBtn.click()
 
       eventually {

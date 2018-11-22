@@ -1,3 +1,3 @@
 package io.udash
 
-package object rpc extends RPCBackend
+package object rpc extends RpcBackend

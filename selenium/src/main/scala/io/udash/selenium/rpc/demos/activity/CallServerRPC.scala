@@ -8,4 +8,4 @@ trait CallServerRPC {
   def calls: Future[Seq[Call]]
 }
 
-object CallServerRPC extends DefaultServerRpcCompanion[CallServerRPC]
+object CallServerRPC extends DefaultRpcCompanion[CallServerRPC]

@@ -10,13 +10,13 @@ object NotificationsClient extends NotificationsClientRPC {
 
   def registerListener(listener: String => Any): Future[Unit] = {
     listeners += listener
-    if (listeners.size == 1) serverRpc.demos().notificationsDemo().register()
+    if (listeners.size == 1) serverRpc.call().demos().notificationsDemo().register()
     else Future.successful(())
   }
 
   def unregisterListener(listener: String => Any): Future[Unit] = {
     listeners -= listener
-    if (listeners.isEmpty) serverRpc.demos().notificationsDemo().unregister()
+    if (listeners.isEmpty) serverRpc.call().demos().notificationsDemo().unregister()
     else Future.successful(())
   }
 

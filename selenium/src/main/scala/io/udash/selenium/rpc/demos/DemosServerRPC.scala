@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos
 
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 import io.udash.selenium.rpc.demos.activity.CallServerRPC
 import io.udash.selenium.rpc.demos.rpc._
 
@@ -17,4 +17,4 @@ trait DemosServerRPC {
   def call(): CallServerRPC
 }
 
-object DemosServerRPC extends DefaultServerRpcCompanion[DemosServerRPC]
+object DemosServerRPC extends DefaultRpcCompanion[DemosServerRPC]

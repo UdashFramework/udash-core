@@ -10,10 +10,10 @@ import scala.concurrent.Future
 case class Record(i: Int, fuu: String)
 object Record extends HasGenCodec[Record]
 
-case class CustomRPCException(i: Int) extends Throwable
-object CustomRPCException extends HasGenCodec[CustomRPCException]
+case class CustomRpcException(i: Int) extends Throwable
+object CustomRpcException extends HasGenCodec[CustomRpcException]
 
-trait RPCMethods {
+trait RpcMethods {
   @silent
   def handle: Unit
 
@@ -31,24 +31,18 @@ trait RPCMethods {
 }
 
 /** Inner Server side RPC interface */
-trait InnerRPC {
+trait InnerRpc {
   def proc(): Unit
 
   @Logged
   def func(arg: Int): Future[String]
 
-  def recInner(arg: String): InnerRPC
+  def recInner(arg: String): InnerRpc
 }
-object InnerRPC extends DefaultServerRpcCompanion[InnerRPC]
-
-/** Inner Client RPC interface */
-trait InnerClientRPC {
-  def proc(): Unit
-}
-object InnerClientRPC extends DefaultClientRpcCompanion[InnerClientRPC]
+object InnerRpc extends DefaultRpcCompanion[InnerRpc]
 
 /** Main Server side RPC interface */
-trait TestRPC extends RPCMethods {
+trait TestRpc extends RpcMethods {
   def doStuff(yes: Boolean): Future[String]
 
   def doStuffWithFail(no: Boolean): Future[String]
@@ -62,20 +56,15 @@ trait TestRPC extends RPCMethods {
   @Logged
   def fireSomething(arg: Int): Unit
 
-  def innerRpc(name: String): InnerRPC
+  def innerRpc(name: String): InnerRpc
 
-  def throwingGetter(): InnerRPC
+  def throwingGetter(): InnerRpc
 
-  def nullGetter(): InnerRPC
-}
-
-/** Main Client RPC interface */
-trait TestClientRPC extends RPCMethods {
-  def innerRpc(name: String): InnerClientRPC
+  def nullGetter(): InnerRpc
 }
 
 /** Basic RPC methods implementation with callbacks support */
-trait RPCMethodsImpl extends RPCMethods {
+trait RpcMethodsImpl extends RpcMethods {
   def onInvocationInternal: (String, List[Any], Option[Any]) => Any
 
   protected def onFire(methodName: String, args: List[Any]): Unit =
@@ -123,10 +112,10 @@ trait RPCMethodsImpl extends RPCMethods {
 }
 
 @silent
-object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
+object TestRpc extends DefaultRpcCompanion[TestRpc] {
   /** Returns implementation of server side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
-    new TestRPC with RPCMethodsImpl {
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRpc =
+    new TestRpc with RpcMethodsImpl {
       override def doStuff(yes: Boolean): Future[String] =
         onCall("doStuff", List(List(yes)), "doStuffResult")
 
@@ -134,7 +123,7 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
         onFailingCall("doStuffWithFail", List(List(no)), new Exception)
 
       override def doStuffWithEx(): Future[String] =
-        onFailingCall("doStuffWithEx", List(List()), CustomRPCException(5))
+        onFailingCall("doStuffWithEx", List(List()), CustomRpcException(5))
 
       override def doStuffInt(yes: Boolean): Future[Int] =
         onCall("doStuffInt", List(List(yes)), 5)
@@ -147,45 +136,28 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
 
       override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
 
-      override def innerRpc(name: String): InnerRPC = {
+      override def innerRpc(name: String): InnerRpc = {
         onInvocationInternal("innerRpc", List(List(name)), None)
-        new InnerRPC {
+        new InnerRpc {
           def func(arg: Int): Future[String] =
             onCall("innerRpc.func", List(List(arg)), "innerRpc.funcResult")
 
           def proc(): Unit =
             onFire("innerRpc.proc", List(Nil))
 
-          def recInner(arg: String): InnerRPC =
+          def recInner(arg: String): InnerRpc =
             this
         }
       }
 
-      override def throwingGetter(): InnerRPC = {
+      override def throwingGetter(): InnerRpc = {
         onInvocationInternal("throwingGetter", List(List()), None)
         throw new NullPointerException
       }
 
-      override def nullGetter(): InnerRPC = {
+      override def nullGetter(): InnerRpc = {
         onInvocationInternal("nullGetter", List(List()), None)
         null
-      }
-    }
-}
-
-@silent
-object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
-  /** Returns implementation of client side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestClientRPC =
-    new TestClientRPC with RPCMethodsImpl {
-      override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
-
-      override def innerRpc(name: String): InnerClientRPC = {
-        onInvocationInternal("innerRpc", List(List(name)), None)
-        new InnerClientRPC {
-          def proc(): Unit =
-            onFire("innerRpc.proc", List(Nil))
-        }
       }
     }
 }

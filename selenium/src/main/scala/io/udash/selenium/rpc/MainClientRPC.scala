@@ -1,10 +1,10 @@
 package io.udash.selenium.rpc
 
-import io.udash.rpc.DefaultClientRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 import io.udash.selenium.rpc.demos.DemosClientRPC
 
 trait MainClientRPC {
   def demos(): DemosClientRPC
 }
 
-object MainClientRPC extends DefaultClientRpcCompanion[MainClientRPC]
+object MainClientRPC extends DefaultRpcCompanion[MainClientRPC]

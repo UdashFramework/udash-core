@@ -27,7 +27,7 @@ class PingPongPushDemoComponent extends CssView {
 
     def onButtonClick(): Unit = {
       registerCallback()
-      Launcher.serverRpc.demos().pingDemo().ping(clientId.get)
+      Launcher.serverRpc.call().demos().pingDemo().ping(clientId.get)
     }
 
     private def registerCallback(): Unit = if (!registered) {

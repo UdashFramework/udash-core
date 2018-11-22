@@ -1,9 +1,9 @@
 package io.udash.selenium.rpc.demos.rpc
 
-import io.udash.rpc.DefaultClientRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 
 trait PingClientRPC {
   def pong(id: Int): Unit
 }
 
-object PingClientRPC extends DefaultClientRpcCompanion[PingClientRPC]
+object PingClientRPC extends DefaultRpcCompanion[PingClientRPC]

@@ -1,6 +1,6 @@
 package io.udash.i18n
 
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 
 import scala.concurrent.Future
 
@@ -20,4 +20,4 @@ trait RemoteTranslationRPC {
   /** Returns map of translations and bundle hash. If `oldHash` is not outdated, this Future will contain None. */
   def loadTranslationsForLang(lang: Lang, oldHash: BundleHash): Future[Option[Bundle]]
 }
-object RemoteTranslationRPC extends DefaultServerRpcCompanion[RemoteTranslationRPC]
+object RemoteTranslationRPC extends DefaultRpcCompanion[RemoteTranslationRPC]

@@ -26,7 +26,7 @@ class LoggingDemoComponent extends CssView {
 
   class LoggingDemoPresenter(calls: SeqProperty[Call]) {
     def onButtonClick(): Unit = {
-      Launcher.serverRpc.demos().call().calls onComplete {
+      Launcher.serverRpc.call().demos().call().calls onComplete {
         case Success(data) => calls.set(data)
         case Failure(_) => calls.clear()
       }

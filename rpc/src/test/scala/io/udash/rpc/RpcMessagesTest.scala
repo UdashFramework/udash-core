@@ -5,20 +5,18 @@ import com.avsystem.commons.serialization._
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
 import io.udash.testing.UdashSharedTest
 
-import scala.util.Random
-
 private case class CustomException(error: String, counter: Int) extends Throwable
 
 private sealed trait SealedExceptions extends Throwable
 private case class SealedExceptionsA(a: Int) extends SealedExceptions
 private case class SealedExceptionsB(b: Double) extends SealedExceptions
 
-trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
+class RpcMessagesTest extends UdashSharedTest with Utils {
   val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
   exceptionsRegistry.register(GenCodec.materialize[CustomException])
   exceptionsRegistry.register(GenCodec.materialize[SealedExceptions])
 
-  def tests(): Unit = {
+  "RPCMessages default serializers" should {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
     val inv = RpcInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
@@ -221,22 +219,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized.i2.set should be(item.i2.set)
       deserialized.i2.obj should be(item.i2.obj)
       deserialized.i2.map should be(item.i2.map)
-    }
-  }
-
-  def hugeTests(): Unit = {
-    "serialize and deserialize huge case classes" in {
-      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
-      def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
-      def dncc(counter: Int = 0): DeepNestedTestCC =
-        if (counter < 500) DeepNestedTestCC(ncc(), dncc(counter + 1))
-        else DeepNestedTestCC(ncc(), null)
-
-      val test: DeepNestedTestCC = dncc()
-      val serialized = write(test)
-      val deserialized = read[DeepNestedTestCC](serialized)
-
-      deserialized should be(test)
     }
   }
 }

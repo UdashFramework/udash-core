@@ -27,7 +27,7 @@ class PingPongCallDemoComponent extends CssView {
 
   class PingPongCallDemoPresenter(model: Property[Int]) {
     def onButtonClick(): Future[Unit] = {
-      Launcher.serverRpc.demos().pingDemo().fPing(model.get).setup {
+      Launcher.serverRpc.call().demos().pingDemo().fPing(model.get).setup {
         _.onComplete {
           case Success(response) =>
             model.set(response + 1)

@@ -1,11 +1,11 @@
 package io.udash.selenium.rpc.demos.rpc
 
 import com.avsystem.commons.serialization.{GenCodec, HasGenCodec, Input, Output}
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 
 import scala.concurrent.Future
 
-object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
+object GenCodecServerRPC extends DefaultRpcCompanion[GenCodecServerRPC] {
   case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
   object DemoCaseClass extends HasGenCodec[DemoCaseClass]
 

@@ -1,9 +1,9 @@
 package io.udash.selenium.rpc.demos.rpc
 
-import io.udash.rpc.DefaultClientRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 
 trait NotificationsClientRPC {
   def notify(msg: String): Unit
 }
 
-object NotificationsClientRPC extends DefaultClientRpcCompanion[NotificationsClientRPC]
+object NotificationsClientRPC extends DefaultRpcCompanion[NotificationsClientRPC]

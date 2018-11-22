@@ -16,7 +16,7 @@ class DynamicRemoteTranslationsDemo {
   import scalatags.JsDom.all._
 
   def getTemplate: Element = {
-    implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
+    implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.call().demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = LangProperty(Lang("en"))
 
     val enBtn = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty, componentId = ComponentId("enButton"))(_ => "EN")

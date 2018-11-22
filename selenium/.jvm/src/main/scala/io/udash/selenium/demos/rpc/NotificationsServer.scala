@@ -1,43 +1,48 @@
 package io.udash.selenium.demos.rpc
 
-import java.util.concurrent.TimeUnit
+import java.util.{Timer, TimerTask}
 import java.{time => jt}
 
 import io.udash.rpc._
-import io.udash.selenium.rpc.ClientRPC
+import io.udash.rpc.utils.ClientId
+import io.udash.selenium.rpc.MainClientRPC
 import io.udash.selenium.rpc.demos.rpc.NotificationsServerRPC
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class NotificationsServer()(implicit clientId: ClientId, ec: ExecutionContext) extends NotificationsServerRPC {
+class NotificationsServer(server: RpcServer[_, MainClientRPC])(implicit clientId: ClientId, ec: ExecutionContext) extends NotificationsServerRPC {
+  NotificationsService.setRpcServer(server)
   override def register(): Future[Unit] = Future { NotificationsService.register }
   override def unregister(): Future[Unit] = Future { NotificationsService.unregister }
 }
 
 object NotificationsService {
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   private val clients = scala.collection.mutable.ArrayBuffer[ClientId]()
+  private var server: RpcServer[_, MainClientRPC] = _
 
-  def register(implicit clientId: ClientId) = clients.synchronized {
-    clients += clientId
+  def setRpcServer(server: RpcServer[_, MainClientRPC]): Unit = {
+    clients.synchronized(this.server = server)
   }
 
-  def unregister(implicit clientId: ClientId) = clients.synchronized {
-    clients -= clientId
+  def register(implicit clientId: ClientId): Unit = {
+    clients.synchronized {
+      clients += clientId
+    }
   }
 
-  global.execute(new Runnable {
+  def unregister(implicit clientId: ClientId): Unit = {
+    clients.synchronized {
+      clients -= clientId
+    }
+  }
+
+  private val timer: Timer = new Timer()
+  timer.scheduleAtFixedRate(new TimerTask {
     override def run(): Unit = {
-      while (true) {
-        val msg = jt.LocalDateTime.now().toString
-        clients.synchronized {
-          clients.foreach(clientId => {
-            ClientRPC(clientId).demos().notificationsDemo().notify(msg)
-          })
-        }
-        TimeUnit.MILLISECONDS.sleep(100)
+      val msg = jt.LocalDateTime.now().toString
+      clients.synchronized {
+        server.call(clients, _.demos().notificationsDemo().notify(msg))
       }
     }
-  })
+  }, 100, 100)
 }

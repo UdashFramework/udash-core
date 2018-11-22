@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos.rpc
 
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 import io.udash.rpc.utils.Logged
 
 import scala.concurrent.Future
@@ -10,4 +10,4 @@ trait ClientIdServerRPC {
   def clientId(): Future[String]
 }
 
-object ClientIdServerRPC extends DefaultServerRpcCompanion[ClientIdServerRPC]
+object ClientIdServerRPC extends DefaultRpcCompanion[ClientIdServerRPC]

@@ -5,7 +5,9 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.7"
+  
   val silencerVersion = "1.2.1"
+  val avsCommonsVersion = "1.34.1"
 
   val jqueryWrapperVersion = "2.0.0"
   val jqueryVersion = "3.3.1"
@@ -15,7 +17,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.34.1"
+  val javaWebsocketVersion = "1.1"
 
   val atmosphereJSVersion = "2.3.6"
   val atmosphereVersion = "2.4.30"
@@ -28,8 +30,11 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.0"
 
   val jettyVersion = "9.4.11.v20180605" // Tests only
+  val logbackClassicVersion = "1.2.3" // Tests only
 
   val scalatestVersion = "3.0.5"
+  val scalamockVersion = "4.1.0"
+  
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
@@ -49,7 +54,8 @@ object Dependencies {
   ))
 
   val commonTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
+    "org.scalatest" %%% "scalatest" % scalatestVersion,
+    "org.scalamock" %%% "scalamock" % scalamockVersion,
   ).map(_ % Test))
 
   val macroDeps = Def.setting(Seq(
@@ -85,7 +91,10 @@ object Dependencies {
 
   val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
-    "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
+    "javax.websocket" % "javax.websocket-api" % javaWebsocketVersion,
+    "org.eclipse.jetty.websocket" % "javax-websocket-server-impl" % jettyVersion % Test, 
+    "org.eclipse.jetty.websocket" % "javax-websocket-client-impl" % jettyVersion % Test, 
+    "ch.qos.logback" % "logback-classic" % logbackClassicVersion % Test
   ))
 
   val rpcSjsDeps = rpcCrossDeps
@@ -163,6 +172,9 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "javax-websocket-server-impl" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "javax-websocket-client-impl" % jettyVersion,
+    "ch.qos.logback" % "logback-classic" % logbackClassicVersion,
     "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))

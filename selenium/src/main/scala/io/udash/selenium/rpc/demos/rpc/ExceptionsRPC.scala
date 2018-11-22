@@ -1,6 +1,6 @@
 package io.udash.selenium.rpc.demos.rpc
 
-import io.udash.rpc.DefaultServerRpcCompanion
+import io.udash.rpc.DefaultRpcCompanion
 
 import scala.concurrent.Future
 
@@ -10,4 +10,4 @@ trait ExceptionsRPC {
   def unknownError(): Future[Unit]
 }
 
-object ExceptionsRPC extends DefaultServerRpcCompanion[ExceptionsRPC]
+object ExceptionsRPC extends DefaultRpcCompanion[ExceptionsRPC]

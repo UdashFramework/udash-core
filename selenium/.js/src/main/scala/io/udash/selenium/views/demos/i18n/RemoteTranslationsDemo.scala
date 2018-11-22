@@ -13,7 +13,7 @@ class RemoteTranslationsDemo {
   import scalatags.JsDom.all._
 
   def getTemplate: Element = {
-    implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
+    implicit val translationProvider = new RemoteTranslationProvider(Launcher.serverRpc.call().demos().translations(), Some(LocalStorage), 6 hours)
     implicit val lang = Lang("pl")
     div(id := "rpc-translations-demo")(
       ul(

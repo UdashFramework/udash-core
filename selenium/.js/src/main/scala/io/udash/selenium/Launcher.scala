@@ -3,7 +3,7 @@ package io.udash.selenium
 import io.udash.Application
 import io.udash.rest.DefaultRestClient
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
-import io.udash.rpc.DefaultServerRPC
+import io.udash.rpc.DefaultRpcClient
 import io.udash.selenium.routing.{RoutingRegistryDef, RoutingState, StatesToViewFactoryDef}
 import io.udash.selenium.rpc.demos.rest.MainServerREST
 import io.udash.selenium.rpc.{GuideExceptions, MainClientRPC, MainServerRPC, RPCService}
@@ -27,13 +27,15 @@ object Launcher {
     override protected def log(url: String, referrer: Option[String]): Unit =
       UrlLoggingDemoService.log(url, referrer)
   }
-  val serverRpc: MainServerRPC =
-    DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
+  private val (scheme, defaultPort) =
+    if (dom.window.location.protocol == "https:") ("https", 443) else ("http", 80)
+  private val port = Try(dom.window.location.port.toInt).getOrElse(defaultPort)
+
+  val serverRpc: DefaultRpcClient[MainClientRPC, MainServerRPC] = {
+    DefaultRpcClient[MainClientRPC, MainServerRPC](new RPCService, s"ws://${dom.window.location.hostname}:$port/websocket", GuideExceptions.registry)
+  }
   val restServer: MainServerREST = {
-    val (scheme, defaultPort) =
-      if (dom.window.location.protocol == "https:") ("https", 443) else ("http", 80)
-    val port = Try(dom.window.location.port.toInt).getOrElse(defaultPort)
     DefaultRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
   }
 

@@ -26,7 +26,7 @@ class ClientIdDemoComponent extends CssView {
 
   class ClientIdDemoPresenter(model: Property[String]) {
     def onButtonClick(): Unit = {
-      Launcher.serverRpc.demos().clientIdDemo().clientId() onComplete {
+      Launcher.serverRpc.call().demos().clientIdDemo().clientId() onComplete {
         case Success(cid) => model.set(cid)
         case Failure(ex) => model.set(ex.toString)
       }

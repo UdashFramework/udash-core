@@ -59,7 +59,7 @@ class GenCodecsDemoComponent extends CssView with CrossLogging {
       BigInt.probablePrime(32, Random).toString(16)
 
     def onButtonClick(): Unit = {
-      val demoRpc: GenCodecServerRPC = Launcher.serverRpc.demos().gencodecsDemo()
+      val demoRpc: GenCodecServerRPC = Launcher.serverRpc.call().demos().gencodecsDemo()
       demoRpc.sendInt(Random.nextInt()) onComplete {
         case Success(response) => model.subProp(_.int).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
