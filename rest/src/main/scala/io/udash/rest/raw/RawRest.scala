@@ -169,11 +169,19 @@ object RawRest extends RawRpcCompanion[RawRest] {
   def failingAsync[T](cause: Throwable): Async[T] =
     readyAsync(Failure(cause))
 
+  def transformAsync[A, B](async: Async[A])(f: Try[A] => Try[B]): Async[B] =
+    cb => async(contraTransformCallback(cb)(f))
+
   def mapAsync[A, B](async: Async[A])(f: A => B): Async[B] =
-    cb => async(contramapCallback(cb)(f))
+    transformAsync(async)(_.map(f))
+
+  def contraTransformCallback[A, B](callback: Callback[B])(f: Try[A] => Try[B]): Callback[A] =
+    ta => callback(try f(ta) catch {
+      case NonFatal(cause) => Failure(cause)
+    })
 
   def contramapCallback[A, B](callback: Callback[B])(f: A => B): Callback[A] =
-    ta => callback(ta.map(f))
+    contraTransformCallback(callback)(_.map(f))
 
   def fromHandleRequest[Real: AsRealRpc : RestMetadata](handleRequest: HandleRequest): Real =
     RawRest.asReal(new DefaultRawRest(RestMetadata[Real], RestParameters.Empty, handleRequest))
