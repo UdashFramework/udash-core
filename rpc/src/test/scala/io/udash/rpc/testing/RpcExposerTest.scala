@@ -90,7 +90,7 @@ abstract class RpcExposerTest(name: String) extends AsyncUdashSharedTest with Ut
         responses.size should be(2)
         responses should contain(RpcResponseFailure("com.avsystem.commons.rpc.UnknownRpc", "Unknown RPC proc for raw method call", "callId2"))
         responses.exists {
-          case RpcResponseException("java.lang.NullPointerException", ex, "callId1") =>
+          case RpcResponseException("NPE", ex, "callId1") =>
             ex.isInstanceOf[NullPointerException]
           case _ => false
         } should be(true)

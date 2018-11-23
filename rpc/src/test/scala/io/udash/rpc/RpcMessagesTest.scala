@@ -13,8 +13,8 @@ private case class SealedExceptionsB(b: Double) extends SealedExceptions
 
 class RpcMessagesTest extends UdashSharedTest with Utils {
   val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry
-  exceptionsRegistry.register(GenCodec.materialize[CustomException])
-  exceptionsRegistry.register(GenCodec.materialize[SealedExceptions])
+  exceptionsRegistry.register(GenCodec.materialize[CustomException], "CustomException")
+  exceptionsRegistry.register(GenCodec.materialize[SealedExceptions], "SealedExceptions")
 
   "RPCMessages default serializers" should {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
@@ -26,9 +26,9 @@ class RpcMessagesTest extends UdashSharedTest with Utils {
     val req = RpcCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
     val success = RpcResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
     val failure = RpcResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
-    val exception = RpcResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
-    val runtimeException = RpcResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
-    val sealedException = RpcResponseException(classOf[SealedExceptions].getName, SealedExceptionsA(2), "\"ca{[]}ll1\"")
+    val exception = RpcResponseException("CustomException", CustomException("test", 5), "\"ca{[]}ll1\"")
+    val runtimeException = RpcResponseException("NPE", new NullPointerException(null), "\"ca{[]}ll1\"")
+    val sealedException = RpcResponseException("SealedExceptions", SealedExceptionsA(2), "\"ca{[]}ll1\"")
     val rpcFail = RpcFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
 
     "serialize and deserialize call request" in {

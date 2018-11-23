@@ -15,12 +15,12 @@ trait RpcParty[LocalRpcApi, RemoteRpcApi] extends ExposesLocalRpc[LocalRpcApi] w
         case Success(response) =>
           sendRpcMessage(RpcResponseSuccess(response, call.callId))
         case Failure(ex) =>
-          val exceptionName = exceptionsRegistry.name(ex)
-          val response = if (exceptionsRegistry.contains(exceptionName)) {
-            RpcResponseException(exceptionName, ex, call.callId)
-          } else {
-            val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
-            RpcResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
+          val response = exceptionsRegistry.name(ex) match {
+            case Some(exceptionName) =>
+              RpcResponseException(exceptionName, ex, call.callId)
+            case None =>
+              val cause: String = if (ex.getCause != null) ex.getCause.getMessage else ex.getClass.getName
+              RpcResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
           }
           sendRpcMessage(response)
       }
