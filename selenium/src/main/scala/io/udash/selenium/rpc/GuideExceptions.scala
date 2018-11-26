@@ -10,8 +10,8 @@ object GuideExceptions {
   case class TranslatableExampleException(trKey: TranslationKey0) extends Exception
 
   val registry: ExceptionCodecRegistry = (new DefaultExceptionCodecRegistry).setup { registry =>
-    registry.register(GenCodec.materialize[ExampleException])
-    registry.register(GenCodec.materialize[TranslatableExampleException])
+    registry.register(GenCodec.materialize[ExampleException], "ExampleException")
+    registry.register(GenCodec.materialize[TranslatableExampleException], "TranslatableExampleException")
     registry
   }
 }
