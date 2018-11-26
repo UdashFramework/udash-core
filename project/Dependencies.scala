@@ -22,7 +22,8 @@ object Dependencies {
 
   val upickleVersion = "0.6.6" // Tests only
   val circeVersion = "0.9.3" // Tests only
-
+  val monixVersion = "3.0.0-RC2" // Tests only
+  
   val sttpVersion = "1.3.4"
 
   val scalaLoggingVersion = "3.9.0"
@@ -97,6 +98,7 @@ object Dependencies {
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
+    "io.monix" %%% "monix" % monixVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
