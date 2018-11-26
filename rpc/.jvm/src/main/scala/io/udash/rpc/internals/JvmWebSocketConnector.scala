@@ -5,7 +5,7 @@ import io.udash.rpc.WebSocketConnector
 import javax.websocket.Session
 
 class JvmWebSocketConnector(
-  socket: Session,
+  socket: Session
 ) extends WebSocketConnector {
   override def isOpen: Boolean = socket.isOpen
   override def isClosed: Boolean = !socket.isOpen

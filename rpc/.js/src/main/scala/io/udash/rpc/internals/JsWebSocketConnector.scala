@@ -9,7 +9,7 @@ class JsWebSocketConnector(
   onOpen: Event => Unit,
   onClose: CloseEvent => Unit,
   onError: Event => Unit,
-  onMessage: MessageEvent => Unit,
+  onMessage: MessageEvent => Unit
 ) extends WebSocketConnector {
   private val socket: WebSocket = new WebSocket(url)
 

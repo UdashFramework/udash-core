@@ -12,7 +12,7 @@ import scala.util.{Success, Try}
 
 abstract class AbstractRpcClient[LocalRpcApi : RawRpc.AsRawRpc, RemoteRpcApi : RawRpc.AsRealRpc](
   localApiImpl: LocalRpcApi,
-  exceptionsRegistry: ExceptionCodecRegistry,
+  exceptionsRegistry: ExceptionCodecRegistry
 ) extends RpcParty[LocalRpcApi, RemoteRpcApi] {
   protected def createSession(): WebSocketConnector
 

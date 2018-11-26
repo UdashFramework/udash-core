@@ -19,7 +19,7 @@ class TestRpcServer[LocalRpcApi : RawRpc.AsRawRpc : RpcMetadata, RemoteRpcApi : 
   localApiImpl: (RpcServer[LocalRpcApi, RemoteRpcApi], ClientId) => LocalRpcApi,
   exceptionsRegistry: ExceptionCodecRegistry,
   timeouts: TimeoutConfig,
-  clientCleanup: FiniteDuration,
+  clientCleanup: FiniteDuration
 )(implicit
   ec: ExecutionContext
 ) extends DefaultRpcServer[LocalRpcApi, RemoteRpcApi](localApiImpl, exceptionsRegistry, timeouts, clientCleanup, _ => ())
