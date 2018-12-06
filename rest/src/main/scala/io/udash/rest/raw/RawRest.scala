@@ -105,7 +105,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
     * A callback that gets notified when value of type `T` gets computed or when computation of that value fails.
     * Callbacks should never throw exceptions. Preferably, they should be simple notifiers that delegate the real
     * work somewhere else, e.g. schedule some handling code on a separate executor
-    * (e.g. [[scala.concurrent.ExecutionException ExecutionContext]]).
+    * (e.g. [[scala.concurrent.ExecutionContext ExecutionContext]]).
     */
   type Callback[T] = Try[T] => Unit
 
