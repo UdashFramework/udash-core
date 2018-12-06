@@ -21,7 +21,7 @@ trait MonixRestImplicits extends GenCodecRestImplicits {
   ): AsRaw[RawRest.Async[RestResponse], Try[Task[T]]] =
     AsRaw.create { triedtask =>
       val task = triedtask.fold(Task.raiseError, identity).map(respAsRaw.asRaw)
-      callback => task.runAsync(r => callback(r.toTry))
+      callback => task.runAsync(r => callback(r.fold(Failure(_), Success(_))))
     }
 
   implicit def taskFromAsyncResp[T](
