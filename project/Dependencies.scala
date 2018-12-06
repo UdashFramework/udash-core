@@ -7,7 +7,7 @@ object Dependencies {
   val versionOfScala = "2.12.7"
   val silencerVersion = "1.2.1"
 
-  val jqueryWrapperVersion = "2.0.0"
+  val jqueryWrapperVersion = "3.0.0"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.6"
@@ -15,14 +15,15 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "3.1.0"
-  val avsCommonsVersion = "1.34.1"
+  val avsCommonsVersion = "1.34.2"
 
   val atmosphereJSVersion = "2.3.6"
   val atmosphereVersion = "2.4.30"
 
   val upickleVersion = "0.6.6" // Tests only
   val circeVersion = "0.9.3" // Tests only
-
+  val monixVersion = "3.0.0-RC2" // Tests only
+  
   val sttpVersion = "1.3.4"
 
   val scalaLoggingVersion = "3.9.0"
@@ -97,6 +98,7 @@ object Dependencies {
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
+    "io.monix" %%% "monix" % monixVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
