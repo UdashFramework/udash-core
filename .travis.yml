@@ -25,7 +25,7 @@ jdk:
   - oraclejdk8
 scala:
   - 2.11.12
-  - 2.12.7
+  - 2.12.8
 
 env:
   - TEST_PACKAGE="utils/test utils-js/test"
