@@ -6,7 +6,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-M9",
+  version := "0.8.0-M10",
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
