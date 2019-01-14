@@ -219,7 +219,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("bad body") {
     val request = RestRequest(HttpMethod.PUT, RestParameters(List(PathValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
     val response = RestResponse(400, Mapping.empty, HttpBody.plain(
-      "Invalid HTTP body: Unexpected EOF (line 3, column 2) (line content: {)"))
+      "Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"))
 
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
