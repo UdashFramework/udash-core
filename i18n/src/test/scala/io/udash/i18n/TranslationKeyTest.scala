@@ -44,6 +44,22 @@ class TranslationKeyTest extends UdashSharedTest {
   val testKeyX = TranslationKey.keyX("testX")
   val testKeyU = TranslationKey.untranslatable("testUntranslatable")
 
+  "Translation arguments should be escaped (actually: putArgs test)" in {
+    implicit val provider = new TranslationProvider {
+      override def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] = {
+        Future.successful(putArgs(key, argv: _*))
+      }
+
+      override protected def handleMixedPlaceholders(template: String): Unit = ()
+    }
+
+    val theKey = TranslationKey.key1[String]("This is {}")
+
+    getTranslatedString(theKey("plain string")) should be("This is plain string")
+    getTranslatedString(theKey("${foo}")) should be("This is ${foo}")
+    getTranslatedString(theKey("<([{\\^-=$!|]})?*+.>")) should be("This is <([{\\^-=$!|]})?*+.>") //regex special chars
+  }
+
   "TranslationKey" should {
     "obtain translation from provider" in {
       getTranslatedString(testKey0()) should be("test0:")

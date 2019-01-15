@@ -3,6 +3,7 @@ package io.udash.i18n
 
 import scala.concurrent.Future
 import scala.util.Try
+import scala.util.matching.Regex
 
 trait TranslationProvider {
   import TranslationProvider._
@@ -13,7 +14,8 @@ trait TranslationProvider {
   protected def handleMixedPlaceholders(template: String): Unit
 
   protected def putArgs(template: String, argv: Any*): Translated = {
-    val args = argv.map(_.toString).lift
+    val args = argv.map(_.toString).map(Regex.quoteReplacement).lift
+
     var prevN = -1
     var indexed = false
     var unindexed = false
