@@ -44,8 +44,8 @@ class TranslationKeyTest extends UdashSharedTest {
   val testKeyX = TranslationKey.keyX("testX")
   val testKeyU = TranslationKey.untranslatable("testUntranslatable")
 
-  "Translation arguments should be escaped (actually: putArgs test)" in {
-    implicit val provider = new TranslationProvider {
+  "Test template placeholders substitution" in {
+    implicit val provider: TranslationProvider = new TranslationProvider {
       override def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] = {
         Future.successful(putArgs(key, argv: _*))
       }
@@ -53,11 +53,19 @@ class TranslationKeyTest extends UdashSharedTest {
       override protected def handleMixedPlaceholders(template: String): Unit = ()
     }
 
-    val theKey = TranslationKey.key1[String]("This is {}")
+    //escape regex chars in replacement (actually: putArgs test)
+    val plainKey = TranslationKey.key1[String]("This is {}")
+    getTranslatedString(plainKey("plain string")) should be("This is plain string")
+    getTranslatedString(plainKey("${foo}")) should be("This is ${foo}")
+    getTranslatedString(plainKey("<([{\\^-=$!|]})?*+.>")) should be("This is <([{\\^-=$!|]})?*+.>") //regex special chars
 
-    getTranslatedString(theKey("plain string")) should be("This is plain string")
-    getTranslatedString(theKey("${foo}")) should be("This is ${foo}")
-    getTranslatedString(theKey("<([{\\^-=$!|]})?*+.>")) should be("This is <([{\\^-=$!|]})?*+.>") //regex special chars
+    //indexed template
+    val indexedKey = TranslationKey.key3[Int, Int, Int]("This is {2} {1} {0}")
+    getTranslatedString(indexedKey(1,2,3)) should be("This is 3 2 1")
+
+    //mixed templates are actually unhandled
+    val mixedKey = TranslationKey.key3[Int, Int, Int]("This is {2} {} {0}")
+    getTranslatedString(mixedKey(1,2,3)) should be("This is 3 {} 1")
   }
 
   "TranslationKey" should {
