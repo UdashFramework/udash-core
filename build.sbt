@@ -179,7 +179,10 @@ lazy val udash = project.in(file("."))
     css, `css-js`,
     bootstrap, bootstrap4, charts
   )
-  .settings(noPublishSettings)
+  .settings(
+    noPublishSettings,
+    crossScalaVersions := Nil,
+  )
 
 lazy val macros = project
   .settings(
