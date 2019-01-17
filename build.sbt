@@ -108,12 +108,7 @@ val commonJSSettings = Seq(
 )
 
 val noPublishSettings = Seq(
-  publishArtifact := false,
-  publish := {},
-  publishLocal := {},
-  publishM2 := {},
-  publishSigned := {},
-  publishLocalSigned := {},
+  publish / skip := true,
   doc := (doc / target).value,
 )
 
