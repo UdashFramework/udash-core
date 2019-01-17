@@ -35,7 +35,7 @@ trait Properties {
   implicit def any2Property[A](value: A): Any2Property[A] = new Any2Property(value)
   implicit def any2ModelProperty[A: ModelPropertyCreator](value: A): Any2ModelProperty[A] = new Any2ModelProperty(value)
   implicit def any2SeqProperty[A](value: Seq[A]): Any2SeqProperty[A] = new Any2SeqProperty(value)
-  implicit def propertySeq2SeqProperty[A](value: ISeq[Property[A]]): PropertySeq2SeqProperty[A] = new PropertySeq2SeqProperty(value)
+  implicit def propertySeq2SeqProperty[A](value: ISeq[ReadableProperty[A]]): PropertySeq2SeqProperty[A] = new PropertySeq2SeqProperty(value)
   implicit def booleanProp2BooleanOpsProperty(value: Property[Boolean]): BooleanPropertyOps = new BooleanPropertyOps(value)
 }
 
@@ -52,7 +52,7 @@ object Properties extends Properties {
     def toSeqProperty[B >: A : PropertyCreator]: ReadableSeqProperty[B] = new ImmutableSeqProperty[B](value)
   }
 
-  class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[Property[A]]) extends AnyVal {
+  class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[ReadableProperty[A]]) extends AnyVal {
     def combineToSeqProperty: ReadableSeqProperty[A] = new PropertySeqCombinedReadableSeqProperty[A](value)
   }
 
