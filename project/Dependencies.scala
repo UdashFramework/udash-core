@@ -11,6 +11,8 @@ object Dependencies {
   val udashJQueryVersion = "2.0.1"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
+  val prismVersion = "1.15.0"
+  val svg4everybodyVersion = "2.1.9"
 
   val scalaLoggingVersion = "3.9.2"
   val logbackVersion = "1.2.3"
@@ -38,6 +40,7 @@ object Dependencies {
 
   val frontendJsDeps = Def.setting(Seq(
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+    "org.webjars.bowergithub.prismjs" % "prism" % prismVersion / "prism.js",
 
     "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
       minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
@@ -56,7 +59,8 @@ object Dependencies {
   val guideJsDeps = Def.setting(Seq.empty[org.scalajs.sbtplugin.JSModuleID])
 
   val homepageJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js"
+    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js",
+    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/lib/svg4everybody.js",
   ))
 
   val backendDeps = Def.setting(Seq(
