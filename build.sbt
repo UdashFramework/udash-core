@@ -2,7 +2,8 @@ import org.openqa.selenium.Capabilities
 import org.openqa.selenium.chrome.ChromeOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import sbt.Compile
-import sbtcrossproject.{CrossType, crossProject}
+import sbtcrossproject.CrossPlugin.autoImport.crossProject
+import sbtcrossproject.CrossType
 
 name := "udash-guide"
 
