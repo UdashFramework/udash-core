@@ -9,6 +9,7 @@ object Dependencies {
 
   val udashVersion = "0.8.0-M11"
   val udashJQueryVersion = "2.0.1"
+  val fontAwesomeVersion = "5.6.3"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
   val prismVersion = "1.15.0"
@@ -36,6 +37,7 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap4" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
+    "org.webjars" % "font-awesome" % fontAwesomeVersion,
   ))
 
   val frontendJsDeps = Def.setting(Seq(
