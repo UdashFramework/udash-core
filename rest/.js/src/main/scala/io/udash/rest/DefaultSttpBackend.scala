@@ -5,6 +5,6 @@ import com.softwaremill.sttp.{FetchBackend, SttpBackend}
 
 import scala.concurrent.Future
 
-private[rest] object DefaultSttpBackend {
-  implicit val backend: SttpBackend[Future, Nothing] = FetchBackend()
+object DefaultSttpBackend {
+  def apply(): SttpBackend[Future, Nothing] = FetchBackend()
 }

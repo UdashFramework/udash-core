@@ -4,6 +4,8 @@ package rest
 import java.net.ConnectException
 
 import com.avsystem.commons.meta.Mapping
+import com.softwaremill.sttp.SttpBackend
+import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -12,7 +14,6 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import io.udash.rest.raw._
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -59,9 +60,11 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     HttpBody.json(JsonValue(body))
   )
 
-  val rawHandler = futureHandle(DefaultRestClient.asHandleRequest(baseUri))
-  val proxy: TestServerRESTInterface = DefaultRestClient[TestServerRESTInterface](baseUri)
-  val badRawHandler = futureHandle(DefaultRestClient.asHandleRequest(s"http://127.0.0.1:69$contextPrefix"))
+  implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+
+  val rawHandler = futureHandle(SttpRestClient.asHandleRequest(baseUri))
+  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface](baseUri)
+  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest(s"http://127.0.0.1:69$contextPrefix"))
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)

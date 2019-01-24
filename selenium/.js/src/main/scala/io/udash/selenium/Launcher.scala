@@ -1,7 +1,8 @@
 package io.udash.selenium
 
+import com.softwaremill.sttp.SttpBackend
 import io.udash.Application
-import io.udash.rest.DefaultRestClient
+import io.udash.rest.SttpRestClient
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
 import io.udash.rpc.DefaultServerRPC
 import io.udash.selenium.routing.{RoutingRegistryDef, RoutingState, StatesToViewFactoryDef}
@@ -12,7 +13,7 @@ import io.udash.wrappers.jquery.jQ
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js.annotation.JSExport
 import scala.util.Try
 
@@ -30,11 +31,13 @@ object Launcher {
   val serverRpc: MainServerRPC =
     DefaultServerRPC[MainClientRPC, MainServerRPC](new RPCService, exceptionsRegistry = GuideExceptions.registry)
 
+  implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+
   val restServer: MainServerREST = {
     val (scheme, defaultPort) =
       if (dom.window.location.protocol == "https:") ("https", 443) else ("http", 80)
     val port = Try(dom.window.location.port.toInt).getOrElse(defaultPort)
-    DefaultRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
+    SttpRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
   }
 
   @JSExport
