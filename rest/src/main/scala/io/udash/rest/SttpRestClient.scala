@@ -12,7 +12,7 @@ import io.udash.rest.raw._
 import scala.concurrent.Future
 
 object SttpRestClient {
-  def defaultBackend(): SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+  def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String)(
     implicit backend: SttpBackend[Future, Nothing]
