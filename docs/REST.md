@@ -125,10 +125,11 @@ object ServerMain {
 
 ```
 
-Finally, obtain a client proxy for your API using Jetty HTTP client and make a call:
+Finally, obtain a client proxy for your API using STTP and make a call:
 
 ```scala
-import io.udash.rest.DefaultRestClient
+import com.softwaremill.sttp.SttpBackend
+import io.udash.rest.SttpRestClient
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -136,11 +137,13 @@ import scala.util.{Failure, Success}
 
 object ClientMain {
   def main(args: Array[String]): Unit = {
-    val proxy: UserApi = DefaultRestClient[UserApi]("http://localhost:9090/")
+    implicit val sttpBackend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
 
+    // make a remote REST call
     val result: Future[User] = proxy.createUser("Fred", 1990)
 
-    // just for this example, normally it's not recommended
+    // use whatever execution context is appropriate
     import scala.concurrent.ExecutionContext.Implicits.global
 
     result.onComplete {

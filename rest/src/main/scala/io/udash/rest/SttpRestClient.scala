@@ -7,18 +7,23 @@ import com.avsystem.commons.meta.Mapping
 import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
 import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
-import io.udash.rest.DefaultSttpBackend.backend
 import io.udash.rest.raw._
 
-object DefaultRestClient {
-  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String): RestApi =
+import scala.concurrent.Future
+
+object SttpRestClient {
+  def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
+
+  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String)(
+    implicit backend: SttpBackend[Future, Nothing]
+  ): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri))
 
   /**
     * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
     * a specified base URI using default HTTP client implementation (sttp).
     */
-  def asHandleRequest(baseUri: String): RawRest.HandleRequest =
+  def asHandleRequest(baseUri: String)(implicit backend: SttpBackend[Future, Nothing]): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri")
 
   private def toSttpRequest(baseUri: Uri, request: RestRequest): Request[String, Nothing] = {
@@ -61,7 +66,7 @@ object DefaultRestClient {
       }
     )
 
-  private def asHandleRequest(baseUri: Uri): RawRest.HandleRequest =
+  private def asHandleRequest(baseUri: Uri)(implicit backend: SttpBackend[Future, Nothing]): RawRest.HandleRequest =
     RawRest.safeHandle(request => {
       val sttpReq = toSttpRequest(baseUri, request)
       callback =>
