@@ -12,7 +12,6 @@ object Dependencies {
   val fontAwesomeVersion = "5.6.3"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
-  val prismVersion = "1.15.0"
   val svg4everybodyVersion = "2.1.9"
 
   val scalaLoggingVersion = "3.9.2"
@@ -42,7 +41,7 @@ object Dependencies {
 
   val frontendJsDeps = Def.setting(Seq(
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars.bowergithub.prismjs" % "prism" % prismVersion / "prism.js",
+    ProvidedJS / "prism.js",
 
     "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
       minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
