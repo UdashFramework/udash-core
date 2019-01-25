@@ -112,7 +112,7 @@ def frontendProject(proj: Project, sourceDir: File)(
       jsDependencies ++= jsDeps.value,
 
       Assets / LessKeys.less / includeFilter := "assets.less",
-      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "styles",
+      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets"/ "styles",
 
       Compile / copyAssets := {
         val udashStatics = target.value / staticsRoot
