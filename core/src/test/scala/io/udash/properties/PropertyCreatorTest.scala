@@ -801,7 +801,31 @@ class PropertyCreatorTest extends UdashCoreTest {
         |""".stripMargin should compile
     }
 
-    "not allow to use Seq[_] in model" in {
+    "work with subSeq and subProb on immutable Seq in model" in {
+      """object Test {
+        |  case class B(x: String, y: scala.collection.immutable.Seq[Int])
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.y).get)
+        |println(t.subSeq(_.y).get)
+        |""".stripMargin should compile
+    }
+
+    "work with subSeq and subProb on mutable Seq in model" in {
+      """object Test {
+        |  case class B(x: String, y: scala.collection.mutable.Seq[Int])
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.y).get)
+        |println(t.subSeq(_.y).get)
+        |""".stripMargin should compile
+    }
+
+    "work with Seq[_] in model" in {
       """object Test {
         |  class A[T](val a: T)
         |  case class B(x: A[_], y: String, z: Seq[_])
@@ -811,7 +835,22 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val t = ModelProperty[Test.B](null)
         |println(t.subProp(_.x).get)
         |println(t.subProp(_.y).get)
-        |""".stripMargin shouldNot compile
+        |println(t.subProp(_.z).get)
+        |println(t.subSeq(_.z).get)
+        |""".stripMargin should compile
+    }
+
+    "work with immutable Seq[_] in model" in {
+      """object Test {
+        |  case class B(x: String, y: scala.collection.immutable.Seq[_])
+        |  object B extends HasModelPropertyCreator[B]
+        |}
+        |
+        |val t = ModelProperty[Test.B](null)
+        |println(t.subProp(_.x).get)
+        |println(t.subProp(_.y).get)
+        |println(t.subSeq(_.y).get)
+        |""".stripMargin should compile
     }
   }
 }
