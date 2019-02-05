@@ -343,6 +343,11 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val p = Property[A](null).asModel
         |val s = p.subSeq(_.s)""".stripMargin should compile
 
+      """case class A(s: Vector[String], i: List[Int])
+        |implicit val propertyCreator: ModelPropertyCreator[A] = ModelPropertyCreator.materialize[A]
+        |val p = Property[A](null).asModel
+        |val s = p.subSeq(_.s)""".stripMargin should compile
+
       """case class A(s: String, i: Int)
         |implicit val propertyCreator: ModelPropertyCreator[A] = ModelPropertyCreator.materialize[A]
         |case class B(a: A)
@@ -353,10 +358,23 @@ class PropertyCreatorTest extends UdashCoreTest {
       """case class A(s: Seq[String], i: Seq[Int])
         |implicit val propertyCreator: ModelPropertyCreator[A] = ModelPropertyCreator.materialize[A]
         |val p = Property[A](null).asModel
-        |val s = p.subSeq(_.s)""".stripMargin should compile
+        |val s = p.subSeq(_.i)""".stripMargin should compile
+
+      """case class A(s: Vector[String], i: List[Int])
+        |implicit val propertyCreator: ModelPropertyCreator[A] = ModelPropertyCreator.materialize[A]
+        |val p = Property[A](null).asModel
+        |val s = p.subSeq(_.i)""".stripMargin should compile
 
       """object Model {
         |  case class A(s: Seq[String], i: A)
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |val p = Property[Model.A](null).asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin should compile
+
+      """object Model {
+        |  case class A(s: List[String], i: A)
         |  object A extends HasModelPropertyCreator[A]
         |}
         |val p = Property[Model.A](null).asModel
@@ -372,6 +390,13 @@ class PropertyCreatorTest extends UdashCoreTest {
 
     "create ModelProperty for simple classes" in {
       """class A(val s: Seq[String], val i: A)
+        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |
+        |val p = Property[A](null).asModel
+        |val s = p.subSeq(_.s)
+        |val i = p.subModel(_.i)""".stripMargin should compile
+
+      """class A(val s: Vector[String], val i: A)
         |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
         |
         |val p = Property[A](null).asModel
@@ -435,6 +460,8 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """val p = Property[Seq[Int]](null).asModel""".stripMargin shouldNot compile
 
+      """val p = Property[Vector[Int]](null).asModel""".stripMargin shouldNot compile
+
       """sealed trait T
         |case object A extends T
         |case object B extends T
@@ -449,6 +476,13 @@ class PropertyCreatorTest extends UdashCoreTest {
         |
         |val p = Property[Seq[T]](null).asModel""".stripMargin shouldNot compile
 
+      """sealed trait T
+        |case object A extends T
+        |case object B extends T
+        |object T extends HasModelPropertyCreator[T]
+        |
+        |val p = Property[List[T]](null).asModel""".stripMargin shouldNot compile
+
       """trait T {
         |  def i: Int
         |  def s: String
@@ -457,11 +491,25 @@ class PropertyCreatorTest extends UdashCoreTest {
         |
         |val p = Property[Seq[T]](null).asModel""".stripMargin shouldNot compile
 
+      """trait T {
+        |  def i: Int
+        |  def s: String
+        |}
+        |object T extends HasModelPropertyCreator[T]
+        |
+        |val p = Property[Vector[T]](null).asModel""".stripMargin shouldNot compile
+
       """object Model {
         |  case class A(s: String, i: Int)
         |  object A extends HasModelPropertyCreator[A]
         |}
         |val p = Property[Seq[Model.A]](null).asModel""".stripMargin shouldNot compile
+
+      """object Model {
+        |  case class A(s: String, i: Int)
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |val p = Property[List[Model.A]](null).asModel""".stripMargin shouldNot compile
 
       """object Model {
         |  case class SimpleWithVar(i: Int, var s: String)
@@ -510,18 +558,38 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val i = p.subProp(_.i)""".stripMargin should compile
 
       """object Model {
+        |  case class A(s: Seq[String], i: Set[Int])
+        |  object A extends HasModelPropertyCreator[A]
+        |}
+        |val p = Property[Model.A](null).asModel
+        |val s = p.subSeq(_.i)""".stripMargin shouldNot compile
+
+      """object Model {
         |  case class A(s: Seq[String], i: scala.collection.mutable.Seq[Int])
         |  object A extends HasModelPropertyCreator[A]
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.s)
+        |val si = p.subSeq(_.i)
         |val i = p.subProp(_.i)""".stripMargin should compile
     }
 
-    "create SeqProperty for Seq" in {
+    "create SeqProperty for any Seq" in {
       """val p = Property[Seq[Int]](null).asSeq[Int]""".stripMargin should compile
 
+      """val p = Property[scala.collection.immutable.Seq[Int]](null).asSeq[Int]""".stripMargin should compile
+
       """val p = Property[Seq[Seq[Int]]](Seq(Seq(1,2))).asSeq[Seq[Int]]
+        |val p2 = p.elemProperties.head.asSeq[Int]
+        |val i: Property[Int] = p2.elemProperties.head
+        |i.set(5)""".stripMargin should compile
+
+      """val p = Property[List[Vector[Int]]](List(Vector(1,2))).asSeq[Vector[Int]]
+        |val p2 = p.elemProperties.head.asSeq[Int]
+        |val i: Property[Int] = p2.elemProperties.head
+        |i.set(5)""".stripMargin should compile
+
+      """val p = Property[Seq[List[Int]]](List(List(1,2))).asSeq[List[Int]]
         |val p2 = p.elemProperties.head.asSeq[Int]
         |val i: Property[Int] = p2.elemProperties.head
         |i.set(5)""".stripMargin should compile
@@ -530,13 +598,34 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def i: Int
         |  def s: String
         |}
-        |val p = Property[Seq[T]](null).asSeq[T]""".stripMargin should compile
+        |val p = Property[Seq[T]](null).asSeq[T]
+        |val ip = Property[scala.collection.immutable.Seq[T]](null).asSeq[T]
+        |val mp = Property[scala.collection.mutable.Seq[T]](null).asSeq[T]
+        |val vp = Property[Vector[T]](null).asSeq[T]""".stripMargin should compile
 
       """trait T {
         |  def i: Int
         |  def s: String
         |}
         |val p = Property[Seq[Seq[T]]](null).asSeq[T]""".stripMargin shouldNot compile
+
+      """trait T {
+        |  def i: Int
+        |  def s: String
+        |}
+        |val p = Property[Seq[List[T]]](null).asSeq[T]""".stripMargin shouldNot compile
+
+      """trait T {
+        |  def i: Int
+        |  def s: String
+        |}
+        |val p = Property[Vector[Seq[T]]](null).asSeq[T]""".stripMargin shouldNot compile
+
+      """trait T {
+        |  def i: Int
+        |  def s: String
+        |}
+        |val p = Property[List[scala.collection.mutable.Seq[T]]](null).asSeq[T]""".stripMargin shouldNot compile
 
       """object Model {
         |  trait T {
@@ -549,7 +638,12 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val p = Property[Seq[Model.T]](null).asSeq[Model.T]
         |val m: ModelProperty[Model.T] = p.elemProperties.head.asModel
         |val sub = m.subProp(_.s)
-        |val sub2 = m.subModel(_.t)""".stripMargin should compile
+        |val sub2 = m.subModel(_.t)
+
+        |val ip = Property[scala.collection.immutable.Seq[Model.T]](null).asSeq[Model.T]
+        |val im: ModelProperty[Model.T] = ip.elemProperties.head.asModel
+        |val isub = im.subProp(_.s)
+        |val isub2 = im.subModel(_.t)""".stripMargin should compile
 
       """object Model {
         |  trait T {
@@ -564,7 +658,13 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val p2 = p.elemProperties.head.asSeq[Model.T]
         |val m: ModelProperty[Model.T] = p2.elemProperties.head.asModel
         |val sub = m.subProp(_.s)
-        |val sub2 = m.subModel(_.t)""".stripMargin should compile
+        |val sub2 = m.subModel(_.t)
+
+        |val ip = Property[List[Vector[Model.T]]](null).asSeq[scala.collection.immutable.Seq[Model.T]]
+        |val ip2 = ip.elemProperties.head.asSeq[Model.T]
+        |val im: ModelProperty[Model.T] = ip2.elemProperties.head.asModel
+        |val isub = im.subProp(_.s)
+        |val isub2 = im.subModel(_.t)""".stripMargin should compile
 
       """trait X {
         |  def a: String
@@ -575,7 +675,11 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def s: String
         |  def x: X
         |}
-        |val p = Property[Seq[T]](null).asSeq[T]""".stripMargin should compile
+        |val p1 = Property[Seq[T]](null).asSeq[T]
+        |val p2 = Property[List[T]](null).asSeq[T]
+        |val p3 = Property[Vector[T]](null).asSeq[T]
+        |val p4 = Property[scala.collection.mutable.Seq[T]](null).asSeq[T]
+        |val p5 = Property[scala.collection.immutable.Seq[T]](null).asSeq[T]""".stripMargin should compile
 
       """trait X {
         |  def a: String
@@ -592,13 +696,36 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def sx: Seq[X]
         |}
         |val p = Property[Seq[T]](null).asSeq[T]
-        |val p2 = Property[Seq[Seq[T]]](null).asSeq[Seq[T]]""".stripMargin should compile
+        |val p2 = Property[Seq[Seq[T]]](null).asSeq[Seq[T]]
+        |val ip = Property[Vector[T]](null).asSeq[T]
+        |val ip2 = Property[List[Vector[T]]](null).asSeq[Vector[T]]""".stripMargin should compile
+
+      """trait X {
+        |  def a: String
+        |  def t: T
+        |  def x: X
+        |  def st: List[T]
+        |}
+        |
+        |trait T {
+        |  def i: Int
+        |  def s: String
+        |  def t: T
+        |  def x: X
+        |  def sx: scala.collection.mutable.Seq[X]
+        |}
+        |val p = Property[Seq[T]](null).asSeq[T]
+        |val p2 = Property[Seq[Seq[T]]](null).asSeq[Seq[T]]
+        |val ip = Property[Vector[T]](null).asSeq[T]
+        |val ip2 = Property[List[Vector[T]]](null).asSeq[Vector[T]]""".stripMargin should compile
 
       """sealed trait T
         |case object A extends T
         |case object B extends T
         |val p = Property[Seq[T]](null).asSeq[T]
-        |val m: Property[T] = p.elemProperties.head""".stripMargin should compile
+        |val m: Property[T] = p.elemProperties.head
+        |val ip = Property[Vector[T]](null).asSeq[T]
+        |val im: Property[T] = ip.elemProperties.head""".stripMargin should compile
 
       """sealed trait T
         |case object A extends T
@@ -606,14 +733,28 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val p = Property[Seq[T]](null).asSeq[T]
         |val m: ModelProperty[T] = p.elemProperties.head.asModel""".stripMargin shouldNot compile
 
+      """sealed trait T
+        |case object A extends T
+        |case object B extends T
+        |val p = Property[Vector[T]](null).asSeq[T]
+        |val m: ModelProperty[T] = p.elemProperties.head.asModel""".stripMargin shouldNot compile
+
       """val p = SeqProperty.blank[(String, Option[String])]""".stripMargin should compile
 
       """val items = SeqProperty(
         |  Seq.fill(7)((3.1, 2.5, 4.564))
         |)""".stripMargin should compile
+
+      """val items = SeqProperty(
+        |  Vector.fill(7)((3.1, 2.5, 4.564))
+        |)""".stripMargin should compile
+
+      """val items = SeqProperty(
+        |  scala.collection.mutable.Buffer.fill(7)((3.1, 2.5, 4.564))
+        |)""".stripMargin should compile
     }
 
-    "not create SeqProperty for anything other than Seq" in {
+    "not create SeqProperty for anything not extending Seq" in {
       """val p = Property[Int](null.asInstanceOf[Int]).asSeq""".stripMargin shouldNot compile
 
       """val p = Property[String](null).asSeq""".stripMargin shouldNot compile
@@ -626,19 +767,24 @@ class PropertyCreatorTest extends UdashCoreTest {
       """sealed trait T
         |case object A extends T
         |case object B extends T
-        |val p = Property[Seq[T]](null).asSeq""".stripMargin shouldNot compile
+        |val p = Property[Seq[T]](null).asSeq
+        |val mp = Property[scala.collection.mutable.Buffer[T]](null).asSeq
+        |val ip = Property[Vector[T]](null).asSeq""".stripMargin should compile
 
       """case class A(s: String, i: Int)
         |val p = Property[A](null).asSeq""".stripMargin shouldNot compile
 
       """case class A(s: String, i: Int)
-        |val p = Property[Seq[A]](null).asSeq""".stripMargin shouldNot compile
+        |val p = Property[Seq[A]](null).asSeq
+        |val ip = Property[scala.collection.immutable.Seq[A]](null).asSeq
+        |val mp = Property[scala.collection.mutable.Seq[A]](null).asSeq""".stripMargin should compile
 
       """trait T {
         |  def i: Int
         |  def s: String
         |}
-        |val p = Property[Seq[T]](null).asSeq""".stripMargin shouldNot compile
+        |val p = Property[Seq[T]](null).asSeq
+        |val ip = Property[Vector[T]](null).asSeq""".stripMargin should compile
 
       """trait T {
         |  def i: Seq[Int]
@@ -675,6 +821,29 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  trait ST {
         |    def c: C
         |    def s: Seq[Char]
+        |  }
+        |  object ST extends HasModelPropertyCreator[ST]
+        |}
+        |
+        |val p = Property[Model.T](null).asModel
+        |val s = p.subModel(_.t).subSeq(_.s)
+        |val s2 = p.subSeq(_.t.s)
+        |val i = p.subProp(_.t.c.i)""".stripMargin should compile
+
+      """object Model {
+        |  case class C(i: Int, s: String)
+        |  object C extends HasModelPropertyCreator[C]
+        |
+        |  trait T {
+        |    def i: Int
+        |    def s: Option[String]
+        |    def t: ST
+        |  }
+        |  object T extends HasModelPropertyCreator[T]
+        |
+        |  trait ST {
+        |    def c: C
+        |    def s: List[Char]
         |  }
         |  object ST extends HasModelPropertyCreator[ST]
         |}
@@ -788,6 +957,22 @@ class PropertyCreatorTest extends UdashCoreTest {
         |}""".stripMargin should compile
     }
 
+    "handle explicit creation of property creator for recursive model (case class with Vector, PropertyCreator[Seq[T]])" in {
+      """case class T(a: Int, t: T, st: Vector[T])
+        |object Test {
+        |  implicit val pc: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+        |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator.propertyCreator[Seq[T]]
+        |}""".stripMargin should compile
+    }
+
+    "handle explicit creation of property creator for recursive model (case class with Vector, PropertyCreator[Vector[T]])" in {
+      """case class T(a: Int, t: T, st: Vector[T])
+        |object Test {
+        |  implicit val pc: PropertyCreator[T] = PropertyCreator.propertyCreator[T]
+        |  implicit val pcS: PropertyCreator[Vector[T]] = PropertyCreator.propertyCreator[Vector[T]]
+        |}""".stripMargin should compile
+    }
+
     "work with generic subproperties" in {
       """object Test {
         |  class A[T](val a: T)
@@ -798,30 +983,6 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val t = ModelProperty[Test.B](null)
         |println(t.subProp(_.x).get)
         |println(t.subProp(_.y).get)
-        |""".stripMargin should compile
-    }
-
-    "work with subSeq and subProb on immutable Seq in model" in {
-      """object Test {
-        |  case class B(x: String, y: scala.collection.immutable.Seq[Int])
-        |  object B extends HasModelPropertyCreator[B]
-        |}
-        |
-        |val t = ModelProperty[Test.B](null)
-        |println(t.subProp(_.y).get)
-        |println(t.subSeq(_.y).get)
-        |""".stripMargin should compile
-    }
-
-    "work with subSeq and subProb on mutable Seq in model" in {
-      """object Test {
-        |  case class B(x: String, y: scala.collection.mutable.Seq[Int])
-        |  object B extends HasModelPropertyCreator[B]
-        |}
-        |
-        |val t = ModelProperty[Test.B](null)
-        |println(t.subProp(_.y).get)
-        |println(t.subSeq(_.y).get)
         |""".stripMargin should compile
     }
 
