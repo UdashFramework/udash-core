@@ -11,7 +11,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val Package = q"_root_.io.udash.properties"
   val IsModelPropertyTemplateCls = tq"$Package.IsModelPropertyTemplate"
 
-  val RegistrationCls = tq"$Package.Registration"
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
   val SinglePropertyCreatorCls = tq"$Package.SinglePropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
@@ -21,18 +20,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
   val CastableReadablePropertyCls = tq"$Package.single.CastableReadableProperty"
   val PropertyCls = tq"$Package.single.Property"
-  val DirectPropertyImplCls = tq"$Package.single.DirectPropertyImpl"
   val ReadableSeqPropertyCls = tq"$Package.seq.ReadableSeqProperty"
   val SeqPropertyCls = tq"$Package.seq.SeqProperty"
-  val DirectSeqPropertyImplCls = tq"$Package.seq.DirectSeqPropertyImpl"
   val ReadableModelPropertyCls = tq"$Package.model.ReadableModelProperty"
   val ModelPropertyCls = tq"$Package.model.ModelProperty"
   val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
   val CastablePropertyCls = tq"$Package.single.CastableProperty"
-  val ImmutablePropertyCls = tq"$Package.ImmutableProperty"
   val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
-
-  val PatchCls = tq"$Package.SeqProperty.Patch"
 
   private lazy val SeqTpe = typeOf[Seq[_]]
   private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
