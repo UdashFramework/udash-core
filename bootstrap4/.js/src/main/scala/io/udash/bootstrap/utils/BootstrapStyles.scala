@@ -88,10 +88,15 @@ object BootstrapStyles {
   object SpacingSize extends AbstractValueEnumCompanion[SpacingSize] {
     final val None: Value = new SpacingSize("-0")
     final val ExtraSmall: Value = new SpacingSize("-1")
+    final val NegativeExtraSmall: Value = new SpacingSize("-n1")
     final val Small: Value = new SpacingSize("-2")
+    final val NegativeSmall: Value = new SpacingSize("-n2")
     final val Normal: Value = new SpacingSize("-3")
+    final val NegativeNormal: Value = new SpacingSize("-n3")
     final val Large: Value = new SpacingSize("-4")
+    final val NegativeLarge: Value = new SpacingSize("-n4")
     final val ExtraLarge: Value = new SpacingSize("-5")
+    final val NegativeExtraLarge: Value = new SpacingSize("-n5")
   }
 
   def active = CssStyleName("active")
