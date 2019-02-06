@@ -63,6 +63,7 @@ object BootstrapStyles {
   object Size extends AbstractValueEnumCompanion[Size] {
     final val Small: Value = new Size("-sm")
     final val Large: Value = new Size("-lg")
+    final val ExtraLarge: Value = new Size("-xl")
   }
 
   final class FlexContentJustification(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
