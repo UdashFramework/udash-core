@@ -365,6 +365,7 @@ object BootstrapStyles {
     def customFileInput = CssStyleName("custom-file-input")
     def customRadio = CssStyleName("custom-radio")
     def customSelect = CssStyleName("custom-select")
+    def customSwitch = CssStyleName("custom-switch")
     def customRange = CssStyleName("custom-range")
 
     def size(size: Size) =

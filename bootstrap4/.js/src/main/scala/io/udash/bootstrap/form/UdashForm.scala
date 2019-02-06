@@ -451,6 +451,7 @@ final class UdashForm private(
         property: Property[Boolean],
         validationTrigger: ValidationTrigger = selectValidationTrigger,
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
+        switch: ReadableProperty[Boolean] = UdashBootstrap.False,
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
       )(
@@ -470,7 +471,9 @@ final class UdashForm private(
           override val componentId: ComponentId = groupId
 
           override val render: Element = div(
-            id := groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
+            id := groupId, BootstrapStyles.Form.customControl,
+            nestedInterceptor(BootstrapStyles.Form.customSwitch.styleIf(switch)),
+            nestedInterceptor(BootstrapStyles.Form.customCheckbox.styleIf(switch.transform(!_))),
             input.render.styles(BootstrapStyles.Form.customControlInput),
             nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
             label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
