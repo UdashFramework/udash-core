@@ -4,6 +4,7 @@ package dropdown
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bindings.modifiers.Binding.NestedInterceptor
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils._
 import io.udash.component.{ComponentId, Listenable, ListenableEvent}
@@ -24,7 +25,8 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   override val componentId: ComponentId
 )(
   itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
-  buttonContent: Binding.NestedInterceptor => Modifier
+  buttonContent: Binding.NestedInterceptor => Modifier,
+  buttonFactory: (NestedInterceptor => Modifier) => UdashButton
 ) extends UdashBootstrapComponent
   with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
 
@@ -34,9 +36,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import io.udash.wrappers.jquery._
 
   /** Dropdown menu list ID. */
-  val menuId: ComponentId = ComponentId.newId()
+  val menuId: ComponentId = componentId.subcomponent("menu")
   /** Dropdown button ID. */
-  val buttonId: ComponentId = ComponentId.newId()
+  val buttonId: ComponentId = componentId.subcomponent("button")
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
@@ -69,7 +71,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     )(
       nestedInterceptor(produceWithNested(buttonToggle) {
         case (true, nested) =>
-          val btn = UdashButton() { nested => Seq[Modifier](
+          val btn = buttonFactory { nested => Seq[Modifier](
             BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
             aria.haspopup := true, aria.expanded := false,
             buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
@@ -200,6 +202,7 @@ object UdashDropdown {
     *                       Usually you should add the `BootstrapStyles.Dropdown.item` style to your element.
     * @param buttonContent  Content of the element opening the dropdown.
     *                       Use the provided interceptor to properly clean up bindings inside the content.
+    * @param buttonFactory  Allows to customize button options.
     * @tparam ItemType A single element's type in the `items` sequence.
     * @tparam ElemType A type of a property containing an element in the `items` sequence.
     * @return A `UdashDropdown` component, call `render` to create a DOM element.
@@ -212,9 +215,10 @@ object UdashDropdown {
     componentId: ComponentId = ComponentId.newId()
   )(
     itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
-    buttonContent: Binding.NestedInterceptor => Modifier
+    buttonContent: Binding.NestedInterceptor => Modifier,
+    buttonFactory: (NestedInterceptor => Modifier) => UdashButton = UdashButton()
   ): UdashDropdown[ItemType, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemFactory, buttonContent)
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemFactory, buttonContent, buttonFactory)
   }
 
   /**
@@ -238,7 +242,7 @@ object UdashDropdown {
   )(
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[DefaultDropdownItem, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(defaultItemFactory, buttonContent)
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(defaultItemFactory, buttonContent, UdashButton())
   }
 
   @js.native
