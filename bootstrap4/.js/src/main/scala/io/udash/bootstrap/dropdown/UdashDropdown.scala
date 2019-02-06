@@ -38,6 +38,14 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   /** Dropdown button ID. */
   val buttonId: ComponentId = ComponentId.newId()
 
+  /** Shows the menu. */
+  def show(): Unit =
+    jQSelector().dropdown("show")
+
+  /** Hides the menu. */
+  def hide(): Unit =
+    jQSelector().dropdown("hide")
+
   /** Toggles menu visibility. */
   def toggle(): Unit =
     jQSelector().dropdown("toggle")
