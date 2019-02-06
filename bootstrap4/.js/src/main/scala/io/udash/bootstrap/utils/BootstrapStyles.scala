@@ -116,6 +116,8 @@ object BootstrapStyles {
   def iconNext = CssStyleName("icon-next")
   def in = CssStyleName("in")
   def item = CssStyleName("item")
+  def overflowAuto = CssStyleName("overflow-auto")
+  def overflowHidden = CssStyleName("overflow-hidden")
   def pillPane = CssStyleName("pill-pane")
   def preScrollable = CssStyleName("pre-scrollable")
   def prettyprint = CssStyleName("prettyprint")
@@ -145,6 +147,7 @@ object BootstrapStyles {
   object Badge {
     def badge = CssStyleName("badge")
     def pill = CssStyleName("badge-pill")
+    def rounded = CssStyleName("rounded-pill")
 
     def color(color: Color = Color.Secondary) =
       CssStyleName(s"badge${color.classMarker}")
@@ -574,6 +577,12 @@ object BootstrapStyles {
 
     def maxWidth = CssStyleName("mw-100")
     def maxHeight = CssStyleName("mh-100")
+
+    def minViewportWidth100 = CssStyleName("min-vw-100")
+    def minViewportHeight100 = CssStyleName("min-vh-100")
+
+    def viewportWidth100 = CssStyleName("vw-100")
+    def viewportHeight100 = CssStyleName("vh-100")
   }
 
   object Spacing {
@@ -616,6 +625,7 @@ object BootstrapStyles {
     def black50 = CssStyleName("text-black-50")
     def white50 = CssStyleName("text-white-50")
 
+    def wrap = CssStyleName("text-wrap")
     def nowrap = CssStyleName("text-nowrap")
     def truncate = CssStyleName("text-truncate")
 
@@ -635,6 +645,7 @@ object BootstrapStyles {
     def decorationNone = CssStyleName("text-decoration-none")
     def hide = CssStyleName("text-hide")
     def muted = CssStyleName("text-muted")
+    def reset = CssStyleName("text-reset")
   }
 
   object Tooltip {
