@@ -13,6 +13,33 @@ trait BenchmarkUtils {
     )
   }
 
+  sealed trait ModelWithSeqItem {
+    def i: Int
+    def s: String
+    def seq: Seq[Int]
+  }
+
+  case class ModelWithBSeqItem(i: Int, s: String, seq: Seq[Int]) extends ModelWithSeqItem
+  object ModelWithBSeqItem extends HasModelPropertyCreator[ModelWithBSeqItem] {
+    def random: ModelWithBSeqItem = ModelWithBSeqItem(
+      Random.nextInt(100), Random.nextString(5), 1 to Random.nextInt(100) + 100
+    )
+  }
+
+  case class ModelWithISeqItem(i: Int, s: String, seq: scala.collection.immutable.Seq[Int]) extends ModelWithSeqItem
+  object ModelWithISeqItem extends HasModelPropertyCreator[ModelWithISeqItem] {
+    def random: ModelWithISeqItem = ModelWithISeqItem(
+      Random.nextInt(100), Random.nextString(5), 1 to Random.nextInt(100) + 100
+    )
+  }
+
+  case class ModelWithMSeqItem(i: Int, s: String, seq: scala.collection.mutable.Seq[Int]) extends ModelWithSeqItem
+  object ModelWithMSeqItem extends HasModelPropertyCreator[ModelWithMSeqItem] {
+    def random: ModelWithMSeqItem = ModelWithMSeqItem(
+      Random.nextInt(100), Random.nextString(5), (1 to Random.nextInt(100) + 100).toBuffer
+    )
+  }
+
   def slowInc(v: Int): Int = {
     var r = v
     (1 to 10000).foreach(_ => r += 1)
