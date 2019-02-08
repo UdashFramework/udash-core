@@ -10,7 +10,7 @@ object ModelPropertyWithSeqListeners extends BenchmarkUtils {
     ("direct Seq model property", () => {
       val p = ModelProperty(model)
       (p, p)
-    }),
+    })
   )
 
   private def benchmarks[T <: ModelWithSeqItem : ModelPropertyCreator](model: T, seqLabel: String): Seq[Benchmark[Unit]] =
