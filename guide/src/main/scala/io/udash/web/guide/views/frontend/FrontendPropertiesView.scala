@@ -154,6 +154,13 @@ class FrontendPropertiesView extends FinalView with CssView {
       i("CastableProperty"), " and ", i("ReadableCastableProperty"), " for ", i("ReadableSeqProperty"), ". You can import ",
       i("io.udash.seq.SeqProperty"), " and provide the second generic argument to specify element type."
     ),
+    p(
+      i("SeqProperty"), " may be created from any value of type extending ", i("scala.collection.Seq"), ".",
+      "Note that due to SeqProperty mutable nature, there may be performance overhead while calling ", i("subSeq"),
+      " on fields of type more specific than ", i("scala.collection.Seq"), " e.g. ",
+      i("scala.collection.immutable.List"), " or ", i("scala.collection.immutable.Seq"),
+      ". This is because of potential copying the underlying data structure"
+    ),
 
     h3("Properties hierarchy"),
     p("In more complex models we can look at properties as a hierarchy. For example:"),
