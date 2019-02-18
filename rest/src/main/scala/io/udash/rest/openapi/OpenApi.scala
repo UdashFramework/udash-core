@@ -390,7 +390,7 @@ object Xml extends HasGenObjectCodec[Xml]
   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responseObject Response Object]]
   */
 case class Response(
-  @td description: OptArg[String] = OptArg.Empty,
+  description: String,
   @td headers: Map[String, RefOr[Header]] = Map.empty,
   @td content: Map[String, MediaType] = Map.empty,
   @td links: Map[String, RefOr[Link]] = Map.empty
