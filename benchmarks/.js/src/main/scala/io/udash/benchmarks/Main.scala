@@ -12,6 +12,7 @@ object Main {
     BenchmarkGUI.renderMenu(document.getElementById("body"))(
       SinglePropertyListeners.suite,
       ModelPropertyListeners.suite,
+      ModelPropertyWithSeqListeners.suite,
       TransformedSeqPropertyListeners.suite,
       FilteredSeqPropertyListeners.suite,
       ReversedSeqPropertyListeners.suite,
