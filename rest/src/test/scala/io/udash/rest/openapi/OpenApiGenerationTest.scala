@@ -84,7 +84,9 @@ class OpenApiGenerationTest extends FunSuite {
         |          "required": true
         |        },
         |        "responses": {
-        |          "204": {}
+        |          "204": {
+        |            "description": "Success"
+        |          }
         |        }
         |      },
         |      "post": {
@@ -117,7 +119,9 @@ class OpenApiGenerationTest extends FunSuite {
         |          "required": true
         |        },
         |        "responses": {
-        |          "204": {}
+        |          "204": {
+        |            "description": "Success"
+        |          }
         |        }
         |      }
         |    },
@@ -136,6 +140,7 @@ class OpenApiGenerationTest extends FunSuite {
         |        ],
         |        "responses": {
         |          "200": {
+        |            "description": "Custom response",
         |            "headers": {
         |              "X-Value": {
         |                "schema": {
@@ -158,7 +163,9 @@ class OpenApiGenerationTest extends FunSuite {
         |      "get": {
         |        "operationId": "failingGet",
         |        "responses": {
-        |          "204": {}
+        |          "204": {
+        |            "description": "Success"
+        |          }
         |        }
         |      }
         |    },
@@ -200,6 +207,7 @@ class OpenApiGenerationTest extends FunSuite {
         |        },
         |        "responses": {
         |          "200": {
+        |            "description": "Success",
         |            "content": {
         |              "application/json": {
         |                "schema": {
@@ -215,7 +223,9 @@ class OpenApiGenerationTest extends FunSuite {
         |      "get": {
         |        "operationId": "moreFailingGet",
         |        "responses": {
-        |          "204": {}
+        |          "204": {
+        |            "description": "Success"
+        |          }
         |        }
         |      }
         |    },
@@ -281,6 +291,7 @@ class OpenApiGenerationTest extends FunSuite {
         |        ],
         |        "responses": {
         |          "200": {
+        |            "description": "Success",
         |            "content": {
         |              "application/json": {
         |                "schema": {
@@ -372,6 +383,7 @@ class OpenApiGenerationTest extends FunSuite {
         |        },
         |        "responses": {
         |          "200": {
+        |            "description": "Success",
         |            "content": {
         |              "application/json": {
         |                "schema": {
@@ -443,6 +455,7 @@ class OpenApiGenerationTest extends FunSuite {
         |        ],
         |        "responses": {
         |          "200": {
+        |            "description": "Success",
         |            "content": {
         |              "application/json": {
         |                "schema": {
@@ -458,7 +471,9 @@ class OpenApiGenerationTest extends FunSuite {
         |      "get": {
         |        "operationId": "trivialGet",
         |        "responses": {
-        |          "204": {}
+        |          "204": {
+        |            "description": "Success"
+        |          }
         |        }
         |      }
         |    }
