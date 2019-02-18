@@ -36,6 +36,7 @@ object CustomResp {
   )
   implicit val restResponses: RestResponses[CustomResp] = RestResponses { _ =>
     Responses(byStatusCode = Map(200 -> RefOr(Response(
+      description = "Custom response",
       headers = Map("X-Value" -> RefOr(OASHeader(
         schema = RefOr(Schema.String)
       ))),
