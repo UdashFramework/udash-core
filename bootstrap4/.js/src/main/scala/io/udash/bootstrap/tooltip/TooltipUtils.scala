@@ -12,6 +12,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
+import scala.scalajs.js.|
 
 trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventType, ThisType]] extends Listenable[ThisType, EventType] {
   /** Shows the tooltip. */
@@ -85,13 +86,13 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     animation: Boolean = true,
     boundary: String = "scrollParent",
     container: Option[String] = None,
-    content: dom.Node => String = _ => "",
+    content: dom.Node => String | dom.Node = _ => "",
     delay: Delay = Delay(0 millis, 0 millis),
     html: Boolean = false,
     offset: String = "0",
     placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
     template: Option[String] = None,
-    title: dom.Node => String = _ => "",
+    title: dom.Node => String | dom.Node = _ => "",
     trigger: Seq[Trigger] = defaultTrigger
   )(el: dom.Node): TooltipType =
     initTooltip(
