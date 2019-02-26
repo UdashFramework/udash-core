@@ -105,6 +105,8 @@ object UdashNavbar {
     * @param componentId       An id of the root DOM node.
     * @param navigationFactory Navigation content factory - if you want to clean up the created navigation on
     *                          the navigation bar cleanup pass it to the provided interceptor.
+    *                          The returned modifier is applied to the collapsible navigation container.
+    *                          Usually the modifier should be an `Element` or a sequence of `Element`s.
     * @param brand             A brand DOM element.
     * @tparam ItemType A single element's type in the `items` sequence.
     * @tparam ElemType A type of a property containing an element in the `items` sequence.
