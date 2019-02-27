@@ -6,6 +6,6 @@ import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
 
 import scala.concurrent.Future
 
-private[udash] object DefaultSttpBackend {
-  implicit val backend: SttpBackend[Future, Nothing] = AsyncHttpClientFutureBackend()
+object DefaultSttpBackend {
+  def apply(): SttpBackend[Future, Nothing] = AsyncHttpClientFutureBackend()
 }

@@ -147,15 +147,18 @@ case class RestResponses[T](responses: SchemaResolver => Responses)
 object RestResponses {
   def apply[T](implicit r: RestResponses[T]): RestResponses[T] = r
 
+  final val SuccessDescription = "Success"
+
   implicit val emptyResponseForUnit: RestResponses[Unit] =
     RestResponses(_ => Responses(byStatusCode = Map(
-      204 -> RefOr(Response())
+      204 -> RefOr(Response(description = SuccessDescription))
     )))
 
   implicit def fromSchema[T: RestSchema]: RestResponses[T] =
     RestResponses(resolver => Responses(byStatusCode = Map(
-      200 -> RefOr(Response(content = Map(
-        HttpBody.JsonType -> MediaType(schema = resolver.resolve(RestSchema[T])))
+      200 -> RefOr(Response(
+        description = SuccessDescription,
+        content = Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(RestSchema[T])))
       ))
     )))
 
