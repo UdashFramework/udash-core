@@ -1,4 +1,3 @@
-import com.typesafe.sbt.SbtPgp.autoImportImpl.PgpKeys._
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
@@ -6,7 +5,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-M11",
+  version := "0.8.0-M12",
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
