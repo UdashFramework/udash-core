@@ -17,7 +17,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
   position: ReadableProperty[UdashNavbar.Position],
   override val componentId: ComponentId
 )(
-  navigationFactory: Binding.NestedInterceptor => UdashNav[ItemType, ElemType],
+  navigationFactory: Binding.NestedInterceptor => Modifier,
   brand: Modifier
 )
   extends UdashBootstrapComponent {
@@ -50,8 +50,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
         id := collapseId, BootstrapStyles.Collapse.collapse,
         BootstrapStyles.NavigationBar.collapse
       )(
-        navigationFactory(nestedInterceptor).render
-          .styles(BootstrapStyles.NavigationBar.nav)
+        navigationFactory(nestedInterceptor)
       )
     ).render
 }
@@ -86,6 +85,41 @@ object UdashNavbar {
     componentId: ComponentId = ComponentId.newId()
   )(
     navigationFactory: Binding.NestedInterceptor => UdashNav[ItemType, ElemType],
+    brand: Modifier = ()
+  ): UdashNavbar[ItemType, ElemType] = {
+    import io.udash.css.CssView._
+    new UdashNavbar(expandBreakpoint, darkStyle, backgroundStyle, position, componentId)(
+      interceptor => navigationFactory(interceptor).render.styles(BootstrapStyles.NavigationBar.nav),
+      brand
+    )
+  }
+
+  /**
+    * Creates a default, responsive navigation bar.
+    * More: <a href="http://getbootstrap.com/docs/4.1/components/navbar/">Bootstrap Docs</a>.
+    *
+    * @param expandBreakpoint  Screen size breakpoint to switch between collapsed and expanded menu.
+    * @param darkStyle         If true, enables dark navigation bar theme.
+    * @param backgroundStyle   Selects navigation bar background style.
+    * @param position          Sets bar position.
+    * @param componentId       An id of the root DOM node.
+    * @param navigationFactory Navigation content factory - if you want to clean up the created navigation on
+    *                          the navigation bar cleanup pass it to the provided interceptor.
+    *                          The returned modifier is applied to the collapsible navigation container.
+    *                          Usually the modifier should be an `Element` or a sequence of `Element`s.
+    * @param brand             A brand DOM element.
+    * @tparam ItemType A single element's type in the `items` sequence.
+    * @tparam ElemType A type of a property containing an element in the `items` sequence.
+    * @return A `UdashNavbar` component, call `render` to create a DOM element.
+    */
+  def customContent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    expandBreakpoint: ReadableProperty[BootstrapStyles.ResponsiveBreakpoint] = BootstrapStyles.ResponsiveBreakpoint.Large.toProperty,
+    darkStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
+    backgroundStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Light.toProperty,
+    position: ReadableProperty[UdashNavbar.Position] = Position.Auto.toProperty,
+    componentId: ComponentId = ComponentId.newId()
+  )(
+    navigationFactory: Binding.NestedInterceptor => Modifier,
     brand: Modifier = ()
   ): UdashNavbar[ItemType, ElemType] = {
     new UdashNavbar(expandBreakpoint, darkStyle, backgroundStyle, position, componentId)(navigationFactory, brand)
