@@ -4,6 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.meta.Mapping
+import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet.DefaultHandleTimeout
 import io.udash.rest.raw._
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -19,7 +20,7 @@ object RestServlet {
 }
 
 class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDuration = DefaultHandleTimeout)
-  extends HttpServlet {
+  extends HttpServlet with LazyLogging {
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync().setup(_.setTimeout(handleTimeout.toMillis))
@@ -29,6 +30,7 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
         asyncContext.complete()
       case Failure(e) =>
         writeFailure(response, e.getMessage.opt)
+        logger.error("Failed to handle REST request", e)
         asyncContext.complete()
     }
   }
