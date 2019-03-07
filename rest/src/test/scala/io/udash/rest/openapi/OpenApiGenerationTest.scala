@@ -486,7 +486,6 @@ class OpenApiGenerationTest extends FunSuite {
         |  "components": {
         |    "schemas": {
         |      "BaseEntity": {
-        |        "type": "object",
         |        "oneOf": [
         |          {
         |            "type": "object",
@@ -503,22 +502,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "type": "object",
         |            "properties": {
         |              "RestOtherEntity": {
-        |                "type": "object",
-        |                "properties": {
-        |                  "fuu": {
-        |                    "type": "boolean"
-        |                  },
-        |                  "kek": {
-        |                    "type": "array",
-        |                    "items": {
-        |                      "type": "string"
-        |                    }
-        |                  }
-        |                },
-        |                "required": [
-        |                  "fuu",
-        |                  "kek"
-        |                ]
+        |                "$ref": "#/components/schemas/RestOtherEntity"
         |              }
         |            },
         |            "required": [
@@ -529,7 +513,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "type": "object",
         |            "properties": {
         |              "SingletonEntity": {
-        |                "type": "object"
+        |                "$ref": "#/components/schemas/SingletonEntity"
         |              }
         |            },
         |            "required": [
@@ -539,11 +523,10 @@ class OpenApiGenerationTest extends FunSuite {
         |        ]
         |      },
         |      "FlatBaseEntity": {
-        |        "type": "object",
         |        "description": "Flat sealed entity with some serious cases",
         |        "oneOf": [
         |          {
-        |            "$ref": "#/components/schemas/taggedRestEntity"
+        |            "$ref": "#/components/schemas/RestEntity"
         |          },
         |          {
         |            "$ref": "#/components/schemas/RestOtherEntity"
@@ -553,12 +536,7 @@ class OpenApiGenerationTest extends FunSuite {
         |          }
         |        ],
         |        "discriminator": {
-        |          "propertyName": "_case",
-        |          "mapping": {
-        |            "RestEntity": "#/components/schemas/taggedRestEntity",
-        |            "RestOtherEntity": "#/components/schemas/RestOtherEntity",
-        |            "SingletonEntity": "#/components/schemas/SingletonEntity"
-        |          }
+        |          "propertyName": "_case"
         |        }
         |      },
         |      "RestEntity": {
@@ -591,12 +569,6 @@ class OpenApiGenerationTest extends FunSuite {
         |      "RestOtherEntity": {
         |        "type": "object",
         |        "properties": {
-        |          "_case": {
-        |            "type": "string",
-        |            "enum": [
-        |              "RestOtherEntity"
-        |            ]
-        |          },
         |          "fuu": {
         |            "type": "boolean"
         |          },
@@ -608,45 +580,12 @@ class OpenApiGenerationTest extends FunSuite {
         |          }
         |        },
         |        "required": [
-        |          "_case",
         |          "fuu",
         |          "kek"
         |        ]
         |      },
         |      "SingletonEntity": {
-        |        "type": "object",
-        |        "properties": {
-        |          "_case": {
-        |            "type": "string",
-        |            "enum": [
-        |              "SingletonEntity"
-        |            ]
-        |          }
-        |        },
-        |        "required": [
-        |          "_case"
-        |        ]
-        |      },
-        |      "taggedRestEntity": {
-        |        "allOf": [
-        |          {
-        |            "type": "object",
-        |            "properties": {
-        |              "_case": {
-        |                "type": "string",
-        |                "enum": [
-        |                  "RestEntity"
-        |                ]
-        |              }
-        |            },
-        |            "required": [
-        |              "_case"
-        |            ]
-        |          },
-        |          {
-        |            "$ref": "#/components/schemas/RestEntity"
-        |          }
-        |        ]
+        |        "type": "object"
         |      }
         |    }
         |  }

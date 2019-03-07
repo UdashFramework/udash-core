@@ -23,7 +23,7 @@ abstract class I18NRestDataCompanion[T](
 ) {
   implicit lazy val codec: GenCodec[T] = instances(DefaultRestImplicits, this).codec
   implicit def restSchema(implicit i18N: I18N): RestSchema[T] =
-    RestSchema.lazySchema(instances(DefaultRestImplicits, this).structure.standaloneSchema)
+    RestSchema.lazySchema(instances(DefaultRestImplicits, this).structure.restSchema)
 }
 
 trait I18NOpenApiFullInstances[Real] extends FullInstances[Real] {

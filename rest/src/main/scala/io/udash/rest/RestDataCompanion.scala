@@ -26,5 +26,5 @@ abstract class RestDataCompanion[T](implicit
 ) extends {
   implicit lazy val codec: GenCodec[T] = instances(DefaultRestImplicits, this).codec
   implicit lazy val restStructure: RestStructure[T] = instances(DefaultRestImplicits, this).structure
-  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
+  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.restSchema)
 }

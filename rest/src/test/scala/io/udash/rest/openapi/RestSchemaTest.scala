@@ -2,8 +2,8 @@ package io.udash
 package rest.openapi
 
 import com.avsystem.commons._
+import com.avsystem.commons.serialization._
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, name, transparent}
 import io.udash.rest.RestDataCompanion
 import io.udash.rest.openapi.adjusters.description
 import org.scalatest.FunSuite
@@ -11,8 +11,11 @@ import org.scalatest.FunSuite
 class Fuu[T](thing: T)
 
 class RestSchemaTest extends FunSuite {
-  private def schemaStr[T](implicit schema: RestSchema[T]): String =
-    JsonStringOutput.writePretty(new InliningResolver().resolve(schema))
+  private def schemasStr[T](implicit schema: RestSchema[T]): String = {
+    val resolver = new SchemaRegistry
+    resolver.resolve(schema)
+    JsonStringOutput.writePretty(resolver.registeredSchemas)
+  }
 
   trait Dependency
   object Dependency {
@@ -29,34 +32,36 @@ class RestSchemaTest extends FunSuite {
   object KejsKlass extends RestDataCompanion[KejsKlass]
 
   test("case class") {
-    assert(schemaStr[KejsKlass] ==
+    assert(schemasStr[KejsKlass] ==
       """{
-        |  "type": "object",
-        |  "description": "kejs klass",
-        |  "properties": {
-        |    "integer": {
-        |      "type": "integer",
-        |      "format": "int32",
-        |      "default": 42
+        |  "KejsKlass": {
+        |    "type": "object",
+        |    "description": "kejs klass",
+        |    "properties": {
+        |      "integer": {
+        |        "type": "integer",
+        |        "format": "int32",
+        |        "default": 42
+        |      },
+        |      "dep": {
+        |        "description": "serious dependency",
+        |        "allOf": [
+        |          {
+        |            "$ref": "Dependency.json"
+        |          }
+        |        ]
+        |      },
+        |      "str": {
+        |        "type": "string",
+        |        "description": "serious string",
+        |        "nullable": true,
+        |        "default": null
+        |      }
         |    },
-        |    "dep": {
-        |      "description": "serious dependency",
-        |      "allOf": [
-        |        {
-        |          "$ref": "Dependency.json"
-        |        }
-        |      ]
-        |    },
-        |    "str": {
-        |      "type": "string",
-        |      "description": "serious string",
-        |      "nullable": true,
-        |      "default": null
-        |    }
-        |  },
-        |  "required": [
-        |    "dep"
-        |  ]
+        |    "required": [
+        |      "dep"
+        |    ]
+        |  }
         |}""".stripMargin)
   }
 
@@ -65,10 +70,12 @@ class RestSchemaTest extends FunSuite {
   object Wrap extends RestDataCompanion[Wrap]
 
   test("transparent wrapper") {
-    assert(schemaStr[Wrap] ==
+    assert(schemasStr[Wrap] ==
       """{
-        |  "type": "string",
-        |  "description": "wrapped string"
+        |  "Wrap": {
+        |    "type": "string",
+        |    "description": "wrapped string"
+        |  }
         |}""".stripMargin)
   }
 
@@ -76,18 +83,190 @@ class RestSchemaTest extends FunSuite {
   object GenCC extends RestDataCompanion[GenCC[String]]
 
   test("generic case class") {
-    println(GenCC.restStructure.asInstanceOf[RestStructure.Record[_]].fields.head.fallbackValue)
-
-    assert(schemaStr[GenCC[String]] ==
+    assert(schemasStr[GenCC[String]] ==
       """{
-        |  "type": "object",
-        |  "properties": {
-        |    "value": {
-        |      "type": "string",
-        |      "default": null
+        |  "GenCC": {
+        |    "type": "object",
+        |    "properties": {
+        |      "value": {
+        |        "type": "string",
+        |        "default": null
+        |      }
         |    }
         |  }
         |}""".stripMargin
     )
+  }
+
+  sealed trait NestedBase
+  @flatten sealed trait FlatBase extends NestedBase
+  case class PlainCase(int: Int) extends FlatBase
+  case class SpecializedCase(str: String) extends FlatBase
+  object SpecializedCase extends RestDataCompanion[SpecializedCase]
+  case class ExternalCase(thing: Int) extends FlatBase
+  object ExternalCase {
+    implicit val schema: RestSchema[ExternalCase] =
+      RestSchema.ref("external.json")
+  }
+  case class UnnamedCase(foo: Double) extends FlatBase
+  object UnnamedCase {
+    implicit val schema: RestSchema[UnnamedCase] =
+      RestSchema.plain(Schema(`type` = DataType.Object, title = "unnamed"))
+  }
+  case object SingletonCase extends FlatBase
+  object FlatBase extends RestDataCompanion[FlatBase]
+  object NestedBase extends RestDataCompanion[NestedBase]
+
+  test("nested sealed hierarchy") {
+    assert(schemasStr[NestedBase] ==
+      """{
+        |  "NestedBase": {
+        |    "oneOf": [
+        |      {
+        |        "type": "object",
+        |        "properties": {
+        |          "PlainCase": {
+        |            "$ref": "#/components/schemas/PlainCase"
+        |          }
+        |        },
+        |        "required": [
+        |          "PlainCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "properties": {
+        |          "SpecializedCase": {
+        |            "$ref": "#/components/schemas/SpecializedCase"
+        |          }
+        |        },
+        |        "required": [
+        |          "SpecializedCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "properties": {
+        |          "ExternalCase": {
+        |            "$ref": "external.json"
+        |          }
+        |        },
+        |        "required": [
+        |          "ExternalCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "properties": {
+        |          "UnnamedCase": {
+        |            "type": "object",
+        |            "title": "unnamed"
+        |          }
+        |        },
+        |        "required": [
+        |          "UnnamedCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "properties": {
+        |          "SingletonCase": {
+        |            "$ref": "#/components/schemas/SingletonCase"
+        |          }
+        |        },
+        |        "required": [
+        |          "SingletonCase"
+        |        ]
+        |      }
+        |    ]
+        |  },
+        |  "PlainCase": {
+        |    "type": "object",
+        |    "properties": {
+        |      "int": {
+        |        "type": "integer",
+        |        "format": "int32"
+        |      }
+        |    },
+        |    "required": [
+        |      "int"
+        |    ]
+        |  },
+        |  "SingletonCase": {
+        |    "type": "object"
+        |  },
+        |  "SpecializedCase": {
+        |    "type": "object",
+        |    "properties": {
+        |      "str": {
+        |        "type": "string"
+        |      }
+        |    },
+        |    "required": [
+        |      "str"
+        |    ]
+        |  }
+        |}""".stripMargin)
+  }
+
+  test("flat sealed hierarchy") {
+    assert(schemasStr[FlatBase] ==
+      """{
+        |  "FlatBase": {
+        |    "oneOf": [
+        |      {
+        |        "$ref": "#/components/schemas/PlainCase"
+        |      },
+        |      {
+        |        "$ref": "#/components/schemas/SpecializedCase"
+        |      },
+        |      {
+        |        "$ref": "external.json"
+        |      },
+        |      {
+        |        "$ref": "#/components/schemas/UnnamedCase"
+        |      },
+        |      {
+        |        "$ref": "#/components/schemas/SingletonCase"
+        |      }
+        |    ],
+        |    "discriminator": {
+        |      "propertyName": "_case",
+        |      "mapping": {
+        |        "ExternalCase": "external.json"
+        |      }
+        |    }
+        |  },
+        |  "PlainCase": {
+        |    "type": "object",
+        |    "properties": {
+        |      "int": {
+        |        "type": "integer",
+        |        "format": "int32"
+        |      }
+        |    },
+        |    "required": [
+        |      "int"
+        |    ]
+        |  },
+        |  "SingletonCase": {
+        |    "type": "object"
+        |  },
+        |  "SpecializedCase": {
+        |    "type": "object",
+        |    "properties": {
+        |      "str": {
+        |        "type": "string"
+        |      }
+        |    },
+        |    "required": [
+        |      "str"
+        |    ]
+        |  },
+        |  "UnnamedCase": {
+        |    "type": "object",
+        |    "title": "unnamed"
+        |  }
+        |}""".stripMargin)
   }
 }

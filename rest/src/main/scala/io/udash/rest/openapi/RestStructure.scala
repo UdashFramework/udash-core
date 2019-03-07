@@ -12,8 +12,12 @@ import io.udash.rest.raw._
 
 sealed trait RestStructure[T] extends TypedMetadata[T] {
   def schemaAdjusters: List[SchemaAdjuster]
-  def standaloneSchema: RestSchema[T]
   def info: GenInfo[T]
+
+  protected def createSchema(resolver: SchemaResolver): RefOr[Schema]
+
+  def restSchema: RestSchema[T] =
+    RestSchema.create(createSchema, info.rawName)
 
   protected def applyAdjusters(schema: Schema): Schema =
     schemaAdjusters.foldRight(schema)(_ adjustSchema _)
@@ -25,38 +29,43 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @composite info: GenUnionInfo[T]
   ) extends RestStructure[T] {
 
-    def standaloneSchema: RestSchema[T] =
-      RestSchema.create(createSchema, info.rawName)
+    protected def createSchema(resolver: SchemaResolver): RefOr[Schema] = {
+      def mkFinalSchema(caseSchemas: List[RefOr[Schema]], disc: OptArg[Discriminator] = OptArg.Empty) =
+        RefOr(applyAdjusters(Schema(
+          oneOf = caseSchemas,
+          discriminator = disc
+        )))
 
-    private def createSchema(resolver: SchemaResolver): RefOr[Schema] = {
-      val caseFieldOpt = info.flatten.map(_.caseFieldName)
-      val caseSchemas = cases.map { c =>
-        val baseSchema = resolver.resolve(c.caseSchema(caseFieldOpt))
-        if (caseFieldOpt.nonEmpty) baseSchema
-        else RefOr(Schema(
-          `type` = DataType.Object,
-          properties = Mapping(c.info.rawName -> baseSchema),
-          required = List(c.info.rawName)
-        ))
+      info.flatten.map(_.caseFieldName) match {
+        case Opt(caseFieldName) =>
+          val caseSchemas = cases.map { c =>
+            // discriminator field requires that all case schemas are references
+            resolver.resolve(c.restSchema) match {
+              case RefOr.Value(schema) =>
+                resolver.resolve(RestSchema.plain(schema).named(c.info.rawName))
+              case s: RefOr.Ref => s
+            }
+          }
+          val mapping = (cases zip caseSchemas).iterator.collect {
+            case (c, RefOr.Ref(ref)) if !ref.endsWith(s"/${c.info.rawName}") => (c.info.rawName, ref)
+          }
+          mkFinalSchema(caseSchemas, Discriminator(caseFieldName, mapping.toMap))
+
+        case Opt.Empty =>
+          val caseSchemas = cases.map(c => RefOr(Schema(
+            `type` = DataType.Object,
+            properties = Map(c.info.rawName -> resolver.resolve(c.restSchema)),
+            required = List(c.info.rawName)
+          )))
+          mkFinalSchema(caseSchemas)
       }
-      val disc = caseFieldOpt.map { caseFieldName =>
-        val mapping = Mapping((cases zip caseSchemas).collect {
-          case (c, RefOr.Ref(ref)) => (c.info.rawName, ref)
-        })
-        Discriminator(caseFieldName, mapping)
-      }
-      RefOr(applyAdjusters(Schema(
-        `type` = DataType.Object,
-        oneOf = caseSchemas,
-        discriminator = disc.toOptArg
-      )))
     }
   }
   object Union extends AdtMetadataCompanion[Union]
 
   sealed trait Case[T] extends TypedMetadata[T] {
     def info: GenCaseInfo[T]
-    def caseSchema(caseFieldName: Opt[String]): RestSchema[T]
+    def restSchema: RestSchema[T]
   }
   object Case extends AdtMetadataCompanion[Case]
 
@@ -64,28 +73,9 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
     */
   @positioned(positioned.here) case class CustomCase[T](
-    @checked @infer restSchema: RestSchema[T],
-    @composite info: GenCaseInfo[T]
-  ) extends Case[T] {
-    def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
-      caseFieldName.fold(restSchema) { cfn =>
-        val caseFieldSchema = RefOr(Schema.enumOf(List(info.rawName)))
-        val taggedName =
-          if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}"
-          else info.rawName
-        restSchema.map({
-          case RefOr.Value(caseSchema) => caseSchema.copy(
-            properties = caseSchema.properties + (cfn -> caseFieldSchema),
-            required = cfn :: caseSchema.required
-          )
-          case ref => Schema(allOf = List(RefOr(Schema(
-            `type` = DataType.Object,
-            properties = Mapping(cfn -> caseFieldSchema),
-            required = List(cfn)
-          )), ref))
-        }, taggedName)
-      }
-  }
+    @composite info: GenCaseInfo[T],
+    @checked @infer restSchema: RestSchema[T]
+  ) extends Case[T]
 
   /**
     * Will be inferred for types having apply/unapply(Seq) pair in their companion.
@@ -96,26 +86,14 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @composite info: GenCaseInfo[T]
   ) extends RestStructure[T] with Case[T] {
 
-    def standaloneSchema: RestSchema[T] =
-      RestSchema.create(createSchema(_, Opt.Empty), info.rawName)
-
-    def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
-      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.map(_ => info.rawName).toOptArg)
-
-    private def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
-      (fields, caseFieldName) match {
-        case (single :: Nil, Opt.Empty) if info.transparent =>
-          SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(single.restSchema))
-        case _ =>
-          val props = caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).iterator ++
-            fields.iterator.map(f => (f.info.rawName, f.resolveSchema(resolver)))
-          val required = caseFieldName.iterator ++
-            fields.iterator.filterNot(_.hasFallbackValue).map(_.info.rawName)
-          RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-            properties = Mapping(props.toList),
-            required = required.toList
-          )))
-      }
+    protected def createSchema(resolver: SchemaResolver): RefOr[Schema] = fields match {
+      case single :: Nil if info.transparent =>
+        SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(single.restSchema))
+      case _ =>
+        val properties = fields.iterator.map(f => (f.info.rawName, f.resolveSchema(resolver))).toMap
+        val required = fields.iterator.filterNot(_.hasFallbackValue).map(_.info.rawName).toList
+        RefOr(applyAdjusters(Schema(`type` = DataType.Object, properties = properties, required = required)))
+    }
   }
   object Record extends AdtMetadataCompanion[Record]
 
@@ -127,18 +105,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @infer @checked value: ValueOf[T],
     @composite info: GenCaseInfo[T]
   ) extends RestStructure[T] with Case[T] {
-
-    def standaloneSchema: RestSchema[T] =
-      RestSchema.create(createSchema(_, Opt.Empty))
-
-    def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
-      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.map(_ => info.rawName).toOptArg)
-
-    def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
-      RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-        properties = Mapping(caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).toList),
-        required = caseFieldName.toList
-      )))
+    protected def createSchema(resolver: SchemaResolver): RefOr[Schema] =
+      RefOr(applyAdjusters(Schema(`type` = DataType.Object)))
   }
   object Singleton extends AdtMetadataCompanion[Singleton]
 
