@@ -213,29 +213,51 @@ class RestSchemaTest extends FunSuite {
     assert(schemasStr[FlatBase] ==
       """{
         |  "FlatBase": {
-        |    "oneOf": [
+        |    "allOf": [
         |      {
-        |        "$ref": "#/components/schemas/PlainCase"
+        |        "type": "object",
+        |        "properties": {
+        |          "_case": {
+        |            "type": "string",
+        |            "enum": [
+        |              "PlainCase",
+        |              "SpecializedCase",
+        |              "ExternalCase",
+        |              "UnnamedCase",
+        |              "SingletonCase"
+        |            ]
+        |          }
+        |        },
+        |        "required": [
+        |          "_case"
+        |        ]
         |      },
         |      {
-        |        "$ref": "#/components/schemas/SpecializedCase"
-        |      },
-        |      {
-        |        "$ref": "external.json"
-        |      },
-        |      {
-        |        "$ref": "#/components/schemas/UnnamedCase"
-        |      },
-        |      {
-        |        "$ref": "#/components/schemas/SingletonCase"
+        |        "oneOf": [
+        |          {
+        |            "$ref": "#/components/schemas/PlainCase"
+        |          },
+        |          {
+        |            "$ref": "#/components/schemas/SpecializedCase"
+        |          },
+        |          {
+        |            "$ref": "external.json"
+        |          },
+        |          {
+        |            "$ref": "#/components/schemas/UnnamedCase"
+        |          },
+        |          {
+        |            "$ref": "#/components/schemas/SingletonCase"
+        |          }
+        |        ],
+        |        "discriminator": {
+        |          "propertyName": "_case",
+        |          "mapping": {
+        |            "ExternalCase": "external.json"
+        |          }
+        |        }
         |      }
-        |    ],
-        |    "discriminator": {
-        |      "propertyName": "_case",
-        |      "mapping": {
-        |        "ExternalCase": "external.json"
-        |      }
-        |    }
+        |    ]
         |  },
         |  "PlainCase": {
         |    "type": "object",

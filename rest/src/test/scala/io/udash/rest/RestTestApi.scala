@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.meta.Mapping
 import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.{flatten, whenAbsent}
+import com.avsystem.commons.serialization.{defaultCase, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
@@ -16,7 +16,7 @@ object BaseEntity extends RestDataCompanion[BaseEntity]
 @flatten sealed trait FlatBaseEntity extends BaseEntity
 object FlatBaseEntity extends RestDataCompanion[FlatBaseEntity]
 
-@description("REST entity")
+@defaultCase @description("REST entity")
 case class RestEntity(
   @description("entity id") id: String,
   @whenAbsent("anonymous") name: String = whenAbsent.value,

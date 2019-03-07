@@ -7,6 +7,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.AsRaw
 import com.avsystem.commons.serialization._
+import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.raw._
 
@@ -29,13 +30,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @composite info: GenUnionInfo[T]
   ) extends RestStructure[T] {
 
-    protected def createSchema(resolver: SchemaResolver): RefOr[Schema] = {
-      def mkFinalSchema(caseSchemas: List[RefOr[Schema]], disc: OptArg[Discriminator] = OptArg.Empty) =
-        RefOr(applyAdjusters(Schema(
-          oneOf = caseSchemas,
-          discriminator = disc
-        )))
-
+    protected def createSchema(resolver: SchemaResolver): RefOr[Schema] =
       info.flatten.map(_.caseFieldName) match {
         case Opt(caseFieldName) =>
           val caseSchemas = cases.map { c =>
@@ -46,10 +41,29 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
               case s: RefOr.Ref => s
             }
           }
-          val mapping = (cases zip caseSchemas).iterator.collect {
-            case (c, RefOr.Ref(ref)) if !ref.endsWith(s"/${c.info.rawName}") => (c.info.rawName, ref)
-          }
-          mkFinalSchema(caseSchemas, Discriminator(caseFieldName, mapping.toMap))
+
+          val defaultCase = cases.findOpt(_.info.defaultCase)
+          val discSchema = Schema(
+            `type` = DataType.Object,
+            properties = Map(caseFieldName -> RefOr(Schema(
+              `type` = DataType.String,
+              enum = cases.map(_.caseNameJson),
+              default = defaultCase.map(_.caseNameJson).toOptArg
+            ))),
+            required = if (defaultCase.isEmpty) List(caseFieldName) else Nil
+          )
+
+          val discriminator = Discriminator(
+            caseFieldName,
+            (cases zip caseSchemas).iterator.collect {
+              case (c, RefOr.Ref(ref)) if !ref.endsWith(s"/${c.info.rawName}") => (c.info.rawName, ref)
+            }.toMap
+          )
+
+          RefOr(applyAdjusters(Schema(allOf = List(
+            RefOr(discSchema),
+            RefOr(Schema(oneOf = caseSchemas, discriminator = discriminator))
+          ))))
 
         case Opt.Empty =>
           val caseSchemas = cases.map(c => RefOr(Schema(
@@ -57,15 +71,17 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
             properties = Map(c.info.rawName -> resolver.resolve(c.restSchema)),
             required = List(c.info.rawName)
           )))
-          mkFinalSchema(caseSchemas)
+          RefOr(applyAdjusters(Schema(oneOf = caseSchemas)))
       }
-    }
   }
   object Union extends AdtMetadataCompanion[Union]
 
   sealed trait Case[T] extends TypedMetadata[T] {
     def info: GenCaseInfo[T]
     def restSchema: RestSchema[T]
+
+    def caseNameJson: JsonValue =
+      JsonValue(JsonStringOutput.write(info.rawName))
   }
   object Case extends AdtMetadataCompanion[Case]
 

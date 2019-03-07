@@ -524,20 +524,38 @@ class OpenApiGenerationTest extends FunSuite {
         |      },
         |      "FlatBaseEntity": {
         |        "description": "Flat sealed entity with some serious cases",
-        |        "oneOf": [
+        |        "allOf": [
         |          {
-        |            "$ref": "#/components/schemas/RestEntity"
+        |            "type": "object",
+        |            "properties": {
+        |              "_case": {
+        |                "type": "string",
+        |                "enum": [
+        |                  "RestEntity",
+        |                  "RestOtherEntity",
+        |                  "SingletonEntity"
+        |                ],
+        |                "default": "RestEntity"
+        |              }
+        |            }
         |          },
         |          {
-        |            "$ref": "#/components/schemas/RestOtherEntity"
-        |          },
-        |          {
-        |            "$ref": "#/components/schemas/SingletonEntity"
+        |            "oneOf": [
+        |              {
+        |                "$ref": "#/components/schemas/RestEntity"
+        |              },
+        |              {
+        |                "$ref": "#/components/schemas/RestOtherEntity"
+        |              },
+        |              {
+        |                "$ref": "#/components/schemas/SingletonEntity"
+        |              }
+        |            ],
+        |            "discriminator": {
+        |              "propertyName": "_case"
+        |            }
         |          }
-        |        ],
-        |        "discriminator": {
-        |          "propertyName": "_case"
-        |        }
+        |        ]
         |      },
         |      "RestEntity": {
         |        "type": "object",
