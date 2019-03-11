@@ -26,9 +26,9 @@ object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
     implicit val DemoClassCodec = new GenCodec[DemoClass] {
       override def read(input: Input): DemoClass = {
         val list = input.readList()
-        val i = list.nextElement().readInt()
-        val s = list.nextElement().readString()
-        val _v = list.nextElement().readInt()
+        val i = list.nextElement().readSimple().readInt()
+        val s = list.nextElement().readSimple().readString()
+        val _v = list.nextElement().readSimple().readInt()
         val demo = new DemoClass(i, s)
         demo._v = _v
         demo
@@ -36,9 +36,9 @@ object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
 
       override def write(output: Output, value: DemoClass): Unit = {
         val values = output.writeList()
-        values.writeElement().writeInt(value.i)
-        values.writeElement().writeString(value.s)
-        values.writeElement().writeInt(value._v)
+        values.writeElement().writeSimple().writeInt(value.i)
+        values.writeElement().writeSimple().writeString(value.s)
+        values.writeElement().writeSimple().writeInt(value._v)
         values.finish()
       }
     }

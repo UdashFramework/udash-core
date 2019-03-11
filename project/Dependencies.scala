@@ -4,19 +4,22 @@ import sbt._
 
 object Dependencies {
 
-  val versionOfScala = "2.12.6"
-  val jettyVersion = "9.4.10.v20180503"
+  val versionOfScala = "2.12.8"
+  val jettyVersion = "9.4.14.v20181114"
 
-  val udashVersion = "0.8.0-M5"
-  val udashJQueryVersion = "1.2.0"
-  val highchartsVersion = "5.0.10"
+  val udashVersion = "0.8.0-M11"
+  val udashJQueryVersion = "2.0.1"
+  val fontAwesomeVersion = "5.6.3"
+  val jqueryVersion = "3.3.1"
+  val highchartsVersion = "5.0.14"
+  val svg4everybodyVersion = "2.1.9"
 
-  val scalaLoggingVersion = "3.9.0"
+  val scalaLoggingVersion = "3.9.2"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.28.1"
-  val typesafeConfigVersion = "1.3.1"
-  val springVersion = "4.3.17.RELEASE"
+  val avsystemCommonsVersion = "1.34.7"
+  val typesafeConfigVersion = "1.3.3"
+  val springVersion = "4.3.22.RELEASE"
 
   val FlexmarkVersion = "0.34.48"
 
@@ -35,9 +38,13 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % udashJQueryVersion,
     "io.udash" %%% "udash-bootstrap4" % udashVersion,
     "io.udash" %%% "udash-charts" % udashVersion,
+    "org.webjars" % "font-awesome" % fontAwesomeVersion,
   ))
 
   val frontendJsDeps = Def.setting(Seq(
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+    ProvidedJS / "prism.js",
+
     "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
       minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
     "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
@@ -55,7 +62,8 @@ object Dependencies {
   val guideJsDeps = Def.setting(Seq.empty[org.scalajs.sbtplugin.JSModuleID])
 
   val homepageJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js"
+    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js",
+    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/lib/svg4everybody.js",
   ))
 
   val backendDeps = Def.setting(Seq(

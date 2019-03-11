@@ -1,8 +1,9 @@
+import org.openqa.selenium.Capabilities
 import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.remote.DesiredCapabilities
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import sbt.Compile
-import sbtcrossproject.{crossProject, CrossType}
+import sbtcrossproject.CrossPlugin.autoImport.crossProject
+import sbtcrossproject.CrossType
 
 name := "udash-guide"
 
@@ -35,15 +36,11 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 // Settings for JS tests run in browser
-val browserCapabilities: DesiredCapabilities = {
+val browserCapabilities: Capabilities = {
   // requires ChromeDriver: https://sites.google.com/a/chromium.org/chromedriver/
-  val capabilities = DesiredCapabilities.chrome()
-  capabilities.setCapability(ChromeOptions.CAPABILITY, {
-    val options = new ChromeOptions()
-    options.addArguments("--headless", "--disable-gpu")
-    options
-  })
-  capabilities
+  val options = new ChromeOptions()
+  options.addArguments("--headless", "--disable-gpu")
+  options
 }
 
 // Reusable settings for all modules
@@ -53,7 +50,7 @@ val commonSettings = Seq(
 
 // Reusable settings for modules compiled to JS
 val commonJSSettings = Seq(
-  Compile / emitSourceMaps  := true,
+  Compile / emitSourceMaps := true,
   Compile / scalaJSUseMainModuleInitializer := true,
   Test / scalaJSUseMainModuleInitializer := false,
 
@@ -61,15 +58,19 @@ val commonJSSettings = Seq(
   jsDependencies ++= Dependencies.frontendJsDeps.value,
 
   // enables scalajs-env-selenium plugin
-  Test / jsEnv := new SeleniumJSEnv(browserCapabilities)
+  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
+  
+  //library CSS settings
+  LessKeys.compress in Assets := true,
+  LessKeys.verbose in Assets := true,
 )
 
 lazy val udashGuide = project.in(file("."))
-  .aggregate(sharedJS, sharedJVM, guide, homepage, backend, `frontend-commons`)
+  .aggregate(sharedJS, sharedJVM, guide, homepage, backend, commons)
   .dependsOn(backend)
   .settings(
     publishArtifact := false,
-    Compile / mainClass := Some("io.udash.web.Launcher")
+    Compile / mainClass := Some("io.udash.web.Launcher"),
   )
 
 lazy val shared = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("shared"))
@@ -90,7 +91,8 @@ lazy val backend = project.in(file("backend"))
     Compile / mainClass := Some("io.udash.web.Launcher"),
   )
 
-lazy val `frontend-commons` = project.in(file("commons")).enablePlugins(ScalaJSPlugin)
+lazy val commons = project.in(file("commons"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(sharedJS)
   .settings(commonSettings)
   .settings(commonJSSettings)
@@ -102,30 +104,36 @@ def frontendProject(proj: Project, sourceDir: File)(
   staticsRoot: String, cssRendererObject: String, jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]
 ) = {
   proj.in(sourceDir)
-    .enablePlugins(ScalaJSPlugin)
-    .dependsOn(`frontend-commons`)
+    .enablePlugins(ScalaJSPlugin, SbtWeb)
+    .dependsOn(commons)
     .settings(commonSettings)
     .settings(commonJSSettings)
     .settings(
       jsDependencies ++= jsDeps.value,
 
+      Assets / LessKeys.less / includeFilter := "assets.less",
+      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets"/ "styles",
+
       Compile / copyAssets := {
+        val udashStatics = target.value / staticsRoot
+        val assets = udashStatics / "assets"
         IO.copyDirectory(
-          (`frontend-commons` / sourceDirectory).value / "main/assets",
-          target.value / s"$staticsRoot/assets"
+          (commons / sourceDirectory).value / "main" / "assets",
+          assets
         )
         IO.copyDirectory(
-          sourceDirectory.value / "main/assets",
-          target.value / s"$staticsRoot/assets"
+          sourceDirectory.value / "main" / "assets",
+          assets
         )
-        IO.copyFile(
-          sourceDirectory.value / "main/assets/index.html",
-          target.value / s"$staticsRoot/index.html"
+        IO.move(
+          assets / "index.html",
+          udashStatics / "index.html"
         )
+        IO.delete(assets / "assets.less")
       },
 
       // Compiles CSS files and put them in the target directory
-      cssDir := (Compile / fastOptJS / target).value / staticsRoot / "styles",
+      cssDir := (Compile / target).value / staticsRoot / "styles",
       compileCss := Def.taskDyn {
         val dir = (Compile / cssDir).value
         val path = dir.absolutePath
