@@ -14,24 +14,34 @@ import scala.collection.mutable
 @implicitNotFound("OpenApiMetadata for ${T} not found, does it have a correctly defined companion object, " +
   "e.g. one that extends DefaultRestApiCompanion or other companion base?")
 @methodTag[RestMethodTag]
+@methodTag[BodyTypeTag]
 case class OpenApiMetadata[T](
   @multi @rpcMethodMetadata
   @tagged[Prefix](whenUntagged = new Prefix)
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
   prefixes: List[OpenApiPrefix[_]],
 
   @multi @rpcMethodMetadata
   @tagged[GET]
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
   @rpcMethodMetadata
   gets: List[OpenApiGetOperation[_]],
 
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag](defaultTag = new BodyField)
+  @tagged[CustomBody]
+  @paramTag[RestParamTag](defaultTag = new Body)
+  customBodyMethods: List[OpenApiCustomBodyOperation[_]],
+
+  @multi @rpcMethodMetadata
+  @tagged[BodyMethodTag](whenUntagged = new POST)
+  @tagged[SomeBodyTag](whenUntagged = new JsonBody)
+  @paramTag[RestParamTag](defaultTag = new Body)
   bodyMethods: List[OpenApiBodyOperation[_]]
 ) {
-  val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ bodyMethods
+  val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ customBodyMethods ++ bodyMethods
 
   def operations(resolver: SchemaResolver): Iterator[PathOperation] =
     prefixes.iterator.flatMap(_.operations(resolver)) ++
@@ -166,27 +176,41 @@ case class OpenApiGetOperation[T](
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = Opt.Empty
 }
 
+case class OpenApiCustomBodyOperation[T](
+  name: String,
+  methodTag: HttpMethodTag,
+  operationAdjusters: List[OperationAdjuster],
+  pathAdjusters: List[PathItemAdjuster],
+  parameters: List[OpenApiParameter[_]],
+  @encoded @rpcParamMetadata @tagged[Body] singleBody: OpenApiBody[_],
+  resultType: RestResultType[T]
+) extends OpenApiOperation[T] {
+  def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
+    singleBody.requestBody(resolver).opt
+}
+
 case class OpenApiBodyOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
   parameters: List[OpenApiParameter[_]],
-  @multi @rpcParamMetadata @tagged[BodyField] bodyFields: List[OpenApiBodyField[_]],
-  @optional @encoded @rpcParamMetadata @tagged[Body] singleBody: Opt[OpenApiBody[_]],
-  @isAnnotated[FormBody] formBody: Boolean,
+  @multi @rpcParamMetadata @tagged[Body] bodyFields: List[OpenApiBodyField[_]],
+  @reifyAnnot bodyTypeTag: BodyTypeTag,
   resultType: RestResultType[T]
 ) extends OpenApiOperation[T] {
 
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    singleBody.map(_.requestBody(resolver).opt).getOrElse {
-      if (bodyFields.isEmpty) Opt.Empty else Opt {
-        val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
-        val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
-        val schema = Schema(`type` = DataType.Object, properties = Mapping(fields), required = requiredFields)
-        val mimeType = if (formBody) HttpBody.FormType else HttpBody.JsonType
-        RefOr(RestRequestBody.simpleRequestBody(mimeType, RefOr(schema), requiredFields.nonEmpty))
+    if (bodyFields.isEmpty) Opt.Empty else Opt {
+      val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
+      val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
+      val schema = Schema(`type` = DataType.Object, properties = Mapping(fields), required = requiredFields)
+      val mimeType = bodyTypeTag match {
+        case _: JsonBody => HttpBody.JsonType
+        case _: FormBody => HttpBody.FormType
+        case _ => throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
       }
+      RefOr(RestRequestBody.simpleRequestBody(mimeType, RefOr(schema), requiredFields.nonEmpty))
     }
 }
 

@@ -8,6 +8,8 @@ import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 
+import scala.annotation.implicitNotFound
+
 sealed abstract class RestMethodCall {
   val pathParams: List[PathValue]
   val metadata: RestMethodMetadata[_]
@@ -29,6 +31,7 @@ case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], final
 }
 
 @methodTag[RestMethodTag]
+@methodTag[BodyTypeTag]
 trait RawRest {
 
   import RawRest._
@@ -37,31 +40,59 @@ trait RawRest {
 
   @multi @tried
   @tagged[Prefix](whenUntagged = new Prefix)
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
-  def prefix(@methodName name: String, @composite parameters: RestParameters): Try[RawRest]
+  @unmatched("it cannot be translated to a prefix method")
+  @unmatchedParam[Body]("prefix methods cannot take @Body parameters")
+  def prefix(
+    @methodName name: String,
+    @composite parameters: RestParameters
+  ): Try[RawRest]
 
   @multi @tried
   @tagged[GET]
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
-  def get(@methodName name: String, @composite parameters: RestParameters): Async[RestResponse]
-
-  @multi @tried @annotated[FormBody]
-  @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag](defaultTag = new BodyField)
-  def handleForm(@methodName name: String, @composite parameters: RestParameters,
-    @multi @tagged[BodyField] body: Mapping[QueryValue]): Async[RestResponse]
-
-  @multi @tried
-  @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag](defaultTag = new BodyField)
-  def handle(@methodName name: String, @composite parameters: RestParameters,
-    @multi @tagged[BodyField] body: Mapping[JsonValue]): Async[RestResponse]
+  @unmatched("it cannot be translated to a HTTP GET method")
+  @unmatchedParam[Body]("GET methods cannot take @Body parameters")
+  def get(
+    @methodName name: String,
+    @composite parameters: RestParameters
+  ): Async[RestResponse]
 
   @multi @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag]
-  def handleSingle(@methodName name: String, @composite parameters: RestParameters,
-    @encoded @tagged[Body] body: HttpBody): Async[RestResponse]
+  @tagged[FormBody]
+  @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched("it cannot be translated to a HTTP method with form body")
+  def handleForm(
+    @methodName name: String,
+    @composite parameters: RestParameters,
+    @multi @tagged[Body] body: Mapping[QueryValue]
+  ): Async[RestResponse]
+
+  @multi @tried
+  @tagged[BodyMethodTag](whenUntagged = new POST)
+  @tagged[JsonBody](whenUntagged = new JsonBody)
+  @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched("it cannot be translated to a HTTP method")
+  def handleJson(
+    @methodName name: String,
+    @composite parameters: RestParameters,
+    @multi @tagged[Body] body: Mapping[JsonValue]
+  ): Async[RestResponse]
+
+  @multi @tried
+  @tagged[BodyMethodTag](whenUntagged = new POST)
+  @tagged[CustomBody]
+  @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched("it cannot be translated to a HTTP method with custom body")
+  @unmatchedParam[Body]("expected exactly one @Body parameter but more than one was found")
+  def handleCustom(
+    @methodName name: String,
+    @composite parameters: RestParameters,
+    @encoded @tagged[Body] @unmatched("expected exactly one @Body parameter but none was found") body: HttpBody
+  ): Async[RestResponse]
 
   def asHandleRequest(metadata: RestMetadata[_]): HandleRequest =
     RawRest.resolveAndHandle(metadata)(handleResolved)
@@ -86,12 +117,12 @@ trait RawRest {
         val finalParameters = parameters.copy(path = finalPathParams)
         if (method == HttpMethod.GET)
           rawRest.get(finalMetadata.name, finalParameters)
-        else if (finalMetadata.singleBody)
-          rawRest.handleSingle(finalMetadata.name, finalParameters, body)
+        else if (finalMetadata.customBody)
+          rawRest.handleCustom(finalMetadata.name, finalParameters, body)
         else if (finalMetadata.formBody)
           rawRest.handleForm(finalMetadata.name, finalParameters, handleBadBody(HttpBody.parseFormBody(body)))
         else
-          rawRest.handle(finalMetadata.name, finalParameters, handleBadBody(HttpBody.parseJsonBody(body)))
+          rawRest.handleJson(finalMetadata.name, finalParameters, handleBadBody(HttpBody.parseJsonBody(body)))
     }
     try resolveCall(this, prefixes) catch {
       case e: InvalidRpcCall =>
@@ -122,7 +153,25 @@ object RawRest extends RawRpcCompanion[RawRest] {
   type Async[T] = Callback[T] => Unit
 
   /**
-    * Raw type of an operation that executes a [[io.udash.rest.raw.RestRequest RestRequest]]. The operation should be run every time the
+    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
+    * can be converted to [[RawRest.Async]].
+    */
+  @implicitNotFound("${F} is not a valid asynchronous effect, ToAsync instance is missing")
+  trait ToAsync[F[_]] {
+    def toAsync[A](fa: F[A]): Async[A]
+  }
+
+  /**
+    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
+    * can be constructed from [[RawRest.Async]].
+    */
+  @implicitNotFound("${F} is not a valid asynchronous effect, FromAsync instance is missing")
+  trait FromAsync[F[_]] {
+    def fromAsync[A](async: Async[A]): F[A]
+  }
+
+  /**
+    * Raw type of an operation that executes a [[RestRequest]]. The operation should be run every time the
     * resulting `Async` value is passed a callback. It should not be run before that. Each run may involve side
     * effects, network communication, etc. Runs may be concurrent.
     * Request handlers should never throw exceptions but rather convert them into failing implementation of
@@ -234,13 +283,13 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def get(name: String, parameters: RestParameters): Async[RestResponse] =
       doHandle("get", name, parameters, HttpBody.Empty)
 
-    def handle(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
+    def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
       doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
     def handleForm(name: String, parameters: RestParameters, body: Mapping[QueryValue]): Async[RestResponse] =
       doHandle("handleForm", name, parameters, HttpBody.createFormBody(body))
 
-    def handleSingle(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
+    def handleCustom(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
       doHandle("handleSingle", name, parameters, body)
 
     private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =

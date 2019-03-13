@@ -12,17 +12,24 @@ import scala.annotation.implicitNotFound
 @implicitNotFound("RestMetadata for ${T} not found, does it have a correctly defined companion object, " +
   "e.g. one that extends DefaultRestApiCompanion or other companion base?")
 @methodTag[RestMethodTag]
+@methodTag[BodyTypeTag]
 case class RestMetadata[T](
-  @multi @tagged[Prefix](whenUntagged = new Prefix)
+  @multi
+  @tagged[Prefix](whenUntagged = new Prefix)
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
   @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
 
-  @multi @tagged[GET]
+  @multi
+  @tagged[GET]
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
   @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
 
-  @multi @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag](defaultTag = new BodyField)
+  @multi
+  @tagged[BodyMethodTag](whenUntagged = new POST)
+  @tagged[SomeBodyTag](whenUntagged = new JsonBody)
+  @paramTag[RestParamTag](defaultTag = new Body)
   @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]]
 ) {
   val httpMethods: List[HttpMethodMetadata[_]] =
@@ -65,10 +72,9 @@ case class RestMetadata[T](
           s"name in prefix ${prefix.name}")
     }
 
-    prefixMethods.foreach {
-      prefix =>
-        ensureUniqueParams(prefix)
-        prefix.result.value.ensureUniqueParams(prefix :: prefixes)
+    prefixMethods.foreach { prefix =>
+      ensureUniqueParams(prefix)
+      prefix.result.value.ensureUniqueParams(prefix :: prefixes)
     }
     httpMethods.foreach(ensureUniqueParams)
   }
@@ -247,15 +253,24 @@ case class PrefixMetadata[T](
 case class HttpMethodMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: HttpMethodTag,
+  @reifyAnnot bodyTypeTag: BodyTypeTag,
   @composite parametersMetadata: RestParametersMetadata,
-  @multi @tagged[BodyField] @rpcParamMetadata bodyFields: Mapping[ParamMetadata[_]],
-  @optional @encoded @tagged[Body] @rpcParamMetadata singleBodyParam: Opt[ParamMetadata[_]],
+  @multi @tagged[Body] @rpcParamMetadata bodyParams: Mapping[ParamMetadata[_]],
   @isAnnotated[FormBody] formBody: Boolean,
   @infer @checked responseType: HttpResponseType[T]
 ) extends RestMethodMetadata[T] {
   val method: HttpMethod = methodTag.method
-  val singleBody: Boolean = singleBodyParam.isDefined
-  def methodPath: List[PathValue] = PathValue.splitDecode(methodTag.path)
+
+  val customBody: Boolean = bodyTypeTag match {
+    case _: CustomBody => true
+    case _ => false
+  }
+
+  def singleBodyParam: Opt[ParamMetadata[_]] =
+    if (customBody) bodyParams.values.headOpt else Opt.Empty
+
+  def methodPath: List[PathValue] =
+    PathValue.splitDecode(methodTag.path)
 }
 
 /**

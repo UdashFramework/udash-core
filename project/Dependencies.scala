@@ -15,13 +15,13 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.34.8"
+  val avsCommonsVersion = "1.34.10-SNAPSHOT"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.4.32"
 
   val upickleVersion = "0.7.1" // Tests only
-  val circeVersion = "0.11.0" // Tests only
+  val circeVersion = "0.11.0" // Tests only 
   val monixVersion = "3.0.0-RC2" // Tests only
 
   val sttpVersion = "1.5.2"

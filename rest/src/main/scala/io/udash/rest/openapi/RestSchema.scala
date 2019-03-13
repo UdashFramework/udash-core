@@ -162,7 +162,7 @@ object RestResponses {
       ))
     )))
 
-  @implicitNotFound("RestResponses instance for ${T} not found, probably because: #{forSchema}")
+  @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forSchema}")
   implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestResponses[T]] =
     ImplicitNotFound()
 }
@@ -214,7 +214,7 @@ object RestRequestBody {
       }
     }
 
-  @implicitNotFound("RestRequestBody instance for ${T} not found, probably because: #{forSchema}")
+  @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forSchema}")
   implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestRequestBody[T]] =
     ImplicitNotFound()
 }
