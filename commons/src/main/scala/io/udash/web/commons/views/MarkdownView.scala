@@ -33,7 +33,7 @@ final class MarkdownPresenter[T <: MarkdownPageState](
   }
 }
 
-final class MarkdownView(content: Property[String]) extends View {
+final class MarkdownView(content: ReadableProperty[String]) extends View {
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 

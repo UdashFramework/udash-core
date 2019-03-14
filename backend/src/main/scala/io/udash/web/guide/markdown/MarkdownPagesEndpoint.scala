@@ -10,7 +10,7 @@ import com.vladsch.flexmark.parser.Parser
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MarkdownPagesEndpoint(guideResourceBase: String)(implicit ec: ExecutionContext) extends MarkdownPageRPC {
+final class MarkdownPagesEndpoint(guideResourceBase: String)(implicit ec: ExecutionContext) extends MarkdownPageRPC {
 
   private val parser = Parser.builder.build
   private val renderer = HtmlRenderer.builder.build
