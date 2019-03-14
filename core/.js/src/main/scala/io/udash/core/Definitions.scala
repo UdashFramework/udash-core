@@ -2,7 +2,6 @@ package io.udash.core
 
 import io.udash.properties.HasModelPropertyCreator
 import org.scalajs.dom._
-
 import scalatags.generic.Modifier
 
 /**
@@ -18,7 +17,7 @@ object Url extends HasModelPropertyCreator[Url]
   *
   * @tparam S State for which this presenter is defined.
   */
-trait Presenter[S <: State] {
+trait Presenter[-S <: State] {
   /**
     * This method will be called by [[io.udash.routing.RoutingEngine]] when relevant state need to be resolved.
     * It can be uses to get parameters from state and use it to call eg. external API.
