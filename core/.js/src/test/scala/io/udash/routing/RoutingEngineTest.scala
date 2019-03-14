@@ -13,7 +13,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         var calls = 0
         override def create() = {
           calls += 1
-          (rootView, new EmptyPresenter[RootState])
+          (rootView, EmptyPresenter)
         }
       }
 
