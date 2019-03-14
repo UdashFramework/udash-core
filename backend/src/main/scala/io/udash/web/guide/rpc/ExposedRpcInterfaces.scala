@@ -8,6 +8,7 @@ import io.udash.web.guide.markdown.{MarkdownPageRPC, MarkdownPagesEndpoint}
 
 class ExposedRpcInterfaces(callLogger: CallLogger, guideResourceBase: String)(implicit clientId: ClientId) extends MainServerRPC {
   import io.udash.web.Implicits._
-  override def demos(): DemosServerRPC = new DemosServer(callLogger)
-  override def pages(): MarkdownPageRPC = new MarkdownPagesEndpoint(guideResourceBase)
+
+  override val demos: DemosServerRPC = new DemosServer(callLogger)
+  override val pages: MarkdownPageRPC = new MarkdownPagesEndpoint(guideResourceBase)
 }
