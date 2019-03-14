@@ -5,8 +5,8 @@ import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import io.udash.rest.openapi.adjusters._
-import io.udash.rest.{Header => HeaderAnnot, _}
 import io.udash.rest.raw._
+import io.udash.rest.{Header => HeaderAnnot, _}
 
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
@@ -218,7 +218,8 @@ case class OpenApiParameter[T](
     val pathParam = in == Location.Path
     val param = Parameter(info.name, in,
       required = pathParam || !info.hasFallbackValue,
-      schema = info.schema(resolver, withDefaultValue = !pathParam)
+      schema = info.schema(resolver, withDefaultValue = !pathParam),
+      explode = if (in == Location.Query) OptArg(false) else OptArg.Empty
     )
     RefOr(adjusters.foldRight(param)(_ adjustParameter _))
   }

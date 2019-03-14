@@ -133,6 +133,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "value",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "string"
         |            }
@@ -177,6 +178,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q1",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "string"
         |            }
@@ -275,6 +277,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q1",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "integer",
         |              "format": "int32"
@@ -283,6 +286,7 @@ class OpenApiGenerationTest extends FunSuite {
         |          {
         |            "name": "q=2",
         |            "in": "query",
+        |            "explode": false,
         |            "schema": {
         |              "type": "string",
         |              "default": "q2def"
@@ -343,6 +347,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q1",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "integer",
         |              "format": "int32"
@@ -352,6 +357,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q=2",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "string"
         |            }
@@ -420,6 +426,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q0",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "string"
         |            },
@@ -447,6 +454,7 @@ class OpenApiGenerationTest extends FunSuite {
         |            "name": "q1",
         |            "in": "query",
         |            "required": true,
+        |            "explode": false,
         |            "schema": {
         |              "type": "integer",
         |              "format": "int32"
