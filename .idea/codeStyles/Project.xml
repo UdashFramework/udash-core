@@ -1,7 +1,7 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <MarkdownNavigatorCodeStyleSettings>
-      <option name="RIGHT_MARGIN" value="72" />
+      <option name="RIGHT_MARGIN" value="-1" />
     </MarkdownNavigatorCodeStyleSettings>
     <ScalaCodeStyleSettings>
       <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />
