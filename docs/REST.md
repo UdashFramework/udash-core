@@ -796,7 +796,7 @@ REST API then you must also provide an implicit instance of `RestResultType` whi
 understand that `Task[T]` is a valid method result type and that `T` is the actual result data type whose schema will 
 be used in OpenAPI response description.
 
-Udash repository contains an [example implementation of Monix Task support in its test sources]().
+Udash repository contains an [example implementation of Monix Task support in its test sources](https://github.com/UdashFramework/udash-core/blob/master/rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
 
 ## API evolution
 
