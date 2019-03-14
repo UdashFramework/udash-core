@@ -48,7 +48,7 @@ trait FutureRestImplicits {
   implicit def futureRestResultType[T: RestResponses]: RestResultType[Future[T]] =
     RestResultType[Future[T]](RestResponses[T].responses)
 
-  @implicitNotFound("${T} is not a valid REST HTTP method result type - it must be a Future")
+  @implicitNotFound("${T} is not a valid HTTP method result type - it must be a Future")
   implicit def httpResponseTypeNotFound[T]: ImplicitNotFound[HttpResponseType[T]] =
     ImplicitNotFound()
 

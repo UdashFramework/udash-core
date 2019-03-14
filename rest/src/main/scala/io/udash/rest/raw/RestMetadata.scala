@@ -9,8 +9,8 @@ import io.udash.rest.raw.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
 
-@implicitNotFound("RestMetadata for ${T} not found, does it have a correctly defined companion object, " +
-  "e.g. one that extends DefaultRestApiCompanion or other companion base?")
+@implicitNotFound("RestMetadata for ${T} not found, " +
+  "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
 case class RestMetadata[T](

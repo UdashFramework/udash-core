@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
+import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
 
 import scala.annotation.implicitNotFound
@@ -42,7 +43,7 @@ trait RawRest {
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
-  @unmatched("it cannot be translated to a prefix method")
+  @unmatched("it cannot be translated into a prefix method")
   @unmatchedParam[Body]("prefix methods cannot take @Body parameters")
   def prefix(
     @methodName name: String,
@@ -53,7 +54,7 @@ trait RawRest {
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
-  @unmatched("it cannot be translated to a HTTP GET method")
+  @unmatched("it cannot be translated into a HTTP GET method")
   @unmatchedParam[Body]("GET methods cannot take @Body parameters")
   def get(
     @methodName name: String,
@@ -64,7 +65,7 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[FormBody]
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated to a HTTP method with form body")
+  @unmatched("it cannot be translated into a HTTP method with form body")
   def handleForm(
     @methodName name: String,
     @composite parameters: RestParameters,
@@ -75,7 +76,7 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated to a HTTP method")
+  @unmatched("it cannot be translated into a HTTP method")
   def handleJson(
     @methodName name: String,
     @composite parameters: RestParameters,
@@ -86,7 +87,7 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[CustomBody]
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated to a HTTP method with custom body")
+  @unmatched("it cannot be translated into a HTTP method with custom body")
   @unmatchedParam[Body]("expected exactly one @Body parameter but more than one was found")
   def handleCustom(
     @methodName name: String,
@@ -153,24 +154,6 @@ object RawRest extends RawRpcCompanion[RawRest] {
   type Async[T] = Callback[T] => Unit
 
   /**
-    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
-    * can be converted to [[RawRest.Async]].
-    */
-  @implicitNotFound("${F} is not a valid asynchronous effect, ToAsync instance is missing")
-  trait ToAsync[F[_]] {
-    def toAsync[A](fa: F[A]): Async[A]
-  }
-
-  /**
-    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
-    * can be constructed from [[RawRest.Async]].
-    */
-  @implicitNotFound("${F} is not a valid asynchronous effect, FromAsync instance is missing")
-  trait FromAsync[F[_]] {
-    def fromAsync[A](async: Async[A]): F[A]
-  }
-
-  /**
     * Raw type of an operation that executes a [[RestRequest]]. The operation should be run every time the
     * resulting `Async` value is passed a callback. It should not be run before that. Each run may involve side
     * effects, network communication, etc. Runs may be concurrent.
@@ -231,6 +214,33 @@ object RawRest extends RawRpcCompanion[RawRest] {
 
   def contramapCallback[A, B](callback: Callback[B])(f: A => B): Callback[A] =
     contraTransformCallback(callback)(_.map(f))
+
+  /**
+    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
+    * can be converted to [[RawRest.Async]].
+    */
+  @implicitNotFound("${F} is not a valid asynchronous effect, ToAsync instance is missing")
+  trait ToAsync[F[_]] {
+    def toAsync[A](fa: F[A]): Async[A]
+  }
+
+  /**
+    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
+    * can be constructed from [[RawRest.Async]].
+    */
+  @implicitNotFound("${F} is not a valid asynchronous effect, FromAsync instance is missing")
+  trait FromAsync[F[_]] {
+    def fromAsync[A](async: Async[A]): F[A]
+  }
+
+  final val InvalidTraitMessage =
+    "result type ${T} is not a valid REST API trait, does it have a properly defined companion object?"
+
+  @implicitNotFound(InvalidTraitMessage)
+  implicit def rawRestAsRealNotFound[T]: ImplicitNotFound[AsReal[RawRest, T]] = ImplicitNotFound()
+
+  @implicitNotFound(InvalidTraitMessage)
+  implicit def rawRestAsRawNotFound[T]: ImplicitNotFound[AsRaw[RawRest, T]] = ImplicitNotFound()
 
   def fromHandleRequest[Real: AsRealRpc : RestMetadata](handleRequest: HandleRequest): Real =
     RawRest.asReal(new DefaultRawRest(RestMetadata[Real], RestParameters.Empty, handleRequest))

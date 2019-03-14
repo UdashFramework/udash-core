@@ -11,8 +11,8 @@ import io.udash.rest.{Header => HeaderAnnot, _}
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
 
-@implicitNotFound("OpenApiMetadata for ${T} not found, does it have a correctly defined companion object, " +
-  "e.g. one that extends DefaultRestApiCompanion or other companion base?")
+@implicitNotFound("OpenApiMetadata for ${T} not found, " +
+  "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
 case class OpenApiMetadata[T](
