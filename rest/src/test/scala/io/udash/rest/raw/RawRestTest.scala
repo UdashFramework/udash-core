@@ -39,6 +39,8 @@ trait UserApi {
   @CustomBody def singleBodyAutopost(body: String): Future[String]
   @FormBody def formpost(@Query qarg: String, sarg: String, iarg: Int): Future[String]
 
+  @addRequestHeader("X-Req-Custom", "custom-req")
+  @addResponseHeader("X-Res-Custom", "custom-res")
   def eatHeader(@Header("X-Stuff") stuff: String): Future[String]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
@@ -67,8 +69,12 @@ class RawRestTest extends FunSuite with ScalaFutures {
     s"-> ${req.method} $pathRepr$queryRepr$headersRepr${repr(req.body, hasHeaders)}".trim
   }
 
-  def repr(resp: RestResponse): String =
-    s"<- ${resp.code} ${repr(resp.body)}".trim
+  def repr(resp: RestResponse): String = {
+    val hasHeaders = resp.headers.nonEmpty
+    val headersRepr = resp.headers.iterator
+      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
+    s"<- ${resp.code}$headersRepr${repr(resp.body, hasHeaders)}".trim
+  }
 
   class RootApiImpl(id: Int, query: String) extends RootApi with UserApi {
     def self: UserApi = this
@@ -182,6 +188,19 @@ class RawRestTest extends FunSuite with ScalaFutures {
       """-> POST /failMore
         |<- 400 text/plain
         |ZUO
+        |""".stripMargin
+    )
+  }
+
+  test("request and response adjusting") {
+    testRestCall(_.self.eatHeader("stuff"),
+      """-> POST /eatHeader
+        |X-Stuff: stuff
+        |X-Req-Custom: custom-req
+        |<- 200
+        |X-Res-Custom: custom-res
+        |application/json
+        |"stuff"
         |""".stripMargin
     )
   }

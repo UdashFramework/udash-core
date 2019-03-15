@@ -29,6 +29,9 @@ case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], final
 
   def rpcChainRepr: String =
     prefixes.iterator.map(_.rpcName).mkString("", "->", s"->${finalCall.rpcName}")
+
+  def adjustResponse(response: RawRest.Async[RestResponse]): RawRest.Async[RestResponse] =
+    prefixes.foldRight(finalCall.metadata.adjustResponse(response))(_.metadata.adjustResponse(_))
 }
 
 @methodTag[RestMethodTag]
@@ -125,7 +128,7 @@ trait RawRest {
         else
           rawRest.handleJson(finalMetadata.name, finalParameters, handleBadBody(HttpBody.parseJsonBody(body)))
     }
-    try resolveCall(this, prefixes) catch {
+    try resolved.adjustResponse(resolveCall(this, prefixes)) catch {
       case e: InvalidRpcCall =>
         RawRest.successfulAsync(RestResponse.plain(400, e.getMessage))
     }
@@ -243,7 +246,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   implicit def rawRestAsRawNotFound[T]: ImplicitNotFound[AsRaw[RawRest, T]] = ImplicitNotFound()
 
   def fromHandleRequest[Real: AsRealRpc : RestMetadata](handleRequest: HandleRequest): Real =
-    RawRest.asReal(new DefaultRawRest(RestMetadata[Real], RestParameters.Empty, handleRequest))
+    RawRest.asReal(new DefaultRawRest(Nil, RestMetadata[Real], RestParameters.Empty, handleRequest))
 
   def asHandleRequest[Real: AsRawRpc : RestMetadata](real: Real): HandleRequest =
     RawRest.asRaw(real).asHandleRequest(RestMetadata[Real])
@@ -281,13 +284,17 @@ object RawRest extends RawRpcCompanion[RawRest] {
     }
   }
 
-  private final class DefaultRawRest(metadata: RestMetadata[_], prefixHeaders: RestParameters, handleRequest: HandleRequest)
-    extends RawRest {
+  private final class DefaultRawRest(
+    prefixMetas: List[PrefixMetadata[_]],
+    metadata: RestMetadata[_],
+    prefixParams: RestParameters,
+    handleRequest: HandleRequest
+  ) extends RawRest {
 
     def prefix(name: String, parameters: RestParameters): Try[RawRest] =
       metadata.prefixesByName.get(name).map { prefixMeta =>
-        val newHeaders = prefixHeaders.append(prefixMeta, parameters)
-        Success(new DefaultRawRest(prefixMeta.result.value, newHeaders, handleRequest))
+        val newHeaders = prefixParams.append(prefixMeta, parameters)
+        Success(new DefaultRawRest(prefixMeta :: prefixMetas, prefixMeta.result.value, newHeaders, handleRequest))
       } getOrElse Failure(new UnknownRpc(name, "prefix"))
 
     def get(name: String, parameters: RestParameters): Async[RestResponse] =
@@ -304,8 +311,10 @@ object RawRest extends RawRpcCompanion[RawRest] {
 
     private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
       metadata.httpMethodsByName.get(name).map { methodMeta =>
-        val newHeaders = prefixHeaders.append(methodMeta, parameters)
-        handleRequest(RestRequest(methodMeta.method, newHeaders, body))
+        val newHeaders = prefixParams.append(methodMeta, parameters)
+        val baseRequest = RestRequest(methodMeta.method, newHeaders, body)
+        val request = prefixMetas.foldLeft(methodMeta.adjustRequest(baseRequest))((req, meta) => meta.adjustRequest(req))
+        handleRequest(request)
       } getOrElse RawRest.failingAsync(new UnknownRpc(name, rawName))
   }
 }

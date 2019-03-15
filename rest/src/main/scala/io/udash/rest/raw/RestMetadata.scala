@@ -211,6 +211,8 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def name: String
   def methodPath: List[PathValue]
   def parametersMetadata: RestParametersMetadata
+  def requestAdjusters: List[RequestAdjuster]
+  def responseAdjusters: List[ResponseAdjuster]
 
   val pathPattern: List[PathPatternElement] = methodPath.map(PathName) ++
     parametersMetadata.path.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName))
@@ -239,12 +241,21 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
       }
     loop(path, pathPattern)
   }
+
+  def adjustRequest(request: RestRequest): RestRequest =
+    requestAdjusters.foldRight(request)(_ adjustRequest _)
+
+  def adjustResponse(asyncResponse: RawRest.Async[RestResponse]): RawRest.Async[RestResponse] =
+    if (responseAdjusters.isEmpty) asyncResponse
+    else RawRest.mapAsync(asyncResponse)(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
 }
 
 case class PrefixMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: Prefix,
   @composite parametersMetadata: RestParametersMetadata,
+  @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
+  @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T]
 ) extends RestMethodMetadata[T] {
   def methodPath: List[PathValue] = PathValue.splitDecode(methodTag.path)
@@ -257,6 +268,8 @@ case class HttpMethodMetadata[T](
   @composite parametersMetadata: RestParametersMetadata,
   @multi @tagged[Body] @rpcParamMetadata bodyParams: Mapping[ParamMetadata[_]],
   @isAnnotated[FormBody] formBody: Boolean,
+  @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
+  @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @infer @checked responseType: HttpResponseType[T]
 ) extends RestMethodMetadata[T] {
   val method: HttpMethod = methodTag.method

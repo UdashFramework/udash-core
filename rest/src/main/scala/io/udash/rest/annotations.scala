@@ -1,7 +1,9 @@
 package io.udash
 package rest
 
+import com.avsystem.commons._
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
+import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
 import io.udash.rest.raw._
 
@@ -229,3 +231,51 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   */
 class Body(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with RestParamTag
+
+/**
+  * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+  * in order to customize outgoing request on the client side.
+  */
+trait RequestAdjuster extends RealSymAnnotation {
+  def adjustRequest(request: RestRequest): RestRequest
+}
+
+/**
+  * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+  * in order to customize outgoing response on the server side.
+  */
+trait ResponseAdjuster extends RealSymAnnotation {
+  def adjustResponse(response: RestResponse): RestResponse
+}
+
+/**
+  * Convenience implementation of [[RequestAdjuster]].
+  */
+class adjustRequest(f: RestRequest => RestRequest) extends RequestAdjuster {
+  def adjustRequest(request: RestRequest): RestRequest = f(request)
+}
+
+/**
+  * Convenience implementation of [[ResponseAdjuster]].
+  */
+class adjustResponse(f: RestResponse => RestResponse) extends ResponseAdjuster {
+  def adjustResponse(response: RestResponse): RestResponse = f(response)
+}
+
+/**
+  * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
+  * HTTP header to all outgoing requests generated for invocations of that method on the client side.
+  */
+class addRequestHeader(name: String, value: String) extends RequestAdjuster {
+  def adjustRequest(request: RestRequest): RestRequest =
+    request |> (r => r.copy(parameters = r.parameters |> (p => p.copy(headers = p.headers + ((name, HeaderValue(value)))))))
+}
+
+/**
+  * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
+  * HTTP header to all outgoing responses generated for invocations of that method on the server side.
+  */
+class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
+  def adjustResponse(response: RestResponse): RestResponse =
+    response |> (r => r.copy(headers = r.headers + ((name, HeaderValue(value)))))
+}
