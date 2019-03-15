@@ -148,13 +148,13 @@ lazy val macros = project
   )
 
 lazy val utils = jvmProject(project)
-  .dependsOn(macros % CompileAndTest)
+  .dependsOn(macros)
   .settings(
     libraryDependencies ++= Dependencies.utilsJvmDeps.value,
   )
 
 lazy val `utils-js` = jsProjectFor(project, utils)
-  .dependsOn(macros % CompileAndTest)
+  .dependsOn(macros)
   .settings(
     libraryDependencies ++= Dependencies.utilsSjsDeps.value,
   )
