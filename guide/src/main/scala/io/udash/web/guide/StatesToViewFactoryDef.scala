@@ -1,6 +1,7 @@
 package io.udash.web.guide
 
 import io.udash._
+import io.udash.web.commons.views.MarkdownPageViewFactory
 import io.udash.web.guide.views._
 import io.udash.web.guide.views.bootstrapping.{BootstrappingFrontendViewFactory, _}
 import io.udash.web.guide.views.ext._
@@ -14,7 +15,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case RootState => RootViewFactory
       case ContentState => ContentViewFactory
 
-      case IntroState => IntroViewFactory
+      case IntroState => MarkdownPageViewFactory[IntroState.type]()(Context.serverRpc.pages())
 
       case BootstrappingState => BootstrappingViewFactory
       case BootstrappingIntroState => BootstrappingIntroViewFactory
@@ -46,7 +47,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case RestClientServerState => RestClientServerViewFactory
       case RestServerState => RestServerViewFactory
 
-      case I18NExtState => I18NExtViewFactory
+      case I18NExtState => MarkdownPageViewFactory[I18NExtState.type]()(Context.serverRpc.pages())
       case BootstrapExtState => BootstrapExtViewFactory
       case AuthorizationExtState => AuthorizationExtViewFactory
       case ChartsExtState => ChartsExtViewFactory
@@ -54,7 +55,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case UserActivityExtState => UserActivityExtViewFactory
 
       case FaqState => FaqViewFactory
-      case LicenseState => LicenseViewFactory
+      case LicenseState => MarkdownPageViewFactory[LicenseState.type]()(Context.serverRpc.pages())
 
       case _ => ErrorViewFactory
     }

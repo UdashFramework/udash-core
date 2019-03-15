@@ -39,7 +39,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     val atmosphereHolder = {
       val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
         val callLogger = new CallLogger
-        new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger)(clientId)) with CallLogging[MainServerRPC] {
+        new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger, guideResourceBase)(clientId)) with CallLogging[MainServerRPC] {
           override protected val metadata: ServerRpcMetadata[MainServerRPC] = MainServerRPC.metadata
 
           override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =

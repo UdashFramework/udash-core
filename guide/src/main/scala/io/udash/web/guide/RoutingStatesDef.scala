@@ -1,6 +1,8 @@
 package io.udash.web.guide
 
 import io.udash._
+import io.udash.web.commons.views.MarkdownPageState
+import io.udash.web.guide.markdown.MarkdownPage
 
 sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState]) extends State {
   override type HierarchyRoot = RoutingState
@@ -10,6 +12,7 @@ sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState
 }
 sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with ContainerState
 sealed abstract class FinalRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with FinalState
+sealed abstract class MarkdownState(final val page: MarkdownPage) extends FinalRoutingState(Some(ContentState)) with MarkdownPageState
 
 case object RootState extends ContainerRoutingState(None)
 
@@ -17,11 +20,11 @@ case object ContentState extends ContainerRoutingState(Some(RootState))
 
 case object ErrorState extends FinalRoutingState(Some(RootState))
 
-case object IntroState extends FinalRoutingState(Some(ContentState))
+case object IntroState extends MarkdownState(MarkdownPage.Intro)
 
 case object FaqState extends FinalRoutingState(Some(ContentState))
 
-case object LicenseState extends FinalRoutingState(Some(ContentState))
+case object LicenseState extends MarkdownState(MarkdownPage.License)
 
 /** Bootstrapping chapters */
 case object BootstrappingState extends ContainerRoutingState(Some(ContentState))
@@ -88,7 +91,7 @@ case object ChartsExtState extends FinalRoutingState(Some(ContentState))
 
 case object JQueryExtState extends FinalRoutingState(Some(ContentState))
 
-case object I18NExtState extends FinalRoutingState(Some(ContentState))
+case object I18NExtState extends MarkdownState(MarkdownPage.I18n)
 
 case object UserActivityExtState extends FinalRoutingState(Some(ContentState))
 

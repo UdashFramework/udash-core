@@ -4,13 +4,12 @@ import io.udash.css.CssFileRenderer
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.{FooterStyles, MobileMenuStyles}
 import io.udash.web.commons.styles.utils.CommonStyleUtils
-import io.udash.web.guide.styles.GuideDefaultStyles
+import io.udash.web.guide.styles.{GuideDefaultStyles, MarkdownStyles}
 import io.udash.web.guide.styles.demo.{ExampleKeyframes, ExampleStyles}
 import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles => GuideHeaderStyles, MenuStyles => GuideMenuStyles}
 import io.udash.web.guide.styles.utils.GuideStyleUtils
 import io.udash.web.homepage.styles.HomepageDefaultStyles
 import io.udash.web.homepage.styles.partials.{HomepageStyles, ButtonsStyle => HomeButtonsStyle, DemoStyles => HomeDemoStyles, HeaderStyles => HomeHeaderStyles}
-
 import scalacss.internal.{Renderer, StringRenderer}
 
 class CssRenderer(renderPretty: Boolean) {
@@ -47,7 +46,8 @@ class CssRenderer(renderPretty: Boolean) {
         GuideHeaderStyles,
         GuideStyles,
         ExampleKeyframes,
-        ExampleStyles
+        ExampleStyles,
+        MarkdownStyles
       ), createMain = true
     ).render()(renderer)
   }
