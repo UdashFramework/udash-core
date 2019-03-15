@@ -129,7 +129,7 @@ sealed trait SomeBodyTag extends BodyTypeTag
 
 /**
   * Causes the [[io.udash.rest.Body Body]] parameters of a HTTP REST method to be encoded as `application/json`.
-  * Each parameter value itself will be first serialized to [[JsonValue]].
+  * Each parameter value itself will be first serialized to [[io.udash.rest.raw.JsonValue JsonValue]].
   * This annotation only applies to methods which may include HTTP body (i.e. not [[io.udash.rest.GET GET]])
   * and is assumed by default, so there should be no reason to apply it explicitly.
   */
@@ -137,7 +137,8 @@ class JsonBody extends SomeBodyTag
 
 /**
   * Causes the [[io.udash.rest.Body Body]] parameters of a HTTP REST method to be encoded as
-  * `application/x-www-form-urlencoded`. Each parameter value itself will be first serialized to [[QueryValue]].
+  * `application/x-www-form-urlencoded`. Each parameter value itself will be first serialized to
+  * [[io.udash.rest.raw.QueryValue QueryValue]].
   * This annotation only applies to methods which may include HTTP body (i.e. not [[io.udash.rest.GET GET]]).
   */
 class FormBody extends SomeBodyTag
