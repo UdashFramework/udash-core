@@ -39,9 +39,11 @@ trait UserApi {
   @CustomBody def singleBodyAutopost(body: String): Future[String]
   @FormBody def formpost(@Query qarg: String, sarg: String, iarg: Int): Future[String]
 
+  def eatHeader(@Header("X-Stuff") stuff: String): Future[String]
+
   @addRequestHeader("X-Req-Custom", "custom-req")
   @addResponseHeader("X-Res-Custom", "custom-res")
-  def eatHeader(@Header("X-Stuff") stuff: String): Future[String]
+  def adjusted: Future[Unit]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
 
@@ -89,6 +91,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def fail: Future[Unit] = Future.failed(HttpErrorException(400, "zuo"))
     def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
+    def adjusted: Future[Unit] = Future.unit
   }
 
   var trafficLog: String = _
@@ -193,14 +196,11 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("request and response adjusting") {
-    testRestCall(_.self.eatHeader("stuff"),
-      """-> POST /eatHeader
-        |X-Stuff: stuff
+    testRestCall(_.self.adjusted,
+      """-> POST /adjusted
         |X-Req-Custom: custom-req
-        |<- 200
+        |<- 204
         |X-Res-Custom: custom-res
-        |application/json
-        |"stuff"
         |""".stripMargin
     )
   }
