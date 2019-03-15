@@ -204,7 +204,7 @@ case class OpenApiBodyOperation[T](
     if (bodyFields.isEmpty) Opt.Empty else Opt {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
-      val schema = Schema(`type` = DataType.Object, properties = Mapping(fields), required = requiredFields)
+      val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
       val mimeType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
         case _: FormBody => HttpBody.FormType

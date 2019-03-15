@@ -13,19 +13,10 @@ import io.udash.rest.raw._
 import scala.annotation.implicitNotFound
 
 trait FloatingPointRestImplicits {
-  implicit final val floatPathValueAsRealRaw: AsRawReal[PathValue, Float] =
-    AsRawReal.create(v => PathValue(v.toString), _.value.toFloat)
-  implicit final val floatHeaderValueAsRealRaw: AsRawReal[HeaderValue, Float] =
-    AsRawReal.create(v => HeaderValue(v.toString), _.value.toFloat)
-  implicit final val floatQueryValueAsRealRaw: AsRawReal[QueryValue, Float] =
-    AsRawReal.create(v => QueryValue(v.toString), _.value.toFloat)
-
-  implicit final val doublePathValueAsRealRaw: AsRawReal[PathValue, Double] =
-    AsRawReal.create(v => PathValue(v.toString), _.value.toDouble)
-  implicit final val doubleHeaderValueAsRealRaw: AsRawReal[HeaderValue, Double] =
-    AsRawReal.create(v => HeaderValue(v.toString), _.value.toDouble)
-  implicit final val doubleQueryValueAsRealRaw: AsRawReal[QueryValue, Double] =
-    AsRawReal.create(v => QueryValue(v.toString), _.value.toDouble)
+  implicit final val floatPlainValueAsRealRaw: AsRawReal[PlainValue, Float] =
+    AsRawReal.create(v => PlainValue(v.toString), _.value.toFloat)
+  implicit final val doublePlainValueAsRealRaw: AsRawReal[PlainValue, Double] =
+    AsRawReal.create(v => PlainValue(v.toString), _.value.toDouble)
 }
 object FloatingPointRestImplicits extends FloatingPointRestImplicits
 
@@ -73,19 +64,9 @@ trait GenCodecRestImplicits extends FloatingPointRestImplicits {
 
   // Implicits wrapped into `Fallback` so that they don't get higher priority just because they're imported
   // This way concrete classes may override these implicits with implicits in their companion objects
-  implicit def pathValueFallbackAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[PathValue, T]] =
+  implicit def plainValueFallbackAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[PlainValue, T]] =
     Fallback(AsRawReal.create(
-      v => PathValue(GenKeyCodec.write[T](v)),
-      v => handleReadFailure(GenKeyCodec.read[T](v.value))
-    ))
-  implicit def headerValueDefaultAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[HeaderValue, T]] =
-    Fallback(AsRawReal.create(
-      v => HeaderValue(GenKeyCodec.write[T](v)),
-      v => handleReadFailure(GenKeyCodec.read[T](v.value))
-    ))
-  implicit def queryValueDefaultAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[QueryValue, T]] =
-    Fallback(AsRawReal.create(
-      v => QueryValue(GenKeyCodec.write[T](v)),
+      v => PlainValue(GenKeyCodec.write[T](v)),
       v => handleReadFailure(GenKeyCodec.read[T](v.value))
     ))
 
@@ -95,35 +76,15 @@ trait GenCodecRestImplicits extends FloatingPointRestImplicits {
       v => handleReadFailure(JsonStringInput.read[T](v.value))
     ))
 
-  @implicitNotFound("Cannot serialize ${T} into PathValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRawPathNotFound[T](
+  @implicitNotFound("Cannot serialize ${T} into PlainValue, most likely because:\n#{forKeyCodec}")
+  implicit def asRawPlainNotFound[T](
     implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsRaw[PathValue, T]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsRaw[PlainValue, T]] = ImplicitNotFound()
 
-  @implicitNotFound("Cannot deserialize ${T} from PathValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRealPathNotFound[T](
+  @implicitNotFound("Cannot deserialize ${T} from PlainValue, most likely because:\n#{forKeyCodec}")
+  implicit def asRealPlainNotFound[T](
     implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsReal[PathValue, T]] = ImplicitNotFound()
-
-  @implicitNotFound("Cannot serialize ${T} into HeaderValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRawHeaderNotFound[T](
-    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsRaw[HeaderValue, T]] = ImplicitNotFound()
-
-  @implicitNotFound("Cannot deserialize ${T} from HeaderValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRealHeaderNotFound[T](
-    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsReal[HeaderValue, T]] = ImplicitNotFound()
-
-  @implicitNotFound("Cannot serialize ${T} into QueryValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRawQueryNotFound[T](
-    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsRaw[QueryValue, T]] = ImplicitNotFound()
-
-  @implicitNotFound("Cannot deserialize ${T} from QueryValue, most likely because:\n#{forKeyCodec}")
-  implicit def asRealQueryNotFound[T](
-    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
-  ): ImplicitNotFound[AsReal[QueryValue, T]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsReal[PlainValue, T]] = ImplicitNotFound()
 
   @implicitNotFound("Cannot serialize ${T} into JsonValue, because:\n#{forGenCodec}")
   implicit def asRawJsonNotFound[T](

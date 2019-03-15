@@ -4,7 +4,6 @@ package raw
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
-import com.avsystem.commons.meta.Mapping
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 import org.scalactic.source.Position
 import org.scalatest.FunSuite
@@ -63,7 +62,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
 
   def repr(req: RestRequest): String = {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
-    val queryRepr = req.parameters.query.iterator
+    val queryRepr = req.parameters.query.entries.iterator
       .map({ case (k, v) => s"$k=${v.value}" }).mkStringOrEmpty("?", "&", "")
     val hasHeaders = req.parameters.headers.nonEmpty
     val headersRepr = req.parameters.headers.iterator
@@ -206,8 +205,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("OPTIONS") {
-    val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PathValue("user"))), HttpBody.Empty)
-    val response = RestResponse(200, Mapping("Allow" -> HeaderValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
+    val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
+    val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
 
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
@@ -215,9 +214,9 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("HEAD") {
-    val params = RestParameters(List(PathValue("user")), query = Mapping("userId" -> QueryValue("UID")))
+    val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
-    val response = RestResponse(200, Mapping.empty, HttpBody.empty)
+    val response = RestResponse(200, IMapping.empty, HttpBody.empty)
 
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
@@ -226,19 +225,19 @@ class RawRestTest extends FunSuite with ScalaFutures {
 
   test("header case insensitivity") {
     val params = RestParameters(
-      path = List(PathValue("eatHeader")),
-      headers = Mapping(List("x-sTuFf" -> HeaderValue("StUfF")), caseInsensitive = true)
+      path = List(PlainValue("eatHeader")),
+      headers = IMapping("x-sTuFf" -> PlainValue("StUfF"))
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
-    val response = RestResponse(200, Mapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
+    val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)
   }
 
   test("bad body") {
-    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PathValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
-    val response = RestResponse(400, Mapping.empty, HttpBody.plain(
+    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain(
       "Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"))
 
     val promise = Promise[RestResponse]
@@ -248,8 +247,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
 
   test("bad argument") {
     val body = HttpBody.json(JsonValue("{\"user\": {}}"))
-    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PathValue("user"))), body)
-    val response = RestResponse(400, Mapping.empty, HttpBody.plain(
+    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), body)
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain(
       "Argument user of RPC put_user is invalid: " +
         "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
     ))
@@ -260,8 +259,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("missing argument") {
-    val request = RestRequest(HttpMethod.GET, RestParameters(List(PathValue("user"))), HttpBody.Empty)
-    val response = RestResponse(400, Mapping.empty, HttpBody.plain("Argument userId of RPC user is missing"))
+    val request = RestRequest(HttpMethod.GET, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument userId of RPC user is missing"))
 
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)
@@ -269,8 +268,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("missing argument in prefix") {
-    val request = RestRequest(HttpMethod.GET, RestParameters(PathValue.splitDecode("subApi/42/user")), HttpBody.Empty)
-    val response = RestResponse(400, Mapping.empty, HttpBody.plain("Argument query of RPC subApi is missing"))
+    val request = RestRequest(HttpMethod.GET, RestParameters(PlainValue.decodePath("subApi/42/user")), HttpBody.Empty)
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument query of RPC subApi is missing"))
 
     val promise = Promise[RestResponse]
     serverHandle(request).apply(promise.complete)

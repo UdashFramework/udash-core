@@ -3,7 +3,6 @@ package rest
 
 import java.net.ConnectException
 
-import com.avsystem.commons.meta.Mapping
 import com.softwaremill.sttp.SttpBackend
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
@@ -47,9 +46,9 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   ): RestRequest = RestRequest(
     method,
     RestParameters(
-      PathValue.splitDecode(url),
-      Mapping(headers.mapValues(HeaderValue)),
-      Mapping(queryArguments.mapValues(QueryValue))
+      PlainValue.decodePath(url),
+      IMapping(headers.mapValues(PlainValue)),
+      Mapping(queryArguments.mapValues(PlainValue))
     ),
     HttpBody.json(JsonValue(body))
   )

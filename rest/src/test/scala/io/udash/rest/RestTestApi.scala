@@ -2,7 +2,6 @@ package io.udash
 package rest
 
 import com.avsystem.commons._
-import com.avsystem.commons.meta.Mapping
 import com.avsystem.commons.rpc.AsRawReal
 import com.avsystem.commons.serialization.{flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
@@ -31,7 +30,7 @@ case object SingletonEntity extends FlatBaseEntity
 case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
-    cr => RestResponse(200, Mapping("X-Value" -> HeaderValue(cr.value)), HttpBody.plain("Yes")),
+    cr => RestResponse(200, IMapping("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
     resp => CustomResp(resp.headers("X-Value").value)
   )
   implicit val restResponses: RestResponses[CustomResp] = RestResponses { _ =>

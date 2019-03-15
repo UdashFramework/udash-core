@@ -3,7 +3,6 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
-import com.avsystem.commons.meta.Mapping
 import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
 import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
@@ -31,16 +30,16 @@ object SttpRestClient {
       (u => u.copy(path = u.path ++
         request.parameters.path.map(_.value))) |>
       (u => u.copy(queryFragments = u.queryFragments ++
-        request.parameters.query.iterator.map {
-          case (k, QueryValue(v)) => KeyValue(k, v, QueryFragmentEncoding.All, QueryFragmentEncoding.All)
+        request.parameters.query.entries.iterator.map {
+          case (k, PlainValue(v)) => KeyValue(k, v, QueryFragmentEncoding.All, QueryFragmentEncoding.All)
         }.toList
       ))
 
     val contentTypeHeader = request.body.mimeTypeOpt.map {
       mimeType => (HeaderNames.ContentType, s"$mimeType;charset=utf-8")
     }
-    val paramHeaders = request.parameters.headers.iterator.map {
-      case (n, HeaderValue(v)) => (n, v)
+    val paramHeaders = request.parameters.headers.entries.iterator.map {
+      case (n, PlainValue(v)) => (n, v)
     }.toList
 
     sttp.copy[Id, String, Nothing](
@@ -54,12 +53,7 @@ object SttpRestClient {
   private def fromSttpResponse(sttpResp: Response[String]): RestResponse =
     RestResponse(
       sttpResp.code,
-      Mapping(
-        sttpResp.headers.iterator.map {
-          case (n, v) => (n, HeaderValue(v))
-        }.toList,
-        caseInsensitive = true
-      ),
+      IMapping(sttpResp.headers.iterator.map { case (n, v) => (n, PlainValue(v)) }.toList),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
         val mimeType = contentType.split(";", 2).head
         HttpBody(sttpResp.body.fold(identity, identity), mimeType)

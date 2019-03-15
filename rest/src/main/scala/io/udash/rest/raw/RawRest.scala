@@ -12,12 +12,12 @@ import com.avsystem.commons.rpc._
 import scala.annotation.implicitNotFound
 
 sealed abstract class RestMethodCall {
-  val pathParams: List[PathValue]
+  val pathParams: List[PlainValue]
   val metadata: RestMethodMetadata[_]
   def rpcName: String = metadata.name
 }
-case class PrefixCall(pathParams: List[PathValue], metadata: PrefixMetadata[_]) extends RestMethodCall
-case class HttpCall(pathParams: List[PathValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
+case class PrefixCall(pathParams: List[PlainValue], metadata: PrefixMetadata[_]) extends RestMethodCall
+case class HttpCall(pathParams: List[PlainValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
 
 case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], finalCall: HttpCall) {
   lazy val pathPattern: List[PathPatternElement] =
@@ -72,7 +72,7 @@ trait RawRest {
   def handleForm(
     @methodName name: String,
     @composite parameters: RestParameters,
-    @multi @tagged[Body] body: Mapping[QueryValue]
+    @multi @tagged[Body] body: Mapping[PlainValue]
   ): Async[RestResponse]
 
   @multi @tried
@@ -258,7 +258,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
       val path = request.parameters.path
       metadata.resolvePath(path) match {
         case Nil =>
-          val message = s"path ${PathValue.encodeJoin(path)} not found"
+          val message = s"path ${PlainValue.encodePath(path)} not found"
           RawRest.successfulAsync(RestResponse.plain(404, message))
         case calls => request.method match {
           case HttpMethod.OPTIONS =>
@@ -266,7 +266,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
               case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
               case m => List(m)
             } ++ Iterator(HttpMethod.OPTIONS)
-            val response = RestResponse(200, Mapping("Allow" -> HeaderValue(meths.mkString(","))), HttpBody.Empty)
+            val response = RestResponse(200, IMapping("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
             RawRest.successfulAsync(response)
           case wireMethod =>
             val head = wireMethod == HttpMethod.HEAD
@@ -276,7 +276,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
                 val resp = handleResolved(req, call)
                 if (head) RawRest.mapAsync(resp)(_.copy(body = HttpBody.empty)) else resp
               case None =>
-                val message = s"$wireMethod not allowed on path ${PathValue.encodeJoin(path)}"
+                val message = s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"
                 RawRest.successfulAsync(RestResponse.plain(405, message))
             }
         }
@@ -303,7 +303,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
       doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
-    def handleForm(name: String, parameters: RestParameters, body: Mapping[QueryValue]): Async[RestResponse] =
+    def handleForm(name: String, parameters: RestParameters, body: Mapping[PlainValue]): Async[RestResponse] =
       doHandle("handleForm", name, parameters, HttpBody.createFormBody(body))
 
     def handleCustom(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =

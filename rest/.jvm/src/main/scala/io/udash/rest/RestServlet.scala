@@ -3,7 +3,6 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
-import com.avsystem.commons.meta.Mapping
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet.DefaultHandleTimeout
 import io.udash.rest.raw._
@@ -38,11 +37,11 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
   private def readParameters(request: HttpServletRequest): RestParameters = {
     // can't use request.getPathInfo because it decodes the URL before we can split it
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
-    val path = PathValue.splitDecode(request.getRequestURI.stripPrefix(pathPrefix))
-    val query = request.getQueryString.opt.map(QueryValue.decode).getOrElse(Mapping.empty)
-    val headersBuilder = Mapping.newBuilder[HeaderValue](caseInsensitive = true)
+    val path = PlainValue.decodePath(request.getRequestURI.stripPrefix(pathPrefix))
+    val query = request.getQueryString.opt.map(PlainValue.decodeQuery).getOrElse(Mapping.empty)
+    val headersBuilder = IMapping.newBuilder[PlainValue]
     request.getHeaderNames.asScala.foreach { headerName =>
-      headersBuilder += headerName -> HeaderValue(request.getHeader(headerName))
+      headersBuilder += headerName -> PlainValue(request.getHeader(headerName))
     }
     val headers = headersBuilder.result()
     RestParameters(path, headers, query)
@@ -68,8 +67,8 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
 
   private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
     response.setStatus(restResponse.code)
-    restResponse.headers.foreach {
-      case (name, HeaderValue(value)) => response.addHeader(name, value)
+    restResponse.headers.entries.foreach {
+      case (name, PlainValue(value)) => response.addHeader(name, value)
     }
     restResponse.body.forNonEmpty { (content, mimeType) =>
       response.setContentType(s"$mimeType;charset=utf-8")
