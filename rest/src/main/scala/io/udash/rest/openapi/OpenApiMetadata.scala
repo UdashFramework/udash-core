@@ -208,7 +208,8 @@ case class OpenApiBodyOperation[T](
       val mimeType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
         case _: FormBody => HttpBody.FormType
-        case _ => throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
+        case _: CustomBody | _: NoBody =>
+          throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
       }
       RefOr(RestRequestBody.simpleRequestBody(mimeType, RefOr(schema), requiredFields.nonEmpty))
     }

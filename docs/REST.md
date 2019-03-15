@@ -268,7 +268,7 @@ method into a HTTP REST call.
 * By default (if not annotated explicitly) each method is interpreted as HTTP `POST`.
 * Method name is appended to the URL path. This can also be customized with annotations.
 * Every parameter is interpreted as part of the body - by default all the body parameters will be
-  combined into a JSON object sent through HTTP body. If your method is annotated as [`@GET`](#get-methods)
+  combined into a JSON object sent through HTTP body. If your method is annotated with [`@GET`](#get-methods)
   then it cannot send a body and method parameters are interpreted as query parameters rather than body fields.
   You may also use other body formats by annotating your method as [`@FormBody`](#formbody) or 
   [`@CustomBody`](#custombody).
@@ -307,7 +307,7 @@ for this path will return `GET,HEAD,POST,OPTIONS`.
 
 #### `GET` methods
 
-Trait method annotated as `@GET` is interpreted somewhat differently from other HTTP methods.
+Trait method annotated with `@GET` is interpreted somewhat differently from other HTTP methods.
 Its parameters are interpreted as _query_ parameters rather than _body_ parameters. For example:
 
 ```scala
@@ -346,7 +346,7 @@ Empty paths may be especially useful for [prefix methods](#prefix-methods).
 
 ### Path parameters
 
-If a parameter of REST API trait method is annotated as `@Path`, its value is
+If a parameter of REST API trait method is annotated with `@Path`, its value is
 appended to URL path rather than translated into query parameter or body part.
 
 ```scala
@@ -405,13 +405,13 @@ See [serialization](#path-query-and-header-serialization) for more details.
 
 #### `@FormBody`
 
-Non-`GET` methods may be annotated as `@FormBody`. This changes serialization of body parameters
-from JSON object to HTTP form, encoded as `application/x-www-form-urlencoded`. Each body parameter itself
+Non-`GET` methods may be annotated with `@FormBody`. This changes serialization of body parameters
+from JSON object to HTTP form, encoded as `application/x-www-form-urlencoded`. Each body parameter
 is then serialized into `QueryValue` rather than `JsonValue`.
 
 #### `@CustomBody`
 
-Methods annotated as `@CustomBody` are required to take **exactly one** body parameter. This body parameter will
+Methods annotated with `@CustomBody` are required to take **exactly one** body parameter. This body parameter will
 be then serialized directly into `HttpBody`. This makes it possible to fully customize the way HTTP body is built.
 See [`@CustomBody` serialization](#custom-body-serialization) for more details.
 
@@ -441,7 +441,7 @@ annotation is not necessary as long as your method returns a valid REST API trai
 see [companion objects](#companion-objects)).
 
 Prefix methods may take parameters. They are interpreted as path parameters by default,
-but they may also be annotated as `@Query` or `@Header`. Prefix methods must not take
+but they may also be annotated with `@Query` or `@Header`. Prefix methods must not take
 body parameters.
 
 Path and parameters collected by a prefix method will be prepended/added
@@ -584,7 +584,7 @@ HTTP requests. This means that serialization should not worry about that.
 Body parameters are by default serialized into `JsonValue` which is also a simple wrapper class over `String`,
 but is importantly distinct from `PathValue`/`QueryValue`/`HeaderValue` because it must always contain
 a valid JSON string. This is required because JSON body parameters are ultimately composed into a single
-JSON object sent as HTTP body. If a method is annotated as [`@FormBody`](#formbody), body parameters are serialized into
+JSON object sent as HTTP body. If a method is annotated with [`@FormBody`](#formbody), body parameters are serialized into
 `QueryValue` and combined into an URL-encoded form.
 
 There are no "global" implicits defined for `JsonValue` - JSON serialization must be either imported,

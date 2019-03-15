@@ -5,7 +5,7 @@ import com.avsystem.commons.macros.AbstractMacroCommons
 
 import scala.reflect.macros.{TypecheckException, blackbox}
 
-class MiscMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
+class TestMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
 
   import c.universe._
 

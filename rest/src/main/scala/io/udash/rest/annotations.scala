@@ -60,7 +60,7 @@ sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTa
   * serialized into JSON (through encoding to [[io.udash.rest.raw.JsonValue JsonValue]]) and combined into JSON
   * object that is sent as HTTP body.
   *
-  * Parameters may also contribute to URL path, HTTP headers and query parameters if annotated as
+  * Parameters may also contribute to URL path, HTTP headers and query parameters if annotated with
   * [[io.udash.rest.Path Path]], [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
   *
   * REST method may also take a single parameter representing the entire HTTP body. Such parameter must be annotated
@@ -80,9 +80,9 @@ sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTa
 sealed abstract class BodyMethodTag(method: HttpMethod) extends HttpMethodTag(method)
 
 /**
-  * REST method annotated as `@GET` will translate to HTTP GET request. By default, parameters of such method
+  * REST method annotated with `@GET` will translate to HTTP GET request. By default, parameters of such method
   * are translated into URL query parameters (encoded as [[io.udash.rest.raw.QueryValue QueryValue]]).
-  * Alternatively, each parameter may be annotated as [[io.udash.rest.Path Path]] or [[io.udash.rest.Header Header]]
+  * Alternatively, each parameter may be annotated with [[io.udash.rest.Path Path]] or [[io.udash.rest.Header Header]]
   * which means that it will be translated into HTTP header value.
   *
   * @param path see [[RestMethodTag.path]]
@@ -151,13 +151,13 @@ class FormBody extends SomeBodyTag
 class CustomBody extends SomeBodyTag
 
 /**
-  * REST methods annotated as [[io.udash.rest.Prefix Prefix]] are expected to return another REST API trait as their
+  * REST methods annotated with [[io.udash.rest.Prefix Prefix]] are expected to return another REST API trait as their
   * result. They do not yet represent an actual HTTP request but contribute to URL path, HTTP headers and query
   * parameters.
   *
   * By default, parameters of a prefix method are interpreted as URL path fragments. Their values are encoded as
   * [[io.udash.rest.raw.PathValue PathValue]] and appended to URL path. Alternatively, each parameter may also be
-  * explicitly annotated as [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
+  * explicitly annotated with [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
   *
   * NOTE: REST method is interpreted as prefix method by default which means that there is no need to apply
   * [[io.udash.rest.Prefix Prefix]] annotation explicitly unless you want to specify a custom path.
@@ -191,7 +191,7 @@ sealed trait NonBodyTag extends RestParamTag {
 }
 
 /**
-  * REST method parameters annotated as [[io.udash.rest.Path Path]] will be encoded as
+  * REST method parameters annotated with [[io.udash.rest.Path Path]] will be encoded as
   * [[io.udash.rest.raw.PathValue PathValue]] and appended to URL path, in the declaration order.
   * Parameters of [[io.udash.rest.Prefix Prefix]] REST methods are interpreted as [[io.udash.rest.Path Path]]
   * parameters by default.
@@ -199,7 +199,7 @@ sealed trait NonBodyTag extends RestParamTag {
 class Path(val pathSuffix: String = "") extends NonBodyTag
 
 /**
-  * REST method parameters annotated as [[io.udash.rest.Header Header]] will be encoded as
+  * REST method parameters annotated with [[io.udash.rest.Header Header]] will be encoded as
   * [[io.udash.rest.raw.HeaderValue HeaderValue]] and added to HTTP headers.
   * Header name must be explicitly given as argument of this annotation.
   */
@@ -207,7 +207,7 @@ class Header(override val name: String)
   extends rpcName(name) with NonBodyTag
 
 /**
-  * REST method parameters annotated as [[io.udash.rest.Query Query]] will be encoded as
+  * REST method parameters annotated with [[io.udash.rest.Query Query]] will be encoded as
   * [[io.udash.rest.raw.QueryValue QueryValue]] and added to URL query parameters.
   * Parameters of [[io.udash.rest.GET GET]] REST methods are interpreted as [[io.udash.rest.Query Query]]
   * parameters by default.
@@ -216,12 +216,12 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with NonBodyTag
 
 /**
-  * REST method parameters annotated as [[io.udash.rest.Body Body]] will be used to build HTTP request body.
+  * REST method parameters annotated with [[io.udash.rest.Body Body]] will be used to build HTTP request body.
   * How exactly that happens depends on [[io.udash.rest.BodyTypeTag BodyTypeTag]] applied on a method. By default,
   * [[io.udash.rest.JsonBody JsonBody]] is assumed which means that body parameters will be combined into a single
   * JSON object sent as body.
   *
-  * Body parameters are allowed only in REST methods annotated as [[io.udash.rest.POST POST]],
+  * Body parameters are allowed only in REST methods annotated with [[io.udash.rest.POST POST]],
   * [[io.udash.rest.PATCH PATCH]], [[io.udash.rest.PUT PUT]] or [[io.udash.rest.DELETE DELETE]]. Actually, for these
   * methods, an unannotated parameter is assumed to be a body parameter by default. This means that there's usually
   * no reason to apply this annotation explicitly. It may only be useful when wanting to customize JSON/form field name
