@@ -35,7 +35,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
-    rawHandle.andThen(FutureRestImplicits.futureFromAsync.fromAsync)
+    rawHandle.andThen(FutureRestImplicits.futureAsyncEffect.fromAsync)
 
   def mkRequest(
     url: String,

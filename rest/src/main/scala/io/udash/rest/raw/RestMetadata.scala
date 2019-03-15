@@ -7,6 +7,7 @@ import java.util.Locale
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
+import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
@@ -20,18 +21,23 @@ case class RestMetadata[T](
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
+  @unmatched(RawRest.NotValidPrefixMethod)
+  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
   @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
 
   @multi
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
+  @unmatched(RawRest.NotValidGetMethod)
+  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
   @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
 
   @multi
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched(RawRest.NotValidHttpMethod)
   @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]]
 ) {
   val httpMethods: List[HttpMethodMetadata[_]] =
@@ -303,6 +309,10 @@ case class HttpMethodMetadata[T](
   */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
 case class HttpResponseType[T]()
+object HttpResponseType {
+  implicit def asyncEffectResponseType[F[_] : AsyncEffect, T]: HttpResponseType[F[T]] =
+    HttpResponseType()
+}
 
 case class RestParametersMetadata(
   @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],

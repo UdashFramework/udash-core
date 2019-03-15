@@ -6,7 +6,7 @@ import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.ImplicitNotFound
 import io.udash.rest.openapi.{RestResponses, RestResultType}
 import io.udash.rest.raw.HttpResponseType
-import io.udash.rest.raw.RawRest.{Async, FromAsync, ToAsync}
+import io.udash.rest.raw.RawRest.{Async, AsyncEffect}
 import io.udash.rest.{GenCodecRestImplicits, OpenApiFullInstances, RestOpenApiCompanion}
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -16,14 +16,10 @@ import scala.annotation.implicitNotFound
 trait MonixRestImplicits extends GenCodecRestImplicits {
   implicit def scheduler: Scheduler = Scheduler.global
 
-  implicit def taskToAsync: ToAsync[Task] =
-    new ToAsync[Task] {
+  implicit def taskToAsync: AsyncEffect[Task] =
+    new AsyncEffect[Task] {
       def toAsync[A](task: Task[A]): Async[A] =
         callback => task.runAsync(res => callback(res.fold(Failure(_), Success(_))))
-    }
-
-  implicit def taskFromAsync: FromAsync[Task] =
-    new FromAsync[Task] {
       def fromAsync[A](async: Async[A]): Task[A] =
         Task.async(callback => async(res => callback(res.fold(Left(_), Right(_)))))
     }

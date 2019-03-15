@@ -7,7 +7,7 @@ import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal, InvalidRpcCall}
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.avsystem.commons.serialization.{GenCodec, GenKeyCodec}
-import io.udash.rest.openapi.{OpenApiMetadata, RestResponses, RestResultType, RestSchema}
+import io.udash.rest.openapi.{OpenApiMetadata, RestSchema}
 import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
@@ -21,32 +21,17 @@ trait FloatingPointRestImplicits {
 object FloatingPointRestImplicits extends FloatingPointRestImplicits
 
 trait FutureRestImplicits {
-  implicit def futureToAsync: RawRest.ToAsync[Future] =
-    new RawRest.ToAsync[Future] {
+  implicit def futureAsyncEffect: RawRest.AsyncEffect[Future] =
+    new RawRest.AsyncEffect[Future] {
       def toAsync[A](fa: Future[A]): RawRest.Async[A] =
         fa.onCompleteNow
-    }
-
-  implicit def futureFromAsync: RawRest.FromAsync[Future] =
-    new RawRest.FromAsync[Future] {
       def fromAsync[A](async: RawRest.Async[A]): Future[A] =
         Promise[A].setup(p => async(p.complete)).future
     }
 
-  implicit def futureHttpResponseType[T]: HttpResponseType[Future[T]] =
-    HttpResponseType[Future[T]]()
-
-  implicit def futureRestResultType[T: RestResponses]: RestResultType[Future[T]] =
-    RestResultType[Future[T]](RestResponses[T].responses)
-
-  @implicitNotFound("${T} is not a valid HTTP method result type - it must be a Future")
+  @implicitNotFound("${T} is not a valid result type of HTTP REST method - it must be a Future")
   implicit def httpResponseTypeNotFound[T]: ImplicitNotFound[HttpResponseType[T]] =
     ImplicitNotFound()
-
-  @implicitNotFound("#{forRestResponses}")
-  implicit def futureRestResultTypeNotFound[T](
-    implicit forRestResponses: ImplicitNotFound[RestResponses[T]]
-  ): ImplicitNotFound[RestResultType[Future[T]]] = ImplicitNotFound()
 }
 object FutureRestImplicits extends FutureRestImplicits
 

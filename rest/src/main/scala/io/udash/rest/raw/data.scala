@@ -245,16 +245,16 @@ object RestResponse {
     AsRaw.create(value => bodyAsRaw.asRaw(value).defaultResponse.recoverHttpError)
 
   implicit def effectFromAsyncResp[F[_], T](
-    implicit fromAsync: RawRest.FromAsync[F], asResponse: AsReal[RestResponse, T]
+    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsReal[RestResponse, T]
   ): AsReal[RawRest.Async[RestResponse], Try[F[T]]] =
-    AsReal.create(async => Success(fromAsync.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
+    AsReal.create(async => Success(asyncEff.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
 
   implicit def effectToAsyncResp[F[_], T](
-    implicit toAsync: RawRest.ToAsync[F], asResponse: AsRaw[RestResponse, T]
+    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsRaw[RestResponse, T]
   ): AsRaw[RawRest.Async[RestResponse], Try[F[T]]] =
     AsRaw.create(_.fold(
       RawRest.failingAsync,
-      ft => RawRest.mapAsync(toAsync.toAsync(ft))(asResponse.asRaw)
+      ft => RawRest.mapAsync(asyncEff.toAsync(ft))(asResponse.asRaw)
     ).recoverHttpError)
 
   // following two implicits forward implicit-not-found error messages for HttpBody as error messages for RestResponse
@@ -274,13 +274,13 @@ object RestResponse {
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: RawRest.FromAsync[F],
+    fromAsync: RawRest.AsyncEffect[F],
     forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
   ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: RawRest.ToAsync[F],
+    toAsync: RawRest.AsyncEffect[F],
     forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
   ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 

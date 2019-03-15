@@ -46,8 +46,8 @@ trait RawRest {
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
-  @unmatched("it cannot be translated into a prefix method")
-  @unmatchedParam[Body]("prefix methods cannot take @Body parameters")
+  @unmatched(RawRest.NotValidPrefixMethod)
+  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
   def prefix(
     @methodName name: String,
     @composite parameters: RestParameters
@@ -57,8 +57,8 @@ trait RawRest {
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
-  @unmatched("it cannot be translated into a HTTP GET method")
-  @unmatchedParam[Body]("GET methods cannot take @Body parameters")
+  @unmatched(RawRest.NotValidGetMethod)
+  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
   def get(
     @methodName name: String,
     @composite parameters: RestParameters
@@ -68,7 +68,7 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[FormBody]
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated into a HTTP method with form body")
+  @unmatched(RawRest.NotValidFormBodyMethod)
   def handleForm(
     @methodName name: String,
     @composite parameters: RestParameters,
@@ -79,7 +79,7 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated into a HTTP method")
+  @unmatched(RawRest.NotValidHttpMethod)
   def handleJson(
     @methodName name: String,
     @composite parameters: RestParameters,
@@ -90,12 +90,12 @@ trait RawRest {
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[CustomBody]
   @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched("it cannot be translated into a HTTP method with custom body")
-  @unmatchedParam[Body]("expected exactly one @Body parameter but more than one was found")
+  @unmatched(RawRest.NotValidCustomBodyMethod)
+  @unmatchedParam[Body](RawRest.SuperfluousBodyParam)
   def handleCustom(
     @methodName name: String,
     @composite parameters: RestParameters,
-    @encoded @tagged[Body] @unmatched("expected exactly one @Body parameter but none was found") body: HttpBody
+    @encoded @tagged[Body] @unmatched(RawRest.MissingBodyParam) body: HttpBody
   ): Async[RestResponse]
 
   def asHandleRequest(metadata: RestMetadata[_]): HandleRequest =
@@ -222,20 +222,30 @@ object RawRest extends RawRpcCompanion[RawRest] {
     * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
     * can be converted to [[RawRest.Async]].
     */
-  @implicitNotFound("${F} is not a valid asynchronous effect, ToAsync instance is missing")
-  trait ToAsync[F[_]] {
+  @implicitNotFound("${F} is not a valid asynchronous effect, AsyncEffect instance is missing")
+  trait AsyncEffect[F[_]] {
     def toAsync[A](fa: F[A]): Async[A]
-  }
-
-  /**
-    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
-    * can be constructed from [[RawRest.Async]].
-    */
-  @implicitNotFound("${F} is not a valid asynchronous effect, FromAsync instance is missing")
-  trait FromAsync[F[_]] {
     def fromAsync[A](async: Async[A]): F[A]
   }
 
+  final val NotValidPrefixMethod =
+    "it cannot be translated into a prefix method"
+  final val PrefixMethodBodyParam =
+    "prefix methods cannot take @Body parameters"
+  final val NotValidGetMethod =
+    "it cannot be translated into a HTTP GET method"
+  final val GetMethodBodyParam =
+    "GET methods cannot take @Body parameters"
+  final val NotValidHttpMethod =
+    "it cannot be translated into a HTTP method"
+  final val NotValidFormBodyMethod =
+    "it cannot be translated into a HTTP method with form body"
+  final val NotValidCustomBodyMethod =
+    "it cannot be translated into a HTTP method with custom body"
+  final val MissingBodyParam =
+    "expected exactly one @Body parameter but more than one was found"
+  final val SuperfluousBodyParam =
+    "expected exactly one @Body parameter but none was found"
   final val InvalidTraitMessage =
     "result type ${T} is not a valid REST API trait, does it have a properly defined companion object?"
 

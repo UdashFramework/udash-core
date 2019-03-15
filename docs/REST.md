@@ -779,10 +779,11 @@ However, `Future` is low level and limited in many ways (e.g. there is no way to
 asynchronous computation starts). It is possible to use other task-like containers, e.g.
 [Monix Task](https://monix.io/docs/2x/eval/task.html) or [Cats IO](https://typelevel.org/cats-effect/).
 
-In order to do that, you must provide some additional "serialization" implicits which will make the macro engine
+In order to do that, you must provide some additional implicits which will make the macro engine
 understand how to translate between `Async[T]` and `Task[T]` for arbitrary type `T`. This is controlled by
-`ToAsync` and `FromAsync` typeclasses defined in `RawRest` object. This means that you must provide implicit instances
-of `ToAsync[Task]` and `FromAsync[Task]`.
+`AsyncEffect` typeclass defined in `RawRest` object which represents a bidirectional polymorphic conversion between
+some an effect type constructor and `Async`. This means that you must provide implicit instance
+of `AsyncEffect[Task]`.
 
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
