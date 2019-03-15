@@ -50,6 +50,7 @@ class I18nDemosTest extends SeleniumTest {
       runDemo("frontend-translations-demo")()
     }
 
+    //todo fix after new, Atmosphere-less RPC is merged
     "contain working remote translations demo" ignore {
       driver.navigate().refresh()
       val translations = runDemo("rpc-translations-demo")()
