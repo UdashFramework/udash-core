@@ -227,6 +227,13 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def toAsync[A](fa: F[A]): Async[A]
     def fromAsync[A](async: Async[A]): F[A]
   }
+  object AsyncEffect {
+    implicit val identity: AsyncEffect[Async] =
+      new AsyncEffect[Async] {
+        def toAsync[A](a: Async[A]): Async[A] = a
+        def fromAsync[A](a: Async[A]): Async[A] = a
+      }
+  }
 
   final val NotValidPrefixMethod =
     "it cannot be translated into a prefix method"

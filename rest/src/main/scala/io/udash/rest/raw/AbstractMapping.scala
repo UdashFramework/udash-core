@@ -83,6 +83,13 @@ abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] {
     }
 }
 
+/**
+  * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
+  * initialized map which allows fast lookup by key. When looking up values by key, duplicate entries are dropped and
+  * only the last value for given key is returned.
+  *
+  * Mappings have O(1) prepend, append and concatenation operations.
+  */
 final case class Mapping[V](entries: IIterable[(String, V)]) extends AbstractMapping[V] {
   type Self = Mapping[V]
   def caseSensitive: Boolean = true
@@ -93,6 +100,7 @@ object Mapping extends AbstractMappingCompanion[Mapping]
 
 /**
   * A version of [[Mapping]] which is case-insensitive when looking up values by key.
+  * Used primarily to represent [[io.udash.rest.Header Header]] parameter values.
   */
 final case class IMapping[V](entries: IIterable[(String, V)]) extends AbstractMapping[V] {
   type Self = IMapping[V]
