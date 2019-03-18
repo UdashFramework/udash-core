@@ -99,6 +99,9 @@ object Dependencies {
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
     "io.monix" %%% "monix" % monixVersion % Test,
+    "io.circe" %%% "circe-core" % circeVersion % Test,
+    "io.circe" %%% "circe-parser" % circeVersion % Test,
+    "io.circe" %%% "circe-generic" % circeVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(

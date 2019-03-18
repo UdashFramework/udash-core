@@ -1,8 +1,6 @@
 package io.udash
 package rest.raw
 
-import java.util.Locale
-
 import com.avsystem.commons._
 import io.udash.rest.raw.AbstractMapping.ConcatIterable
 
@@ -18,7 +16,7 @@ sealed abstract class AbstractMapping[V] extends PartialFunction[String, V] {
   protected def createNew(rawEntries: IIterable[(String, V)]): Self
 
   private def normKey(key: String): String =
-    if (caseSensitive) key else key.toLowerCase(Locale.ENGLISH)
+    if (caseSensitive) key else key.toLowerCase
 
   lazy val toMap: IMap[String, V] =
     entries.iterator.map { case (name, value) => (normKey(name), value) }.toMap
