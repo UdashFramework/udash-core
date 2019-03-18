@@ -155,11 +155,11 @@ class FrontendPropertiesView extends FinalView with CssView {
       i("io.udash.seq.SeqProperty"), " and provide the second generic argument to specify element type."
     ),
     p(
-      i("SeqProperty"), " may be created from any value of type extending ", i("scala.collection.Seq"), ". ",
-      "Note that due to, ", i("SeqProperty"), " mutable nature, there may be performance overhead while calling ", i("subSeq"),
+      i("SeqProperty"), " may be created from any value of subtype of ", i("scala.collection.Seq"), ". ",
+      "Note that due to, ", i("SeqProperty"), "'s mutable nature, there may be a performance overhead when calling ", i("subSeq"),
       " on fields of type more specific than ", i("scala.collection.Seq"), " (e.g. ",
       i("scala.collection.immutable.List"), " or ", i("scala.collection.immutable.Seq"),
-      "). ", "This is because of potential copying the underlying data structure."
+      "). ", "This is because of potential need of copying the underlying data structure."
     ),
 
     h3("Properties hierarchy"),
