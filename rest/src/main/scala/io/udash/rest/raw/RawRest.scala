@@ -250,9 +250,9 @@ object RawRest extends RawRpcCompanion[RawRest] {
   final val NotValidCustomBodyMethod =
     "it cannot be translated into a HTTP method with custom body"
   final val MissingBodyParam =
-    "expected exactly one @Body parameter but more than one was found"
-  final val SuperfluousBodyParam =
     "expected exactly one @Body parameter but none was found"
+  final val SuperfluousBodyParam =
+    "expected exactly one @Body parameter but more than one was found"
   final val InvalidTraitMessage =
     "result type ${T} is not a valid REST API trait, does it have a properly defined companion object?"
 
