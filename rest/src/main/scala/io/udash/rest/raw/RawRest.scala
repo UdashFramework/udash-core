@@ -302,7 +302,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   }
 
   private final class DefaultRawRest(
-    prefixMetas: List[PrefixMetadata[_]],
+    prefixMetas: List[PrefixMetadata[_]], //in reverse invocation order!
     metadata: RestMetadata[_],
     prefixParams: RestParameters,
     handleRequest: HandleRequest
