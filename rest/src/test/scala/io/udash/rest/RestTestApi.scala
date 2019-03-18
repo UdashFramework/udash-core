@@ -64,13 +64,14 @@ trait RestTestApi {
     @Path("p1") p1: Int, @Path p2: String,
     @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
     @Query q1: Int, @Query("q=2") q2: String,
-    b1: Int, @BodyField("b\"2") @description("weird body field") b2: String
+    b1: Int, @Body("b\"2") @description("weird body field") b2: String
   ): Future[RestEntity]
 
+  @CustomBody
   @bodyDescription("Serious body")
   @responseDescription("Serious response")
   @PUT("") def singleBodyPut(
-    @Body @description("REST entity description") entity: RestEntity
+    @description("REST entity description") entity: RestEntity
   ): Future[String]
 
   @FormBody

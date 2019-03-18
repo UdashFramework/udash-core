@@ -23,8 +23,7 @@ sealed trait Adjuster extends StaticAnnotation
   *
   * - Fields of case classes for which [[io.udash.rest.openapi.RestStructure RestStructure]] is macro materialized.
   *
-  * - Body parameters of REST methods (parameters tagged with [[io.udash.rest.BodyField BodyField]]
-  * or [[io.udash.rest.Body Body]] annotations)
+  * - [[io.udash.rest.Body Body]] parameters of REST methods.
   *
   * Schema adjusters DO NOT WORK on REST methods themselves and their path/header/query parameters.
   * Instead, use [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] and [[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]].

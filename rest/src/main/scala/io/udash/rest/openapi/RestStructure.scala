@@ -162,7 +162,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
 
   case class DefaultValueInfo[T](
     @reifyDefaultValue defaultValue: DefaultValue[T],
-    @infer("for default value: ") asJson: AsRaw[JsonValue, T]
+    @infer("Cannot materialize default parameter value:\n") asJson: AsRaw[JsonValue, T]
   ) extends TypedMetadata[T] {
     val fallbackValue: Opt[JsonValue] =
       Try(defaultValue.value).toOpt.map(asJson.asRaw)

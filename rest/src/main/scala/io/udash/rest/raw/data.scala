@@ -13,7 +13,6 @@ import io.udash.utils.URLEncoder
 
 import scala.annotation.implicitNotFound
 import scala.util.control.NoStackTrace
-import scala.util.{Failure, Success, Try}
 
 sealed trait RestValue extends Any {
   def value: String
@@ -40,7 +39,8 @@ object PathValue extends (String => PathValue) {
 case class HeaderValue(value: String) extends AnyVal with RestValue
 
 /**
-  * Value used as encoding of [[io.udash.rest.Query Query]] parameters and [[io.udash.rest.BodyField BodyField]] parameters of [[io.udash.rest.FormBody FormBody]] methods.
+  * Value used as encoding of [[io.udash.rest.Query Query]] parameters and [[io.udash.rest.Body Body]] parameters of
+  * [[io.udash.rest.FormBody FormBody]] methods.
   */
 case class QueryValue(value: String) extends AnyVal with RestValue
 object QueryValue extends (String => QueryValue) {
@@ -64,7 +64,8 @@ object QueryValue extends (String => QueryValue) {
 }
 
 /**
-  * Value used as encoding of [[io.udash.rest.BodyField BodyField]] parameters of non-[[io.udash.rest.FormBody FormBody]] methods.
+  * Value used as encoding of [[io.udash.rest.Body Body]] parameters of
+  * non-[[io.udash.rest.JsonBody FormJsonBodyody]] methods.
   * Wrapped value MUST be a valid JSON.
   */
 case class JsonValue(value: String) extends AnyVal with RestValue
@@ -76,8 +77,10 @@ object JsonValue {
 }
 
 /**
-  * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameters. Types that have
-  * encoding to [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to [[io.udash.rest.raw.HttpBody HttpBody]] which uses application/json MIME type.
+  * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameter in
+  * [[io.udash.rest.FormBody FormBody]] methods.
+  * Types that have encoding to [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to
+  * [[io.udash.rest.raw.HttpBody HttpBody]] which uses application/json MIME type.
   * There is also a specialized encoding provided for `Unit` which returns empty HTTP body when writing and ignores
   * the body when reading.
   */
@@ -183,12 +186,12 @@ object HttpBody {
   implicit def httpBodyJsonAsReal[T](implicit jsonAsReal: AsReal[JsonValue, T]): AsReal[HttpBody, T] =
     AsReal.create(v => jsonAsReal.asReal(v.readJson()))
 
-  @implicitNotFound("Cannot deserialize ${T} from HttpBody, probably because: #{forJson}")
+  @implicitNotFound("Cannot deserialize ${T} from HttpBody, because:\n#{forJson}")
   implicit def asRealNotFound[T](
     implicit forJson: ImplicitNotFound[AsReal[JsonValue, T]]
   ): ImplicitNotFound[AsReal[HttpBody, T]] = ImplicitNotFound()
 
-  @implicitNotFound("Cannot serialize ${T} into HttpBody, probably because: #{forJson}")
+  @implicitNotFound("Cannot serialize ${T} into HttpBody, because:\n#{forJson}")
   implicit def asRawNotFound[T](
     implicit forJson: ImplicitNotFound[AsRaw[JsonValue, T]]
   ): ImplicitNotFound[AsRaw[HttpBody, T]] = ImplicitNotFound()
@@ -242,11 +245,12 @@ object RestResponse {
   }
   implicit def lazyOps(resp: => RestResponse): LazyOps = new LazyOps(() => resp)
 
-  implicit class TryOps(private val respTry: Try[RestResponse]) extends AnyVal {
-    def recoverHttpError: Try[RestResponse] = respTry match {
-      case Failure(e: HttpErrorException) => Success(e.toResponse)
-      case _ => respTry
-    }
+  implicit class AsyncOps(private val asyncResp: RawRest.Async[RestResponse]) extends AnyVal {
+    def recoverHttpError: RawRest.Async[RestResponse] =
+      callback => asyncResp {
+        case Failure(e: HttpErrorException) => callback(Success(e.toResponse))
+        case tr => callback(tr)
+      }
   }
 
   implicit def bodyBasedFromResponse[T](implicit bodyAsReal: AsReal[HttpBody, T]): AsReal[RestResponse, T] =
@@ -255,15 +259,47 @@ object RestResponse {
   implicit def bodyBasedToResponse[T](implicit bodyAsRaw: AsRaw[HttpBody, T]): AsRaw[RestResponse, T] =
     AsRaw.create(value => bodyAsRaw.asRaw(value).defaultResponse.recoverHttpError)
 
-  @implicitNotFound("Cannot deserialize ${T} from RestResponse, probably because: #{forBody}")
+  implicit def effectFromAsyncResp[F[_], T](
+    implicit fromAsync: RawRest.FromAsync[F], asResponse: AsReal[RestResponse, T]
+  ): AsReal[RawRest.Async[RestResponse], Try[F[T]]] =
+    AsReal.create(async => Success(fromAsync.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
+
+  implicit def effectToAsyncResp[F[_], T](
+    implicit toAsync: RawRest.ToAsync[F], asResponse: AsRaw[RestResponse, T]
+  ): AsRaw[RawRest.Async[RestResponse], Try[F[T]]] =
+    AsRaw.create(_.fold(
+      RawRest.failingAsync,
+      ft => RawRest.mapAsync(toAsync.toAsync(ft))(asResponse.asRaw)
+    ).recoverHttpError)
+
+  // following two implicits forward implicit-not-found error messages for HttpBody as error messages for RestResponse
+
+  @implicitNotFound("Cannot deserialize ${T} from RestResponse, because:\n#{forBody}")
   implicit def asRealNotFound[T](
     implicit forBody: ImplicitNotFound[AsReal[HttpBody, T]]
   ): ImplicitNotFound[AsReal[RestResponse, T]] = ImplicitNotFound()
 
-  @implicitNotFound("Cannot serialize ${T} into RestResponse, probably because: #{forBody}")
+  @implicitNotFound("Cannot serialize ${T} into RestResponse, because:\n#{forBody}")
   implicit def asRawNotFound[T](
     implicit forBody: ImplicitNotFound[AsRaw[HttpBody, T]]
   ): ImplicitNotFound[AsRaw[RestResponse, T]] = ImplicitNotFound()
+
+  // following two implicits provide nice error messages when serialization is lacking for HTTP method result
+  // while the async wrapper is fine (e.g. Future)
+
+  @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
+  implicit def effAsyncAsRealNotFound[F[_], T](implicit
+    fromAsync: RawRest.FromAsync[F],
+    forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
+  ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
+
+  @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
+  implicit def effAsyncAsRawNotFound[F[_], T](implicit
+    toAsync: RawRest.ToAsync[F],
+    forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
+  ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
+
+  // following two implicits provide nice error messages when result type of HTTP method is totally wrong
 
   @implicitNotFound("#{forResponseType}")
   implicit def asyncAsRealNotFound[T](
