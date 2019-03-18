@@ -22,6 +22,7 @@ object Dependencies {
 
   val upickleVersion = "0.7.1" // Tests only
   val circeVersion = "0.11.0" // Tests only 
+  val circeDerivationVersion = "0.11.0-M1" // Tests only 
   val monixVersion = "3.0.0-RC2" // Tests only
 
   val sttpVersion = "1.5.2"
@@ -101,7 +102,7 @@ object Dependencies {
     "io.monix" %%% "monix" % monixVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
-    "io.circe" %%% "circe-generic" % circeVersion % Test,
+    "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
