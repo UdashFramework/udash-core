@@ -66,7 +66,7 @@ case class RestMetadata[T](
       for {
         prefix <- prefixes
         headerParam <- method.parametersMetadata.headerParams
-        if prefix.parametersMetadata.headerParamsMap.contains(headerParam.name.toLowerCase(Locale.ENGLISH))
+        if prefix.parametersMetadata.headerParamsMap.contains(headerParam.name.toLowerCase)
       } throw new InvalidRestApiException(
         s"Header parameter ${headerParam.name} of ${method.name} collides with header parameter of the same " +
           s"(case insensitive) name in prefix ${prefix.name}")
@@ -320,7 +320,7 @@ case class RestParametersMetadata(
   @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]]
 ) {
   lazy val headerParamsMap: Map[String, ParamMetadata[_]] =
-    headerParams.toMapBy(_.name.toLowerCase(Locale.ENGLISH))
+    headerParams.toMapBy(_.name.toLowerCase)
   lazy val queryParamsMap: Map[String, ParamMetadata[_]] =
     queryParams.toMapBy(_.name)
 }
