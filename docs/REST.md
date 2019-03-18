@@ -782,7 +782,7 @@ asynchronous computation starts). It is possible to use other task-like containe
 In order to do that, you must provide some additional implicits which will make the macro engine
 understand how to translate between `Async[T]` and `Task[T]` for arbitrary type `T`. This is controlled by
 `AsyncEffect` typeclass defined in `RawRest` object which represents a bidirectional polymorphic conversion between
-some an effect type constructor and `Async`. This means that you must provide implicit instance
+some effect type constructor and `Async`. This means that you must provide implicit instance
 of `AsyncEffect[Task]`.
 
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
