@@ -38,6 +38,7 @@ into your dependencies (e.g. UI related modules).
   - [Body parameter serialization](#body-parameter-serialization)
     - [Custom body serialization](#custom-body-serialization)
   - [Result serialization](#result-serialization)
+    - [Serialization implicits summary](#serialization-implicits-summary)
   - [Customizing serialization](#customizing-serialization)
     - [Introduction](#introduction)
     - [Plugging in entirely custom serialization](#plugging-in-entirely-custom-serialization)
@@ -630,15 +631,18 @@ of `R` into any of the following: `JsonValue`, `HttpBody`, `RestResponse` - depe
 you need. Also, remember that when using `DefaultRestApiCompanion`, `JsonValue` serialization is automatically
 derived from `GenCodec` instance.
 
-Below is a diagram that summarizes dependencies and defaults of implicits used to serialize results of HTTP REST methods.
-Each arrow `Raw <-> Real` indicates that macro engine searches for an implicit instance of `AsRaw[Raw, Real]` or
-`AsReal[Raw, Real]` depending on whether server or client code is being materialized.
-
-![REST implicits](images/REST.svg)
-
 Ultimately, if you don't want to use `Future`s, you may replace it with some other asynchronous wrapper type,
 e.g. Monix Task or some IO monad.
 See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
+
+#### Serialization implicits summary
+
+Below is a diagram that summarizes dependencies and defaults of implicits used to serialize parameters and results
+of HTTP REST methods. `AsRaw/AsReal[Raw, Real]` indicates that the macro engine searches for either `AsRaw[Raw, Real]`
+(for parameters on client side & results on server side) or `AsReal[Raw, Real]` (parameters on server side and
+results on client side).
+
+![REST implicits](images/REST.svg)
 
 ### Customizing serialization
 
