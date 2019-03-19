@@ -33,8 +33,7 @@ abstract class RestDataCompanion[T](implicit
 
 /**
   * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
-  * This companion ensures instances of [[com.avsystem.commons.serialization.GenCodec GenCodec]],
-  * [[com.avsystem.commons.serialization.GenKeyCodec GenKeyCodec]] and [[io.udash.rest.openapi.RestSchema RestSchema]],
+  * This companion ensures instances of `GenCodec`, `GenKeyCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]],
   * assuming that these instances are available for the wrapped type.
   *
   * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
