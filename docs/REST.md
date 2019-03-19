@@ -38,7 +38,7 @@ into your dependencies (e.g. UI related modules).
   - [Body parameter serialization](#body-parameter-serialization)
     - [Custom body serialization](#custom-body-serialization)
   - [Result serialization](#result-serialization)
-    - [Serialization implicits summary](#serialization-implicits-summary)
+  - [Serialization implicits summary](#serialization-implicits-summary)
   - [Customizing serialization](#customizing-serialization)
     - [Introduction](#introduction)
     - [Plugging in entirely custom serialization](#plugging-in-entirely-custom-serialization)
