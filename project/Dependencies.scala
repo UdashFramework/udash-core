@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.34.11"
+  val avsCommonsVersion = "1.34.12"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.4.32"
@@ -58,7 +58,7 @@ object Dependencies {
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
-  
+
   val utilsCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
   ))
@@ -93,7 +93,8 @@ object Dependencies {
   val rpcSjsDeps = rpcCrossDeps
 
   val rpcJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js" minified s"$atmosphereJSVersion/atmosphere-min.js"
+    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
+      minified s"$atmosphereJSVersion/atmosphere-min.js"
   ))
 
   private val restCrossDeps = Def.setting(Seq(
@@ -131,9 +132,12 @@ object Dependencies {
   ))
 
   val bootstrapJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js" minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
+      minified s"$jqueryVersion/jquery.min.js",
+    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js"
+      minified "bootstrap.min.js" dependsOn "jquery.js",
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js"
+      minified s"$momentJsVersion/min/moment-with-locales.min.js",
 
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion /
       s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
@@ -146,10 +150,14 @@ object Dependencies {
   ))
 
   val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js" minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js" minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js" minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
+      minified s"$jqueryVersion/jquery.min.js",
+    "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js"
+      minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js"
+      minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
+      minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
   ))
 
   val chartsSjsDeps = Def.setting(Seq(

@@ -9,7 +9,12 @@ import org.scalactic.source.Position
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
 
-case class User(id: String, name: String)
+case class UserId(id: String) extends AnyVal {
+  override def toString: String = id
+}
+object UserId extends RestDataWrapperCompanion[String, UserId]
+
+case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
 
 class omit[T](value: => T) extends AnnotationAggregate {
@@ -17,7 +22,7 @@ class omit[T](value: => T) extends AnnotationAggregate {
 }
 
 trait UserApi {
-  @GET def user(userId: String): Future[User]
+  @GET def user(userId: UserId): Future[User]
   @PUT def user(user: User): Future[Unit]
 
   @CustomBody
@@ -80,7 +85,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   class RootApiImpl(id: Int, query: String) extends RootApi with UserApi {
     def self: UserApi = this
     def subApi(newId: Int, newQuery: String): UserApi = new RootApiImpl(newId, query + newQuery)
-    def user(userId: String): Future[User] = Future.successful(User(userId, s"$userId-$id-$query"))
+    def user(userId: UserId): Future[User] = Future.successful(User(userId, s"$userId-$id-$query"))
     def user(user: User): Future[Unit] = Future.unit
     def user(paf: String, awesome: Boolean, f: Int, user: User): Future[Unit] = Future.unit
     def defaults(awesome: Boolean, foo: Int, kek: String): Future[Unit] = Future.unit
@@ -115,7 +120,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("simple GET") {
-    testRestCall(_.self.user("ID"),
+    testRestCall(_.self.user(UserId("ID")),
       """-> GET /user?userId=ID
         |<- 200 application/json
         |{"id":"ID","name":"ID-0-"}
@@ -124,7 +129,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("simple POST with path, header and query") {
-    testRestCall(_.self.user("paf", awesome = true, 42, User("ID", "Fred")),
+    testRestCall(_.self.user("paf", awesome = true, 42, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
         |application/json
@@ -168,7 +173,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("simple GET after prefix call") {
-    testRestCall(_.subApi(1, "query").user("ID"),
+    testRestCall(_.subApi(1, "query").user(UserId("ID")),
       """-> GET /subApi/1/user?query=query&userId=ID
         |<- 200 application/json
         |{"id":"ID","name":"ID-1-query"}
