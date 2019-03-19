@@ -189,6 +189,9 @@ REST framework relies heavily on annotations for customization. All annotations 
 the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. 
 To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
 
+The most important feature of annotation processing engine is an ability to create custom annotations which aggregate 
+a bunch of other annotations. This is the primary mechanism of code reuse for annotations.
+
 ## REST API traits
 
 As we saw in the quickstart example, REST API is defined by a Scala trait adjusted with annotations.
@@ -229,7 +232,8 @@ object MyApi extends DefaultRestApiCompanion[MyApi]
 materialize all the necessary typeclass instances mentioned earlier. The "`Default`" in its name means that
 `DefaultRestImplicits` is used as a provider of serialization-related implicits. This effectively plugs
 [`GenCodec`](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md) as the default serialization
-library. See [serialization](#serialization) for more details on customizing serialization.
+library and `Future` as the default asynchronous effect for method results. 
+See [serialization](#serialization) for more details on customizing serialization.
 
 `DefaultRestApiCompanion` provides all the implicit instances necessary for both the client and server.
 If you intend to use your API trait only on the server or only on the client, you may want to use more lightweight
@@ -238,9 +242,14 @@ generated code and make compilation faster.
 
 #### Manual declaration of implicits
 
-On less frequent occasions you might be unable to use one of the companion base classes. In such situations you must
-declare all the implicit instances manually (however, they will still be implemented with a macro).
-For example:
+On less frequent occasions you might be unable to use one of the companion base classes. This is usually necessary
+when macro materialization requires some additional implicits or when your API trait takes type parameters.
+The recommended way of dealing with this situation is to design your own version of base companion class specialized
+for your use case. For more details on how to do this, consult the Scaladoc of 
+[`MacroInstances`](https://github.com/AVSystem/scala-commons/blob/master/commons-core/src/main/scala/com/avsystem/commons/meta/MacroInstances.scala).
+
+Ultimately, you can resort to declaring all the implicit instances manually (however, they will still be implemented 
+with a macro). For example:
 
 ```scala
 import io.udash.rest._
@@ -258,8 +267,6 @@ object GenericApi {
   implicit def openApiMetadata[T: RestSchema]: OpenApiMetadata[GenericApi[T]] = OpenApiMetadata.materialize
 }
 ```
-
-This is usually necessary when the API trait is generic, like in the example above.
 
 ### HTTP REST methods
 
@@ -368,8 +375,7 @@ Calling `getUsername("ID")` will make a HTTP request on path `users/ID/name`.
 
 This way you can model completely arbitrary path patterns.
 
-Values of path parameters are serialized into `PathValue` objects. This means that the macro engine will look for
-implicit instances of `AsRaw[PathValue, T]` and `AsReal[PathValue, T]` for every path parameter of type `T`.
+Values of path parameters are serialized into `PlainValue` objects.
 See [serialization](#path-query-and-header-serialization) for more details.
 
 ### Query parameters
@@ -381,8 +387,7 @@ as query parameters by default, so this annotation is necessary only for paramet
 `@Query` annotation also takes optional `name` parameter which may be specified to customize
 URL parameter name. If not specified, trait method parameter name is used.
 
-Values of query parameters are serialized into `QueryValue` objects. This means that the macro engine will look for
-implicit instances of `AsRaw[QueryValue, T]` and `AsReal[QueryValue, T]` for every query parameter of type `T`.
+Values of query parameters are serialized into `PlainValue` objects. 
 See [serialization](#path-query-and-header-serialization) for more details.
 
 ### Header parameters
@@ -390,8 +395,7 @@ See [serialization](#path-query-and-header-serialization) for more details.
 You may also request that some parameter is translated into a HTTP header using `@Header` annotation.
 It takes an obligatory `name` argument that specifies HTTP header name (case insensitive).
 
-Values of header parameters are serialized into `HeaderValue` objects. This means that the macro engine will look for
-implicit instances of `AsRaw[HeaderValue, T]` and `AsReal[HeaderValue, T]` for every header parameter of type `T`.
+Values of header parameters are serialized into `PlainValue` objects.
 See [serialization](#path-query-and-header-serialization) for more details.
 
 ### Body parameters
@@ -400,15 +404,14 @@ Every parameter of an API trait method (except for `@GET`) is interpreted as a f
 HTTP body. Just like for path, query and header parameters, there is a `@Body` annotation which requests this 
 explicitly. However, the only reason to use it explicitly is in order to customize the name of JSON field.
 
-Body parameters are serialized into `JsonValue` objects. This means that the macro engine will look for
-implicit instances of `AsRaw[JsonValue, T]` and `AsReal[JsonValue, T]` for every path parameter of type `T`.
-See [serialization](#path-query-and-header-serialization) for more details.
+Body parameters are serialized into `JsonValue` objects.
+See [serialization](#body-parameter-serialization) for more details.
 
 #### `@FormBody`
 
 Non-`GET` methods may be annotated with `@FormBody`. This changes serialization of body parameters
 from JSON object to HTTP form, encoded as `application/x-www-form-urlencoded`. Each body parameter
-is then serialized into `QueryValue` rather than `JsonValue`.
+is then serialized into `PlainValue` rather than `JsonValue`.
 
 #### `@CustomBody`
 
@@ -468,7 +471,7 @@ object RootApi extends DefaultRestApiCompanion[RootApi]
 
 ### Default parameter values
 
-`@Query`, `@Header` and `@BodyField` parameters may accept a default value which
+`@Query`, `@Header` and `@Body` parameters may accept a default value which
 is picked up by REST framework macro engine and used as fallback value when actual value
 is missing in the HTTP request. This is useful primarily for [API evolution](#api-evolution) -
 it lets you add more parameters to your REST methods without breaking backwards compatibility
@@ -538,8 +541,8 @@ Any of these solutions can be plugged into REST framework.
 Depending on the context where a type is used in a REST API trait, it will be serialized to a different
 _raw value_:
 
-* path/query/header parameters are serialized as `PathValue`/`QueryValue`/`HeaderValue`
-* body parameters are serialized as `JsonValue` (by default), `QueryValue` (for [`@FormBody`](#formbody) methods)
+* path/query/header parameters are serialized as `PlainValue`
+* body parameters are serialized as `JsonValue` (by default), `PlainValue` (for [`@FormBody`](#formbody) methods)
   or directly as `HttpBody` (for [`@CustomBody`](#custombody) methods).
 * Response types are serialized as `RestResponse`
 * Prefix result types (other REST API traits) are "serialized" as `RawRest`
@@ -560,18 +563,18 @@ These implicit instances may come from multiple sources:
 Of course, these implicits may also depend on other implicits which effectively means that
 you can use whatever typeclass-based serialization library you want.
 For example, you can define an instance of `AsRaw[JsonValue, Real]` which actually uses
-`Encoder[Real]` from [circe](https://circe.github.io/circe/). See [Customizing serialization](#customizing-serialization)
-for more details.
+`Encoder[Real]` from [circe](https://circe.github.io/circe/). 
+See [Customizing serialization](#customizing-serialization) for more details.
 
 ### Path, query and header serialization
 
-Path, query and header parameter values are serialized into `PathValue`/`QueryValue`/`HeaderValue`.
-These three classes are all simple `String` wrappers. Thanks to the fact that they are distinct types,
-you can have completely different serialization defined for each one of them if you need.
+Path, query and header parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
+This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `Real[PlainValue, T]` for 
+every parameter of type `T` (`AsRaw` for the client, `AsReal` for the server).
 
-There are no "global" implicits defined for these raw types. They must be either imported, defined by each
+There are no "global" implicits defined for `PlainValue`. They must be either imported, defined by each
 "real" type or plugged in by REST API trait companion. For example, the `DefaultRestApiCompanion` and its
-variations automatically provide serialization to `PathValue`/`QueryValue`/`HeaderValue` based on `GenKeyCodec`
+variations automatically provide serialization to `PlainValue` based on `GenKeyCodec`
 and additional instances for `Float` and `Double`. This effectively provides serialization for all the
 primitive types, its Java boxed counterparts, `String`, all `NamedEnum`s, Java enums and `Timestamp`.
 It's also easy to provide path/query/header serialization for any type which has a natural, unambiguous textual
@@ -583,10 +586,10 @@ HTTP requests. This means that serialization should not worry about that.
 ### Body parameter serialization
 
 Body parameters are by default serialized into `JsonValue` which is also a simple wrapper class over `String`,
-but is importantly distinct from `PathValue`/`QueryValue`/`HeaderValue` because it must always contain
-a valid JSON string. This is required because JSON body parameters are ultimately composed into a single
-JSON object sent as HTTP body. If a method is annotated with [`@FormBody`](#formbody), body parameters are serialized into
-`QueryValue` and combined into an URL-encoded form.
+but is importantly distinct from `PlainValue` because it must always contain a valid JSON string. 
+This is required because JSON body parameters are ultimately composed into a single
+JSON object sent as HTTP body. If a method is annotated with [`@FormBody`](#formbody), body parameters are 
+serialized into `PlainValue` and combined into an URL-encoded form.
 
 There are no "global" implicits defined for `JsonValue` - JSON serialization must be either imported,
 defined by each "real" type manually or plugged in by REST API trait companion. For example,
@@ -801,7 +804,7 @@ REST API then you must also provide an implicit instance of `RestResultType` whi
 understand that `Task[T]` is a valid method result type and that `T` is the actual result data type whose schema will 
 be used in OpenAPI response description.
 
-Udash repository contains an [example implementation of Monix Task support in its test sources](https://github.com/UdashFramework/udash-core/blob/master/rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
+Udash repository contains an [example implementation of Monix Task support in its test sources](../rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
 
 ## API evolution
 
@@ -816,7 +819,7 @@ that still use the old version:
 * Splitting parameters into multiple parameter lists or making them `implicit`.
 * Renaming `@Path` parameters - their names are not used in REST requests
 * Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
-  `@Query`, `@Header` or `@BodyField` annotation.
+  `@Query`, `@Header` or `@Body` annotation.
 * Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
 * Adding new non-`@Path` parameters, as long as default value is provided for them - either as
   Scala-level default parameter value or by using `@whenAbsent` annotation. The server will simply
@@ -1112,7 +1115,7 @@ and can be applied on:
 
 * data types with macro-generated `RestSchema`
 * case class fields of data types with macro generated `RestSchema`
-* `@BodyField` and `@Body` parameters of REST methods
+* `@Body` parameters of REST methods
 
 Schema adjusters do **NOT** work on path/header/query parameters and REST methods
 themselves. Instead use [parameter adjusters](#adjusting-parameters) and
@@ -1155,8 +1158,5 @@ it will apply to all Path Item Objects associated with result of this prefix met
 
 ### Limitations
 
-* It's not possible to use boolean values for `additionalProperties` field in Schema objects.
-* Scala-level default values of method parameters are not included in the OpenAPI Schema objects.
-  You need to use `@whenAbsent` annotation instead.
 * Current representation of OpenAPI document does not support
 [specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#specificationExtensions).
