@@ -4,8 +4,8 @@ package rest.openapi
 import com.avsystem.commons._
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{GenCodec, name, transparent}
-import io.udash.rest.RestDataCompanion
 import io.udash.rest.openapi.adjusters.description
+import io.udash.rest.{PolyRestDataCompanion, RestDataCompanion}
 import org.scalatest.FunSuite
 
 class Fuu[T](thing: T)
@@ -72,12 +72,28 @@ class RestSchemaTest extends FunSuite {
         |}""".stripMargin)
   }
 
+  case class PlainGenericCC[+T](thing: T)
+  object PlainGenericCC extends PolyRestDataCompanion[PlainGenericCC]
+
+  test("generic case class") {
+    assert(schemaStr[PlainGenericCC[String]] ==
+      """{
+        |  "type": "object",
+        |  "properties": {
+        |    "thing": {
+        |      "type": "string"
+        |    }
+        |  },
+        |  "required": [
+        |    "thing"
+        |  ]
+        |}""".stripMargin)
+  }
+
   case class GenCC[+T >: Null](@customWa[T](null) value: T)
   object GenCC extends RestDataCompanion[GenCC[String]]
 
-  test("generic case class") {
-    println(GenCC.restStructure.asInstanceOf[RestStructure.Record[_]].fields.head.fallbackValue)
-
+  test("generic case class with with annotation") {
     assert(schemaStr[GenCC[String]] ==
       """{
         |  "type": "object",
