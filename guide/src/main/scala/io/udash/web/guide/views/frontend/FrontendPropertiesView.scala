@@ -6,15 +6,13 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-
 import scalatags.JsDom
 
 case object FrontendPropertiesViewFactory extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
 class FrontendPropertiesView extends FinalView with CssView {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
+  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = div(
     h2("Property - the Udash Data Model"),
@@ -155,7 +153,7 @@ class FrontendPropertiesView extends FinalView with CssView {
       i("io.udash.seq.SeqProperty"), " and provide the second generic argument to specify element type."
     ),
     p(
-      i("SeqProperty"), " may be created from any value of subtype of ", i("scala.collection.Seq"), ". ",
+      i("SeqProperty"), " may be created from any ", i("scala.collection.Seq"), ". ",
       "Note that due to, ", i("SeqProperty"), "'s mutable nature, there may be a performance overhead when calling ", i("subSeq"),
       " on fields of type more specific than ", i("scala.collection.Seq"), " (e.g. ",
       i("scala.collection.immutable.List"), " or ", i("scala.collection.immutable.Seq"),
