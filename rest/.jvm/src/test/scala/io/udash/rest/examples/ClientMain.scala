@@ -11,16 +11,16 @@ import scala.util.{Failure, Success}
 object ClientMain {
   def main(args: Array[String]): Unit = {
     implicit val sttpBackend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
-    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
+    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090")
 
     // make a remote REST call
-    val result: Future[Unit] = proxy.createUser(User("fred", "Fred"))
+    val result: Future[User] = proxy.createUser("Fred")
 
     // use whatever execution context is appropriate
     import scala.concurrent.ExecutionContext.Implicits.global
 
     result.onComplete {
-      case Success(()) => println(s"User created")
+      case Success(user) => println(s"User $user created")
       case Failure(cause) => cause.printStackTrace()
     }
 

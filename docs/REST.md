@@ -117,13 +117,12 @@ object ServerMain {
   def main(args: Array[String]): Unit = {
     val server = new Server(9090)
     val handler = new ServletContextHandler
-    handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/")
+    handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/*")
     server.setHandler(handler)
     server.start()
     server.join()
   }
 }
-
 ```
 
 Finally, obtain a client proxy for your API using STTP and make a call:
