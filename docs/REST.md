@@ -635,7 +635,7 @@ Ultimately, if you don't want to use `Future`s, you may replace it with some oth
 e.g. Monix Task or some IO monad.
 See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
 
-#### Serialization implicits summary
+### Serialization implicits summary
 
 Below is a diagram that summarizes dependencies and defaults of implicits used to serialize parameters and results
 of HTTP REST methods. `AsRaw/AsReal[Raw, Real]` indicates that the macro engine searches for either `AsRaw[Raw, Real]`
