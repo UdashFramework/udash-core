@@ -14,13 +14,13 @@ object ClientMain {
     val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
 
     // make a remote REST call
-    val result: Future[User] = proxy.createUser("Fred", 1990)
+    val result: Future[Unit] = proxy.createUser(User("fred", "Fred"))
 
     // use whatever execution context is appropriate
     import scala.concurrent.ExecutionContext.Implicits.global
 
     result.onComplete {
-      case Success(user) => println(s"User ${user.id} created")
+      case Success(()) => println(s"User created")
       case Failure(cause) => cause.printStackTrace()
     }
 

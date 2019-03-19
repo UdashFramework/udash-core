@@ -8,8 +8,7 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import scala.concurrent.Future
 
 class UserApiImpl extends UserApi {
-  def createUser(name: String, birthYear: Int): Future[User] =
-    Future.successful(User(s"$name-ID", name, birthYear))
+  def createUser(user: User): Future[Unit] = Future.unit
 }
 
 object ServerMain {
