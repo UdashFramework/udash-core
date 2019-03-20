@@ -2,7 +2,6 @@ package io.udash.web.commons.views
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.Element
-
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scalatags.generic.Namespace
@@ -16,7 +15,7 @@ object ImageFactoryPrefixSet {
 
 object ClickableImageFactory {
   def apply(prefix: ImageFactoryPrefix, name: String, altText: String, xs: Modifier*): JsDom.TypedTag[dom.html.Anchor] =
-    a(href := "/" + prefix.value + "/" + name, target := "_blank", xs)(
+    a(href := prefix.value + "/" + name, target := "_blank", rel := "external", xs)(
       (new ImageFactory(prefix.value))(name, altText)
     )
 }
