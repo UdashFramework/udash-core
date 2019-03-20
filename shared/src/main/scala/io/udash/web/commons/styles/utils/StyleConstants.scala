@@ -9,7 +9,7 @@ object StyleConstants extends CssBase {
     * SIZES
     */
   object Sizes {
-    val BodyWidth = 1075
+    val BodyPaddingPx = 30
     val MinSiteHeight = 550
     val LandingPageHeaderHeight = 150
     val HeaderHeight = 80
@@ -39,7 +39,7 @@ object StyleConstants extends CssBase {
     * MEDIA QUERIES
     */
   object MediaQueriesBounds {
-    val TabletLandscapeMax = Sizes.BodyWidth - 1
+    val TabletLandscapeMax = 1074
     val TabletLandscapeMin = 768
     val TabletMax = TabletLandscapeMin - 1
     val TabletMin = 481

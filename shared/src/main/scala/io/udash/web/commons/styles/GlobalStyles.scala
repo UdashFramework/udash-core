@@ -28,7 +28,7 @@ object GlobalStyles extends CssBase {
 
   val body = style(
     position.relative,
-    width(StyleConstants.Sizes.BodyWidth px),
+    padding(StyleConstants.Sizes.BodyPaddingPx px),
     height(100 %%),
     margin(0 px, auto),
 
