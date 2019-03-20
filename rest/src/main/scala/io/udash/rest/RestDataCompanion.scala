@@ -2,9 +2,8 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
-import com.avsystem.commons.misc.AnnotationsOf
-import com.avsystem.commons.serialization.{GenCodec, SerializationName, TransparentWrapperCompanion}
-import io.udash.rest.openapi.adjusters.SchemaAdjuster
+import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
+import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.openapi.{RestSchema, RestStructure}
 
 trait CodecWithStructure[T] {
@@ -46,9 +45,8 @@ abstract class RestDataCompanion[T](implicit
   * }}}
   */
 abstract class RestDataWrapperCompanion[Wrapped, T](implicit
-  sname: SerializationName[T],
-  adjusters: AnnotationsOf[SchemaAdjuster, T]
+  nameAndAdjusters: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
 ) extends TransparentWrapperCompanion[Wrapped, T] {
   implicit def restSchema(implicit wrappedSchema: RestSchema[Wrapped]): RestSchema[T] =
-    RestSchema.create(r => SchemaAdjuster.adjustRef(adjusters.annots, r.resolve(wrappedSchema)), sname.name)
+    nameAndAdjusters(DefaultRestImplicits, this).apply().restSchema(wrappedSchema)
 }

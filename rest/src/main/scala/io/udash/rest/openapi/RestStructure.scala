@@ -167,4 +167,16 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     val fallbackValue: Opt[JsonValue] =
       Try(defaultValue.value).toOpt.map(asJson.asRaw)
   }
+
+  case class NameAndAdjusters[T](
+    @reifyName sourceName: String,
+    @optional @reifyAnnot annotName: Opt[name],
+    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+  ) extends TypedMetadata[T] {
+    def restSchema(wrappedSchema: RestSchema[_]): RestSchema[T] = RestSchema.create(
+      r => SchemaAdjuster.adjustRef(schemaAdjusters, r.resolve(wrappedSchema)),
+      annotName.fold(sourceName)(_.name)
+    )
+  }
+  object NameAndAdjusters extends AdtMetadataCompanion[NameAndAdjusters]
 }
