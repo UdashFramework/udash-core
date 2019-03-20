@@ -1,7 +1,9 @@
 package io.udash
 package rest
 
+import com.avsystem.commons._
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
+import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
 import io.udash.rest.raw._
 
@@ -81,7 +83,7 @@ sealed abstract class BodyMethodTag(method: HttpMethod) extends HttpMethodTag(me
 
 /**
   * REST method annotated with `@GET` will translate to HTTP GET request. By default, parameters of such method
-  * are translated into URL query parameters (encoded as [[io.udash.rest.raw.QueryValue QueryValue]]).
+  * are translated into URL query parameters (encoded as [[io.udash.rest.raw.PlainValue PlainValue]]).
   * Alternatively, each parameter may be annotated with [[io.udash.rest.Path Path]] or [[io.udash.rest.Header Header]]
   * which means that it will be translated into HTTP header value.
   *
@@ -138,7 +140,7 @@ class JsonBody extends SomeBodyTag
 /**
   * Causes the [[io.udash.rest.Body Body]] parameters of a HTTP REST method to be encoded as
   * `application/x-www-form-urlencoded`. Each parameter value itself will be first serialized to
-  * [[io.udash.rest.raw.QueryValue QueryValue]].
+  * [[io.udash.rest.raw.PlainValue PlainValue]].
   * This annotation only applies to methods which may include HTTP body (i.e. not [[io.udash.rest.GET GET]]).
   */
 class FormBody extends SomeBodyTag
@@ -156,7 +158,7 @@ class CustomBody extends SomeBodyTag
   * parameters.
   *
   * By default, parameters of a prefix method are interpreted as URL path fragments. Their values are encoded as
-  * [[io.udash.rest.raw.PathValue PathValue]] and appended to URL path. Alternatively, each parameter may also be
+  * [[io.udash.rest.raw.PlainValue PlainValue]] and appended to URL path. Alternatively, each parameter may also be
   * explicitly annotated with [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
   *
   * NOTE: REST method is interpreted as prefix method by default which means that there is no need to apply
@@ -192,7 +194,7 @@ sealed trait NonBodyTag extends RestParamTag {
 
 /**
   * REST method parameters annotated with [[io.udash.rest.Path Path]] will be encoded as
-  * [[io.udash.rest.raw.PathValue PathValue]] and appended to URL path, in the declaration order.
+  * [[io.udash.rest.raw.PlainValue PlainValue]] and appended to URL path, in the declaration order.
   * Parameters of [[io.udash.rest.Prefix Prefix]] REST methods are interpreted as [[io.udash.rest.Path Path]]
   * parameters by default.
   */
@@ -200,7 +202,7 @@ class Path(val pathSuffix: String = "") extends NonBodyTag
 
 /**
   * REST method parameters annotated with [[io.udash.rest.Header Header]] will be encoded as
-  * [[io.udash.rest.raw.HeaderValue HeaderValue]] and added to HTTP headers.
+  * [[io.udash.rest.raw.PlainValue PlainValue]] and added to HTTP headers.
   * Header name must be explicitly given as argument of this annotation.
   */
 class Header(override val name: String)
@@ -208,7 +210,7 @@ class Header(override val name: String)
 
 /**
   * REST method parameters annotated with [[io.udash.rest.Query Query]] will be encoded as
-  * [[io.udash.rest.raw.QueryValue QueryValue]] and added to URL query parameters.
+  * [[io.udash.rest.raw.PlainValue PlainValue]] and added to URL query parameters.
   * Parameters of [[io.udash.rest.GET GET]] REST methods are interpreted as [[io.udash.rest.Query Query]]
   * parameters by default.
   */
@@ -229,3 +231,51 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   */
 class Body(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with RestParamTag
+
+/**
+  * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+  * in order to customize outgoing request on the client side.
+  */
+trait RequestAdjuster extends RealSymAnnotation {
+  def adjustRequest(request: RestRequest): RestRequest
+}
+
+/**
+  * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+  * in order to customize outgoing response on the server side.
+  */
+trait ResponseAdjuster extends RealSymAnnotation {
+  def adjustResponse(response: RestResponse): RestResponse
+}
+
+/**
+  * Convenience implementation of [[RequestAdjuster]].
+  */
+class adjustRequest(f: RestRequest => RestRequest) extends RequestAdjuster {
+  def adjustRequest(request: RestRequest): RestRequest = f(request)
+}
+
+/**
+  * Convenience implementation of [[ResponseAdjuster]].
+  */
+class adjustResponse(f: RestResponse => RestResponse) extends ResponseAdjuster {
+  def adjustResponse(response: RestResponse): RestResponse = f(response)
+}
+
+/**
+  * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
+  * HTTP header to all outgoing requests generated for invocations of that method on the client side.
+  */
+class addRequestHeader(name: String, value: String) extends RequestAdjuster {
+  def adjustRequest(request: RestRequest): RestRequest =
+    request |> (r => r.copy(parameters = r.parameters |> (p => p.copy(headers = p.headers.append(name, PlainValue(value))))))
+}
+
+/**
+  * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
+  * HTTP header to all outgoing responses generated for invocations of that method on the server side.
+  */
+class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
+  def adjustResponse(response: RestResponse): RestResponse =
+    response |> (r => r.copy(headers = r.headers.append(name, PlainValue(value))))
+}

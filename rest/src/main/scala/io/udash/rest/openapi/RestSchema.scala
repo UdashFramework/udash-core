@@ -6,6 +6,7 @@ import java.util.UUID
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
 import io.udash.rest.openapi.adjusters.SchemaAdjuster
+import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
@@ -142,7 +143,7 @@ object RestSchema {
   * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a given type.
   * By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
   */
-@implicitNotFound("RestResponses for ${T} not found")
+@implicitNotFound("RestResponses instance for ${T} not found")
 case class RestResponses[T](responses: SchemaResolver => Responses)
 object RestResponses {
   def apply[T](implicit r: RestResponses[T]): RestResponses[T] = r
@@ -185,10 +186,18 @@ object RestResponses {
   */
 case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
+  implicit def forAsyncEffect[F[_] : AsyncEffect, T: RestResponses]: RestResultType[F[T]] =
+    RestResultType(RestResponses[T].responses)
+
   @implicitNotFound("#{forResponseType}")
   implicit def notFound[T](
     implicit forResponseType: ImplicitNotFound[HttpResponseType[T]]
   ): ImplicitNotFound[RestResultType[T]] = ImplicitNotFound()
+
+  @implicitNotFound("#{forRestResponses}")
+  implicit def notFoundForAsyncEffect[F[_] : AsyncEffect, T](
+    implicit forRestResponses: ImplicitNotFound[RestResponses[T]]
+  ): ImplicitNotFound[RestResultType[F[T]]] = ImplicitNotFound()
 }
 
 @implicitNotFound("RestRequestBody instance for ${T} not found")

@@ -56,7 +56,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
         | * it cannot be translated into a prefix method:
         |   Unit is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
         | * it cannot be translated into a HTTP method:
-        |   Unit is not a valid HTTP method result type - it must be a Future""".stripMargin)
+        |   Unit is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
   trait UnexpectedPrefixBodyParam {
@@ -71,7 +71,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
         | * it cannot be translated into a prefix method:
         |   prefix methods cannot take @Body parameters
         | * it cannot be translated into a HTTP method:
-        |   CompilationErrorsTest.this.SubApi is not a valid HTTP method result type - it must be a Future""".stripMargin)
+        |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
   trait UnexpectedGETBodyParam {

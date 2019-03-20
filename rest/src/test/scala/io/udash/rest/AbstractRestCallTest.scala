@@ -41,7 +41,7 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
   }
 
   test("single body PUT") {
-    testCall(_.singleBodyPut(RestEntity("id", "señor")))
+    testCall(_.singleBodyPut(RestEntity(RestEntityId("id"), "señor")))
   }
 
   test("form POST") {

@@ -221,6 +221,34 @@ class OpenApiGenerationTest extends FunSuite {
         |        }
         |      }
         |    },
+        |    "/getEntity": {
+        |      "get": {
+        |        "operationId": "getEntity",
+        |        "parameters": [
+        |          {
+        |            "name": "id",
+        |            "in": "query",
+        |            "required": true,
+        |            "explode": false,
+        |            "schema": {
+        |              "$ref": "#/components/schemas/RestEntityId"
+        |            }
+        |          }
+        |        ],
+        |        "responses": {
+        |          "200": {
+        |            "description": "Success",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "$ref": "#/components/schemas/RestEntity"
+        |                }
+        |              }
+        |            }
+        |          }
+        |        }
+        |      }
+        |    },
         |    "/moreFailingGet": {
         |      "get": {
         |        "operationId": "moreFailingGet",
@@ -574,8 +602,12 @@ class OpenApiGenerationTest extends FunSuite {
         |        "description": "REST entity",
         |        "properties": {
         |          "id": {
-        |            "type": "string",
-        |            "description": "entity id"
+        |            "description": "entity id",
+        |            "allOf": [
+        |              {
+        |                "$ref": "#/components/schemas/RestEntityId"
+        |              }
+        |            ]
         |          },
         |          "name": {
         |            "type": "string",
@@ -595,6 +627,10 @@ class OpenApiGenerationTest extends FunSuite {
         |        "required": [
         |          "id"
         |        ]
+        |      },
+        |      "RestEntityId": {
+        |        "type": "string",
+        |        "description": "Entity identifier"
         |      },
         |      "RestOtherEntity": {
         |        "type": "object",

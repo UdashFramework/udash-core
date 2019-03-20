@@ -5,11 +5,10 @@ import io.udash.rest._
 
 import scala.concurrent.Future
 
-case class User(id: String, name: String, birthYear: Int)
+case class User(id: Long, name: String)
 object User extends RestDataCompanion[User]
 
 trait UserApi {
-  /** Returns newly created user */
-  def createUser(name: String, birthYear: Int): Future[User]
+  def createUser(name: String): Future[User]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]

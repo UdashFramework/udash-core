@@ -3,7 +3,7 @@ package rest.openapi
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.positioned
-import com.avsystem.commons.meta._
+import com.avsystem.commons.meta.{Mapping => _, _}
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.AsRaw
 import com.avsystem.commons.serialization._
@@ -35,14 +35,14 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
         if (caseFieldOpt.nonEmpty) baseSchema
         else RefOr(Schema(
           `type` = DataType.Object,
-          properties = Mapping(c.info.rawName -> baseSchema),
+          properties = IListMap(c.info.rawName -> baseSchema),
           required = List(c.info.rawName)
         ))
       }
       val disc = caseFieldOpt.map { caseFieldName =>
-        val mapping = Mapping((cases zip caseSchemas).collect {
+        val mapping = IListMap((cases zip caseSchemas).collect {
           case (c, RefOr.Ref(ref)) => (c.info.rawName, ref)
-        })
+        }: _*)
         Discriminator(caseFieldName, mapping)
       }
       RefOr(applyAdjusters(Schema(
@@ -80,7 +80,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
           )
           case ref => Schema(allOf = List(RefOr(Schema(
             `type` = DataType.Object,
-            properties = Mapping(cfn -> caseFieldSchema),
+            properties = IListMap(cfn -> caseFieldSchema),
             required = List(cfn)
           )), ref))
         }, taggedName)
@@ -112,7 +112,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
           val required = caseFieldName.iterator ++
             fields.iterator.filterNot(_.hasFallbackValue).map(_.info.rawName)
           RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-            properties = Mapping(props.toList),
+            properties = IListMap(props.toList: _*),
             required = required.toList
           )))
       }
@@ -136,7 +136,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
 
     def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
       RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-        properties = Mapping(caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).toList),
+        properties = IListMap(caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).toList: _*),
         required = caseFieldName.toList
       )))
   }
@@ -167,4 +167,16 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     val fallbackValue: Opt[JsonValue] =
       Try(defaultValue.value).toOpt.map(asJson.asRaw)
   }
+
+  case class NameAndAdjusters[T](
+    @reifyName sourceName: String,
+    @optional @reifyAnnot annotName: Opt[name],
+    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+  ) extends TypedMetadata[T] {
+    def restSchema(wrappedSchema: RestSchema[_]): RestSchema[T] = RestSchema.create(
+      r => SchemaAdjuster.adjustRef(schemaAdjusters, r.resolve(wrappedSchema)),
+      annotName.fold(sourceName)(_.name)
+    )
+  }
+  object NameAndAdjusters extends AdtMetadataCompanion[NameAndAdjusters]
 }

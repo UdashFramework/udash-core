@@ -18,45 +18,30 @@ sealed trait RestValue extends Any {
   def value: String
 }
 
-/**
-  * Value used as encoding of [[io.udash.rest.Path Path]] parameters.
-  */
-case class PathValue(value: String) extends AnyVal with RestValue
-object PathValue extends (String => PathValue) {
-  def splitDecode(path: String): List[PathValue] =
-    path.split("/").iterator.map(s => PathValue(URLEncoder.decode(s, plusAsSpace = false))).toList match {
-      case PathValue("") :: tail => tail
+case class PlainValue(value: String) extends AnyVal with RestValue
+object PlainValue extends (String => PlainValue) {
+  def decodePath(path: String): List[PlainValue] =
+    path.split("/").iterator.map(s => PlainValue(URLEncoder.decode(s, plusAsSpace = false))).toList match {
+      case PlainValue("") :: tail => tail
       case res => res
     }
 
-  def encodeJoin(path: List[PathValue]): String =
+  def encodePath(path: List[PlainValue]): String =
     path.iterator.map(pv => URLEncoder.encode(pv.value, spaceAsPlus = false)).mkString("/", "/", "")
-}
 
-/**
-  * Value used as encoding of [[io.udash.rest.Header Header]] parameters.
-  */
-case class HeaderValue(value: String) extends AnyVal with RestValue
-
-/**
-  * Value used as encoding of [[io.udash.rest.Query Query]] parameters and [[io.udash.rest.Body Body]] parameters of
-  * [[io.udash.rest.FormBody FormBody]] methods.
-  */
-case class QueryValue(value: String) extends AnyVal with RestValue
-object QueryValue extends (String => QueryValue) {
   final val FormKVSep = "="
   final val FormKVPairSep = "&"
 
-  def encode(query: Mapping[QueryValue]): String =
-    query.iterator.map { case (name, QueryValue(value)) =>
+  def encodeQuery(query: Mapping[PlainValue]): String =
+    query.entries.iterator.map { case (name, PlainValue(value)) =>
       s"${URLEncoder.encode(name, spaceAsPlus = true)}$FormKVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
     }.mkString(FormKVPairSep)
 
-  def decode(queryString: String): Mapping[QueryValue] = {
-    val builder = Mapping.newBuilder[QueryValue]()
+  def decodeQuery(queryString: String): Mapping[PlainValue] = {
+    val builder = Mapping.newBuilder[PlainValue]
     queryString.split(FormKVPairSep).iterator.filter(_.nonEmpty).map(_.split(FormKVSep, 2)).foreach {
       case Array(name, value) => builder +=
-        URLEncoder.decode(name, plusAsSpace = true) -> QueryValue(URLEncoder.decode(value, plusAsSpace = true))
+        URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
       case _ => throw new IllegalArgumentException(s"invalid query string $queryString")
     }
     builder.result()
@@ -69,7 +54,7 @@ object QueryValue extends (String => QueryValue) {
   * Wrapped value MUST be a valid JSON.
   */
 case class JsonValue(value: String) extends AnyVal with RestValue
-object JsonValue {
+object JsonValue extends (String => JsonValue) {
   implicit val codec: GenCodec[JsonValue] = GenCodec.create(
     i => JsonValue(i.readCustom(RawJson).getOrElse(i.readSimple().readString())),
     (o, v) => if (!o.writeCustom(RawJson, v.value)) o.writeSimple().writeString(v.value)
@@ -122,7 +107,7 @@ sealed trait HttpBody {
   }
 
   final def defaultResponse: RestResponse =
-    RestResponse(defaultStatus, Mapping.empty, this)
+    RestResponse(defaultStatus, IMapping.empty, this)
 }
 object HttpBody {
   case object Empty extends HttpBody
@@ -147,19 +132,19 @@ object HttpBody {
 
   def json(json: JsonValue): HttpBody = HttpBody(json.value, JsonType)
 
-  def createFormBody(values: Mapping[QueryValue]): HttpBody =
-    if (values.isEmpty) HttpBody.Empty else HttpBody(QueryValue.encode(values), FormType)
+  def createFormBody(values: Mapping[PlainValue]): HttpBody =
+    if (values.isEmpty) HttpBody.Empty else HttpBody(PlainValue.encodeQuery(values), FormType)
 
-  def parseFormBody(body: HttpBody): Mapping[QueryValue] = body match {
-    case HttpBody.Empty => Mapping.empty
-    case _ => QueryValue.decode(body.readForm())
+  def parseFormBody(body: HttpBody): Mapping[PlainValue] = body match {
+    case HttpBody.Empty => Mapping.empty[PlainValue]
+    case _ => PlainValue.decodeQuery(body.readForm())
   }
 
   def createJsonBody(fields: Mapping[JsonValue]): HttpBody =
     if (fields.isEmpty) HttpBody.Empty else {
       val sb = new JStringBuilder
       val oo = new JsonStringOutput(sb).writeObject()
-      fields.foreach {
+      fields.entries.foreach {
         case (key, JsonValue(json)) =>
           oo.writeField(key).writeRawJson(json)
       }
@@ -171,7 +156,7 @@ object HttpBody {
     case HttpBody.Empty => Mapping.empty
     case _ =>
       val oi = new JsonStringInput(new JsonReader(body.readJson().value)).readObject()
-      val builder = Mapping.newBuilder[JsonValue]()
+      val builder = Mapping.newBuilder[JsonValue]
       while (oi.hasNext) {
         val fi = oi.nextField()
         builder += ((fi.fieldName, JsonValue(fi.readRawJson())))
@@ -206,9 +191,9 @@ object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
 }
 
 case class RestParameters(
-  @multi @tagged[Path] path: List[PathValue] = Nil,
-  @multi @tagged[Header] headers: Mapping[HeaderValue] = Mapping.empty,
-  @multi @tagged[Query] query: Mapping[QueryValue] = Mapping.empty
+  @multi @tagged[Path] path: List[PlainValue] = Nil,
+  @multi @tagged[Header] headers: IMapping[PlainValue] = IMapping.empty,
+  @multi @tagged[Query] query: Mapping[PlainValue] = Mapping.empty
 ) {
   def append(method: RestMethodMetadata[_], otherParameters: RestParameters): RestParameters =
     RestParameters(
@@ -227,7 +212,7 @@ case class HttpErrorException(code: Int, payload: OptArg[String] = OptArg.Empty,
 }
 
 case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody)
-case class RestResponse(code: Int, headers: Mapping[HeaderValue], body: HttpBody) {
+case class RestResponse(code: Int, headers: IMapping[PlainValue], body: HttpBody) {
   def toHttpError: HttpErrorException =
     HttpErrorException(code, body.contentOpt.toOptArg)
   def ensureNonError: RestResponse =
@@ -236,7 +221,7 @@ case class RestResponse(code: Int, headers: Mapping[HeaderValue], body: HttpBody
 
 object RestResponse {
   def plain(status: Int, message: OptArg[String] = OptArg.Empty): RestResponse =
-    RestResponse(status, Mapping.empty, HttpBody.plain(message))
+    RestResponse(status, IMapping.empty, HttpBody.plain(message))
 
   class LazyOps(private val resp: () => RestResponse) extends AnyVal {
     def recoverHttpError: RestResponse = try resp() catch {
@@ -260,16 +245,16 @@ object RestResponse {
     AsRaw.create(value => bodyAsRaw.asRaw(value).defaultResponse.recoverHttpError)
 
   implicit def effectFromAsyncResp[F[_], T](
-    implicit fromAsync: RawRest.FromAsync[F], asResponse: AsReal[RestResponse, T]
+    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsReal[RestResponse, T]
   ): AsReal[RawRest.Async[RestResponse], Try[F[T]]] =
-    AsReal.create(async => Success(fromAsync.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
+    AsReal.create(async => Success(asyncEff.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
 
   implicit def effectToAsyncResp[F[_], T](
-    implicit toAsync: RawRest.ToAsync[F], asResponse: AsRaw[RestResponse, T]
+    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsRaw[RestResponse, T]
   ): AsRaw[RawRest.Async[RestResponse], Try[F[T]]] =
     AsRaw.create(_.fold(
       RawRest.failingAsync,
-      ft => RawRest.mapAsync(toAsync.toAsync(ft))(asResponse.asRaw)
+      ft => RawRest.mapAsync(asyncEff.toAsync(ft))(asResponse.asRaw)
     ).recoverHttpError)
 
   // following two implicits forward implicit-not-found error messages for HttpBody as error messages for RestResponse
@@ -289,13 +274,13 @@ object RestResponse {
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: RawRest.FromAsync[F],
+    fromAsync: RawRest.AsyncEffect[F],
     forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
   ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: RawRest.ToAsync[F],
+    toAsync: RawRest.AsyncEffect[F],
     forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
   ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 

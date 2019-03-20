@@ -2,7 +2,8 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
-import com.avsystem.commons.serialization.GenCodec
+import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
+import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.openapi.{RestSchema, RestStructure}
 
 trait CodecWithStructure[T] {
@@ -27,4 +28,25 @@ abstract class RestDataCompanion[T](implicit
   implicit lazy val codec: GenCodec[T] = instances(DefaultRestImplicits, this).codec
   implicit lazy val restStructure: RestStructure[T] = instances(DefaultRestImplicits, this).structure
   implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
+}
+
+/**
+  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
+  * This companion ensures instances of `GenCodec`, `GenKeyCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]],
+  * assuming that these instances are available for the wrapped type.
+  *
+  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
+  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
+  *
+  * @example
+  * {{{
+  *   case class UserId(id: String) extends AnyVal
+  *   object UserId extends RestDataWrapperCompanion[String, UserId]
+  * }}}
+  */
+abstract class RestDataWrapperCompanion[Wrapped, T](implicit
+  nameAndAdjusters: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
+) extends TransparentWrapperCompanion[Wrapped, T] {
+  implicit def restSchema(implicit wrappedSchema: RestSchema[Wrapped]): RestSchema[T] =
+    nameAndAdjusters(DefaultRestImplicits, this).apply().restSchema(wrappedSchema)
 }

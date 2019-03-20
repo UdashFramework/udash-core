@@ -20,25 +20,32 @@ case class OpenApiMetadata[T](
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
+  @unmatched(RawRest.NotValidPrefixMethod)
+  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
   prefixes: List[OpenApiPrefix[_]],
 
   @multi @rpcMethodMetadata
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
-  @rpcMethodMetadata
+  @unmatched(RawRest.NotValidGetMethod)
+  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
   gets: List[OpenApiGetOperation[_]],
 
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[CustomBody]
   @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched(RawRest.NotValidCustomBodyMethod)
+  @unmatchedParam[Body](RawRest.SuperfluousBodyParam)
   customBodyMethods: List[OpenApiCustomBodyOperation[_]],
 
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
+  @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched(RawRest.NotValidHttpMethod)
   bodyMethods: List[OpenApiBodyOperation[_]]
 ) {
   val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ customBodyMethods ++ bodyMethods
@@ -182,7 +189,7 @@ case class OpenApiCustomBodyOperation[T](
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
   parameters: List[OpenApiParameter[_]],
-  @encoded @rpcParamMetadata @tagged[Body] singleBody: OpenApiBody[_],
+  @encoded @rpcParamMetadata @tagged[Body] @unmatched(RawRest.MissingBodyParam) singleBody: OpenApiBody[_],
   resultType: RestResultType[T]
 ) extends OpenApiOperation[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
@@ -204,7 +211,7 @@ case class OpenApiBodyOperation[T](
     if (bodyFields.isEmpty) Opt.Empty else Opt {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
-      val schema = Schema(`type` = DataType.Object, properties = Mapping(fields), required = requiredFields)
+      val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
       val mimeType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
         case _: FormBody => HttpBody.FormType

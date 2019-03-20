@@ -4,9 +4,8 @@ package rest.monix
 import com.avsystem.commons._
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.ImplicitNotFound
-import io.udash.rest.openapi.{RestResponses, RestResultType}
 import io.udash.rest.raw.HttpResponseType
-import io.udash.rest.raw.RawRest.{Async, FromAsync, ToAsync}
+import io.udash.rest.raw.RawRest.{Async, AsyncEffect}
 import io.udash.rest.{GenCodecRestImplicits, OpenApiFullInstances, RestOpenApiCompanion}
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -16,32 +15,17 @@ import scala.annotation.implicitNotFound
 trait MonixRestImplicits extends GenCodecRestImplicits {
   implicit def scheduler: Scheduler = Scheduler.global
 
-  implicit def taskToAsync: ToAsync[Task] =
-    new ToAsync[Task] {
+  implicit def taskToAsync: AsyncEffect[Task] =
+    new AsyncEffect[Task] {
       def toAsync[A](task: Task[A]): Async[A] =
         callback => task.runAsync(res => callback(res.fold(Failure(_), Success(_))))
-    }
-
-  implicit def taskFromAsync: FromAsync[Task] =
-    new FromAsync[Task] {
       def fromAsync[A](async: Async[A]): Task[A] =
         Task.async(callback => async(res => callback(res.fold(Left(_), Right(_)))))
     }
 
-  implicit def taskHttpResponseType[T]: HttpResponseType[Task[T]] =
-    HttpResponseType[Task[T]]()
-
-  implicit def taskRestResultType[T: RestResponses]: RestResultType[Task[T]] =
-    RestResultType[Task[T]](RestResponses[T].responses)
-
   @implicitNotFound("${T} is not a valid HTTP method result type - it must be wrapped into a Task")
   implicit def httpResponseTypeNotFound[T]: ImplicitNotFound[HttpResponseType[T]] =
     ImplicitNotFound()
-
-  @implicitNotFound("#{forRestResponses}")
-  implicit def taskRestResultTypeNotFound[T](
-    implicit forRestResponses: ImplicitNotFound[RestResponses[T]]
-  ): ImplicitNotFound[RestResultType[Task[T]]] = ImplicitNotFound()
 }
 object MonixRestImplicits extends MonixRestImplicits
 
