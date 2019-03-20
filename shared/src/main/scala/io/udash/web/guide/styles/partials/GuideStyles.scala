@@ -18,27 +18,6 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     minHeight :=! s"calc(100vh - ${StyleConstants.Sizes.HeaderHeight}px - ${StyleConstants.Sizes.FooterHeight}px)"
   )
 
-  val imgSmall = style(
-    GuideStyleUtils.border(),
-    maxWidth(40 %%),
-    maxHeight(200 px),
-    padding(1.5 rem),
-    margin(`0`, 2 rem, 2 rem, 2 rem)
-  )
-
-  val imgMedium = style(
-    GuideStyleUtils.border(),
-    maxWidth(70 %%),
-    maxHeight(350 px),
-    padding(1.5 rem),
-    margin(`0`, 2 rem, 2 rem, 2 rem)
-  )
-
-  val imgBig = style(
-    maxWidth(100 %%),
-    maxHeight(750 px)
-  )
-
   val floatLeft = style(float.left)
   val floatRight = style(
     float.right
@@ -203,6 +182,31 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     display.block,
     padding(1.5 rem),
     margin(2 rem, `0`)
+  )
+
+  val imgSmall = style(
+    display.table,
+    GuideStyleUtils.border(),
+    maxWidth(40 %%),
+    maxHeight(200 px),
+    padding(1.5 rem),
+    margin(`0`, 2 rem, 2 rem, 2 rem),
+    display.table
+  )
+
+  val imgMedium = style(
+    display.table,
+    GuideStyleUtils.border(),
+    maxWidth(70 %%),
+    maxHeight(350 px),
+    padding(1.5 rem),
+    margin(`0`, 2 rem, 2 rem, 2 rem)
+  )
+
+  val imgBig = style(
+    display.table,
+    maxWidth(100 %%),
+    maxHeight(750 px)
   )
 
   val useBootstrap = style(
