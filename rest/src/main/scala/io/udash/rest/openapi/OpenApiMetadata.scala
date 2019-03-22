@@ -193,7 +193,7 @@ case class OpenApiCustomBodyOperation[T](
   resultType: RestResultType[T]
 ) extends OpenApiOperation[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    singleBody.requestBody(resolver).opt
+    singleBody.requestBody(resolver)
 }
 
 case class OpenApiBodyOperation[T](
@@ -208,7 +208,7 @@ case class OpenApiBodyOperation[T](
 ) extends OpenApiOperation[T] {
 
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    if (bodyFields.isEmpty) Opt.Empty else Opt {
+    if (bodyFields.isEmpty) Opt.Empty else {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
       val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
@@ -218,7 +218,7 @@ case class OpenApiBodyOperation[T](
         case _: CustomBody | _: NoBody =>
           throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
       }
-      RefOr(RestRequestBody.simpleRequestBody(mediaType, RefOr(schema), requiredFields.nonEmpty))
+      RestRequestBody.simpleRequestBody(mediaType, RefOr(schema), requiredFields.nonEmpty)
     }
 }
 
@@ -269,6 +269,6 @@ case class OpenApiBody[T](
   @infer restRequestBody: RestRequestBody[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
-  def requestBody(resolver: SchemaResolver): RefOr[RequestBody] =
+  def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
     restRequestBody.requestBody(resolver, schemaAdjusters)
 }

@@ -210,36 +210,35 @@ object RestResultType {
 
 @implicitNotFound("RestRequestBody instance for ${T} not found")
 trait RestRequestBody[T] {
-  def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody]
+  def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]]
 }
 object RestRequestBody {
   def apply[T](implicit r: RestRequestBody[T]): RestRequestBody[T] = r
 
-  def simpleRequestBody(mediaType: String, schema: RefOr[Schema], required: Boolean): RequestBody =
-    RequestBody(
+  def simpleRequestBody(mediaType: String, schema: RefOr[Schema], required: Boolean): Opt[RefOr[RequestBody]] =
+    Opt(RefOr(RequestBody(
       content = Map(
         mediaType -> MediaType(schema = schema)
       ),
       required = required
-    )
+    )))
 
   implicit val UnitRequestBody: RestRequestBody[Unit] = new RestRequestBody[Unit] {
-    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] =
-      RefOr(RequestBody(description = "Empty", content = Map.empty))
+    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]] = Opt.Empty
   }
 
   implicit val ByteArrayRequestBody: RestRequestBody[Array[Byte]] = new RestRequestBody[Array[Byte]] {
-    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] = {
+    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]] = {
       val schema = SchemaAdjuster.adjustRef(schemaAdjusters, RefOr(Schema.Binary))
-      RefOr(simpleRequestBody(HttpBody.OctetStreamType, schema, required = true))
+      simpleRequestBody(HttpBody.OctetStreamType, schema, required = true)
     }
   }
 
   implicit def fromSchema[T: RestSchema]: RestRequestBody[T] =
     new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] = {
+      def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]] = {
         val schema = SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(RestSchema[T]))
-        RefOr(simpleRequestBody(HttpBody.JsonType, schema, required = true))
+        simpleRequestBody(HttpBody.JsonType, schema, required = true)
       }
     }
 
