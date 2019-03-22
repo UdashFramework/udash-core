@@ -48,6 +48,8 @@ trait UserApi {
   @addRequestHeader("X-Req-Custom", "custom-req")
   @addResponseHeader("X-Res-Custom", "custom-res")
   def adjusted: Future[Unit]
+
+  @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
 
@@ -62,7 +64,11 @@ object RootApi extends DefaultRestApiCompanion[RootApi]
 class RawRestTest extends FunSuite with ScalaFutures {
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
-    case HttpBody(content, mediaType) => s"${if (inNewLine) "" else " "}$mediaType\n$content"
+    case tb@HttpBody.Textual(content, _, _) =>
+      s"${if (inNewLine) "" else " "}${tb.contentType}\n$content"
+    case bb@HttpBody.Binary(content, _, enc) =>
+      s"${if (inNewLine) "" else " "}${bb.contentType}${enc.mkStringOrEmpty("(", ",", ")")}\n" +
+        s"${content.iterator.map(b => f"$b%02X").mkString}"
   }
 
   def repr(req: RestRequest): String = {
@@ -96,6 +102,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
+    def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
   }
 
   var trafficLog: String = _
@@ -115,14 +122,19 @@ class RawRestTest extends FunSuite with ScalaFutures {
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
   def testRestCall[T](call: RootApi => Future[T], expectedTraffic: String)(implicit pos: Position): Unit = {
-    assert(call(realProxy).wrapToTry.futureValue == call(real).catchFailures.wrapToTry.futureValue)
+    assert(call(realProxy).wrapToTry.futureValue.map(mkDeep) == call(real).catchFailures.wrapToTry.futureValue.map(mkDeep))
     assert(trafficLog == expectedTraffic)
+  }
+
+  def mkDeep(value: Any): Any = value match {
+    case arr: Array[_] => arr.deep
+    case _ => value
   }
 
   test("simple GET") {
     testRestCall(_.self.user(UserId("ID")),
       """-> GET /user?userId=ID
-        |<- 200 application/json
+        |<- 200 application/json;charset=utf-8
         |{"id":"ID","name":"ID-0-"}
         |""".stripMargin
     )
@@ -132,7 +144,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     testRestCall(_.self.user("paf", awesome = true, 42, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
-        |application/json
+        |application/json;charset=utf-8
         |{"id":"ID","name":"Fred"}
         |<- 204
         |""".stripMargin)
@@ -147,27 +159,27 @@ class RawRestTest extends FunSuite with ScalaFutures {
 
   test("auto POST") {
     testRestCall(_.self.autopost("bod"),
-      """-> POST /autopost application/json
+      """-> POST /autopost application/json;charset=utf-8
         |{"bodyarg":"bod"}
-        |<- 200 application/json
+        |<- 200 application/json;charset=utf-8
         |"BOD"
         |""".stripMargin)
   }
 
   test("single body auto POST") {
     testRestCall(_.self.singleBodyAutopost("bod"),
-      """-> POST /singleBodyAutopost application/json
+      """-> POST /singleBodyAutopost application/json;charset=utf-8
         |"bod"
-        |<- 200 application/json
+        |<- 200 application/json;charset=utf-8
         |"BOD"
         |""".stripMargin)
   }
 
   test("form POST") {
     testRestCall(_.self.formpost("qu", "a=b", 42),
-      """-> POST /formpost?qarg=qu application/x-www-form-urlencoded
+      """-> POST /formpost?qarg=qu application/x-www-form-urlencoded;charset=utf-8
         |sarg=a%3Db&iarg=42
-        |<- 200 application/json
+        |<- 200 application/json;charset=utf-8
         |"qu-a=b-42"
         |""".stripMargin)
   }
@@ -175,7 +187,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("simple GET after prefix call") {
     testRestCall(_.subApi(1, "query").user(UserId("ID")),
       """-> GET /subApi/1/user?query=query&userId=ID
-        |<- 200 application/json
+        |<- 200 application/json;charset=utf-8
         |{"id":"ID","name":"ID-1-query"}
         |""".stripMargin
     )
@@ -184,7 +196,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("failing POST") {
     testRestCall(_.fail,
       """-> POST /fail
-        |<- 400 text/plain
+        |<- 400 text/plain;charset=utf-8
         |zuo
         |""".stripMargin
     )
@@ -193,7 +205,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("throwing POST") {
     testRestCall(_.failMore,
       """-> POST /failMore
-        |<- 400 text/plain
+        |<- 400 text/plain;charset=utf-8
         |ZUO
         |""".stripMargin
     )
@@ -207,6 +219,15 @@ class RawRestTest extends FunSuite with ScalaFutures {
         |X-Res-Custom: custom-res
         |""".stripMargin
     )
+  }
+
+  test("binary body") {
+    testRestCall(_.self.binaryEcho(Array.fill[Byte](5)(5)),
+      """-> POST /binaryEcho application/octet-stream
+        |0505050505
+        |<- 200 application/octet-stream
+        |0505050505
+        |""".stripMargin)
   }
 
   test("OPTIONS") {
