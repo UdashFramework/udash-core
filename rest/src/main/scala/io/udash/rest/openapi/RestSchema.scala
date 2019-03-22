@@ -224,7 +224,8 @@ object RestRequestBody {
     )))
 
   implicit val UnitRequestBody: RestRequestBody[Unit] = new RestRequestBody[Unit] {
-    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]] = Opt.Empty
+    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): Opt[RefOr[RequestBody]] =
+      Opt.Empty
   }
 
   implicit val ByteArrayRequestBody: RestRequestBody[Array[Byte]] = new RestRequestBody[Array[Byte]] {
