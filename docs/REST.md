@@ -599,7 +599,7 @@ that has a `GenCodec` instance will be serializable to `JsonValue`.
 #### Custom body serialization
 
 Body parameters of [`@CustomBody`](#custombody) methods are serialized straight into `HttpBody`, which encapsulates
-not only raw content but also MIME type. This way you can define custom body serializations for your types and
+not only raw content but also media type. This way you can define custom body serializations for your types and
 you are not limited to `application/json` and `application/x-www-form-urlencoded`.
 
 By default (if there are no more specific implicit instances defined),
@@ -846,7 +846,7 @@ parameters, HTTP header values and a body (`HttpBody`). All data is already in s
 easily sent through network.
 
 `RestResponse` is, similarly, a simple representation of HTTP response. `RestResponse` is made of HTTP status
-code and HTTP body (`HttpBody`, which also contains MIME type).
+code and HTTP body (`HttpBody`, which also contains media type).
 
 `Async` is a type alias defined in `RawRest` object and serves as a low level representation of asynchronous,
 repeatable computation.

@@ -35,8 +35,8 @@ object SttpRestClient {
         }.toList
       ))
 
-    val contentTypeHeader = request.body.mimeTypeOpt.map {
-      mimeType => (HeaderNames.ContentType, s"$mimeType;charset=utf-8")
+    val contentTypeHeader = request.body.mediaTypeOpt.map {
+      mediaType => (HeaderNames.ContentType, s"$mediaType;charset=utf-8")
     }
     val paramHeaders = request.parameters.headers.entries.iterator.map {
       case (n, PlainValue(v)) => (n, v)
@@ -55,8 +55,8 @@ object SttpRestClient {
       sttpResp.code,
       IMapping(sttpResp.headers.iterator.map { case (n, v) => (n, PlainValue(v)) }.toList),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
-        val mimeType = contentType.split(";", 2).head
-        HttpBody(sttpResp.body.fold(identity, identity), mimeType)
+        val mediaType = contentType.split(";", 2).head
+        HttpBody(sttpResp.body.fold(identity, identity), mediaType)
       }
     )
 

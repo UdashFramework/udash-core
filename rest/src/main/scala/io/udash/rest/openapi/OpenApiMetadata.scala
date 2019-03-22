@@ -212,13 +212,13 @@ case class OpenApiBodyOperation[T](
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
       val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
-      val mimeType = bodyTypeTag match {
+      val mediaType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
         case _: FormBody => HttpBody.FormType
         case _: CustomBody | _: NoBody =>
           throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
       }
-      RefOr(RestRequestBody.simpleRequestBody(mimeType, RefOr(schema), requiredFields.nonEmpty))
+      RefOr(RestRequestBody.simpleRequestBody(mediaType, RefOr(schema), requiredFields.nonEmpty))
     }
 }
 

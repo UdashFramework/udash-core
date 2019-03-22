@@ -207,10 +207,10 @@ trait RestRequestBody[T] {
 object RestRequestBody {
   def apply[T](implicit r: RestRequestBody[T]): RestRequestBody[T] = r
 
-  def simpleRequestBody(mimeType: String, schema: RefOr[Schema], required: Boolean): RequestBody =
+  def simpleRequestBody(mediaType: String, schema: RefOr[Schema], required: Boolean): RequestBody =
     RequestBody(
       content = Map(
-        mimeType -> MediaType(schema = schema)
+        mediaType -> MediaType(schema = schema)
       ),
       required = required
     )

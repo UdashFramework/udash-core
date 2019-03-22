@@ -9,7 +9,9 @@ import scala.concurrent.Future
 
 class UserApiImpl extends UserApi {
   def createUser(name: String): Future[User] =
-    Future.successful(User(0, name))
+    Future.successful(User(UserId(0), name))
+  def getUser(id: UserId): Future[User] =
+    Future.successful(User(id, s"$id-name"))
 }
 
 object ServerMain {

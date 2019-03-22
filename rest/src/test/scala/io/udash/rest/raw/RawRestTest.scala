@@ -62,7 +62,7 @@ object RootApi extends DefaultRestApiCompanion[RootApi]
 class RawRestTest extends FunSuite with ScalaFutures {
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
-    case HttpBody(content, mimeType) => s"${if (inNewLine) "" else " "}$mimeType\n$content"
+    case HttpBody(content, mediaType) => s"${if (inNewLine) "" else " "}$mediaType\n$content"
   }
 
   def repr(req: RestRequest): String = {

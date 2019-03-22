@@ -65,7 +65,7 @@ object JsonValue extends (String => JsonValue) {
   * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameter in
   * [[io.udash.rest.FormBody FormBody]] methods.
   * Types that have encoding to [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to
-  * [[io.udash.rest.raw.HttpBody HttpBody]] which uses application/json MIME type.
+  * [[io.udash.rest.raw.HttpBody HttpBody]] which uses application/json media type.
   * There is also a specialized encoding provided for `Unit` which returns empty HTTP body when writing and ignores
   * the body when reading.
   */
@@ -75,13 +75,13 @@ sealed trait HttpBody {
     case HttpBody.Empty => Opt.Empty
   }
 
-  final def mimeTypeOpt: Opt[String] = this match {
-    case HttpBody(_, mimeType) => Opt(mimeType)
+  final def mediaTypeOpt: Opt[String] = this match {
+    case HttpBody(_, mediaType) => Opt(mediaType)
     case HttpBody.Empty => Opt.Empty
   }
 
   final def forNonEmpty(consumer: (String, String) => Unit): Unit = this match {
-    case HttpBody(content, mimeType) => consumer(content, mimeType)
+    case HttpBody(content, mediaType) => consumer(content, mediaType)
     case HttpBody.Empty =>
   }
 
@@ -93,12 +93,12 @@ sealed trait HttpBody {
   final def readJson(): JsonValue = JsonValue(readContent(HttpBody.JsonType))
   final def readForm(): String = readContent(HttpBody.FormType)
 
-  final def readContent(mimeType: String): String = this match {
-    case HttpBody(content, `mimeType`) => content
+  final def readContent(mediaType: String): String = this match {
+    case HttpBody(content, `mediaType`) => content
     case HttpBody(_, actualMimeType) =>
-      throw new ReadFailure(s"Expected body with $mimeType type, got $actualMimeType")
+      throw new ReadFailure(s"Expected body with $mediaType type, got $actualMimeType")
     case HttpBody.Empty =>
-      throw new ReadFailure(s"Expected body with $mimeType type, got empty body")
+      throw new ReadFailure(s"Expected body with $mediaType type, got empty body")
   }
 
   final def defaultStatus: Int = this match {
@@ -111,16 +111,16 @@ sealed trait HttpBody {
 }
 object HttpBody {
   case object Empty extends HttpBody
-  final case class NonEmpty(content: String, mimeType: String) extends HttpBody
+  final case class NonEmpty(content: String, mediaType: String) extends HttpBody
 
   def empty: HttpBody = Empty
 
-  def apply(content: String, mimeType: String): HttpBody =
-    NonEmpty(content, mimeType)
+  def apply(content: String, mediaType: String): HttpBody =
+    NonEmpty(content, mediaType)
 
   def unapply(body: HttpBody): Opt[(String, String)] = body match {
     case Empty => Opt.Empty
-    case NonEmpty(content, mimeType) => Opt((content, mimeType))
+    case NonEmpty(content, mediaType) => Opt((content, mediaType))
   }
 
   final val PlainType = "text/plain"

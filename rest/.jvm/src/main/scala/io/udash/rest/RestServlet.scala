@@ -48,13 +48,13 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
   }
 
   private def readBody(request: HttpServletRequest): HttpBody = {
-    val mimeType = request.getContentType.opt.map(_.split(";", 2).head)
-    mimeType.fold(HttpBody.empty) { mimeType =>
+    val mediaType = request.getContentType.opt.map(_.split(";", 2).head)
+    mediaType.fold(HttpBody.empty) { mediaType =>
       val bodyReader = request.getReader
       val bodyBuilder = new JStringBuilder
       Iterator.continually(bodyReader.read())
         .takeWhile(_ != -1).foreach(bodyBuilder.appendCodePoint)
-      HttpBody(bodyBuilder.toString, mimeType)
+      HttpBody(bodyBuilder.toString, mediaType)
     }
   }
 
@@ -70,8 +70,8 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
     restResponse.headers.entries.foreach {
       case (name, PlainValue(value)) => response.addHeader(name, value)
     }
-    restResponse.body.forNonEmpty { (content, mimeType) =>
-      response.setContentType(s"$mimeType;charset=utf-8")
+    restResponse.body.forNonEmpty { (content, mediaType) =>
+      response.setContentType(s"$mediaType;charset=utf-8")
       response.getWriter.write(content)
     }
   }
