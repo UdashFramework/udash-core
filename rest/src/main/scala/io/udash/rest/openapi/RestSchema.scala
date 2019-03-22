@@ -150,9 +150,17 @@ object RestResponses {
 
   final val SuccessDescription = "Success"
 
-  implicit val emptyResponseForUnit: RestResponses[Unit] =
+  implicit val UnitResponses: RestResponses[Unit] =
     RestResponses(_ => Responses(byStatusCode = Map(
       204 -> RefOr(Response(description = SuccessDescription))
+    )))
+
+  implicit val ByteArrayResponses: RestResponses[Array[Byte]] =
+    RestResponses(_ => Responses(byStatusCode = Map(
+      200 -> RefOr(Response(
+        description = SuccessDescription,
+        content = Map(HttpBody.OctetStreamType -> MediaType(schema = RefOr(Schema.Binary)))
+      ))
     )))
 
   implicit def fromSchema[T: RestSchema]: RestResponses[T] =
@@ -214,6 +222,18 @@ object RestRequestBody {
       ),
       required = required
     )
+
+  implicit val UnitRequestBody: RestRequestBody[Unit] = new RestRequestBody[Unit] {
+    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] =
+      RefOr(RequestBody(description = "Empty", content = Map.empty))
+  }
+
+  implicit val ByteArrayRequestBody: RestRequestBody[Array[Byte]] = new RestRequestBody[Array[Byte]] {
+    def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] = {
+      val schema = SchemaAdjuster.adjustRef(schemaAdjusters, RefOr(Schema.Binary))
+      RefOr(simpleRequestBody(HttpBody.OctetStreamType, schema, required = true))
+    }
+  }
 
   implicit def fromSchema[T: RestSchema]: RestRequestBody[T] =
     new RestRequestBody[T] {

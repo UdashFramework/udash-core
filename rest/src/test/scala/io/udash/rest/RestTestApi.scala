@@ -104,6 +104,8 @@ trait RestTestApi {
   ): Future[Unit]
 
   def customResponse(@Query value: String): Future[CustomResp]
+
+  @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
@@ -124,6 +126,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def complexParams(baseEntity: BaseEntity, flatBaseEntity: Opt[FlatBaseEntity]): Future[Unit] = Future.unit
     def complexParams(flatBaseEntity: FlatBaseEntity, baseEntity: Opt[BaseEntity]): Future[Unit] = Future.unit
     def customResponse(value: String): Future[CustomResp] = Future.successful(CustomResp(value))
+    def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
   }
 }
 
