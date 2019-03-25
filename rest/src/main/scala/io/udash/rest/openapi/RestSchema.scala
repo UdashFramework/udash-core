@@ -5,7 +5,6 @@ import java.util.UUID
 
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
-import io.udash.rest.openapi.adjusters.SchemaAdjuster
 import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
 
@@ -140,28 +139,43 @@ object RestSchema {
 }
 
 /**
-  * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a given type.
-  * By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
+  * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a
+  * given type. By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on
+  * [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
   */
 @implicitNotFound("RestResponses instance for ${T} not found")
-case class RestResponses[T](responses: SchemaResolver => Responses)
+trait RestResponses[T] {
+  /**
+    * @param schemaTransform Should be used if [[RestResponses]] is being built based on [[RestSchema]] for
+    *                        the same type. The transformation may adjust the schema and give it a different name.
+    */
+  def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses
+}
 object RestResponses {
   def apply[T](implicit r: RestResponses[T]): RestResponses[T] = r
 
   final val SuccessDescription = "Success"
 
   implicit val emptyResponseForUnit: RestResponses[Unit] =
-    RestResponses(_ => Responses(byStatusCode = Map(
-      204 -> RefOr(Response(description = SuccessDescription))
-    )))
+    new RestResponses[Unit] {
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[Unit] => RestSchema[_]): Responses =
+        Responses(byStatusCode = Map(
+          204 -> RefOr(Response(description = SuccessDescription))
+        ))
+    }
 
   implicit def fromSchema[T: RestSchema]: RestResponses[T] =
-    RestResponses(resolver => Responses(byStatusCode = Map(
-      200 -> RefOr(Response(
-        description = SuccessDescription,
-        content = Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(RestSchema[T])))
-      ))
-    )))
+    new RestResponses[T] {
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
+        Responses(byStatusCode = Map(
+          200 -> RefOr(Response(
+            description = SuccessDescription,
+            content = Map(HttpBody.JsonType ->
+              MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T])))
+            )
+          ))
+        ))
+    }
 
   @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forSchema}")
   implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestResponses[T]] =
@@ -187,7 +201,7 @@ object RestResponses {
 case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
   implicit def forAsyncEffect[F[_] : AsyncEffect, T: RestResponses]: RestResultType[F[T]] =
-    RestResultType(RestResponses[T].responses)
+    RestResultType(RestResponses[T].responses(_, identity))
 
   @implicitNotFound("#{forResponseType}")
   implicit def notFound[T](
@@ -202,7 +216,11 @@ object RestResultType {
 
 @implicitNotFound("RestRequestBody instance for ${T} not found")
 trait RestRequestBody[T] {
-  def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody]
+  /**
+    * @param schemaTransform Should be used if [[RestRequestBody]] is being built based on [[RestSchema]] for
+    *                        the same type. The transformation may adjust the schema and give it a different name.
+    */
+  def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): RefOr[RequestBody]
 }
 object RestRequestBody {
   def apply[T](implicit r: RestRequestBody[T]): RestRequestBody[T] = r
@@ -217,8 +235,8 @@ object RestRequestBody {
 
   implicit def fromSchema[T: RestSchema]: RestRequestBody[T] =
     new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaAdjusters: List[SchemaAdjuster]): RefOr[RequestBody] = {
-        val schema = SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(RestSchema[T]))
+      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): RefOr[RequestBody] = {
+        val schema = resolver.resolve(schemaTransform(RestSchema[T]))
         RefOr(simpleRequestBody(HttpBody.JsonType, schema, required = true))
       }
     }

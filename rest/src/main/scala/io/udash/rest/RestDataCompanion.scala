@@ -2,9 +2,11 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
+import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
-import io.udash.rest.openapi.{RestSchema, RestStructure}
+import io.udash.rest.openapi._
+import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
 
 trait CodecWithStructure[T] {
   def codec: GenCodec[T]
@@ -45,8 +47,46 @@ abstract class RestDataCompanion[T](implicit
   * }}}
   */
 abstract class RestDataWrapperCompanion[Wrapped, T](implicit
-  nameAndAdjusters: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
+  instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
 ) extends TransparentWrapperCompanion[Wrapped, T] {
+  private def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+
+  implicit def plainAsRaw(implicit wrappedAsRaw: AsRaw[PlainValue, Wrapped]): AsRaw[PlainValue, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def plainAsReal(implicit wrappedAsRaw: AsReal[PlainValue, Wrapped]): AsReal[PlainValue, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def jsonAsRaw(implicit wrappedAsRaw: AsRaw[JsonValue, Wrapped]): AsRaw[JsonValue, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def jsonAsReal(implicit wrappedAsRaw: AsReal[JsonValue, Wrapped]): AsReal[JsonValue, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def bodyAsRaw(implicit wrappedAsRaw: AsRaw[HttpBody, Wrapped]): AsRaw[HttpBody, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def bodyAsReal(implicit wrappedAsRaw: AsReal[HttpBody, Wrapped]): AsReal[HttpBody, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def responseAsRaw(implicit wrappedAsRaw: AsRaw[RestResponse, Wrapped]): AsRaw[RestResponse, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def responseAsReal(implicit wrappedAsRaw: AsReal[RestResponse, Wrapped]): AsReal[RestResponse, T] =
+    AsReal.fromTransparentWrapping
+
   implicit def restSchema(implicit wrappedSchema: RestSchema[Wrapped]): RestSchema[T] =
-    nameAndAdjusters(DefaultRestImplicits, this).apply().restSchema(wrappedSchema)
+    nameAndAdjusters.restSchema(wrappedSchema)
+
+  implicit def restRequestBody(implicit wrappedBody: RestRequestBody[Wrapped]): RestRequestBody[T] =
+    new RestRequestBody[T] {
+      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): RefOr[RequestBody] =
+        wrappedBody.requestBody(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
+    }
+
+  implicit def restResponses(implicit wrappedResponses: RestResponses[Wrapped]): RestResponses[T] =
+    new RestResponses[T] {
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
+        wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
+    }
 }
