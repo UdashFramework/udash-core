@@ -51,6 +51,10 @@ object CustomResp {
   }
 }
 
+@description("binary bytes")
+case class Bytes(bytes: Array[Byte]) extends AnyVal
+object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
+
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
   @GET def failingGet: Future[Unit]
@@ -107,6 +111,7 @@ trait RestTestApi {
   def customResponse(@Query value: String): Future[CustomResp]
 
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
+  @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
   @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
@@ -129,6 +134,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def complexParams(flatBaseEntity: FlatBaseEntity, baseEntity: Opt[BaseEntity]): Future[Unit] = Future.unit
     def customResponse(value: String): Future[CustomResp] = Future.successful(CustomResp(value))
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
   }
 }

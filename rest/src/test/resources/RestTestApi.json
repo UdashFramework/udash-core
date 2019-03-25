@@ -528,6 +528,33 @@
         }
       }
     },
+    "/wrappedBinaryEcho": {
+      "post": {
+        "operationId": "wrappedBinaryEcho",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "$ref": "#/components/schemas/Bytes"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bytes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/wrappedBody": {
       "post": {
         "operationId": "wrappedBody",
@@ -615,6 +642,11 @@
             ]
           }
         ]
+      },
+      "Bytes": {
+        "type": "string",
+        "format": "binary",
+        "description": "binary bytes"
       },
       "FlatBaseEntity": {
         "type": "object",
