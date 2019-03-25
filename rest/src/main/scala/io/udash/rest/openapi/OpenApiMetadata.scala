@@ -269,6 +269,9 @@ case class OpenApiBody[T](
   @infer restRequestBody: RestRequestBody[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
-  def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    restRequestBody.requestBody(resolver, schemaAdjusters)
+  def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = {
+    def transformSchema(schema: RestSchema[T]): RestSchema[_] =
+      RestSchema.create(resolver => SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(schema)))
+    restRequestBody.requestBody(resolver, transformSchema)
+  }
 }
