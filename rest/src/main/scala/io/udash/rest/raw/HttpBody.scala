@@ -35,21 +35,20 @@ sealed trait HttpBody {
     case HttpBody.Textual(content, mediaType, _) if requiredMediaType.forall(_ == mediaType) => content
     case HttpBody.Empty =>
       throw new ReadFailure("Expected non-empty textual body")
-    case HttpBody.Binary(_, mediaType, enc) =>
+    case HttpBody.Binary(_, mediaType) =>
       throw new ReadFailure(s"Expected non-empty textual body" +
         s"${requiredMediaType.fold("")(mt => s" with media type $mt")}, " +
-        s"got binary body with media type $mediaType${enc.mkStringOrEmpty("and encoding ", ",", "")}")
+        s"got binary body with media type $mediaType")
   }
 
-  final def readBytes(requiredMediaType: OptArg[String] = OptArg.Empty, requiredEncodings: List[String] = Nil): Array[Byte] =
+  final def readBytes(requiredMediaType: OptArg[String] = OptArg.Empty): Array[Byte] =
     this match {
       case HttpBody.Empty => throw new ReadFailure("Expected non-empty body")
       case ne: HttpBody.NonEmpty =>
-        if (requiredMediaType.forall(_ == ne.mediaType) && ne.contentEncoding == requiredEncodings) ne.bytes
+        if (requiredMediaType.forall(_ == ne.mediaType)) ne.bytes
         else throw new ReadFailure(s"Expected non-empty body" +
           requiredMediaType.fold("")(mt => s" with media type $mt") +
-          requiredEncodings.mkStringOrEmpty("and encoding ", ",", "") + ", " +
-          s"got body with content type ${ne.contentType}${ne.contentEncoding.mkString("and encoding ", ",", "")}")
+          s" but got body with content type ${ne.contentType}")
     }
 
   final def defaultStatus: Int = this match {
@@ -66,25 +65,21 @@ object HttpBody extends HttpBodyLowPrio {
   sealed trait NonEmpty extends HttpBody {
     def mediaType: String
     def contentType: String
-    def contentEncoding: List[String]
     def bytes: Array[Byte]
   }
 
   /**
-    * Represents textual HTTP body. A body is considered textual if `Content-Type` has `charset` defined AND
-    * no `Content-Encoding` is defined.
+    * Represents textual HTTP body. A body is considered textual if `Content-Type` has `charset` defined.
     */
   final case class Textual(content: String, mediaType: String, charset: String) extends NonEmpty {
     def contentType: String = s"$mediaType;charset=$charset"
-    def contentEncoding: List[String] = Nil
     lazy val bytes: Array[Byte] = content.getBytes(charset)
   }
 
   /**
-    * Represents binary HTTP body. A body is considered binary if `Content-Type` does not have `charset` defined OR
-    * `Content-Encoding` different than `identity` is defined.
+    * Represents binary HTTP body. A body is considered binary if `Content-Type` does not have `charset` defined.
     */
-  final case class Binary(bytes: Array[Byte], contentType: String, contentEncoding: List[String]) extends NonEmpty {
+  final case class Binary(bytes: Array[Byte], contentType: String) extends NonEmpty {
     def mediaType: String = mediaTypeOf(contentType)
   }
 
@@ -93,8 +88,8 @@ object HttpBody extends HttpBodyLowPrio {
   def textual(content: String, mediaType: String = PlainType, charset: String = Utf8Charset): HttpBody =
     Textual(content, mediaType, charset)
 
-  def binary(bytes: Array[Byte], contentType: String = OctetStreamType, contentEncoding: List[String] = Nil): HttpBody =
-    Binary(bytes, contentType, contentEncoding)
+  def binary(bytes: Array[Byte], contentType: String = OctetStreamType): HttpBody =
+    Binary(bytes, contentType)
 
   final val PlainType = "text/plain"
   final val JsonType = "application/json"

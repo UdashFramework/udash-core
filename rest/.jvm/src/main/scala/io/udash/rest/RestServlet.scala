@@ -20,7 +20,6 @@ object RestServlet {
     apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
 
-  private final val ContentEncoding = "Content-Encoding"
   private final val BufferSize = 8192
 }
 
@@ -58,11 +57,8 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
   private def readBody(request: HttpServletRequest): HttpBody = {
     request.getContentType.opt.fold(HttpBody.empty) { contentType =>
       val mediaType = HttpBody.mediaTypeOf(contentType)
-      val contentEncoding = request.getHeader(ContentEncoding)
-        .opt.map(_.split(",").iterator.map(_.trim).toList).getOrElse(Nil)
-
-      (HttpBody.charsetOf(contentType), contentEncoding) match {
-        case (Opt(charset), Nil) =>
+      HttpBody.charsetOf(contentType) match {
+        case Opt(charset) =>
           val bodyReader = request.getReader
           val bodyBuilder = new JStringBuilder
           val cbuf = new Array[Char](BufferSize)
@@ -86,7 +82,7 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
               readLoop()
           }
           readLoop()
-          HttpBody.binary(bodyOs.toByteArray, contentType, contentEncoding)
+          HttpBody.binary(bodyOs.toByteArray, contentType)
       }
     }
   }
@@ -105,12 +101,9 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
     }
     restResponse.body.nonEmptyOpt.foreach { neBody =>
       response.setContentType(neBody.contentType)
-      if (neBody.contentEncoding.nonEmpty) {
-        response.addHeader(ContentEncoding, neBody.contentEncoding.mkString(","))
-      }
       neBody match {
         case HttpBody.Textual(content, _, _) => response.getWriter.write(content)
-        case HttpBody.Binary(bytes, _, _) => response.getOutputStream.write(bytes)
+        case HttpBody.Binary(bytes, _) => response.getOutputStream.write(bytes)
       }
     }
   }

@@ -66,8 +66,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
     case HttpBody.Empty => ""
     case tb@HttpBody.Textual(content, _, _) =>
       s"${if (inNewLine) "" else " "}${tb.contentType}\n$content"
-    case bb@HttpBody.Binary(content, _, enc) =>
-      s"${if (inNewLine) "" else " "}${bb.contentType}${enc.mkStringOrEmpty("(", ",", ")")}\n" +
+    case bb@HttpBody.Binary(content, _) =>
+      s"${if (inNewLine) "" else " "}${bb.contentType}\n" +
         s"${content.iterator.map(b => f"$b%02X").mkString}"
   }
 

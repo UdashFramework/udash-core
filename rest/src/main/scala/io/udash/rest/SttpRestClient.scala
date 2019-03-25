@@ -25,8 +25,6 @@ object SttpRestClient {
   def asHandleRequest(baseUri: String)(implicit backend: SttpBackend[Future, Nothing]): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri")
 
-  private final val ContentEncoding = "Content-Encoding"
-
   private def toSttpRequest(baseUri: Uri, request: RestRequest): Request[Array[Byte], Nothing] = {
     val uri = baseUri |>
       (u => u.copy(path = u.path ++
@@ -40,12 +38,7 @@ object SttpRestClient {
     val contentHeaders = request.body match {
       case HttpBody.Empty => Nil
       case neBody: HttpBody.NonEmpty =>
-        val contentTypeHeader = (HeaderNames.ContentType, neBody.contentType)
-        val contentEncodingHeader = neBody.contentEncoding match {
-          case Nil => Opt.Empty
-          case encodings => Opt((HeaderNames.ContentEncoding, encodings.mkString(",")))
-        }
-        contentTypeHeader :: contentEncodingHeader.toList
+        List((HeaderNames.ContentType, neBody.contentType))
     }
 
     val paramHeaders = request.parameters.headers.entries.iterator.map {
@@ -60,7 +53,7 @@ object SttpRestClient {
       body = request.body match {
         case HttpBody.Empty => NoBody
         case HttpBody.Textual(content, _, charset) => StringBody(content, charset, None)
-        case HttpBody.Binary(bytes, _, _) => ByteArrayBody(bytes, None)
+        case HttpBody.Binary(bytes, _) => ByteArrayBody(bytes, None)
       },
       response = ResponseAsByteArray
     )
@@ -72,16 +65,14 @@ object SttpRestClient {
       IMapping(sttpResp.headers.iterator.map { case (n, v) => (n, PlainValue(v)) }.toList),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
         val mediaType = HttpBody.mediaTypeOf(contentType)
-        val contentEncoding = sttpResp.header(ContentEncoding).toOpt
-          .map(_.split(",").iterator.map(_.trim).toList).getOrElse(Nil)
-        (HttpBody.charsetOf(contentType), contentEncoding) match {
-          case (Opt(charset), Nil) =>
+        HttpBody.charsetOf(contentType) match {
+          case Opt(charset) =>
             // TODO: uncool that we have to go through byte array for textual body
             val text = sttpResp.body.fold(identity, new String(_, charset))
             HttpBody.textual(text, mediaType, charset)
           case _ =>
             // unsafeBody should be safe because error body should be recognized as textual
-            HttpBody.binary(sttpResp.unsafeBody, contentType, contentEncoding)
+            HttpBody.binary(sttpResp.unsafeBody, contentType)
         }
       }
     )
