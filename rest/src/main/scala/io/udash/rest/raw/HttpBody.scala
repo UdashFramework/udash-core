@@ -23,19 +23,20 @@ sealed trait HttpBody {
     case _ => Opt.Empty
   }
 
-  final def textualContentOpt: Opt[String] = this match {
-    case HttpBody.Textual(content, _, _) => Opt(content)
-    case _ => Opt.Empty
-  }
+  final def textualContentOpt: Opt[String] =
+    nonEmptyOpt.map(_.readText())
 
-  final def readJson(): JsonValue = JsonValue(readText(HttpBody.JsonType))
-  final def readForm(): String = readText(HttpBody.FormType)
+  final def readJson(defaultCharset: String = HttpBody.Utf8Charset): JsonValue =
+    JsonValue(readText(HttpBody.JsonType, defaultCharset))
+
+  final def readForm(defaultCharset: String = HttpBody.Utf8Charset): String =
+    readText(HttpBody.FormType, defaultCharset)
 
   final def readText(requiredMediaType: OptArg[String] = OptArg.Empty, defaultCharset: String = HttpBody.Utf8Charset): String = this match {
     case HttpBody.Empty =>
       throw new ReadFailure("Expected non-empty textual body")
     case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) =>
-      ne.readContent(defaultCharset)
+      ne.text(defaultCharset)
     case ne: HttpBody.NonEmpty =>
       throw new ReadFailure(s"Expected non-empty textual body" +
         requiredMediaType.fold("")(mt => s" with media type $mt") +
@@ -69,7 +70,7 @@ object HttpBody extends HttpBodyLowPrio {
   sealed trait NonEmpty extends HttpBody {
     def mediaType: String
     def contentType: String
-    def readContent(defaultCharset: String = Utf8Charset): String
+    def text(defaultCharset: String = Utf8Charset): String
     def bytes: Array[Byte]
   }
 
@@ -78,7 +79,7 @@ object HttpBody extends HttpBodyLowPrio {
     */
   final case class Textual(content: String, mediaType: String, charset: String) extends NonEmpty {
     def contentType: String = s"$mediaType;charset=$charset"
-    def readContent(defaultCharset: String): String = content
+    def text(defaultCharset: String): String = content
     lazy val bytes: Array[Byte] = content.getBytes(charset)
   }
 
@@ -87,7 +88,7 @@ object HttpBody extends HttpBodyLowPrio {
     */
   final case class Binary(bytes: Array[Byte], contentType: String) extends NonEmpty {
     def mediaType: String = mediaTypeOf(contentType)
-    def readContent(defaultCharset: String): String = defaultCharset match {
+    def text(defaultCharset: String): String = defaultCharset match {
       case Utf8Charset => utf8text
       case _ => new String(bytes, defaultCharset)
     }
