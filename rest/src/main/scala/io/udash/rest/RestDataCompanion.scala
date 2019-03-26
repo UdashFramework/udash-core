@@ -35,7 +35,7 @@ abstract class RestDataCompanion[T](implicit
 
 /**
   * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
-  * This companion ensures instances of `GenCodec`, `GenKeyCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]],
+  * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
   * assuming that these instances are available for the wrapped type.
   *
   * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
@@ -51,6 +51,11 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
 ) extends TransparentWrapperCompanion[Wrapped, T] {
   private def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+
+  // These implicits must be specialized for every raw type (PlainValue, JsonValue, etc.) because
+  // it lifts their priority. Unfortunately, controlling implicit priority is not pretty.
+  // Also, it's probably good that we explicitly enable derivation only for REST-related raw types
+  // and not for all raw types - this avoids possible interference with other features using RPC.
 
   implicit def plainAsRaw(implicit wrappedAsRaw: AsRaw[PlainValue, Wrapped]): AsRaw[PlainValue, T] =
     AsRaw.fromTransparentWrapping
