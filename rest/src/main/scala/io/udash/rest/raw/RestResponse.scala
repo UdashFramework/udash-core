@@ -4,7 +4,6 @@ package rest.raw
 import com.avsystem.commons._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
-import com.avsystem.commons.{OptArg, Success, Try}
 
 import scala.annotation.implicitNotFound
 import scala.util.Failure

@@ -31,25 +31,25 @@ sealed trait HttpBody {
   final def readJson(): JsonValue = JsonValue(readText(HttpBody.JsonType))
   final def readForm(): String = readText(HttpBody.FormType)
 
-  final def readText(requiredMediaType: OptArg[String] = OptArg.Empty): String = this match {
-    case HttpBody.Textual(content, mediaType, _) if requiredMediaType.forall(_ == mediaType) => content
+  final def readText(requiredMediaType: OptArg[String] = OptArg.Empty, defaultCharset: String = HttpBody.Utf8Charset): String = this match {
     case HttpBody.Empty =>
       throw new ReadFailure("Expected non-empty textual body")
-    case HttpBody.Binary(_, mediaType) =>
+    case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) =>
+      ne.readContent(defaultCharset)
+    case ne: HttpBody.NonEmpty =>
       throw new ReadFailure(s"Expected non-empty textual body" +
-        s"${requiredMediaType.fold("")(mt => s" with media type $mt")}, " +
-        s"got binary body with media type $mediaType")
+        requiredMediaType.fold("")(mt => s" with media type $mt") +
+        s" but got body with content type ${ne.contentType}")
   }
 
-  final def readBytes(requiredMediaType: OptArg[String] = OptArg.Empty): Array[Byte] =
-    this match {
-      case HttpBody.Empty => throw new ReadFailure("Expected non-empty body")
-      case ne: HttpBody.NonEmpty =>
-        if (requiredMediaType.forall(_ == ne.mediaType)) ne.bytes
-        else throw new ReadFailure(s"Expected non-empty body" +
-          requiredMediaType.fold("")(mt => s" with media type $mt") +
-          s" but got body with content type ${ne.contentType}")
-    }
+  final def readBytes(requiredMediaType: OptArg[String] = OptArg.Empty): Array[Byte] = this match {
+    case HttpBody.Empty => throw new ReadFailure("Expected non-empty body")
+    case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) => ne.bytes
+    case ne: HttpBody.NonEmpty =>
+      throw new ReadFailure(s"Expected non-empty body" +
+        requiredMediaType.fold("")(mt => s" with media type $mt") +
+        s" but got body with content type ${ne.contentType}")
+  }
 
   final def defaultStatus: Int = this match {
     case HttpBody.Empty => 204
@@ -62,9 +62,14 @@ sealed trait HttpBody {
 object HttpBody extends HttpBodyLowPrio {
   case object Empty extends HttpBody
 
+  /**
+    * Non empty body can be either textual or binary. This is mostly an optimization to avoid unnecessary conversions
+    * between strings and byte arrays. Both [[Binary]] and [[Textual]] can be read as text and as raw bytes.
+    */
   sealed trait NonEmpty extends HttpBody {
     def mediaType: String
     def contentType: String
+    def readContent(defaultCharset: String = Utf8Charset): String
     def bytes: Array[Byte]
   }
 
@@ -73,6 +78,7 @@ object HttpBody extends HttpBodyLowPrio {
     */
   final case class Textual(content: String, mediaType: String, charset: String) extends NonEmpty {
     def contentType: String = s"$mediaType;charset=$charset"
+    def readContent(defaultCharset: String): String = content
     lazy val bytes: Array[Byte] = content.getBytes(charset)
   }
 
@@ -81,6 +87,11 @@ object HttpBody extends HttpBodyLowPrio {
     */
   final case class Binary(bytes: Array[Byte], contentType: String) extends NonEmpty {
     def mediaType: String = mediaTypeOf(contentType)
+    def readContent(defaultCharset: String): String = defaultCharset match {
+      case Utf8Charset => utf8text
+      case _ => new String(bytes, defaultCharset)
+    }
+    lazy val utf8text: String = new String(bytes, Utf8Charset)
   }
 
   def empty: HttpBody = Empty
