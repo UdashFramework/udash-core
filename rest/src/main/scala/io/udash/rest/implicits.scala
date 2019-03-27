@@ -1,76 +1,37 @@
 package io.udash
 package rest
 
+import com.avsystem.commons._
 import com.avsystem.commons.meta.Fallback
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal, InvalidRpcCall}
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.avsystem.commons.serialization.{GenCodec, GenKeyCodec}
-import com.avsystem.commons.{Future, Promise, Success, Try, _}
-import io.udash.rest.openapi.{OpenApiMetadata, RestResponses, RestResultType, RestSchema}
+import io.udash.rest.openapi.{OpenApiMetadata, RestSchema}
 import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
 
 trait FloatingPointRestImplicits {
-  implicit final val floatPathValueAsRealRaw: AsRawReal[PathValue, Float] =
-    AsRawReal.create(v => PathValue(v.toString), _.value.toFloat)
-  implicit final val floatHeaderValueAsRealRaw: AsRawReal[HeaderValue, Float] =
-    AsRawReal.create(v => HeaderValue(v.toString), _.value.toFloat)
-  implicit final val floatQueryValueAsRealRaw: AsRawReal[QueryValue, Float] =
-    AsRawReal.create(v => QueryValue(v.toString), _.value.toFloat)
-
-  implicit final val doublePathValueAsRealRaw: AsRawReal[PathValue, Double] =
-    AsRawReal.create(v => PathValue(v.toString), _.value.toDouble)
-  implicit final val doubleHeaderValueAsRealRaw: AsRawReal[HeaderValue, Double] =
-    AsRawReal.create(v => HeaderValue(v.toString), _.value.toDouble)
-  implicit final val doubleQueryValueAsRealRaw: AsRawReal[QueryValue, Double] =
-    AsRawReal.create(v => QueryValue(v.toString), _.value.toDouble)
+  implicit final val floatPlainValueAsRealRaw: AsRawReal[PlainValue, Float] =
+    AsRawReal.create(v => PlainValue(v.toString), _.value.toFloat)
+  implicit final val doublePlainValueAsRealRaw: AsRawReal[PlainValue, Double] =
+    AsRawReal.create(v => PlainValue(v.toString), _.value.toDouble)
 }
 object FloatingPointRestImplicits extends FloatingPointRestImplicits
 
 trait FutureRestImplicits {
-  implicit def futureToAsyncResp[T](
-    implicit respAsRaw: AsRaw[RestResponse, T]
-  ): AsRaw[RawRest.Async[RestResponse], Try[Future[T]]] =
-    AsRaw.create { triedFuture =>
-      val future = triedFuture.fold(Future.failed, identity)
-      callback => future.onCompleteNow(t => callback(t.map(respAsRaw.asRaw).recoverHttpError))
+  implicit def futureAsyncEffect: RawRest.AsyncEffect[Future] =
+    new RawRest.AsyncEffect[Future] {
+      def toAsync[A](fa: Future[A]): RawRest.Async[A] =
+        fa.onCompleteNow
+      def fromAsync[A](async: RawRest.Async[A]): Future[A] =
+        Promise[A].setup(p => async(p.complete)).future
     }
 
-  implicit def futureFromAsyncResp[T](
-    implicit respAsReal: AsReal[RestResponse, T]
-  ): AsReal[RawRest.Async[RestResponse], Try[Future[T]]] =
-    AsReal.create { async =>
-      val promise = Promise[T]
-      async(t => promise.complete(t.map(respAsReal.asReal)))
-      Success(promise.future)
-    }
-
-  @implicitNotFound("#{forResponse}")
-  implicit def futureAsRawNotFound[T](
-    implicit forResponse: ImplicitNotFound[AsRaw[RestResponse, T]]
-  ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[Future[T]]]] = ImplicitNotFound()
-
-  @implicitNotFound("#{forResponse}")
-  implicit def futureAsRealNotFound[T](
-    implicit forResponse: ImplicitNotFound[AsReal[RestResponse, T]]
-  ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[Future[T]]]] = ImplicitNotFound()
-
-  implicit def futureHttpResponseType[T]: HttpResponseType[Future[T]] =
-    HttpResponseType[Future[T]]()
-
-  @implicitNotFound("${T} is not a valid REST HTTP method result type - it must be wrapped into a Future")
+  @implicitNotFound("${T} is not a valid result type of HTTP REST method - it must be a Future")
   implicit def httpResponseTypeNotFound[T]: ImplicitNotFound[HttpResponseType[T]] =
     ImplicitNotFound()
-
-  implicit def futureRestResultType[T: RestResponses]: RestResultType[Future[T]] =
-    RestResultType[Future[T]](RestResponses[T].responses)
-
-  @implicitNotFound("#{forRestResponses}")
-  implicit def futureRestResultTypeNotFound[T](
-    implicit forRestResponses: ImplicitNotFound[RestResponses[T]]
-  ): ImplicitNotFound[RestResultType[Future[T]]] = ImplicitNotFound()
 }
 object FutureRestImplicits extends FutureRestImplicits
 
@@ -88,19 +49,9 @@ trait GenCodecRestImplicits extends FloatingPointRestImplicits {
 
   // Implicits wrapped into `Fallback` so that they don't get higher priority just because they're imported
   // This way concrete classes may override these implicits with implicits in their companion objects
-  implicit def pathValueFallbackAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[PathValue, T]] =
+  implicit def plainValueFallbackAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[PlainValue, T]] =
     Fallback(AsRawReal.create(
-      v => PathValue(GenKeyCodec.write[T](v)),
-      v => handleReadFailure(GenKeyCodec.read[T](v.value))
-    ))
-  implicit def headerValueDefaultAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[HeaderValue, T]] =
-    Fallback(AsRawReal.create(
-      v => HeaderValue(GenKeyCodec.write[T](v)),
-      v => handleReadFailure(GenKeyCodec.read[T](v.value))
-    ))
-  implicit def queryValueDefaultAsRealRaw[T: GenKeyCodec]: Fallback[AsRawReal[QueryValue, T]] =
-    Fallback(AsRawReal.create(
-      v => QueryValue(GenKeyCodec.write[T](v)),
+      v => PlainValue(GenKeyCodec.write[T](v)),
       v => handleReadFailure(GenKeyCodec.read[T](v.value))
     ))
 
@@ -110,12 +61,22 @@ trait GenCodecRestImplicits extends FloatingPointRestImplicits {
       v => handleReadFailure(JsonStringInput.read[T](v.value))
     ))
 
-  @implicitNotFound("Cannot serialize ${T} into JsonValue, probably because: #{forGenCodec}")
+  @implicitNotFound("Cannot serialize ${T} into PlainValue, most likely because:\n#{forKeyCodec}")
+  implicit def asRawPlainNotFound[T](
+    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
+  ): ImplicitNotFound[AsRaw[PlainValue, T]] = ImplicitNotFound()
+
+  @implicitNotFound("Cannot deserialize ${T} from PlainValue, most likely because:\n#{forKeyCodec}")
+  implicit def asRealPlainNotFound[T](
+    implicit forKeyCodec: ImplicitNotFound[GenKeyCodec[T]]
+  ): ImplicitNotFound[AsReal[PlainValue, T]] = ImplicitNotFound()
+
+  @implicitNotFound("Cannot serialize ${T} into JsonValue, because:\n#{forGenCodec}")
   implicit def asRawJsonNotFound[T](
     implicit forGenCodec: ImplicitNotFound[GenCodec[T]]
   ): ImplicitNotFound[AsRaw[JsonValue, T]] = ImplicitNotFound()
 
-  @implicitNotFound("Cannot deserialize ${T} from JsonValue, probably because: #{forGenCodec}")
+  @implicitNotFound("Cannot deserialize ${T} from JsonValue, because:\n#{forGenCodec}")
   implicit def asRealJsonNotFound[T](
     implicit forGenCodec: ImplicitNotFound[GenCodec[T]]
   ): ImplicitNotFound[AsReal[JsonValue, T]] = ImplicitNotFound()

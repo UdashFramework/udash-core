@@ -1,13 +1,16 @@
 package io.udash
 package rest
 
+import java.io.ByteArrayOutputStream
+
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
-import com.avsystem.commons.meta.Mapping
+import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet.DefaultHandleTimeout
 import io.udash.rest.raw._
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
+import scala.annotation.tailrec
 import scala.concurrent.duration._
 
 object RestServlet {
@@ -16,10 +19,14 @@ object RestServlet {
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
+
+  private final val BufferSize = 8192
 }
 
 class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDuration = DefaultHandleTimeout)
-  extends HttpServlet {
+  extends HttpServlet with LazyLogging {
+
+  import RestServlet._
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync().setup(_.setTimeout(handleTimeout.toMillis))
@@ -29,6 +36,7 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
         asyncContext.complete()
       case Failure(e) =>
         writeFailure(response, e.getMessage.opt)
+        logger.error("Failed to handle REST request", e)
         asyncContext.complete()
     }
   }
@@ -36,24 +44,46 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
   private def readParameters(request: HttpServletRequest): RestParameters = {
     // can't use request.getPathInfo because it decodes the URL before we can split it
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
-    val path = PathValue.splitDecode(request.getRequestURI.stripPrefix(pathPrefix))
-    val query = request.getQueryString.opt.map(QueryValue.decode).getOrElse(Mapping.empty)
-    val headersBuilder = Mapping.newBuilder[HeaderValue](caseInsensitive = true)
+    val path = PlainValue.decodePath(request.getRequestURI.stripPrefix(pathPrefix))
+    val query = request.getQueryString.opt.map(PlainValue.decodeQuery).getOrElse(Mapping.empty)
+    val headersBuilder = IMapping.newBuilder[PlainValue]
     request.getHeaderNames.asScala.foreach { headerName =>
-      headersBuilder += headerName -> HeaderValue(request.getHeader(headerName))
+      headersBuilder += headerName -> PlainValue(request.getHeader(headerName))
     }
     val headers = headersBuilder.result()
     RestParameters(path, headers, query)
   }
 
   private def readBody(request: HttpServletRequest): HttpBody = {
-    val mimeType = request.getContentType.opt.map(_.split(";", 2).head)
-    mimeType.fold(HttpBody.empty) { mimeType =>
-      val bodyReader = request.getReader
-      val bodyBuilder = new JStringBuilder
-      Iterator.continually(bodyReader.read())
-        .takeWhile(_ != -1).foreach(bodyBuilder.appendCodePoint)
-      HttpBody(bodyBuilder.toString, mimeType)
+    request.getContentType.opt.fold(HttpBody.empty) { contentType =>
+      val mediaType = HttpBody.mediaTypeOf(contentType)
+      HttpBody.charsetOf(contentType) match {
+        case Opt(charset) =>
+          val bodyReader = request.getReader
+          val bodyBuilder = new JStringBuilder
+          val cbuf = new Array[Char](BufferSize)
+          @tailrec def readLoop(): Unit = bodyReader.read(cbuf) match {
+            case -1 =>
+            case len =>
+              bodyBuilder.append(cbuf, 0, len)
+              readLoop()
+          }
+          readLoop()
+          HttpBody.textual(bodyBuilder.toString, mediaType, charset)
+
+        case _ =>
+          val bodyIs = request.getInputStream
+          val bodyOs = new ByteArrayOutputStream
+          val bbuf = new Array[Byte](BufferSize)
+          @tailrec def readLoop(): Unit = bodyIs.read(bbuf) match {
+            case -1 =>
+            case len =>
+              bodyOs.write(bbuf, 0, len)
+              readLoop()
+          }
+          readLoop()
+          HttpBody.binary(bodyOs.toByteArray, contentType)
+      }
     }
   }
 
@@ -66,12 +96,17 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
 
   private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
     response.setStatus(restResponse.code)
-    restResponse.headers.foreach {
-      case (name, HeaderValue(value)) => response.addHeader(name, value)
+    restResponse.headers.entries.foreach {
+      case (name, PlainValue(value)) => response.addHeader(name, value)
     }
-    restResponse.body.forNonEmpty { (content, mimeType) =>
-      response.setContentType(s"$mimeType;charset=utf-8")
-      response.getWriter.write(content)
+    restResponse.body match {
+      case HttpBody.Empty =>
+      case neBody: HttpBody.NonEmpty =>
+        // TODO: can we improve performance by avoiding intermediate byte array for textual content?
+        val bytes = neBody.bytes
+        response.setContentType(neBody.contentType)
+        response.setContentLength(bytes.length)
+        response.getOutputStream.write(bytes)
     }
   }
 

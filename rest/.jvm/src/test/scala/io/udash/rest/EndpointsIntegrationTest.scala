@@ -3,7 +3,6 @@ package rest
 
 import java.net.ConnectException
 
-import com.avsystem.commons.meta.Mapping
 import com.softwaremill.sttp.SttpBackend
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
@@ -17,7 +16,6 @@ import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -37,12 +35,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
-    rawHandle.andThen { async =>
-      FutureRestImplicits.futureFromAsyncResp.asReal(async) match {
-        case Success(f) => f
-        case Failure(t) => Future.failed(t)
-      }
-    }
+    rawHandle.andThen(FutureRestImplicits.futureAsyncEffect.fromAsync)
 
   def mkRequest(
     url: String,
@@ -53,9 +46,9 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   ): RestRequest = RestRequest(
     method,
     RestParameters(
-      PathValue.splitDecode(url),
-      Mapping(headers.mapValues(HeaderValue)),
-      Mapping(queryArguments.mapValues(QueryValue))
+      PlainValue.decodePath(url),
+      IMapping(headers.mapValues(PlainValue).toList),
+      Mapping(queryArguments.mapValues(PlainValue).toList)
     ),
     HttpBody.json(JsonValue(body))
   )
@@ -113,26 +106,26 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     }
     "report valid HTTP codes (1)" in {
       val eventualResponse = rawHandler(mkRequest("/non/existing/path",
-        HttpMethod.POST, Map.empty, Map.empty, null))
+        HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
     }
     "report valid HTTP codes (2)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceOne/loadAll",
-        HttpMethod.POST, Map.empty, Map.empty, null))
+        HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(405)
     }
     "report valid HTTP codes (3)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceTwo/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(400)
     }
     "report valid HTTP codes (4)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceThree/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
 
       val eventualResponse2 = rawHandler(mkRequest("/service_three/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       // "loadAll" is interpreted as URL argument from `serviceThree` getter
       await(eventualResponse2).code should be(404)
     }
@@ -148,7 +141,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
       val eventualResponse =
         badRawHandler(mkRequest("/non/existing/path",
-          HttpMethod.POST, Map.empty, Map.empty, null))
+          HttpMethod.POST, Map.empty, Map.empty, ""))
       eventualResponse.failed.futureValue shouldBe a[ConnectException]
 
       val eventualResponse2 =

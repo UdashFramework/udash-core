@@ -8,10 +8,10 @@ package object udash
 
   // Defaults
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
-  type EmptyPresenter[S <: State] = io.udash.core.EmptyPresenter[S]
+  final val EmptyPresenter = io.udash.core.EmptyPresenter
 
   // Definitions
-  final val  Url = io.udash.core.Url
+  final val Url = io.udash.core.Url
   type Url = io.udash.core.Url
 
   type Presenter[S <: State] = io.udash.core.Presenter[S]

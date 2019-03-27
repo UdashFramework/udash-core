@@ -5,24 +5,37 @@ package raw
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
+import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.RestMetadata.ResolutionTrie
 
 import scala.annotation.implicitNotFound
 
-@implicitNotFound("RestMetadata for ${T} not found, does it have a correctly defined companion object, " +
-  "e.g. one that extends DefaultRestApiCompanion or other companion base?")
+@implicitNotFound("RestMetadata for ${T} not found, " +
+  "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
-case class RestMetadata[T](
-  @multi @tagged[Prefix](whenUntagged = new Prefix)
+@methodTag[BodyTypeTag]
+final case class RestMetadata[T](
+  @multi
+  @tagged[Prefix](whenUntagged = new Prefix)
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
+  @unmatched(RawRest.NotValidPrefixMethod)
+  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
   @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
 
-  @multi @tagged[GET]
+  @multi
+  @tagged[GET]
+  @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
+  @unmatched(RawRest.NotValidGetMethod)
+  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
   @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
 
-  @multi @tagged[BodyMethodTag](whenUntagged = new POST)
-  @paramTag[RestParamTag](defaultTag = new BodyField)
+  @multi
+  @tagged[BodyMethodTag](whenUntagged = new POST)
+  @tagged[SomeBodyTag](whenUntagged = new JsonBody)
+  @paramTag[RestParamTag](defaultTag = new Body)
+  @unmatched(RawRest.NotValidHttpMethod)
   @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]]
 ) {
   val httpMethods: List[HttpMethodMetadata[_]] =
@@ -50,25 +63,24 @@ case class RestMetadata[T](
     def ensureUniqueParams(method: RestMethodMetadata[_]): Unit = {
       for {
         prefix <- prefixes
-        prefixHeaders = new Mapping(prefix.parametersMetadata.headers, caseInsensitive = true)
-        headerParam <- method.parametersMetadata.headers.keys if prefixHeaders.contains(headerParam)
+        headerParam <- method.parametersMetadata.headerParams
+        if prefix.parametersMetadata.headerParamsMap.contains(headerParam.name.toLowerCase)
       } throw new InvalidRestApiException(
-        s"Header parameter $headerParam of ${method.name} collides with header parameter of the same " +
+        s"Header parameter ${headerParam.name} of ${method.name} collides with header parameter of the same " +
           s"(case insensitive) name in prefix ${prefix.name}")
 
       for {
         prefix <- prefixes
-        queryParam <- method.parametersMetadata.query.keys
-        if prefix.parametersMetadata.query.contains(queryParam)
+        queryParam <- method.parametersMetadata.queryParams
+        if prefix.parametersMetadata.queryParamsMap.contains(queryParam.name)
       } throw new InvalidRestApiException(
-        s"Query parameter $queryParam of ${method.name} collides with query parameter of the same " +
+        s"Query parameter ${queryParam.name} of ${method.name} collides with query parameter of the same " +
           s"name in prefix ${prefix.name}")
     }
 
-    prefixMethods.foreach {
-      prefix =>
-        ensureUniqueParams(prefix)
-        prefix.result.value.ensureUniqueParams(prefix :: prefixes)
+    prefixMethods.foreach { prefix =>
+      ensureUniqueParams(prefix)
+      prefix.result.value.ensureUniqueParams(prefix :: prefixes)
     }
     httpMethods.foreach(ensureUniqueParams)
   }
@@ -87,12 +99,12 @@ case class RestMetadata[T](
     }
   }
 
-  def resolvePath(path: List[PathValue]): List[ResolvedCall] =
+  def resolvePath(path: List[PlainValue]): List[ResolvedCall] =
     resolutionTrie.resolvePath(this, Nil, Nil, path).toList
 }
 object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
   private class ResolutionTrie(methods: List[(List[PathPatternElement], RestMethodMetadata[_])]) {
-    private val named: Map[PathValue, ResolutionTrie] = methods.iterator
+    private val named: Map[PlainValue, ResolutionTrie] = methods.iterator
       .collect { case (PathName(pv) :: tail, method) => (pv, (tail, method)) }
       .groupToMap(_._1, _._2).iterator
       .map { case (pv, submethods) => (pv, new ResolutionTrie(submethods.toList)) }
@@ -109,7 +121,7 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
       .collect { case (Nil, pm: PrefixMetadata[_]) => pm }
 
     def resolvePath(
-      root: RestMetadata[_], prefixCalls: List[PrefixCall], pathParams: List[PathValue], path: List[PathValue]
+      root: RestMetadata[_], prefixCalls: List[PrefixCall], pathParams: List[PlainValue], path: List[PlainValue]
     ): Iterator[ResolvedCall] = {
 
       val fromPrefixes = prefixes.iterator.flatMap { prefix =>
@@ -141,7 +153,7 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
 
     def forPattern(pattern: List[PathPatternElement]): ValidationTrie = pattern match {
       case Nil => this
-      case PathName(PathValue(pathName)) :: tail =>
+      case PathName(PlainValue(pathName)) :: tail =>
         byName.getOrElseUpdate(pathName, new ValidationTrie).forPattern(tail)
       case PathParam(_) :: tail =>
         wildcard.getOrElse(new ValidationTrie().setup(t => wildcard = Opt(t))).forPattern(tail)
@@ -198,31 +210,33 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
 }
 
 sealed trait PathPatternElement
-case class PathName(value: PathValue) extends PathPatternElement
-case class PathParam(param: PathParamMetadata[_]) extends PathPatternElement
+final case class PathName(value: PlainValue) extends PathPatternElement
+final case class PathParam(param: PathParamMetadata[_]) extends PathPatternElement
 
 sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def name: String
-  def methodPath: List[PathValue]
+  def methodPath: List[PlainValue]
   def parametersMetadata: RestParametersMetadata
+  def requestAdjusters: List[RequestAdjuster]
+  def responseAdjusters: List[ResponseAdjuster]
 
   val pathPattern: List[PathPatternElement] = methodPath.map(PathName) ++
-    parametersMetadata.path.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName))
+    parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName))
 
-  def applyPathParams(params: List[PathValue]): List[PathValue] = {
-    def loop(params: List[PathValue], pattern: List[PathPatternElement]): List[PathValue] =
+  def applyPathParams(params: List[PlainValue]): List[PlainValue] = {
+    def loop(params: List[PlainValue], pattern: List[PathPatternElement]): List[PlainValue] =
       (params, pattern) match {
         case (Nil, Nil) => Nil
         case (_, PathName(patternHead) :: patternTail) => patternHead :: loop(params, patternTail)
         case (param :: paramsTail, PathParam(_) :: patternTail) => param :: loop(paramsTail, patternTail)
         case _ => throw new IllegalArgumentException(
-          s"got ${params.size} path params, expected ${parametersMetadata.path.size}")
+          s"got ${params.size} path params, expected ${parametersMetadata.pathParams.size}")
       }
     loop(params, pathPattern)
   }
 
-  def extractPathParams(path: List[PathValue]): Opt[(List[PathValue], List[PathValue])] = {
-    def loop(path: List[PathValue], pattern: List[PathPatternElement]): Opt[(List[PathValue], List[PathValue])] =
+  def extractPathParams(path: List[PlainValue]): Opt[(List[PlainValue], List[PlainValue])] = {
+    def loop(path: List[PlainValue], pattern: List[PathPatternElement]): Opt[(List[PlainValue], List[PlainValue])] =
       (path, pattern) match {
         case (pathTail, Nil) => Opt((Nil, pathTail))
         case (param :: pathTail, PathParam(_) :: patternTail) =>
@@ -233,29 +247,49 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
       }
     loop(path, pathPattern)
   }
+
+  def adjustRequest(request: RestRequest): RestRequest =
+    requestAdjusters.foldRight(request)(_ adjustRequest _)
+
+  def adjustResponse(asyncResponse: RawRest.Async[RestResponse]): RawRest.Async[RestResponse] =
+    if (responseAdjusters.isEmpty) asyncResponse
+    else RawRest.mapAsync(asyncResponse)(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
 }
 
-case class PrefixMetadata[T](
+final case class PrefixMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: Prefix,
   @composite parametersMetadata: RestParametersMetadata,
+  @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
+  @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T]
 ) extends RestMethodMetadata[T] {
-  def methodPath: List[PathValue] = PathValue.splitDecode(methodTag.path)
+  def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
 
-case class HttpMethodMetadata[T](
+final case class HttpMethodMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: HttpMethodTag,
+  @reifyAnnot bodyTypeTag: BodyTypeTag,
   @composite parametersMetadata: RestParametersMetadata,
-  @multi @tagged[BodyField] @rpcParamMetadata bodyFields: Mapping[ParamMetadata[_]],
-  @optional @encoded @tagged[Body] @rpcParamMetadata singleBodyParam: Opt[ParamMetadata[_]],
+  @multi @tagged[Body] @rpcParamMetadata bodyParams: List[ParamMetadata[_]],
   @isAnnotated[FormBody] formBody: Boolean,
+  @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
+  @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @infer @checked responseType: HttpResponseType[T]
 ) extends RestMethodMetadata[T] {
   val method: HttpMethod = methodTag.method
-  val singleBody: Boolean = singleBodyParam.isDefined
-  def methodPath: List[PathValue] = PathValue.splitDecode(methodTag.path)
+
+  val customBody: Boolean = bodyTypeTag match {
+    case _: CustomBody => true
+    case _ => false
+  }
+
+  def singleBodyParam: Opt[ParamMetadata[_]] =
+    if (customBody) bodyParams.headOpt else Opt.Empty
+
+  def methodPath: List[PlainValue] =
+    PlainValue.decodePath(methodTag.path)
 }
 
 /**
@@ -272,18 +306,30 @@ case class HttpMethodMetadata[T](
   * See `MacroInstances` for more information on injection of implicits.
   */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
-case class HttpResponseType[T]()
+final case class HttpResponseType[T]()
+object HttpResponseType {
+  implicit def asyncEffectResponseType[F[_] : AsyncEffect, T]: HttpResponseType[F[T]] =
+    HttpResponseType()
+}
 
-case class RestParametersMetadata(
-  @multi @tagged[Path] @rpcParamMetadata path: List[PathParamMetadata[_]],
-  @multi @tagged[Header] @rpcParamMetadata headers: Mapping[ParamMetadata[_]],
-  @multi @tagged[Query] @rpcParamMetadata query: Mapping[ParamMetadata[_]]
-)
+final case class RestParametersMetadata(
+  @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],
+  @multi @tagged[Header] @rpcParamMetadata headerParams: List[ParamMetadata[_]],
+  @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]]
+) {
+  lazy val headerParamsMap: Map[String, ParamMetadata[_]] =
+    headerParams.toMapBy(_.name.toLowerCase)
+  lazy val queryParamsMap: Map[String, ParamMetadata[_]] =
+    queryParams.toMapBy(_.name)
+}
 
-case class ParamMetadata[T]() extends TypedMetadata[T]
-case class PathParamMetadata[T](
+final case class ParamMetadata[T](
+  @reifyName(useRawName = true) name: String
+) extends TypedMetadata[T]
+
+final case class PathParamMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot pathAnnot: Path
 ) extends TypedMetadata[T] {
-  val pathSuffix: List[PathValue] = PathValue.splitDecode(pathAnnot.pathSuffix)
+  val pathSuffix: List[PlainValue] = PlainValue.decodePath(pathAnnot.pathSuffix)
 }

@@ -9,7 +9,7 @@ import io.udash.rest.raw.JsonValue
 
 import scala.util.Try
 
-case class WhenAbsentInfo[T](
+final case class WhenAbsentInfo[T](
   @reifyAnnot annot: whenAbsent[T],
   @infer("for @whenAbsent value: ") asJson: AsRaw[JsonValue, T]
 ) extends TypedMetadata[T] {

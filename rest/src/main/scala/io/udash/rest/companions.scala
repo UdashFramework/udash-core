@@ -3,6 +3,7 @@ package rest
 
 import com.avsystem.commons.meta.MacroInstances
 import io.udash.rest.openapi.OpenApiMetadata
+import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.{RawRest, RestMetadata}
 
 trait ClientInstances[Real] {
@@ -21,7 +22,7 @@ trait OpenApiInstances[Real] {
 trait OpenApiServerInstances[Real] extends ServerInstances[Real] with OpenApiInstances[Real]
 trait OpenApiFullInstances[Real] extends FullInstances[Real] with OpenApiInstances[Real]
 
-/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
 abstract class RestClientApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, ClientInstances[Real]]
 ) {
@@ -32,7 +33,7 @@ abstract class RestClientApiCompanion[Implicits, Real](protected val implicits: 
     RawRest.fromHandleRequest(handleRequest)
 }
 
-/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
 abstract class RestServerApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, ServerInstances[Real]]
 ) {
@@ -43,7 +44,7 @@ abstract class RestServerApiCompanion[Implicits, Real](protected val implicits: 
     RawRest.asHandleRequest(real)
 }
 
-/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
 abstract class RestServerOpenApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiServerInstances[Real]]
 ) {
@@ -75,7 +76,7 @@ abstract class RestApiCompanion[Implicits, Real](protected val implicits: Implic
     RawRest.asHandleRequest(real)
 }
 
-/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]]*/
+/** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
 abstract class RestOpenApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiFullInstances[Real]]
 ) {
@@ -88,4 +89,21 @@ abstract class RestOpenApiCompanion[Implicits, Real](protected val implicits: Im
     RawRest.fromHandleRequest(handleRequest)
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+}
+
+trait PolyRestApiFullInstances[T[_[_]]] {
+  def asRawRest[F[_] : AsyncEffect]: RawRest.AsRawRpc[T[F]]
+  def fromRawRest[F[_] : AsyncEffect]: RawRest.AsRealRpc[T[F]]
+  def restMetadata[F[_] : AsyncEffect]: RestMetadata[T[F]]
+  def openapiMetadata[F[_] : AsyncEffect]: OpenApiMetadata[T[F]]
+}
+
+abstract class DefaultPolyRestApiCompanion[T[_[_]]](implicit
+  instances: MacroInstances[GenCodecRestImplicits, PolyRestApiFullInstances[T]]
+) {
+  private lazy val inst = instances(GenCodecRestImplicits, this)
+  implicit def asRawRest[F[_] : AsyncEffect]: RawRest.AsRawRpc[T[F]] = inst.asRawRest
+  implicit def fromRawRest[F[_] : AsyncEffect]: RawRest.AsRealRpc[T[F]] = inst.fromRawRest
+  implicit def restMetadata[F[_] : AsyncEffect]: RestMetadata[T[F]] = inst.restMetadata
+  implicit def openapiMetadata[F[_] : AsyncEffect]: OpenApiMetadata[T[F]] = inst.openapiMetadata
 }
