@@ -334,6 +334,25 @@
               "type": "string",
               "default": "q2def"
             }
+          },
+          {
+            "name": "c1",
+            "in": "cookie",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "coo",
+            "in": "cookie",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

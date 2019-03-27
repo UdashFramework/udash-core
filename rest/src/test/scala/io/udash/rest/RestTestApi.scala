@@ -67,7 +67,8 @@ trait RestTestApi {
   @GET("multi/param") def complexGet(
     @Path("p1") p1: Int, @description("Very serious path parameter") @title("Stri") @Path p2: String,
     @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
-    q1: Int, @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value
+    q1: Int, @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
+    @Cookie c1: Int, @Cookie("coo") c2: String,
   ): Future[RestEntity]
 
   @POST("multi/param") def multiParamPost(
@@ -120,8 +121,8 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
-    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String): Future[RestEntity] =
-      Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1"), s"$p2-$h2-$q2"))
+    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
+      Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))
     def multiParamPost(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, b1: Int, b2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$b1"), s"$p2-$h2-$q2-$b2"))
     def singleBodyPut(entity: RestEntity): Future[String] =

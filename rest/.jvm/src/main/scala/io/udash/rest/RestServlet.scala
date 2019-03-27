@@ -15,6 +15,7 @@ import scala.concurrent.duration._
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
+  final val CookieHeader = "Cookie"
 
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
@@ -48,10 +49,17 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
     val query = request.getQueryString.opt.map(PlainValue.decodeQuery).getOrElse(Mapping.empty)
     val headersBuilder = IMapping.newBuilder[PlainValue]
     request.getHeaderNames.asScala.foreach { headerName =>
-      headersBuilder += headerName -> PlainValue(request.getHeader(headerName))
+      if (!headerName.equalsIgnoreCase(CookieHeader)) { // cookies are separate, don't include them into header params
+        headersBuilder += headerName -> PlainValue(request.getHeader(headerName))
+      }
     }
     val headers = headersBuilder.result()
-    RestParameters(path, headers, query)
+    val cookiesBuilder = Mapping.newBuilder[PlainValue]
+    request.getCookies.opt.getOrElse(Array.empty).foreach { cookie =>
+      cookiesBuilder += cookie.getName -> PlainValue(cookie.getValue)
+    }
+    val cookies = cookiesBuilder.result()
+    RestParameters(path, headers, query, cookies)
   }
 
   private def readBody(request: HttpServletRequest): HttpBody = {

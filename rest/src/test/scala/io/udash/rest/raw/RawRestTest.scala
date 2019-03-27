@@ -30,6 +30,7 @@ trait UserApi {
     @Path("moar/path") paf: String,
     @Header("X-Awesome") awesome: Boolean,
     @Query("f") foo: Int,
+    @Cookie("co") coo: Double,
     user: User
   ): Future[Unit]
 
@@ -74,11 +75,13 @@ class RawRestTest extends FunSuite with ScalaFutures {
   def repr(req: RestRequest): String = {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
     val queryRepr = req.parameters.query.entries.iterator
-      .map({ case (k, v) => s"$k=${v.value}" }).mkStringOrEmpty("?", "&", "")
+      .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
     val hasHeaders = req.parameters.headers.nonEmpty
     val headersRepr = req.parameters.headers.iterator
-      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
-    s"-> ${req.method} $pathRepr$queryRepr$headersRepr${repr(req.body, hasHeaders)}".trim
+      .map({ case (n, PlainValue(v)) => s"$n: $v" }).mkStringOrEmpty("\n", "\n", "\n")
+    val cookiesRepr = req.parameters.cookies.iterator
+      .map({ case (n, PlainValue(v)) => s"$n=$v" }).mkStringOrEmpty("\nCookie: ", "; ", "\n")
+    s"-> ${req.method} $pathRepr$queryRepr$headersRepr$cookiesRepr${repr(req.body, hasHeaders)}".trim
   }
 
   def repr(resp: RestResponse): String = {
@@ -93,7 +96,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def subApi(newId: Int, newQuery: String): UserApi = new RootApiImpl(newId, query + newQuery)
     def user(userId: UserId): Future[User] = Future.successful(User(userId, s"$userId-$id-$query"))
     def user(user: User): Future[Unit] = Future.unit
-    def user(paf: String, awesome: Boolean, f: Int, user: User): Future[Unit] = Future.unit
+    def user(paf: String, awesome: Boolean, f: Int, c: Double, user: User): Future[Unit] = Future.unit
     def defaults(awesome: Boolean, foo: Int, kek: String): Future[Unit] = Future.unit
     def autopost(bodyarg: String): Future[String] = Future.successful(bodyarg.toUpperCase)
     def singleBodyAutopost(body: String): Future[String] = Future.successful(body.toUpperCase)
@@ -140,10 +143,11 @@ class RawRestTest extends FunSuite with ScalaFutures {
     )
   }
 
-  test("simple POST with path, header and query") {
-    testRestCall(_.self.user("paf", awesome = true, 42, User(UserId("ID"), "Fred")),
+  test("simple POST with path, header, query and cookie") {
+    testRestCall(_.self.user("paf", awesome = true, 42, 3.14, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
+        |Cookie: coo=3.14
         |application/json;charset=utf-8
         |{"id":"ID","name":"Fred"}
         |<- 204
