@@ -106,26 +106,26 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     }
     "report valid HTTP codes (1)" in {
       val eventualResponse = rawHandler(mkRequest("/non/existing/path",
-        HttpMethod.POST, Map.empty, Map.empty, null))
+        HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
     }
     "report valid HTTP codes (2)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceOne/loadAll",
-        HttpMethod.POST, Map.empty, Map.empty, null))
+        HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(405)
     }
     "report valid HTTP codes (3)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceTwo/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(400)
     }
     "report valid HTTP codes (4)" in {
       val eventualResponse = rawHandler(mkRequest("/serviceThree/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
 
       val eventualResponse2 = rawHandler(mkRequest("/service_three/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, null))
+        HttpMethod.GET, Map.empty, Map.empty, ""))
       // "loadAll" is interpreted as URL argument from `serviceThree` getter
       await(eventualResponse2).code should be(404)
     }
@@ -141,7 +141,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
       val eventualResponse =
         badRawHandler(mkRequest("/non/existing/path",
-          HttpMethod.POST, Map.empty, Map.empty, null))
+          HttpMethod.POST, Map.empty, Map.empty, ""))
       eventualResponse.failed.futureValue shouldBe a[ConnectException]
 
       val eventualResponse2 =

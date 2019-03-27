@@ -19,7 +19,7 @@ sealed trait RestStructure[T] extends TypedMetadata[T] {
     schemaAdjusters.foldRight(schema)(_ adjustSchema _)
 }
 object RestStructure extends AdtMetadataCompanion[RestStructure] {
-  @positioned(positioned.here) case class Union[T](
+  @positioned(positioned.here) final case class Union[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtCaseMetadata @multi cases: List[Case[_]],
     @composite info: GenUnionInfo[T]
@@ -63,7 +63,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   /**
     * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
     */
-  @positioned(positioned.here) case class CustomCase[T](
+  @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
     @composite info: GenCaseInfo[T]
   ) extends Case[T] {
@@ -90,7 +90,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   /**
     * Will be inferred for types having apply/unapply(Seq) pair in their companion.
     */
-  @positioned(positioned.here) case class Record[T](
+  @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtParamMetadata @multi fields: List[Field[_]],
     @composite info: GenCaseInfo[T]
@@ -122,7 +122,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   /**
     * Will be inferred for singleton types (objects).
     */
-  @positioned(positioned.here) case class Singleton[T](
+  @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: ValueOf[T],
     @composite info: GenCaseInfo[T]
@@ -142,7 +142,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   }
   object Singleton extends AdtMetadataCompanion[Singleton]
 
-  case class Field[T](
+  final case class Field[T](
     @composite info: GenParamInfo[T],
     @infer restSchema: RestSchema[T],
     @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
@@ -160,7 +160,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     }
   }
 
-  case class DefaultValueInfo[T](
+  final case class DefaultValueInfo[T](
     @reifyDefaultValue defaultValue: DefaultValue[T],
     @infer("Cannot materialize default parameter value:\n") asJson: AsRaw[JsonValue, T]
   ) extends TypedMetadata[T] {
@@ -168,7 +168,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       Try(defaultValue.value).toOpt.map(asJson.asRaw)
   }
 
-  case class NameAndAdjusters[T](
+  final case class NameAndAdjusters[T](
     @reifyName sourceName: String,
     @optional @reifyAnnot annotName: Opt[name],
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]

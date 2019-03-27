@@ -15,7 +15,7 @@ import scala.collection.mutable
   "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
-case class OpenApiMetadata[T](
+final case class OpenApiMetadata[T](
   @multi @rpcMethodMetadata
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
@@ -105,7 +105,7 @@ case class OpenApiMetadata[T](
 }
 object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata]
 
-case class PathOperation(
+final case class PathOperation(
   path: String,
   method: HttpMethod,
   operation: Operation,
@@ -129,7 +129,7 @@ sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
   }
 }
 
-case class OpenApiPrefix[T](
+final case class OpenApiPrefix[T](
   name: String,
   methodTag: Prefix,
   parameters: List[OpenApiParameter[_]],
@@ -172,7 +172,7 @@ sealed trait OpenApiOperation[T] extends OpenApiMethod[T] {
     PathOperation(pathPattern, methodTag.method, operation(resolver), pathAdjusters)
 }
 
-case class OpenApiGetOperation[T](
+final case class OpenApiGetOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -183,7 +183,7 @@ case class OpenApiGetOperation[T](
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = Opt.Empty
 }
 
-case class OpenApiCustomBodyOperation[T](
+final case class OpenApiCustomBodyOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -193,10 +193,10 @@ case class OpenApiCustomBodyOperation[T](
   resultType: RestResultType[T]
 ) extends OpenApiOperation[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    singleBody.requestBody(resolver).opt
+    singleBody.requestBody(resolver)
 }
 
-case class OpenApiBodyOperation[T](
+final case class OpenApiBodyOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -208,21 +208,21 @@ case class OpenApiBodyOperation[T](
 ) extends OpenApiOperation[T] {
 
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    if (bodyFields.isEmpty) Opt.Empty else Opt {
+    if (bodyFields.isEmpty) Opt.Empty else {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
       val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
-      val mimeType = bodyTypeTag match {
+      val mediaType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
         case _: FormBody => HttpBody.FormType
         case _: CustomBody | _: NoBody =>
           throw new IllegalArgumentException(s"Unexpected body type $bodyTypeTag")
       }
-      RefOr(RestRequestBody.simpleRequestBody(mimeType, RefOr(schema), requiredFields.nonEmpty))
+      RestRequestBody.simpleRequestBody(mediaType, RefOr(schema), requiredFields.nonEmpty)
     }
 }
 
-case class OpenApiParamInfo[T](
+final case class OpenApiParamInfo[T](
   @reifyName(useRawName = true) name: String,
   @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
   @reifyFlags flags: ParamFlags,
@@ -235,7 +235,7 @@ case class OpenApiParamInfo[T](
     resolver.resolve(restSchema) |> (s => if (withDefaultValue) s.withDefaultValue(whenAbsentValue) else s)
 }
 
-case class OpenApiParameter[T](
+final case class OpenApiParameter[T](
   @reifyAnnot paramTag: NonBodyTag,
   @composite info: OpenApiParamInfo[T],
   @multi @reifyAnnot adjusters: List[ParameterAdjuster]
@@ -257,7 +257,7 @@ case class OpenApiParameter[T](
   }
 }
 
-case class OpenApiBodyField[T](
+final case class OpenApiBodyField[T](
   @composite info: OpenApiParamInfo[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
@@ -265,10 +265,13 @@ case class OpenApiBodyField[T](
     SchemaAdjuster.adjustRef(schemaAdjusters, info.schema(resolver, withDefaultValue = true))
 }
 
-case class OpenApiBody[T](
+final case class OpenApiBody[T](
   @infer restRequestBody: RestRequestBody[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
-  def requestBody(resolver: SchemaResolver): RefOr[RequestBody] =
-    restRequestBody.requestBody(resolver, schemaAdjusters)
+  def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = {
+    def transformSchema(schema: RestSchema[T]): RestSchema[_] =
+      RestSchema.create(resolver => SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(schema)))
+    restRequestBody.requestBody(resolver, transformSchema)
+  }
 }

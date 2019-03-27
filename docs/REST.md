@@ -89,7 +89,10 @@ Then, define some trivial REST interface:
 ```scala
 import io.udash.rest._
 
-case class User(id: String, name: String, birthYear: Int)
+case class UserId(id: String) extends AnyVal
+object UserId extends RestDataWrapperCompanion[String, UserId]
+
+case class User(id: UserId, name: String, birthYear: Int)
 object User extends RestDataCompanion[User]
 
 trait UserApi {
@@ -110,7 +113,7 @@ import scala.concurrent.Future
 
 class UserApiImpl extends UserApi {
   def createUser(name: String, birthYear: Int): Future[User] =
-    Future.successful(User(s"$name-ID", name, birthYear))
+    Future.successful(User(UserId(s"$name-ID"), name, birthYear))
 }
 
 object ServerMain {
@@ -301,7 +304,7 @@ You can specify which HTTP method you want by explicitly annotating trait method
 `@GET`/`@POST`/`@PATCH`/`@PUT` or `@DELETE` (from `io.udash.rest` package).
 
 ```scala
-@DELETE def deleteUser(id: String): Future[Unit]
+@DELETE def deleteUser(id: UserId): Future[Unit]
 ```
 
 Currently it is not possible define methods to handle `HEAD`, `OPTIONS`, `TRACE` and `CONNECT`
@@ -318,7 +321,7 @@ Trait method annotated with `@GET` is interpreted somewhat differently from othe
 Its parameters are interpreted as _query_ parameters rather than _body_ parameters. For example:
 
 ```scala
-@GET def getUsername(id: String): Future[String]
+@GET def getUsername(id: UserId): Future[String]
 ```
 
 Calling `getUsername("ID")` on the client will result in HTTP request:
@@ -341,7 +344,7 @@ This can be customized. Every annotation specifying HTTP method (e.g. `GET`) tak
 `path` argument that you can use to customize your path:
 
 ```scala
-@GET("username") def getUsername(id: String): Future[String]
+@GET("username") def getUsername(id: UserId): Future[String]
 ```
 
 The specified path may be multipart (it may contain slashes) or it may even be empty.
@@ -357,7 +360,7 @@ If a parameter of REST API trait method is annotated with `@Path`, its value is
 appended to URL path rather than translated into query parameter or body part.
 
 ```scala
-@GET("username") def getUsername(@Path id: String): Future[String]
+@GET("username") def getUsername(@Path id: UserId): Future[String]
 ```
 
 Calling `getUsername("ID")` will make a HTTP request on path `username/ID`.
@@ -367,7 +370,7 @@ order of declaration. Each path parameters may also optionally specify a _path s
 will be appended to path after value of each parameter:
 
 ```scala
-@GET("users") def getUsername(@Path(pathSuffix = "name") id: String): Future[String]
+@GET("users") def getUsername(@Path(pathSuffix = "name") id: UserId): Future[String]
 ```
 
 Calling `getUsername("ID")` will make a HTTP request on path `users/ID/name`.
@@ -599,7 +602,7 @@ that has a `GenCodec` instance will be serializable to `JsonValue`.
 #### Custom body serialization
 
 Body parameters of [`@CustomBody`](#custombody) methods are serialized straight into `HttpBody`, which encapsulates
-not only raw content but also MIME type. This way you can define custom body serializations for your types and
+not only raw content but also media type. This way you can define custom body serializations for your types and
 you are not limited to `application/json` and `application/x-www-form-urlencoded`.
 
 By default (if there are no more specific implicit instances defined),
@@ -846,7 +849,7 @@ parameters, HTTP header values and a body (`HttpBody`). All data is already in s
 easily sent through network.
 
 `RestResponse` is, similarly, a simple representation of HTTP response. `RestResponse` is made of HTTP status
-code and HTTP body (`HttpBody`, which also contains MIME type).
+code and HTTP body (`HttpBody`, which also contains media type).
 
 `Async` is a type alias defined in `RawRest` object and serves as a low level representation of asynchronous,
 repeatable computation.
@@ -1022,7 +1025,7 @@ import io.udash.rest._
 import io.udash.rest.openapi._
 
 @description("data type for users")
-case class User(id: String, @description("user name") name: User, birthYear: Int)
+case class User(id: UserId, @description("user name") name: User, birthYear: Int)
 object User extends RestDataCompanion[User]
 ```
 

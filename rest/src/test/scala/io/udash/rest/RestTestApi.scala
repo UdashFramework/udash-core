@@ -37,18 +37,23 @@ object CustomResp {
     cr => RestResponse(200, IMapping("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
     resp => CustomResp(resp.headers("X-Value").value)
   )
-  implicit val restResponses: RestResponses[CustomResp] = RestResponses { _ =>
-    Responses(byStatusCode = Map(200 -> RefOr(Response(
-      description = "Custom response",
-      headers = Map("X-Value" -> RefOr(OASHeader(
-        schema = RefOr(Schema.String)
-      ))),
-      content = Map(HttpBody.PlainType -> MediaType(
-        schema = RefOr(Schema.String)
-      ))
-    ))))
+  implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {
+    def responses(resolver: SchemaResolver, schemaTransform: RestSchema[CustomResp] => RestSchema[_]): Responses =
+      Responses(byStatusCode = Map(200 -> RefOr(Response(
+        description = "Custom response",
+        headers = Map("X-Value" -> RefOr(OASHeader(
+          schema = RefOr(Schema.String)
+        ))),
+        content = Map(HttpBody.PlainType -> MediaType(
+          schema = RefOr(Schema.String)
+        ))
+      ))))
   }
 }
+
+@description("binary bytes")
+case class Bytes(bytes: Array[Byte]) extends AnyVal
+object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
 
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
@@ -104,6 +109,10 @@ trait RestTestApi {
   ): Future[Unit]
 
   def customResponse(@Query value: String): Future[CustomResp]
+
+  @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
+  @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
+  @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
@@ -124,6 +133,9 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def complexParams(baseEntity: BaseEntity, flatBaseEntity: Opt[FlatBaseEntity]): Future[Unit] = Future.unit
     def complexParams(flatBaseEntity: FlatBaseEntity, baseEntity: Opt[BaseEntity]): Future[Unit] = Future.unit
     def customResponse(value: String): Future[CustomResp] = Future.successful(CustomResp(value))
+    def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
+    def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
   }
 }
 

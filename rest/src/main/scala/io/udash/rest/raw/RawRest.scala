@@ -16,10 +16,10 @@ sealed abstract class RestMethodCall {
   val metadata: RestMethodMetadata[_]
   def rpcName: String = metadata.name
 }
-case class PrefixCall(pathParams: List[PlainValue], metadata: PrefixMetadata[_]) extends RestMethodCall
-case class HttpCall(pathParams: List[PlainValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
+final case class PrefixCall(pathParams: List[PlainValue], metadata: PrefixMetadata[_]) extends RestMethodCall
+final case class HttpCall(pathParams: List[PlainValue], metadata: HttpMethodMetadata[_]) extends RestMethodCall
 
-case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], finalCall: HttpCall) {
+final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], finalCall: HttpCall) {
   lazy val pathPattern: List[PathPatternElement] =
     if (prefixes.isEmpty) finalCall.metadata.pathPattern
     else (prefixes.iterator.flatMap(_.metadata.pathPattern.iterator) ++

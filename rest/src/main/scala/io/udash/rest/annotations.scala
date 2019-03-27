@@ -68,7 +68,7 @@ sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTa
   * REST method may also take a single parameter representing the entire HTTP body. Such parameter must be annotated
   * as [[io.udash.rest.Body Body]] and must be the only body parameter of that method. Value of this parameter will
   * be encoded as [[io.udash.rest.raw.HttpBody HttpBody]] which doesn't necessarily have to be JSON
-  * (it may define its own MIME type).
+  * (it may define its own media type).
   *
   * @example
   * {{{
