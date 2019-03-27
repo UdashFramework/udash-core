@@ -14,7 +14,7 @@ import scala.annotation.implicitNotFound
   "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
-case class RestMetadata[T](
+final case class RestMetadata[T](
   @multi
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
@@ -210,8 +210,8 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
 }
 
 sealed trait PathPatternElement
-case class PathName(value: PlainValue) extends PathPatternElement
-case class PathParam(param: PathParamMetadata[_]) extends PathPatternElement
+final case class PathName(value: PlainValue) extends PathPatternElement
+final case class PathParam(param: PathParamMetadata[_]) extends PathPatternElement
 
 sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def name: String
@@ -256,7 +256,7 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
     else RawRest.mapAsync(asyncResponse)(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
 }
 
-case class PrefixMetadata[T](
+final case class PrefixMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: Prefix,
   @composite parametersMetadata: RestParametersMetadata,
@@ -267,7 +267,7 @@ case class PrefixMetadata[T](
   def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
 
-case class HttpMethodMetadata[T](
+final case class HttpMethodMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot methodTag: HttpMethodTag,
   @reifyAnnot bodyTypeTag: BodyTypeTag,
@@ -306,13 +306,13 @@ case class HttpMethodMetadata[T](
   * See `MacroInstances` for more information on injection of implicits.
   */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
-case class HttpResponseType[T]()
+final case class HttpResponseType[T]()
 object HttpResponseType {
   implicit def asyncEffectResponseType[F[_] : AsyncEffect, T]: HttpResponseType[F[T]] =
     HttpResponseType()
 }
 
-case class RestParametersMetadata(
+final case class RestParametersMetadata(
   @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],
   @multi @tagged[Header] @rpcParamMetadata headerParams: List[ParamMetadata[_]],
   @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]]
@@ -323,11 +323,11 @@ case class RestParametersMetadata(
     queryParams.toMapBy(_.name)
 }
 
-case class ParamMetadata[T](
+final case class ParamMetadata[T](
   @reifyName(useRawName = true) name: String
 ) extends TypedMetadata[T]
 
-case class PathParamMetadata[T](
+final case class PathParamMetadata[T](
   @reifyName(useRawName = true) name: String,
   @reifyAnnot pathAnnot: Path
 ) extends TypedMetadata[T] {

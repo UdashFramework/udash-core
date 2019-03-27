@@ -99,12 +99,14 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
     restResponse.headers.entries.foreach {
       case (name, PlainValue(value)) => response.addHeader(name, value)
     }
-    restResponse.body.nonEmptyOpt.foreach { neBody =>
-      response.setContentType(neBody.contentType)
-      neBody match {
-        case HttpBody.Textual(content, _, _) => response.getWriter.write(content)
-        case HttpBody.Binary(bytes, _) => response.getOutputStream.write(bytes)
-      }
+    restResponse.body match {
+      case HttpBody.Empty =>
+      case neBody: HttpBody.NonEmpty =>
+        // TODO: can we improve performance by avoiding intermediate byte array for textual content?
+        val bytes = neBody.bytes
+        response.setContentType(neBody.contentType)
+        response.setContentLength(bytes.length)
+        response.getOutputStream.write(bytes)
     }
   }
 

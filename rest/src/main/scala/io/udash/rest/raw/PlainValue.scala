@@ -10,7 +10,7 @@ import io.udash.utils.URLEncoder
   *
   * Wrapped string MUST NOT be URL-encoded.
   */
-case class PlainValue(value: String) extends AnyVal
+final case class PlainValue(value: String) extends AnyVal
 object PlainValue extends (String => PlainValue) {
   def decodePath(path: String): List[PlainValue] =
     path.split("/").iterator.map(s => PlainValue(URLEncoder.decode(s, plusAsSpace = false))).toList match {

@@ -8,7 +8,7 @@ import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import scala.annotation.implicitNotFound
 import scala.util.Failure
 
-case class RestResponse(code: Int, headers: IMapping[PlainValue], body: HttpBody) {
+final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: HttpBody) {
   def toHttpError: HttpErrorException =
     HttpErrorException(code, body.textualContentOpt.toOptArg)
   def ensureNonError: RestResponse =

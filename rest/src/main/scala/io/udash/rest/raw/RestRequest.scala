@@ -20,7 +20,7 @@ object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
 /**
   * Aggregates serialized path, header and query parameters of an HTTP request.
   */
-case class RestParameters(
+final case class RestParameters(
   @multi @tagged[Path] path: List[PlainValue] = Nil,
   @multi @tagged[Header] headers: IMapping[PlainValue] = IMapping.empty,
   @multi @tagged[Query] query: Mapping[PlainValue] = Mapping.empty
@@ -36,9 +36,9 @@ object RestParameters {
   final val Empty = RestParameters()
 }
 
-case class HttpErrorException(code: Int, payload: OptArg[String] = OptArg.Empty, cause: Throwable = null)
+final case class HttpErrorException(code: Int, payload: OptArg[String] = OptArg.Empty, cause: Throwable = null)
   extends RuntimeException(s"HTTP ERROR $code${payload.fold("")(p => s": $p")}", cause) with NoStackTrace {
   def toResponse: RestResponse = RestResponse.plain(code, payload)
 }
 
-case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody)
+final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody)

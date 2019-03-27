@@ -211,7 +211,7 @@ object RestResponses {
   * is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
   * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
   */
-case class RestResultType[T](responses: SchemaResolver => Responses)
+final case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
   implicit def forAsyncEffect[F[_] : AsyncEffect, T: RestResponses]: RestResultType[F[T]] =
     RestResultType(RestResponses[T].responses(_, identity))

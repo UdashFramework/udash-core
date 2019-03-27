@@ -15,7 +15,7 @@ import scala.collection.mutable
   "is it a valid REST API trait with properly defined companion object?")
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
-case class OpenApiMetadata[T](
+final case class OpenApiMetadata[T](
   @multi @rpcMethodMetadata
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
@@ -105,7 +105,7 @@ case class OpenApiMetadata[T](
 }
 object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata]
 
-case class PathOperation(
+final case class PathOperation(
   path: String,
   method: HttpMethod,
   operation: Operation,
@@ -129,7 +129,7 @@ sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
   }
 }
 
-case class OpenApiPrefix[T](
+final case class OpenApiPrefix[T](
   name: String,
   methodTag: Prefix,
   parameters: List[OpenApiParameter[_]],
@@ -172,7 +172,7 @@ sealed trait OpenApiOperation[T] extends OpenApiMethod[T] {
     PathOperation(pathPattern, methodTag.method, operation(resolver), pathAdjusters)
 }
 
-case class OpenApiGetOperation[T](
+final case class OpenApiGetOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -183,7 +183,7 @@ case class OpenApiGetOperation[T](
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = Opt.Empty
 }
 
-case class OpenApiCustomBodyOperation[T](
+final case class OpenApiCustomBodyOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -196,7 +196,7 @@ case class OpenApiCustomBodyOperation[T](
     singleBody.requestBody(resolver)
 }
 
-case class OpenApiBodyOperation[T](
+final case class OpenApiBodyOperation[T](
   name: String,
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
@@ -222,7 +222,7 @@ case class OpenApiBodyOperation[T](
     }
 }
 
-case class OpenApiParamInfo[T](
+final case class OpenApiParamInfo[T](
   @reifyName(useRawName = true) name: String,
   @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
   @reifyFlags flags: ParamFlags,
@@ -235,7 +235,7 @@ case class OpenApiParamInfo[T](
     resolver.resolve(restSchema) |> (s => if (withDefaultValue) s.withDefaultValue(whenAbsentValue) else s)
 }
 
-case class OpenApiParameter[T](
+final case class OpenApiParameter[T](
   @reifyAnnot paramTag: NonBodyTag,
   @composite info: OpenApiParamInfo[T],
   @multi @reifyAnnot adjusters: List[ParameterAdjuster]
@@ -257,7 +257,7 @@ case class OpenApiParameter[T](
   }
 }
 
-case class OpenApiBodyField[T](
+final case class OpenApiBodyField[T](
   @composite info: OpenApiParamInfo[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
@@ -265,7 +265,7 @@ case class OpenApiBodyField[T](
     SchemaAdjuster.adjustRef(schemaAdjusters, info.schema(resolver, withDefaultValue = true))
 }
 
-case class OpenApiBody[T](
+final case class OpenApiBody[T](
   @infer restRequestBody: RestRequestBody[T],
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
