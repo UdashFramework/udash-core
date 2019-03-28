@@ -68,7 +68,7 @@ trait RestTestApi {
     @Path("p1") p1: Int, @description("Very serious path parameter") @title("Stri") @Path p2: String,
     @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
     q1: Int, @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
-    @Cookie c1: Int, @Cookie("coo") c2: String,
+    @Cookie c1: Int, @Cookie("coo") c2: String
   ): Future[RestEntity]
 
   @POST("multi/param") def multiParamPost(
