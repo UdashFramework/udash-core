@@ -77,11 +77,11 @@ class RawRestTest extends FunSuite with ScalaFutures {
     val queryRepr = req.parameters.query.entries.iterator
       .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
     val hasHeaders = req.parameters.headers.nonEmpty
-    val headersRepr = req.parameters.headers.iterator
+    val cookieHeader = Opt(req.parameters.cookies).filter(_.nonEmpty)
+      .map(cs => "Cookie" -> PlainValue(cs.iterator.map({ case (n, PlainValue(v)) => s"$n=$v" }).mkString("; ")))
+    val headersRepr = (req.parameters.headers.iterator ++ cookieHeader.iterator)
       .map({ case (n, PlainValue(v)) => s"$n: $v" }).mkStringOrEmpty("\n", "\n", "\n")
-    val cookiesRepr = req.parameters.cookies.iterator
-      .map({ case (n, PlainValue(v)) => s"$n=$v" }).mkStringOrEmpty("\nCookie: ", "; ", "\n")
-    s"-> ${req.method} $pathRepr$queryRepr$headersRepr$cookiesRepr${repr(req.body, hasHeaders)}".trim
+    s"-> ${req.method} $pathRepr$queryRepr$headersRepr${repr(req.body, hasHeaders)}".trim
   }
 
   def repr(resp: RestResponse): String = {
@@ -147,7 +147,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     testRestCall(_.self.user("paf", awesome = true, 42, 3.14, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
-        |Cookie: coo=3.14
+        |Cookie: co=3.14
         |application/json;charset=utf-8
         |{"id":"ID","name":"Fred"}
         |<- 204
