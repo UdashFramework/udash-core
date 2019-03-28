@@ -1134,7 +1134,7 @@ and can be applied on:
 * case class fields of data types with macro generated `RestSchema`
 * `@Body` parameters of REST methods
 
-Schema adjusters do **NOT** work on path/header/query parameters and REST methods
+Schema adjusters do **NOT** work on path/header/query/cookie parameters and REST methods
 themselves. Instead use [parameter adjusters](#adjusting-parameters) and
 [operation adjusters](#adjusting-operations) which can also modify schemas
 used by `Parameter` and `Operation` objects.
