@@ -134,6 +134,12 @@ class RawRestTest extends FunSuite with ScalaFutures {
     case _ => value
   }
 
+  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
   test("simple GET") {
     testRestCall(_.self.user(UserId("ID")),
       """-> GET /user?userId=ID
@@ -237,20 +243,14 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("OPTIONS") {
     val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
     val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("HEAD") {
     val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.empty)
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("header case insensitivity") {
@@ -260,19 +260,14 @@ class RawRestTest extends FunSuite with ScalaFutures {
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("bad body") {
     val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
     val response = RestResponse(400, IMapping.empty, HttpBody.plain(
       "Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("bad argument") {
@@ -282,27 +277,25 @@ class RawRestTest extends FunSuite with ScalaFutures {
       "Argument user of RPC put_user is invalid: " +
         "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
     ))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("missing argument") {
     val request = RestRequest(HttpMethod.GET, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument userId of RPC user is missing"))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("missing argument in prefix") {
     val request = RestRequest(HttpMethod.GET, RestParameters(PlainValue.decodePath("subApi/42/user")), HttpBody.Empty)
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument query of RPC subApi is missing"))
+    assertRawExchange(request, response)
+  }
 
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+  test("parsing textual content without charset") {
+    val body = HttpBody.binary("""{"bodyarg":"value"}""".getBytes(HttpBody.Utf8Charset), HttpBody.JsonType)
+    val request = RestRequest(HttpMethod.POST, RestParameters(List(PlainValue("autopost"))), body)
+    val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"VALUE\"")))
+    assertRawExchange(request, response)
   }
 }
