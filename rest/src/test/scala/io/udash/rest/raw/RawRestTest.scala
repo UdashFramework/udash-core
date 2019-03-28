@@ -76,7 +76,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
     val queryRepr = req.parameters.query.entries.iterator
       .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
-    val hasHeaders = req.parameters.headers.nonEmpty
+    val hasHeaders = req.parameters.headers.nonEmpty || req.parameters.cookies.nonEmpty
     val cookieHeader = Opt(req.parameters.cookies).filter(_.nonEmpty)
       .map(cs => "Cookie" -> PlainValue(cs.iterator.map({ case (n, PlainValue(v)) => s"$n=$v" }).mkString("; ")))
     val headersRepr = (req.parameters.headers.iterator ++ cookieHeader.iterator)
