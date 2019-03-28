@@ -45,17 +45,19 @@ object SttpRestClient {
       case (n, PlainValue(v)) => (n, v)
     }.toList
 
-    val cookies = request.parameters.cookies.entries.iterator.map {
-      case (n, PlainValue(v)) =>
-        require(!v.contains(";"), s"invalid cookie: $n=$v")
-        (n, v)
-    }.toList
+    val cookieHeaders = List(request.parameters.cookies.entries).filter(_.nonEmpty).map { cookies =>
+      "Cookie" -> cookies.iterator.map {
+        case (n, PlainValue(v)) =>
+          require(!v.contains(";"), s"invalid cookie: $n=$v")
+          s"$n=$v"
+      }.mkString(";")
+    }
 
     val paramsRequest =
       sttp.method(Method(request.method.name), uri)
         .headers(contentHeaders: _*)
         .headers(paramHeaders: _*)
-        .cookies(cookies: _*)
+        .headers(cookieHeaders: _*)
 
     val bodyRequest = request.body match {
       case HttpBody.Empty => paramsRequest
