@@ -218,6 +218,14 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with NonBodyTag
 
 /**
+  * REST method parameterrs annotated with [[io.udash.rest.Query Query]] will be encoded as
+  * [[io.udash.rest.raw.PlainValue PlainValue]] and sent as cookie values (using `Cookie` HTTP header).
+  * Cookie parameter values must not contain ';' character (semicolon).
+  */
+class Cookie(@defaultsToName override val name: String = RestParamTag.paramName)
+  extends rpcName(name) with NonBodyTag
+
+/**
   * REST method parameters annotated with [[io.udash.rest.Body Body]] will be used to build HTTP request body.
   * How exactly that happens depends on [[io.udash.rest.BodyTypeTag BodyTypeTag]] applied on a method. By default,
   * [[io.udash.rest.JsonBody JsonBody]] is assumed which means that body parameters will be combined into a single

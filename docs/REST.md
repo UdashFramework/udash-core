@@ -26,6 +26,7 @@ into your dependencies (e.g. UI related modules).
   - [Path parameters](#path-parameters)
   - [Query parameters](#query-parameters)
   - [Header parameters](#header-parameters)
+  - [Cookie parameters](#cookie-parameters)
   - [Body parameters](#body-parameters)
     - [`@FormBody`](#formbody)
     - [`@CustomBody`](#custombody)
@@ -34,7 +35,7 @@ into your dependencies (e.g. UI related modules).
     - [`@transientDefault`](#transientdefault)
 - [Serialization](#serialization)
   - [Real and raw values](#real-and-raw-values)
-  - [Path, query and header serialization](#path-query-and-header-serialization)
+  - [Path, query, header and cookie serialization](#path-query-header-and-cookie-serialization)
   - [Body parameter serialization](#body-parameter-serialization)
     - [Custom body serialization](#custom-body-serialization)
   - [Result serialization](#result-serialization)
@@ -378,7 +379,7 @@ Calling `getUsername("ID")` will make a HTTP request on path `users/ID/name`.
 This way you can model completely arbitrary path patterns.
 
 Values of path parameters are serialized into `PlainValue` objects.
-See [serialization](#path-query-and-header-serialization) for more details.
+See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
 ### Query parameters
 
@@ -387,10 +388,10 @@ using `@Query` annotation. As mentioned earlier, parameters of `GET` methods are
 as query parameters by default, so this annotation is necessary only for parameters of non-`GET` methods.
 
 `@Query` annotation also takes optional `name` parameter which may be specified to customize
-URL parameter name. If not specified, trait method parameter name is used.
+URL parameter name. If not specified, Scala parameter name is used.
 
 Values of query parameters are serialized into `PlainValue` objects. 
-See [serialization](#path-query-and-header-serialization) for more details.
+See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
 ### Header parameters
 
@@ -398,12 +399,18 @@ You may also request that some parameter is translated into a HTTP header using 
 It takes an obligatory `name` argument that specifies HTTP header name (case insensitive).
 
 Values of header parameters are serialized into `PlainValue` objects.
-See [serialization](#path-query-and-header-serialization) for more details.
+See [serialization](#path-query-header-and-cookie-serialization) for more details.
+
+### Cookie parameters
+
+You may also request that some parameter is translated into a HTTP cookie using `@Cookie` annotation.
+It also takes optional `name` parameter which may be specified to customize cookie name. If not specified,
+Scala parameter name is used.
 
 ### Body parameters
 
 Every parameter of an API trait method (except for `@GET`) is interpreted as a field of a JSON object sent as 
-HTTP body. Just like for path, query and header parameters, there is a `@Body` annotation which requests this 
+HTTP body. Just like for path, query, header and cookie parameters, there is a `@Body` annotation which requests this 
 explicitly. However, the only reason to use it explicitly is in order to customize the name of JSON field.
 
 Body parameters are serialized into `JsonValue` objects.
@@ -447,7 +454,7 @@ annotation is not necessary as long as your method returns a valid REST API trai
 see [companion objects](#companion-objects)).
 
 Prefix methods may take parameters. They are interpreted as path parameters by default,
-but they may also be annotated with `@Query` or `@Header`. Prefix methods must not take
+but they may also be annotated with `@Query`, `@Header` or `@Cookie`. Prefix methods must not take
 body parameters.
 
 Path and parameters collected by a prefix method will be prepended/added
@@ -473,7 +480,7 @@ object RootApi extends DefaultRestApiCompanion[RootApi]
 
 ### Default parameter values
 
-`@Query`, `@Header` and `@Body` parameters may accept a default value which
+`@Query`, `@Header`, `@Cookie` and `@Body` parameters may accept a default value which
 is picked up by REST framework macro engine and used as fallback value when actual value
 is missing in the HTTP request. This is useful primarily for [API evolution](#api-evolution) -
 it lets you add more parameters to your REST methods without breaking backwards compatibility
@@ -568,9 +575,9 @@ For example, you can define an instance of `AsRaw[JsonValue, Real]` which actual
 `Encoder[Real]` from [circe](https://circe.github.io/circe/). 
 See [Customizing serialization](#customizing-serialization) for more details.
 
-### Path, query and header serialization
+### Path, query, header and cookie serialization
 
-Path, query and header parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
+Path, query, header and cookie parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
 This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `Real[PlainValue, T]` for 
 every parameter of type `T` (`AsRaw` for the client, `AsReal` for the server).
 
@@ -584,6 +591,7 @@ representation.
 
 Serialized values of path & query parameters are automatically URL-encoded when being embedded into
 HTTP requests. This means that serialization should not worry about that.
+Cookie parameter values must not contain ';' character (semicolon).
 
 ### Body parameter serialization
 
@@ -821,7 +829,7 @@ that still use the old version:
 * Splitting parameters into multiple parameter lists or making them `implicit`.
 * Renaming `@Path` parameters - their names are not used in REST requests
 * Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
-  `@Query`, `@Header` or `@Body` annotation.
+  `@Query`, `@Header`, `@Cookie` or `@Body` annotation.
 * Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
 * Adding new non-`@Path` parameters, as long as default value is provided for them - either as
   Scala-level default parameter value or by using `@whenAbsent` annotation. The server will simply
@@ -829,6 +837,13 @@ that still use the old version:
 * Changing parameter or result types or their serialization - as long as serialized formats of new and old type
   are compatible. This depends on on the serialization library you're using. If you're using `GenCodec`, consult
   [its documentation on retaining backwards compatibility](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md#safely-introducing-changes-to-serialized-classes-retaining-backwards-compatibility).
+  
+Conversely, changes that would break your API include:
+* Renaming REST methods without explicitly configuring path
+* Renaming non-`@Path` parameters which don't have explicit name configured
+* Adding or removing `@Path` parameters
+* Adding non-`@Path` parameters without giving them default value
+* Changing order of `@Path` parameters
 
 ## Implementing backends
 
@@ -1119,7 +1134,7 @@ and can be applied on:
 * case class fields of data types with macro generated `RestSchema`
 * `@Body` parameters of REST methods
 
-Schema adjusters do **NOT** work on path/header/query parameters and REST methods
+Schema adjusters do **NOT** work on path/header/query/cookie parameters and REST methods
 themselves. Instead use [parameter adjusters](#adjusting-parameters) and
 [operation adjusters](#adjusting-operations) which can also modify schemas
 used by `Parameter` and `Operation` objects.

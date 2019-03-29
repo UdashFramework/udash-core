@@ -76,6 +76,14 @@ final case class RestMetadata[T](
       } throw new InvalidRestApiException(
         s"Query parameter ${queryParam.name} of ${method.name} collides with query parameter of the same " +
           s"name in prefix ${prefix.name}")
+
+      for {
+        prefix <- prefixes
+        cookieParam <- method.parametersMetadata.cookieParams
+        if prefix.parametersMetadata.cookieParamsMap.contains(cookieParam.name)
+      } throw new InvalidRestApiException(
+        s"Cookie parameter ${cookieParam.name} of ${method.name} collides with cookie parameter of the same " +
+          s"name in prefix ${prefix.name}")
     }
 
     prefixMethods.foreach { prefix =>
@@ -315,12 +323,15 @@ object HttpResponseType {
 final case class RestParametersMetadata(
   @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],
   @multi @tagged[Header] @rpcParamMetadata headerParams: List[ParamMetadata[_]],
-  @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]]
+  @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]],
+  @multi @tagged[Cookie] @rpcParamMetadata cookieParams: List[ParamMetadata[_]]
 ) {
   lazy val headerParamsMap: Map[String, ParamMetadata[_]] =
     headerParams.toMapBy(_.name.toLowerCase)
   lazy val queryParamsMap: Map[String, ParamMetadata[_]] =
     queryParams.toMapBy(_.name)
+  lazy val cookieParamsMap: Map[String, ParamMetadata[_]] =
+    cookieParams.toMapBy(_.name)
 }
 
 final case class ParamMetadata[T](

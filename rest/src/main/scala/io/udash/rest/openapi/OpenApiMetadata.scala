@@ -246,12 +246,14 @@ final case class OpenApiParameter[T](
       case _: Path => Location.Path
       case _: HeaderAnnot => Location.Header
       case _: Query => Location.Query
+      case _: Cookie => Location.Cookie
     }
     val pathParam = in == Location.Path
     val param = Parameter(info.name, in,
       required = pathParam || !info.hasFallbackValue,
       schema = info.schema(resolver, withDefaultValue = !pathParam),
-      explode = if (in == Location.Query) OptArg(false) else OptArg.Empty
+      // repeated query/cookie/header params are not supported for now so ensure `explode` is never assumed to be true
+      explode = if (in.defaultStyle.explodeByDefault) OptArg(false) else OptArg.Empty
     )
     RefOr(adjusters.foldRight(param)(_ adjustParameter _))
   }

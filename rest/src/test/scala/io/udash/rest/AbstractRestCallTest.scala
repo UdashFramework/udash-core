@@ -20,7 +20,7 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
   def testCall[T](call: RestTestApi => Future[T])(implicit pos: Position): Unit =
     assert(
       call(proxy).wrapToTry.futureValue.map(mkDeep) ==
-      call(RestTestApi.Impl).catchFailures.wrapToTry.futureValue.map(mkDeep)
+        call(RestTestApi.Impl).catchFailures.wrapToTry.futureValue.map(mkDeep)
     )
 
   def mkDeep(value: Any): Any = value match {
@@ -41,7 +41,7 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
   }
 
   test("complex GET") {
-    testCall(_.complexGet(0, "a/ +&", 1, "b/ +&", 2, "ć/ +&"))
+    testCall(_.complexGet(0, "a/ +&", 1, "b/ +&", 2, "ć/ +&", 3, "ó /&f"))
   }
 
   test("multi-param body POST") {
@@ -66,6 +66,10 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
 
   test("binary request and response") {
     testCall(_.binaryEcho(Array.fill[Byte](5)(5)))
+  }
+
+  test("large binary request and response") {
+    testCall(_.binaryEcho(Array.fill[Byte](1024 * 1024)(5)))
   }
 }
 
