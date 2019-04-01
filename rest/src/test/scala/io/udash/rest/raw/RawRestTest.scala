@@ -30,6 +30,7 @@ trait UserApi {
     @Path("moar/path") paf: String,
     @Header("X-Awesome") awesome: Boolean,
     @Query("f") foo: Int,
+    @Cookie("co") coo: Double,
     user: User
   ): Future[Unit]
 
@@ -74,10 +75,12 @@ class RawRestTest extends FunSuite with ScalaFutures {
   def repr(req: RestRequest): String = {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
     val queryRepr = req.parameters.query.entries.iterator
-      .map({ case (k, v) => s"$k=${v.value}" }).mkStringOrEmpty("?", "&", "")
-    val hasHeaders = req.parameters.headers.nonEmpty
-    val headersRepr = req.parameters.headers.iterator
-      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
+      .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
+    val hasHeaders = req.parameters.headers.nonEmpty || req.parameters.cookies.nonEmpty
+    val cookieHeader = Opt(req.parameters.cookies).filter(_.nonEmpty)
+      .map(cs => "Cookie" -> PlainValue(cs.iterator.map({ case (n, PlainValue(v)) => s"$n=$v" }).mkString("; ")))
+    val headersRepr = (req.parameters.headers.iterator ++ cookieHeader.iterator)
+      .map({ case (n, PlainValue(v)) => s"$n: $v" }).mkStringOrEmpty("\n", "\n", "\n")
     s"-> ${req.method} $pathRepr$queryRepr$headersRepr${repr(req.body, hasHeaders)}".trim
   }
 
@@ -93,7 +96,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def subApi(newId: Int, newQuery: String): UserApi = new RootApiImpl(newId, query + newQuery)
     def user(userId: UserId): Future[User] = Future.successful(User(userId, s"$userId-$id-$query"))
     def user(user: User): Future[Unit] = Future.unit
-    def user(paf: String, awesome: Boolean, f: Int, user: User): Future[Unit] = Future.unit
+    def user(paf: String, awesome: Boolean, f: Int, c: Double, user: User): Future[Unit] = Future.unit
     def defaults(awesome: Boolean, foo: Int, kek: String): Future[Unit] = Future.unit
     def autopost(bodyarg: String): Future[String] = Future.successful(bodyarg.toUpperCase)
     def singleBodyAutopost(body: String): Future[String] = Future.successful(body.toUpperCase)
@@ -131,6 +134,12 @@ class RawRestTest extends FunSuite with ScalaFutures {
     case _ => value
   }
 
+  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
+    val promise = Promise[RestResponse]
+    serverHandle(request).apply(promise.complete)
+    assert(promise.future.futureValue == response)
+  }
+
   test("simple GET") {
     testRestCall(_.self.user(UserId("ID")),
       """-> GET /user?userId=ID
@@ -140,10 +149,11 @@ class RawRestTest extends FunSuite with ScalaFutures {
     )
   }
 
-  test("simple POST with path, header and query") {
-    testRestCall(_.self.user("paf", awesome = true, 42, User(UserId("ID"), "Fred")),
+  test("simple POST with path, header, query and cookie") {
+    testRestCall(_.self.user("paf", awesome = true, 42, 3.14, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
+        |Cookie: co=3.14
         |application/json;charset=utf-8
         |{"id":"ID","name":"Fred"}
         |<- 204
@@ -233,20 +243,14 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("OPTIONS") {
     val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
     val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("HEAD") {
     val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.empty)
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("header case insensitivity") {
@@ -256,19 +260,14 @@ class RawRestTest extends FunSuite with ScalaFutures {
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("bad body") {
     val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
     val response = RestResponse(400, IMapping.empty, HttpBody.plain(
       "Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("bad argument") {
@@ -278,27 +277,25 @@ class RawRestTest extends FunSuite with ScalaFutures {
       "Argument user of RPC put_user is invalid: " +
         "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
     ))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("missing argument") {
     val request = RestRequest(HttpMethod.GET, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument userId of RPC user is missing"))
-
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    assertRawExchange(request, response)
   }
 
   test("missing argument in prefix") {
     val request = RestRequest(HttpMethod.GET, RestParameters(PlainValue.decodePath("subApi/42/user")), HttpBody.Empty)
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("Argument query of RPC subApi is missing"))
+    assertRawExchange(request, response)
+  }
 
-    val promise = Promise[RestResponse]
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+  test("parsing textual content without charset") {
+    val body = HttpBody.binary("""{"bodyarg":"value"}""".getBytes(HttpBody.Utf8Charset), HttpBody.JsonType)
+    val request = RestRequest(HttpMethod.POST, RestParameters(List(PlainValue("autopost"))), body)
+    val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"VALUE\"")))
+    assertRawExchange(request, response)
   }
 }

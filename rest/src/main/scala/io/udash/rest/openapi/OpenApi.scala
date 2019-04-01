@@ -433,6 +433,11 @@ object Entry {
 
 final class Location(implicit enumCtx: EnumCtx) extends AbstractValueEnum {
   override val name: String = enumCtx.valName.uncapitalize
+
+  def defaultStyle: Style = this match {
+    case Location.Query | Location.Cookie => Style.Form
+    case Location.Path | Location.Header => Style.Simple
+  }
 }
 object Location extends AbstractValueEnumCompanion[Location] {
   final val Query, Header, Path, Cookie: Value = new Location
@@ -444,6 +449,8 @@ object Location extends AbstractValueEnumCompanion[Location] {
   */
 final class Style(implicit enumCtx: EnumCtx) extends AbstractValueEnum {
   override val name: String = enumCtx.valName.uncapitalize
+
+  def explodeByDefault: Boolean = this == Style.Form
 }
 object Style extends AbstractValueEnumCompanion[Style] {
   final val Matrix, Label, Form, Simple, SpaceDelimited, PipeDelimited, DeepObject: Value = new Style

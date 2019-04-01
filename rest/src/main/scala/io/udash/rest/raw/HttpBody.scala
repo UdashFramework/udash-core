@@ -8,6 +8,7 @@ import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput, Jso
 import com.avsystem.commons.{JStringBuilder, Opt, OptArg, _}
 
 import scala.annotation.implicitNotFound
+import scala.util.hashing.MurmurHash3
 
 /**
   * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameter in
@@ -93,6 +94,18 @@ object HttpBody extends HttpBodyLowPrio {
       case _ => new String(bytes, defaultCharset)
     }
     lazy val utf8text: String = new String(bytes, Utf8Charset)
+
+    override def hashCode(): Int =
+      MurmurHash3.mixLast(MurmurHash3.bytesHash(bytes), MurmurHash3.stringHash(contentType))
+
+    override def equals(obj: Any): Boolean = obj match {
+      case Binary(otherBytes, otherContentType) =>
+        java.util.Arrays.equals(bytes, otherBytes) && contentType == otherContentType
+      case _ => false
+    }
+
+    override def toString: String =
+      s"Binary(${bytes.iterator.map(b => f"$b%02X").mkString},$contentType)"
   }
 
   def empty: HttpBody = Empty

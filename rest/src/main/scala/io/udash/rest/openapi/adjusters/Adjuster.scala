@@ -27,7 +27,7 @@ sealed trait Adjuster extends StaticAnnotation
   *
   * - [[io.udash.rest.Body Body]] parameters of REST methods.
   *
-  * Schema adjusters DO NOT WORK on REST methods themselves and their path/header/query parameters.
+  * Schema adjusters DO NOT WORK on REST methods themselves and their path/header/query/cookie parameters.
   * Instead, use [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] and
   * [[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]].
   *
@@ -160,7 +160,7 @@ class schemaDescription(desc: String) extends SchemaAdjuster with ParameterSchem
 
 /**
   * Annotation that specifies description that will be included into generated OpenAPI specification.
-  * It can be applied on REST methods ([[OperationAdjuster OperationAdjuster]]), path/header/query parameters
+  * It can be applied on REST methods ([[OperationAdjuster OperationAdjuster]]), path/header/query/cookie parameters
   * ([[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]]),
   * body parameters ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]), case class fields
   * ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]) and ADTs for which

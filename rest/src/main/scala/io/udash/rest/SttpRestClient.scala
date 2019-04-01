@@ -45,18 +45,27 @@ object SttpRestClient {
       case (n, PlainValue(v)) => (n, v)
     }.toList
 
+    val cookieHeaders = List(request.parameters.cookies.entries).filter(_.nonEmpty).map { cookies =>
+      "Cookie" -> cookies.iterator.map {
+        case (n, PlainValue(v)) =>
+          require(!v.contains(";"), s"invalid cookie: $n=$v")
+          s"$n=$v"
+      }.mkString(";")
+    }
 
-    sttp.copy[Id, Array[Byte], Nothing](
-      method = Method(request.method.name),
-      uri = uri,
-      headers = contentHeaders ++ paramHeaders,
-      body = request.body match {
-        case HttpBody.Empty => NoBody
-        case HttpBody.Textual(content, _, charset) => StringBody(content, charset, None)
-        case HttpBody.Binary(bytes, _) => ByteArrayBody(bytes, None)
-      },
-      response = ResponseAsByteArray
-    )
+    val paramsRequest =
+      sttp.method(Method(request.method.name), uri)
+        .headers(contentHeaders: _*)
+        .headers(paramHeaders: _*)
+        .headers(cookieHeaders: _*)
+
+    val bodyRequest = request.body match {
+      case HttpBody.Empty => paramsRequest
+      case HttpBody.Textual(content, _, charset) => paramsRequest.body(content, charset)
+      case HttpBody.Binary(bytes, _) => paramsRequest.body(bytes)
+    }
+
+    bodyRequest.response(ResponseAsByteArray)
   }
 
   private def fromSttpResponse(sttpResp: Response[Array[Byte]]): RestResponse =
