@@ -5,6 +5,7 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 import com.avsystem.commons._
+import com.vladsch.flexmark.ext.toc.TocExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
 
@@ -12,8 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final class MarkdownPagesEndpoint(guideResourceBase: String)(implicit ec: ExecutionContext) extends MarkdownPageRPC {
 
-  private val parser = Parser.builder.build
-  private val renderer = HtmlRenderer.builder.build
+  private val tocExtension = TocExtension.create
+  private val parser = Parser.builder.extensions(JList(tocExtension)).build
+  private val renderer = HtmlRenderer.builder.extensions(JList(tocExtension)).build
   private val renderedPages = new ConcurrentHashMap[MarkdownPage, (Future[String], Instant)]
 
   private def render(file: File): Future[String] = Future {
