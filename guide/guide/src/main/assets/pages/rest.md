@@ -1,4 +1,4 @@
-# REST framework
+# Udash REST
 
 Udash framework contains an RPC based REST framework for defining REST services using Scala traits.
 It may be used for implementing both client and server side and works in both JVM and JS, as long as
