@@ -963,7 +963,7 @@ Schema derived for an ADT from macro materialized `RestStructure` will describe 
 `GenCodec` macro materialized for that type. It will take into account all the annotations, e.g.
 `@flatten`, `@name`, `@transparent`, `@whenAbsent` etc.
 
-##### Registered schemas
+#### Registered schemas
 
 By default, schemas macro materialized for case classes and sealed hierarchies will be _named_.
 This means they will not be inlined but rather registered under their name in
@@ -977,7 +977,7 @@ conflicts if you have multiple data types with the same name but in different pa
 disambiguate names of your data types with `@name` annotation. Unfortunately, such conflicts cannot be detected in compile
 time and will only be reported in runtime, when trying to generate OpenAPI document.
 
-##### Adjusting macro materialized schemas
+#### Adjusting macro materialized schemas
 
 It's possible to adjust schemas macro materialized for ADTs using annotations. For example, you can use
 `@description` annotation on data types and case class fields to inject description into materialized schemas, e.g.
