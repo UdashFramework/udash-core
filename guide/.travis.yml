@@ -1,0 +1,20 @@
+sudo: required
+dist: trusty
+addons:
+  chrome: stable
+language: scala
+
+before_script:
+  # Install Selenium chromedriver
+  - wget http://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d selenium-bin
+  - export PATH=$PWD/selenium-bin:$PATH
+
+jdk:
+  - oraclejdk8
+
+scala:
+  - 2.12.8
+
+script:
+  - sbt compile "selenium/test"
