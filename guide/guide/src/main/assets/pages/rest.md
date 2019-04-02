@@ -178,7 +178,7 @@ Server: Jetty(9.3.23.v20180228)
 
 ## REST API traits
 
-As we saw in the quickstart example, REST API is defined by a Scala trait adjusted with annotations.
+As we saw in the quickstart example, REST API is defined with a plain Scala trait.
 This approach is analogous to various well-established REST frameworks for other languages, e.g. JAX-RS for Java.
 However, such frameworks are usually based on runtime reflection while in Scala it can be
 done using compile-time reflection through macros which offers several advantages:
@@ -190,6 +190,7 @@ done using compile-time reflection through macros which offers several advantage
 * pluggable typeclass based serialization - for serialization of REST parameters and results,
   typeclasses are used which also offers strong compile-time safety. If any of your parameters or
   method results cannot be serialized, a detailed compilation error will be raised.
+* significantly better annotation processing
 
 ### Companion objects
 
@@ -250,6 +251,35 @@ object GenericApi {
   import openapi._
   implicit def openApiMetadata[T: RestSchema]: OpenApiMetadata[GenericApi[T]] = OpenApiMetadata.materialize
 }
+```
+
+### Data types
+
+When a data type is used in a REST API trait as parameter type or result type, it must also come with an appropriate
+set of implicits. This includes [serialization-related implicits](#serialization-implicits-summary) and
+[OpenAPI related implicits](#restschema-typeclass). Just like for traits, these implicits can be provided by
+giving your data type a well-defined companion object.
+
+#### `RestDataCompanion`
+
+`RestDataCompanion` is a base class for companion objects of algebraic data types (case classes, sealed hierarchies)
+used in REST API traits. This base class automatically derives instances of `GenCodec` (for serialization) and
+`RestSchema` (for OpenAPI generation).
+
+```scala
+case class Address(city: String, zip: String)
+object Address extends RestDataCompanion[Address]
+```
+
+#### `RestDataWrapperCompanion`
+
+`RestDataWrapperCompanion` is a handy base companion class which you can use for data types which simply wrap
+another type. It will establish a relation between the wrapping and wrapped types so that all implicits for the 
+wrapping type are automatically derived from corresponding implicits for the wrapped type.
+
+```scala
+case class UserId(id: String) extends AnyVal
+object UserId extends RestDataWrapperCompanion[String, UserId]
 ```
 
 ### Use of annotations
@@ -495,8 +525,7 @@ There are two ways to define default values:
 
   Instead of defining Scala-level default value, you can use `@whenAbsent` annotation:
   ```scala
-  case class Person(id: String, @whenAbsent("anon") name: String)
-  object Person extends RestDataCompanion[Person]
+  @GET def fetchUsers(@whenAbsent(".*") namePattern: String): List[User]
   ```
   This brings two advantages:
   * The default value is for deserialization _only_ and does not affect programmer API, which is often desired.
@@ -511,8 +540,7 @@ for Scala programming API. And if you want these values to be the same, there's 
 macro which you can use to avoid writing the same default value twice:
 
 ```scala
-case class Person(id: String, @whenAbsent("anon") name: String = whenAbsent.value)
-object Person extends RestDataCompanion[Person]
+@GET def fetchUsers(@whenAbsent(".*") namePattern: String = whenAbsent.value): List[User]
 ```
 
 #### `@transientDefault`
@@ -738,7 +766,8 @@ REST API, then along from custom serialization you must provide customized insta
 #### Customizing serialization for your own type
 
 If you need to write manual serialization for your own type, the easiest way to do this is to
-provide appropriate implicit in its companion object:
+provide appropriate implicit in its companion object. In the example below, we provide custom serialization
+to `JsonValue`:
 
 ```scala
 class MyClass { ... }
@@ -749,7 +778,7 @@ object MyClass {
 
 **WARNING**: Remember that if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API then you must also provide custom [`RestSchema`](#restschema-typeclass) instance for your type that
-will match its serialization format.
+will reflect its custom JSON serialization format.
 
 #### Providing serialization for third party type
 
@@ -778,7 +807,7 @@ object MyRestApi extends RestApiCompanion[EnhancedRestImplicits, MyRestApi](Enha
 
 Also, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API then you must provide a [`RestSchema`](#restschema-typeclass) instance for your type that
-will properly describe its serialization format.
+will reflect its serialization format.
 
 #### Supporting result containers other than `Future`
 
@@ -818,7 +847,9 @@ that still use the old version:
 * Reordering parameters of your REST methods, except for `@Path` parameters which may be freely intermixed
   with other parameters but they must retain the same order relative to each other.
 * Splitting parameters into multiple parameter lists or making them `implicit`.
-* Renaming `@Path` parameters - their names are not used in REST requests
+* Extracting common path fragments or parameters into [prefix methods](#prefix-methods).
+* Renaming `@Path` parameters - their names are not used in REST requests 
+  (they are used when generating OpenAPI though)
 * Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
   `@Query`, `@Header`, `@Cookie` or `@Body` annotation.
 * Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
