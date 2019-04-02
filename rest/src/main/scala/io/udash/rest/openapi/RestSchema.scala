@@ -106,6 +106,7 @@ object RestSchema {
     RestSchema[T].map(Schema.arrayOf(_))
   implicit def jSetSchema[C[X] <: JSet[X], T: RestSchema]: RestSchema[C[T]] =
     RestSchema[T].map(Schema.arrayOf(_, uniqueItems = true))
+
   implicit def mapSchema[M[X, Y] <: BMap[X, Y], K, V: RestSchema]: RestSchema[M[K, V]] =
     RestSchema[V].map(Schema.mapOf)
   implicit def jMapSchema[M[X, Y] <: JMap[X, Y], K, V: RestSchema]: RestSchema[M[K, V]] =
@@ -132,10 +133,25 @@ object RestSchema {
       )))
     }
 
-  implicit def namedEnumSchema[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): RestSchema[E] =
-    RestSchema.plain(Schema.enumOf(comp.values.iterator.map(_.name).toList))
-  implicit def jEnumSchema[E <: Enum[E]](implicit ct: ClassTag[E]): RestSchema[E] =
-    RestSchema.plain(Schema.enumOf(ct.runtimeClass.getEnumConstants.iterator.map(_.asInstanceOf[E].name).toList))
+  private def enumValues[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): List[String] =
+    comp.values.iterator.map(_.name).toList
+  private def jEnumValues[E <: Enum[E] : ClassTag]: List[String] =
+    classTag[E].runtimeClass.getEnumConstants.iterator.map(_.asInstanceOf[E].name).toList
+
+  implicit def namedEnumSchema[E <: NamedEnum : NamedEnumCompanion]: RestSchema[E] =
+    RestSchema.plain(Schema.enumOf(enumValues[E]))
+  implicit def jEnumSchema[E <: Enum[E] : ClassTag]: RestSchema[E] =
+    RestSchema.plain(Schema.enumOf(jEnumValues[E]))
+
+  implicit def namedEnumMapSchema[M[X, Y] <: BMap[X, Y], K <: NamedEnum : NamedEnumCompanion, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(enumValues[K], _))
+  implicit def jEnumMapSchema[M[X, Y] <: BMap[X, Y], K <: Enum[K] : ClassTag, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(jEnumValues[K], _))
+
+  implicit def namedEnumJMapSchema[M[X, Y] <: JMap[X, Y], K <: NamedEnum : NamedEnumCompanion, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(enumValues[K], _))
+  implicit def jEnumJMapSchema[M[X, Y] <: JMap[X, Y], K <: Enum[K] : ClassTag, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(jEnumValues[K], _))
 }
 
 /**
