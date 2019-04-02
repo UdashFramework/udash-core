@@ -1,4 +1,4 @@
-# REST framework
+# Udash REST
 
 Udash framework contains an RPC based REST framework for defining REST services using Scala traits.
 It may be used for implementing both client and server side and works in both JVM and JS, as long as
@@ -10,64 +10,9 @@ Udash REST is a module completely independent of other parts of Udash.
 This means you can use it as a pure REST library without bringing unwanted stuff
 into your dependencies (e.g. UI related modules).
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+## Table of contents
 
-- [Quickstart example](#quickstart-example)
-- [Annotations](#annotations)
-- [REST API traits](#rest-api-traits)
-  - [Companion objects](#companion-objects)
-    - [Manual declaration of implicits](#manual-declaration-of-implicits)
-  - [HTTP REST methods](#http-rest-methods)
-  - [Choosing the HTTP method](#choosing-the-http-method)
-    - [`GET` methods](#get-methods)
-  - [Customizing paths](#customizing-paths)
-  - [Path parameters](#path-parameters)
-  - [Query parameters](#query-parameters)
-  - [Header parameters](#header-parameters)
-  - [Cookie parameters](#cookie-parameters)
-  - [Body parameters](#body-parameters)
-    - [`@FormBody`](#formbody)
-    - [`@CustomBody`](#custombody)
-  - [Prefix methods](#prefix-methods)
-  - [Default parameter values](#default-parameter-values)
-    - [`@transientDefault`](#transientdefault)
-- [Serialization](#serialization)
-  - [Real and raw values](#real-and-raw-values)
-  - [Path, query, header and cookie serialization](#path-query-header-and-cookie-serialization)
-  - [Body parameter serialization](#body-parameter-serialization)
-    - [Custom body serialization](#custom-body-serialization)
-  - [Result serialization](#result-serialization)
-  - [Serialization implicits summary](#serialization-implicits-summary)
-  - [Customizing serialization](#customizing-serialization)
-    - [Introduction](#introduction)
-    - [Plugging in entirely custom serialization](#plugging-in-entirely-custom-serialization)
-    - [Customizing serialization for your own type](#customizing-serialization-for-your-own-type)
-    - [Providing serialization for third party type](#providing-serialization-for-third-party-type)
-    - [Supporting result containers other than `Future`](#supporting-result-containers-other-than-future)
-- [API evolution](#api-evolution)
-- [Implementing backends](#implementing-backends)
-  - [Handler function](#handler-function)
-  - [Implementing a server](#implementing-a-server)
-  - [Implementing a client](#implementing-a-client)
-- [Generating OpenAPI 3.0 specifications](#generating-openapi-30-specifications)
-  - [Operation IDs](#operation-ids)
-  - [`RestSchema` typeclass](#restschema-typeclass)
-    - [Macro materialized ADT schemas](#macro-materialized-adt-schemas)
-      - [Registered schemas](#registered-schemas)
-      - [Adjusting macro materialized schemas](#adjusting-macro-materialized-schemas)
-    - [Manually defined schemas](#manually-defined-schemas)
-  - [`RestResponses` typeclass](#restresponses-typeclass)
-  - [`RestRequestBody` typeclass](#restrequestbody-typeclass)
-  - [Adjusting generated OpenAPI documents with annotations](#adjusting-generated-openapi-documents-with-annotations)
-    - [Adjusting schemas](#adjusting-schemas)
-    - [Adjusting parameters](#adjusting-parameters)
-    - [Adjusting operations](#adjusting-operations)
-    - [Adjusting path items](#adjusting-path-items)
-  - [Limitations](#limitations)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+[TOC levels=2-4]
 
 ## Quickstart example
 
@@ -355,7 +300,9 @@ creating a server.
 
 Empty paths may be especially useful for [prefix methods](#prefix-methods).
 
-### Path parameters
+### Customizing parameters
+
+#### Path parameters
 
 If a parameter of REST API trait method is annotated with `@Path`, its value is
 appended to URL path rather than translated into query parameter or body part.
@@ -381,7 +328,7 @@ This way you can model completely arbitrary path patterns.
 Values of path parameters are serialized into `PlainValue` objects.
 See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
-### Query parameters
+#### Query parameters
 
 You may explicitly request that some parameter is translated into URL query parameter
 using `@Query` annotation. As mentioned earlier, parameters of `GET` methods are treated
@@ -393,7 +340,7 @@ URL parameter name. If not specified, Scala parameter name is used.
 Values of query parameters are serialized into `PlainValue` objects. 
 See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
-### Header parameters
+#### Header parameters
 
 You may also request that some parameter is translated into a HTTP header using `@Header` annotation.
 It takes an obligatory `name` argument that specifies HTTP header name (case insensitive).
@@ -401,13 +348,13 @@ It takes an obligatory `name` argument that specifies HTTP header name (case ins
 Values of header parameters are serialized into `PlainValue` objects.
 See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
-### Cookie parameters
+#### Cookie parameters
 
 You may also request that some parameter is translated into a HTTP cookie using `@Cookie` annotation.
 It also takes optional `name` parameter which may be specified to customize cookie name. If not specified,
 Scala parameter name is used.
 
-### Body parameters
+#### Body parameters
 
 Every parameter of an API trait method (except for `@GET`) is interpreted as a field of a JSON object sent as 
 HTTP body. Just like for path, query, header and cookie parameters, there is a `@Body` annotation which requests this 
@@ -575,6 +522,15 @@ For example, you can define an instance of `AsRaw[JsonValue, Real]` which actual
 `Encoder[Real]` from [circe](https://circe.github.io/circe/). 
 See [Customizing serialization](#customizing-serialization) for more details.
 
+### Serialization implicits summary
+
+Below is a diagram that summarizes dependencies and defaults of implicits used to serialize parameters and results
+of HTTP REST methods. `AsRaw/AsReal[Raw, Real]` indicates that the macro engine searches for either `AsRaw[Raw, Real]`
+(for parameters on client side & results on server side) or `AsReal[Raw, Real]` (parameters on server side and
+results on client side).
+
+![REST implicits](assets/images/views/rest/serialization.svg)
+
 ### Path, query, header and cookie serialization
 
 Path, query, header and cookie parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
@@ -609,7 +565,7 @@ that has a `GenCodec` instance will be serializable to `JsonValue`.
 
 #### Custom body serialization
 
-Body parameters of [`@CustomBody`](#custombody) methods are serialized straight into `HttpBody`, which encapsulates
+Body parameter of a [`@CustomBody`](#custombody) method is serialized straight into `HttpBody`, which encapsulates
 not only raw content but also media type. This way you can define custom body serializations for your types and
 you are not limited to `application/json` and `application/x-www-form-urlencoded`.
 
@@ -647,15 +603,6 @@ derived from `GenCodec` instance.
 Ultimately, if you don't want to use `Future`s, you may replace it with some other asynchronous wrapper type,
 e.g. Monix Task or some IO monad.
 See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
-
-### Serialization implicits summary
-
-Below is a diagram that summarizes dependencies and defaults of implicits used to serialize parameters and results
-of HTTP REST methods. `AsRaw/AsReal[Raw, Real]` indicates that the macro engine searches for either `AsRaw[Raw, Real]`
-(for parameters on client side & results on server side) or `AsReal[Raw, Real]` (parameters on server side and
-results on client side).
-
-![REST implicits](images/REST.svg)
 
 ### Customizing serialization
 
@@ -1016,7 +963,7 @@ Schema derived for an ADT from macro materialized `RestStructure` will describe 
 `GenCodec` macro materialized for that type. It will take into account all the annotations, e.g.
 `@flatten`, `@name`, `@transparent`, `@whenAbsent` etc.
 
-##### Registered schemas
+#### Registered schemas
 
 By default, schemas macro materialized for case classes and sealed hierarchies will be _named_.
 This means they will not be inlined but rather registered under their name in
@@ -1030,7 +977,7 @@ conflicts if you have multiple data types with the same name but in different pa
 disambiguate names of your data types with `@name` annotation. Unfortunately, such conflicts cannot be detected in compile
 time and will only be reported in runtime, when trying to generate OpenAPI document.
 
-##### Adjusting macro materialized schemas
+#### Adjusting macro materialized schemas
 
 It's possible to adjust schemas macro materialized for ADTs using annotations. For example, you can use
 `@description` annotation on data types and case class fields to inject description into materialized schemas, e.g.

@@ -72,15 +72,7 @@ case object RpcClientServerState extends FinalRoutingState(Some(RpcState))
 case object RpcServerClientState extends FinalRoutingState(Some(RpcState))
 
 /** REST communication chapters */
-case object RestState extends ContainerRoutingState(Some(ContentState))
-
-case object RestIntroState extends FinalRoutingState(Some(RestState))
-
-case object RestInterfacesState extends FinalRoutingState(Some(RestState))
-
-case object RestClientServerState extends FinalRoutingState(Some(RestState))
-
-case object RestServerState extends FinalRoutingState(Some(RestState))
+case object RestState extends MarkdownState(MarkdownPage.Rest)
 
 /** Extensions **/
 case object BootstrapExtState extends FinalRoutingState(Some(ContentState))

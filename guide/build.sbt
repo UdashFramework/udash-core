@@ -6,6 +6,7 @@ import sbtcrossproject.CrossPlugin.autoImport.crossProject
 import sbtcrossproject.CrossType
 
 name := "udash-guide"
+cancelable in Global := true
 
 inThisBuild(Seq(
   version := "0.7.1",

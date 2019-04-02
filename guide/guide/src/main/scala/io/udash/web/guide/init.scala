@@ -59,12 +59,7 @@ object Context {
       MenuLink("Server ➔ Client", RpcServerClientState),
       MenuLink("Serialization", RpcSerializationState)
     )),
-    MenuContainer("REST", Seq(
-      MenuLink("Introduction", RestIntroState),
-      MenuLink("Interfaces", RestInterfacesState),
-      MenuLink("Client ➔ Server", RestClientServerState),
-      MenuLink("Server", RestServerState)
-    )),
+    MenuLink("REST", RestState),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
       MenuLink("Authorization", AuthorizationExtState),
@@ -73,12 +68,13 @@ object Context {
       MenuLink("jQuery wrapper", JQueryExtState),
       MenuLink("User activity", UserActivityExtState)
     )),
-    MenuLink("License", LicenseState)/*,
+    MenuLink("License", LicenseState) /*,
     MenuLink("FAQ", FAQState)*/
   )
 }
 
 object Init {
+
   import Context._
 
   @JSExport
