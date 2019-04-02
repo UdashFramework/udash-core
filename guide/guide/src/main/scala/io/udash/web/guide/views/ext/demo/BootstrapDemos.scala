@@ -597,7 +597,7 @@ object BootstrapDemos extends CrossLogging with CssView {
           },
           isDropdown = _.transform {
             case MenuContainer(_, _) => true
-            case MenuLink(_, _) => false
+            case MenuLink(_, _, _) => false
           }
         ),
         span("Udash"),

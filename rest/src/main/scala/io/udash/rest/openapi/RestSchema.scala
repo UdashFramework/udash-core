@@ -198,7 +198,7 @@ object RestResponses {
 /**
   * Just like [[io.udash.rest.openapi.RestResponses RestResponses]],
   * [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
-  * Responses Object will look like for a HTTP method which returns given type. The difference between
+  * Responses Object will look like for an HTTP method which returns given type. The difference between
   * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]]
   * is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
   * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).

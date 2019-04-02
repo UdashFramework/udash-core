@@ -13,6 +13,10 @@ sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState
 sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with ContainerState
 sealed abstract class FinalRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with FinalState
 sealed abstract class MarkdownState(final val page: MarkdownPage) extends FinalRoutingState(Some(ContentState)) with MarkdownPageState
+object MarkdownState {
+  def chapterFragment(chapterTitle: String): String =
+    chapterTitle.replaceAll("[^A-Za-z0-9_ ]+", "").trim.replaceAll("\\s+", "-").toLowerCase
+}
 
 case object RootState extends ContainerRoutingState(None)
 

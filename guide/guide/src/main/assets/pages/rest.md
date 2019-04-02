@@ -1,6 +1,6 @@
 # Udash REST
 
-Udash framework contains an RPC based REST framework for defining REST services using Scala traits.
+Udash framework contains an RPC based REST framework for defining REST services using plain Scala traits.
 It may be used for implementing both client and server side and works in both JVM and JS, as long as
 appropriate network layer is implemented. By default, Udash provides Java Servlet based server
 implementation and [sttp](https://github.com/softwaremill/sttp) based client implementation 
@@ -14,11 +14,35 @@ into your dependencies (e.g. UI related modules).
 
 [TOC levels=2-4]
 
+## Overview
+
+Udash REST:
+
+* Provides automatic translation of **plain Scala traits** into REST endpoints
+  * Lets you cover your web endpoint with nice, typesafe, well organized, IDE-friendly language-level interface.
+  * Forms a type safety layer between the client and the server
+* Gives you a set of annotations for adjusting how the translation into an HTTP endpoint happens.
+* Statically validates your trait, emitting **detailed and readable compilation errors** in case anything is wrong.
+* Uses typeclass-based, boilerplate free, pluggable and extensible serialization. You can easily integrate your
+  favorite serialization library into it.
+* Uses pluggable and extensible effects for asynchronous IO. You can easily integrate your favorite async 
+  IO effect with it, be it `Future`, Monix `Task`, one of the `IO` monad implementations, etc. Blocking API is 
+  also possible.
+* Is agnostic about being purely functional or not. You can use it with both programming styles.
+* Automatically generates **OpenAPI** documents for your APIs.
+* Has multiple ways of adjusting generated OpenAPI definition
+  * Provides a set of standard adjusting annotations, e.g. `@description`
+  * Lets you define your own adjusting annotations which may perform arbitrary modifications
+  * Gives you a nice, case class based representation of OpenAPI document which can be modified programmatically
+* Uses pluggable network layer. You can easily integrate it with your favorite HTTP client and server.
+
 ## Quickstart example
 
+### Project setup
+
 First, make sure appropriate dependencies are configured for your project.
-Udash provides Servlet-based implementation for REST servers but a servlet must
-be run inside an HTTP server. Here we'll use [Jetty](https://www.eclipse.org/jetty/) for that purpose.
+Udash REST provides Servlet-based implementation for REST servers but a servlet must be run inside an HTTP server. 
+In this example we will use [Jetty](https://www.eclipse.org/jetty/) for that purpose.
 
 ```scala
 val udashVersion: String = ??? // appropriate version of Udash here
@@ -30,7 +54,10 @@ libraryDependencies ++= Seq(
 )
 ```
 
-Then, define some trivial REST interface:
+### The API trait
+
+Then, define your REST API trait along with data types that it uses. These will be shared between
+client and server code. If your client is in ScalaJS then this code will be cross compiled for JVM and JS.
 
 ```scala
 import io.udash.rest._
@@ -48,25 +75,35 @@ trait UserApi {
 object UserApi extends DefaultRestApiCompanion[UserApi]
 ```
 
-Then, implement it on server side and expose it on localhost port 9090 using Jetty:
+### Server
+
+Then, implement your trait on server side:
 
 ```scala
-import io.udash.rest.RestServlet
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
-
 import scala.concurrent.Future
 
 class UserApiImpl extends UserApi {
   def createUser(name: String, birthYear: Int): Future[User] =
     Future.successful(User(UserId(s"$name-ID"), name, birthYear))
 }
+```
+
+and expose it on localhost port 9090 using Jetty:
+
+```scala
+import io.udash.rest.RestServlet
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 
 object ServerMain {
   def main(args: Array[String]): Unit = {
+    // translate UserApiImpl into a Servlet
+    val userApiServlet = RestServlet[UserApi](new UserApiImpl)
+  
+    // do all the Jetty related plumbing
     val server = new Server(9090)
     val handler = new ServletContextHandler
-    handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/*")
+    handler.addServlet(new ServletHolder(userApiServlet), "/*")
     server.setHandler(handler)
     server.start()
     server.join()
@@ -74,7 +111,9 @@ object ServerMain {
 }
 ```
 
-Finally, obtain a client proxy for your API using STTP and make a call:
+### Client
+
+On the client side, obtain a client proxy for your API and make a call:
 
 ```scala
 import com.softwaremill.sttp.SttpBackend
@@ -86,27 +125,33 @@ import scala.util.{Failure, Success}
 
 object ClientMain {
   def main(args: Array[String]): Unit = {
+    // allocate an STTP backend
     implicit val sttpBackend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
-    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
+    
+    // obtain a "proxy" instance of UserApi
+    val client: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
 
     // make a remote REST call
-    val result: Future[User] = proxy.createUser("Fred", 1990)
+    val result: Future[User] = client.createUser("Fred", 1990)
 
     // use whatever execution context is appropriate
     import scala.concurrent.ExecutionContext.Implicits.global
 
+    // do something with the result
     result.onComplete {
       case Success(user) => println(s"User ${user.id} created")
       case Failure(cause) => cause.printStackTrace()
     }
 
-    // just wait until future is complete so that main thread doesn't finish prematurely
+    // just wait until the Future is complete so that main thread doesn't finish prematurely
     Await.ready(result, 10.seconds)
   }
 }
 ```
 
-If we look at HTTP traffic, that's what we'll see:
+### Resulting HTTP
+
+If we look at HTTP traffic created by the previous example, that's what we'll see:
 
 Request:
 ```
@@ -130,15 +175,6 @@ Server: Jetty(9.3.23.v20180228)
 
 {"id":"Fred-ID","name":"Fred","birthYear":1990}
 ```
-
-## Annotations
-
-REST framework relies heavily on annotations for customization. All annotations are governed by
-the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. 
-To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
-
-The most important feature of annotation processing engine is an ability to create custom annotations which aggregate 
-a bunch of other annotations. This is the primary mechanism of code reuse for annotations.
 
 ## REST API traits
 
@@ -216,10 +252,23 @@ object GenericApi {
 }
 ```
 
+### Use of annotations
+
+REST framework relies on annotations for customization of REST API traits. All annotations are governed by
+the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules
+and extensions, implemented by the underlying macro engine from 
+[AVSystem Commons](https://github.com/AVSystem/scala-commons) library.
+To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
+
+The most important feature of annotation processing engine is an ability to create 
+[`AnnotationAggregate`s](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/annotation/AnnotationAggregate.html). An annotation aggregate is a user-defined annotation which effectively applies a bunch of other annotations.
+This is a primary mechanism of code reuse in the area of annotations. It lets you significantly reduce annotation
+related boilerplate.
+
 ### HTTP REST methods
 
 REST macro engine inspects an API trait and looks for all abstract methods. It then tries to translate every abstract
-method into a HTTP REST call.
+method into an HTTP REST call.
 
 * By default (if not annotated explicitly) each method is interpreted as HTTP `POST`.
 * Method name is appended to the URL path. This can also be customized with annotations.
@@ -300,7 +349,7 @@ creating a server.
 
 Empty paths may be especially useful for [prefix methods](#prefix-methods).
 
-### Customizing parameters
+### Parameter flavors
 
 #### Path parameters
 
@@ -311,7 +360,7 @@ appended to URL path rather than translated into query parameter or body part.
 @GET("username") def getUsername(@Path id: UserId): Future[String]
 ```
 
-Calling `getUsername("ID")` will make a HTTP request on path `username/ID`.
+Calling `getUsername("ID")` will make an HTTP request on path `username/ID`.
 
 If there are multiple `@Path` parameters, their values are appended to the path in the
 order of declaration. Each path parameters may also optionally specify a _path suffix_ that
@@ -321,7 +370,7 @@ will be appended to path after value of each parameter:
 @GET("users") def getUsername(@Path(pathSuffix = "name") id: UserId): Future[String]
 ```
 
-Calling `getUsername("ID")` will make a HTTP request on path `users/ID/name`.
+Calling `getUsername("ID")` will make an HTTP request on path `users/ID/name`.
 
 This way you can model completely arbitrary path patterns.
 
@@ -342,7 +391,7 @@ See [serialization](#path-query-header-and-cookie-serialization) for more detail
 
 #### Header parameters
 
-You may also request that some parameter is translated into a HTTP header using `@Header` annotation.
+You may also request that some parameter is translated into an HTTP header using `@Header` annotation.
 It takes an obligatory `name` argument that specifies HTTP header name (case insensitive).
 
 Values of header parameters are serialized into `PlainValue` objects.
@@ -350,7 +399,7 @@ See [serialization](#path-query-header-and-cookie-serialization) for more detail
 
 #### Cookie parameters
 
-You may also request that some parameter is translated into a HTTP cookie using `@Cookie` annotation.
+You may also request that some parameter is translated into an HTTP cookie using `@Cookie` annotation.
 It also takes optional `name` parameter which may be specified to customize cookie name. If not specified,
 Scala parameter name is used.
 
@@ -405,7 +454,7 @@ but they may also be annotated with `@Query`, `@Header` or `@Cookie`. Prefix met
 body parameters.
 
 Path and parameters collected by a prefix method will be prepended/added
-to the HTTP request generated by a HTTP method call on the API trait returned by this
+to the HTTP request generated by an HTTP method call on the API trait returned by this
 prefix method. This way prefix methods "contribute" to the final HTTP requests.
 
 However, sometimes it may also be useful to create completely "transparent" prefix methods -
