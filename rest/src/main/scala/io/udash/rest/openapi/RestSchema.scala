@@ -155,8 +155,44 @@ object RestSchema {
 }
 
 /**
+  * Intermediate typeclass which serves as basis for [[RestResponses]] and [[RestRequestBody]].
+  * [[RestMediaTypes]] is derived by default from [[io.udash.rest.openapi.RestSchema RestSchema]].
+  * It should be defined manually for every type which has custom serialization to [[HttpBody]] defined.
+  */
+@implicitNotFound("RestMediaTypes instance for ${T} not found")
+trait RestMediaTypes[T] {
+  /**
+    * @param schemaTransform Should be used if [[RestMediaTypes]] is being built based on [[RestSchema]] for
+    *                        the same type. The transformation may adjust the schema and give it a different name.
+    */
+  def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType]
+}
+object RestMediaTypes {
+  def apply[T](implicit r: RestMediaTypes[T]): RestMediaTypes[T] = r
+
+  implicit val ByteArrayMediaTypes: RestMediaTypes[Array[Byte]] =
+    new RestMediaTypes[Array[Byte]] {
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Map[String, MediaType] = {
+        val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
+        Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
+      }
+    }
+
+  implicit def fromSchema[T: RestSchema]: RestMediaTypes[T] =
+    new RestMediaTypes[T] {
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType] =
+        Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
+    }
+
+  @implicitNotFound("RestMediaTypes instance for ${T} not found, because:\n#{forSchema}")
+  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestMediaTypes[T]] =
+    ImplicitNotFound()
+}
+
+/**
   * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a
   * given type. By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on
+  * [[io.udash.rest.openapi.RestMediaTypes RestMediaTypes]] for that type which is itself derived by default from
   * [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
   */
 @implicitNotFound("RestResponses instance for ${T} not found")
@@ -180,34 +216,19 @@ object RestResponses {
         ))
     }
 
-  implicit val ByteArrayResponses: RestResponses[Array[Byte]] =
-    new RestResponses[Array[Byte]] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Responses = {
-        val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
-        Responses(byStatusCode = Map(
-          200 -> RefOr(Response(
-            description = SuccessDescription,
-            content = Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
-          ))
-        ))
-      }
-    }
-
-  implicit def fromSchema[T: RestSchema]: RestResponses[T] =
+  implicit def fromMediaTypes[T: RestMediaTypes]: RestResponses[T] =
     new RestResponses[T] {
       def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
         Responses(byStatusCode = Map(
           200 -> RefOr(Response(
             description = SuccessDescription,
-            content = Map(HttpBody.JsonType ->
-              MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T])))
-            )
+            content = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
           ))
         ))
     }
 
-  @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forSchema}")
-  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestResponses[T]] =
+  @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forMediaTypes}")
+  implicit def notFound[T](implicit forMediaTypes: ImplicitNotFound[RestMediaTypes[T]]): ImplicitNotFound[RestResponses[T]] =
     ImplicitNotFound()
 }
 
@@ -243,6 +264,12 @@ object RestResultType {
   ): ImplicitNotFound[RestResultType[F[T]]] = ImplicitNotFound()
 }
 
+/**
+  * Typeclass which defines how OpenAPI [[RequestBody]] Object will look like for a Given type when that type is
+  * used as a type of [[io.udash.rest.Body Body]] parameter of a [[io.udash.rest.CustomBody CustomBody]] method.
+  * By default, [[RestRequestBody]] is derived from [[RestMediaTypes]] which by itself is derived by default
+  * from [[RestSchema]].
+  */
 @implicitNotFound("RestRequestBody instance for ${T} not found")
 trait RestRequestBody[T] {
   /**
@@ -267,23 +294,16 @@ object RestRequestBody {
       Opt.Empty
   }
 
-  implicit val ByteArrayRequestBody: RestRequestBody[Array[Byte]] = new RestRequestBody[Array[Byte]] {
-    def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
-      val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
-      simpleRequestBody(HttpBody.OctetStreamType, schema, required = true)
-    }
-  }
-
-  implicit def fromSchema[T: RestSchema]: RestRequestBody[T] =
+  implicit def fromMediaTypes[T: RestMediaTypes]: RestRequestBody[T] =
     new RestRequestBody[T] {
       def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
-        val schema = resolver.resolve(schemaTransform(RestSchema[T]))
-        simpleRequestBody(HttpBody.JsonType, schema, required = true)
+        val mediaTypes = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
+        Opt(RefOr(RequestBody(content = mediaTypes, required = true)))
       }
     }
 
-  @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forSchema}")
-  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestRequestBody[T]] =
+  @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forMediaTypes}")
+  implicit def notFound[T](implicit forMediaTypes: ImplicitNotFound[RestMediaTypes[T]]): ImplicitNotFound[RestRequestBody[T]] =
     ImplicitNotFound()
 }
 
