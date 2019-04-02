@@ -5,22 +5,21 @@ import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 
 case object RpcInterfacesViewFactory extends StaticViewFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
 class RpcInterfacesView extends FinalView with CssView {
-  import Context._
 
+  import Context._
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
     h2("Interfaces"),
     p(
       "Interfaces are the most important part of the Udash RPC system. Thanks to the cross compilation, they make client-server " +
-      "communication easy to develop and maintain. You can find two types of RPC interfaces in Udash: "
+        "communication easy to develop and maintain. You can find two types of RPC interfaces in Udash: "
     ),
     ul(GuideStyles.defaultList)(
       li(i("RPC"), " - the RPC interface exposed by the server-side."),
@@ -138,17 +137,18 @@ class RpcInterfacesView extends FinalView with CssView {
       "The client RPC cannot contain ", i("call"), " methods, because it can broadcast to many clients. It is hard to decide ",
       "when a broadcasted call can be assumed as finished without any use case context."
     ),
-    h2("RPC interfaces hierarchy"),
+    h2("RPC interface composition"),
     p(
-      "The Udash RPC system makes creating RPC interfaces hierarchy easy. Inside the application you can create one ",
-      i("MainServerRPC"), " and one ", i("MainClientRPC"), " which will give access to other service RPC interfaces."
+      "The Udash RPC system makes it possible to compose RPC interfaces from smaller interfaces. Inside the application " +
+        "you can create one ", i("MainServerRPC"), " and one ", i("MainClientRPC"),
+      " which will give access to other service RPC interfaces."
     ),
     CodeBlock(
       """import io.udash.rpc._
         |
         |trait MainServerRPC {
-        |  def auth(): AuthenticationRPC
-        |  def newsletter(): NewsletterRPC
+        |  def auth: AuthenticationRPC
+        |  def newsletter: NewsletterRPC
         |}
         |
         |trait AuthenticationRPC {
@@ -157,7 +157,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |
         |trait NewsletterRPC {
         |  def loadNews(limit: Int, skip: Int): Future[Seq[News]]
-        |  def subscriptions(): NewsletterSubscriptionRPC
+        |  def subscriptions: NewsletterSubscriptionRPC
         |}
         |
         |trait NewsletterSubscriptionRPC {
@@ -168,21 +168,22 @@ class RpcInterfacesView extends FinalView with CssView {
         |// RPCCompanions skipped""".stripMargin
     )(GuideStyles),
     p(
-      "Thanks to such interface arrangement, you have only one entry point to RPC communication. Do not worry that your hierarchy " +
-      "may be too deep - you can obtain a nested interface, without any performance impact in the following way: "
+      "Thanks to such interface arrangement, you have only one entry point to RPC communication. Do not worry that the structure " +
+        "may be too deep - you can obtain a nested interface and reuse it - there will be no intermediate network calls: "
     ),
     CodeBlock(
       """def doSomething(rpc: MainServerRPC) = {
         |  val subscriptions: NewsletterSubscriptionRPC =
-        |    rpc.newsletter().subscriptions()
+        |    rpc.newsletter.subscriptions
         |  // operations using NewsletterSubscriptionRPC...
         |}""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(
       "Now you know more about Udash RPC interfaces. You might also want to take a look at ",
-      a(href := RpcClientServerState.url)("Client ➔ Server"), " & ", a(href := RpcClientServerState.url)("Server ➔ Client"), " communication or ",
-      "the ", a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
+      a(href := RpcClientServerState.url)("Client ➔ Server"), " & ",
+      a(href := RpcClientServerState.url)("Server ➔ Client"), " communication or the ",
+      a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
     )
   )
 }

@@ -17,7 +17,7 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
 
   import io.udash.web.guide.Context._
 
-  val rpc: CallServerRPC = Context.serverRpc.demos().call()
+  val rpc: CallServerRPC = Context.serverRpc.demos.call
 
   override def handleState(state: UserActivityExtState.type): Unit = ()
 

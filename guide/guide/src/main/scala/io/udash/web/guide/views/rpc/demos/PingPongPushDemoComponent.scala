@@ -29,7 +29,7 @@ class PingPongPushDemoComponent extends Component {
     def onButtonClick(disabled: Property[Boolean]) = {
       disabled.set(true)
       registerCallback(disabled)
-      Context.serverRpc.demos().pingDemo().ping(model.get)
+      Context.serverRpc.demos.pingDemo.ping(model.get)
     }
 
     private def registerCallback(disabled: Property[Boolean]) = if (!registered) {

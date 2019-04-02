@@ -27,7 +27,7 @@ class ClientIdDemoComponent extends Component {
 
   class ClientIdDemoPresenter(model: Property[String]) {
     def onButtonClick() = {
-      Context.serverRpc.demos().clientIdDemo().clientId() onComplete {
+      Context.serverRpc.demos.clientIdDemo.clientId() onComplete {
         case Success(cid) => println(cid); model.set(cid)
         case Failure(ex) => println(ex); model.set(ex.toString)
       }

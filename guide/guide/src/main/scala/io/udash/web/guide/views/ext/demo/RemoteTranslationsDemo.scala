@@ -16,7 +16,7 @@ object RemoteTranslationsDemo {
 
   def apply(): dom.Element = {
     import io.udash.web.guide.Context._
-    implicit val translationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
+    implicit val translationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(LocalStorage), 6 hours)
     implicit val lang = Lang("pl")
     div(id := "rpc-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       ul(

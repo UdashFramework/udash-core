@@ -14,7 +14,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case RootState => RootViewFactory
       case ContentState => ContentViewFactory
 
-      case IntroState => MarkdownPageViewFactory[IntroState.type]()(Context.serverRpc.pages())
+      case IntroState => MarkdownPageViewFactory[IntroState.type]()(Context.serverRpc.pages)
 
       case BootstrappingState => BootstrappingViewFactory
       case BootstrappingIntroState => BootstrappingIntroViewFactory
@@ -40,9 +40,9 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case RpcClientServerState => RpcClientServerViewFactory
       case RpcServerClientState => RpcServerClientViewFactory
 
-      case RestState => MarkdownPageViewFactory[RestState.type]()(Context.serverRpc.pages())
+      case RestState => MarkdownPageViewFactory[RestState.type]()(Context.serverRpc.pages)
 
-      case I18NExtState => MarkdownPageViewFactory[I18NExtState.type]()(Context.serverRpc.pages())
+      case I18NExtState => MarkdownPageViewFactory[I18NExtState.type]()(Context.serverRpc.pages)
       case BootstrapExtState => BootstrapExtViewFactory
       case AuthorizationExtState => AuthorizationExtViewFactory
       case ChartsExtState => ChartsExtViewFactory
@@ -50,7 +50,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case UserActivityExtState => UserActivityExtViewFactory
 
       case FaqState => FaqViewFactory
-      case LicenseState => MarkdownPageViewFactory[LicenseState.type]()(Context.serverRpc.pages())
+      case LicenseState => MarkdownPageViewFactory[LicenseState.type]()(Context.serverRpc.pages)
 
       case _ => ErrorViewFactory
     }
