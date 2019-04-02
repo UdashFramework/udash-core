@@ -1,5 +1,6 @@
 package io.udash.web.guide
 
+import com.softwaremill.sttp.SttpBackend
 import io.udash._
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
 import io.udash.rpc._
@@ -11,6 +12,7 @@ import io.udash.wrappers.jquery._
 import org.scalajs.dom
 import org.scalajs.dom.Element
 
+import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSExport
 import scala.util.Try
 
@@ -30,7 +32,8 @@ object Context {
     import io.udash.rest._
     val (scheme, defaultPort) = if (dom.window.location.protocol == "https:") ("https", 443) else ("http", 80)
     val port = Try(dom.window.location.port.toInt).getOrElse(defaultPort)
-    DefaultRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
+    implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+    SttpRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
   }
 
   val mainMenuEntries: Seq[MenuEntry] = Seq(
