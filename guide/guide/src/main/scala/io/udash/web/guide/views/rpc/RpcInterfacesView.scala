@@ -49,7 +49,7 @@ class RpcInterfacesView extends FinalView with CssView {
         |trait ServerRPC {
         |  def fire(): Unit
         |  def fireWithArgs(num: Int): Unit
-        |  @RPCName("fireWithManyArgsLists")
+        |  @rpcName("fireWithManyArgsLists")
         |  def fireWithArgs(i: Int, s: String)(o: Option[Boolean]): Unit
         |  def fireWithCaseClass(r: Record): Unit
         |  def call(yes: Boolean): Future[String]
