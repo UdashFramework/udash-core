@@ -15,6 +15,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
   import dsl._
 
   val main: CssStyle = style(
+    paddingTop(50 px),
     position.relative,
     minHeight :=! s"calc(100vh - ${StyleConstants.Sizes.HeaderHeight}px - ${StyleConstants.Sizes.FooterHeight}px)"
   )
@@ -64,6 +65,10 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     borderBottomWidth(1 px),
     borderBottomStyle.solid,
     transform := none,
+
+    MediaQueries.desktop(
+      borderBottomWidth(`0`),
+    ),
 
     MediaQueries.tabletLandscape(
       position.fixed,

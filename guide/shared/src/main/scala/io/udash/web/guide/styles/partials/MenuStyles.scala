@@ -16,6 +16,14 @@ object MenuStyles extends CssBase {
     GuideStyleUtils.border(),
     width(100 %%),
 
+    MediaQueries.desktop(
+      &.attr(Attributes.data(Attributes.Pinned), "true")(
+        position.fixed,
+        top(120 px),
+        width.inherit
+      )
+    ),
+
     MediaQueries.phone(
       width(320 - StyleConstants.Sizes.GuideHeaderHeightMobile px),
       height(100 %%),

@@ -19,6 +19,9 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     height(StyleConstants.Sizes.HeaderHeight px),
     fontSize(1 rem),
     zIndex(99),
+    position.fixed,
+    top(`0`),
+    width(100 %%),
 
     MediaQueries.tabletPortrait(
       height(StyleConstants.Sizes.GuideHeaderHeightMobile px)

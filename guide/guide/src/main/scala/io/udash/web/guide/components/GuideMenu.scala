@@ -131,6 +131,24 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
     jqElement.attr(Attributes.data(Attributes.Active), newValue.toString)
   }
+
+  private val window = jQ(org.scalajs.dom.window)
+  window.on("scroll", onScroll)
+
+  private val originalMenuOffsetTop = 30
+
+  private def onScroll(el: Element, ev: JQueryEvent): Unit = {
+    val pinnedAttr: String = Attributes.data(Attributes.Pinned)
+
+    val pin = jQ(template).attr(pinnedAttr).getOrElse("false").toBoolean
+    val scrollTop = jQ(org.scalajs.dom.window).scrollTop()
+
+    if (scrollTop >= originalMenuOffsetTop && !pin) {
+      jQ(template).attr(pinnedAttr, "true")
+    } else if (scrollTop < originalMenuOffsetTop && pin) {
+      jQ(template).attr(pinnedAttr, "false")
+    }
+  }
 }
 
 object GuideMenu {
