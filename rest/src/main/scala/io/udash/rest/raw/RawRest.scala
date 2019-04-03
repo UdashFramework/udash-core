@@ -240,15 +240,15 @@ object RawRest extends RawRpcCompanion[RawRest] {
   final val PrefixMethodBodyParam =
     "prefix methods cannot take @Body parameters"
   final val NotValidGetMethod =
-    "it cannot be translated into a HTTP GET method"
+    "it cannot be translated into an HTTP GET method"
   final val GetMethodBodyParam =
     "GET methods cannot take @Body parameters"
   final val NotValidHttpMethod =
-    "it cannot be translated into a HTTP method"
+    "it cannot be translated into an HTTP method"
   final val NotValidFormBodyMethod =
-    "it cannot be translated into a HTTP method with form body"
+    "it cannot be translated into an HTTP method with form body"
   final val NotValidCustomBodyMethod =
-    "it cannot be translated into a HTTP method with custom body"
+    "it cannot be translated into an HTTP method with custom body"
   final val MissingBodyParam =
     "expected exactly one @Body parameter but none was found"
   final val SuperfluousBodyParam =

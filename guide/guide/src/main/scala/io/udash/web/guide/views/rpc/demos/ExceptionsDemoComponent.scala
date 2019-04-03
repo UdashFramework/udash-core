@@ -37,7 +37,7 @@ class ExceptionsDemoComponent extends Component {
 
   class ExceptionsDemoPresenter(model: ModelProperty[ExceptionsDemoModel]) {
     def exceptionCall(): Unit = {
-      Context.serverRpc.demos().exceptions().example() onComplete {
+      Context.serverRpc.demos.exceptions.example() onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
         case Failure(ex) => model.subProp(_.exception).set(ex match {
           case ex: GuideExceptions.ExampleException =>
@@ -49,7 +49,7 @@ class ExceptionsDemoComponent extends Component {
     }
 
     def translatableExceptionCall(): Unit = {
-      Context.serverRpc.demos().exceptions().exampleWithTranslatableError() onComplete {
+      Context.serverRpc.demos.exceptions.exampleWithTranslatableError() onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
         case Failure(ex) => model.subProp(_.translatableException).set(ex match {
           case ex: GuideExceptions.TranslatableExampleException => ex.trKey
@@ -59,7 +59,7 @@ class ExceptionsDemoComponent extends Component {
     }
 
     def unknownExceptionCall(): Unit = {
-      Context.serverRpc.demos().exceptions().unknownError() onComplete {
+      Context.serverRpc.demos.exceptions.unknownError() onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
         case Failure(ex) => model.subProp(_.unknownException).set(ex match {
           case ex: GuideExceptions.ExampleException => s"ExampleException: ${ex.msg}"
@@ -73,7 +73,7 @@ class ExceptionsDemoComponent extends Component {
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
 
-    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos().translations(), Some(LocalStorage), 6 hours)
+    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(LocalStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
 
     private val exceptionButtonDisabled = Property(false)

@@ -251,7 +251,7 @@ class operationId(operationId: OptArg[String] = OptArg.Empty) extends OperationA
   */
 class tags(tags: String*) extends OperationAdjuster {
   def adjustOperation(operation: Operation): Operation =
-    operation.copy(tags = tags.toList)
+    operation.copy(tags = operation.tags ++ tags)
 }
 
 /**

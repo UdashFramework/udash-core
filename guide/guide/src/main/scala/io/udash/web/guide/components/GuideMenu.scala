@@ -1,5 +1,6 @@
 package io.udash.web.guide.components
 
+import com.avsystem.commons.misc.OptArg
 import io.udash._
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.MobileMenuStyles
@@ -8,47 +9,46 @@ import io.udash.web.guide.styles.partials.{GuideStyles, MenuStyles}
 import io.udash.web.guide.{Context, _}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.raw.Element
-
-import scala.annotation.tailrec
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.tags2._
+
+import scala.annotation.tailrec
 
 sealed trait MenuEntry {
   def name: String
 }
 
 case class MenuContainer(override val name: String, children: Seq[MenuLink]) extends MenuEntry
-case class MenuLink(override val name: String, state: RoutingState) extends MenuEntry
+case class MenuLink(override val name: String, state: RoutingState, fragment: OptArg[String] = OptArg.Empty) extends MenuEntry
 
 class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
-  import io.udash.css.CssView._
 
+  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   private val ClickEvent = "click"
   private val ActiveItemSelector = s".${MenuStyles.subToggle.className}[${Attributes.data(Attributes.Active)} = 'true']"
   private val InactiveItemSelector = s".${MenuStyles.subToggle.className}[${Attributes.data(Attributes.Active)} = 'false']"
 
-  private def getMenuElementTag(entry: MenuEntry): TypedTag[Element] = {
-    entry match {
-      case MenuLink(name, state) =>
-        li(MenuStyles.item)(
-          a(href := state.url(Context.applicationInstance), MenuStyles.link, data("id") := entry.name)(
-            span(MenuStyles.linkText)(entry.name)
-          )
+  private def getMenuElementTag(entry: MenuEntry): TypedTag[Element] = entry match {
+    case MenuLink(_, state, fragment) =>
+      li(MenuStyles.item)(
+        a(href := state.url(Context.applicationInstance) + fragment.fold("")("#" + _), MenuStyles.link, data("id") := entry.name)(
+          span(MenuStyles.linkText)(entry.name)
         )
-      case MenuContainer(name, children) =>
-        li(MenuStyles.subItem)(
-          a(href := "#", MenuStyles.subToggle, data("id") := entry.name)(
-            span(MenuStyles.linkText)(entry.name),
-            i(MenuStyles.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11)))
-          ),
-          ul(MenuStyles.subList)(
-            children.map(subEntry => getMenuElementTag(subEntry))
-          )
+      )
+    case MenuContainer(_, children) =>
+      li(MenuStyles.subItem)(
+        a(href := "#", MenuStyles.subToggle, data("id") := entry.name)(
+          span(MenuStyles.linkText)(entry.name),
+          i(MenuStyles.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11)))
+        ),
+        ul(MenuStyles.subList)(
+          children.map(subEntry => getMenuElementTag(subEntry))
         )
-    }
+      )
   }
+
 
   private lazy val btnMenu = a(href := "#", MobileMenuStyles.btnMobile, MenuStyles.btnMobile)(
     div(MobileMenuStyles.btnMobileLines)(

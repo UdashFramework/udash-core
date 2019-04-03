@@ -1,6 +1,6 @@
 # Udash REST
 
-Udash framework contains an RPC based REST framework for defining REST services using Scala traits.
+Udash framework contains an RPC based REST framework for defining REST services using plain Scala traits.
 It may be used for implementing both client and server side and works in both JVM and JS, as long as
 appropriate network layer is implemented. By default, Udash provides Java Servlet based server
 implementation and [sttp](https://github.com/softwaremill/sttp) based client implementation 
@@ -14,11 +14,35 @@ into your dependencies (e.g. UI related modules).
 
 [TOC levels=2-4]
 
+## Overview
+
+Udash REST:
+
+* Provides automatic translation of **plain Scala traits** into REST endpoints
+  * Lets you cover your web endpoint with nice, typesafe, well organized, IDE-friendly language-level interface.
+  * Forms a type safety layer between the client and the server
+* Gives you a set of annotations for adjusting how the translation into an HTTP endpoint happens.
+* Statically validates your trait, emitting **detailed and readable compilation errors** in case anything is wrong.
+* Uses typeclass-based, boilerplate free, pluggable and extensible serialization. You can easily integrate your
+  favorite serialization library into it.
+* Uses pluggable and extensible effects for asynchronous IO. You can easily integrate your favorite async 
+  IO effect with it, be it `Future`, Monix `Task`, one of the `IO` monad implementations, etc. Blocking API is 
+  also possible.
+* Is agnostic about being purely functional or not. You can use it with both programming styles.
+* Automatically generates **OpenAPI** documents for your APIs.
+* Has multiple ways of adjusting generated OpenAPI definition
+  * Provides a set of standard adjusting annotations, e.g. `@description`
+  * Lets you define your own adjusting annotations which may perform arbitrary modifications
+  * Gives you a nice, case class based representation of OpenAPI document which can be modified programmatically
+* Uses pluggable network layer. You can easily integrate it with your favorite HTTP client and server.
+
 ## Quickstart example
 
+### Project setup
+
 First, make sure appropriate dependencies are configured for your project.
-Udash provides Servlet-based implementation for REST servers but a servlet must
-be run inside an HTTP server. Here we'll use [Jetty](https://www.eclipse.org/jetty/) for that purpose.
+Udash REST provides Servlet-based implementation for REST servers but a servlet must be run inside an HTTP server. 
+In this example we will use [Jetty](https://www.eclipse.org/jetty/) for that purpose.
 
 ```scala
 val udashVersion: String = ??? // appropriate version of Udash here
@@ -30,7 +54,10 @@ libraryDependencies ++= Seq(
 )
 ```
 
-Then, define some trivial REST interface:
+### The API trait
+
+Then, define your REST API trait along with data types that it uses. These will be shared between
+client and server code. If your client is in ScalaJS then this code will be cross compiled for JVM and JS.
 
 ```scala
 import io.udash.rest._
@@ -48,25 +75,35 @@ trait UserApi {
 object UserApi extends DefaultRestApiCompanion[UserApi]
 ```
 
-Then, implement it on server side and expose it on localhost port 9090 using Jetty:
+### Server
+
+Then, implement your trait on server side:
 
 ```scala
-import io.udash.rest.RestServlet
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
-
 import scala.concurrent.Future
 
 class UserApiImpl extends UserApi {
   def createUser(name: String, birthYear: Int): Future[User] =
     Future.successful(User(UserId(s"$name-ID"), name, birthYear))
 }
+```
+
+and expose it on localhost port 9090 using Jetty:
+
+```scala
+import io.udash.rest.RestServlet
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 
 object ServerMain {
   def main(args: Array[String]): Unit = {
+    // translate UserApiImpl into a Servlet
+    val userApiServlet = RestServlet[UserApi](new UserApiImpl)
+  
+    // do all the Jetty related plumbing
     val server = new Server(9090)
     val handler = new ServletContextHandler
-    handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/*")
+    handler.addServlet(new ServletHolder(userApiServlet), "/*")
     server.setHandler(handler)
     server.start()
     server.join()
@@ -74,7 +111,9 @@ object ServerMain {
 }
 ```
 
-Finally, obtain a client proxy for your API using STTP and make a call:
+### Client
+
+On the client side, obtain a client proxy for your API and make a call:
 
 ```scala
 import com.softwaremill.sttp.SttpBackend
@@ -86,27 +125,33 @@ import scala.util.{Failure, Success}
 
 object ClientMain {
   def main(args: Array[String]): Unit = {
+    // allocate an STTP backend
     implicit val sttpBackend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
-    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
+    
+    // obtain a "proxy" instance of UserApi
+    val client: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
 
     // make a remote REST call
-    val result: Future[User] = proxy.createUser("Fred", 1990)
+    val result: Future[User] = client.createUser("Fred", 1990)
 
     // use whatever execution context is appropriate
     import scala.concurrent.ExecutionContext.Implicits.global
 
+    // do something with the result
     result.onComplete {
       case Success(user) => println(s"User ${user.id} created")
       case Failure(cause) => cause.printStackTrace()
     }
 
-    // just wait until future is complete so that main thread doesn't finish prematurely
+    // just wait until the Future is complete so that main thread doesn't finish prematurely
     Await.ready(result, 10.seconds)
   }
 }
 ```
 
-If we look at HTTP traffic, that's what we'll see:
+### Resulting HTTP
+
+If we look at HTTP traffic created by the previous example, that's what we'll see:
 
 Request:
 ```
@@ -131,18 +176,9 @@ Server: Jetty(9.3.23.v20180228)
 {"id":"Fred-ID","name":"Fred","birthYear":1990}
 ```
 
-## Annotations
-
-REST framework relies heavily on annotations for customization. All annotations are governed by
-the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. 
-To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
-
-The most important feature of annotation processing engine is an ability to create custom annotations which aggregate 
-a bunch of other annotations. This is the primary mechanism of code reuse for annotations.
-
 ## REST API traits
 
-As we saw in the quickstart example, REST API is defined by a Scala trait adjusted with annotations.
+As we saw in the quickstart example, REST API is defined with a plain Scala trait.
 This approach is analogous to various well-established REST frameworks for other languages, e.g. JAX-RS for Java.
 However, such frameworks are usually based on runtime reflection while in Scala it can be
 done using compile-time reflection through macros which offers several advantages:
@@ -154,6 +190,7 @@ done using compile-time reflection through macros which offers several advantage
 * pluggable typeclass based serialization - for serialization of REST parameters and results,
   typeclasses are used which also offers strong compile-time safety. If any of your parameters or
   method results cannot be serialized, a detailed compilation error will be raised.
+* significantly better annotation processing
 
 ### Companion objects
 
@@ -216,10 +253,52 @@ object GenericApi {
 }
 ```
 
+### Data types
+
+When a data type is used in a REST API trait as parameter type or result type, it must also come with an appropriate
+set of implicits. This includes [serialization-related implicits](#serialization-implicits-summary) and
+[OpenAPI related implicits](#restschema-typeclass). Just like for traits, these implicits can be provided by
+giving your data type a well-defined companion object.
+
+#### `RestDataCompanion`
+
+`RestDataCompanion` is a base class for companion objects of algebraic data types (case classes, sealed hierarchies)
+used in REST API traits. This base class automatically derives instances of `GenCodec` (for serialization) and
+`RestSchema` (for OpenAPI generation).
+
+```scala
+case class Address(city: String, zip: String)
+object Address extends RestDataCompanion[Address]
+```
+
+#### `RestDataWrapperCompanion`
+
+`RestDataWrapperCompanion` is a handy base companion class which you can use for data types which simply wrap
+another type. It will establish a relation between the wrapping and wrapped types so that all implicits for the 
+wrapping type are automatically derived from corresponding implicits for the wrapped type.
+
+```scala
+case class UserId(id: String) extends AnyVal
+object UserId extends RestDataWrapperCompanion[String, UserId]
+```
+
+### Use of annotations
+
+REST framework relies on annotations for customization of REST API traits. All annotations are governed by
+the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules
+and extensions, implemented by the underlying macro engine from 
+[AVSystem Commons](https://github.com/AVSystem/scala-commons) library.
+To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
+
+The most important feature of annotation processing engine is an ability to create 
+[`AnnotationAggregate`s](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/annotation/AnnotationAggregate.html). An annotation aggregate is a user-defined annotation which effectively applies a bunch of other annotations.
+This is a primary mechanism of code reuse in the area of annotations. It lets you significantly reduce annotation
+related boilerplate.
+
 ### HTTP REST methods
 
 REST macro engine inspects an API trait and looks for all abstract methods. It then tries to translate every abstract
-method into a HTTP REST call.
+method into an HTTP REST call.
 
 * By default (if not annotated explicitly) each method is interpreted as HTTP `POST`.
 * Method name is appended to the URL path. This can also be customized with annotations.
@@ -300,18 +379,17 @@ creating a server.
 
 Empty paths may be especially useful for [prefix methods](#prefix-methods).
 
-### Customizing parameters
+### Parameter flavors
 
 #### Path parameters
 
-If a parameter of REST API trait method is annotated with `@Path`, its value is
-appended to URL path rather than translated into query parameter or body part.
+If a parameter of REST API trait method is annotated with `@Path`, its value is appended to URL path.
 
 ```scala
 @GET("username") def getUsername(@Path id: UserId): Future[String]
 ```
 
-Calling `getUsername("ID")` will make a HTTP request on path `username/ID`.
+Calling `getUsername("ID")` will make an HTTP request on path `username/ID`.
 
 If there are multiple `@Path` parameters, their values are appended to the path in the
 order of declaration. Each path parameters may also optionally specify a _path suffix_ that
@@ -321,7 +399,7 @@ will be appended to path after value of each parameter:
 @GET("users") def getUsername(@Path(pathSuffix = "name") id: UserId): Future[String]
 ```
 
-Calling `getUsername("ID")` will make a HTTP request on path `users/ID/name`.
+Calling `getUsername("ID")` will make an HTTP request on path `users/ID/name`.
 
 This way you can model completely arbitrary path patterns.
 
@@ -342,7 +420,7 @@ See [serialization](#path-query-header-and-cookie-serialization) for more detail
 
 #### Header parameters
 
-You may also request that some parameter is translated into a HTTP header using `@Header` annotation.
+You may also request that some parameter is translated into an HTTP header using `@Header` annotation.
 It takes an obligatory `name` argument that specifies HTTP header name (case insensitive).
 
 Values of header parameters are serialized into `PlainValue` objects.
@@ -350,7 +428,7 @@ See [serialization](#path-query-header-and-cookie-serialization) for more detail
 
 #### Cookie parameters
 
-You may also request that some parameter is translated into a HTTP cookie using `@Cookie` annotation.
+You may also request that some parameter is translated into an HTTP cookie using `@Cookie` annotation.
 It also takes optional `name` parameter which may be specified to customize cookie name. If not specified,
 Scala parameter name is used.
 
@@ -384,13 +462,10 @@ object User extends RestDataCompanion[User]
 
 ### Prefix methods
 
-If a method in REST API trait doesn't return `Future[T]` (or other type that
-properly translates to asynchronous HTTP response) then it may also be interpreted as _prefix_ method.
-
 Prefix methods are methods that return other REST API traits. They are useful for:
 
-* capturing common path or path/query/header parameters in a single prefix call
-* splitting your REST API into multiple traits in order to better organize it
+* capturing common path or path/query/header/cookie parameters in a single prefix call
+* splitting your REST API into multiple smaller traits in order to organize it better
 
 Just like HTTP API methods (`GET`, `POST`, etc.), prefix methods have their own
 annotation that can be used explicitly when you want your trait method to be treated as
@@ -400,18 +475,16 @@ annotation is not necessary as long as your method returns a valid REST API trai
 (where "valid" is determined by presence of appropriate implicits -
 see [companion objects](#companion-objects)).
 
-Prefix methods may take parameters. They are interpreted as path parameters by default,
-but they may also be annotated with `@Query`, `@Header` or `@Cookie`. Prefix methods must not take
-body parameters.
+Prefix methods may take path, header, query and cookie parameters. They cannot take body parameters.
+By default, prefix method parameters are interpreted as `@Path` parameters.
 
 Path and parameters collected by a prefix method will be prepended/added
-to the HTTP request generated by a HTTP method call on the API trait returned by this
+to the HTTP request generated by an HTTP method call on the API trait returned by this
 prefix method. This way prefix methods "contribute" to the final HTTP requests.
 
 However, sometimes it may also be useful to create completely "transparent" prefix methods -
-prefix methods with empty path and no parameters. This is useful when you want to refactor your
-REST API trait by grouping methods into multiple, separate traits without changing the
-format of HTTP requests.
+prefix methods with empty path and no parameters. This is useful when you simply want to refactor your
+REST API trait by grouping methods into separate traits without changing the format of HTTP requests.
 
 Example of prefix method that adds authorization header to the overall API:
 
@@ -427,20 +500,21 @@ object RootApi extends DefaultRestApiCompanion[RootApi]
 
 ### Default parameter values
 
-`@Query`, `@Header`, `@Cookie` and `@Body` parameters may accept a default value which
+All parameters except for `@Path` parameters may accept a default value which
 is picked up by REST framework macro engine and used as fallback value when actual value
 is missing in the HTTP request. This is useful primarily for [API evolution](#api-evolution) -
 it lets you add more parameters to your REST methods without breaking backwards compatibility
 with clients not aware of these new parameters.
 
 Assuming `GenCodec`-based serialization, default values may also be defined for fields of
-case classes used as parameter or result types of REST methods.
+case classes used as parameter types or result types of REST methods.
 
 There are two ways to define default values:
 
 * Scala-level default value
 
-  You can simply use [Scala default parameter value](https://docs.scala-lang.org/tour/default-parameter-values.html)
+  You can simply use 
+  [language level default parameter value](https://docs.scala-lang.org/tour/default-parameter-values.html)
   for your REST method parameters and case class parameters. They will be picked up during macro materialization and
   used as fallback values for missing parameters during deserialization. However, Scala-level default values cannot
   be picked up and included into [OpenAPI documents](#generating-openapi-30-specifications) due to how they are encoded
@@ -451,12 +525,11 @@ There are two ways to define default values:
 
   Instead of defining Scala-level default value, you can use `@whenAbsent` annotation:
   ```scala
-  case class Person(id: String, @whenAbsent("anon") name: String)
-  object Person extends RestDataCompanion[Person]
+  @GET def fetchUsers(@whenAbsent(".*") namePattern: String): List[User]
   ```
   This brings two advantages:
   * The default value is for deserialization _only_ and does not affect programmer API, which is often desired.
-  * Value from `@whenAbsent` annotation can be picked up by macro materialization of
+  * Value from `@whenAbsent` will be picked up by macro materialization of
     [OpenAPI documents](#generating-openapi-30-specifications) and included as default value in OpenAPI
     [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
 
@@ -467,14 +540,13 @@ for Scala programming API. And if you want these values to be the same, there's 
 macro which you can use to avoid writing the same default value twice:
 
 ```scala
-case class Person(id: String, @whenAbsent("anon") name: String = whenAbsent.value)
-object Person extends RestDataCompanion[Person]
+@GET def fetchUsers(@whenAbsent(".*") namePattern: String = whenAbsent.value): List[User]
 ```
 
 #### `@transientDefault`
 
 If your REST method parameter or case class parameter has a default value defined, you can
-also annotate it as `@transientDefault`. This way these parameters will not be serialized at all
+also annotate it as `@transientDefault`. This way these parameters will not be omitted during serialization
 if their value is equal to the default value. During deserialization, of course, the default value
 will be picked up for them. This way you can reduce the amount of network traffic by sending only
 actually meaningful parameters.
@@ -497,16 +569,16 @@ Any of these solutions can be plugged into REST framework.
 Depending on the context where a type is used in a REST API trait, it will be serialized to a different
 _raw value_:
 
-* path/query/header parameters are serialized as `PlainValue`
-* body parameters are serialized as `JsonValue` (by default), `PlainValue` (for [`@FormBody`](#formbody) methods)
-  or directly as `HttpBody` (for [`@CustomBody`](#custombody) methods).
-* Response types are serialized as `RestResponse`
-* Prefix result types (other REST API traits) are "serialized" as `RawRest`
+* path/query/header parameters are serialized into `PlainValue`
+* body parameters are serialized into `JsonValue` (by default), `PlainValue` (for [`@FormBody`](#formbody) methods)
+  or directly into `HttpBody` (for [`@CustomBody`](#custombody) methods).
+* Response types are serialized into `RestResponse`
+* Prefix result types (other REST API traits) are "serialized" into an instance of `RawRest`.
 
 When a macro needs to serialize a value of some type (let's call it `Real`) to one of these raw types
 listed above (let's call it `Raw`) then it looks for an implicit instance of `AsRaw[Raw, Real]`.
-In the same manner, an implicit instance of `AsReal[Raw, Real]` is used for deserialization.
-Additionally, if there is an implicit instance of `AsRawReal[Raw, Real]` then it serves both purposes.
+In the same manner, implicit instance of `AsReal[Raw, Real]` is used for deserialization.
+Additionally, an implicit instance of `AsRawReal[Raw, Real]` can serve as both.
 
 These implicit instances may come from multiple sources:
 
@@ -694,7 +766,8 @@ REST API, then along from custom serialization you must provide customized insta
 #### Customizing serialization for your own type
 
 If you need to write manual serialization for your own type, the easiest way to do this is to
-provide appropriate implicit in its companion object:
+provide appropriate implicit in its companion object. In the example below, we provide custom serialization
+to `JsonValue`:
 
 ```scala
 class MyClass { ... }
@@ -705,7 +778,7 @@ object MyClass {
 
 **WARNING**: Remember that if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API then you must also provide custom [`RestSchema`](#restschema-typeclass) instance for your type that
-will match its serialization format.
+will reflect its custom JSON serialization format.
 
 #### Providing serialization for third party type
 
@@ -734,7 +807,7 @@ object MyRestApi extends RestApiCompanion[EnhancedRestImplicits, MyRestApi](Enha
 
 Also, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API then you must provide a [`RestSchema`](#restschema-typeclass) instance for your type that
-will properly describe its serialization format.
+will reflect its serialization format.
 
 #### Supporting result containers other than `Future`
 
@@ -774,7 +847,9 @@ that still use the old version:
 * Reordering parameters of your REST methods, except for `@Path` parameters which may be freely intermixed
   with other parameters but they must retain the same order relative to each other.
 * Splitting parameters into multiple parameter lists or making them `implicit`.
-* Renaming `@Path` parameters - their names are not used in REST requests
+* Extracting common path fragments or parameters into [prefix methods](#prefix-methods).
+* Renaming `@Path` parameters - their names are not used in REST requests 
+  (they are used when generating OpenAPI though)
 * Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
   `@Query`, `@Header`, `@Cookie` or `@Body` annotation.
 * Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
@@ -902,6 +977,13 @@ map to REST requests.
 Note that Operation object itself may be arbitrarily adjusted with other annotations -
 see [adjusting operations](#adjusting-operations).
 
+### OpenAPI implicits summary
+
+Generation of OpenAPI documents is governed by multiple typeclasses. Below is a diagram which summarizes
+their roles and dependencies between them.
+
+![OpenAPI implicits](assets/images/views/rest/openapi.svg)
+
 ### `RestSchema` typeclass
 
 In order to macro-materialize `OpenApiMetadata` for your REST API, you need to provide an instance of `RestSchema` typeclass
@@ -1010,6 +1092,20 @@ object CustomStringType {
 }
 ```
 
+### `RestMediaTypes` typeclass
+
+`RestMediaType` is an auxiliary typeclass which serves as a basis for `RestResponses` and `RestRequestBody` typeclasses.
+It captures all the possible media types which may be used in a request or response body for given Scala type.
+Media types are represented using OpenAPI 
+[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject).
+
+By default, `RestMediaTypes` instance is derived from `RestSchema` instance and `application/json` is assumed as 
+the only available media type.
+
+You **should** define `RestMediaTypes` manually for every type which has custom serialization to `HttpBody` defined
+(`AsRaw/AsReal[HttpBody, T]`). In general, you may want to define it manually every time you want to describe media
+types other than `application/json` for your Scala type.
+
 ### `RestResponses` typeclass
 
 `RestResponses` is an auxiliary typeclass which is needed for result type of every HTTP REST method
@@ -1018,36 +1114,29 @@ of `RestResponses[User]` (this transformation is modeled by yet another intermed
 This typeclass governs generation of
 [Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
 
-By default, if no specific `RestResponses` instance is provided, it is created based on `RestSchema`.
+By default, if no specific `RestResponses` instance is provided, it is created based on `RestMediaTypes`.
 The resulting [Responses](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
 will contain exactly one
 [Response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responseObject)
-for HTTP status code `200 OK` with a single
-[Media Type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
-for `application/json` media type and
-[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
-inferred from `RestSchema` instance.
+for HTTP status code `200 OK` with 
+[Media Types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
+inferred from `RestMediaTypes` instance. Also note that `RestMediaTypes` itself is by default derived from 
+`RestSchema`
 
-You may want to define `RestResponses` instance manually if you want to use other media types than
-`application/json` or you want to define multiple possible responses for different HTTP status codes.
-You may also modify responses for particular method - see [Adjusting operations](#adjusting-operations).
-Normally, manual `RestResponses` instance is needed when a type has custom `AsRaw/AsReal[RestResponse, T]`
-instance which defines custom serialization to HTTP response.
+You **should** define `RestResponses` manually for every type which has custom serialization
+to `RestResponse` defined (`AsRaw/AsReal[RestResponse, T]`). In general, you may want to define 
+it manually every time you want to describe responses for status codes other than `200 OK`. 
+
+Also remember that `Responses` object can be adjusted locally, for each method, using annotations - 
+see [Adjusting operations](#adjusting-operations).
 
 ### `RestRequestBody` typeclass
 
 `RestRequestBody` typeclass is an auxiliary typeclass analogous to `RestResponses`. It's necessary
-for `@Body` parameters of REST methods and governs generation of
+for the `@Body` parameter of every `@CustomBody` method and governs generation of
 [Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#requestBodyObject).
-By default, if not defined explicitly, it's also derived from `RestSchema` and contains single
-[Media Type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
-for `application/json` media type and
-[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
-inferred from `RestSchema` instance.
-
-You may want to provide custom instance of `RestRequestBody` for your type if that type is serialized
-to different media type than `application/json` (which can be done by providing appropriate instance
-of `AsReal/AsRaw[HttpBody, T]`.
+By default, if not defined explicitly, it is derived from `RestMediaTypes` instance - which by itself is derived
+from `RestSchema` by default.
 
 ### Adjusting generated OpenAPI documents with annotations
 
@@ -1064,7 +1153,7 @@ However, `@description` is just an example of more general mechanism - schemas, 
 can be modified arbitrarily.
 
 Also, remember that all annotations are processed with respect to the same
-[annotation processing](Annotations.md) rules. It is recommended to familiarize oneself with these rules in
+[annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. It is recommended to familiarize oneself with these rules in
 order to use them more effectively and with less boilerplate.
 
 #### Adjusting schemas

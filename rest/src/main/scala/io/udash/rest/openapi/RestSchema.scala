@@ -106,6 +106,7 @@ object RestSchema {
     RestSchema[T].map(Schema.arrayOf(_))
   implicit def jSetSchema[C[X] <: JSet[X], T: RestSchema]: RestSchema[C[T]] =
     RestSchema[T].map(Schema.arrayOf(_, uniqueItems = true))
+
   implicit def mapSchema[M[X, Y] <: BMap[X, Y], K, V: RestSchema]: RestSchema[M[K, V]] =
     RestSchema[V].map(Schema.mapOf)
   implicit def jMapSchema[M[X, Y] <: JMap[X, Y], K, V: RestSchema]: RestSchema[M[K, V]] =
@@ -132,16 +133,70 @@ object RestSchema {
       )))
     }
 
-  implicit def namedEnumSchema[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): RestSchema[E] =
-    RestSchema.plain(Schema.enumOf(comp.values.iterator.map(_.name).toList))
-  implicit def jEnumSchema[E <: Enum[E]](implicit ct: ClassTag[E]): RestSchema[E] =
-    RestSchema.plain(Schema.enumOf(ct.runtimeClass.getEnumConstants.iterator.map(_.asInstanceOf[E].name).toList))
+  private def enumValues[E <: NamedEnum](implicit comp: NamedEnumCompanion[E]): List[String] =
+    comp.values.iterator.map(_.name).toList
+  private def jEnumValues[E <: Enum[E] : ClassTag]: List[String] =
+    classTag[E].runtimeClass.getEnumConstants.iterator.map(_.asInstanceOf[E].name).toList
+
+  implicit def namedEnumSchema[E <: NamedEnum : NamedEnumCompanion]: RestSchema[E] =
+    RestSchema.plain(Schema.enumOf(enumValues[E]))
+  implicit def jEnumSchema[E <: Enum[E] : ClassTag]: RestSchema[E] =
+    RestSchema.plain(Schema.enumOf(jEnumValues[E]))
+
+  implicit def namedEnumMapSchema[M[X, Y] <: BMap[X, Y], K <: NamedEnum : NamedEnumCompanion, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(enumValues[K], _))
+  implicit def jEnumMapSchema[M[X, Y] <: BMap[X, Y], K <: Enum[K] : ClassTag, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(jEnumValues[K], _))
+
+  implicit def namedEnumJMapSchema[M[X, Y] <: JMap[X, Y], K <: NamedEnum : NamedEnumCompanion, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(enumValues[K], _))
+  implicit def jEnumJMapSchema[M[X, Y] <: JMap[X, Y], K <: Enum[K] : ClassTag, V: RestSchema]: RestSchema[M[K, V]] =
+    RestSchema[V].map(Schema.enumMapOf(jEnumValues[K], _))
 }
 
 /**
-  * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a
-  * given type. By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on
-  * [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
+  * Intermediate typeclass which serves as basis for [[RestResponses]] and [[RestRequestBody]].
+  * [[RestMediaTypes]] is derived by default from [[RestSchema]].
+  * It should be defined manually for every type which has custom serialization to
+  * [[io.udash.rest.raw.HttpBody HttpBody]] defined so that generated OpenAPI properly reflects that custom
+  * serialization format.
+  */
+@implicitNotFound("RestMediaTypes instance for ${T} not found")
+trait RestMediaTypes[T] {
+  /**
+    * @param schemaTransform Should be used if [[RestMediaTypes]] is being built based on [[RestSchema]] for
+    *                        the same type. The transformation may adjust the schema and give it a different name.
+    */
+  def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType]
+}
+object RestMediaTypes {
+  def apply[T](implicit r: RestMediaTypes[T]): RestMediaTypes[T] = r
+
+  implicit val ByteArrayMediaTypes: RestMediaTypes[Array[Byte]] =
+    new RestMediaTypes[Array[Byte]] {
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Map[String, MediaType] = {
+        val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
+        Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
+      }
+    }
+
+  implicit def fromSchema[T: RestSchema]: RestMediaTypes[T] =
+    new RestMediaTypes[T] {
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType] =
+        Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
+    }
+
+  @implicitNotFound("RestMediaTypes instance for ${T} not found, because:\n#{forSchema}")
+  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestMediaTypes[T]] =
+    ImplicitNotFound()
+}
+
+/**
+  * Typeclass which defines how an OpenAPI [[Responses]] Object will look like for a given type.
+  * By default, [[RestResponses]] is derived based on [[RestMediaTypes]] for that type which is itself derived by
+  * default from [[RestSchema]] for that type. It should be defined manually for every type which has custom
+  * serialization to [[io.udash.rest.raw.RestResponse RestResponse]] defined so that generated OpenAPI properly
+  * reflects that custom serialization format.
   */
 @implicitNotFound("RestResponses instance for ${T} not found")
 trait RestResponses[T] {
@@ -164,41 +219,26 @@ object RestResponses {
         ))
     }
 
-  implicit val ByteArrayResponses: RestResponses[Array[Byte]] =
-    new RestResponses[Array[Byte]] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Responses = {
-        val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
-        Responses(byStatusCode = Map(
-          200 -> RefOr(Response(
-            description = SuccessDescription,
-            content = Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
-          ))
-        ))
-      }
-    }
-
-  implicit def fromSchema[T: RestSchema]: RestResponses[T] =
+  implicit def fromMediaTypes[T: RestMediaTypes]: RestResponses[T] =
     new RestResponses[T] {
       def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
         Responses(byStatusCode = Map(
           200 -> RefOr(Response(
             description = SuccessDescription,
-            content = Map(HttpBody.JsonType ->
-              MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T])))
-            )
+            content = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
           ))
         ))
     }
 
-  @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forSchema}")
-  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestResponses[T]] =
+  @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forMediaTypes}")
+  implicit def notFound[T](implicit forMediaTypes: ImplicitNotFound[RestMediaTypes[T]]): ImplicitNotFound[RestResponses[T]] =
     ImplicitNotFound()
 }
 
 /**
   * Just like [[io.udash.rest.openapi.RestResponses RestResponses]],
   * [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
-  * Responses Object will look like for a HTTP method which returns given type. The difference between
+  * Responses Object will look like for an HTTP method which returns given type. The difference between
   * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]]
   * is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
   * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
@@ -227,6 +267,12 @@ object RestResultType {
   ): ImplicitNotFound[RestResultType[F[T]]] = ImplicitNotFound()
 }
 
+/**
+  * Typeclass which defines how OpenAPI [[RequestBody]] Object will look like for a Given type when that type is
+  * used as a type of [[io.udash.rest.Body Body]] parameter of a [[io.udash.rest.CustomBody CustomBody]] method.
+  * By default, [[RestRequestBody]] is derived from [[RestMediaTypes]] which by itself is derived by default
+  * from [[RestSchema]].
+  */
 @implicitNotFound("RestRequestBody instance for ${T} not found")
 trait RestRequestBody[T] {
   /**
@@ -251,23 +297,16 @@ object RestRequestBody {
       Opt.Empty
   }
 
-  implicit val ByteArrayRequestBody: RestRequestBody[Array[Byte]] = new RestRequestBody[Array[Byte]] {
-    def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
-      val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
-      simpleRequestBody(HttpBody.OctetStreamType, schema, required = true)
-    }
-  }
-
-  implicit def fromSchema[T: RestSchema]: RestRequestBody[T] =
+  implicit def fromMediaTypes[T: RestMediaTypes]: RestRequestBody[T] =
     new RestRequestBody[T] {
       def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
-        val schema = resolver.resolve(schemaTransform(RestSchema[T]))
-        simpleRequestBody(HttpBody.JsonType, schema, required = true)
+        val mediaTypes = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
+        Opt(RefOr(RequestBody(content = mediaTypes, required = true)))
       }
     }
 
-  @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forSchema}")
-  implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestRequestBody[T]] =
+  @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forMediaTypes}")
+  implicit def notFound[T](implicit forMediaTypes: ImplicitNotFound[RestMediaTypes[T]]): ImplicitNotFound[RestRequestBody[T]] =
     ImplicitNotFound()
 }
 

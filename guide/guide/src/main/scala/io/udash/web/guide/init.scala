@@ -36,6 +36,9 @@ object Context {
     SttpRestClient[MainServerREST](s"$scheme://${dom.window.location.hostname}:$port/rest_api")
   }
 
+  def markdownLink(state: MarkdownState, chapter: String): MenuLink =
+    MenuLink(chapter, state, MarkdownState.chapterFragment(chapter))
+
   val mainMenuEntries: Seq[MenuEntry] = Seq(
     MenuLink("Intro", IntroState),
     MenuContainer("Bootstrapping", Seq(
@@ -62,7 +65,15 @@ object Context {
       MenuLink("Server ➔ Client", RpcServerClientState),
       MenuLink("Serialization", RpcSerializationState)
     )),
-    MenuLink("REST", RestState),
+    MenuContainer("REST", Seq(
+      markdownLink(RestState, "Overview"),
+      markdownLink(RestState, "Quickstart example"),
+      markdownLink(RestState, "REST API traits"),
+      markdownLink(RestState, "Serialization"),
+      markdownLink(RestState, "API evolution"),
+      markdownLink(RestState, "Implementing backends"),
+      markdownLink(RestState, "Generating OpenAPI 3.0 specifications"),
+    )),
     MenuContainer("Extensions", Seq(
       MenuLink("Internationalization", I18NExtState),
       MenuLink("Authorization", AuthorizationExtState),

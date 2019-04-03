@@ -46,7 +46,9 @@ val browserCapabilities: Capabilities = {
 
 // Reusable settings for all modules
 val commonSettings = Seq(
-  moduleName := "udash-guide-" + moduleName.value
+  moduleName := "udash-guide-" + moduleName.value,
+  Compile / ideOutputDirectory := Some(baseDirectory.value / "out/production"),
+  Test / ideOutputDirectory := Some(baseDirectory.value / "out/test"),
 )
 
 // Reusable settings for modules compiled to JS

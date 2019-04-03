@@ -56,7 +56,7 @@ object RestMethodTag {
 sealed abstract class HttpMethodTag(val method: HttpMethod) extends RestMethodTag with AnnotationAggregate
 
 /**
-  * Base trait for annotations representing HTTP methods which may define a HTTP body. This includes
+  * Base trait for annotations representing HTTP methods which may define an HTTP body. This includes
   * [[io.udash.rest.PUT PUT]], [[io.udash.rest.POST POST]], [[io.udash.rest.PATCH PATCH]] and
   * [[io.udash.rest.DELETE DELETE]]. Parameters of REST methods annotated with one of these tags are by default
   * serialized into JSON (through encoding to [[io.udash.rest.raw.JsonValue JsonValue]]) and combined into JSON
@@ -115,13 +115,13 @@ class DELETE(val path: String = RestMethodTag.methodName) extends BodyMethodTag(
 }
 
 /**
-  * Base trait for tag annotations which specify how a HTTP body is built for invocation of particular
+  * Base trait for tag annotations which specify how an HTTP body is built for invocation of particular
   * method. The default one is [[io.udash.rest.JsonBody JsonBody]].
   */
 sealed trait BodyTypeTag extends RpcTag
 
 /**
-  * Indicates that a HTTP REST method takes no body. This annotation is assumed by default
+  * Indicates that an HTTP REST method takes no body. This annotation is assumed by default
   * for [[io.udash.rest.GET GET]] and [[io.udash.rest.Prefix Prefix]] methods. There should be no reason to use it
   * explicitly.
   */
@@ -130,7 +130,7 @@ class NoBody extends BodyTypeTag
 sealed trait SomeBodyTag extends BodyTypeTag
 
 /**
-  * Causes the [[io.udash.rest.Body Body]] parameters of a HTTP REST method to be encoded as `application/json`.
+  * Causes the [[io.udash.rest.Body Body]] parameters of an HTTP REST method to be encoded as `application/json`.
   * Each parameter value itself will be first serialized to [[io.udash.rest.raw.JsonValue JsonValue]].
   * This annotation only applies to methods which may include HTTP body (i.e. not [[io.udash.rest.GET GET]])
   * and is assumed by default, so there should be no reason to apply it explicitly.
@@ -138,7 +138,7 @@ sealed trait SomeBodyTag extends BodyTypeTag
 class JsonBody extends SomeBodyTag
 
 /**
-  * Causes the [[io.udash.rest.Body Body]] parameters of a HTTP REST method to be encoded as
+  * Causes the [[io.udash.rest.Body Body]] parameters of an HTTP REST method to be encoded as
   * `application/x-www-form-urlencoded`. Each parameter value itself will be first serialized to
   * [[io.udash.rest.raw.PlainValue PlainValue]].
   * This annotation only applies to methods which may include HTTP body (i.e. not [[io.udash.rest.GET GET]]).

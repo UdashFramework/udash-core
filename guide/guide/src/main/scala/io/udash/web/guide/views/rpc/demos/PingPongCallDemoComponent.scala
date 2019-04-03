@@ -27,7 +27,7 @@ class PingPongCallDemoComponent extends Component {
   class PingPongCallDemoPresenter(model: Property[Int]) {
     def onButtonClick(disabled: Property[Boolean]) = {
       disabled.set(true)
-      Context.serverRpc.demos().pingDemo().fPing(model.get) onComplete {
+      Context.serverRpc.demos.pingDemo.fPing(model.get) onComplete {
         case Success(response) =>
           model.set(response + 1)
           disabled.set(false)

@@ -61,7 +61,7 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
       BigInt.probablePrime(32, Random).toString(16)
 
     def onButtonClick() = {
-      val demoRpc: GenCodecServerRPC = Context.serverRpc.demos().gencodecsDemo()
+      val demoRpc: GenCodecServerRPC = Context.serverRpc.demos.gencodecsDemo
       demoRpc.sendInt(Random.nextInt()) onComplete {
         case Success(response) => model.subProp(_.int).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
