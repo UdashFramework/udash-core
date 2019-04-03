@@ -7,8 +7,8 @@ object Dependencies {
   val versionOfScala = "2.12.8"
   val jettyVersion = "9.4.14.v20181114"
 
-  val udashVersion = "0.8.0-M11"
-  val udashJQueryVersion = "2.0.1"
+  val udashVersion = "0.8.0-M14"
+  val udashJQueryVersion = "3.0.0"
   val fontAwesomeVersion = "5.6.3"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
@@ -62,8 +62,7 @@ object Dependencies {
   val guideJsDeps = Def.setting(Seq.empty[org.scalajs.sbtplugin.JSModuleID])
 
   val homepageJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    ProvidedJS / "jquery.mCustomScrollbar.concat.min.js",
-    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/lib/svg4everybody.js",
+    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
   ))
 
   val backendDeps = Def.setting(Seq(
