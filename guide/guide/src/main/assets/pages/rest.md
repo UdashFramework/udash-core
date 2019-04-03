@@ -835,15 +835,6 @@ of `AsyncEffect[Task]`.
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
 
-Additionally, you must provide an implicit instance of `HttpResponseType`, similar to the one defined
-in `FutureRestImplicits` trait for `Future`s. This drives materialization of `RestMetadata` in a similar way
-`AsRaw` and `AsReal` drive materialization of real<->raw interface translation.
-
-Ultimately, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
-REST API then you must also provide an implicit instance of `RestResultType` which will make the macro engine
-understand that `Task[T]` is a valid method result type and that `T` is the actual result data type whose schema will 
-be used in OpenAPI response description.
-
 Udash repository contains an [example implementation of Monix Task support in its test sources](../rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
 
 ## API evolution
