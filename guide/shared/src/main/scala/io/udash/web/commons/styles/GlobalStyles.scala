@@ -3,13 +3,12 @@ package io.udash.web.commons.styles
 import io.udash.css._
 import io.udash.web.commons.styles.utils._
 
-import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 object GlobalStyles extends CssBase {
   import dsl._
 
-  val clearfix = style(
+  val clearfix: CssStyle = style(
     &.before (
       content := "\" \"",
       display.table
@@ -22,20 +21,21 @@ object GlobalStyles extends CssBase {
     )
   )
 
-  val main = style(
+  val main: CssStyle = style(
     position.relative
   )
 
-  val body = style(
+  val body: CssStyle = style(
     position.relative,
     padding(StyleConstants.Sizes.BodyPaddingPx px),
+    lineHeight(1.5 rem),
     height(100 %%),
     margin(0 px, auto),
 
     MediaQueries.tabletLandscape(
       width(100 %%),
-      paddingLeft(2 rem),
-      paddingRight(2 rem)
+      paddingLeft(1.25 rem),
+      paddingRight(1.25 rem)
     ),
 
     MediaQueries.phone(
@@ -44,76 +44,44 @@ object GlobalStyles extends CssBase {
     )
   )
 
-  val col = style(
+  val col: CssStyle = mixin(
     position.relative,
     display.inlineBlock,
     verticalAlign.top,
     height(100 %%)
   )
 
-  val block = style(
+  val block: CssStyle = style(
     display.block
   )
 
-  val table = style(
-    display.table
-  )
-
-  val red = style(
+  val red: CssStyle = style(
     color(StyleConstants.Colors.Red).important
   )
 
-  val grey = style(
+  val grey: CssStyle = style(
     color(StyleConstants.Colors.Grey).important
   )
 
-  val width100 = style(
-    width(100 %%)
-  )
-
-  val width50 = style(
-    width(50 %%)
-  )
-
-  val width33 = style(
-    width(100 / 3 %%)
-  )
-
-  val width66 = style(
-    width(100 * 2 / 3 %%)
-  )
-
-  val textLeft = style(
-    textAlign.left
-  )
-
-  val textRight = style(
-    textAlign.right
-  )
-
-  val inline = style(
+  val inline: CssStyle = style(
     display.inline
   )
 
-  val hidden = style(
-    visibility.hidden
-  )
-
-  val noMargin = style(
+  val noMargin: CssStyle = style(
     margin(`0`).important
   )
 
-  val smallMargin = style(
+  val smallMargin: CssStyle = style(
     margin(5 px).important
   )
 
-  val underlineLink = style(
+  val underlineLink: CssStyle = style(
     position.relative,
     display.block,
     color.white,
 
     &.after(
-      CommonStyleUtils.transition(transform, 250 milliseconds),
+      CommonStyleUtils.transition(transform),
       position.absolute,
       top(100 %%),
       left(`0`),
@@ -128,7 +96,7 @@ object GlobalStyles extends CssBase {
 
     &.hover(
       cursor.pointer,
-      textDecoration := "none",
+      textDecoration := none,
 
       &.after (
         transformOrigin := "0 50%",
@@ -137,7 +105,7 @@ object GlobalStyles extends CssBase {
     )
   )
 
-  val centerBlock = style(
+  val centerBlock: CssStyle = style(
     display.block,
     textAlign.center,
     margin(`0`, auto)

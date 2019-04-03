@@ -1,25 +1,24 @@
 package io.udash.web.homepage.styles.partials
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, CommonStyleUtils}
+import io.udash.web.commons.styles.utils.{CommonStyleUtils, MediaQueries, StyleConstants}
+import scalacss.internal.Literal
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
-  val header = style(
+  val header: CssStyle = style(
     position.absolute,
     top(`0`),
     left(`0`),
     width(100 %%),
     height(StyleConstants.Sizes.LandingPageHeaderHeight px),
-    fontSize(1.6 rem),
+    fontSize(1 rem),
     zIndex(999),
 
     &.attr(Attributes.data(Attributes.Pinned), "true")(
@@ -28,7 +27,7 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
       backgroundColor.black,
       animationName(headerAnimation),
       animationIterationCount.count(1),
-      animationDuration(new FiniteDuration(300, TimeUnit.MILLISECONDS)),
+      animationDuration(300 milliseconds),
 
       MediaQueries.tabletLandscape(
         height(StyleConstants.Sizes.HeaderHeightPin * .85 px)
@@ -54,7 +53,7 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     )
   )
 
-  lazy val headerAnimation = keyframes(
+  private lazy val headerAnimation: CssStyle = keyframes(
     0d -> keyframe(
       transform := "translateY(-100%)"
     ),
@@ -64,13 +63,13 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     )
   )
 
-  val headerLeft = style(
+  val headerLeft: CssStyle = style(
     position.relative,
     float.left,
     height(100 %%)
   )
 
-  lazy val headerLogo = style(
+  lazy val headerLogo: CssStyle = style(
     CommonStyleUtils.relativeMiddle,
     display.inlineBlock,
     verticalAlign.middle,
@@ -85,13 +84,13 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
       display.block,
       width(StyleConstants.Sizes.GuideHeaderHeightMobile px),
       height(14 px),
-      backgroundPosition := "bottom",
-      transform := "none",
+      backgroundPosition := Literal.bottom,
+      transform := none,
       top.auto
     )
   )
 
-  lazy val btnMobile = style(
+  lazy val btnMobile: CssStyle = style(
     position.relative
   )
 }

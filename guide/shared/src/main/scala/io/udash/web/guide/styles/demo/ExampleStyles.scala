@@ -1,18 +1,16 @@
 package io.udash.web.guide.styles.demo
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.attributes.Attributes
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationInt
 
 object ExampleStyles extends CssBase {
   import dsl._
 
   import scala.language.postfixOps
 
-  val btn = style(
+  val btn: CssStyle = style(
     display.inlineBlock,
     padding(6 px, 12 px),
     fontSize(14 px),
@@ -25,11 +23,11 @@ object ExampleStyles extends CssBase {
     borderStyle.solid,
     borderColor.transparent,
     borderRadius(4 px),
-    userSelect := "none",
+    userSelect := none,
     overflow.hidden
   )
 
-  val btnDefault = style(
+  val btnDefault: CssStyle = style(
     color(c"#000000"),
     backgroundColor(c"#FFFFFF"),
     borderColor(c"#CCCCCC"),
@@ -38,11 +36,11 @@ object ExampleStyles extends CssBase {
       color(c"#333333"),
       backgroundColor(c"#E6E6E6"),
       borderColor(c"#ADADAD"),
-      textDecoration := "none"
+      textDecoration := none
     )
   )
 
-  val btnSuccess = style(
+  val btnSuccess: CssStyle = style(
     color(c"#FFFFFF"),
     backgroundColor(c"#5CB85C"),
     borderColor(c"#4CAE4C"),
@@ -54,20 +52,20 @@ object ExampleStyles extends CssBase {
     )
   )
 
-  val btnAnimated = style(
+  val btnAnimated: CssStyle = style(
     &.hover {
-      ExampleMixins.animation(ExampleKeyframes.colorPulse, FiniteDuration(750, TimeUnit.MILLISECONDS))
+      ExampleMixins.animation(ExampleKeyframes.colorPulse, 750 milliseconds)
     }
   )
 
-  val innerOff = style(
+  val innerOff: CssStyle = style(
     padding(6 px, 12 px),
     borderBottomWidth(1 px),
     borderBottomStyle.solid,
     borderBottomColor(c"#CCCCCC")
   )
 
-  val innerOn = style(
+  val innerOn: CssStyle = style(
     padding(6 px, 12 px),
     color(c"#FFFFFF"),
     backgroundColor(c"#5CB85C"),
@@ -76,17 +74,17 @@ object ExampleStyles extends CssBase {
     borderTopColor(c"#4CAE4C")
   )
 
-  val swither = style(
+  val swither: CssStyle = style(
     display.inlineBlock,
     borderWidth(1 px),
     borderStyle.solid,
     borderRadius(4 px),
     borderColor(c"#CCCCCC"),
     cursor.pointer,
-    userSelect := "none",
+    userSelect := none,
 
     &.hover (
-      textDecoration := "none"
+      textDecoration := none
     ),
 
     &.attr(Attributes.data(Attributes.State), "on") (
@@ -107,14 +105,14 @@ object ExampleStyles extends CssBase {
     )
   )
 
-  val mediaDesktop = style(
+  val mediaDesktop: CssStyle = style(
     backgroundColor(c"#E6E6E6"),
     media.maxWidth(769 px) (
       display.none
     )
   )
 
-  val mediaTablet = style(
+  val mediaTablet: CssStyle = style(
     display.none,
     backgroundColor(c"#5CB85C"),
 
@@ -123,7 +121,7 @@ object ExampleStyles extends CssBase {
     )
   )
 
-  val mediaContainer = style(
+  val mediaContainer: CssStyle = style(
     position.relative,
     fontSize(28 px),
     textAlign.center,

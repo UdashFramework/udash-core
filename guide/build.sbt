@@ -65,6 +65,7 @@ val commonJSSettings = Seq(
   
   //library CSS settings
   LessKeys.compress in Assets := true,
+  LessKeys.strictMath in Assets := true,
   LessKeys.verbose in Assets := true,
 )
 

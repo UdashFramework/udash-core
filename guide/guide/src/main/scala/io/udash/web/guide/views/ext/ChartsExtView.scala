@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
@@ -8,7 +9,6 @@ import io.udash.web.guide.views.ext.demo.charts._
 import io.udash.web.guide.views.{References, Versions}
 import io.udash.wrappers.highcharts.config.HighchartsConfig
 import org.scalajs.dom.Element
-
 import scalatags.JsDom
 
 case object ChartsExtViewFactory extends StaticViewFactory[ChartsExtState.type](() => new ChartsExtView)
@@ -16,10 +16,12 @@ case object ChartsExtViewFactory extends StaticViewFactory[ChartsExtState.type](
 
 class ChartsExtView extends FinalView {
   import Context._
+  import JsDom.all._
   import io.udash.wrappers.highcharts.HighchartsUtils._
   import io.udash.wrappers.jquery._
 
-  import JsDom.all._
+  import scala.concurrent.duration.DurationInt
+  import scala.scalajs.js.timers._
 
   val charts: Seq[(String, HighchartsConfig)] = Seq(
     ("Basic line", BasicLine.config),
@@ -70,9 +72,13 @@ class ChartsExtView extends FinalView {
       a(href := "https://github.com/UdashFramework/udash-guide/tree/master/guide/src/main/scala/io/udash/web/guide/views/ext/demo/charts")("GitHub"), "."
     ),
     charts.map { case (name, config) =>
-      val c = chartContainer()
-      jQ(c).highcharts(config)
-      div(h3(name), c)
+      // For some reason with new highcharts, they initialize before browser parses styles for their containers...
+      // This hack is to delay highcharts initialization until container widths are calculated
+      div()(h3(name), chartContainer().setup(chartContainer =>
+        setTimeout(0.milliseconds) {
+          jQ(chartContainer).highcharts(config)
+        }
+      ))
     },
     h2("What's next?"),
     p("You can check the ", a(href := BootstrapExtState.url)("Bootstrap Components"),

@@ -2,29 +2,29 @@ package io.udash.web.commons.styles
 
 import io.udash.css.CssBase
 import io.udash.web.commons.styles.utils._
+import scalacss.internal.{Attr, Literal}
 
 import scala.language.postfixOps
-import scalacss.internal.{Attr, Literal}
 
 trait DefaultStyles extends CssBase {
   import dsl._
 
   style(
     unsafeRoot( """
-         |html, body, div, span, applet, object, iframe,
-         |h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-         |a, abbr, acronym, address, big, cite, code,
-         |del, dfn, em, img, ins, kbd, q, s, samp,
-         |small, strike, strong, sub, sup, tt, var,
-         |b, u, i, center,
-         |dl, dt, dd, ol, ul, li,
-         |fieldset, form, label, legend,
-         |table, caption, tbody, tfoot, thead, tr, th, td,
-         |article, aside, canvas, details, embed,
-         |figure, figcaption, footer, header, hgroup,
-         |menu, nav, output, ruby, section, summary,
-         |time, mark, audio, video
-       """.stripMargin.replaceAll("\\s+", ""))(
+                  |html, body, div, span, applet, object, iframe,
+                  |h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+                  |a, abbr, acronym, address, big, cite, code,
+                  |del, dfn, em, img, ins, kbd, q, s, samp,
+                  |small, strike, strong, sub, sup, tt, var,
+                  |b, u, i, center,
+                  |dl, dt, dd, ol, ul, li,
+                  |fieldset, form, label, legend,
+                  |table, caption, tbody, tfoot, thead, tr, th, td,
+                  |article, aside, canvas, details, embed,
+                  |figure, figcaption, footer, header, hgroup,
+                  |menu, nav, output, ruby, section, summary,
+                  |time, mark, audio, video
+                """.stripMargin.replaceAll("\\s+", ""))(
       margin.`0`,
       padding.`0`,
       border.`0`,
@@ -42,7 +42,7 @@ trait DefaultStyles extends CssBase {
     ),
 
     unsafeRoot("ol,ul")(
-      listStyle := none // TODO
+      listStyle := none
     ),
 
     unsafeRoot("blockquote, q")(
@@ -64,10 +64,9 @@ trait DefaultStyles extends CssBase {
     ),
 
     unsafeRoot("html") (
-      UdashFonts.acumin(),
+      UdashFonts.roboto(),
       position.relative,
       height(100 %%),
-      fontSize(62.5 %%)
     ),
 
     unsafeRoot("body") (
@@ -82,11 +81,11 @@ trait DefaultStyles extends CssBase {
 
     unsafeRoot("h1") (
       position.relative,
-      UdashFonts.acumin(FontWeight.SemiBold),
-      paddingTop(7 rem),
-      paddingBottom(4.5 rem),
+      UdashFonts.roboto(FontWeight.Bold),
+      paddingTop(4.375 rem),
+      paddingBottom(2.8125 rem),
       lineHeight(1.2),
-      fontSize(4.8 rem),
+      fontSize(3 rem),
       textAlign.left,
 
       &.after (
@@ -94,36 +93,36 @@ trait DefaultStyles extends CssBase {
         position.absolute,
         left(`0`),
         bottom(`0`),
-        fontSize(3.6 rem)
+        fontSize(2.25 rem)
       ),
 
       MediaQueries.phone(
-        fontSize(3.2 rem)
+        fontSize(2 rem)
       )
     ),
 
     unsafeRoot("h2") (
-      UdashFonts.acumin(FontWeight.SemiBold),
-      marginTop(5.5 rem),
-      marginBottom(2 rem),
+      UdashFonts.roboto(FontWeight.Bold),
+      marginTop(3.4375 rem),
+      marginBottom(1.25 rem),
       lineHeight(1.2),
-      fontSize(3.2 rem),
+      fontSize(2 rem),
 
       MediaQueries.phone(
-        fontSize(2.8 rem)
+        fontSize(1.75 rem)
       )
     ),
 
     unsafeRoot("blockquote") (
-      UdashFonts.acumin(FontWeight.ExtraLight, FontStyle.Italic),
+      UdashFonts.roboto(FontWeight.Thin, FontStyle.Italic),
       position.relative,
-      margin(4 rem, `0`, 5 rem, 4.5 rem),
-      padding(1.5 rem, 3 rem),
-      fontSize(3.2 rem),
+      margin(2.5 rem, `0`, 3.125 rem, 2.8125 rem),
+      padding(.9375 rem, 1.875 rem),
+      fontSize(2 rem),
       color(StyleConstants.Colors.Grey),
 
       &.before(
-        CommonStyleUtils.border(StyleConstants.Colors.Red, .3 rem),
+        CommonStyleUtils.border(StyleConstants.Colors.Red,.1875 rem),
         content := "\" \"",
         position.absolute,
         top(`0`),
@@ -132,24 +131,24 @@ trait DefaultStyles extends CssBase {
       ),
 
       MediaQueries.phone(
-        fontSize(2.4 rem)
+        fontSize(1.5 rem)
       )
     ),
 
     unsafeRoot("a") (
-      textDecoration := "none",
+      textDecoration := none,
       outline(`0`).important,
 
       &.link(
-        textDecoration := "none"
+        textDecoration := none
       ),
 
       &.hover (
-        textDecoration := "none"
+        textDecoration := none
       ),
 
       &.hover (
-        textDecoration := "underline"
+        textDecoration := Literal.underline
       )
     ),
 
@@ -164,7 +163,7 @@ trait DefaultStyles extends CssBase {
 
     unsafeRoot("object[type='image/svg+xml']") (
       display.block,
-      pointerEvents := "none"
+      pointerEvents := none
     ),
 
     unsafeRoot("input") (
@@ -178,12 +177,12 @@ trait DefaultStyles extends CssBase {
     ),
 
     unsafeRoot("input::-webkit-outer-spin-button")(
-      Attr.real("-webkit-appearance") := "none",
+      Attr.real("-webkit-appearance") := none,
       margin(`0`)
     ),
 
     unsafeRoot("input::-webkit-inner-spin-button")(
-      Attr.real("-webkit-appearance") := "none",
+      Attr.real("-webkit-appearance") := none,
       margin(`0`)
     ),
 

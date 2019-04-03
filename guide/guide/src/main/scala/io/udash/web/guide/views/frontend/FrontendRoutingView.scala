@@ -10,9 +10,9 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
 import org.scalajs.dom
+import scalatags.JsDom
 
 import scala.scalajs.js
-import scalatags.JsDom
 
 case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState] {
   override def create(): (View, Presenter[FrontendRoutingState]) = {
@@ -30,7 +30,6 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
 
 class FrontendRoutingView(url: Property[String]) extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -182,7 +181,10 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     ),
     ForceBootstrap(
       div(GuideStyles.frame, GuideStyles.useBootstrap)(
-        input(
+        div(BootstrapStyles.Spacing.margin(
+          side = BootstrapStyles.Side.Bottom,
+          size = BootstrapStyles.SpacingSize.Normal
+        ))(input(
           BootstrapStyles.Form.control, id := "url-demo-link-input", value := "",
           placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
             applicationInstance.goTo(FrontendRoutingState(
@@ -192,7 +194,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
             ))
             true
           })
-        ),
+        )),
         p("This view was created with: ", span(id := "url-demo-link-init")(applicationInstance.currentUrl.value))
       )
     ),

@@ -2,6 +2,7 @@ package io.udash.web.guide.views.ext.demo
 
 import java.util.concurrent.TimeUnit
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap._
@@ -10,6 +11,8 @@ import io.udash.bootstrap.badge.UdashBadge
 import io.udash.bootstrap.breadcrumb.UdashBreadcrumbs
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.card.UdashCard
+import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
+import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.datepicker.UdashDatePicker
 import io.udash.bootstrap.dropdown.UdashDropdown
@@ -23,7 +26,7 @@ import io.udash.bootstrap.pagination.UdashPagination
 import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
-import io.udash.bootstrap.utils.BootstrapStyles.{Color, ResponsiveBreakpoint, Size}
+import io.udash.bootstrap.utils.BootstrapStyles._
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
@@ -43,19 +46,24 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   import JsDom.all._
   import io.udash.web.guide.Context._
+  import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
   def statics(): dom.Element =
     div(BootstrapStyles.Grid.row, GuideStyles.frame)(
-      div(BootstrapStyles.Grid.col(9), BootstrapStyles.Border.border())(
+      div(BootstrapStyles.Grid.col(9), wellStyles,
+        BootstrapStyles.Spacing.margin(
+          side = Side.Bottom, size = SpacingSize.Normal
+        )
+      )(
         ".col-xs-9"
       ),
-      div(BootstrapStyles.Grid.col(4), BootstrapStyles.Border.border())(
+      div(BootstrapStyles.Grid.col(4), wellStyles)(
         ".col-xs-4", br,
         "Since 9 + 4 = 13 > 12, this 4-column-wide div",
         "gets wrapped onto a new line as one contiguous unit."
       ),
-      div(BootstrapStyles.Grid.col(6), BootstrapStyles.Border.border())(
+      div(BootstrapStyles.Grid.col(6), wellStyles)(
         ".col-xs-6", br,
         "Subsequent columns continue along the new line."
       )
@@ -144,12 +152,12 @@ object BootstrapDemos extends CrossLogging with CssView {
         UdashButtonGroup()(
           factory.externalBinding(showButton).render,
           factory.externalBinding(hideButton).render,
-            factory.externalBinding(enableButton).render,
-              factory.externalBinding(disableButton).render
+          factory.externalBinding(enableButton).render,
+          factory.externalBinding(disableButton).render
         ).render
       )}.render,
       hr,
-      div(BootstrapStyles.Border.border())(
+      div(wellStyles)(
         repeat(events)(ev => Seq(i(ev.get).render, br.render))
       )
     ).render
@@ -254,7 +262,9 @@ object BootstrapDemos extends CrossLogging with CssView {
       UdashDropdown.defaultItemFactory,
       _ => Seq[Modifier]("Dropdown ", BootstrapStyles.Button.color(Color.Primary))
     )
-    val dropup = UdashDropdown(items, UdashDropdown.Direction.Up.toProperty)(UdashDropdown.defaultItemFactory, _ => "Dropup ")
+    val dropup = UdashDropdown(items, UdashDropdown.Direction.Up.toProperty)(
+      UdashDropdown.defaultItemFactory, _ => "Dropup "
+    )
     val listener: PartialFunction[UdashDropdown.DropdownEvent[DefaultDropdownItem, CastableProperty[DefaultDropdownItem]], Unit] = {
       case UdashDropdown.DropdownEvent.SelectionEvent(_, item) => clicks.append(item.toString)
       case ev: DropdownEvent[_, _] => logger.info(ev.toString)
@@ -264,13 +274,13 @@ object BootstrapDemos extends CrossLogging with CssView {
     dropup.listen(listener)
 
     div(GuideStyles.frame)(
-      div(BootstrapStyles.Grid.row)(
+      div(BootstrapStyles.Grid.row, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
         div(BootstrapStyles.Grid.col(6))(dropdown.render),
         div(BootstrapStyles.Grid.col(6))(dropup.render)
       ),
       h4("Clicks: "),
       produce(clicks)(seq =>
-        ul(BootstrapStyles.Border.border())(seq.map(click =>
+        ul(wellStyles)(seq.map(click =>
           li(click)
         ): _*).render
       )
@@ -308,13 +318,15 @@ object BootstrapDemos extends CrossLogging with CssView {
     }
 
     div(GuideStyles.frame)(
-      push.render,
-      div(GlobalStyles.centerBlock)(
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        push.render,
+      ),
+      div(GlobalStyles.centerBlock, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
         buttons.map(_.render)
       ),
       h4("Clicks: "),
       produce(clicks)(seq =>
-        ul(BootstrapStyles.Border.border())(seq.map(li(_))).render
+        ul(wellStyles)(seq.map(li(_))).render
       )
     ).render
   }
@@ -329,11 +341,11 @@ object BootstrapDemos extends CrossLogging with CssView {
     }
 
     div(GuideStyles.frame)(
-      div(GlobalStyles.centerBlock)(
+      div(GlobalStyles.centerBlock, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
         buttons.map { case (_, (_, btn)) => btn.render }
       ),
       h4("Is active: "),
-      div(BootstrapStyles.Border.border())(
+      div(wellStyles)(
         buttons.map({ case (name, (active, _)) =>
           span(s"$name: ", bind(active), br)
         }).toSeq
@@ -372,9 +384,11 @@ object BootstrapDemos extends CrossLogging with CssView {
     val selected = SeqProperty[String]("Checkbox 1")
     val options = SeqProperty[String]("Checkbox 1", "Checkbox 2", "Checkbox 3")
     div(GuideStyles.frame)(
-      UdashButtonGroup.checkboxes(selected, options)().render,
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        UdashButtonGroup.checkboxes(selected, options)().render
+      ),
       h4("Is active: "),
-      div(BootstrapStyles.Border.border())(
+      div(wellStyles)(
         repeatWithNested(options) { (option, nested) =>
           val checked = selected.transform((_: Seq[String]).contains(option.get))
           div(bind(option), ": ", bind(checked)).render
@@ -387,9 +401,11 @@ object BootstrapDemos extends CrossLogging with CssView {
     val selected = Property[String]("Radio 1")
     val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
     div(GuideStyles.frame)(
-      UdashButtonGroup.radio(selected, options)().render,
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        UdashButtonGroup.radio(selected, options)().render
+      ),
       h4("Is active: "),
-      div(BootstrapStyles.Border.border())(
+      div(wellStyles)(
         repeatWithNested(options) { (option, nested) =>
           val checked = selected.transform(_ == option.get)
           div(bind(option), ": ", bind(checked)).render
@@ -532,15 +548,14 @@ object BootstrapDemos extends CrossLogging with CssView {
     div(GuideStyles.frame)(
       UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
         elemFactory = (panel, nested) => a(
+          BootstrapStyles.Navigation.link,
           href := "",
-          onclick :+= ((ev: Event) => selected.set(panel.get), true)
+          onclick :+= ((_: Event) => selected.set(panel.get), true)
         )(nested(bind(panel.asModel.subProp(_.title)))).render,
         isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
       ).render,
       div(
-        BootstrapStyles.Border.border(BootstrapStyles.Side.Left),
-        BootstrapStyles.Border.border(BootstrapStyles.Side.Right),
-        BootstrapStyles.Border.border(BootstrapStyles.Side.Bottom),
+        wellStyles,
         BootstrapStyles.Spacing.padding()
       )(
         bind(selected.asModel.subProp(_.content))
@@ -567,7 +582,11 @@ object BootstrapDemos extends CrossLogging with CssView {
     div(GuideStyles.frame)(
       UdashNavbar()(
         _ => UdashNav(panels)(
-          elemFactory = (panel, nested) => a(href := "", onclick :+= ((ev: Event) => true))(
+          elemFactory = (panel, nested) => a(
+            BootstrapStyles.Navigation.link,
+            href := "",
+            onclick :+= ((_: Event) => true)
+          )(
             nested(bind(panel.asModel.subProp(_.title)))
           ).render,
           isActive = el => el.transform(_.title.endsWith("1")),
@@ -579,8 +598,12 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def udashNavigation(): dom.Element = {
-    def linkFactory(l: MenuLink) =
-      a(href := l.state.url, BootstrapStyles.Dropdown.item)(span(l.name)).render
+    def linkFactory(l: MenuLink, dropdown: Boolean = true) =
+      a(
+        href := l.state.url,
+        BootstrapStyles.Dropdown.item.styleIf(dropdown),
+        BootstrapStyles.Navigation.link.styleIf(!dropdown)
+      )(span(l.name)).render
 
     val panels = SeqProperty[MenuEntry](mainMenuEntries.slice(0, 4))
     div(GuideStyles.frame)(
@@ -592,8 +615,8 @@ object BootstrapDemos extends CrossLogging with CssView {
               UdashDropdown(childrenProperty, buttonToggle = false.toProperty)(
                 (item: Property[MenuLink], _) => linkFactory(item.get),
                 _ => span(name, " ")
-              ).render
-            case link: MenuLink => linkFactory(link)
+              ).render.setup(_.firstElementChild.applyTags(BootstrapStyles.Navigation.link))
+            case link: MenuLink => linkFactory(link, dropdown = false)
           },
           isDropdown = _.transform {
             case MenuContainer(_, _) => true
@@ -613,10 +636,13 @@ object BootstrapDemos extends CrossLogging with CssView {
       new Breadcrumb("Dev's Guide", Url("http://guide.udash.io/")),
       new Breadcrumb("Extensions", Url("http://guide.udash.io/")),
       new Breadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
-    )
+    ).readable
 
     val breadcrumbs = UdashBreadcrumbs(pages)(
-      defaultPageFactory,
+      (page, nested) => nested(produce(page) { page =>
+        if (pages.get.last == page) JsDom.StringFrag(page.name).render
+        else a(href := page.link)(page.name).render
+      }),
       pages.get.last == _
     )
     div(GuideStyles.frame)(
@@ -637,30 +663,38 @@ object BootstrapDemos extends CrossLogging with CssView {
     val pagination = UdashPagination(
       pages, selected,
       showArrows = showArrows, highlightActive = highlightActive
-    )(defaultPageFactory)
+    )(defaultPageFactory).render.setup(_.firstElementChild.applyTags(
+      BootstrapStyles.Flex.justifyContent(
+        BootstrapStyles.FlexContentJustification.Center
+      )
+    ))
     div(GuideStyles.frame)(
-      div(
+      div(BootstrapStyles.Spacing.margin(
+        side = Side.Bottom, size = SpacingSize.Normal
+      ))(
         UdashButtonGroup()(
           toggleArrows.render,
           toggleHighlight.render
         ).render
       ),
-      div("Selected page index: ", bind(selected)),
-      div(GlobalStyles.centerBlock)(pagination.render)
+      div(BootstrapStyles.Spacing.margin(
+        side = Side.Bottom, size = SpacingSize.Normal
+      ))("Selected page index: ", bind(selected)),
+      div(pagination)
     ).render
   }
 
   def labels(): dom.Element = {
     div(GuideStyles.frame)(
       div(
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill").render,
-        UdashBadge.link(Property("https://udash.io/"), badgeStyle = BootstrapStyles.Color.Success.toProperty)(_ => "Success Link").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Danger.toProperty)(_ => "Danger").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render,
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render,
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill").render, " ",
+        UdashBadge.link(Property("https://udash.io/"), badgeStyle = BootstrapStyles.Color.Success.toProperty)(_ => "Success Link").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Danger.toProperty)(_ => "Danger").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render, " ",
+        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render, " ",
       )
     ).render
   }
@@ -698,9 +732,13 @@ object BootstrapDemos extends CrossLogging with CssView {
     div(GuideStyles.frame)(
       alerts,
       create.render,
-      h4("Dismissed: "),
-      produce(dismissed)(seq =>
-        ul(seq.map(click => li(click))).render
+      div(BootstrapStyles.Spacing.margin(
+        side = Side.Top, size = SpacingSize.Normal
+      ))(
+        h4("Dismissed: "),
+        div(wellStyles)(produce(dismissed)(seq =>
+          ul(seq.map(click => li(click))).render
+        ))
       )
     ).render
   }
@@ -716,16 +754,25 @@ object BootstrapDemos extends CrossLogging with CssView {
           UdashButton.toggle(active = animate)("Animate").render
         ).render
       ), br,
-      UdashProgressBar(value, showPercentage, barStyle = Some(BootstrapStyles.Color.Success).toProperty)().render,
-      UdashProgressBar(value, showPercentage, stripped = true.toProperty)(
-        (value, min, max, nested) => Seq[Modifier](
-          nested(bind(value.combine(min)(_ - _).combine(max.combine(min)(_ - _))(_ * 100 / _))),
-          " percent"
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        UdashProgressBar(value, showPercentage, barStyle = Some(BootstrapStyles.Color.Success).toProperty)().render
+      ),
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        UdashProgressBar(value, showPercentage, stripped = true.toProperty)(
+          (value, min, max, nested) => Seq[Modifier](
+            nested(bind(value.combine(min)(_ - _).combine(max.combine(min)(_ - _))(_ * 100 / _))),
+            " percent"
+          )
+        ).render
+      ),
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        UdashProgressBar(value, showPercentage, stripped = true.toProperty, animated = animate,
+          barStyle = Some(BootstrapStyles.Color.Danger).toProperty)().render,
+      ),
+      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+        NumberInput(value.transform(_.toString, Integer.parseInt))(
+          BootstrapStyles.Form.control, placeholder := "Percentage"
         )
-      ).render,
-      UdashProgressBar(value, showPercentage, stripped = true.toProperty, animated = animate, barStyle = Some(BootstrapStyles.Color.Danger).toProperty)().render,
-      NumberInput(value.transform(_.toString, Integer.parseInt))(
-        BootstrapStyles.Form.control, placeholder := "Percentage"
       )
     ).render
   }
@@ -788,7 +835,9 @@ object BootstrapDemos extends CrossLogging with CssView {
   def simpleModal(): dom.Element = {
     val events = SeqProperty.blank[UdashModal.ModalEvent]
     val header = (_: Binding.NestedInterceptor) => div("Modal events").render
-    val body = (nested: Binding.NestedInterceptor) => div(ul(nested(repeat(events)(event => li(event.get.toString).render)))).render
+    val body = (nested: Binding.NestedInterceptor) => div(wellStyles, BootstrapStyles.Spacing.margin())(
+      ul(nested(repeat(events)(event => li(event.get.toString).render)))
+    ).render
     val footer = (_: Binding.NestedInterceptor) => div(
       UdashButton()(_ => Seq[Modifier](UdashModal.CloseButtonAttr, "Close")).render,
       UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Something...").render
@@ -821,11 +870,13 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   def tooltips(): dom.Element = {
     import scala.concurrent.duration.DurationInt
+    val tooltipContainerId = ComponentId("tooltip-container")
     val label1 = UdashBadge()(_ => Seq[Modifier]("Tooltip on hover with delay", GlobalStyles.smallMargin)).render
     UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Hover),
       delay = UdashTooltip.Delay(500 millis, 250 millis),
-      title = (_) => "Tooltip..."
+      title = (_) => "Tooltip...",
+      container = Option(s"#$tooltipContainerId")
     )(label1)
 
     val label2 = UdashBadge()(_ => Seq[Modifier]("Tooltip on click", GlobalStyles.smallMargin)).render
@@ -833,32 +884,36 @@ object BootstrapDemos extends CrossLogging with CssView {
       trigger = Seq(UdashTooltip.Trigger.Click),
       delay = UdashTooltip.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashTooltip.Placement.Bottom),
-      title = (_) => "Tooltip 2..."
+      title = (_) => "Tooltip 2...",
+      container = Option(s"#$tooltipContainerId")
     )(label2)
 
     val label3 = UdashBadge()(_ => Seq[Modifier]("Tooltip with JS toggler", GlobalStyles.smallMargin)).render
     val label3Tooltip = UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Manual),
       placement = (_, _) => Seq(UdashTooltip.Placement.Right),
-      title = (_) => "Tooltip 3..."
+      title = (_) => "Tooltip 3...",
+      container = Option(s"#$tooltipContainerId")
     )(label3)
 
     val button = UdashButton()("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(GuideStyles.frame)(
+    div(GuideStyles.frame, id := tooltipContainerId)(
       label1, label2, label3, button.render
     ).render
   }
 
   def popovers(): dom.Element = {
     import scala.concurrent.duration.DurationInt
+    val popoverContainerId = ComponentId("popover-container")
     val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", GlobalStyles.smallMargin)).render
     UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Hover),
       delay = UdashPopover.Delay(500 millis, 250 millis),
       title = (_) => "Popover...",
-      content = (_) => "Content..."
+      content = (_) => "Content...",
+      container = Option(s"#$popoverContainerId")
     )(label1)
 
     val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.smallMargin)).render
@@ -867,7 +922,8 @@ object BootstrapDemos extends CrossLogging with CssView {
       delay = UdashPopover.Delay(0 millis, 250 millis),
       placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
       title = (_) => "Popover 2...",
-      content = (_) => "Content..."
+      content = (_) => "Content...",
+      container = Option(s"#$popoverContainerId")
     )(label2)
 
     val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalStyles.smallMargin)).render
@@ -882,13 +938,14 @@ object BootstrapDemos extends CrossLogging with CssView {
           p("HTML content..."),
           ul(li("Item 1"), li("Item 2"), li("Item 3"))
         ).render
-      }
+      },
+      container = Option(s"#$popoverContainerId")
     )(label3)
 
     val button = UdashButton()("Toggle popover")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(GuideStyles.frame)(
+    div(GuideStyles.frame, id := popoverContainerId)(
       label1, label2, label3, button.render
     ).render
   }
@@ -896,7 +953,7 @@ object BootstrapDemos extends CrossLogging with CssView {
   def simpleCollapse(): dom.Element = {
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
-      div(BootstrapStyles.Border.border())(
+      div(wellStyles)(
         ul(repeat(events)(event => li(event.get.toString).render))
       )
     )
@@ -928,7 +985,7 @@ object BootstrapDemos extends CrossLogging with CssView {
 
     val accordion = UdashAccordion(news)(
       (news, _) => span(news.get).render,
-      (_, _) => ul(repeat(events)(event => li(event.get.toString).render)).render
+      (_, _) => div(wellStyles)(ul(repeat(events)(event => li(event.get.toString).render))).render
     )
 
     val accordionElement = accordion.render
@@ -940,44 +997,47 @@ object BootstrapDemos extends CrossLogging with CssView {
   }
 
   def carousel(): dom.Element = {
-//    def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-//      Url("/assets/images/ext/bootstrap/carousel.jpg")
-//    )(
-//      h3(randomString()),
-//      p(randomString())
-//    )
-//    val slides = SeqProperty[UdashCarouselSlide]((1 to 5).map(_ => newSlide()))
-//    val active = Property(true)
-//    import scala.concurrent.duration._
-//    val carousel = UdashCarousel(slides, activeSlide = 1,
-//      animationOptions = AnimationOptions(interval = 2 seconds, keyboard = false, active = active.get)
-//    )
-//    val prevButton = UdashButton()("Prev")
-//    val nextButton = UdashButton()("Next")
-//    val prependButton = UdashButton()("Prepend")
-//    val appendButton = UdashButton()("Append")
-//    prevButton.listen { case _ => carousel.previousSlide() }
-//    nextButton.listen { case _ => carousel.nextSlide() }
-//    prependButton.listen { case _ => slides.prepend(newSlide()) }
-//    appendButton.listen { case _ => slides.append(newSlide()) }
-//    active.listen(b => if (b) carousel.cycle() else carousel.pause())
+    def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
+      Url("/assets/images/ext/bootstrap/carousel.jpg")
+    )(
+      h3(randomString()),
+      p(randomString())
+    )
+
+    val slides = SeqProperty[UdashCarouselSlide]((1 to 5).map(_ => newSlide()))
+    val active = Property(true)
+    import scala.concurrent.duration._
+    val carousel = UdashCarousel(
+      slides = slides,
+      activeSlide = Property(1),
+      animationOptions = Property(AnimationOptions(interval = 2 seconds, keyboard = false, active = active.get))
+    ) { case (slide, nested) => nested(produce(slide)(_.render)) }
+    val prevButton = UdashButton()("Prev")
+    val nextButton = UdashButton()("Next")
+    val prependButton = UdashButton()("Prepend")
+    val appendButton = UdashButton()("Append")
+    prevButton.listen { case _ => carousel.previousSlide() }
+    nextButton.listen { case _ => carousel.nextSlide() }
+    prependButton.listen { case _ => slides.prepend(newSlide()) }
+    appendButton.listen { case _ => slides.append(newSlide()) }
+    active.listen(b => if (b) carousel.cycle() else carousel.pause())
     div(
-//      div(GuideStyles.frame)(
-//        UdashButtonToolbar(
-//          UdashButton.toggle(active = active)("Run animation").render,
-//          UdashButtonGroup()(
-//            prevButton.render,
-//            nextButton.render
-//          ).render,
-//          UdashButtonGroup()(
-//            prependButton.render,
-//            appendButton.render
-//          ).render
-//        ).render
-//      ),
-//      div(
-//        carousel.render
-//      )
+      div(GuideStyles.frame)(
+        UdashButtonToolbar()(
+          UdashButton.toggle(active = active)("Run animation").render,
+          UdashButtonGroup()(
+            prevButton.render,
+            nextButton.render
+          ).render,
+          UdashButtonGroup()(
+            prependButton.render,
+            appendButton.render
+          ).render
+        ).render
+      ),
+      div(
+        carousel.render
+      )
     ).render
   }
 

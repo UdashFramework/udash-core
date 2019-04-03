@@ -1,6 +1,6 @@
 package io.udash.web.guide.styles.partials
 
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles}
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
@@ -13,11 +13,11 @@ import scala.language.postfixOps
 object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 
-  val header = style(
+  val header: CssStyle = style(
     position.relative,
     backgroundColor.black,
     height(StyleConstants.Sizes.HeaderHeight px),
-    fontSize(1.6 rem),
+    fontSize(1 rem),
     zIndex(99),
 
     MediaQueries.tabletPortrait(
@@ -25,13 +25,13 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     )
   )
 
-  val headerLeft = style(
+  val headerLeft: CssStyle = style(
     position.relative,
     float.left,
     height(100 %%)
   )
 
-  val headerLogo = style(
+  val headerLogo: CssStyle = style(
     GuideStyleUtils.relativeMiddle,
     display.inlineBlock,
     verticalAlign.top,

@@ -1,7 +1,7 @@
 package io.udash.web.guide.demos.rest
 
 import io.udash.web.SeleniumTest
-import org.openqa.selenium.By.{ById, ByTagName}
+import org.openqa.selenium.By.ById
 
 class RestIntroTest extends SeleniumTest {
   val rpcIntroUrl = "/rest"
@@ -20,13 +20,19 @@ class RestIntroTest extends SeleniumTest {
       val stringButton = callDemo.findElement(new ById("simple-rest-demo-string-btn"))
       val intButton = callDemo.findElement(new ById("simple-rest-demo-int-btn"))
       val classButton = callDemo.findElement(new ById("simple-rest-demo-class-btn"))
+      val responseHeader = callDemo.findElement(new ById("simple-rest-demo-response-header"))
+      val stringResponse = callDemo.findElement(new ById("simple-rest-demo-response-string"))
+      val intResponse = callDemo.findElement(new ById("simple-rest-demo-response-int"))
+      val classResponse = callDemo.findElement(new ById("simple-rest-demo-response-class"))
 
       eventually {
-        val responses = callDemo.findElements(new ByTagName("div"))
-        responses.size should be(4)
-        responses.get(1).getText should be("String: -")
-        responses.get(2).getText should be("Int: 0")
-        responses.get(3).getText should be("Class: None")
+        responseHeader.getText should be("Results:")
+      }
+
+      eventually {
+        stringResponse.getText should be("String: -")
+        intResponse.getText should be("Int: 0")
+        classResponse.getText should be("Class: None")
       }
 
       stringButton.click()
@@ -34,11 +40,9 @@ class RestIntroTest extends SeleniumTest {
       classButton.click()
 
       eventually {
-        val responses = callDemo.findElements(new ByTagName("div"))
-        responses.size should be(4)
-        responses.get(1).getText should be("String: OK")
-        responses.get(2).getText should be("Int: 123")
-        responses.get(3).getText should be("Class: Some(RestExampleClass(42,Udash,InnerClass(321.123,REST Support)))")
+        stringResponse.getText should be("String: OK")
+        intResponse.getText should be("Int: 123")
+        classResponse.getText should be("Class: Some(RestExampleClass(42,Udash,InnerClass(321.123,REST Support)))")
       }
     }
   }

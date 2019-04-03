@@ -10,7 +10,7 @@ object ExampleMixins extends CssBase {
 
   def animation(keyframes: CssStyle, duration: FiniteDuration,
                 iterationCount: AV = animationIterationCount.infinite,
-                easing: AV = animationTimingFunction.easeInOut): CssStyle = style(
+                easing: AV = animationTimingFunction.easeInOut): CssStyle = mixin(
     animationName(keyframes),
     iterationCount,
     animationDuration(duration),

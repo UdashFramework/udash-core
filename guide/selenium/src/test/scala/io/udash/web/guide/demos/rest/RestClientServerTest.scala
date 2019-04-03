@@ -19,35 +19,36 @@ class RestClientServerTest extends SeleniumTest {
       val callDemo = driver.findElementById("echo-rest-demo")
       val inputDemo = callDemo.findElement(new ById("echo-rest-demo-input"))
       val responseDemo = callDemo.findElement(new ById("echo-rest-demo-response"))
+      val responseHeader = callDemo.findElement(new ById("echo-rest-demo-response-header"))
       val queryButton = callDemo.findElement(new ById("echo-rest-demo-query-btn"))
       val headerButton = callDemo.findElement(new ById("echo-rest-demo-header-btn"))
       val urlButton = callDemo.findElement(new ById("echo-rest-demo-url-btn"))
       val bodyButton = callDemo.findElement(new ById("echo-rest-demo-body-btn"))
 
       eventually {
-        responseDemo.getText should be("Response:")
+        responseHeader.getText should be("Response:")
       }
 
       val request = inputDemo.getAttribute("value")
 
       queryButton.click()
       eventually {
-        responseDemo.getText should be(s"Response:\nQuery:$request")
+        responseDemo.getText should be(s"Query:$request")
       }
 
       headerButton.click()
       eventually {
-        responseDemo.getText should be(s"Response:\nHeader:$request")
+        responseDemo.getText should be(s"Header:$request")
       }
 
       urlButton.click()
       eventually {
-        responseDemo.getText should be(s"Response:\nURL:$request")
+        responseDemo.getText should be(s"URL:$request")
       }
 
       bodyButton.click()
       eventually {
-        responseDemo.getText should be(s"Response:\nBody:$request")
+        responseDemo.getText should be(s"Body:$request")
       }
     }
   }
