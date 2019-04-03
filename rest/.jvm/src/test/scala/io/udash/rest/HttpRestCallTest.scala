@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.softwaremill.sttp.SttpBackend
+import io.udash.rest.raw.HttpErrorException
 import io.udash.rest.raw.RawRest.HandleRequest
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletHandler, ServletHolder}
@@ -10,7 +11,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class HttpRestCallTest extends AbstractRestCallTest with UsesHttpServer {
-  override def patienceConfig: PatienceConfig = PatienceConfig(10.seconds)
+  override implicit def patienceConfig: PatienceConfig = PatienceConfig(10.seconds)
 
   implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
 
@@ -24,4 +25,10 @@ class HttpRestCallTest extends AbstractRestCallTest with UsesHttpServer {
 
   def clientHandle: HandleRequest =
     SttpRestClient.asHandleRequest(s"$baseUrl/api")
+
+  test("too large binary request") {
+    val future = proxy.binaryEcho(Array.fill[Byte](16 * 1024 * 1024 + 1)(5))
+    val exception = future.failed.futureValue
+    assert(exception == HttpErrorException(413, "Payload is larger than maximum 16777216 bytes (16777217)"))
+  }
 }
