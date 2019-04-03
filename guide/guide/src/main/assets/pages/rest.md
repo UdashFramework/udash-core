@@ -821,21 +821,22 @@ REST API, then along from custom serialization you must provide customized insta
 
 #### Supporting async effects other than `Future`
 
-By default, every HTTP method in REST API trait must return its return wrapped into a `Future`.
-However, `Future` is low level and limited in many ways (e.g. there is no way to control when the actual
-asynchronous computation starts). It is possible to use other task-like containers, e.g.
-[Monix Task](https://monix.io/docs/2x/eval/task.html) or [Cats IO](https://typelevel.org/cats-effect/).
+When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return 
+its return wrapped into a `Future`. However, `Future` is low level and limited in many ways 
+(e.g. there is no way to control when the actual asynchronous computation starts). 
+It is possible to use other task-like containers, e.g. [Monix Task](https://monix.io/docs/2x/eval/task.html) 
+or [Cats IO](https://typelevel.org/cats-effect/).
 
 In order to do that, you must provide some additional implicits which will make the macro engine
-understand how to translate between `Async[T]` and `Task[T]` for arbitrary type `T`. This is controlled by
+understand how to translate between `Async[T]` and `MyFavoriteIOMonad[T]` for arbitrary type `T`. This is controlled by
 `AsyncEffect` typeclass defined in `RawRest` object which represents a bidirectional polymorphic conversion between
 some effect type constructor and `Async`. This means that you must provide implicit instance
-of `AsyncEffect[Task]`.
+of `AsyncEffect[MyFavoriteIOMonad]`.
 
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
 
-Udash repository contains an [example implementation of Monix Task support in its test sources](../rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
+Udash repository contains an [example implementation of Monix Task support in its test sources](https://github.com/UdashFramework/udash-core/blob/master/rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
 
 ## API evolution
 
@@ -871,8 +872,9 @@ Conversely, changes that would break your API include:
 ## Implementing backends
 
 Core REST framework has Servlet based server implementation and `sttp` based client implementation.
-However, it's fairly easy to implement additional backends as most of the heavy-lifting related to
-REST is already done by the core framework (its macro engine, in particular).
+However, it's relatively easy to implement custom backends as most of the heavy-lifting is already done by the core
+framework (its macro engine, in particular). Implementing a backend mostly boils down to translating between
+representations of requests and responses and handling asynchronous computations.
 
 ### Handler function
 
@@ -909,8 +911,9 @@ An existing implementation of REST API trait can be easily turned into a `Handle
 function using `RawRest.asHandleRequest`.
 
 Therefore, the only thing you need to do to expose your REST API trait as an actual web service it to turn
-`HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into `RestRequest`,
-passing them to `HandleRequest` function and translating resulting `RestResponse` to native HTTP response.
+`HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into
+a `RestRequest`, passing them to `HandleRequest` function and translating resulting `RestResponse` to native 
+HTTP response.
 
 See [`RestServlet`](../rest/.jvm/src/main/scala/io/udash/rest/RestServlet.scala)
 for an example implementation.
