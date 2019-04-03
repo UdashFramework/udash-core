@@ -1153,7 +1153,7 @@ However, `@description` is just an example of more general mechanism - schemas, 
 can be modified arbitrarily.
 
 Also, remember that all annotations are processed with respect to the same
-[annotation processing](Annotations.md) rules. It is recommended to familiarize oneself with these rules in
+[annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. It is recommended to familiarize oneself with these rules in
 order to use them more effectively and with less boilerplate.
 
 #### Adjusting schemas
