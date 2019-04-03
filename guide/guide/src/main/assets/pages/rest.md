@@ -257,7 +257,7 @@ object GenericApi {
 
 When a data type is used in a REST API trait as parameter type or result type, it must also come with an appropriate
 set of implicits. This includes [serialization-related implicits](#serialization-implicits-summary) and
-[OpenAPI related implicits](#restschema-typeclass). Just like for traits, these implicits can be provided by
+[OpenAPI related implicits](#openapi-implicits-summary). Just like for traits, these implicits can be provided by
 giving your data type a well-defined companion object.
 
 #### `RestDataCompanion`
@@ -274,8 +274,8 @@ object Address extends RestDataCompanion[Address]
 #### `RestDataWrapperCompanion`
 
 `RestDataWrapperCompanion` is a handy base companion class which you can use for data types which simply wrap
-another type. It will establish a relation between the wrapping and wrapped types so that all implicits for the 
-wrapping type are automatically derived from corresponding implicits for the wrapped type.
+another type. It will establish a relation between the wrapping and wrapped types so that all REST-related implicits 
+for the wrapping type are automatically derived from corresponding implicits for the wrapped type.
 
 ```scala
 case class UserId(id: String) extends AnyVal
@@ -1052,16 +1052,18 @@ Schema derived for an ADT from macro materialized `RestStructure` will describe 
 #### Registered schemas
 
 By default, schemas macro materialized for case classes and sealed hierarchies will be _named_.
-This means they will not be inlined but rather registered under their name in
+This means they will be registered under their name in
 [Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#componentsObject).
+
 By default, the name that will be used will be the simple (unqualified) name of the data type, e.g. "User".
+This can be changed with [`@name`](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/serialization/name.html) annotation.
+
 When referring to registered schema (e.g. in
 [Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)),
 a [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#referenceObject)
 will be inserted, e.g. `{"$ref": "#/components/schemas/User"}`. This is good for schema reuse but may lead to name
-conflicts if you have multiple data types with the same name but in different packages. In such situations, you must
-disambiguate names of your data types with `@name` annotation. Unfortunately, such conflicts cannot be detected in compile
-time and will only be reported in runtime, when trying to generate OpenAPI document.
+conflicts if you have multiple data types with the same name but in different packages. Unfortunately, such conflicts
+cannot be detected in compile time and will only be reported in runtime, when trying to generate OpenAPI document.
 
 #### Adjusting macro materialized schemas
 
@@ -1095,6 +1097,19 @@ object CustomStringType {
     RestSchema.plain(Schema(`type` = DataType.String, description = "custom string type"))
 }
 ```
+
+When one `RestSchema` needs to refer to some other `RestSchema`, it must be resolved using `SchemaResolver`, e.g.
+
+```scala
+class CustomListType[T] { ... }
+object CustomListType {
+  implicit def restSchema[T: RestSchema]: RestSchema[CustomListType[T]] =
+    RestSchema.create(resolver => Schema.arrayOf(resolver.resolve(RestSchema[T])))
+}
+```
+
+This ensures that when the other schema is _named_ then the resolver will return a reference to registered schema
+rather than inlined schema.
 
 ### `RestMediaTypes` typeclass
 
