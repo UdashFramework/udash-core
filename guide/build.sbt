@@ -160,6 +160,10 @@ def frontendProject(proj: Project, sourceDir: File)(
         Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
       ).value,
 
+      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
+      skip in (Compile / packageJSDependencies) := true,
+      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
+
       // Target files for Scala.js plugin
       Compile / fastOptJS / artifactPath :=
         (Compile / fastOptJS / target).value /
