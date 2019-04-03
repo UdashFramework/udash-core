@@ -11,7 +11,11 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
   import dsl._
 
   val body: CssStyle = style(
-    width(StyleConstants.Sizes.BodyWidth px),
+    MediaQueries.desktop(
+      width(StyleConstants.Sizes.BodyWidth px),
+      paddingLeft(`0`),
+      paddingRight(`0`),
+    ),
   )
 
   val section: CssStyle = style(
