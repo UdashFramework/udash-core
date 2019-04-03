@@ -35,7 +35,7 @@ case object BootstrappingState extends ContainerRoutingState(Some(ContentState))
 
 case object BootstrappingIntroState extends FinalRoutingState(Some(BootstrappingState))
 
-case object BootstrappingSBTState extends FinalRoutingState(Some(BootstrappingState))
+case object BootstrappingSbtState extends FinalRoutingState(Some(BootstrappingState))
 
 case object BootstrappingRpcState extends FinalRoutingState(Some(BootstrappingState))
 
@@ -87,7 +87,7 @@ case object ChartsExtState extends FinalRoutingState(Some(ContentState))
 
 case object JQueryExtState extends FinalRoutingState(Some(ContentState))
 
-case object I18NExtState extends MarkdownState(MarkdownPage.I18n)
+case object I18NExtState extends FinalRoutingState(Some(ContentState))
 
 case object UserActivityExtState extends FinalRoutingState(Some(ContentState))
 

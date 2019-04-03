@@ -18,7 +18,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
 
       case BootstrappingState => BootstrappingViewFactory
       case BootstrappingIntroState => BootstrappingIntroViewFactory
-      case BootstrappingSBTState => BootstrappingSBTViewFactory
+      case BootstrappingSbtState => BootstrappingSbtViewFactory
       case BootstrappingRpcState => BootstrappingRpcViewFactory
       case BootstrappingFrontendState => BootstrappingFrontendViewFactory
       case BootstrappingBackendState => BootstrappingBackendViewFactory
@@ -42,7 +42,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
 
       case RestState => MarkdownPageViewFactory[RestState.type]()(Context.serverRpc.pages)
 
-      case I18NExtState => MarkdownPageViewFactory[I18NExtState.type]()(Context.serverRpc.pages)
+      case I18NExtState => I18NExtViewFactory
       case BootstrapExtState => BootstrapExtViewFactory
       case AuthorizationExtState => AuthorizationExtViewFactory
       case ChartsExtState => ChartsExtViewFactory

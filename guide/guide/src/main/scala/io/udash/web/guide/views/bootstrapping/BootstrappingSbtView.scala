@@ -8,9 +8,9 @@ import io.udash.web.guide.views.Versions
 import io.udash.web.guide.{Context, _}
 import scalatags.JsDom
 
-case object BootstrappingSBTViewFactory extends StaticViewFactory[BootstrappingSBTState.type](() => new BootstrappingSBTView)
+case object BootstrappingSbtViewFactory extends StaticViewFactory[BootstrappingSbtState.type](() => new BootstrappingSbtView)
 
-class BootstrappingSBTView extends FinalView with CssView {
+class BootstrappingSbtView extends FinalView with CssView {
   import Context._
   import JsDom.all._
   import io.udash.web.guide.views.References._
