@@ -6,16 +6,14 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.Versions
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object BootstrappingSBTViewFactory extends StaticViewFactory[BootstrappingSBTState.type](() => new BootstrappingSBTView)
 
 class BootstrappingSBTView extends FinalView with CssView {
   import Context._
-  import io.udash.web.guide.views.References._
-
   import JsDom.all._
+  import io.udash.web.guide.views.References._
 
   override def getTemplate: Modifier =
     div(
@@ -23,7 +21,7 @@ class BootstrappingSBTView extends FinalView with CssView {
       p(
         a(href := SbtHomepage)("SBT"),
         " is the recommended build tool for ScalaJS. The excellent ",
-        a(href := SbtScalaJsPluginHomepage)("ScalaJS SBT plugin"),
+        a(href := SbtScalaJsPluginHomepage)("Scala.js SBT plugin"),
         " provides tools for configuring cross-compiled modules and JS dependencies management. If you want to use it, " +
           "add the following line into the ", i("project/plugins.sbt"), " file: "
       ),
