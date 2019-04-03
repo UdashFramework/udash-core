@@ -10,7 +10,6 @@ import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
 import org.scalajs.dom.raw.Element
-
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
@@ -37,7 +36,7 @@ object Header extends HeaderButtons with HeaderNav {
   )
 
   private lazy val template = header(HeaderStyles.header)(
-    div(GlobalStyles.body, GlobalStyles.clearfix)(
+    div(GlobalStyles.body, GlobalStyles.clearfix, HomepageStyles.body)(
       div(HeaderStyles.headerLeft)(
         btnMobileMenu,
         a(HeaderStyles.headerLogo, href := IndexState(None).url)(),

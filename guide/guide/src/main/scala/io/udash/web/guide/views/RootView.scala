@@ -15,7 +15,7 @@ class RootView extends ViewContainer {
   private val content = div(
     Header.getTemplate,
     child,
-    Footer.getTemplate
+    Footer.getTemplate()
   )
 
   override def getTemplate: Modifier = content

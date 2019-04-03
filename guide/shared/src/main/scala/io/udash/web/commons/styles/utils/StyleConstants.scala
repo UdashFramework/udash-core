@@ -9,6 +9,7 @@ object StyleConstants extends CssBase {
     * SIZES
     */
   object Sizes {
+    val BodyWidth = 1135
     val BodyPaddingPx = 30
     val MinSiteHeight = 550
     val LandingPageHeaderHeight = 150

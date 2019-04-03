@@ -10,6 +10,10 @@ import scala.language.postfixOps
 object HomepageStyles extends CssBase with CodeBlockStyles {
   import dsl._
 
+  val body: CssStyle = style(
+    width(StyleConstants.Sizes.BodyWidth px),
+  )
+
   val section: CssStyle = style(
     position.relative,
     width(100 %%),

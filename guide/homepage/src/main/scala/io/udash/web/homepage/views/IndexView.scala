@@ -42,7 +42,7 @@ private[views] object IndexView {
   import scalatags.JsDom.tags2._
 
   val sectionIntro = section(HomepageStyles.sectionIntro)(
-    div(GlobalStyles.body)(
+    div(GlobalStyles.body, HomepageStyles.body)(
       div(HomepageStyles.introInner)(
         a(href := ExternalUrls.scalajs, HomepageStyles.introScala, target := "_blank")(
           i(HomepageStyles.introScalaIcon)(
@@ -61,7 +61,7 @@ private[views] object IndexView {
   )
 
   val sectionFeatures = section(HomepageStyles.section)(
-    div(GlobalStyles.body)(
+    div(GlobalStyles.body, HomepageStyles.body)(
       h1(
         "Combined forces", br(), "of Scala & JavaScript"
       ),
@@ -86,7 +86,7 @@ private[views] object IndexView {
   )
 
   val sectionMore = section(HomepageStyles.section)(
-    div(GlobalStyles.body)(
+    div(GlobalStyles.body, HomepageStyles.body)(
       h1("Why Udash?"),
       ul(HomepageStyles.moreList)(
         li(HomepageStyles.moreListItem, HomepageStyles.moreListItemTwoLineTitle)(
@@ -132,7 +132,7 @@ private[views] object IndexView {
   )
 
   def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
-    div(GlobalStyles.body)(
+    div(GlobalStyles.body, HomepageStyles.body)(
       h1("Have a code preview"),
       new DemoComponent(state).getTemplate,
       p(HomepageStyles.demoDescription)("It's free, try it now!"),
