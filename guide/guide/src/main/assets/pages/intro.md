@@ -20,6 +20,8 @@ To compile and start the generated project run the following command inside the 
 
 ### What's inside?
 
+**Warning: we're in the process of updating the guide for Udash 0.8. Please refer to the template code for now.**
+
 The generator creates a simple chat application, which showcases the most important features of the Udash framework. 
 It uses properties, Bootstrap components, RPC with notifications from the server, translations and more.
 
