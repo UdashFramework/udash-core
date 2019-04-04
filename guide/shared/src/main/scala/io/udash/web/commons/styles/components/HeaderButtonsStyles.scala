@@ -1,11 +1,9 @@
 package io.udash.web.commons.styles.components
 
-import java.util.concurrent.TimeUnit
-
 import io.udash.css.{CssBase, CssStyle}
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, CommonStyleUtils}
+import io.udash.web.commons.styles.utils.{CommonStyleUtils, MediaQueries, StyleConstants}
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 trait HeaderButtonsStyles extends CssBase {
@@ -23,10 +21,10 @@ trait HeaderButtonsStyles extends CssBase {
 
   val headerSocialItem: CssStyle = style(
     display.inlineBlock,
-    marginLeft(2 rem)
+    marginLeft(1.25 rem)
   )
 
-  private val socialLink = style(
+  private val socialLink = mixin(
     position.relative,
     display.block,
     width(33 px),
@@ -41,16 +39,16 @@ trait HeaderButtonsStyles extends CssBase {
   )
 
   val tooltip: CssStyle = style(
-    CommonStyleUtils.transition(150 milliseconds),
+    CommonStyleUtils.transition(duration = 150 milliseconds),
     position.absolute,
     top :=! "calc(100% + 10px)",
     right(`0`),
-    fontSize(1.2 rem),
+    fontSize(.75 rem),
     color.black,
     textAlign.center,
     visibility.hidden,
     opacity(0),
-    pointerEvents := "none",
+    pointerEvents := none,
 
     MediaQueries.tabletLandscape(
       display.none
@@ -58,7 +56,7 @@ trait HeaderButtonsStyles extends CssBase {
   )
 
   val tooltipTop: CssStyle = style(
-    CommonStyleUtils.transition(350 milliseconds),
+    CommonStyleUtils.transition(duration = 350 milliseconds),
     transitionDelay(200 milliseconds),
     position.relative,
     width(100 %%),
@@ -95,7 +93,7 @@ trait HeaderButtonsStyles extends CssBase {
   )
 
   val tooltipTextInner: CssStyle = style(
-    CommonStyleUtils.transition(200 milliseconds),
+    CommonStyleUtils.transition(duration = 200 milliseconds),
     position.relative,
     width(100 %%),
     padding(10 px, 15 px),
@@ -136,12 +134,12 @@ trait HeaderButtonsStyles extends CssBase {
         ),
 
         unsafeChild(s".${tooltipTop.className}")(
-          transitionDelay(new FiniteDuration(0, TimeUnit.MILLISECONDS)),
+          transitionDelay(0 milliseconds),
           transform := "scaleX(1)"
         ),
 
         unsafeChild(s".${tooltipTextInner.className}")(
-          transitionDelay(new FiniteDuration(350, TimeUnit.MILLISECONDS)),
+          transitionDelay(350 milliseconds),
           transform := "translateY(0)"
         )
       )

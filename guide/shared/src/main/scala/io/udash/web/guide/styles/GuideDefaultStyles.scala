@@ -11,7 +11,7 @@ object GuideDefaultStyles extends CssBase with DefaultStyles {
 
   style(
     unsafeRoot("body") (
-      fontSize(1.6 rem)
+      fontSize(1 rem)
     ),
 
     unsafeRoot("pre") (
@@ -20,8 +20,8 @@ object GuideDefaultStyles extends CssBase with DefaultStyles {
     ),
 
     unsafeRoot("p")(
-      marginTop(2.5 rem),
-      fontSize(1.6 rem),
+      marginTop(1.5625 rem),
+      fontSize(1 rem),
       lineHeight(1.3),
 
       &.firstChild (
@@ -29,33 +29,27 @@ object GuideDefaultStyles extends CssBase with DefaultStyles {
       )
     ),
 
-    unsafeRoot("a") (
-      &.visited(
-        color.inherit
-      )
-    ),
-
     unsafeRoot("h3") (
-      UdashFonts.acumin(FontWeight.ExtraLight),
-      marginTop(4.5 rem),
-      marginBottom(1.5 rem),
+      UdashFonts.roboto(FontWeight.Thin),
+      marginTop(2.8125 rem),
+      marginBottom(.9375 rem),
       lineHeight(1.2),
-      fontSize(3.2 rem),
+      fontSize(2 rem),
 
       MediaQueries.phone(
-        fontSize(2.6 rem)
+        fontSize(1.625 rem)
       )
     ),
 
     unsafeRoot("h4") (
-      UdashFonts.acumin(FontWeight.ExtraLight),
-      marginTop(3.5 rem),
-      marginBottom(1.5 rem),
+      UdashFonts.roboto(FontWeight.Thin),
+      marginTop(2.1875 rem),
+      marginBottom(.9375 rem),
       lineHeight(1.2),
-      fontSize(2.4 rem),
+      fontSize(1.5 rem),
 
       MediaQueries.phone(
-        fontSize(2 rem)
+        fontSize(1.25 rem)
       )
     )
   )

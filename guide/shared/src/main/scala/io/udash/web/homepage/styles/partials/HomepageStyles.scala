@@ -1,27 +1,36 @@
 package io.udash.web.homepage.styles.partials
 
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.components.CodeBlockStyles
 import io.udash.web.commons.styles.utils._
+import scalacss.internal.Literal
 
 import scala.language.postfixOps
 
 object HomepageStyles extends CssBase with CodeBlockStyles {
   import dsl._
 
-  val section = style(
+  val body: CssStyle = style(
+    MediaQueries.desktop(
+      width(StyleConstants.Sizes.BodyWidth px),
+      paddingLeft(`0`),
+      paddingRight(`0`),
+    ),
+  )
+
+  val section: CssStyle = style(
     position.relative,
     width(100 %%),
     overflow.hidden
   )
 
-  val sectionIntro = style(
+  val sectionIntro: CssStyle = style(
     section,
     height(100 vh),
     color.white,
     backgroundColor.black,
     backgroundImage := "url(/assets/images/intro_bg.jpg)",
-    backgroundSize := "cover",
+    backgroundSize := Literal.cover,
 
     media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
       height.auto,
@@ -41,7 +50,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  val introInner = style(
+  val introInner: CssStyle = style(
     CommonStyleUtils.relativeMiddle,
     top(55 %%),
     transform := "translate3d(0, 0, 1)",
@@ -61,15 +70,15 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  val introScala = style(
+  val introScala: CssStyle = style(
     CommonStyleUtils.transition(),
-    padding(.2 rem, 2.4 rem, .3 rem, 1 rem),
+    padding(.125 rem, 1.5 rem,.1875 rem,.625 rem),
     color.white,
-    fontSize(1.6 rem),
+    fontSize(1 rem),
     backgroundColor(StyleConstants.Colors.RedDark),
 
     &.hover (
-      textDecoration := "none"
+      textDecoration := none
     ),
 
     MediaQueries.desktop(
@@ -83,24 +92,24 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  lazy val introScalaIcon = style(
+  lazy val introScalaIcon: CssStyle = style(
     CommonStyleUtils.transition(),
     position.relative,
     width(10 px),
     display.inlineBlock,
-    marginRight(1 rem),
+    marginRight(.625 rem),
 
     unsafeChild("svg") (
       svgFill := c"#fff"
     )
   )
 
-  val introHead = style(
-    UdashFonts.acumin(FontWeight.SemiBold),
-    fontSize(8.8 rem),
+  val introHead: CssStyle = style(
+    UdashFonts.roboto(FontWeight.Bold),
+    fontSize(5.5 rem),
     lineHeight(1.1),
-    marginTop(5 rem),
-    marginBottom(7.5 rem),
+    marginTop(3.125 rem),
+    marginBottom(4.6875 rem),
     transform := "translate3d(0, 0, 1)",
     textShadow := "0 0 15px black",
 
@@ -129,86 +138,86 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     ),
 
     media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(850 px)(
-      marginTop(2 rem),
-      marginBottom(3 rem)
+      marginTop(1.25 rem),
+      marginBottom(1.875 rem)
     ),
 
     media.minHeight(751 px).maxHeight(850 px)(
-      marginTop(2 rem),
-      marginBottom(3 rem),
-      fontSize(8 rem)
-    ),
-
-    media.minHeight(651 px).maxHeight(750 px)(
-      fontSize(6 rem)
-    ),
-
-    media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(650 px)(
+      marginTop(1.25 rem),
+      marginBottom(1.875 rem),
       fontSize(5 rem)
     ),
 
+    media.minHeight(651 px).maxHeight(750 px)(
+      fontSize(3.75 rem)
+    ),
+
+    media.minHeight(StyleConstants.Sizes.MinSiteHeight px).maxHeight(650 px)(
+      fontSize(3.125 rem)
+    ),
+
     media.minHeight(1 px).maxHeight(StyleConstants.Sizes.MinSiteHeight - 1 px)(
-      fontSize(6 rem),
-      marginTop(4 rem),
-      marginBottom(6 rem)
+      fontSize(3.75 rem),
+      marginTop(2.5 rem),
+      marginBottom(3.75 rem)
     ),
 
     MediaQueries.tabletLandscape(
-      fontSize(8 rem).important
+      fontSize(5 rem).important
     ),
 
     MediaQueries.tabletLandscape(
-      marginTop(3 rem).important,
-      marginBottom(6 rem).important,
-      fontSize(6 rem).important
+      marginTop(1.875 rem).important,
+      marginBottom(3.75 rem).important,
+      fontSize(3.75 rem).important
     ),
 
     MediaQueries.phone(
-      fontSize(4 rem).important,
+      fontSize(2.5 rem).important,
       lineHeight(1.2)
     )
   )
 
-  val boxList = style(
+  val boxList: CssStyle = style(
     position.relative,
     textAlign.center
   )
 
-  val boxListItem = style(
+  private val boxListItem: CssStyle = mixin(
     CommonStyleUtils.border(),
     position.relative,
     display.inlineBlock,
     verticalAlign.top
   )
 
-  val boxListHead = style(
-    UdashFonts.acumin(FontWeight.Medium),
+  private val boxListHead: CssStyle = mixin(
+    UdashFonts.roboto(FontWeight.Medium),
     position.relative,
     display.block,
-    paddingBottom(5.5 rem),
+    paddingBottom(3.4375 rem),
     margin(`0`),
 
     &.after(
-      UdashFonts.acumin(FontWeight.Light),
+      UdashFonts.roboto(FontWeight.Light),
       content := "\"—\"",
       position.absolute,
       width(100 %%),
       bottom(`0`),
       left(`0`),
-      fontSize(2.6 rem),
+      fontSize(1.625 rem),
       textAlign.center
     )
   )
 
-  val boxListDescription = style(
-    marginTop(.5 rem)
+  private val boxListDescription: CssStyle = mixin(
+    marginTop(.3125 rem)
   )
 
-  val featuresListItem = style(
+  val featuresListItem: CssStyle = style(
     boxListItem,
     width :=! "calc((100% - 30px) / 3)",
-    minHeight(50 rem),
-    padding(25 rem, 2 rem, 2 rem , 2 rem),
+    minHeight(31.25 rem),
+    padding(15.625 rem, 1.25 rem, 1.25 rem, 1.25 rem),
 
     &.nthChild(2)(
       margin(`0`, 15 px)
@@ -230,7 +239,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     MediaQueries.tabletPortrait(
       width(100 %%),
       minHeight(`0`),
-      padding(20 rem, 2 rem, 4 rem , 2 rem),
+      padding(12.5 rem, 1.25 rem, 1.25 rem, 1.25 rem),
       margin(`0`),
       borderBottomStyle.none,
 
@@ -248,45 +257,45 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  val featuresListIcon = style(
+  val featuresListIcon: CssStyle = style(
     display.block,
     position.absolute,
     width(100 %%),
-    top(7.5 rem),
+    top(4.6875 rem),
     left(`0`),
 
     MediaQueries.tabletPortrait(
-      top(3 rem)
+      top(1.875 rem)
     )
   )
 
-  val featuresListHead = style(
+  val featuresListHead: CssStyle = style(
     boxListHead,
-    fontSize(3.2 rem)
+    fontSize(2 rem)
   )
 
-  val featuresListHeadInner = style(
-    UdashFonts.acumin(FontWeight.ExtraLight, FontStyle.Italic),
+  val featuresListHeadInner: CssStyle = style(
+    UdashFonts.roboto(FontWeight.Thin, FontStyle.Italic),
     position.absolute,
-    top(4.2 rem),
+    top(2.625 rem),
     display.block,
     width(100 %%),
-    fontSize(1.4 rem)
+    fontSize(.875 rem)
   )
 
-  val moreList = style(
+  val moreList: CssStyle = style(
     boxList,
     paddingBottom(1 px)
   )
 
-  val moreListItem = style(
+  val moreListItem: CssStyle = style(
     CommonStyleUtils.border(),
     marginLeft(-1 px),
     marginBottom(-1 px),
     boxListItem,
     width :=! "calc(100% / 3)",
-    minHeight(36 rem),
-    padding(10.5 rem, 2 rem, 2 rem , 2 rem),
+    minHeight(22.5 rem),
+    padding(6.5625 rem, 1.25 rem, 1.25 rem, 1.25 rem),
 
 
     MediaQueries.tabletLandscape(
@@ -300,7 +309,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     MediaQueries.tabletPortrait(
       width(100 %%),
       minHeight(`0`),
-      padding(4 rem, 2 rem, 4 rem , 2 rem),
+      padding(2.5 rem, 1.25 rem, 1.25 rem, 1.25 rem),
       borderBottomStyle.none,
 
       &.nthChild(2)(
@@ -315,55 +324,55 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
   )
 
 
-  val moreListItemTwoLineTitle = style(
+  val moreListItemTwoLineTitle: CssStyle = style(
     paddingTop(57 px)
   )
 
-  val moreListHead = style(
+  val moreListHead: CssStyle = style(
     boxListHead,
-    fontSize(4 rem)
+    fontSize(2.5 rem)
   )
 
-  val moreListDescription = style(
+  val moreListDescription: CssStyle = style(
     boxListDescription,
     lineHeight(1.6)
   )
 
-  val sectionDemo = style(
+  val sectionDemo: CssStyle = style(
     section,
-    paddingBottom(15 rem),
+    paddingBottom(9.375 rem),
     textAlign.center,
 
     MediaQueries.tabletLandscape(
-      paddingBottom(10 rem)
+      paddingBottom(6.25 rem)
     ),
 
     MediaQueries.phone(
-      paddingBottom(5 rem)
+      paddingBottom(3.125 rem)
     )
   )
 
-  val demoDescription = style(
-    UdashFonts.acumin(FontWeight.ExtraLight),
-    fontSize(3.2 rem),
-    marginBottom(3.5 rem)
+  val demoDescription: CssStyle = style(
+    UdashFonts.roboto(FontWeight.Thin),
+    fontSize(2 rem),
+    marginBottom(2.1875 rem)
   )
 
-  val codeWrapper = style(
-    marginTop(1.5 rem),
-    marginBottom(1.5 rem),
-    paddingTop(1 rem),
-    paddingBottom(1 rem)
+  val codeWrapper: CssStyle = style(
+    marginTop(.9375 rem),
+    marginBottom(.9375 rem),
+    paddingTop(.625 rem),
+    paddingBottom(.625 rem)
   )
 
-  val codeBlock = style(
+  val codeBlock: CssStyle = style(
     counterReset := "code",
     listStyleType := "decimal",
     listStylePosition.outside,
     fontFamily :=! "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
     color(StyleConstants.Colors.Grey),
-    paddingLeft(4 rem),
-    fontSize(1.4 rem),
+    paddingLeft(2.5 rem),
+    fontSize(.875 rem),
 
 
     unsafeChild(":not(pre) > code[class*=\"language-\"]") (
@@ -372,7 +381,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  val sectionError = style(
+  val sectionError: CssStyle = style(
     sectionIntro,
     height :=! s"calc(100vh - 120px)",
 
@@ -381,12 +390,12 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     )
   )
 
-  val errorInner = style(
+  val errorInner: CssStyle = style(
     introInner,
     top(50 %%)
   )
 
-  val errorHead = style(
+  val errorHead: CssStyle = style(
     introHead,
     margin(`0`),
 

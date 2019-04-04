@@ -1,12 +1,9 @@
 package io.udash.web.commons.styles.components
 
-import java.util.concurrent.TimeUnit
-
 import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.attributes.Attributes
-import io.udash.web.commons.styles.utils.{MediaQueries, CommonStyleUtils}
+import io.udash.web.commons.styles.utils.{CommonStyleUtils, MediaQueries}
 
-import scala.concurrent.duration.FiniteDuration
 import scala.language.postfixOps
 
 trait HeaderNavStyles extends CssBase {
@@ -34,7 +31,7 @@ trait HeaderNavStyles extends CssBase {
     )
   )
 
-  val headerLinkList = style(
+  val headerLinkList: CssStyle = style(
     MediaQueries.tabletPortrait(
       CommonStyleUtils.center,
       position.absolute
@@ -45,8 +42,8 @@ trait HeaderNavStyles extends CssBase {
     position.relative,
     display.inlineBlock,
     verticalAlign.middle,
-    paddingLeft(1.8 rem),
-    paddingRight(1.8 rem),
+    paddingLeft(1.125 rem),
+    paddingRight(1.125 rem),
 
     &.firstChild (
       paddingLeft(0 px)
@@ -62,7 +59,7 @@ trait HeaderNavStyles extends CssBase {
       left(`0`),
 
       &.hover(
-        textDecoration := "none"
+        textDecoration := none
       ),
 
       MediaQueries.tabletPortrait(
@@ -72,7 +69,7 @@ trait HeaderNavStyles extends CssBase {
 
     MediaQueries.tabletPortrait(
       display.block,
-      padding(1 rem, `0`),
+      padding(.625 rem, `0`),
       textAlign.center
     )
   )
@@ -83,7 +80,7 @@ trait HeaderNavStyles extends CssBase {
     color.white,
 
     &.after(
-      CommonStyleUtils.transition(transform, new FiniteDuration(250, TimeUnit.MILLISECONDS)),
+      CommonStyleUtils.transition(transform),
       position.absolute,
       top(100 %%),
       left(`0`),
@@ -97,7 +94,7 @@ trait HeaderNavStyles extends CssBase {
     ),
 
     &.hover(
-      textDecoration := "none"
+      textDecoration := none
     ),
 
     MediaQueries.desktop(

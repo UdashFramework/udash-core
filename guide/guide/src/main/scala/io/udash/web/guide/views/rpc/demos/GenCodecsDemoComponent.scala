@@ -2,20 +2,22 @@ package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.logging.CrossLogging
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
+import io.udash.web.guide.components.BootstrapUtils
 import io.udash.web.guide.demos.rpc.GenCodecServerRPC
 import io.udash.web.guide.styles.partials.GuideStyles
-
-import scala.util.{Failure, Random, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
+import scala.util.{Failure, Random, Success}
+
 trait GenCodecsDemoModel {
   import io.udash.web.guide.demos.rpc.GenCodecServerRPC._
-  
+
   def int: Option[Int]
   def double: Option[Double]
   def string: Option[String]
@@ -117,9 +119,15 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
-      loadIdButton.render,
-      h3("Results:"),
-      p(
+      div(BootstrapStyles.Spacing.margin(
+        side = BootstrapStyles.Side.Bottom,
+        size = BootstrapStyles.SpacingSize.Normal
+      ))(loadIdButton.render),
+      h3(BootstrapStyles.Spacing.margin(
+        side = BootstrapStyles.Side.Bottom,
+        size = BootstrapStyles.SpacingSize.Normal
+      ))("Results:"),
+      p(BootstrapUtils.wellStyles)(
         ul(
           li("Int: ", produce(model.subProp(_.int))(response => span(id := "gencodec-demo-int", response).render)),
           li("Double: ", produce(model.subProp(_.double))(response => span(id := "gencodec-demo-double", response).render)),

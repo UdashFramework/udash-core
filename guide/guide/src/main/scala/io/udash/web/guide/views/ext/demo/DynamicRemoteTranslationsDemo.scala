@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext.demo
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.i18n._
+import io.udash.web.guide.components.BootstrapUtils
 import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
@@ -14,7 +15,6 @@ import scala.language.postfixOps
 
 object DynamicRemoteTranslationsDemo {
   import io.udash.css.CssView._
-
   import scalatags.JsDom.all._
 
   def apply(): dom.Element = {
@@ -24,14 +24,17 @@ object DynamicRemoteTranslationsDemo {
     div(id := "dynamic-rpc-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       button(BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary))(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
       button(BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary))(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
-      ul(BootstrapStyles.Border.border())(
+      div(BootstrapUtils.wellStyles, BootstrapStyles.Spacing.margin(
+        side = BootstrapStyles.Side.Top,
+        size = BootstrapStyles.SpacingSize.Normal
+      ))(ul(
         li("auth.loginLabel: ", translatedDynamic(Translations.auth.loginLabel)(_.apply())),
         li("auth.passwordLabel: ", translatedDynamic(Translations.auth.passwordLabel)(_.apply())),
         li("auth.login.buttonLabel: ", translatedDynamic(Translations.auth.login.buttonLabel)(_.apply())),
         li("auth.login.retriesLeft: ", translatedDynamic(Translations.auth.login.retriesLeft)(_.apply(3))),
         li("auth.login.retriesLeftOne: ", translatedDynamic(Translations.auth.login.retriesLeftOne)(_.apply())),
         li("auth.register.buttonLabel: ", translatedDynamic(Translations.auth.register.buttonLabel)(_.apply()))
-      )
+      ))
     ).render
   }
 }

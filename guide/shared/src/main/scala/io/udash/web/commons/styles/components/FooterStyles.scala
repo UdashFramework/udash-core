@@ -1,7 +1,8 @@
 package io.udash.web.commons.styles.components
 
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.utils._
+import scalacss.internal.Literal
 
 import scala.language.postfixOps
 
@@ -11,46 +12,46 @@ import scala.language.postfixOps
 object FooterStyles extends CssBase {
   import dsl._
 
-  val footer = style(
+  val footer: CssStyle = style(
     backgroundColor.black,
     height(StyleConstants.Sizes.FooterHeight px),
-    fontSize(1.2 rem),
+    fontSize(.75 rem),
     color.white,
 
     MediaQueries.phone(
       height.auto,
-      padding(2 rem, `0`)
+      padding(1.25 rem, `0`)
     )
   )
 
-  val footerInner = style(
+  val footerInner: CssStyle = style(
     CommonStyleUtils.relativeMiddle,
 
     MediaQueries.phone(
       top.auto,
-      transform := "none"
+      transform := none
     )
   )
 
-  val footerLogo = style(
+  val footerLogo: CssStyle = style(
     display.inlineBlock,
     verticalAlign.middle,
     width(50 px),
     marginRight(25 px)
   )
 
-  val footerLinks = style(
+  val footerLinks: CssStyle = style(
     display.inlineBlock,
     verticalAlign.middle
   )
 
-  val footerMore = style(
-    UdashFonts.acumin(FontWeight.SemiBold),
-    marginBottom(1.5 rem),
-    fontSize(2.2 rem)
+  val footerMore: CssStyle = style(
+    UdashFonts.roboto(FontWeight.Bold),
+    marginBottom(.9375 rem),
+    fontSize(1.375 rem)
   )
 
-  val footerCopyrights = style(
+  val footerCopyrights: CssStyle = style(
     position.absolute,
     right(`0`),
     bottom(`0`),
@@ -62,10 +63,10 @@ object FooterStyles extends CssBase {
     )
   )
 
-  val footerAvsystemLink = style(
+  val footerAvsystemLink: CssStyle = style(
     CommonStyleUtils.transition(),
     color.inherit,
-    textDecoration := "underline",
+    textDecoration := Literal.underline,
 
     &.hover (
       color(StyleConstants.Colors.Yellow)
@@ -80,12 +81,12 @@ object FooterStyles extends CssBase {
     )
   )
 
-  val navItem = style(
+  val navItem: CssStyle = style(
     position.relative,
     display.inlineBlock,
     verticalAlign.middle,
-    paddingLeft(1.8 rem),
-    paddingRight(1.8 rem),
+    paddingLeft(1.125 rem),
+    paddingRight(1.125 rem),
 
     &.firstChild (
       paddingLeft(0 px)
@@ -101,7 +102,7 @@ object FooterStyles extends CssBase {
       left(`0`),
 
       &.hover(
-        textDecoration := "none"
+        textDecoration := none
       )
     )
   )

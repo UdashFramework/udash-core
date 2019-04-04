@@ -1,20 +1,18 @@
 package io.udash.web.guide.styles.partials
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.{FontWeight, StyleConstants, UdashFonts}
 import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 object MenuStyles extends CssBase {
   import dsl._
 
-  val guideMenu = style(
-    UdashFonts.acumin(FontWeight.SemiBold),
+  val guideMenu: CssStyle = style(
+    UdashFonts.roboto(FontWeight.Bold),
     GuideStyleUtils.border(),
     width(100 %%),
 
@@ -25,13 +23,13 @@ object MenuStyles extends CssBase {
     )
   )
 
-  private val menuLink = style(
+  private val menuLink: CssStyle = mixin(
     GuideStyleUtils.transition(),
     position.relative,
     display.block,
     width(100 %%),
-    padding(2 rem, `0`, 2 rem, 4.5 rem),
-    fontSize(2.2 rem),
+    padding(1.25 rem, `0`, 1.25 rem, 2.8125 rem),
+    fontSize(1.375 rem),
     color.black,
     textAlign.left,
 
@@ -41,15 +39,15 @@ object MenuStyles extends CssBase {
 
     &.hover (
       color.black,
-      textDecoration := "none"
+      textDecoration := none
     ),
 
     MediaQueries.tabletLandscape(
-      fontSize(1.8 rem)
+      fontSize(1.125 rem)
     )
   )
 
-  val link = style(
+  val link: CssStyle = style(
     menuLink,
 
     &.attr(Attributes.data(Attributes.Active), "true") (
@@ -64,7 +62,7 @@ object MenuStyles extends CssBase {
     )
   )
 
-  val subToggle = style(
+  val subToggle: CssStyle = style(
     menuLink,
 
     &.attr(Attributes.data(Attributes.Active), "true") (
@@ -74,11 +72,11 @@ object MenuStyles extends CssBase {
     )
   )
 
-  lazy val linkText = style(
+  lazy val linkText: CssStyle = style(
     position.relative
   )
 
-  val item = style(
+  val item: CssStyle = style(
     borderBottomColor(StyleConstants.Colors.GreyExtra),
     borderBottomStyle.solid,
     borderBottomWidth(1 px),
@@ -88,7 +86,7 @@ object MenuStyles extends CssBase {
     )
   )
 
-  val subItem = style(
+  val subItem: CssStyle = style(
     borderBottomColor(StyleConstants.Colors.GreyExtra),
     borderBottomStyle.solid,
     borderBottomWidth(1 px),
@@ -98,32 +96,32 @@ object MenuStyles extends CssBase {
     )
   )
 
-  lazy val icon = style(
-    GuideStyleUtils.transition(new FiniteDuration(100, TimeUnit.MILLISECONDS)),
+  lazy val icon: CssStyle = style(
+    GuideStyleUtils.transition(duration = 100 milliseconds),
     position.absolute,
     display.block,
     width(7 px),
     top(50 %%),
-    left(2.5 rem),
+    left(1.5625 rem),
     transform := "translateX(-50%) translateY(-50%)",
     transformOrigin := "50% 25%"
   )
 
-  val subList = style(
+  val subList: CssStyle = style(
     display.none,
-    paddingLeft(5 rem),
-    paddingBottom(1.5 rem),
+    paddingLeft(3.125 rem),
+    paddingBottom(.9375 rem),
 
     unsafeChild(s".${item.className}") (
       border.none.important,
-      paddingTop(1 rem),
-      paddingBottom(1 rem)
+      paddingTop(.625 rem),
+      paddingBottom(.625 rem)
     ),
 
     unsafeChild(s".${link.className}") (
-      UdashFonts.acumin(FontWeight.Bold),
-      padding(`0`, `0`, `0`, 1.5 rem),
-      fontSize(1.6 rem),
+      UdashFonts.roboto(FontWeight.Bold),
+      padding(`0`, `0`, `0`,.9375 rem),
+      fontSize(1 rem),
 
       &.before(
         position.absolute,
@@ -139,13 +137,13 @@ object MenuStyles extends CssBase {
       ),
 
       MediaQueries.tabletLandscape(
-        fontSize(1.4 rem)
+        fontSize(.875 rem)
       )
     ),
 
     unsafeChild(s".${linkText.className}") (
       &.after(
-        GuideStyleUtils.transition(transform, new FiniteDuration(250, TimeUnit.MILLISECONDS)),
+        GuideStyleUtils.transition(transform),
         position.absolute,
         top(100 %%),
         left(`0`),
@@ -160,7 +158,7 @@ object MenuStyles extends CssBase {
     )
   )
 
-  val btnMobile = style(
+  val btnMobile: CssStyle = style(
     GuideStyleUtils.border(),
     borderLeft.none,
     position.absolute,
@@ -174,7 +172,7 @@ object MenuStyles extends CssBase {
 
   )
 
-  private lazy val linkTextHover = style(
+  private lazy val linkTextHover: CssStyle = mixin(
     &.after (
       transformOrigin := "0 50%",
       transform := "scaleX(1)"

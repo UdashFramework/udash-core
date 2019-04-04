@@ -1,17 +1,21 @@
 package io.udash.web.commons.components
 
+import com.avsystem.commons._
+import io.udash.css.CssStyle
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.views.Image
-
+import org.scalajs.dom.html.Element
+import scalatags.JsDom
 import scalatags.JsDom.all._
 
 object Footer {
   import io.udash.css.CssView._
   private val styles = FooterStyles
-  private lazy val template = footer(styles.footer)(
-    div(GlobalStyles.body)(
+
+  private def template(wrapperStyle: Opt[CssStyle]): JsDom.TypedTag[Element] = footer(styles.footer)(
+    div(GlobalStyles.body, wrapperStyle)(
       div(styles.footerInner)(
         a(styles.footerLogo, href := ExternalUrls.homepage)(
           Image("udash_logo.png", "Udash Framework", GlobalStyles.block)
@@ -36,5 +40,5 @@ object Footer {
     )
   )
 
-  def getTemplate: Modifier = template
+  def getTemplate(wrapperStyle: Opt[CssStyle] = Opt.Empty): Modifier = template(wrapperStyle)
 }
