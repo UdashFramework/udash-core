@@ -19,7 +19,9 @@ object RestServlet {
   final val CookieHeader = "Cookie"
 
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
-    apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
+    apiImpl: RestApi,
+    handleTimeout: FiniteDuration = DefaultHandleTimeout,
+    maxPayloadSize: Long = DefaultMaxPayloadSize
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
 
   private final val BufferSize = 8192
