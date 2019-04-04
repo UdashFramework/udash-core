@@ -9,7 +9,7 @@ name := "udash-guide"
 cancelable in Global := true
 
 inThisBuild(Seq(
-  version := "0.7.1",
+  version := "0.8.0-M14",
   scalaVersion := Dependencies.versionOfScala,
   organization := "io.udash",
   scalacOptions ++= Seq(
@@ -160,6 +160,10 @@ def frontendProject(proj: Project, sourceDir: File)(
       compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
         Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
       ).value,
+
+      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
+      skip in (Compile / packageJSDependencies) := true,
+      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
 
       // Target files for Scala.js plugin
       Compile / fastOptJS / artifactPath :=

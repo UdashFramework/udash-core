@@ -5,10 +5,10 @@ import sbt._
 object Dependencies {
 
   val versionOfScala = "2.12.8"
-  val jettyVersion = "9.4.14.v20181114"
+  val jettyVersion = "9.4.15.v20190215"
 
   val udashVersion = "0.8.0-M14"
-  val udashJQueryVersion = "3.0.0"
+  val udashJQueryVersion = "3.0.1"
   val fontAwesomeVersion = "5.6.3"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
@@ -17,14 +17,14 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.2"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.34.7"
+  val avsystemCommonsVersion = "1.34.16"
   val typesafeConfigVersion = "1.3.3"
-  val springVersion = "4.3.22.RELEASE"
+  val springVersion = "4.3.23.RELEASE"
 
-  val FlexmarkVersion = "0.34.48"
+  val FlexmarkVersion = "0.40.32"
 
   val seleniumVersion = "3.12.0"
-  val scalatestVersion = "3.0.5"
+  val scalatestVersion = "3.0.7"
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core" % udashVersion,

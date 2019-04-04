@@ -14,7 +14,7 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
   private val (url2State, state2Url) = bidirectional {
     case "/" => IntroState
     case "/bootstrapping" => BootstrappingIntroState
-    case "/bootstrapping/sbt" => BootstrappingSBTState
+    case "/bootstrapping/sbt" => BootstrappingSbtState
     case "/bootstrapping/rpc" => BootstrappingRpcState
     case "/bootstrapping/backend" => BootstrappingBackendState
     case "/bootstrapping/frontend" => BootstrappingFrontendState

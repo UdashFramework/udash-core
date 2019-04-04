@@ -977,6 +977,13 @@ map to REST requests.
 Note that Operation object itself may be arbitrarily adjusted with other annotations -
 see [adjusting operations](#adjusting-operations).
 
+### OpenAPI implicits summary
+
+Generation of OpenAPI documents is governed by multiple typeclasses. Below is a diagram which summarizes
+their roles and dependencies between them.
+
+![OpenAPI implicits](assets/images/views/rest/openapi.svg)
+
 ### `RestSchema` typeclass
 
 In order to macro-materialize `OpenApiMetadata` for your REST API, you need to provide an instance of `RestSchema` typeclass
@@ -1085,6 +1092,20 @@ object CustomStringType {
 }
 ```
 
+### `RestMediaTypes` typeclass
+
+`RestMediaType` is an auxiliary typeclass which serves as a basis for `RestResponses` and `RestRequestBody` typeclasses.
+It captures all the possible media types which may be used in a request or response body for given Scala type.
+Media types are represented using OpenAPI 
+[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject).
+
+By default, `RestMediaTypes` instance is derived from `RestSchema` instance and `application/json` is assumed as 
+the only available media type.
+
+You **should** define `RestMediaTypes` manually for every type which has custom serialization to `HttpBody` defined
+(`AsRaw/AsReal[HttpBody, T]`). In general, you may want to define it manually every time you want to describe media
+types other than `application/json` for your Scala type.
+
 ### `RestResponses` typeclass
 
 `RestResponses` is an auxiliary typeclass which is needed for result type of every HTTP REST method
@@ -1093,36 +1114,29 @@ of `RestResponses[User]` (this transformation is modeled by yet another intermed
 This typeclass governs generation of
 [Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
 
-By default, if no specific `RestResponses` instance is provided, it is created based on `RestSchema`.
+By default, if no specific `RestResponses` instance is provided, it is created based on `RestMediaTypes`.
 The resulting [Responses](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
 will contain exactly one
 [Response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responseObject)
-for HTTP status code `200 OK` with a single
-[Media Type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
-for `application/json` media type and
-[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
-inferred from `RestSchema` instance.
+for HTTP status code `200 OK` with 
+[Media Types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
+inferred from `RestMediaTypes` instance. Also note that `RestMediaTypes` itself is by default derived from 
+`RestSchema`
 
-You may want to define `RestResponses` instance manually if you want to use other media types than
-`application/json` or you want to define multiple possible responses for different HTTP status codes.
-You may also modify responses for particular method - see [Adjusting operations](#adjusting-operations).
-Normally, manual `RestResponses` instance is needed when a type has custom `AsRaw/AsReal[RestResponse, T]`
-instance which defines custom serialization to HTTP response.
+You **should** define `RestResponses` manually for every type which has custom serialization
+to `RestResponse` defined (`AsRaw/AsReal[RestResponse, T]`). In general, you may want to define 
+it manually every time you want to describe responses for status codes other than `200 OK`. 
+
+Also remember that `Responses` object can be adjusted locally, for each method, using annotations - 
+see [Adjusting operations](#adjusting-operations).
 
 ### `RestRequestBody` typeclass
 
 `RestRequestBody` typeclass is an auxiliary typeclass analogous to `RestResponses`. It's necessary
-for `@Body` parameters of REST methods and governs generation of
+for the `@Body` parameter of every `@CustomBody` method and governs generation of
 [Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#requestBodyObject).
-By default, if not defined explicitly, it's also derived from `RestSchema` and contains single
-[Media Type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
-for `application/json` media type and
-[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
-inferred from `RestSchema` instance.
-
-You may want to provide custom instance of `RestRequestBody` for your type if that type is serialized
-to different media type than `application/json` (which can be done by providing appropriate instance
-of `AsReal/AsRaw[HttpBody, T]`.
+By default, if not defined explicitly, it is derived from `RestMediaTypes` instance - which by itself is derived
+from `RestSchema` by default.
 
 ### Adjusting generated OpenAPI documents with annotations
 
@@ -1139,7 +1153,7 @@ However, `@description` is just an example of more general mechanism - schemas, 
 can be modified arbitrarily.
 
 Also, remember that all annotations are processed with respect to the same
-[annotation processing](Annotations.md) rules. It is recommended to familiarize oneself with these rules in
+[annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules. It is recommended to familiarize oneself with these rules in
 order to use them more effectively and with less boilerplate.
 
 #### Adjusting schemas

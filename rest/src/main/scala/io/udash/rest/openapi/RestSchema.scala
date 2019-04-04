@@ -156,8 +156,10 @@ object RestSchema {
 
 /**
   * Intermediate typeclass which serves as basis for [[RestResponses]] and [[RestRequestBody]].
-  * [[RestMediaTypes]] is derived by default from [[io.udash.rest.openapi.RestSchema RestSchema]].
-  * It should be defined manually for every type which has custom serialization to [[HttpBody]] defined.
+  * [[RestMediaTypes]] is derived by default from [[RestSchema]].
+  * It should be defined manually for every type which has custom serialization to
+  * [[io.udash.rest.raw.HttpBody HttpBody]] defined so that generated OpenAPI properly reflects that custom
+  * serialization format.
   */
 @implicitNotFound("RestMediaTypes instance for ${T} not found")
 trait RestMediaTypes[T] {
@@ -190,10 +192,11 @@ object RestMediaTypes {
 }
 
 /**
-  * Typeclass which defines how an OpenAPI [[io.udash.rest.openapi.Responses Responses]] Object will look like for a
-  * given type. By default, [[io.udash.rest.openapi.RestResponses RestResponses]] is derived based on
-  * [[io.udash.rest.openapi.RestMediaTypes RestMediaTypes]] for that type which is itself derived by default from
-  * [[io.udash.rest.openapi.RestSchema RestSchema]] for that type.
+  * Typeclass which defines how an OpenAPI [[Responses]] Object will look like for a given type.
+  * By default, [[RestResponses]] is derived based on [[RestMediaTypes]] for that type which is itself derived by
+  * default from [[RestSchema]] for that type. It should be defined manually for every type which has custom
+  * serialization to [[io.udash.rest.raw.RestResponse RestResponse]] defined so that generated OpenAPI properly
+  * reflects that custom serialization format.
   */
 @implicitNotFound("RestResponses instance for ${T} not found")
 trait RestResponses[T] {
