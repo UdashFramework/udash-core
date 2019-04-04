@@ -18,6 +18,14 @@ object RestServlet {
   final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
 
+  /**
+    * Wraps an implementation of some REST API trait into a Java Servlet.
+    *
+    * @param apiImpl        implementation of some REST API trait
+    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
+    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
+    *                       if exceeded, `413 Payload Too Large` response will be sent back
+    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,

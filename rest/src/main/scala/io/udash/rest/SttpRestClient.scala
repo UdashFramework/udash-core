@@ -13,6 +13,10 @@ import scala.concurrent.Future
 object SttpRestClient {
   def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
+  /**
+    * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+    * to given URI using STTP.
+    */
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String)(
     implicit backend: SttpBackend[Future, Nothing]
   ): RestApi =
