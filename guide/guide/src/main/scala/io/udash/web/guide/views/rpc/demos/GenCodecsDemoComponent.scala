@@ -123,11 +123,11 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
         side = BootstrapStyles.Side.Bottom,
         size = BootstrapStyles.SpacingSize.Normal
       ))(loadIdButton.render),
-      div(BootstrapStyles.Spacing.margin(
+      h3(BootstrapStyles.Spacing.margin(
         side = BootstrapStyles.Side.Bottom,
         size = BootstrapStyles.SpacingSize.Normal
-      ))(h3("Results:")),
-      div(BootstrapUtils.wellStyles)(p(
+      ))("Results:"),
+      p(BootstrapUtils.wellStyles)(
         ul(
           li("Int: ", produce(model.subProp(_.int))(response => span(id := "gencodec-demo-int", response).render)),
           li("Double: ", produce(model.subProp(_.double))(response => span(id := "gencodec-demo-double", response).render)),
@@ -141,6 +141,6 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
           li("Fruit: ", produce(model.subProp(_.sealedTrait))(response => span(id := "gencodec-demo-sealedTrait", response.map(_.toString)).render))
         )
       )
-      ))
+    )
   }
 }

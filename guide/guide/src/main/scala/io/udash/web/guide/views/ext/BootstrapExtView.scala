@@ -64,16 +64,20 @@ class BootstrapExtView extends FinalView {
          |
          |UdashButtonToolbar()(
          |  UdashButtonGroup()(
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.alignLeft)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.alignCenter)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.alignRight)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.alignJustify)).render
+         |    Seq(
+         |      UdashIcons.FontAwesome.Solid.alignLeft,
+         |      UdashIcons.FontAwesome.Solid.alignCenter,
+         |      UdashIcons.FontAwesome.Solid.alignRight,
+         |      UdashIcons.FontAwesome.Solid.alignJustify
+         |    ).map(icon => UdashButton()(i(icon)).render): _*,
          |  ).render,
          |  UdashButtonGroup()(
-         |    UdashButton()(i(UdashIcons.FontAwesome.Brands.bitcoin)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.euroSign)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Solid.dollarSign)).render,
-         |    UdashButton()(i(UdashIcons.FontAwesome.Brands.superpowers)).render,
+         |    Seq(
+         |      UdashIcons.FontAwesome.Brands.bitcoin,
+         |      UdashIcons.FontAwesome.Solid.euroSign,
+         |      UdashIcons.FontAwesome.Solid.dollarSign,
+         |      UdashIcons.FontAwesome.Brands.superpowers
+         |    ).map(icon => UdashButton()(i(icon)).render): _*,
          |  ).render
          |).render""".stripMargin
     )(GuideStyles),
@@ -175,11 +179,9 @@ class BootstrapExtView extends FinalView {
          |  hover = hover,
          |  small = small
          |)(
-         |  headerFactory = Some(_ => tr(th(b("x")), th(b("y")), th(b("z"))).render),
+         |  headerFactory = Some(_ => tr(Seq("x", "y", "z").map(header => th(b(header)))).render),
          |  rowFactory = (el, nested) => tr(
-         |    td(nested(produce(el)(v => span(v._1).render))),
-         |    td(nested(produce(el)(v => span(v._2).render))),
-         |    td(nested(produce(el)(v => span(v._3).render)))
+         |    nested(produce(el)(v => Seq(v._1, v._2, v._3).map(td(_).render)))
          |  ).render
          |)
          |
@@ -252,17 +254,9 @@ class BootstrapExtView extends FinalView {
       s"""|val smallBtn = Some(Size.Small).toProperty[Option[Size]]
           |val disabledButtons = Property(Set.empty[Int])
           |def disabled(idx: Int): ReadableProperty[Boolean] = disabledButtons.transform(_.contains(idx))
-          |val buttons = Seq(
-          |  UdashButton(Color.Primary.toProperty, smallBtn, disabled = disabled(0))(_ => Seq[Modifier]("Primary", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Secondary.toProperty, smallBtn, disabled = disabled(1))(_ =>Seq[Modifier]("Secondary", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Success.toProperty, smallBtn, disabled = disabled(2))(_ => Seq[Modifier]("Success", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Info.toProperty, smallBtn, disabled = disabled(3))(_ =>Seq[Modifier]("Info", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Warning.toProperty, smallBtn, disabled = disabled(4))(_ => Seq[Modifier]("Warning", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Danger.toProperty, smallBtn, disabled = disabled(5))(_ => Seq[Modifier]("Danger", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Link.toProperty, smallBtn, disabled = disabled(6))(_ => Seq[Modifier]("Link", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Light.toProperty, smallBtn, disabled = disabled(7))(_ => Seq[Modifier]("Light", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.Dark.toProperty, smallBtn, disabled = disabled(8))(_ => Seq[Modifier]("Dark", GlobalStyles.smallMargin)),
-          |  UdashButton(Color.White.toProperty, smallBtn, disabled = disabled(9))(_ => Seq[Modifier]("White", GlobalStyles.smallMargin)),
+          |
+          |val buttons = Color.values.map(color =>
+          |  UdashButton(color.toProperty, smallBtn, disabled = disabled(color.ordinal))(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
           |)
           |
           |val clicks = SeqProperty[String](Seq.empty)
@@ -342,8 +336,8 @@ class BootstrapExtView extends FinalView {
     p("Use ", i("checkboxes"), " method in order to create a group of buttons behaving as checkboxes:"),
     CodeBlock(
       s"""import UdashButtonGroup._
-         |val selected = SeqProperty[String]("Checkbox 1")
          |val options = SeqProperty[String]("Checkbox 1", "Checkbox 2", "Checkbox 3")
+         |val selected = SeqProperty[String](options.get.head)
          |div(
          |  div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
          |    UdashButtonGroup.checkboxes(selected, options)().render
@@ -352,7 +346,7 @@ class BootstrapExtView extends FinalView {
          |  div(wellStyles)(
          |    repeatWithNested(options) { (option, nested) =>
          |      val checked = selected.transform((_: Seq[String]).contains(option.get))
-         |      div(bind(option), ": ", bind(checked)).render
+         |      div(nested(bind(option)), ": ", nested(bind(checked))).render
          |    }
          |  )
          |).render""".stripMargin
@@ -363,8 +357,8 @@ class BootstrapExtView extends FinalView {
     p("The following example presents a group of buttons behaving as radio buttons:"),
     CodeBlock(
       s"""import UdashButtonGroup._
-         |val selected = Property[String]("Radio 1")
          |val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
+         |val selected = Property[String](options.get.head)
          |div(
          |  div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
          |    UdashButtonGroup.radio(selected, options)().render
@@ -373,7 +367,7 @@ class BootstrapExtView extends FinalView {
          |  div(wellStyles)(
          |    repeatWithNested(options) { (option, nested) =>
          |      val checked = selected.transform(_ == option.get)
-         |      div(bind(option), ": ", bind(checked)).render
+         |      div(nested(bind(option)), ": ", nested(bind(checked))).render
          |    }
          |  )
          |).render""".stripMargin
@@ -495,18 +489,17 @@ class BootstrapExtView extends FinalView {
     CodeBlock(
       s"""val search = Property.blank[String]
          |val something = Property.blank[String]
-         |div(
-         |  UdashForm(inline = true)(factory => Seq(
-         |    UdashInputGroup()(
-         |      UdashInputGroup.prependText("Search: "),
-         |      UdashInputGroup.input(factory.input.textInput(search)().render)
-         |    ).render,
-         |    UdashInputGroup()(
-         |      UdashInputGroup.prependText("Something: "),
-         |      UdashInputGroup.input(factory.input.textInput(something)().render)
-         |    ).render,
-         |  )).render
-         |).render""".stripMargin
+         |
+         |UdashForm(inline = true)(factory => Seq(
+         |  UdashInputGroup()(
+         |    UdashInputGroup.prependText("Search: "),
+         |    UdashInputGroup.input(factory.input.textInput(search)().render)
+         |  ).render,
+         |  UdashInputGroup()(
+         |    UdashInputGroup.prependText("Something: "),
+         |    UdashInputGroup.input(factory.input.textInput(something)().render)
+         |  ).render,
+         |)).render""".stripMargin
     )(GuideStyles),
     ForceBootstrap(
       BootstrapDemos.inlineForm()
@@ -518,7 +511,7 @@ class BootstrapExtView extends FinalView {
          |  def content: String
          |}
          |object Panel extends HasModelPropertyCreator[Panel]
-         |case class DefaultPanel(override val title: String, override val content: String) extends Panel
+         |final case class DefaultPanel(override val title: String, override val content: String) extends Panel
          |val panels = SeqProperty[Panel](
          |  DefaultPanel("Title 1", "Content of panel 1..."),
          |  DefaultPanel("Title 2", "Content of panel 2..."),
@@ -536,10 +529,7 @@ class BootstrapExtView extends FinalView {
          |    )(nested(bind(panel.asModel.subProp(_.title)))).render,
          |    isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
          |  ).render,
-         |  div(
-         |    wellStyles,
-         |    BootstrapStyles.Spacing.padding()
-         |  )(
+         |  div(wellStyles)(
          |    bind(selected.asModel.subProp(_.content))
          |  )
          |).render""".stripMargin
@@ -555,7 +545,7 @@ class BootstrapExtView extends FinalView {
          |  def content: String
          |}
          |object Panel extends HasModelPropertyCreator[Panel]
-         |case class DefaultPanel(override val title: String, override val content: String) extends Panel
+         |final case class DefaultPanel(override val title: String, override val content: String) extends Panel
          |val panels = SeqProperty[Panel](
          |  DefaultPanel("Title 1", "Content of panel 1..."),
          |  DefaultPanel("Title 2", "Content of panel 2..."),
@@ -596,7 +586,7 @@ class BootstrapExtView extends FinalView {
          |div(
          |  UdashNavbar(darkStyle = true.toProperty, backgroundStyle = BootstrapStyles.Color.Dark.toProperty)(
          |    _ => UdashNav(panels)(
-         |      elemFactory = (panel, _) => panel.get match {
+         |      elemFactory = (panel, nested) => div(nested(produce(panel) {
          |        case MenuContainer(name, children) =>
          |          val childrenProperty = SeqProperty(children)
          |          UdashDropdown(childrenProperty, buttonToggle = false.toProperty)(
@@ -604,7 +594,7 @@ class BootstrapExtView extends FinalView {
          |            _ => span(name, " ")
          |          ).render.setup(_.firstElementChild.applyTags(BootstrapStyles.Navigation.link))
          |        case link: MenuLink => linkFactory(link, dropdown = false)
-         |      },
+         |      })).render,
          |      isDropdown = _.transform {
          |        case MenuContainer(_, _) => true
          |        case MenuLink(_, _) => false
@@ -628,7 +618,7 @@ class BootstrapExtView extends FinalView {
          |  new Breadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
          |).readable
          |val breadcrumbs = UdashBreadcrumbs(pages)(
-         |  (page, nested) => nested(produce(page) { page =>
+         |  (pageProperty, nested) => nested(produce(pageProperty) { page =>
          |    if (pages.get.last == page) JsDom.StringFrag(page.name).render
          |    else a(href := page.link)(page.name).render
          |  }),
@@ -795,16 +785,21 @@ class BootstrapExtView extends FinalView {
     CodeBlock(
       s"""import io.udash.bootstrap.BootstrapImplicits._
          |val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
+         |
+         |def newsStyle(newsProperty: Property[String]): ReadableProperty[String] = {
+         |  newsProperty.transform(_.last match {
+         |    case '1' => BootstrapStyles.active.className
+         |    case '2' => BootstrapStyles.disabled.className
+         |    case '3' => BootstrapStyles.List.color(BootstrapStyles.Color.Success).className
+         |    case '4' => BootstrapStyles.List.color(BootstrapStyles.Color.Danger).className
+         |    case '5' => BootstrapStyles.List.color(BootstrapStyles.Color.Info).className
+         |    case '6' => BootstrapStyles.List.color(BootstrapStyles.Color.Warning).className
+         |  })
+         |}
          |val listGroup = UdashListGroup(news)((news, nested) =>
-         |  li(
-         |    nested(BootstrapStyles.active.styleIf(news.transform(_.endsWith("1")))),
-         |    nested(BootstrapStyles.disabled.styleIf(news.transform(_.endsWith("2")))),
-         |    nested(BootstrapStyles.List.color(BootstrapStyles.Color.Success).styleIf(news.transform(_.endsWith("3")))),
-         |    nested(BootstrapStyles.List.color(BootstrapStyles.Color.Danger).styleIf(news.transform(_.endsWith("4")))),
-         |    nested(BootstrapStyles.List.color(BootstrapStyles.Color.Info).styleIf(news.transform(_.endsWith("5")))),
-         |    nested(BootstrapStyles.List.color(BootstrapStyles.Color.Warning).styleIf(news.transform(_.endsWith("6"))))
-         |  )(nested(bind(news))).render
+         |  li(nested(cls.bind(newsStyle(news))))(nested(bind(news))).render
          |)
+         |
          |var i = 1
          |val appendHandler = window.setInterval(() => {
          |  news.append(s"Dynamic $i")
@@ -883,11 +878,11 @@ class BootstrapExtView extends FinalView {
           |modal.listen { case ev => events.append(ev) }
           |
           |val openModalButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Show modal...")
-          |openModalButton.listen { case _ =>
+          |openModalButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
           |  modal.show()
           |}
           |val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-          |openAndCloseButton.listen { case _ =>
+          |openAndCloseButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
           |  modal.show()
           |  window.setTimeout(() => modal.hide(), 2000)
           |}
@@ -947,7 +942,7 @@ class BootstrapExtView extends FinalView {
       s"""
          |import scala.concurrent.duration.DurationInt
          |val popoverContainerId = ComponentId("popover-container")
-         |val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", Glo
+         |val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", GlobalStyles.smallMargin)).render
          |UdashPopover(
          |  trigger = Seq(UdashPopover.Trigger.Hover),
          |  delay = UdashPopover.Delay(500 millis, 250 millis),
@@ -955,7 +950,7 @@ class BootstrapExtView extends FinalView {
          |  content = (_) => "Content...",
          |  container = Option("#" + popoverContainerId)
          |)(label1)
-         |val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.s
+         |val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.smallMargin)).render
          |UdashPopover(
          |  trigger = Seq(UdashPopover.Trigger.Click),
          |  delay = UdashPopover.Delay(0 millis, 250 millis),
@@ -964,7 +959,7 @@ class BootstrapExtView extends FinalView {
          |  content = (_) => "Content...",
          |  container = Option("#" + popoverContainerId)
          |)(label2)
-         |val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalS
+         |val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalStyles.smallMargin)).render
          |val label3Tooltip = UdashPopover(
          |  trigger = Seq(UdashPopover.Trigger.Manual),
          |  placement = (_, _) => Seq(UdashPopover.Placement.Left),

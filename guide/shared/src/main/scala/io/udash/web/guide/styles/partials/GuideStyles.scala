@@ -68,6 +68,8 @@ object GuideStyles extends CssBase with CodeBlockStyles {
 
     MediaQueries.desktop(
       borderBottomWidth(`0`),
+      position.sticky,
+      top(50 px)
     ),
 
     MediaQueries.tabletLandscape(

@@ -119,11 +119,11 @@ class IntroFormDemoComponent extends Component {
         ),
         randomizeButton.render
       ).render),
-      div(BootstrapStyles.Spacing.margin(
+      h3(BootstrapStyles.Spacing.margin(
         side = BootstrapStyles.Side.Bottom,
         size = BootstrapStyles.SpacingSize.Normal
-      ))(h3("Is valid?")),
-      div(BootstrapUtils.wellStyles)(p(id := "valid")(
+      ))("Is valid?"),
+      p(id := "valid", BootstrapUtils.wellStyles)(
         // validation binding - waits for model changes and updates the view
         valid(model) {
           case Valid => span("Yes").render
@@ -133,6 +133,6 @@ class IntroFormDemoComponent extends Component {
           ).map(_.render)
         }
       )
-      ))
+    )
   }
 }
