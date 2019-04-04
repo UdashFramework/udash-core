@@ -257,7 +257,7 @@ object GenericApi {
 
 When a data type is used in a REST API trait as parameter type or result type, it must also come with an appropriate
 set of implicits. This includes [serialization-related implicits](#serialization-implicits-summary) and
-[OpenAPI related implicits](#restschema-typeclass). Just like for traits, these implicits can be provided by
+[OpenAPI related implicits](#openapi-implicits-summary). Just like for traits, these implicits can be provided by
 giving your data type a well-defined companion object.
 
 #### `RestDataCompanion`
@@ -274,8 +274,8 @@ object Address extends RestDataCompanion[Address]
 #### `RestDataWrapperCompanion`
 
 `RestDataWrapperCompanion` is a handy base companion class which you can use for data types which simply wrap
-another type. It will establish a relation between the wrapping and wrapped types so that all implicits for the 
-wrapping type are automatically derived from corresponding implicits for the wrapped type.
+another type. It will establish a relation between the wrapping and wrapped types so that all REST-related implicits 
+for the wrapping type are automatically derived from corresponding implicits for the wrapped type.
 
 ```scala
 case class UserId(id: String) extends AnyVal
@@ -606,7 +606,7 @@ results on client side).
 ### Path, query, header and cookie serialization
 
 Path, query, header and cookie parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
-This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `Real[PlainValue, T]` for 
+This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `AsReal[PlainValue, T]` for 
 every parameter of type `T` (`AsRaw` for the client, `AsReal` for the server).
 
 There are no "global" implicits defined for `PlainValue`. They must be either imported, defined by each
@@ -694,6 +694,62 @@ enclosing traits/classes of `MyClass`.
 
 Implicits defined in _implicit scope_ are effectively global and don't need to be imported.
 
+#### Customizing serialization for your own type
+
+If you need to write manual serialization for your own type, the easiest way to do this is to
+provide appropriate implicit in its companion object. In the example below, we provide custom serialization
+to `JsonValue`:
+
+```scala
+class MyClass { ... }
+object MyClass {
+  implicit val jsonAsRawReal: AsRawReal[JsonValue, MyClass] = AsRawReal.create(...)
+}
+```
+
+Apart from `JsonValue`, you can do the same for `PlainValue`, `HttpBody` and `RestResponse`, depending on the
+level of control that you need.
+
+**WARNING**: Remember that if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
+REST API then you must also provide custom instance of one of the [OpenAPI typeclasses](#openapi-implicits-summary)
+so that OpenAPI document properly reflects your custom serialization format. 
+
+* If you have custom serialization to `JsonValue` or `PlainValue` then you should define custom 
+  [`RestSchema`](#restschema-typeclass) instance
+* If you have custom serialization to `HttpBody` then you should define custom 
+  [`RestMediaTypes`](#restmediatypes-typeclass) instance
+* If you have custom serialization to `RestResponse` then you should define custom
+  [`RestResponses`](#restresponses-typeclass) instance
+
+#### Providing serialization for third party type
+
+If you need to define serialization implicits for a third party type, you can't do it through
+implicit scope because you can't modify its companion object. Instead, you can adjust implicits injected
+into REST API trait companion object.
+
+Assume that companion objects of your REST API traits normally extend `DefaultRestApiCompanion`, i.e.
+`GenCodec`-based serialization is used. Now, you can extend `DefaultRestImplicits` to add serialization for
+third party types:
+
+```scala
+trait EnhancedRestImplicits extends DefaultRestImplicits {
+  implicit val thirdPartyJsonAsRawReal: AsRawReal[JsonValue, ThirdParty] =
+    AsRawReal.create(...)
+}
+object EnhancedRestImplicits extends EnhancedRestImplicits
+```
+
+Then, you need to define your REST API trait as:
+
+```scala
+trait MyRestApi { ... }
+object MyRestApi extends RestApiCompanion[EnhancedRestImplicits, MyRestApi](EnhancedRestImplicits)
+```
+
+Also, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
+REST API then you must provide a [`RestSchema`](#restschema-typeclass) instance for your type that
+will reflect its serialization format.
+
 #### Plugging in entirely custom serialization
 
 REST framework deliberately provides **no** default implicits for serialization and deserialization.
@@ -763,78 +819,24 @@ object MyRestApi extends CirceRestApiCompanion[MyRestApi]
 REST API, then along from custom serialization you must provide customized instances of
 [`RestSchema`](#restschema-typeclass) that will adequately describe your new serialization format.
 
-#### Customizing serialization for your own type
+#### Supporting async effects other than `Future`
 
-If you need to write manual serialization for your own type, the easiest way to do this is to
-provide appropriate implicit in its companion object. In the example below, we provide custom serialization
-to `JsonValue`:
-
-```scala
-class MyClass { ... }
-object MyClass {
-  implicit val jsonAsRawReal: AsRawReal[JsonValue, MyClass] = AsRawReal.create(...)
-}
-```
-
-**WARNING**: Remember that if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
-REST API then you must also provide custom [`RestSchema`](#restschema-typeclass) instance for your type that
-will reflect its custom JSON serialization format.
-
-#### Providing serialization for third party type
-
-If you need to define serialization implicits for a third party type, you can't do it through
-implicit scope because you can't modify its companion object. Instead, you can adjust implicits injected
-into REST API trait companion object.
-
-Assume that companion objects of your REST API traits normally extend `DefaultRestApiCompanion`, i.e.
-`GenCodec`-based serialization is used. Now, you can extend `DefaultRestImplicits` to add serialization for
-third party types:
-
-```scala
-trait EnhancedRestImplicits extends DefaultRestImplicits {
-  implicit val thirdPartyJsonAsRawReal: AsRawReal[JsonValue, ThirdParty] =
-    AsRawReal.create(...)
-}
-object EnhancedRestImplicits extends EnhancedRestImplicits
-```
-
-Then, you need to define your REST API trait as:
-
-```scala
-trait MyRestApi { ... }
-object MyRestApi extends RestApiCompanion[EnhancedRestImplicits, MyRestApi](EnhancedRestImplicits)
-```
-
-Also, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
-REST API then you must provide a [`RestSchema`](#restschema-typeclass) instance for your type that
-will reflect its serialization format.
-
-#### Supporting result containers other than `Future`
-
-By default, every HTTP method in REST API trait must return its return wrapped into a `Future`.
-However, `Future` is low level and limited in many ways (e.g. there is no way to control when the actual
-asynchronous computation starts). It is possible to use other task-like containers, e.g.
-[Monix Task](https://monix.io/docs/2x/eval/task.html) or [Cats IO](https://typelevel.org/cats-effect/).
+When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return 
+its return wrapped into a `Future`. However, `Future` is low level and limited in many ways 
+(e.g. there is no way to control when the actual asynchronous computation starts). 
+It is possible to use other task-like containers, e.g. [Monix Task](https://monix.io/docs/2x/eval/task.html) 
+or [Cats IO](https://typelevel.org/cats-effect/).
 
 In order to do that, you must provide some additional implicits which will make the macro engine
-understand how to translate between `Async[T]` and `Task[T]` for arbitrary type `T`. This is controlled by
+understand how to translate between `Async[T]` and `MyFavoriteIOMonad[T]` for arbitrary type `T`. This is controlled by
 `AsyncEffect` typeclass defined in `RawRest` object which represents a bidirectional polymorphic conversion between
 some effect type constructor and `Async`. This means that you must provide implicit instance
-of `AsyncEffect[Task]`.
+of `AsyncEffect[MyFavoriteIOMonad]`.
 
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
 
-Additionally, you must provide an implicit instance of `HttpResponseType`, similar to the one defined
-in `FutureRestImplicits` trait for `Future`s. This drives materialization of `RestMetadata` in a similar way
-`AsRaw` and `AsReal` drive materialization of real<->raw interface translation.
-
-Ultimately, if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
-REST API then you must also provide an implicit instance of `RestResultType` which will make the macro engine
-understand that `Task[T]` is a valid method result type and that `T` is the actual result data type whose schema will 
-be used in OpenAPI response description.
-
-Udash repository contains an [example implementation of Monix Task support in its test sources](../rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
+Udash repository contains an [example implementation of Monix Task support in its test sources](https://github.com/UdashFramework/udash-core/blob/master/rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
 
 ## API evolution
 
@@ -870,8 +872,9 @@ Conversely, changes that would break your API include:
 ## Implementing backends
 
 Core REST framework has Servlet based server implementation and `sttp` based client implementation.
-However, it's fairly easy to implement additional backends as most of the heavy-lifting related to
-REST is already done by the core framework (its macro engine, in particular).
+However, it's relatively easy to implement custom backends as most of the heavy-lifting is already done by the core
+framework (its macro engine, in particular). Implementing a backend mostly boils down to translating between
+representations of requests and responses and handling asynchronous computations.
 
 ### Handler function
 
@@ -908,8 +911,9 @@ An existing implementation of REST API trait can be easily turned into a `Handle
 function using `RawRest.asHandleRequest`.
 
 Therefore, the only thing you need to do to expose your REST API trait as an actual web service it to turn
-`HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into `RestRequest`,
-passing them to `HandleRequest` function and translating resulting `RestResponse` to native HTTP response.
+`HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into
+a `RestRequest`, passing them to `HandleRequest` function and translating resulting `RestResponse` to native 
+HTTP response.
 
 See [`RestServlet`](../rest/.jvm/src/main/scala/io/udash/rest/RestServlet.scala)
 for an example implementation.
@@ -1048,16 +1052,18 @@ Schema derived for an ADT from macro materialized `RestStructure` will describe 
 #### Registered schemas
 
 By default, schemas macro materialized for case classes and sealed hierarchies will be _named_.
-This means they will not be inlined but rather registered under their name in
+This means they will be registered under their name in
 [Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#componentsObject).
+
 By default, the name that will be used will be the simple (unqualified) name of the data type, e.g. "User".
+This can be changed with [`@name`](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/serialization/name.html) annotation.
+
 When referring to registered schema (e.g. in
 [Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)),
 a [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#referenceObject)
 will be inserted, e.g. `{"$ref": "#/components/schemas/User"}`. This is good for schema reuse but may lead to name
-conflicts if you have multiple data types with the same name but in different packages. In such situations, you must
-disambiguate names of your data types with `@name` annotation. Unfortunately, such conflicts cannot be detected in compile
-time and will only be reported in runtime, when trying to generate OpenAPI document.
+conflicts if you have multiple data types with the same name but in different packages. Unfortunately, such conflicts
+cannot be detected in compile time and will only be reported in runtime, when trying to generate OpenAPI document.
 
 #### Adjusting macro materialized schemas
 
@@ -1091,6 +1097,19 @@ object CustomStringType {
     RestSchema.plain(Schema(`type` = DataType.String, description = "custom string type"))
 }
 ```
+
+When one `RestSchema` needs to refer to some other `RestSchema`, it must be resolved using `SchemaResolver`, e.g.
+
+```scala
+class CustomListType[T] { ... }
+object CustomListType {
+  implicit def restSchema[T: RestSchema]: RestSchema[CustomListType[T]] =
+    RestSchema.create(resolver => Schema.arrayOf(resolver.resolve(RestSchema[T])))
+}
+```
+
+This ensures that when the other schema is _named_ then the resolver will return a reference to registered schema
+rather than inlined schema.
 
 ### `RestMediaTypes` typeclass
 
@@ -1203,7 +1222,7 @@ operations associated with result of this prefix method.
 #### Adjusting path items
 
 For adjusting [Path Item Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#pathItemObject)
-there is `PathItemAdjuster` annotation trait with default implementagion `@adjustPathItem`.
+there is `PathItemAdjuster` annotation trait with default implementation `@adjustPathItem`.
 Path item adjuster can be applied on REST HTTP methods in order to transform Path Item objects generated for them.
 Because multiple REST HTTP methods may have the same path, adjusters are collected from all methods and ultimately all
 are applied on the associated Path Item Object. When path item adjuster is applied on a [prefix method](#prefix-methods),

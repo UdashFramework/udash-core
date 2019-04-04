@@ -8,6 +8,7 @@ import org.openqa.selenium.By.{ByCssSelector, ById}
 class I18nDemosTest extends SeleniumTest {
   val url = "/ext/i18n"
 
+  //todo switch to commented version when new rpc (and i18n.md) is used
   //private def runDemo(id: String)(additionalAction: WebElement => Unit = _ => ())(implicit position: Position): Map[String, String] = {
   //  def demo = {
   //    driver.switchTo().parentFrame()

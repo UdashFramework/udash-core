@@ -15,7 +15,7 @@ class BootstrappingIntroView extends FinalView with CssView {
 
   override def getTemplate: Modifier = div(
     h2("Project structure"),
-    p("A typical Udash project contains three modules: "),
+    p("A typical Udash project consists of three modules: "),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_basic.png", "Basic modules structure.", GuideStyles.floatRight, GuideStyles.imgSmall, GuideStyles.imgIntro),
     ul(GuideStyles.defaultList)(
       li(
