@@ -1,38 +1,36 @@
 package io.udash.web.homepage.styles.partials
 
-import java.util.concurrent.TimeUnit
-
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.utils._
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 object ButtonsStyle extends CssBase {
   import dsl._
 
-  val btn = style(
+  val btn: CssStyle = style(
     CommonStyleUtils.transition(),
     position.relative,
     cursor.pointer,
     whiteSpace.nowrap,
     textAlign.center,
-    userSelect := "none",
-    textDecoration := "none",
+    userSelect := none,
+    textDecoration := none,
     overflow.hidden,
 
     &.hover {
-      textDecoration := "none"
+      textDecoration := none
     }
   )
 
-  private val btnDefaultLine = style(
+  private val btnDefaultLine = mixin(
     content := "\" \"",
     position.absolute,
     backgroundColor.white
   )
 
-  private val btnDefaultLineHor = style(
+  private val btnDefaultLineHor = mixin(
     CommonStyleUtils.transition(),
     left(`0`),
     width(100 %%),
@@ -40,20 +38,21 @@ object ButtonsStyle extends CssBase {
     transform := "scaleX(0)"
   )
 
-  private val btnDefaultLineVert = style(
-    CommonStyleUtils.transition(new FiniteDuration(250, TimeUnit.MILLISECONDS), new FiniteDuration(250, TimeUnit.MILLISECONDS)),
+  private val btnDefaultLineVert = mixin(
+    CommonStyleUtils.transition(),
+    transitionDelay(250 milliseconds),
     width(2 px),
     height(100 %%),
     top(`0`),
     transform := "scaleY(0)"
   )
 
-  val btnDefault = style(
+  val btnDefault: CssStyle = style(
     btn,
-    UdashFonts.acumin(FontWeight.SemiBold),
+    UdashFonts.roboto(FontWeight.Bold),
     display.inlineBlock,
     color.white,
-    fontSize(2.8 rem),
+    fontSize(1.75 rem),
     color.white,
     backgroundColor(StyleConstants.Colors.Red),
 
@@ -99,8 +98,8 @@ object ButtonsStyle extends CssBase {
     )
   )
 
-  lazy val btnDefaultInner = style(
-    padding(1 rem, 5 rem, 1.3 rem, 5 rem),
+  lazy val btnDefaultInner: CssStyle = style(
+    padding(.625 rem, 3.125 rem,.8125 rem, 3.125 rem),
     transform := "translate3d(0,0,0)",
     &.before (
       btnDefaultLine,
@@ -122,7 +121,7 @@ object ButtonsStyle extends CssBase {
     )
   )
 
-  val btnDefaultBlack = style(
+  val btnDefaultBlack: CssStyle = style(
     &.before (
       backgroundColor.black
     ),
@@ -132,7 +131,7 @@ object ButtonsStyle extends CssBase {
     )
   )
 
-  val btnDefaultInnerBlack = style(
+  val btnDefaultInnerBlack: CssStyle = style(
     &.before (
       backgroundColor.black
     ),

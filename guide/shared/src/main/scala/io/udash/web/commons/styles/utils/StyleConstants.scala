@@ -9,11 +9,11 @@ object StyleConstants extends CssBase {
     * SIZES
     */
   object Sizes {
+    val BodyWidth = 1075
     val BodyPaddingPx = 30
     val MinSiteHeight = 550
     val LandingPageHeaderHeight = 150
     val HeaderHeight = 80
-    val HeaderHeightMobile = 80
     val GuideHeaderHeightMobile = HeaderHeight * .7
     val HeaderHeightPin = 80
     val FooterHeight = 120
@@ -23,6 +23,7 @@ object StyleConstants extends CssBase {
   /**
     * COLORS
     */
+  //TODO grab all colors here
   object Colors {
     val Red = c"#e30613"
     val RedLight = c"#ff2727"
@@ -32,7 +33,6 @@ object StyleConstants extends CssBase {
     val GreySemi = c"#cfcfd6"
     val GreySuperDark = c"#1c1c1e"
     val Yellow = c"#ffd600"
-    val Cyan = c"#eef4f7"
   }
 
   /**
@@ -40,9 +40,7 @@ object StyleConstants extends CssBase {
     */
   object MediaQueriesBounds {
     val TabletLandscapeMax = 1074
-    val TabletLandscapeMin = 768
-    val TabletMax = TabletLandscapeMin - 1
-    val TabletMin = 481
-    val PhoneMax = TabletMin - 1
+    val TabletMax = 767
+    val PhoneMax = 480
   }
 }

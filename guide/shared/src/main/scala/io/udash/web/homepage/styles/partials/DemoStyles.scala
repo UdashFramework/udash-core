@@ -1,32 +1,32 @@
 package io.udash.web.homepage.styles.partials
 
-import io.udash.css.CssBase
+import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.attributes.Attributes
-import io.udash.web.commons.styles.utils.{MediaQueries, StyleConstants, CommonStyleUtils, UdashFonts}
+import io.udash.web.commons.styles.utils.{CommonStyleUtils, MediaQueries, StyleConstants, UdashFonts}
 
 import scala.language.postfixOps
 
 object DemoStyles extends CssBase {
   import dsl._
 
-  val demoComponent = style(
-    UdashFonts.acumin(),
+  val demoComponent: CssStyle = style(
+    UdashFonts.roboto(),
     position.relative,
     height(682 px),
-    marginBottom(5 rem),
-    fontSize(1.4 rem),
+    marginBottom(3.125 rem),
+    fontSize(.875 rem),
 
     MediaQueries.tabletLandscape(
       height.auto
     ),
 
     unsafeChild("input")(
-      UdashFonts.acumin()
+      UdashFonts.roboto()
     )
   )
 
-  val laptopImage = style(
+  val laptopImage: CssStyle = style(
     position.absolute,
     top(`0`),
     left(50 %%),
@@ -38,7 +38,7 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoBody = style(
+  val demoBody: CssStyle = style(
     width(990 px),
     height(600 px),
     paddingTop(30.px),
@@ -52,7 +52,7 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoFiddle = style(
+  val demoFiddle: CssStyle = style(
     GlobalStyles.col,
     width(100.%%),
     height :=! s"calc(100% - 43px)",
@@ -62,7 +62,7 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoTabs = style(
+  val demoTabs: CssStyle = style(
     position.relative,
     paddingTop(15 px),
     textAlign.left,
@@ -75,7 +75,7 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoTabsItem = style(
+  val demoTabsItem: CssStyle = style(
     GlobalStyles.col,
 
     MediaQueries.phone(
@@ -85,11 +85,11 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoTabsLink = style(
+  val demoTabsLink: CssStyle = style(
     position.relative,
     CommonStyleUtils.transition(),
     display.block,
-    padding(.5 rem, .9 rem),
+    padding(.3125 rem,.5625 rem),
     color(StyleConstants.Colors.Grey),
     zIndex(2),
 
@@ -109,7 +109,7 @@ object DemoStyles extends CssBase {
     MediaQueries.desktop(
       &.hover(
         color.white,
-        textDecoration := "none"
+        textDecoration := none
       )
     ),
 
@@ -153,7 +153,7 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoIOWrapper = style(
+  val demoIOWrapper: CssStyle = style(
     position.relative,
     maxWidth(480 px),
     margin(`0`, auto),
@@ -164,7 +164,7 @@ object DemoStyles extends CssBase {
 
     MediaQueries.tabletLandscape(
       top.auto,
-      transform := "none"
+      transform := none
     ),
 
     MediaQueries.phone(
@@ -172,15 +172,15 @@ object DemoStyles extends CssBase {
     )
   )
 
-  val demoBootstrap = style(
+  val demoBootstrap: CssStyle = style(
     height(300 px)
   )
 
-  val demoInlineField = style(
+  val demoInlineField: CssStyle = style(
     display.tableCell,
     minHeight(34 px),
     height(100 %%),
-    padding(`0`, 1.3 rem),
+    padding(`0`,.8125 rem),
     border.none,
     verticalAlign.middle,
 
@@ -188,35 +188,35 @@ object DemoStyles extends CssBase {
       display.block,
       width(100 %%),
       height.auto,
-      padding(.7 rem, 1.3 rem),
+      padding(.4375 rem,.8125 rem),
       textAlign.center
     )
   )
 
-  val demoInput = style(
-    padding(.7 rem, 1.3 rem),
+  val demoInput: CssStyle = style(
+    padding(.4375 rem,.8125 rem),
     border.none
   )
 
-  val demoOutput = style(
-    padding(1 rem, 1.3 rem),
+  val demoOutput: CssStyle = style(
+    padding(.625 rem,.8125 rem),
     backgroundColor(StyleConstants.Colors.GreyExtra)
   )
 
-  val demoOutpuLabel = style(
+  val demoOutpuLabel: CssStyle = style(
     GlobalStyles.col,
-    GlobalStyles.width33,
+    width(100 / 3 %%),
     paddingRight(15 px),
     textAlign.right
   )
 
-  val navItem = style(
+  val navItem: CssStyle = style(
     color.black,
     position.relative,
     display.inlineBlock,
     verticalAlign.middle,
-    paddingLeft(1.8 rem),
-    paddingRight(1.8 rem),
+    paddingLeft(1.125 rem),
+    paddingRight(1.125 rem),
 
     &.firstChild (
       paddingLeft(0 px)
@@ -232,12 +232,12 @@ object DemoStyles extends CssBase {
       left(`0`),
 
       &.hover(
-        textDecoration := "none"
+        textDecoration := none
       )
     )
   )
 
-  val underlineLink = style(
+  val underlineLink: CssStyle = style(
     GlobalStyles.underlineLink,
     color.black
   )

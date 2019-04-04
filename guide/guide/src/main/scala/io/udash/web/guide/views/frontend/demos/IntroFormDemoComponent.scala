@@ -5,8 +5,10 @@ import java.{lang => jl}
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
+import io.udash.web.guide.components.BootstrapUtils
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
@@ -69,9 +71,9 @@ class IntroFormDemoComponent extends Component {
   }
 
   class IntroFormDemoView(
-    model: ModelProperty[IntroFormDemoModel],
-    presenter: IntroFormDemoPresenter
-  ) extends FinalView {
+                           model: ModelProperty[IntroFormDemoModel],
+                           presenter: IntroFormDemoPresenter
+                         ) extends FinalView {
     import scalatags.JsDom.all._
 
     private val i2s = (i: Int) => i.toString
@@ -99,7 +101,10 @@ class IntroFormDemoComponent extends Component {
       // load Bootstrap styles from CDN
       // UdashBootstrap.loadBootstrapStyles(),
       // another wrapped Bootstrap component
-      UdashInputGroup()(
+      div(BootstrapStyles.Spacing.margin(
+        side = BootstrapStyles.Side.Bottom,
+        size = BootstrapStyles.SpacingSize.Normal
+      ))(UdashInputGroup()(
         UdashInputGroup.input(
           // input synchronised with the model
           NumberInput(minimum)(id := "minimum").render
@@ -113,9 +118,12 @@ class IntroFormDemoComponent extends Component {
           NumberInput(maximum)(id := "maximum").render
         ),
         randomizeButton.render
-      ).render,
-      h3("Is valid?"),
-      p(id := "valid")(
+      ).render),
+      h3(BootstrapStyles.Spacing.margin(
+        side = BootstrapStyles.Side.Bottom,
+        size = BootstrapStyles.SpacingSize.Normal
+      ))("Is valid?"),
+      p(id := "valid", BootstrapUtils.wellStyles)(
         // validation binding - waits for model changes and updates the view
         valid(model) {
           case Valid => span("Yes").render

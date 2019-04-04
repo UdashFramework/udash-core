@@ -11,19 +11,19 @@ object HomepageDefaultStyles extends CssBase with DefaultStyles {
 
   style(
     unsafeRoot("body") (
-      fontSize(1.7 rem)
+      fontSize(1.0625 rem)
     ),
 
     unsafeRoot("p")(
-      fontSize(1.6 rem)
+      fontSize(1 rem)
     ),
 
     unsafeRoot("h1") (
-      marginBottom(5 rem),
+      marginBottom(3.125 rem),
 
       MediaQueries.phone(
-        paddingTop(5 rem),
-        marginBottom(3 rem)
+        paddingTop(3.125 rem),
+        marginBottom(1.875 rem)
       )
     )
   )

@@ -10,7 +10,6 @@ import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.HomepageStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.tags2._
 
 object ErrorViewFactory extends StaticViewFactory[IndexState](() => new ErrorView)
@@ -19,7 +18,7 @@ class ErrorView extends FinalView with CssView {
   import scalatags.JsDom.all._
 
   private val content = section(HomepageStyles.sectionError)(
-    div(GlobalStyles.body)(
+    div(GlobalStyles.body, HomepageStyles.body)(
       div(HomepageStyles.errorInner)(
         p(HomepageStyles.errorHead)(
           span(GlobalStyles.red)("Oops! 404"), br(),
