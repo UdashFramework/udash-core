@@ -9,7 +9,7 @@ name := "udash-guide"
 cancelable in Global := true
 
 inThisBuild(Seq(
-  version := "0.8.0-M14",
+  version := "0.8.0-RC1",
   scalaVersion := Dependencies.versionOfScala,
   organization := "io.udash",
   scalacOptions ++= Seq(
