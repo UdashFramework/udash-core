@@ -292,6 +292,12 @@ object Schema extends HasGenObjectCodec[Schema] {
   def enumOf(values: List[String]): Schema =
     Schema(`type` = DataType.String, enum = values.map(s => JsonValue(JsonStringOutput.write(s))))
 
+  def enumMapOf(keys: List[String], value: RefOr[Schema]): Schema =
+    Schema(`type` = DataType.Object,
+      properties = keys.iterator.map(k => (k, value)).toMap,
+      additionalProperties = AdditionalProperties.Flag(false)
+    )
+
   def nullable(schema: RefOr[Schema]): Schema =
     schema.rewrapRefToAllOf.copy(nullable = true)
 

@@ -36,7 +36,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   scala.concurrent.Future[Any] is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
-        | * it cannot be translated into a HTTP method:
+        | * it cannot be translated into an HTTP method:
         |   scala.concurrent.Future[Any] is not a valid result type because:
         |   Cannot serialize Any into RestResponse, because:
         |   Cannot serialize Any into HttpBody, because:
@@ -55,7 +55,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   Unit is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
-        | * it cannot be translated into a HTTP method:
+        | * it cannot be translated into an HTTP method:
         |   Unit is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -70,7 +70,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   prefix methods cannot take @Body parameters
-        | * it cannot be translated into a HTTP method:
+        | * it cannot be translated into an HTTP method:
         |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -83,7 +83,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
     assert(error ==
       """cannot translate between trait UnexpectedGETBodyParam and trait RawRest:
         |problem with method meth:
-        | * it cannot be translated into a HTTP GET method:
+        | * it cannot be translated into an HTTP GET method:
         |   GET methods cannot take @Body parameters""".stripMargin)
   }
 
@@ -96,7 +96,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
     assert(error ==
       """cannot translate between trait MissingBodyParam and trait RawRest:
         |problem with method meth:
-        | * it cannot be translated into a HTTP method with custom body:
+        | * it cannot be translated into an HTTP method with custom body:
         |   expected exactly one @Body parameter but none was found""".stripMargin)
   }
 
@@ -109,7 +109,7 @@ class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
     assert(error ==
       """cannot translate between trait MultipleBodyParams and trait RawRest:
         |problem with method meth:
-        | * it cannot be translated into a HTTP method with custom body:
+        | * it cannot be translated into an HTTP method with custom body:
         |   expected exactly one @Body parameter but more than one was found""".stripMargin)
   }
 }

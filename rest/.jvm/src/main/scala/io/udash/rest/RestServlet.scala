@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
-import io.udash.rest.RestServlet.DefaultHandleTimeout
+import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -15,17 +15,31 @@ import scala.concurrent.duration._
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
+  final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
 
+  /**
+    * Wraps an implementation of some REST API trait into a Java Servlet.
+    *
+    * @param apiImpl        implementation of some REST API trait
+    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
+    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
+    *                       if exceeded, `413 Payload Too Large` response will be sent back
+    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
-    apiImpl: RestApi, handleTimeout: FiniteDuration = DefaultHandleTimeout
+    apiImpl: RestApi,
+    handleTimeout: FiniteDuration = DefaultHandleTimeout,
+    maxPayloadSize: Long = DefaultMaxPayloadSize
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
 
   private final val BufferSize = 8192
 }
 
-class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDuration = DefaultHandleTimeout)
-  extends HttpServlet with LazyLogging {
+class RestServlet(
+  handleRequest: RawRest.HandleRequest,
+  handleTimeout: FiniteDuration = DefaultHandleTimeout,
+  maxPayloadSize: Long = DefaultMaxPayloadSize
+) extends HttpServlet with LazyLogging {
 
   import RestServlet._
 
@@ -34,6 +48,9 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
     RawRest.safeAsync(handleRequest(readRequest(request))) {
       case Success(restResponse) =>
         writeResponse(response, restResponse)
+        asyncContext.complete()
+      case Failure(e: HttpErrorException) =>
+        writeResponse(response, e.toResponse)
         asyncContext.complete()
       case Failure(e) =>
         writeFailure(response, e.getMessage.opt)
@@ -63,10 +80,16 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
   }
 
   private def readBody(request: HttpServletRequest): HttpBody = {
+    val contentLength = request.getContentLengthLong.opt.filter(_ != -1)
+    contentLength.filter(_ > maxPayloadSize).foreach { length =>
+      throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
+    }
+
     request.getContentType.opt.fold(HttpBody.empty) { contentType =>
       val mediaType = HttpBody.mediaTypeOf(contentType)
       HttpBody.charsetOf(contentType) match {
-        case Opt(charset) =>
+        // if Content-Length is undefined, always read as binary in order to validate maximum length
+        case Opt(charset) if contentLength.isDefined =>
           val bodyReader = request.getReader
           val bodyBuilder = new JStringBuilder
           val cbuf = new Array[Char](BufferSize)
@@ -87,6 +110,9 @@ class RestServlet(handleRequest: RawRest.HandleRequest, handleTimeout: FiniteDur
             case -1 =>
             case len =>
               bodyOs.write(bbuf, 0, len)
+              if (bodyOs.size > maxPayloadSize) {
+                throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes")
+              }
               readLoop()
           }
           readLoop()

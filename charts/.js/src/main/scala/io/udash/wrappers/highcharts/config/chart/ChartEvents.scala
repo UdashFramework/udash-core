@@ -7,7 +7,6 @@ import io.udash.wrappers.highcharts.api.Point
 import io.udash.wrappers.highcharts.config.axis.{Axis, XAxis, YAxis}
 import io.udash.wrappers.highcharts.config.series.{Series => SeriesConfig}
 import io.udash.wrappers.jquery.JQueryEvent
-import org.scalajs.dom.Event
 
 import scala.scalajs.js
 
@@ -155,7 +154,6 @@ object ChartEvents {
   trait DrilldownEvent extends JQueryEvent {
     def category: Int = js.native
     def point: Point = js.native
-    def originalEvent: Event = js.native
     def points: js.Array[Point] = js.native
     def seriesOptions: SeriesConfig = js.native
   }
