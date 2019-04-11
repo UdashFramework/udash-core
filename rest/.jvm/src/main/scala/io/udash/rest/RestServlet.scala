@@ -30,7 +30,7 @@ object RestServlet {
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize
-  ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl))
+  ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl), handleTimeout, maxPayloadSize)
 
   private final val BufferSize = 8192
 }

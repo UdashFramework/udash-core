@@ -148,7 +148,8 @@ final case class OpenApiPrefix[T](
         parameters = prefixParams ++ operation.parameters
       )
       val adjustedOperation = operationAdjusters.foldRight(prefixedOperation)(_ adjustOperation _)
-      PathOperation(pathPattern + path.stripSuffix("/"), httpMethod, adjustedOperation, pathAdjusters ++ subAdjusters)
+      val newPath = if(path == "/") pathPattern else if(pathPattern == "/") path else pathPattern + path
+      PathOperation(newPath, httpMethod, adjustedOperation, pathAdjusters ++ subAdjusters)
     }
   }
 }
