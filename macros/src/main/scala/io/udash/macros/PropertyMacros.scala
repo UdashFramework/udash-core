@@ -12,6 +12,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   val IsModelPropertyTemplateCls = tq"$Package.IsModelPropertyTemplate"
 
   val PropertyCreatorCls = tq"$Package.PropertyCreator"
+  val SeqPropertyCreatorCls = tq"$Package.SeqPropertyCreator"
   val SinglePropertyCreatorCls = tq"$Package.SinglePropertyCreator"
   val PropertyCreatorCompanion = q"$Package.PropertyCreator"
   val ModelPropertyCreatorCls = tq"$Package.ModelPropertyCreator"
@@ -217,7 +218,12 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         members.map {
           case (name, returnTpe) =>
             val reifiedReturnTpe = reifySeqTpe(returnTpe)
-            q"""properties(${name.toString}) = implicitly[$PropertyCreatorCls[$reifiedReturnTpe]].newProperty(null.asInstanceOf[$reifiedReturnTpe], this)"""
+            val reifiedCreatorTpe = getType(
+              if (tpe <:< SeqTpe) tq"$SeqPropertyCreatorCls[${tpe.typeArgs.head}]"
+              else tq"$PropertyCreatorCls[$reifiedReturnTpe]"
+            )
+
+            q"""properties(${name.toString}) = implicitly[$reifiedCreatorTpe].newProperty(null.asInstanceOf[$reifiedReturnTpe], this)"""
         }
       }
           }
