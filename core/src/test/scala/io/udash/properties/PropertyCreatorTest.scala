@@ -6,6 +6,8 @@ class PropertyCreatorTest extends UdashCoreTest {
   // DO NOT REMOVE THIS IMPORT!
   import io.udash.properties.Properties._
 
+  val x = SeqProperty.apply[Nothing](Seq.empty)
+
   "PropertyCreator" should {
     "create Property for basic types (and handle init value)" in {
       """val p = Property.blank[String]""".stripMargin should compile
@@ -1013,5 +1015,20 @@ class PropertyCreatorTest extends UdashCoreTest {
         |println(t.subSeq(_.y).get)
         |""".stripMargin should compile
     }
+
+
+    //    "fail implicit search for SeqPropertyCreator[Nothing]" in {
+    //      "SeqProperty.apply[Nothing](Seq.empty)" shouldNot compile
+    //    }
+    //    case class Chunk[T](
+    //      data: Property[T] = Property.blank
+    //    )
+    //    case class Chunk[T](
+    //      data: SeqProperty[T] = SeqProperty.blank
+    //    )
+    //    //https://github.com/UdashFramework/udash-core/issues/271
+    //    "work with inferred SeqProperty factory type params" in {
+    //
+    //    }
   }
 }
