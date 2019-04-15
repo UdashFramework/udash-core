@@ -1,7 +1,6 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
@@ -275,8 +274,7 @@ class adjustResponse(f: RestResponse => RestResponse) extends ResponseAdjuster {
   * HTTP header to all outgoing requests generated for invocations of that method on the client side.
   */
 class addRequestHeader(name: String, value: String) extends RequestAdjuster {
-  def adjustRequest(request: RestRequest): RestRequest =
-    request |> (r => r.copy(parameters = r.parameters |> (p => p.copy(headers = p.headers.append(name, PlainValue(value))))))
+  def adjustRequest(request: RestRequest): RestRequest = request.header(name, value)
 }
 
 /**
@@ -284,6 +282,5 @@ class addRequestHeader(name: String, value: String) extends RequestAdjuster {
   * HTTP header to all outgoing responses generated for invocations of that method on the server side.
   */
 class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
-  def adjustResponse(response: RestResponse): RestResponse =
-    response |> (r => r.copy(headers = r.headers.append(name, PlainValue(value))))
+  def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
 }
