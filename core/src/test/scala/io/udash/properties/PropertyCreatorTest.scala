@@ -434,27 +434,6 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val test = p.subSeq(_.x)""".stripMargin shouldNot compile
     }
 
-    "create ModelProperty for tuples" in {
-      """val p = ModelProperty(Tuple1("String"))""".stripMargin should compile
-      """val p = ModelProperty(("String", 25))""".stripMargin should compile
-      """val p = ModelProperty(("String", 25, 3))""".stripMargin should compile
-      """val p = ModelProperty(("String", 25, 3, 4))""".stripMargin should compile
-      """val p = ModelProperty(("String", 25, 3, 4, 5))""".stripMargin should compile
-      """val p = ModelProperty(("String", 25, 3, 4, 5, 6))""".stripMargin should compile
-
-      """val p = ModelProperty(("String", 25, 3))
-        |val s1 = p.subProp(_._1)
-        |val s2 = p.subProp(_._2)
-        |val s3 = p.subProp(_._3)
-      """.stripMargin should compile
-
-      """val p = ModelProperty(("String", 25, 3))
-        |val s1 = p.subProp(_._1)
-        |val s2 = p.subProp(_._2)
-        |val s3 = p.subProp(_._4)
-      """.stripMargin shouldNot compile
-    }
-
     "not create ModelProperty for anything other than trait or simple case class" in {
       """val p = Property[Int](null.asInstanceOf[Int]).asModel""".stripMargin shouldNot compile
 
