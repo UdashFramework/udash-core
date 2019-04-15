@@ -4,7 +4,8 @@ trait PropertyCreatorImplicitsLow { this: PropertyCreator.type =>
   implicit def materializeSingle[T]: PropertyCreator[T] = macro io.udash.macros.PropertyMacros.reifyPropertyCreator[T]
 }
 
-trait TuplePropertyCreators { this: PropertyCreator.type =>
+trait PropertyCreatorImplicits extends PropertyCreatorImplicitsLow { this: PropertyCreator.type =>
+  implicit def materializeSeq[T: PropertyCreator]: SeqPropertyCreator[T] = new SeqPropertyCreator[T]
 
   implicit def tuple1[T: PropertyCreator]: ModelPropertyCreator[Tuple1[T]] =
     ModelPropertyCreator.materialize[Tuple1[T]]

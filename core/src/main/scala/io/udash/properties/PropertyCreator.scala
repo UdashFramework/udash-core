@@ -18,12 +18,11 @@ trait PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T]
 }
 
-object PropertyCreator extends TuplePropertyCreators with PropertyCreatorImplicitsLow {
+object PropertyCreator extends PropertyCreatorImplicits {
   /** Marker trait for macro-materialized ModelProperty instances. Serves to prioritize macro-generated instance over other implicits. */
   trait MacroGeneratedPropertyCreator
 
-  def propertyCreator[T: PropertyCreator]: PropertyCreator[T] =
-    implicitly[PropertyCreator[T]]
+  def apply[T](implicit ev: PropertyCreator[T]): PropertyCreator[T] = ev
 
   def newID(): PropertyId = PropertyIdGenerator.next()
 }
@@ -36,9 +35,6 @@ class SinglePropertyCreator[T] extends PropertyCreator[T] {
 class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
     new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
-}
-object SeqPropertyCreator {
-  implicit def materializeSeq[T: PropertyCreator]: SeqPropertyCreator[T] = new SeqPropertyCreator[T]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
