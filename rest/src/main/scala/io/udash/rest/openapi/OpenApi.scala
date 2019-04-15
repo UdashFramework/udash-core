@@ -603,6 +603,11 @@ object Link extends HasGenObjectCodec[Link]
 @transparent final case class Callback(byExpression: Map[String, PathItem])
 object Callback extends HasGenObjectCodec[Callback]
 
+/**
+  * Represents a value which is either some directly available, inlined value (usually one of the OpenAPI objects,
+  * e.g. [[Schema]], [[Parameter]], [[Operation]], etc.) or a
+  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#callbackObject Reference Object]].
+  */
 sealed trait RefOr[+A]
 object RefOr {
   final case class Ref(ref: String) extends RefOr[Nothing]
