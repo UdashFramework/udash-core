@@ -1523,13 +1523,9 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fail on static creator mismatch" in {
-      case class Bla[Type](x: Int, s: String, t: Type)
-      object Bla {
-        implicit def pc[Type: PropertyCreator]: ModelPropertyCreator[Bla[Type]] =
-          ModelPropertyCreator.materialize[Bla[Type]]
-      }
+      case class Clazz[Type](x: Int, s: String, t: Type)
 
-      val p = Property((Bla(5, "asd2", Bla(7, "qwe", 1)), 8, "asd"))
+      val p = Property((Clazz(5, "asd2", Clazz(7, "qwe", 1)), 8, "asd"))
 
       an[IllegalStateException] shouldBe thrownBy(p.asModel(ModelPropertyCreator.materialize))
 
