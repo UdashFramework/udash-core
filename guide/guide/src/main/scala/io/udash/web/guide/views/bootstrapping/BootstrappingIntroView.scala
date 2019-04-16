@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.bootstrapping
 
-import com.avsystem.commons.serialization.GenCodec
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
