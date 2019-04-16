@@ -43,10 +43,3 @@ object ModelPropertyCreator {
   def materialize[T](implicit ev: IsModelPropertyTemplate[T]): ModelPropertyCreator[T] =
     macro io.udash.macros.PropertyMacros.reifyModelPropertyCreator[T]
 }
-
-@implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
-case class MacroModelPropertyCreator[T](pc: ModelPropertyCreator[T]) extends AnyVal
-object MacroModelPropertyCreator {
-  implicit def materialize[T](implicit ev: IsModelPropertyTemplate[T]): MacroModelPropertyCreator[T] =
-    macro io.udash.macros.PropertyMacros.reifyMacroModelPropertyCreator[T]
-}

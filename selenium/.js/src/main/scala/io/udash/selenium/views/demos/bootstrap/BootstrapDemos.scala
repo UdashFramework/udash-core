@@ -32,11 +32,10 @@ import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
-import org.scalajs.dom.Element
 import scalatags.JsDom
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 
@@ -441,29 +440,30 @@ object BootstrapDemos extends CrossLogging {
     ).render
   }
 
+  sealed trait ShirtSize
+  case object Small extends ShirtSize
+  case object Medium extends ShirtSize
+  case object Large extends ShirtSize
+
+  trait UserModel {
+    def name: String
+    def age: Int
+    def shirtSize: ShirtSize
+  }
+  object UserModel extends HasModelPropertyCreator[UserModel] {
+    implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
+      override def name: String = ""
+      override def age: Int = 25
+      override def shirtSize: ShirtSize = Medium
+    })
+  }
+
   def simpleForm(): Element = {
-    sealed trait ShirtSize
-    case object Small extends ShirtSize
-    case object Medium extends ShirtSize
-    case object Large extends ShirtSize
 
     def shirtSizeToLabel(size: ShirtSize): String = size match {
       case Small => "S"
       case Medium => "M"
       case Large => "L"
-    }
-
-    trait UserModel {
-      def name: String
-      def age: Int
-      def shirtSize: ShirtSize
-    }
-    object UserModel extends HasModelPropertyCreator[UserModel] {
-      implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
-        override def name: String = ""
-        override def age: Int = 25
-        override def shirtSize: ShirtSize = Medium
-      })
     }
 
     val user = ModelProperty.blank[UserModel]
@@ -524,12 +524,13 @@ object BootstrapDemos extends CrossLogging {
     ).render
   }
 
+  trait Panel {
+    def title: String
+    def content: String
+  }
+  object Panel extends HasModelPropertyCreator[Panel]
+
   def navs(): Element = {
-    trait Panel {
-      def title: String
-      def content: String
-    }
-    object Panel extends HasModelPropertyCreator[Panel]
     case class DefaultPanel(override val title: String, override val content: String) extends Panel
 
     val panels = SeqProperty[Panel](

@@ -6,6 +6,14 @@ class PropertyCreatorTest extends UdashCoreTest {
   // DO NOT REMOVE THIS IMPORT!
   import io.udash.properties.Properties._
 
+  trait T {
+    def i: Int
+    def x: Int = 5
+    val s: String
+    val l: Long = 8L
+  }
+  object T extends HasModelPropertyCreator[T]
+
   "PropertyCreator" should {
     "create Property for basic types (and handle init value)" in {
       """val p = Property.blank[String]""".stripMargin should compile
@@ -95,187 +103,91 @@ class PropertyCreatorTest extends UdashCoreTest {
     }
 
     "create ModelProperty for trait" in {
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
+      """
         |val p = Property[T](null).asModel
+        |val i = p.subProp(_.i)
         |val s = p.subProp(_.s)""".stripMargin should compile
 
-      """trait T {
-        |  val i: Int
-        |  val s: String
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel
-        |val s = p.subProp(_.s)""".stripMargin should compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  def x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel""".stripMargin should compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  def x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
+      """
         |val p = Property[T](null).asModel
         |val x = p.subProp(_.x)""".stripMargin shouldNot compile
 
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  val x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel""".stripMargin should compile
+      """
+        |val p = Property[T](null).asModel
+        |val x = p.subProp(_.l)""".stripMargin shouldNot compile
 
       """trait T {
         |  def i: Int
         |  def s: String
         |  var x: Int
         |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel""".stripMargin shouldNot compile
+        |implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize""".stripMargin shouldNot compile
 
       """trait T {
         |  def i: Int
         |  def s: String
         |  var x: Int = 5
         |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel""".stripMargin shouldNot compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  var x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |trait T2 {
-        |  def t: T
-        |}
-        |object T2 extends HasModelPropertyCreator[T2]
-        |
-        |val p = Property[T2](null).asModel""".stripMargin shouldNot compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  var x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |trait T2 {
-        |  val t: T
-        |}
-        |object T2 extends HasModelPropertyCreator[T2]
-        |
-        |val p = Property[T2](null).asModel""".stripMargin shouldNot compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  val x: Int = 5
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel
-        |val x = p.subProp(_.x)""".stripMargin shouldNot compile
-
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  val x: Int
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel
-        |val x = p.subProp(_.x)""".stripMargin should compile
+        |implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize""".stripMargin shouldNot compile
 
       """object Model {
         |  trait X {
         |    def a: String
         |  }
-        |  object X extends HasModelPropertyCreator[X]
+        |  object X {
+        |    implicit val mpc: ModelPropertyCreator[X] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait T {
         |    def i: Int
         |    def s: String
         |    def x: X
         |  }
-        |  object T extends HasModelPropertyCreator[T]
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val p = Property[Model.T](null).asModel
         |val x = p.subModel(_.x)
         |val a = p.subProp(_.x.a)""".stripMargin should compile
 
-      """trait X {
-        |  def a: String
+      """object Model {
+        |  trait X {
+        |    def a: String
+        |  }
+        |
+        |  trait T {
+        |    def i: Int
+        |    def s: String
+        |    def x: X
+        |  }
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
-        |trait T {
-        |  def i: Int
-        |  def s: String
-        |  def x: X
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel
+        |val p = Property[Model.T](null).asModel
         |val x = p.subModel(_.x)""".stripMargin shouldNot compile
-
-      """trait X {
-        |  def a: String
-        |}
-        |
-        |trait T {
-        |  def i: Int
-        |  def s: String
-        |  def x: X
-        |}
-        |object T extends HasModelPropertyCreator[T]
-        |
-        |val p = Property[T](null).asModel
-        |val x = p.subModel(_.x.a)""".stripMargin shouldNot compile
     }
 
     "create ModelProperty for recursive trait" in {
-      """trait T {
-        |  def i: Int
-        |  def s: String
-        |  def t: T
-        |}
-        |object T extends HasModelPropertyCreator[T](ModelPropertyCreator.materialize[T])
-        |
-        |val p = Property[T](null).asModel""".stripMargin should compile
-
       """trait X {
         |  def a: String
         |  def t: T
         |}
-        |object X extends HasModelPropertyCreator[X](ModelPropertyCreator.materialize[X])
+        |object X {
+        |  implicit val mpc: ModelPropertyCreator[X] = ModelPropertyCreator.materialize
+        |}
         |
         |trait T {
         |  def i: Int
         |  def s: String
         |  def x: X
         |}
-        |object T extends HasModelPropertyCreator[T](ModelPropertyCreator.materialize[T])
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[T](null).asModel
         |val x = p.subModel(_.x)
@@ -367,7 +279,9 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Model {
         |  case class A(s: Seq[String], i: A)
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.s)
@@ -375,7 +289,9 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Model {
         |  case class A(s: List[String], i: A)
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.s)
@@ -383,21 +299,27 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Test {
         |  case class Todo(name: String, editName: String, completed: Boolean = false, editing: Boolean = false)
-        |  object Todo extends HasModelPropertyCreator[Todo]
+        |  object Todo {
+        |    implicit val mpc: ModelPropertyCreator[Todo] = ModelPropertyCreator.materialize
+        |  }
         |  val x = ModelProperty[Todo](null)
         |}""".stripMargin should compile
     }
 
     "create ModelProperty for simple classes" in {
       """class A(val s: Seq[String], val i: A)
-        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |object A {
+        |  implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[A](null).asModel
         |val s = p.subSeq(_.s)
         |val i = p.subModel(_.i)""".stripMargin should compile
 
       """class A(val s: Vector[String], val i: A)
-        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |object A {
+        |  implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[A](null).asModel
         |val s = p.subSeq(_.s)
@@ -407,7 +329,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  val test: Int = 5
         |  def x: String = "qwe"
         |}
-        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |object A {
+        |  implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[A](null).asModel
         |val s = p.subSeq(_.s)
@@ -417,7 +341,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  val test: Int = 5
         |  def x: String = "qwe"
         |}
-        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |object A {
+        |  implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[A](null).asModel
         |val test = p.subSeq(_.test)""".stripMargin shouldNot compile
@@ -426,7 +352,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  val test: Int = 5
         |  def x: String = "qwe"
         |}
-        |object A extends HasModelPropertyCreator[A](ModelPropertyCreator.materialize)
+        |object A {
+        |  implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[A](null).asModel
         |val test = p.subSeq(_.x)""".stripMargin shouldNot compile
@@ -444,21 +372,27 @@ class PropertyCreatorTest extends UdashCoreTest {
       """sealed trait T
         |case object A extends T
         |case object B extends T
-        |object T extends HasModelPropertyCreator[T]
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[T](null).asModel""".stripMargin shouldNot compile
 
       """sealed trait T
         |case object A extends T
         |case object B extends T
-        |object T extends HasModelPropertyCreator[T]
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[Seq[T]](null).asModel""".stripMargin shouldNot compile
 
       """sealed trait T
         |case object A extends T
         |case object B extends T
-        |object T extends HasModelPropertyCreator[T]
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[List[T]](null).asModel""".stripMargin shouldNot compile
 
@@ -466,7 +400,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def i: Int
         |  def s: String
         |}
-        |object T extends HasModelPropertyCreator[T]
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[Seq[T]](null).asModel""".stripMargin shouldNot compile
 
@@ -474,63 +410,83 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def i: Int
         |  def s: String
         |}
-        |object T extends HasModelPropertyCreator[T]
+        |object T {
+        |  implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |}
         |
         |val p = Property[Vector[T]](null).asModel""".stripMargin shouldNot compile
 
       """object Model {
         |  case class A(s: String, i: Int)
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Seq[Model.A]](null).asModel""".stripMargin shouldNot compile
 
       """object Model {
         |  case class A(s: String, i: Int)
-        |  object A extends HasModelPropertyCreator[A]
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[List[Model.A]](null).asModel""".stripMargin shouldNot compile
 
       """object Model {
         |  case class SimpleWithVar(i: Int, var s: String)
-        |  object SimpleWithVar extends HasModelPropertyCreator[SimpleWithVar]
+        |  object SimpleWithVar {
+        |    implicit val mpc: ModelPropertyCreator[SimpleWithVar] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.SimpleWithVar](null)""".stripMargin shouldNot compile
 
       """object Model {
         |  case class Simple(i: Int, s: String) { val t = 5 }
-        |  object Simple extends HasModelPropertyCreator[Simple]
+        |  object Simple {
+        |    implicit val mpc: ModelPropertyCreator[Simple] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.Simple](null)""".stripMargin should compile
 
       """object Model {
         |  case class SimpleWithVar(i: Int, s: String) { var t = 5 }
-        |  object SimpleWithVar extends HasModelPropertyCreator[SimpleWithVar]
+        |  object SimpleWithVar {
+        |    implicit val mpc: ModelPropertyCreator[SimpleWithVar] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.SimpleWithVar](null)""".stripMargin shouldNot compile
 
       """object Model {
         |  case class Simple(i: Int, s: String) { def t = 5 }
-        |  object Simple extends HasModelPropertyCreator[Simple]
+        |  object Simple {
+        |    implicit val mpc: ModelPropertyCreator[Simple] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.Simple](null)""".stripMargin should compile
 
       """object Model {
         |  class C { val x = 5 }
         |  case class Simple(i: Int, s: String) extends C
-        |  object Simple extends HasModelPropertyCreator[Simple]
+        |  object Simple {
+        |    implicit val mpc: ModelPropertyCreator[Simple] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.Simple](null)""".stripMargin should compile
 
       """object Model {
         |  class C { var x = 5 }
         |  case class SimpleWithVar(i: Int, c: C)
-        |  object SimpleWithVar extends HasModelPropertyCreator[SimpleWithVar]
+        |  object SimpleWithVar {
+        |    implicit val mpc: ModelPropertyCreator[SimpleWithVar] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = ModelProperty[Model.SimpleWithVar](null)""".stripMargin should compile
 
       """object Model {
         |  case class A(s: Seq[String], i: Set[Int])
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.s)
@@ -538,14 +494,18 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Model {
         |  case class A(s: Seq[String], i: Set[Int])
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.i)""".stripMargin shouldNot compile
 
       """object Model {
         |  case class A(s: Seq[String], i: scala.collection.mutable.Seq[Int])
-        |  object A extends HasModelPropertyCreator[A]
+        |  object A {
+        |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Model.A](null).asModel
         |val s = p.subSeq(_.s)
@@ -612,7 +572,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |    def s: String
         |    def t: T
         |  }
-        |  object T extends HasModelPropertyCreator[T](ModelPropertyCreator.materialize)
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |}
         |val p = Property[Seq[Model.T]](null).asSeq[Model.T]
         |val m: ModelProperty[Model.T] = p.elemProperties.head.asModel
@@ -630,7 +592,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |    def s: String
         |    def t: T
         |  }
-        |  object T extends HasModelPropertyCreator[T](ModelPropertyCreator.materialize)
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val p = Property[Seq[Seq[Model.T]]](null).asSeq[Seq[Model.T]]
@@ -788,20 +752,26 @@ class PropertyCreatorTest extends UdashCoreTest {
     "create complex properties" in {
       """object Model {
         |  case class C(i: Int, s: String)
-        |  object C extends HasModelPropertyCreator[C]
+        |  object C {
+        |    implicit val mpc: ModelPropertyCreator[C] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait T {
         |    def i: Int
         |    def s: Option[String]
         |    def t: ST
         |  }
-        |  object T extends HasModelPropertyCreator[T]
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait ST {
         |    def c: C
         |    def s: Seq[Char]
         |  }
-        |  object ST extends HasModelPropertyCreator[ST]
+        |  object ST {
+        |    implicit val mpc: ModelPropertyCreator[ST] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val p = Property[Model.T](null).asModel
@@ -811,20 +781,26 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Model {
         |  case class C(i: Int, s: String)
-        |  object C extends HasModelPropertyCreator[C]
+        |  object C {
+        |    implicit val mpc: ModelPropertyCreator[C] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait T {
         |    def i: Int
         |    def s: Option[String]
         |    def t: ST
         |  }
-        |  object T extends HasModelPropertyCreator[T]
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait ST {
         |    def c: C
         |    def s: List[Char]
         |  }
-        |  object ST extends HasModelPropertyCreator[ST]
+        |  object ST {
+        |    implicit val mpc: ModelPropertyCreator[ST] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val p = Property[Model.T](null).asModel
@@ -840,13 +816,17 @@ class PropertyCreatorTest extends UdashCoreTest {
         |    def s: Option[String]
         |    def t: ST
         |  }
-        |  object T extends HasModelPropertyCreator[T]
+        |  object T {
+        |    implicit val mpc: ModelPropertyCreator[T] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait ST {
         |    def c: C
         |    def s: Seq[Char]
         |  }
-        |  object ST extends HasModelPropertyCreator[ST]
+        |  object ST {
+        |    implicit val mpc: ModelPropertyCreator[ST] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val p = Property[Model.T](null).asModel
@@ -856,14 +836,18 @@ class PropertyCreatorTest extends UdashCoreTest {
 
       """object Model {
         |  case class RestExampleClass(i: Int, s: String, tuple: (Double, String))
-        |  object RestExampleClass extends HasModelPropertyCreator[RestExampleClass]
+        |  object RestExampleClass {
+        |    implicit val mpc: ModelPropertyCreator[RestExampleClass] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait ExampleModel {
         |    def string: String
         |    def int: Int
         |    def cls: RestExampleClass
         |  }
-        |  object ExampleModel extends HasModelPropertyCreator[ExampleModel]
+        |  object ExampleModel {
+        |    implicit val mpc: ModelPropertyCreator[ExampleModel] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val responsesModel = ModelProperty[Model.ExampleModel](null)""".stripMargin should compile
@@ -874,7 +858,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  case object Orange extends Fruit
         |
         |  case class DemoCaseClass(x: String, i: Int)
-        |  object DemoCaseClass extends HasModelPropertyCreator[DemoCaseClass]
+        |  object DemoCaseClass {
+        |    implicit val mpc: ModelPropertyCreator[DemoCaseClass] = ModelPropertyCreator.materialize
+        |  }
         |
         |  trait GenCodecsDemoModel {
         |    def int: Int
@@ -888,7 +874,9 @@ class PropertyCreatorTest extends UdashCoreTest {
         |    def clsVar: Int
         |    def sealedTrait: Fruit
         |  }
-        |  object GenCodecsDemoModel extends HasModelPropertyCreator[GenCodecsDemoModel]
+        |  object GenCodecsDemoModel {
+        |    implicit val mpc: ModelPropertyCreator[GenCodecsDemoModel] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val GenCodecs = ModelProperty[Model.GenCodecsDemoModel](null)""".stripMargin should compile
@@ -956,7 +944,9 @@ class PropertyCreatorTest extends UdashCoreTest {
       """object Test {
         |  class A[T](val a: T)
         |  case class B(x: A[_], y: String)
-        |  object B extends HasModelPropertyCreator[B]
+        |  object B {
+        |    implicit val mpc: ModelPropertyCreator[B] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val t = ModelProperty[Test.B](null)
@@ -969,7 +959,9 @@ class PropertyCreatorTest extends UdashCoreTest {
       """object Test {
         |  class A[T](val a: T)
         |  case class B(x: A[_], y: String, z: Seq[_])
-        |  object B extends HasModelPropertyCreator[B]
+        |  object B {
+        |    implicit val mpc: ModelPropertyCreator[B] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val t = ModelProperty[Test.B](null)
@@ -983,7 +975,9 @@ class PropertyCreatorTest extends UdashCoreTest {
     "work with immutable Seq[_] in model" in {
       """object Test {
         |  case class B(x: String, y: scala.collection.immutable.Seq[_])
-        |  object B extends HasModelPropertyCreator[B]
+        |  object B {
+        |    implicit val mpc: ModelPropertyCreator[B] = ModelPropertyCreator.materialize
+        |  }
         |}
         |
         |val t = ModelProperty[Test.B](null)

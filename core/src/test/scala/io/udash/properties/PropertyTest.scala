@@ -65,6 +65,27 @@ class PropertyTest extends UdashCoreTest {
 
   def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), new C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
 
+  trait M {
+    def x: Double
+    def y: Double
+  }
+  object M extends HasModelPropertyCreator[M] {
+    def apply(_x: Double, _y: Double): M =
+      new M {
+        override def x: Double = _x
+        override def y: Double = _y
+      }
+  }
+
+  case class Bla(s: Seq[_])
+  object Bla extends HasModelPropertyCreator[Bla]
+
+  object Test {
+    class A[G](val a: G)
+    case class B(x: A[_], y: String)
+    object B extends HasModelPropertyCreator[B]
+  }
+
   "Property" should {
     "update value" in {
       val p = Property[Int](5)
@@ -398,18 +419,6 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "combine with other properties (model properties)" in {
-      trait M {
-        def x: Double
-        def y: Double
-      }
-      object M extends HasModelPropertyCreator[M] {
-        def apply(_x: Double, _y: Double): M =
-          new M {
-            override def x: Double = _x
-            override def y: Double = _y
-          }
-      }
-
       val p1 = Property(12)
       val p2 = Property(-2)
 
@@ -1367,9 +1376,9 @@ class PropertyTest extends UdashCoreTest {
       case class CCWithRequire(a: Int, b: Int) {
         require((a > 0 && b > 0) || (a < 0 && b < 0))
       }
-      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = MacroModelPropertyCreator.materialize[CCWithRequire].pc
+      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = ModelPropertyCreator.materialize[CCWithRequire]
       case class TopModel(child: CCWithRequire)
-      implicit val propertyCreator: ModelPropertyCreator[TopModel] = MacroModelPropertyCreator.materialize[TopModel].pc
+      implicit val propertyCreator: ModelPropertyCreator[TopModel] = ModelPropertyCreator.materialize[TopModel]
 
       val p = ModelProperty[TopModel](TopModel(CCWithRequire(1, 2)))
       val c = p.subModel(_.child)
@@ -1390,12 +1399,12 @@ class PropertyTest extends UdashCoreTest {
         def x: Int
         def y: Int = 5
       }
-      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = MacroModelPropertyCreator.materialize[ModelWithImplDef].pc
+      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = ModelPropertyCreator.materialize[ModelWithImplDef]
       trait ModelWithImplVal {
         val x: Int
         val y: Int = 5
       }
-      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
+      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = ModelPropertyCreator.materialize[ModelWithImplVal]
 
       val p1 = ModelProperty(null: ModelWithImplDef)
       val p2 = ModelProperty(null: ModelWithImplVal)
@@ -1421,7 +1430,7 @@ class PropertyTest extends UdashCoreTest {
         def withLabel: String =
           s"$userLabel $displayName"
       }
-      implicit val propertyCreator: ModelPropertyCreator[User] = MacroModelPropertyCreator.materialize[User].pc
+      implicit val propertyCreator: ModelPropertyCreator[User] = ModelPropertyCreator.materialize[User]
 
       val p = ModelProperty[User](User("udash", Some("Udash Framework")))
       p.get.withLabel should be("User: Udash Framework")
@@ -1438,9 +1447,9 @@ class PropertyTest extends UdashCoreTest {
 
     "handle empty model property after subProp call" in {
       case class SubTest(x: Int)
-      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = ModelPropertyCreator.materialize[SubTest]
       case class Test(a: SubTest, s: SubTest)
-      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
+      implicit val propertyCreator: ModelPropertyCreator[Test] = ModelPropertyCreator.materialize[Test]
 
       val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
@@ -1458,12 +1467,12 @@ class PropertyTest extends UdashCoreTest {
       trait SubTest {
         def x: Int
       }
-      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = ModelPropertyCreator.materialize[SubTest]
       trait Test {
         def a: SubTest
         def s: SubTest
       }
-      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
+      implicit val propertyCreator: ModelPropertyCreator[Test] = ModelPropertyCreator.materialize[Test]
 
       val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
@@ -1479,9 +1488,6 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "handle Seq[_]" in {
-      case class Bla(s: Seq[_])
-      object Bla extends HasModelPropertyCreator[Bla]
-
       val mp = ModelProperty(Bla(Seq(1, 8L)))
       val s = mp.subSeq(_.s)
 
@@ -1544,12 +1550,6 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "work with generic wildcard" in {
-      object Test {
-        class A[G](val a: G)
-        case class B(x: A[_], y: String)
-        object B extends HasModelPropertyCreator[B]
-      }
-
       val t = ModelProperty[Test.B](Test.B(new Test.A("a"), "y"))
       t.subProp(_.x).get.a should be("a")
       t.subProp(_.y).get should be("y")
