@@ -25,6 +25,15 @@ object PropertyCreator extends PropertyCreatorImplicits {
   def apply[T](implicit ev: PropertyCreator[T]): PropertyCreator[T] = ev
 
   def newID(): PropertyId = PropertyIdGenerator.next()
+
+  implicit val Double: PropertyCreator[Double] = new SinglePropertyCreator[Double]
+  implicit val Float: PropertyCreator[Float] = new SinglePropertyCreator[Float]
+  implicit val Long: PropertyCreator[Long] = new SinglePropertyCreator[Long]
+  implicit val Int: PropertyCreator[Int] = new SinglePropertyCreator[Int]
+  implicit val Short: PropertyCreator[Short] = new SinglePropertyCreator[Short]
+  implicit val Byte: PropertyCreator[Byte] = new SinglePropertyCreator[Byte]
+  implicit val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator[Boolean]
+  implicit val String: PropertyCreator[String] = new SinglePropertyCreator[String]
 }
 
 class SinglePropertyCreator[T] extends PropertyCreator[T] {
