@@ -1,11 +1,11 @@
 package io.udash.routing
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
-import org.scalajs.dom.raw.HashChangeEvent
+import org.scalajs.dom.raw.{HTMLAnchorElement, HashChangeEvent}
 import org.scalajs.dom.{Element, Location}
 
 import scala.scalajs.js
@@ -31,6 +31,7 @@ trait UrlChangeProvider {
 
 /** Used for routing based on the URL part following # sign. */
 object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
+
   import dom.{document, window}
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
@@ -54,6 +55,7 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
   * Don't forget to configure your web server to handle frontend routes. You may find "rewrite rules" mechanism useful.
   */
 object WindowUrlPathChangeProvider extends UrlChangeProvider {
+
   import dom.{document, window}
   import org.scalajs.dom.experimental.{URL => JSUrl}
   import org.scalajs.dom.raw.{MouseEvent, Node, PopStateEvent}
@@ -91,28 +93,21 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   override def initialize(): Unit = {
     window.document.addEventListener("click", (event: MouseEvent) => {
-      def findLink(el: Node): Element =
-        if (el == null) null
-        else if (el.nodeName.toLowerCase() == "a") el.asInstanceOf[Element]
-        else findLink(el.parentNode)
-
-      val target = findLink(event.target.asInstanceOf[Node])
-      if (target != null) {
-        val href = target.getAttribute("href")
-        val location = window.location
-        val newUrl = new JSUrl(href, location.toString)
-        val (samePath, sameHash, sameOrigin) =
-          (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
-        val ignore = shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)
-
-        if (!ignore) {
-          if (!samePath) {
-            val url = Url(href)
-            changeFragment(url)
+      event.target.opt
+        .collect { case node: Node => node }
+        .flatMap(Iterator.iterate(_)(_.parentNode).takeWhile(_ != null).collectFirstOpt { case a: HTMLAnchorElement => a })
+        .filter(_.href != null)
+        .foreach { target =>
+          val href = target.getAttribute("href")
+          val location = window.location
+          val newUrl = new JSUrl(href, location.toString)
+          val (samePath, sameHash, sameOrigin) =
+            (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
+          if (!shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)) {
+            if (!samePath) changeFragment(Url(href))
+            event.preventDefault()
           }
-          event.preventDefault()
         }
-      }
     })
 
     window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
@@ -132,5 +127,5 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
   }
 
   override def currentFragment: Url =
-    Url(Option(window.history.state).map(_.asInstanceOf[js.Dynamic].url.asInstanceOf[String]).getOrElse(window.location.pathname))
+    Url(window.history.state.opt.map(_.asInstanceOf[js.Dynamic].url.toString).getOrElse(window.location.pathname))
 }
