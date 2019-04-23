@@ -96,7 +96,7 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
       event.target.opt
         .collect { case node: Node => node }
         .flatMap(Iterator.iterate(_)(_.parentNode).takeWhile(_ != null).collectFirstOpt { case a: HTMLAnchorElement => a })
-        .filter(_.href != null)
+        .filter(_.getAttribute("href") != null)
         .foreach { target =>
           val href = target.getAttribute("href")
           val location = window.location
@@ -121,7 +121,7 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
   }
 
   override def changeFragment(url: Url): Unit = {
-    window.history.pushState(js.Dynamic.literal(url = url.value), "", url.value)
+    window.history.pushState(null, "", url.value)
     val withoutHash = Url(url.value.takeWhile(_ != '#'))
     callbacks.foreach(_.apply(withoutHash))
   }

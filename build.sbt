@@ -259,7 +259,7 @@ lazy val selenium = jvmProject(project)
 
     Test / parallelExecution := false,
     Test / compile := (Test / compile)
-      .dependsOn(LocalProject("selenium-js") / compileAndOptimizeStatics).value,
+      .dependsOn(LocalProject("selenium-js") / compileStatics).value,
 
     libraryDependencies ++= Dependencies.seleniumJvmDeps.value
   )
