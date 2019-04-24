@@ -24,17 +24,19 @@ trait CastableReadableProperty[A] extends ReadableProperty[A] {
 trait CastableProperty[A] extends CastableReadableProperty[A] with Property[A] {
   /** Safely casts `DirectProperty[A]` to `ModelProperty[A]` */
   override def asModel(implicit ev: ModelPropertyCreator[A]): ModelProperty[A] = {
-    if (!this.isInstanceOf[ModelProperty[A]])
-      throw new IllegalStateException("Property was created without provided ModelPropertyCreator in scope. " +
+    this match {
+      case mp: ModelProperty[A] => mp
+      case _ => throw new IllegalStateException("Property was created without provided ModelPropertyCreator in scope. " +
         "Make sure it is uniformly available, e.g. in the companion object of the model class.")
-    this.asInstanceOf[ModelProperty[A]]
+    }
   }
 
   /** Safely casts `DirectProperty[Seq[A]]` to `DirectSeqProperty[A]` */
   override def asSeq[B](implicit sev: A <:< Seq[B], ev: SeqPropertyCreator[B]): SeqProperty[B, CastableProperty[B]] = {
-    if (!this.isInstanceOf[SeqProperty[_, _]])
-      throw new IllegalStateException("Property was created without provided SeqPropertyCreator in scope. " +
+    this match {
+      case sp: this.type with SeqProperty[_, _] => sp.asInstanceOf[SeqProperty[B, CastableProperty[B]]]
+      case _ => throw new IllegalStateException("Property was created without provided SeqPropertyCreator in scope. " +
         "Make sure not to explicitly pass creators on property creation.")
-    this.asInstanceOf[SeqProperty[B, CastableProperty[B]]]
+    }
   }
 }

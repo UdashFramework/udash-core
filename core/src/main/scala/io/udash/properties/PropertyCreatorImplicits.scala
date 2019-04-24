@@ -1,6 +1,6 @@
 package io.udash.properties
 
-trait PropertyCreatorImplicitsLow { this: PropertyCreatorImplicits =>
+trait PropertyCreatorImplicitsLow { this: PropertyCreator.type =>
   implicit def materializeSingle[T]: PropertyCreator[T] = new SinglePropertyCreator[T]
 }
 
