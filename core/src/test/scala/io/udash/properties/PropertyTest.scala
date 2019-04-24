@@ -2923,22 +2923,27 @@ class PropertyTest extends UdashCoreTest {
       indexed.get should be(numbers.get.zipWithIndex)
     }
 
-    "handle Seq subclasses with different type parameterization scheme" in {
-      val mp = ModelProperty(WeirdSeqModel(Vector("1") /*Vector(1), Vector("def")*/))
-      println(mp.get)
+    "handle Seq aliases" in {
+      val mp = ModelProperty(WeirdSeqModel(Vector("abc"), Vector("def"), Vector(1) /*, Vector("123")*/))
+      println(mp.subSeq(_.s1).get.head.length)
+      println(mp.subSeq(_.s2).get.head.length)
+      println(mp.subSeq(_.s3).get.head + 2)
+      //println(mp.subSeq(_.s4).get.head.length)
     }
   }
 
   type SeqAlias[A] = Seq[A]
+  type VectorAlias[A] = Vector[A]
   type IntSeq[A] = Seq[Int]
   type WeirdSeq[A, B] = Seq[B]
   case class WeirdSeqModel(
-    //s1: SeqAlias[String],
-    //s2: IntSeq[String],
-    s3: WeirdSeq[Int, String],
+    s1: SeqAlias[String],
+    s2: VectorAlias[String],
+    s3: IntSeq[String],
+    //s4: WeirdSeq[Int, String],
   )
   object WeirdSeqModel {
-    implicit val mpc: ModelPropertyCreator[WeirdSeqModel] = ModelPropertyCreator.materialize
+    implicit val mpc: ModelPropertyCreator[WeirdSeqModel] = ModelPropertyCreator.materialize[WeirdSeqModel]
   }
 
   "Seq[Property]" should {

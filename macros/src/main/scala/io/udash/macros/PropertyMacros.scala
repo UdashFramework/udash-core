@@ -206,7 +206,8 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   private def generateModelProperty(tpe: Type): c.Tree = {
     def reifySeqTpe(tpe: Type): Type = {
       if (tpe <:< SeqTpe) {
-        getType(tq"$ScalaPkg.Seq[${tpe.typeArgs.head}]")
+        val dealiased = tpe.map(_.dealias)
+        getType(tq"$ScalaPkg.Seq[${dealiased.typeArgs.head}]")
       } else tpe
     }
 
@@ -219,7 +220,10 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           case (name, returnTpe) =>
             val reifiedReturnTpe = reifySeqTpe(returnTpe)
             val reifiedCreatorTpe = getType(
-              if (tpe <:< SeqTpe) tq"$SeqPropertyCreatorCls[${tpe.typeArgs.head}]"
+              if (tpe <:< SeqTpe) {
+                val dealias = tpe.map(_.dealias)
+                tq"$SeqPropertyCreatorCls[${dealias.typeArgs.head}]"
+              }
               else tq"$PropertyCreatorCls[$reifiedReturnTpe]"
             )
 
@@ -362,7 +366,8 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     def genTree(source: List[(Type, TermName)], targetTree: Tree): Tree = source match {
       case (resultType, term) :: _ if resultType.typeConstructor <:< SeqTpe.typeConstructor =>
-        q"""$targetTree.getSubSeq[${resultType.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
+        val dealiased = resultType.map(_.dealias)
+        q"""$targetTree.getSubSeq[${dealiased.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: Nil if hasModelPropertyCreator(resultType) =>
         q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: tail if hasModelPropertyCreator(resultType) =>
