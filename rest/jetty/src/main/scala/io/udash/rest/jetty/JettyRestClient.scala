@@ -36,7 +36,7 @@ object JettyRestClient {
     RawRest.safeHandle { request =>
       callback =>
         val path = baseUrl + PlainValue.encodePath(request.parameters.path)
-        val httpReq = client.newRequest(baseUrl).method(request.method.toString)
+        val httpReq = client.newRequest(baseUrl).method(request.method.name)
 
         httpReq.path(path)
         request.parameters.query.entries.foreach {

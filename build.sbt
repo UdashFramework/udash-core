@@ -196,7 +196,7 @@ lazy val `rest-js` = jsProjectFor(project, rest)
     libraryDependencies ++= Dependencies.restSjsDeps.value,
   )
 
-lazy val `rest-jetty` = jvmProject(project).in(file("rest/jetty"))
+lazy val `rest-jetty` = jvmProject(project.in(file("rest/jetty")))
   .dependsOn(rest % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restJettyDeps.value,
