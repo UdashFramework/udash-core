@@ -2924,7 +2924,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "handle Seq aliases" in {
-      val mp = ModelProperty(WeirdSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
+      val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
       mp.subSeq(_.s1).get.head shouldBe "abc"
       mp.subSeq(_.s2).get.head shouldBe "def"
       mp.subSeq(_.s3).get.head shouldBe 1
@@ -2936,13 +2936,13 @@ class PropertyTest extends UdashCoreTest {
   type VectorAlias[A] = Vector[A]
   type IntSeq[A] = Seq[Int]
   type WeirdSeq[A, B] = Seq[B]
-  case class WeirdSeqModel(
+  case class AliasedSeqModel(
     s1: SeqAlias[String],
     s2: VectorAlias[String],
     s3: IntSeq[String],
     s4: WeirdSeq[Int, String],
   )
-  object WeirdSeqModel extends HasModelPropertyCreator[WeirdSeqModel]
+  object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 
   "Seq[Property]" should {
     "combine into ReadableSeqProperty" in {
