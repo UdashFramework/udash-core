@@ -2940,7 +2940,7 @@ class PropertyTest extends UdashCoreTest {
     s1: SeqAlias[String],
     s2: VectorAlias[String],
     s3: IntSeq[String],
-    s4: WeirdSeq[Int, String],
+    s4: WeirdSeq[Int, String]
   )
   object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 
