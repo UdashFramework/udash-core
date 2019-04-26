@@ -463,6 +463,16 @@
         }
       }
     },
+    "/neverGet": {
+      "get": {
+        "operationId": "neverGet",
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/prefix/{p0}/subget/{p1}": {
       "summary": "summary for prefix paths",
       "get": {

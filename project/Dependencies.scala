@@ -115,6 +115,10 @@ object Dependencies {
   ))
 
   val restSjsDeps = restCrossDeps
+  
+  val restJettyDeps = Def.setting(Seq(
+    "org.eclipse.jetty" % "jetty-client" % jettyVersion
+  ))
 
   private val cssCrossDeps = Def.setting(Seq(
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
