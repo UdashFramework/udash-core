@@ -264,11 +264,14 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
           order.map { name =>
             val returnTpe = members(name)
+            val dealiasedReturnType = returnTpe.map(_.dealias)
             val reifiedReturnTpe = reifySeqTpe(returnTpe)
-            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe)
-              q"""getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${returnTpe.typeConstructor}]"""
-            else
+            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe) {
+              q"""getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${dealiasedReturnType.typeConstructor}]"""
+            }
+            else {
               q"""getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+            }
           }
         }
           )
@@ -282,14 +285,15 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
           members.map { case (name, returnTpe) =>
             val reifiedReturnTpe = reifySeqTpe(returnTpe)
-            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe)
-              q"""override val $name: $returnTpe = getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${returnTpe.typeConstructor}]"""
-            else
+            val dealiasedReturnType = returnTpe.map(_.dealias)
+            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe) {
+              q"""override val $name: $returnTpe = getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${dealiasedReturnType.typeConstructor}]"""
+            } else {
               q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+            }
           }
         }
-          }
-        """
+        }"""
       )
     }
   }
