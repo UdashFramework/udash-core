@@ -167,7 +167,7 @@ lazy val udash = project.in(file("."))
     utils, `utils-js`,
     core, `core-js`,
     rpc, `rpc-js`,
-    rest, `rest-js`,
+    rest, `rest-js`, `rest-jetty`,
     i18n, `i18n-js`,
     auth, `auth-js`,
     css, `css-js`,
@@ -233,6 +233,12 @@ lazy val `rest-js` = jsProjectFor(project, rest)
     libraryDependencies ++= Dependencies.restSjsDeps.value,
   )
 
+lazy val `rest-jetty` = jvmProject(project.in(file("rest/jetty")))
+  .dependsOn(rest % CompileAndTest)
+  .settings(
+    libraryDependencies ++= Dependencies.restJettyDeps.value,
+  )
+
 lazy val i18n = jvmProject(project)
   .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
 
@@ -296,7 +302,7 @@ lazy val selenium = jvmProject(project)
 
     Test / parallelExecution := false,
     Test / compile := (Test / compile)
-      .dependsOn(LocalProject("selenium-js") / compileAndOptimizeStatics).value,
+      .dependsOn(LocalProject("selenium-js") / compileStatics).value,
 
     libraryDependencies ++= Dependencies.seleniumJvmDeps.value
   )

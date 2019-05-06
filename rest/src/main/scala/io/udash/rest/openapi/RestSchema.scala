@@ -16,6 +16,7 @@ trait RestSchema[T] { self =>
   /**
     * Creates a [[Schema]] object or external schema reference.
     * May use [[SchemaResolver]] to resolve any dependent `RestSchema` instances.
+    * This method should be called directly only by [[SchemaResolver]].
     */
   def createSchema(resolver: SchemaResolver): RefOr[Schema]
 
@@ -311,6 +312,13 @@ object RestRequestBody {
 }
 
 trait SchemaResolver {
+  /**
+    * Resolves a [[RestSchema]] instance into an actual [[Schema]] object or reference.
+    * If the schema is unnamed then this method will simply return the same value as [[RestSchema.createSchema]].
+    * If the schema is named, it may be internally registered under its name and a
+    * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#callbackObject Reference Object]]
+    * will be returned instead - see [[SchemaRegistry]].
+    */
   def resolve(schema: RestSchema[_]): RefOr[Schema]
 }
 
@@ -335,6 +343,11 @@ object InliningResolver {
     new InliningResolver().resolve(schema)
 }
 
+/**
+  * An implementation of [[SchemaResolver]] which registers named [[RestSchema]]s and replaces them with a
+  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#referenceObject Reference Object]].
+  * All the registered schemas can then be extracted and listed in the [[Components]] object.
+  */
 final class SchemaRegistry(
   nameToRef: String => String = name => s"#/components/schemas/$name",
   initial: Iterable[(String, RefOr[Schema])] = Map.empty

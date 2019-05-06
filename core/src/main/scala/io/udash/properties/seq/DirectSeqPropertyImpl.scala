@@ -13,7 +13,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator](val parent: 
 
   override def replace(idx: Int, amount: Int, values: A*): Unit = {
     val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
-    val newProperties = if (values != null) values.map(value => implicitly[PropertyCreator[A]].newProperty(value, this)) else Seq.empty
+    val newProperties = if (values != null) values.map(value => PropertyCreator[A].newProperty(value, this)) else Seq.empty
 
     CrossCollections.replace(properties, idx, amount, newProperties: _*)
 
@@ -29,7 +29,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator](val parent: 
   override def setInitValue(t: Seq[A]): Unit = {
     val newProperties = Option(t)
       .getOrElse(Seq.empty)
-      .map(value => implicitly[PropertyCreator[A]].newProperty(value, this))
+      .map(value => PropertyCreator[A].newProperty(value, this))
     properties.insertAll(0, newProperties)
   }
 

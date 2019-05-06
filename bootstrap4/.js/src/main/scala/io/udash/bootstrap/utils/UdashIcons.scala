@@ -11,7 +11,7 @@ object UdashIcons {
 
     object Modifiers {
       def border: CssStyle = CssStyleName("fa-border")
-      def fixedWidht: CssStyle = CssStyleName("fa-fw")
+      def fixedWidth: CssStyle = CssStyleName("fa-fw")
       def inverse: CssStyle = CssStyleName("fa-inverse")
       def pullLeft: CssStyle = CssStyleName("fa-pull-left")
       def pullRight: CssStyle = CssStyleName("fa-pull-right")

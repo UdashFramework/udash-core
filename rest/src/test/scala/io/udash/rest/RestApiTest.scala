@@ -8,7 +8,7 @@ import org.scalactic.source.Position
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
 
-abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
+abstract class RestApiTest extends FunSuite with ScalaFutures {
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](RestTestApi.Impl)
 
@@ -27,7 +27,9 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
     case arr: Array[_] => arr.deep
     case _ => value
   }
+}
 
+trait RestApiTestScenarios extends RestApiTest {
   test("trivial GET") {
     testCall(_.trivialGet)
   }
@@ -73,6 +75,6 @@ abstract class AbstractRestCallTest extends FunSuite with ScalaFutures {
   }
 }
 
-class DirectRestCallTest extends AbstractRestCallTest {
+class DirectRestApiTest extends RestApiTestScenarios {
   def clientHandle: HandleRequest = serverHandle
 }

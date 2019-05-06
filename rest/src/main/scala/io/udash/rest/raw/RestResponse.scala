@@ -9,6 +9,9 @@ import scala.annotation.implicitNotFound
 import scala.util.Failure
 
 final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: HttpBody) {
+  def header(name: String, value: String): RestResponse =
+    copy(headers = headers.append(name, PlainValue(value)))
+
   def toHttpError: HttpErrorException =
     HttpErrorException(code, body.textualContentOpt.toOptArg)
   def ensureNonError: RestResponse =

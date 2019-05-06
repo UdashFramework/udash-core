@@ -4,7 +4,7 @@ import com.avsystem.commons._
 import com.github.ghik.silencer.silent
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
-import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
+import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
 
@@ -64,6 +64,27 @@ class PropertyTest extends UdashCoreTest {
   }
 
   def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), new C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
+
+  trait M {
+    def x: Double
+    def y: Double
+  }
+  object M extends HasModelPropertyCreator[M] {
+    def apply(_x: Double, _y: Double): M =
+      new M {
+        override def x: Double = _x
+        override def y: Double = _y
+      }
+  }
+
+  case class Bla(s: Seq[_])
+  object Bla extends HasModelPropertyCreator[Bla]
+
+  object Test {
+    class A[G](val a: G)
+    case class B(x: A[_], y: String)
+    object B extends HasModelPropertyCreator[B]
+  }
 
   "Property" should {
     "update value" in {
@@ -398,18 +419,6 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "combine with other properties (model properties)" in {
-      trait M {
-        def x: Double
-        def y: Double
-      }
-      object M extends HasModelPropertyCreator[M] {
-        def apply(_x: Double, _y: Double): M =
-          new M {
-            override def x: Double = _x
-            override def y: Double = _y
-          }
-      }
-
       val p1 = Property(12)
       val p2 = Property(-2)
 
@@ -540,7 +549,7 @@ class PropertyTest extends UdashCoreTest {
 
       p1.set(2)
       p2.set(3)
-      s.set(Seq(2,1))
+      s.set(Seq(2, 1))
       sc.get should be(Seq(10, 5))
       sqc.get should be(Seq(10, 5))
     }
@@ -661,13 +670,13 @@ class PropertyTest extends UdashCoreTest {
       elementsUpdated should be(0)
 
       p.set("1,0,1,0,1")
-      s.get should be(Seq(1,0,1,0,1))
+      s.get should be(Seq(1, 0, 1, 0, 1))
 
       lastValue = null
       lastPatch = null
       elementsUpdated = 0
       p.set("1,0,1,0,1,0,1")
-      s.get should be(Seq(1,0,1,0,1,0,1))
+      s.get should be(Seq(1, 0, 1, 0, 1, 0, 1))
       lastValue should be(s.get)
       lastPatch.added.size should be(2)
       lastPatch.removed.size should be(0)
@@ -677,7 +686,7 @@ class PropertyTest extends UdashCoreTest {
       lastPatch = null
       elementsUpdated = 0
       p.set("1,0,1,0,1")
-      s.get should be(Seq(1,0,1,0,1))
+      s.get should be(Seq(1, 0, 1, 0, 1))
       lastValue should be(s.get)
       lastPatch.idx should be(5)
       lastPatch.added.size should be(0)
@@ -688,7 +697,7 @@ class PropertyTest extends UdashCoreTest {
       lastPatch = null
       elementsUpdated = 0
       p.touch()
-      s.get should be(Seq(1,0,1,0,1))
+      s.get should be(Seq(1, 0, 1, 0, 1))
       lastValue should be(s.get)
       lastPatch should be(null)
       elementsUpdated should be(0)
@@ -703,9 +712,9 @@ class PropertyTest extends UdashCoreTest {
       p.listenersCount() should be(0)
 
       p.set("1,2,3")
-      s.get should be(Seq(1,2,3))
+      s.get should be(Seq(1, 2, 3))
       p.set("1,2,3,-1,-2,-3")
-      s.get should be(Seq(1,2,3,-1,-2,-3))
+      s.get should be(Seq(1, 2, 3, -1, -2, -3))
     }
 
     "not allow children modification after transformation into ReadableSeqProperty" in {
@@ -718,7 +727,7 @@ class PropertyTest extends UdashCoreTest {
         case _: ReadableProperty[Int] => //ignore
       }
 
-      s.get should be(Seq(1,2,3,4,5))
+      s.get should be(Seq(1, 2, 3, 4, 5))
     }
 
     "transform to SeqProperty" in {
@@ -836,7 +845,7 @@ class PropertyTest extends UdashCoreTest {
       lastPatch.removed.size should be(3)
       elementsUpdated should be(0)
 
-      s.set(Seq(1,0,1,0,1))
+      s.set(Seq(1, 0, 1, 0, 1))
       p.get should be("1,0,1,0,1")
 
       lastValue = null
@@ -852,7 +861,7 @@ class PropertyTest extends UdashCoreTest {
       lastValue = null
       lastPatch = null
       elementsUpdated = 0
-      s.set(Seq(1,0,1,0,1))
+      s.set(Seq(1, 0, 1, 0, 1))
       p.get should be("1,0,1,0,1")
       lastValue should be(s.get)
       lastPatch.idx should be(5)
@@ -877,9 +886,9 @@ class PropertyTest extends UdashCoreTest {
       p.listenersCount() should be(0)
 
       p.set("1,-1,2,-2")
-      s.get should be(Seq(1,-1,2,-2))
+      s.get should be(Seq(1, -1, 2, -2))
 
-      s.set(Seq(4,-4,2,-2))
+      s.set(Seq(4, -4, 2, -2))
       p.get should be("4,-4,2,-2")
     }
 
@@ -887,7 +896,7 @@ class PropertyTest extends UdashCoreTest {
       val s = Property("1,2,3,4,5,6")
       val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
 
-      i.get should be(Seq(1,2,3,4,5,6))
+      i.get should be(Seq(1, 2, 3, 4, 5, 6))
 
       var counter = 0
       val r1 = s.listen(_ => counter += 1)
@@ -895,7 +904,7 @@ class PropertyTest extends UdashCoreTest {
       i.append(7)
 
       s.get should be("1,2,3,4,5,6,7")
-      i.get should be(Seq(1,2,3,4,5,6,7))
+      i.get should be(Seq(1, 2, 3, 4, 5, 6, 7))
       counter should be(1)
 
       CallbackSequencer().sequence {
@@ -903,13 +912,13 @@ class PropertyTest extends UdashCoreTest {
       }
 
       s.get should be("12,12,12,12,12,12,12")
-      i.get should be(Seq(12,12,12,12,12,12,12))
+      i.get should be(Seq(12, 12, 12, 12, 12, 12, 12))
       counter should be(2)
 
       i.elemProperties.foreach(_.set(1))
 
       s.get should be("1,1,1,1,1,1,1")
-      i.get should be(Seq(1,1,1,1,1,1,1))
+      i.get should be(Seq(1, 1, 1, 1, 1, 1, 1))
       counter should be(9)
 
       r1.cancel()
@@ -919,13 +928,13 @@ class PropertyTest extends UdashCoreTest {
       }
 
       s.get should be("13,13,13,13,13,13,13")
-      i.get should be(Seq(13,13,13,13,13,13,13))
+      i.get should be(Seq(13, 13, 13, 13, 13, 13, 13))
       counter should be(9)
 
       i.elemProperties.foreach(_.set(1))
 
       s.get should be("1,1,1,1,1,1,1")
-      i.get should be(Seq(1,1,1,1,1,1,1))
+      i.get should be(Seq(1, 1, 1, 1, 1, 1, 1))
       counter should be(9)
     }
 
@@ -1242,7 +1251,7 @@ class PropertyTest extends UdashCoreTest {
       val p = ModelProperty(null: TT)
       val t = p.transform[Int](
         (p: TT) => p.i + p.t.c.i,
-        (x: Int) => newTT(x/2, None, new C(x/2, ""), Seq.empty)
+        (x: Int) => newTT(x / 2, None, new C(x / 2, ""), Seq.empty)
       )
 
       val r1 = p.listen(listener)
@@ -1275,8 +1284,8 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "work with simple case class" in {
-      case class Simple(i: Int, s:  String)
-      implicit val propertyCreator: ModelPropertyCreator[Simple] = MacroModelPropertyCreator.materialize[Simple].pc
+      case class Simple(i: Int, s: String)
+      implicit val propertyCreator: ModelPropertyCreator[Simple] = ModelPropertyCreator.materialize
 
       val p = ModelProperty(Simple(1, "xxx"))
       p.get should be(Simple(1, "xxx"))
@@ -1289,6 +1298,7 @@ class PropertyTest extends UdashCoreTest {
 
     "work with tuples" in {
       val init = (123, "sth", true, new C(42, "s"))
+      implicit val pc: ModelPropertyCreator[(Int, String, Boolean, C)] = ModelPropertyCreator.materialize
       val p = ModelProperty(init)
 
       var changeCount = 0
@@ -1305,6 +1315,7 @@ class PropertyTest extends UdashCoreTest {
 
     "work with Tuple2" in {
       val init = (123, "sth")
+      implicit val pc: ModelPropertyCreator[(Int, String)] = ModelPropertyCreator.materialize
       val p = ModelProperty(init)
 
       var changeCount = 0
@@ -1334,10 +1345,14 @@ class PropertyTest extends UdashCoreTest {
     "work with recursive trait" in {
       import ReqModels._
 
-      val p = ModelProperty[ReqT](new ReqT { def t: ReqT = null })
+      val p = ModelProperty[ReqT](new ReqT {
+        def t: ReqT = null
+      })
       p.get.t should be(null)
       val s = p.subModel(_.t)
-      s.set(new ReqT { def t: ReqT = null })
+      s.set(new ReqT {
+        def t: ReqT = null
+      })
       s.get.t should be(null)
       p.get.t shouldNot be(null)
     }
@@ -1361,9 +1376,9 @@ class PropertyTest extends UdashCoreTest {
       case class CCWithRequire(a: Int, b: Int) {
         require((a > 0 && b > 0) || (a < 0 && b < 0))
       }
-      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = MacroModelPropertyCreator.materialize[CCWithRequire].pc
+      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = ModelPropertyCreator.materialize[CCWithRequire]
       case class TopModel(child: CCWithRequire)
-      implicit val propertyCreator: ModelPropertyCreator[TopModel] = MacroModelPropertyCreator.materialize[TopModel].pc
+      implicit val propertyCreator: ModelPropertyCreator[TopModel] = ModelPropertyCreator.materialize[TopModel]
 
       val p = ModelProperty[TopModel](TopModel(CCWithRequire(1, 2)))
       val c = p.subModel(_.child)
@@ -1384,12 +1399,12 @@ class PropertyTest extends UdashCoreTest {
         def x: Int
         def y: Int = 5
       }
-      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = MacroModelPropertyCreator.materialize[ModelWithImplDef].pc
+      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = ModelPropertyCreator.materialize[ModelWithImplDef]
       trait ModelWithImplVal {
         val x: Int
         val y: Int = 5
       }
-      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = MacroModelPropertyCreator.materialize[ModelWithImplVal].pc
+      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = ModelPropertyCreator.materialize[ModelWithImplVal]
 
       val p1 = ModelProperty(null: ModelWithImplDef)
       val p2 = ModelProperty(null: ModelWithImplVal)
@@ -1415,7 +1430,7 @@ class PropertyTest extends UdashCoreTest {
         def withLabel: String =
           s"$userLabel $displayName"
       }
-      implicit val propertyCreator: ModelPropertyCreator[User] = MacroModelPropertyCreator.materialize[User].pc
+      implicit val propertyCreator: ModelPropertyCreator[User] = ModelPropertyCreator.materialize[User]
 
       val p = ModelProperty[User](User("udash", Some("Udash Framework")))
       p.get.withLabel should be("User: Udash Framework")
@@ -1432,9 +1447,9 @@ class PropertyTest extends UdashCoreTest {
 
     "handle empty model property after subProp call" in {
       case class SubTest(x: Int)
-      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = ModelPropertyCreator.materialize[SubTest]
       case class Test(a: SubTest, s: SubTest)
-      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
+      implicit val propertyCreator: ModelPropertyCreator[Test] = ModelPropertyCreator.materialize[Test]
 
       val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
@@ -1452,12 +1467,12 @@ class PropertyTest extends UdashCoreTest {
       trait SubTest {
         def x: Int
       }
-      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = MacroModelPropertyCreator.materialize[SubTest].pc
+      implicit val propertyCreatorSub: ModelPropertyCreator[SubTest] = ModelPropertyCreator.materialize[SubTest]
       trait Test {
         def a: SubTest
         def s: SubTest
       }
-      implicit val propertyCreator: ModelPropertyCreator[Test] = MacroModelPropertyCreator.materialize[Test].pc
+      implicit val propertyCreator: ModelPropertyCreator[Test] = ModelPropertyCreator.materialize[Test]
 
       val p = ModelProperty(null: Test)
       val sub = p.subModel(_.s)
@@ -1472,6 +1487,18 @@ class PropertyTest extends UdashCoreTest {
       sub.get.x should be(7)
     }
 
+    "handle Seq[_]" in {
+      val mp = ModelProperty(Bla(Seq(1, 8L)))
+      val s = mp.subSeq(_.s)
+
+      s.get should contain inOrderOnly(1, 8L)
+
+      s.prepend("0")
+      s.replace(1, 2, 0.0, 7)
+
+      s.get should contain inOrderOnly("0", 0.0, 7)
+    }
+
     "handle generic types" in {
       object Outer {
         case class Bla[Type](x: Int, s: String, t: Type)
@@ -1481,10 +1508,8 @@ class PropertyTest extends UdashCoreTest {
         }
       }
 
-      def create[A : PropertyCreator, B : PropertyCreator, D : PropertyCreator](a: A, b: B, d: D): SeqProperty[(A, B, D), CastableProperty[(A, B, D)]] =
-        SeqProperty(Seq.tabulate(10)(_ => (a, b, d)))
-
-      val s = create(Outer.Bla(5, "asd2", Outer.Bla(7, "qwe", 1)), 8, "asd")
+      implicit val mpc: ModelPropertyCreator[(Outer.Bla[Outer.Bla[Int]], Int, String)] = ModelPropertyCreator.materialize
+      val s = SeqProperty(Seq.tabulate(10)(_ => (Outer.Bla(5, "asd2", Outer.Bla(7, "qwe", 1)), 8, "asd")))
       s.elemProperties.foreach { v =>
         val p = v.asModel
         p.subProp(_._1.x).get should be(5)
@@ -1495,6 +1520,17 @@ class PropertyTest extends UdashCoreTest {
         p.subProp(_._2).get should be(8)
         p.subProp(_._3).get should be("asd")
       }
+    }
+
+    "fail on static creator mismatch" in {
+      case class Clazz[Type](x: Int, s: String, t: Type)
+
+      val p = Property((Clazz(5, "asd2", Clazz(7, "qwe", 1)), 8, "asd"))
+
+      an[IllegalStateException] shouldBe thrownBy(p.asModel(ModelPropertyCreator.materialize))
+
+      val p2 = Property(Seq(1, 2, 3))(new SinglePropertyCreator[BSeq[Int]])
+      an[IllegalStateException] shouldBe thrownBy(p2.asSeq)
     }
 
     "cache subproperties" in {
@@ -1510,12 +1546,6 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "work with generic wildcard" in {
-      object Test {
-        class A[G](val a: G)
-        case class B(x: A[_], y: String)
-        object B extends HasModelPropertyCreator[B]
-      }
-
       val t = ModelProperty[Test.B](Test.B(new Test.A("a"), "y"))
       t.subProp(_.x).get.a should be("a")
       t.subProp(_.y).get should be("y")
@@ -1526,7 +1556,7 @@ class PropertyTest extends UdashCoreTest {
 
   "SeqProperty" should {
     "handle sequence of properties" in {
-      val p = SeqProperty[Int](Seq(1,2,3))
+      val p = SeqProperty[Int](Seq(1, 2, 3))
       val pt = SeqProperty[T](TO1, TC1(5), TO2)
       val ptt = SeqProperty[TT](randTT(), randTT(), randTT())
 
@@ -1665,7 +1695,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "handle null value as empty Seq" in {
-      val p = SeqProperty[Int](1,2,3)
+      val p = SeqProperty[Int](1, 2, 3)
       p.set(null)
       p.get.size should be(0)
       p.touch()
@@ -1686,7 +1716,7 @@ class PropertyTest extends UdashCoreTest {
       values.size should be(1)
       values.clear()
 
-      p.set(Seq(1,2,3))
+      p.set(Seq(1, 2, 3))
       values.size should be(1)
       values.last should be(Seq(1, 2, 3))
 
@@ -1735,7 +1765,7 @@ class PropertyTest extends UdashCoreTest {
 
       p.listen(listener)
 
-      p.set(Seq(1,2,3))
+      p.set(Seq(1, 2, 3))
       values.size should be(1)
       values.last should be(Seq(1, 2, 3))
 
@@ -1764,7 +1794,7 @@ class PropertyTest extends UdashCoreTest {
 
       p.listenStructure(listener)
 
-      p.set(Seq(1,2,3))
+      p.set(Seq(1, 2, 3))
       patches.size should be(1)
       patches.last.idx should be(0)
       patches.last.added.size should be(3)
@@ -1826,7 +1856,7 @@ class PropertyTest extends UdashCoreTest {
 
       p.listenStructure(listener)
 
-      p.set(Seq(1,2,3))
+      p.set(Seq(1, 2, 3))
       patches.size should be(1)
       p.elemProperties(1).set(5)
       patches.size should be(1)
@@ -1951,7 +1981,8 @@ class PropertyTest extends UdashCoreTest {
       val f = p.filter(_ % 2 == 0)
 
       val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]: @silent
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]:
+      @silent
 
       ensureNoListeners(p)
 
@@ -2325,7 +2356,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "provide reversed version" in {
-      val p = SeqProperty(1,2,3)
+      val p = SeqProperty(1, 2, 3)
       val r: SeqProperty[Int, Property[Int]] = p.reversed()
       val r2: SeqProperty[Int, Property[Int]] = r.reversed()
 
@@ -2347,9 +2378,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.append(4)
 
-      pValue should be(Seq(1,2,3,4))
-      rValue should be(Seq(4,3,2,1))
-      r2Value should be(Seq(1,2,3,4))
+      pValue should be(Seq(1, 2, 3, 4))
+      rValue should be(Seq(4, 3, 2, 1))
+      r2Value should be(Seq(1, 2, 3, 4))
       pPatch.idx should be(3)
       pPatch.added.size should be(1)
       pPatch.removed.size should be(0)
@@ -2362,9 +2393,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.prepend(0)
 
-      pValue should be(Seq(0,1,2,3,4))
-      rValue should be(Seq(4,3,2,1,0))
-      r2Value should be(Seq(0,1,2,3,4))
+      pValue should be(Seq(0, 1, 2, 3, 4))
+      rValue should be(Seq(4, 3, 2, 1, 0))
+      r2Value should be(Seq(0, 1, 2, 3, 4))
       pPatch.idx should be(0)
       pPatch.added.size should be(1)
       pPatch.removed.size should be(0)
@@ -2377,9 +2408,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.replace(1, 2, 9, 9, 9)
 
-      pValue should be(Seq(0,9,9,9,3,4))
-      rValue should be(Seq(4,3,9,9,9,0))
-      r2Value should be(Seq(0,9,9,9,3,4))
+      pValue should be(Seq(0, 9, 9, 9, 3, 4))
+      rValue should be(Seq(4, 3, 9, 9, 9, 0))
+      r2Value should be(Seq(0, 9, 9, 9, 3, 4))
       pPatch.idx should be(1)
       pPatch.added.size should be(3)
       pPatch.removed.size should be(2)
@@ -2392,7 +2423,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "provide reversed version of transformed and filtered SeqProperty" in {
-      val p = SeqProperty(-3,-2,-1,0,1,2)
+      val p = SeqProperty(-3, -2, -1, 0, 1, 2)
       val f = p.filter(_ >= 0).transform((i: Int) => i + 1)
       val r: ReadableSeqProperty[Int, ReadableProperty[Int]] = f.reversed()
       val r2: ReadableSeqProperty[Int, ReadableProperty[Int]] = r.reversed()
@@ -2415,9 +2446,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.append(3)
 
-      fValue should be(Seq(1,2,3,4))
-      rValue should be(Seq(4,3,2,1))
-      r2Value should be(Seq(1,2,3,4))
+      fValue should be(Seq(1, 2, 3, 4))
+      rValue should be(Seq(4, 3, 2, 1))
+      r2Value should be(Seq(1, 2, 3, 4))
       fPatch.idx should be(3)
       fPatch.added.size should be(1)
       fPatch.removed.size should be(0)
@@ -2431,9 +2462,9 @@ class PropertyTest extends UdashCoreTest {
       p.prepend(-1)
       p.prepend(0)
 
-      fValue should be(Seq(1,1,2,3,4))
-      rValue should be(Seq(4,3,2,1,1))
-      r2Value should be(Seq(1,1,2,3,4))
+      fValue should be(Seq(1, 1, 2, 3, 4))
+      rValue should be(Seq(4, 3, 2, 1, 1))
+      r2Value should be(Seq(1, 1, 2, 3, 4))
       fPatch.idx should be(0)
       fPatch.added.size should be(1)
       fPatch.removed.size should be(0)
@@ -2446,9 +2477,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.replace(5, 2, 8, 8, 8)
 
-      fValue should be(Seq(1,9,9,9,3,4))
-      rValue should be(Seq(4,3,9,9,9,1))
-      r2Value should be(Seq(1,9,9,9,3,4))
+      fValue should be(Seq(1, 9, 9, 9, 3, 4))
+      rValue should be(Seq(4, 3, 9, 9, 9, 1))
+      r2Value should be(Seq(1, 9, 9, 9, 3, 4))
       fPatch.idx should be(1)
       fPatch.added.size should be(3)
       fPatch.removed.size should be(2)
@@ -2461,9 +2492,9 @@ class PropertyTest extends UdashCoreTest {
 
       p.touch()
 
-      fValue should be(Seq(1,9,9,9,3,4))
-      rValue should be(Seq(4,3,9,9,9,1))
-      r2Value should be(Seq(1,9,9,9,3,4))
+      fValue should be(Seq(1, 9, 9, 9, 3, 4))
+      rValue should be(Seq(4, 3, 9, 9, 9, 1))
+      r2Value should be(Seq(1, 9, 9, 9, 3, 4))
     }
 
     "zip with another ReadableProperty" in {
@@ -2478,13 +2509,13 @@ class PropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       numbers.append(20, 21)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(21)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
 
       numbers.append(10)
 
@@ -2497,37 +2528,37 @@ class PropertyTest extends UdashCoreTest {
       evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.elemProperties(3).set(8)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,8), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 8), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.elemProperties(3).set(4)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.elemProperties(2).set(9)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (9,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (9, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.elemProperties(2).set(3)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.append(11)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(0)
 
       numbers.append(12)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)))
       patches.size should be(1)
       patches.last.idx should be(5)
       patches.last.added.size should be(1)
@@ -2535,12 +2566,12 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.append(14)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)))
       patches.size should be(1)
 
       numbers.append(13)
       pairs.size should be(7)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(2)
       patches.last.idx should be(6)
       patches.last.added.size should be(1)
@@ -2548,7 +2579,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(5)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,6), (9,8), (11,10), (13,12)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 6), (9, 8), (11, 10), (13, 12)))
       patches.size should be(3)
       patches.last.idx should be(2)
       patches.last.added.size should be(4)
@@ -2556,7 +2587,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(6)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(4)
       patches.last.idx should be(2)
       patches.last.added.size should be(4)
@@ -2564,17 +2595,17 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.elemProperties(7).set(20)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,20), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 20), (11, 12), (13, 14)))
       patches.size should be(4)
 
       numbers.elemProperties(7).set(10)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(4)
 
       numbers.remove(12)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 14)))
       patches.size should be(5)
       patches.last.idx should be(4)
       patches.last.added.size should be(1)
@@ -2582,7 +2613,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(11)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(6)
       patches.last.idx should be(4)
       patches.last.added.size should be(1)
@@ -2593,14 +2624,14 @@ class PropertyTest extends UdashCoreTest {
         numbers.remove(2)
       }
       pairs.size should be(4)
-      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+      pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(8)
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
       patches.last.removed.size should be(4)
 
       numbers.touch()
-      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+      pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14)))
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
@@ -2614,13 +2645,13 @@ class PropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       numbers.append(20, 21)
-      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+      pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14), (21, 20)))
 
       numbers.remove(4)
-      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20)))
+      pairs.get should be(Seq((3, 8), (7, 10), (9, 14), (13, 20)))
 
       numbers.remove(9)
-      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
+      pairs.get should be(Seq((3, 8), (7, 10), (13, 14), (21, 20)))
     }
 
     "zip all with another ReadableProperty" in {
@@ -2638,13 +2669,13 @@ class PropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       numbers.append(20, 21)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20), (21, -2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
 
       numbers.remove(21)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,20)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
 
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
       val r1 = pairs.listenStructure(p => patches.append(p))
@@ -2655,42 +2686,42 @@ class PropertyTest extends UdashCoreTest {
       evens.structureListenersCount() should be(1)
 
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       numbers.elemProperties(3).set(8)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,8), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 8), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       numbers.elemProperties(3).set(4)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       numbers.elemProperties(2).set(9)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (9,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (9, 4), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       numbers.elemProperties(2).set(3)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       defaultB.set(256)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,256)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 256)))
       patches.size should be(0)
 
       defaultB.set(-2)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       patches.size should be(0)
 
       numbers.append(10)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10)))
       patches.size should be(1)
       patches.last.idx should be(4)
       patches.last.added.size should be(1)
@@ -2698,7 +2729,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.append(11)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, -2)))
       patches.size should be(2)
       patches.last.idx should be(5)
       patches.last.added.size should be(1)
@@ -2706,7 +2737,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.append(12)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)))
       patches.size should be(3)
       patches.last.idx should be(5)
       patches.last.added.size should be(1)
@@ -2714,7 +2745,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.append(14)
       pairs.size should be(7)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (-1, 14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (-1, 14)))
       patches.size should be(4)
       patches.last.idx should be(6)
       patches.last.added.size should be(1)
@@ -2722,7 +2753,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.append(13)
       pairs.size should be(7)
-      pairs.get should be(Seq((1,2), (3,4), (5,6), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(5)
       patches.last.idx should be(6)
       patches.last.added.size should be(1)
@@ -2730,7 +2761,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(5)
       pairs.size should be(7)
-      pairs.get should be(Seq((1,2), (3,4), (7,6), (9,8), (11,10), (13,12), (-1,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 6), (9, 8), (11, 10), (13, 12), (-1, 14)))
       patches.size should be(6)
       patches.last.idx should be(2)
       patches.last.added.size should be(5)
@@ -2738,7 +2769,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(6)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(7)
       patches.last.idx should be(2)
       patches.last.added.size should be(4)
@@ -2746,17 +2777,17 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.elemProperties(7).set(20)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,20), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 20), (11, 12), (13, 14)))
       patches.size should be(7)
 
       numbers.elemProperties(7).set(10)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,12), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 12), (13, 14)))
       patches.size should be(7)
 
       numbers.remove(12)
       pairs.size should be(6)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (11,14), (13,-2)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (11, 14), (13, -2)))
       patches.size should be(8)
       patches.last.idx should be(4)
       patches.last.added.size should be(2)
@@ -2764,7 +2795,7 @@ class PropertyTest extends UdashCoreTest {
 
       numbers.remove(11)
       pairs.size should be(5)
-      pairs.get should be(Seq((1,2), (3,4), (7,8), (9,10), (13,14)))
+      pairs.get should be(Seq((1, 2), (3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(9)
       patches.last.idx should be(4)
       patches.last.added.size should be(1)
@@ -2775,7 +2806,7 @@ class PropertyTest extends UdashCoreTest {
         numbers.remove(2)
       }
       pairs.size should be(4)
-      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14)))
+      pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(11)
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
@@ -2793,13 +2824,13 @@ class PropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       numbers.append(20, 21)
-      pairs.get should be(Seq((3,4), (7,8), (9,10), (13,14), (21, 20)))
+      pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14), (21, 20)))
 
       numbers.remove(4)
-      pairs.get should be(Seq((3,8), (7,10), (9,14), (13,20), (21, -2)))
+      pairs.get should be(Seq((3, 8), (7, 10), (9, 14), (13, 20), (21, -2)))
 
       numbers.remove(9)
-      pairs.get should be(Seq((3,8), (7,10), (13,14), (21,20)))
+      pairs.get should be(Seq((3, 8), (7, 10), (13, 14), (21, 20)))
     }
 
     "zip with indexes" in {
@@ -2891,7 +2922,27 @@ class PropertyTest extends UdashCoreTest {
       numbers.remove(-1)
       indexed.get should be(numbers.get.zipWithIndex)
     }
+
+    "handle Seq aliases" in {
+      val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
+      mp.subSeq(_.s1).get.head shouldBe "abc"
+      mp.subSeq(_.s2).get.head shouldBe "def"
+      mp.subSeq(_.s3).get.head shouldBe 1
+      mp.subSeq(_.s4).get.head shouldBe "123"
+    }
   }
+
+  type SeqAlias[A] = Seq[A]
+  type VectorAlias[A] = Vector[A]
+  type IntSeq[A] = Seq[Int]
+  type WeirdSeq[A, B] = Seq[B]
+  case class AliasedSeqModel(
+    s1: SeqAlias[String],
+    s2: VectorAlias[String],
+    s3: IntSeq[String],
+    s4: WeirdSeq[Int, String]
+  )
+  object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 
   "Seq[Property]" should {
     "combine into ReadableSeqProperty" in {
@@ -2994,7 +3045,7 @@ class PropertyTest extends UdashCoreTest {
 }
 
 private object ReqModels {
-  case class Simple(i: Int, s:  Simple)
+  case class Simple(i: Int, s: Simple)
   object Simple extends HasModelPropertyCreator[Simple]
 
   trait ReqT {

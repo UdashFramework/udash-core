@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.5"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.34.16"
+  val avsCommonsVersion = "1.34.17"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.4.32"
@@ -115,6 +115,10 @@ object Dependencies {
   ))
 
   val restSjsDeps = restCrossDeps
+  
+  val restJettyDeps = Def.setting(Seq(
+    "org.eclipse.jetty" % "jetty-client" % jettyVersion
+  ))
 
   private val cssCrossDeps = Def.setting(Seq(
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
