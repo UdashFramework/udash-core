@@ -60,7 +60,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
     val patch = if (transformed.size > current.size) {
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
-        implicitly[PropertyCreator[B]].newProperty(transformed(current.size + idx), this)
+        PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
       CrossCollections.replace(children, commonBegin, 0, added: _*)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))

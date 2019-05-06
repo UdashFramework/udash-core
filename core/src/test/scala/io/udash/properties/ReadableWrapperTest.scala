@@ -18,7 +18,7 @@ class ReadableWrapperTest extends UdashCoreTest {
     }
 
     "not allow access to the mutable API of ModelProperty" in {
-      val p = ModelProperty[(Int, Int)]((7, 42))
+      val p = ModelProperty[(Int, Int)]((7, 42))(ModelPropertyCreator.materialize)
       p.readable match {
         case p: ModelProperty[(Int, Int)] => p.set((42, 7))
         case _ => // ignore
