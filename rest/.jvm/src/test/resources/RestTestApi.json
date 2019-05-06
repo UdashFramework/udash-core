@@ -463,6 +463,16 @@
         }
       }
     },
+    "/neverGet": {
+      "get": {
+        "operationId": "neverGet",
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/prefix/{p0}/subget/{p1}": {
       "summary": "summary for prefix paths",
       "get": {
@@ -494,6 +504,53 @@
             },
             "example": "q0example"
           },
+          {
+            "name": "p1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "X-H1",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "q1",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subget/{p1}": {
+      "get": {
+        "operationId": "transparentPrefix_subget",
+        "parameters": [
           {
             "name": "p1",
             "in": "path",

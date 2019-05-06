@@ -33,6 +33,18 @@ final case class RestParameters(
       query ++ otherParameters.query,
       cookies ++ otherParameters.cookies
     )
+
+  def path(values: String*): RestParameters =
+    copy(path = path ++ values.iterator.map(PlainValue(_)))
+
+  def header(name: String, value: String): RestParameters =
+    copy(headers = headers.append(name, PlainValue(value)))
+
+  def query(name: String, value: String): RestParameters =
+    copy(query = query.append(name, PlainValue(value)))
+
+  def cookie(name: String, value: String): RestParameters =
+    copy(query = cookies.append(name, PlainValue(value)))
 }
 object RestParameters {
   final val Empty = RestParameters()
@@ -43,4 +55,16 @@ final case class HttpErrorException(code: Int, payload: OptArg[String] = OptArg.
   def toResponse: RestResponse = RestResponse.plain(code, payload)
 }
 
-final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody)
+final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody) {
+  def path(values: String*): RestRequest =
+    copy(parameters = parameters.path(values: _*))
+
+  def header(name: String, value: String): RestRequest =
+    copy(parameters = parameters.header(name, value))
+
+  def query(name: String, value: String): RestRequest =
+    copy(parameters = parameters.query(name, value))
+
+  def cookie(name: String, value: String): RestRequest =
+    copy(parameters = parameters.cookie(name, value))
+}

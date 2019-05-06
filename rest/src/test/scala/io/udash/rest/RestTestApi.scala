@@ -59,6 +59,7 @@ trait RestTestApi {
   @GET def trivialGet: Future[Unit]
   @GET def failingGet: Future[Unit]
   @GET def moreFailingGet: Future[Unit]
+  @GET def neverGet: Future[Unit]
 
   @GET def getEntity(id: RestEntityId): Future[RestEntity]
 
@@ -99,6 +100,8 @@ trait RestTestApi {
     @Query @example("q0example") q0: String
   ): RestTestSubApi
 
+  @Prefix("") def transparentPrefix: RestTestSubApi
+
   def complexParams(
     baseEntity: BaseEntity,
     @whenAbsent(Opt.Empty) flatBaseEntity: Opt[FlatBaseEntity]
@@ -120,6 +123,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
+    def neverGet: Future[Unit] = Promise[Unit].future // Future.never if it wasn't for Scala 2.11
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))
@@ -131,6 +135,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
       Future.successful(s"$q1-$p1-$p2")
     def prefix(p0: String, h0: String, q0: String): RestTestSubApi =
       RestTestSubApi.impl(s"$p0-$h0-$q0")
+    def transparentPrefix: RestTestSubApi = RestTestSubApi.impl("")
     def complexParams(baseEntity: BaseEntity, flatBaseEntity: Opt[FlatBaseEntity]): Future[Unit] = Future.unit
     def complexParams(flatBaseEntity: FlatBaseEntity, baseEntity: Opt[BaseEntity]): Future[Unit] = Future.unit
     def customResponse(value: String): Future[CustomResp] = Future.successful(CustomResp(value))

@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import javax.servlet.{AsyncEvent, AsyncListener}
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -44,7 +45,17 @@ class RestServlet(
   import RestServlet._
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
-    val asyncContext = request.startAsync().setup(_.setTimeout(handleTimeout.toMillis))
+    val asyncContext = request.startAsync()
+    asyncContext.setTimeout(handleTimeout.toMillis)
+    asyncContext.addListener(new AsyncListener {
+      def onComplete(event: AsyncEvent): Unit = ()
+      def onTimeout(event: AsyncEvent): Unit = {
+        writeFailure(response, Opt("server operation timed out"))
+        asyncContext.complete()
+      }
+      def onError(event: AsyncEvent): Unit = ()
+      def onStartAsync(event: AsyncEvent): Unit = ()
+    })
     RawRest.safeAsync(handleRequest(readRequest(request))) {
       case Success(restResponse) =>
         writeResponse(response, restResponse)

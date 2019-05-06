@@ -5,9 +5,9 @@ import org.eclipse.jetty.server.Server
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 trait UsesHttpServer extends BeforeAndAfterAll { this: Suite =>
-  val port: Int = 9090
+  def port: Int
   val server: Server = new Server(port)
-  val baseUrl = s"http://localhost:$port"
+  def baseUrl = s"http://localhost:$port"
 
   protected def setupServer(server: Server): Unit
 
