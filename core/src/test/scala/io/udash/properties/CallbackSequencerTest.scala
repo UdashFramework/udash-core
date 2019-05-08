@@ -16,13 +16,13 @@ class CallbackSequencerTest extends UdashCoreTest {
       fires.size should be(0)
 
       CallbackSequencer().queue("1", l1)
-      fires should contain("a")
+      fires should contain theSameElementsInOrderAs Seq("a")
 
       CallbackSequencer().queue("2", l2)
-      fires should contain("b")
+      fires should contain theSameElementsInOrderAs Seq("a", "b")
 
       CallbackSequencer().queue("3", l3)
-      fires should contain("c")
+      fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
     }
 
     "fire listeners immediately without sequencing (queue id should not matter)" in {
@@ -34,13 +34,13 @@ class CallbackSequencerTest extends UdashCoreTest {
       fires.size should be(0)
 
       CallbackSequencer().queue("1", l1)
-      fires should contain("l1")
+      fires should contain theSameElementsInOrderAs Seq("l1")
 
       CallbackSequencer().queue("1", l2)
-      fires should contain("l2")
+      fires should contain theSameElementsInOrderAs Seq("l1", "l2")
 
       CallbackSequencer().queue("1", l3)
-      fires should contain("l3")
+      fires should contain theSameElementsInOrderAs Seq("l1", "l2", "l3")
     }
 
     "fire listener only once with sequencing" in {
@@ -62,10 +62,7 @@ class CallbackSequencerTest extends UdashCoreTest {
         fires shouldNot contain("l3")
       }
 
-      fires.size should be(3)
-      fires should contain("l1")
-      fires should contain("l2")
-      fires should contain("l3")
+      fires should contain theSameElementsInOrderAs Seq("l1", "l2", "l3")
     }
 
     "fire listener only once with sequencing (now id should matter)" in {
@@ -78,19 +75,17 @@ class CallbackSequencerTest extends UdashCoreTest {
         fires.size should be(0)
 
         CallbackSequencer().queue("1", l1)
-        fires shouldNot contain("l1")
+        fires shouldBe empty
 
         CallbackSequencer().queue("1", l2)
-        fires shouldNot contain("l2")
+        fires shouldBe empty
 
         CallbackSequencer().queue("1", l3)
-        fires shouldNot contain("l3")
+        fires shouldBe empty
       }
 
       fires.size should be(1)
-      fires shouldNot contain("l1")
-      fires shouldNot contain("l2")
-      fires should contain("l3")
+      fires should contain theSameElementsInOrderAs Seq("l3")
     }
 
     "fire last listener with selected id when sequencing" in {
