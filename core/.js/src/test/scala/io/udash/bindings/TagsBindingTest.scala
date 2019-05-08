@@ -1939,13 +1939,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val fired = ListBuffer.empty[(Int, Int)]
 
       div(
-        produceWithNested(p) { (v, nested) =>
+        produceWithNested(p) { (v1, nested) =>
           div(
             nested(produce(s) { v2 =>
-              fired += ((v, v2))
+              fired += v1 -> v2
               div().render
-            }
-            )).render
+            })
+          ).render
         }
       ).render
 
@@ -1967,13 +1967,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val fired = ListBuffer.empty[(Int, Int)]
 
       div(
-        produceWithNested(p) { case (v, nested) =>
+        produceWithNested(p) { case (v1, nested) =>
           div(
             nested(repeat(s) { v2 =>
-              fired += ((v, v2.get))
+              fired += v1 -> v2.get
               div().render
-            }
-            )).render
+            })
+          ).render
         }
       ).render
 
@@ -1989,6 +1989,83 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         (2, 4),
         (2, 5),
         (2, 6)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on SeqProperties from single value" in {
+      val p = Property(1)
+      val source = Property(1)
+      val s = source.transformToSeq(i => Seq(i, i + 1, i + 2))
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { case (v1, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += v1 -> v2.get
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(2)
+        source.set(4)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 4),
+        (2, 5),
+        (2, 6)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on zipped SeqProperties" in {
+      val p = SeqProperty(1, 2, 3)
+      val s = SeqProperty(1, 2, 3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        repeatWithNested(p) { case (v1, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += v1.get -> v2.get
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(Seq(4, 5, 6))
+        s.set(Seq(4, 5, 6))
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 1),
+        (2, 2),
+        (2, 3),
+        (3, 1),
+        (3, 2),
+        (3, 3),
+        (4, 4),
+        (4, 5),
+        (4, 6),
+        (5, 4),
+        (5, 5),
+        (5, 6),
+        (6, 4),
+        (6, 5),
+        (6, 6)
       )
     }
   }
