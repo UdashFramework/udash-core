@@ -158,13 +158,14 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   override lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
 
   protected[properties] override def fireValueListeners(): Unit = {
+    val originalListeners = CrossCollections.copyArray(listeners)
     CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
       val t = get
       val listenersCopy = CrossCollections.copyArray(listeners)
       val oneTimeListenersCopy = CrossCollections.copyArray(oneTimeListeners)
       oneTimeListeners.clear()
       oneTimeListenersCopy.foreach(_.cancel())
-      listenersCopy.foreach(_.apply(t))
+      listenersCopy.foreach { listener => if (originalListeners.contains(listener)) listener(t) }
     })
   }
 
