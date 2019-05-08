@@ -32,7 +32,7 @@ class SttpRestCallTest extends SttpClientRestTest with RestApiTestScenarios {
 
 class ServletTimeoutTest extends SttpClientRestTest {
   def port: Int = 9091
-  override def serverTimeout: FiniteDuration = 1.millisecond
+  override def serverTimeout: FiniteDuration = 500.millis
 
   test("rest method timeout") {
     val exception = proxy.neverGet.failed.futureValue
