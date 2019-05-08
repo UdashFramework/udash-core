@@ -1516,38 +1516,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       dom.textContent should be("")
     }
 
-    "work with lol" in {
-      val p = Property(1)
-      val s = SeqProperty(1, 2, 3)
-
-      val fired = ListBuffer.empty[(Int, Int)]
-
-      div(
-        produce(p) { case v =>
-          div(
-            repeat(s) { v2 =>
-              fired += ((v, v2.get))
-              div().render
-            }
-          ).render
-        }
-      ).render
-
-      CallbackSequencer().sequence {
-        p.set(2)
-        s.set(Seq(4, 5, 6))
-      }
-
-      fired.result() should contain inOrderOnly(
-        (1, 1),
-        (1, 2),
-        (1, 3),
-        (2, 4),
-        (2, 5),
-        (2, 6)
-      )
-    }
-
     "work with filtered SeqProperty of models" in {
       sealed abstract class TodosFilter(val matcher: TodoElement => Boolean)
       case object AllTodosFilter extends TodosFilter(_ => true)
@@ -1960,6 +1928,68 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       bindIfStyle.kill()
       styleProperty.listenersCount() should be(0)
       conditionProperty.listenersCount() should be(0)
+    }
+  }
+
+  "Sequenced binding updates" should {
+    "avoid multiple updates in produceWithNested on single properties" in {
+      val p = Property(1)
+      val s = Property(2)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { (v, nested) =>
+          div(
+            nested(produce(s) { v2 =>
+              fired += ((v, v2))
+              div().render
+            }
+            )).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(3)
+        s.set(4)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 2),
+        (3, 4)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on SeqProperties" in {
+      val p = Property(1)
+      val s = SeqProperty(1, 2, 3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { case (v, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += ((v, v2.get))
+              div().render
+            }
+            )).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(2)
+        s.set(Seq(4, 5, 6))
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 4),
+        (2, 5),
+        (2, 6)
+      )
     }
   }
 }
