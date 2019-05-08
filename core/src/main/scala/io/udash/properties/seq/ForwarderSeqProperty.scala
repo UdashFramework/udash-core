@@ -108,8 +108,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
-    val cpy = CrossCollections.copyArray(structureListeners)
-    cpy.foreach(_.apply(transPatch))
+    structureListeners.foreach(_.apply(transPatch))
     fireValueListeners()
   }
 }
