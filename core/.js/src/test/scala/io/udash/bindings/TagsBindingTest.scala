@@ -9,8 +9,10 @@ import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Node
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
+
   import scalatags.JsDom.all._
 
   object Model {
@@ -801,7 +803,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(1).childNodes(2).textContent should be("3")
       template.childNodes(2).textContent should be("")
 
-      p.set(Seq(2,4,6))
+      p.set(Seq(2, 4, 6))
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("DIV")
       template.childNodes(1).childNodes.length should be(3)
@@ -844,7 +846,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(0).nodeName should be("DIV")
       template.childNodes(0).childNodes.length should be(0)
 
-      p.set(Seq(2,4,6))
+      p.set(Seq(2, 4, 6))
       template.childNodes(0).nodeName should be("DIV")
       template.childNodes(0).childNodes.length should be(3)
       template.childNodes(0).childNodes(0).nodeName should be("B")
@@ -932,7 +934,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "stop updates after `kill` call" in {
-      val p = SeqProperty[Int](1,2,3,4,5)
+      val p = SeqProperty[Int](1, 2, 3, 4, 5)
       val binding = produce(p) { v => span(v.mkString(",")).render }
       val template = div(binding).render
 
@@ -948,8 +950,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "clean nested bindings" in {
-      val p = SeqProperty[Int](1,2,3)
-      val p2 = SeqProperty[Int](3,4,5)
+      val p = SeqProperty[Int](1, 2, 3)
+      val p2 = SeqProperty[Int](3, 4, 5)
 
       var externalCounter = 0
       var internalCounter = 0
@@ -1031,7 +1033,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
         span()
       ).render
 
-      template.childNodes.length should be(3+2)
+      template.childNodes.length should be(3 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("I")
       template.childNodes(1).textContent should be("1")
@@ -1042,26 +1044,26 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(4).textContent should be("")
 
       p.set(Seq())
-      template.childNodes.length should be(1+2)
+      template.childNodes.length should be(1 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).textContent should be("")
       template.childNodes(2).textContent should be("")
 
       p.append(1)
-      template.childNodes.length should be(1+2)
+      template.childNodes.length should be(1 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).textContent should be("1")
       template.childNodes(2).textContent should be("")
 
       p.append(2)
-      template.childNodes.length should be(2+2)
+      template.childNodes.length should be(2 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).textContent should be("1")
       template.childNodes(2).textContent should be("2")
       template.childNodes(3).textContent should be("")
 
-      p.set(Seq(2,4,6))
-      template.childNodes.length should be(3+2)
+      p.set(Seq(2, 4, 6))
+      template.childNodes.length should be(3 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("B")
       template.childNodes(1).textContent should be("2")
@@ -1072,7 +1074,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(4).textContent should be("")
 
       p.append(8)
-      template.childNodes.length should be(4+2)
+      template.childNodes.length should be(4 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("B")
       template.childNodes(1).textContent should be("2")
@@ -1084,8 +1086,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(4).textContent should be("8")
       template.childNodes(5).textContent should be("")
 
-      p.set(Seq(2,4,6))
-      template.childNodes.length should be(3+2)
+      p.set(Seq(2, 4, 6))
+      template.childNodes.length should be(3 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("B")
       template.childNodes(1).textContent should be("2")
@@ -1095,8 +1097,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(3).textContent should be("6")
       template.childNodes(4).textContent should be("")
 
-      p.append(1,3,5,8)
-      template.childNodes.length should be(7+2)
+      p.append(1, 3, 5, 8)
+      template.childNodes.length should be(7 + 2)
       template.childNodes(0).textContent should be("")
       template.childNodes(1).nodeName should be("B")
       template.childNodes(1).textContent should be("2")
@@ -1116,12 +1118,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(Seq())
       template.childNodes(0).textContent should be("")
-      template.childNodes.length should be(1+2) // placeholder
+      template.childNodes.length should be(1 + 2) // placeholder
       template.childNodes(1).textContent should be("")
 
-      p.prepend(1,3)
+      p.prepend(1, 3)
       template.childNodes(0).textContent should be("")
-      template.childNodes.length should be(2+2)
+      template.childNodes.length should be(2 + 2)
       template.childNodes(1).nodeName should be("I")
       template.childNodes(1).textContent should be("1")
       template.childNodes(2).nodeName should be("I")
@@ -1130,7 +1132,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.insert(1, 2)
       template.childNodes(0).textContent should be("")
-      template.childNodes.length should be(3+2)
+      template.childNodes.length should be(3 + 2)
       template.childNodes(1).nodeName should be("I")
       template.childNodes(1).textContent should be("1")
       template.childNodes(2).nodeName should be("B")
@@ -1243,7 +1245,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template.childNodes(0).nodeName should be("#text")
 
-      p.set(Seq(2,4,6))
+      p.set(Seq(2, 4, 6))
       template.childNodes.length should be(3)
       template.childNodes(0).nodeName should be("B")
       template.childNodes(0).textContent should be("2")
@@ -1257,7 +1259,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template.childNodes(0).nodeName should be("#text")
 
-      p.append(1,3,5,8)
+      p.append(1, 3, 5, 8)
       template.childNodes.length should be(4)
       template.childNodes(0).nodeName should be("I")
       template.childNodes(0).textContent should be("1")
@@ -1283,7 +1285,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("")
       template.childNodes(0).nodeName should be("#text")
 
-      p.prepend(1,3)
+      p.prepend(1, 3)
       template.childNodes.length should be(2)
       template.childNodes(0).nodeName should be("I")
       template.childNodes(0).textContent should be("1")
@@ -1402,8 +1404,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "work with filtered SeqProperty" in {
       sealed abstract class NumbersFilter(val matcher: Int => Boolean)
-      case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
-      case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
+      case object OddsFilter extends NumbersFilter(i => i % 2 == 1)
+      case object EvensFilter extends NumbersFilter(i => i % 2 == 0)
 
       val filter = Property[NumbersFilter](OddsFilter)
       val numbers = SeqProperty(1, 2, 3, 4, 5)
@@ -1478,8 +1480,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "work with filtered SeqProperty and CallbackSequencer" in {
       sealed abstract class NumbersFilter(val matcher: Int => Boolean)
-      case object OddsFilter       extends NumbersFilter(i => i % 2 == 1)
-      case object EvensFilter      extends NumbersFilter(i => i % 2 == 0)
+      case object OddsFilter extends NumbersFilter(i => i % 2 == 1)
+      case object EvensFilter extends NumbersFilter(i => i % 2 == 0)
 
       val filter = Property[NumbersFilter](OddsFilter)
       val numbers = SeqProperty(1, 2, 3, 4, 5)
@@ -1520,12 +1522,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "work with filtered SeqProperty of models" in {
       sealed abstract class TodosFilter(val matcher: TodoElement => Boolean)
-      case object AllTodosFilter       extends TodosFilter(_ => true)
-      case object ActiveTodosFilter    extends TodosFilter(todo => !todo.completed)
+      case object AllTodosFilter extends TodosFilter(_ => true)
+      case object ActiveTodosFilter extends TodosFilter(todo => !todo.completed)
       case object CompletedTodosFilter extends TodosFilter(todo => todo.completed)
 
       case class Todo(override val name: String,
-                      override val completed: Boolean) extends TodoElement
+        override val completed: Boolean) extends TodoElement
 
       val filter = Property[TodosFilter](AllTodosFilter)
       val todos = SeqProperty.blank[TodoElement]
@@ -1648,7 +1650,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "stop updates after `kill` call" in {
-      val p = SeqProperty[Int](1,2,3,4,5)
+      val p = SeqProperty[Int](1, 2, 3, 4, 5)
       val binding = repeat(p) { el =>
         span(el.get).render
       }
@@ -1668,7 +1670,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "clean nested bindings" in {
       var counter = 0
       var internalCounter = 0
-      val p = SeqProperty[Int](1,2,3,4,5)
+      val p = SeqProperty[Int](1, 2, 3, 4, 5)
       val binding = repeatWithNested(p) { (el, nested) =>
         counter += 1
         span(nested(produce(el) { v =>
@@ -1924,6 +1926,145 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       bindIfStyle.kill()
       styleProperty.listenersCount() should be(0)
       conditionProperty.listenersCount() should be(0)
+    }
+  }
+
+  "Sequenced binding updates" should {
+    "avoid multiple updates in produceWithNested on single properties" in {
+      val p = Property(1)
+      val s = Property(2)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { (v1, nested) =>
+          div(
+            nested(produce(s) { v2 =>
+              fired += v1 -> v2
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(3)
+        s.set(4)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 2),
+        (3, 4)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on SeqProperties" in {
+      val p = Property(1)
+      val s = SeqProperty(1, 2, 3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { case (v1, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += v1 -> v2.get
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(2)
+        s.set(Seq(4, 5, 6))
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 4),
+        (2, 5),
+        (2, 6)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on SeqProperties from single value" in {
+      val p = Property(1)
+      val source = Property(1)
+      val s = source.transformToSeq(i => Seq(i, i + 1, i + 2))
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p) { case (v1, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += v1 -> v2.get
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(2)
+        source.set(4)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 4),
+        (2, 5),
+        (2, 6)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on zipped SeqProperties" in {
+      val p = SeqProperty(1, 2, 3)
+      val s = SeqProperty(1, 2, 3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        repeatWithNested(p) { case (v1, nested) =>
+          div(
+            nested(repeat(s) { v2 =>
+              fired += v1.get -> v2.get
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(Seq(4, 5, 6))
+        s.set(Seq(4, 5, 6))
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 1),
+        (2, 2),
+        (2, 3),
+        (3, 1),
+        (3, 2),
+        (3, 3),
+        (4, 4),
+        (4, 5),
+        (4, 6),
+        (5, 4),
+        (5, 5),
+        (5, 6),
+        (6, 4),
+        (6, 5),
+        (6, 6)
+      )
     }
   }
 }
