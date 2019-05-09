@@ -448,29 +448,30 @@ object BootstrapDemos extends CrossLogging with CssView {
     ).render
   }
 
-  def simpleForm(): dom.Element = {
-    sealed trait ShirtSize
-    case object Small extends ShirtSize
-    case object Medium extends ShirtSize
-    case object Large extends ShirtSize
+  sealed trait ShirtSize
+  case object Small extends ShirtSize
+  case object Medium extends ShirtSize
+  case object Large extends ShirtSize
 
+
+  trait UserModel {
+    def name: String
+    def age: Int
+    def shirtSize: ShirtSize
+  }
+  object UserModel extends HasModelPropertyCreator[UserModel] {
+    implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
+      override def name: String = ""
+      override def age: Int = 25
+      override def shirtSize: ShirtSize = Medium
+    })
+  }
+
+  def simpleForm(): dom.Element = {
     def shirtSizeToLabel(size: ShirtSize): String = size match {
       case Small => "S"
       case Medium => "M"
       case Large => "L"
-    }
-
-    trait UserModel {
-      def name: String
-      def age: Int
-      def shirtSize: ShirtSize
-    }
-    object UserModel extends HasModelPropertyCreator[UserModel] {
-      implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
-        override def name: String = ""
-        override def age: Int = 25
-        override def shirtSize: ShirtSize = Medium
-      })
     }
 
     val user = ModelProperty.blank[UserModel]
@@ -523,22 +524,23 @@ object BootstrapDemos extends CrossLogging with CssView {
     ).render
   }
 
-  def navs(): dom.Element = {
-    trait Panel {
-      def title: String
-      def content: String
-    }
-    object Panel extends HasModelPropertyCreator[Panel]
-    final case class DefaultPanel(override val title: String, override val content: String) extends Panel
+  trait NavPanel {
+    def title: String
+    def content: String
+  }
+  object NavPanel extends HasModelPropertyCreator[NavPanel]
+  final case class DefaultNavPanel(override val title: String, override val content: String) extends NavPanel
 
-    val panels = SeqProperty[Panel](
-      DefaultPanel("Title 1", "Content of panel 1..."),
-      DefaultPanel("Title 2", "Content of panel 2..."),
-      DefaultPanel("Title 3", "Content of panel 3..."),
-      DefaultPanel("Title 4", "Content of panel 4...")
+  def navs(): dom.Element = {
+
+    val panels = SeqProperty[NavPanel](
+      DefaultNavPanel("Title 1", "Content of panel 1..."),
+      DefaultNavPanel("Title 2", "Content of panel 2..."),
+      DefaultNavPanel("Title 3", "Content of panel 3..."),
+      DefaultNavPanel("Title 4", "Content of panel 4...")
     )
-    val selected = Property[Panel](panels.elemProperties.head.get)
-    panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
+    val selected = Property[NavPanel](panels.elemProperties.head.get)
+    panels.append(DefaultNavPanel("Title 5", "Content of panel 5..."))
     div(GuideStyles.frame)(
       UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
         elemFactory = (panel, nested) => a(
@@ -554,22 +556,22 @@ object BootstrapDemos extends CrossLogging with CssView {
     ).render
   }
 
+  trait NavbarPanel {
+    def title: String
+    def content: String
+  }
+  object NavbarPanel extends HasModelPropertyCreator[NavbarPanel]
+  final case class DefaultNavbarPanel(override val title: String, override val content: String) extends NavbarPanel
+
   def navbars(): dom.Element = {
-    trait Panel {
-      def title: String
-      def content: String
-    }
-    object Panel extends HasModelPropertyCreator[Panel]
 
-    final case class DefaultPanel(override val title: String, override val content: String) extends Panel
-
-    val panels = SeqProperty[Panel](
-      DefaultPanel("Title 1", "Content of panel 1..."),
-      DefaultPanel("Title 2", "Content of panel 2..."),
-      DefaultPanel("Title 3", "Content of panel 3..."),
-      DefaultPanel("Title 4", "Content of panel 4...")
+    val panels = SeqProperty[NavbarPanel](
+      DefaultNavbarPanel("Title 1", "Content of panel 1..."),
+      DefaultNavbarPanel("Title 2", "Content of panel 2..."),
+      DefaultNavbarPanel("Title 3", "Content of panel 3..."),
+      DefaultNavbarPanel("Title 4", "Content of panel 4...")
     )
-    panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
+    panels.append(DefaultNavbarPanel("Title 5", "Content of panel 5..."))
     div(GuideStyles.frame)(
       UdashNavbar()(
         _ => UdashNav(panels)(
