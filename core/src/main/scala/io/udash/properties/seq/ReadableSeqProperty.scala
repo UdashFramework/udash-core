@@ -118,8 +118,11 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
   protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
     patch: Patch[ItemType], structureListeners: mutable.Buffer[Patch[ItemType] => Any]
   ): Unit = {
-    val cpy = CrossCollections.copyArray(structureListeners)
-    CallbackSequencer().queue(s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}", () => cpy.foreach(_.apply(patch)))
+    val originalListeners = structureListeners.toSet
+    CallbackSequencer().queue(
+      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+      () => structureListeners.foreach { listener => if (originalListeners.contains(listener)) listener(patch) }
+    )
   }
 
   override lazy val readable: ReadableSeqProperty[A, ReadableProperty[A]] =

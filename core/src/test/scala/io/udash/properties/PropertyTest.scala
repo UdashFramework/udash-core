@@ -390,7 +390,9 @@ class PropertyTest extends UdashCoreTest {
       p1.listenersCount() should be(2)
       p2.listenersCount() should be(2)
 
-      p2.set(-2)
+      CallbackSequencer().sequence {
+        p2.set(-2)
+      }
 
       sumCallbackValue should be(10)
       mulCallbackValue should be(-24)
