@@ -1140,6 +1140,28 @@ class PropertyTest extends UdashCoreTest {
       source.get should be(4)
       target.get should be(Seq(1, 2, 3, 4))
     }
+
+    "cancel listeners in a callback" in {
+      val t = Property(42)
+      val regs = mutable.ArrayBuffer.empty[Registration]
+      val results = mutable.ArrayBuffer.empty[String]
+
+      regs += t.listen(_ => {
+        results += "1"; regs.foreach(_.cancel())
+      })
+      regs += t.listen(_ => {
+        results += "2"; regs.foreach(_.cancel())
+      })
+      regs += t.listen(_ => {
+        results += "3"; regs.foreach(_.cancel())
+      })
+      regs += t.listen(_ => {
+        results += "4"; regs.foreach(_.cancel())
+      })
+      t.touch()
+
+      results should contain theSameElementsInOrderAs Seq("1")
+    }
   }
 
   "ModelProperty" should {
