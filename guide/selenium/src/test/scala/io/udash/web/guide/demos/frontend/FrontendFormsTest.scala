@@ -102,7 +102,7 @@ class FrontendFormsTest extends SeleniumTest {
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
-        radio.click()
+        driver.executeScript("arguments[0].click();", radio)
         eventually {
           radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")).asScala.forall(el => {
             el.getText == propertyName

@@ -91,8 +91,8 @@ trait ReadableProperty[A] {
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] final val listeners: mutable.Buffer[A => Any] = CrossCollections.createArray[A => Any]
-  protected[this] final val oneTimeListeners: mutable.Buffer[Registration] = CrossCollections.createArray[Registration]
+  protected[this] final val listeners: mutable.ArrayBuffer[A => Any] = mutable.ArrayBuffer.empty[A => Any]
+  protected[this] final val oneTimeListeners: mutable.ArrayBuffer[Registration] = mutable.ArrayBuffer.empty[Registration]
 
   protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
   protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
