@@ -487,6 +487,10 @@ final case class Encoding(
 )
 object Encoding extends HasGenObjectCodec[Encoding]
 
+/**
+  * Representation of
+  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#exampleObject Example Object]]
+  */
 final case class Example(
   @td summary: OptArg[String] = OptArg.Empty,
   @td description: OptArg[String] = OptArg.Empty,
