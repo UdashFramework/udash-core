@@ -31,7 +31,8 @@ object Dependencies {
     "io.udash" %%% "udash-rest" % udashVersion,
     "io.udash" %%% "udash-rpc" % udashVersion,
     "io.udash" %%% "udash-i18n" % udashVersion,
-    "io.udash" %%% "udash-css" % udashVersion
+    "io.udash" %%% "udash-css" % udashVersion,
+    "com.avsystem.commons" %%% "commons-core" % avsystemCommonsVersion, //todo remove in udash RC5
   ))
 
   val frontendDeps = Def.setting(Seq(

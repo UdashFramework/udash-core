@@ -19,6 +19,7 @@ inThisBuild(Seq(
     "-language:implicitConversions",
     "-language:existentials",
     "-language:dynamics",
+    "-Yrangepos",
     "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator,-adapted-args"
