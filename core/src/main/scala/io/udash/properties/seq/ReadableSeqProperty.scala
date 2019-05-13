@@ -3,7 +3,7 @@ package io.udash.properties.seq
 import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
-import io.udash.utils.{CrossCollections, Registration}
+import io.udash.utils.Registration
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -75,7 +75,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
 private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
 
-  protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = CrossCollections.createArray
+  protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = mutable.ArrayBuffer.empty
 
   override def structureListenersCount(): Int = structureListeners.size
   protected def wrapStructureListenerRegistration(reg: Registration): Registration =

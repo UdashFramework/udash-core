@@ -1958,7 +1958,8 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       )
     }
 
-    "avoid multiple updates in produceWithNested on transformed properties" in {
+    //todo https://github.com/UdashFramework/udash-core/issues/282
+    "avoid multiple updates in produceWithNested on transformed properties" ignore {
       val p = Property(2)
       val s = Property(3)
 
@@ -1993,7 +1994,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       )
     }
 
-    "avoid multiple updates in produceWithNested on combined properties" in {
+    "avoid multiple updates in produceWithNested on combined properties" ignore {
       val p = Property(2)
       val c = Property(1)
       val s = Property(3)
