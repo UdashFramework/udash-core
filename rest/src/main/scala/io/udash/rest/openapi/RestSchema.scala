@@ -316,7 +316,7 @@ trait SchemaResolver {
     * Resolves a [[RestSchema]] instance into an actual [[Schema]] object or reference.
     * If the schema is unnamed then this method will simply return the same value as [[RestSchema.createSchema]].
     * If the schema is named, it may be internally registered under its name and a
-    * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#callbackObject Reference Object]]
+    * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#callbackObject Reference Object]]
     * will be returned instead - see [[SchemaRegistry]].
     */
   def resolve(schema: RestSchema[_]): RefOr[Schema]
@@ -345,7 +345,7 @@ object InliningResolver {
 
 /**
   * An implementation of [[SchemaResolver]] which registers named [[RestSchema]]s and replaces them with a
-  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#referenceObject Reference Object]].
+  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject Reference Object]].
   * All the registered schemas can then be extracted and listed in the [[Components]] object.
   */
 final class SchemaRegistry(

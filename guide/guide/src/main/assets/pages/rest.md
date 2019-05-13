@@ -531,7 +531,7 @@ There are two ways to define default values:
   * The default value is for deserialization _only_ and does not affect programmer API, which is often desired.
   * Value from `@whenAbsent` will be picked up by macro materialization of
     [OpenAPI documents](#generating-openapi-30-specifications) and included as default value in OpenAPI
-    [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
+    [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject)
 
 The two approaches can be mixed - you can define Scala-level default value and `@whenAbsent` annotation
 at the same time. During deserialization, value from `@whenAbsent` annotation takes priority over Scala-level
@@ -932,7 +932,7 @@ an example implementation.
 
 ## Generating OpenAPI 3.0 specifications
 
-[OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md) is an open standard for describing
+[OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) is an open standard for describing
 REST endpoints using JSON or YAML. It can be consumed by e.g. [Swagger UI](https://swagger.io/tools/swagger-ui/) in
 order to generate nicely looking, human-readable documentation of a REST endpoint.
 
@@ -963,7 +963,7 @@ object PrintOpenApiJson {
 ### Operation IDs
 
 For every HTTP REST method, an
-[Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#operationObject)
+[Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#operationObject)
 will be generated. `operationId` of that object will be by default set to HTTP method's `rpcName`.
 `rpcName` itself defaults to method's regular name if not specified explicitly.
 
@@ -993,7 +993,7 @@ their roles and dependencies between them.
 In order to macro-materialize `OpenApiMetadata` for your REST API, you need to provide an instance of `RestSchema` typeclass
 for every type used by your API (as a parameter or result type, i.e. when your method returns `Future[T]` then
 `RestSchema[T]` will be needed). `RestSchema` contains a description of data type that is later translated into
-[OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject).
+[OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject).
 
 Most of the primitive types, collection types, `Option`, `Opt`, etc. already have an appropriate `RestSchema` instance defined
 (roughly the same set of simple types that have `GenCodec` automatically available). If `RestSchema` is not defined, there are
@@ -1011,7 +1011,7 @@ case class User(id: String, @whenAbsent("anon") name: String, birthYear: Int)
 object User extends RestDataCompanion[User] // gives GenCodec + RestStructure + RestSchema
 ```
 
-[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject) generated for
+[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject) generated for
 `User` class will look like this:
 
 ```json
@@ -1053,14 +1053,14 @@ Schema derived for an ADT from macro materialized `RestStructure` will describe 
 
 By default, schemas macro materialized for case classes and sealed hierarchies will be _named_.
 This means they will be registered under their name in
-[Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#componentsObject).
+[Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#componentsObject).
 
 By default, the name that will be used will be the simple (unqualified) name of the data type, e.g. "User".
 This can be changed with [`@name`](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/serialization/name.html) annotation.
 
 When referring to registered schema (e.g. in
-[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)),
-a [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#referenceObject)
+[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject)),
+a [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject)
 will be inserted, e.g. `{"$ref": "#/components/schemas/User"}`. This is good for schema reuse but may lead to name
 conflicts if you have multiple data types with the same name but in different packages. Unfortunately, such conflicts
 cannot be detected in compile time and will only be reported in runtime, when trying to generate OpenAPI document.
@@ -1116,7 +1116,7 @@ rather than inlined schema.
 `RestMediaType` is an auxiliary typeclass which serves as a basis for `RestResponses` and `RestRequestBody` typeclasses.
 It captures all the possible media types which may be used in a request or response body for given Scala type.
 Media types are represented using OpenAPI 
-[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject).
+[Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject).
 
 By default, `RestMediaTypes` instance is derived from `RestSchema` instance and `application/json` is assumed as 
 the only available media type.
@@ -1131,14 +1131,14 @@ types other than `application/json` for your Scala type.
 in your REST API trait. For example, if your method returns `Future[User]` then you need an instance
 of `RestResponses[User]` (this transformation is modeled by yet another intermediate typeclass, `RestResultType`).
 This typeclass governs generation of
-[Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
+[Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responsesObject)
 
 By default, if no specific `RestResponses` instance is provided, it is created based on `RestMediaTypes`.
-The resulting [Responses](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responsesObject)
+The resulting [Responses](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responsesObject)
 will contain exactly one
-[Response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#responseObject)
+[Response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject)
 for HTTP status code `200 OK` with 
-[Media Types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#mediaTypeObject)
+[Media Types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject)
 inferred from `RestMediaTypes` instance. Also note that `RestMediaTypes` itself is by default derived from 
 `RestSchema`
 
@@ -1153,7 +1153,7 @@ see [Adjusting operations](#adjusting-operations).
 
 `RestRequestBody` typeclass is an auxiliary typeclass analogous to `RestResponses`. It's necessary
 for the `@Body` parameter of every `@CustomBody` method and governs generation of
-[Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#requestBodyObject).
+[Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#requestBodyObject).
 By default, if not defined explicitly, it is derived from `RestMediaTypes` instance - which by itself is derived
 from `RestSchema` by default.
 
@@ -1163,9 +1163,9 @@ The way OpenAPI documents are generated for your REST API can be influenced with
 applied on REST methods, parameters and data types. The most common example is the `@description` annotation
 which may be applied on data types, case class fields, REST methods and parameters.
 It causes the description to be injected into appropriate
-[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject),
-[Parameter](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#parameterObject) or
-[Operation](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#operationObject)
+[Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject),
+[Parameter](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject) or
+[Operation](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#operationObject)
 objects.
 
 However, `@description` is just an example of more general mechanism - schemas, parameters and operations
@@ -1182,7 +1182,7 @@ There is also a default implementation of `SchemaAdjuster`, the `@adjustSchema` 
 takes a lambda parameter which defines the schema transformation.
 
 Annotations extending `SchemaAdjuster` can arbitrarily transform a
-[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
+[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject)
 and can be applied on:
 
 * data types with macro-generated `RestSchema`
@@ -1196,10 +1196,10 @@ used by `Parameter` and `Operation` objects.
 
 Also, be aware that a `SchemaAdjuster` may be passed a schema reference instead of actual schema object.
 This reference is then wrapped into a
-[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaObject)
+[Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject)
 object defined as `{"allOf": [{"$ref": <the-original-reference>}]}`.
 Therefore, a schema adjuster may extend the referenced schema using
-[Composition and Inheritance](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#schemaComposition)
+[Composition and Inheritance](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaComposition)
 but it should not rely on the ability to inspect the referenced schema.
 
 #### Adjusting parameters
@@ -1207,12 +1207,12 @@ but it should not rely on the ability to inspect the referenced schema.
 Similar to `SchemaAdjuster` there is a `ParameterAdjuster` annotation trait. Its default implementation
 is `@adjustParameter` which takes transformation lambda as its parameter.
 Schema adjusters can arbitrarily transform
-[Parameter Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#parameterObject)
+[Parameter Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject)
 which are generated for path, header and query parameters of REST methods.
 
 #### Adjusting operations
 
-For adjusting [Operation Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#operationObject)
+For adjusting [Operation Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#operationObject)
 there is `OperationAdjuster` annotation trait with default implementation `@adjustOperation`.
 Operation adjuster can be applied on REST HTTP methods in order to transform Operation Objects
 generated for them. This in particular means that operation adjusters can modify request body and responses
@@ -1221,7 +1221,7 @@ operations associated with result of this prefix method.
 
 #### Adjusting path items
 
-For adjusting [Path Item Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#pathItemObject)
+For adjusting [Path Item Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#pathItemObject)
 there is `PathItemAdjuster` annotation trait with default implementation `@adjustPathItem`.
 Path item adjuster can be applied on REST HTTP methods in order to transform Path Item objects generated for them.
 Because multiple REST HTTP methods may have the same path, adjusters are collected from all methods and ultimately all
@@ -1231,4 +1231,4 @@ it will apply to all Path Item Objects associated with result of this prefix met
 ### Limitations
 
 * Current representation of OpenAPI document does not support
-[specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#specificationExtensions).
+[specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#specificationExtensions).

@@ -19,7 +19,7 @@ before_script:
   - export PATH=$PWD/geckodriver:$PATH
 
 script:
-  - xvfb-run sbt ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
+  - xvfb-run sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
 
 jdk:
   - oraclejdk8
