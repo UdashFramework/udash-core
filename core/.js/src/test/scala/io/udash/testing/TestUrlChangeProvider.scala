@@ -12,7 +12,7 @@ class TestUrlChangeProvider(init: Url) extends UrlChangeProvider {
 
   override def initialize(): Unit = ()
 
-  override def changeFragment(url: Url): Unit = {
+  override def changeFragment(url: Url, changeHistory: Boolean): Unit = {
     currUrl = url
     urlsHistory.append(url)
     changeListeners.foreach(_(url))

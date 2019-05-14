@@ -13,11 +13,11 @@ import scala.scalajs.js
 /** Provides information about current URL. */
 trait UrlChangeProvider {
   /** Enables all required event listeners.
-    * [[io.udash.Application]] initializes the provider automatically. */
+   * [[io.udash.Application]] initializes the provider automatically. */
   def initialize(): Unit
 
   /** Changes the URL part representing the frontend routing state. */
-  def changeFragment(url: Url): Unit
+  def changeFragment(url: Url, replaceCurrent: Boolean = false): Unit
 
   /** Returns the URL part representing the frontend routing state. */
   def currentFragment: Url
@@ -26,13 +26,13 @@ trait UrlChangeProvider {
   def onFragmentChange(callback: Url => Unit): Registration
 
   /** Changes the whole URL. */
-  def changeUrl(url: String): Unit
+  def changeUrl(url: String): Unit = dom.window.location.assign(url)
 }
 
 /** Used for routing based on the URL part following # sign. */
-object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
+final class WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
-  import dom.{document, window}
+  import dom.window
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 
@@ -42,21 +42,24 @@ object WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback, Opt.empty)
+    new MutableBufferRegistration(callbacks, callback, Opt.Empty)
   }
 
-  override def currentFragment: Url = Url(document.location.hash.stripPrefix("#"))
-  override def changeFragment(url: Url): Unit = document.location.hash = url.value
-  override def changeUrl(url: String): Unit = document.location.replace(url)
+  override def currentFragment: Url = Url(window.location.hash.stripPrefix("#"))
+
+  override def changeFragment(url: Url, replaceCurrent: Boolean): Unit = {
+    if (replaceCurrent) window.location.replace(window.location.href.takeWhile(_ != '#') + "#" + url.value)
+    else window.location.hash = url.value
+  }
 }
 
 /**
-  * Used for routing based on the URL path.
-  * Don't forget to configure your web server to handle frontend routes. You may find "rewrite rules" mechanism useful.
-  */
-object WindowUrlPathChangeProvider extends UrlChangeProvider {
+ * Used for routing based on the URL path.
+ * Don't forget to configure your web server to handle frontend routes. You may find "rewrite rules" mechanism useful.
+ */
+final class WindowUrlPathChangeProvider extends UrlChangeProvider {
 
-  import dom.{document, window}
+  import dom.window
   import org.scalajs.dom.experimental.{URL => JSUrl}
   import org.scalajs.dom.raw.{MouseEvent, Node, PopStateEvent}
 
@@ -113,15 +116,16 @@ object WindowUrlPathChangeProvider extends UrlChangeProvider {
     window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
   }
 
-  override def changeUrl(url: String): Unit = document.location.replace(url)
-
   override def onFragmentChange(callback: Url => Unit): Registration = {
     callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback, Opt.empty)
+    new MutableBufferRegistration(callbacks, callback, Opt.Empty)
   }
 
-  override def changeFragment(url: Url): Unit = {
-    window.history.pushState(null, "", url.value)
+  override def changeFragment(url: Url, replaceCurrent: Boolean): Unit = {
+    (null, "", url.value) |> (
+      if (replaceCurrent) window.history.replaceState(_: js.Any, _: String, _: String)
+      else window.history.pushState(_: js.Any, _: String, _: String)
+      ).tupled
     val withoutHash = Url(url.value.takeWhile(_ != '#'))
     callbacks.foreach(_.apply(withoutHash))
   }
