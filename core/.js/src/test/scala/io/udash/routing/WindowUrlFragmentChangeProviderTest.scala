@@ -1,10 +1,10 @@
 package io.udash
 package routing
 
-import io.udash.testing.UdashFrontendTest
+import io.udash.testing.AsyncUdashFrontendTest
 import org.scalajs.dom
 
-class WindowUrlFragmentChangeProviderTest extends UdashFrontendTest {
+class WindowUrlFragmentChangeProviderTest extends AsyncUdashFrontendTest {
   "WindowUrlFragmentChangeProvider" should {
     val provider = new WindowUrlFragmentChangeProvider()
 
@@ -18,13 +18,16 @@ class WindowUrlFragmentChangeProviderTest extends UdashFrontendTest {
 
       provider.currentFragment.value shouldBe fragment
       dom.window.location.hash shouldBe "#" + fragment
-      dom.window.history.length shouldBe historyLength + 1
+      retrying {
+        //sometimes history takes time to catch up here
+        dom.window.history.length shouldBe historyLength + 1
+      }
 
       dom.window.history.back()
 
       provider.currentFragment shouldBe originalFragment
       dom.window.location.href shouldBe originalHref
-      dom.window.history.length shouldBe historyLength + 1
+
     }
 
     "not modify history on fragment change" in {

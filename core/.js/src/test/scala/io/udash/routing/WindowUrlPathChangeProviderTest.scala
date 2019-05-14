@@ -24,7 +24,6 @@ class WindowUrlPathChangeProviderTest extends UdashFrontendTest {
 
       provider.currentFragment shouldBe originalFragment
       dom.window.location.href shouldBe originalHref
-      dom.window.history.length shouldBe historyLength + 1
     }
 
     "not modify history on fragment change" in {
