@@ -65,7 +65,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
    * Changes application routing state to the provided one.
    *
    * @param state          New application routing state,
-   * @param replaceCurrent indicates whether new state should replace the previous one in history
+   * @param replaceCurrent indicates whether new state should replace the current one in history
    */
   def goTo(state: HierarchyRoot, replaceCurrent: Boolean = false): Unit = {
     val url = routingRegistry.matchState(state)
