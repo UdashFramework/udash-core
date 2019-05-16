@@ -1,7 +1,7 @@
 package io.udash
 package css
 
-import scalatags.Text.all.Modifier
+import scalatags.Text.all._
 import scalatags.text.Builder
 
 trait CssText {
@@ -10,8 +10,8 @@ trait CssText {
 }
 
 object CssText extends CssText {
-  private class TextStyleModifier(styles: CssStyle*) extends Modifier {
+  private final class TextStyleModifier(styles: CssStyle*) extends Modifier {
     override def applyTo(t: Builder): Unit =
-      styles.foreach { s => t.appendAttr("class", Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", ""))) }
+      styles.foreach { s => t.appendAttr(cls.name, Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", ""))) }
   }
 }
