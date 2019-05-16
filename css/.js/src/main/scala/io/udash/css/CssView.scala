@@ -62,8 +62,8 @@ object CssView extends CssView {
   }
 
   final class StyleFactoryOps[T](private val factory: T => CssStyle) extends AnyVal {
-    def reactiveApply(p: ReadableProperty[T]): Binding =
-      reactiveOptionApply(p.transform(Some.apply))
+    def reactiveApply(property: ReadableProperty[T]): Binding =
+      reactiveOptionApply(property.transform(Option.apply))
 
     def reactiveOptionApply(property: ReadableProperty[Option[T]]): Binding = new Binding {
       private var prevStyle: CssStyle = _
