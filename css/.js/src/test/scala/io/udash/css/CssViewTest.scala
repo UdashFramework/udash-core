@@ -7,7 +7,6 @@ class CssViewTest extends UdashFrontendTest {
 
   import CssView._
   import StylesheetExample._
-
   import scalatags.JsDom.all._
 
   "CssView" should {
@@ -26,10 +25,10 @@ class CssViewTest extends UdashFrontendTest {
     }
 
     "reactive manage results of style factory" in {
-      val f1 = (x: Boolean) => if (x) CssStyleName("f1-true") else CssStyleName("f1-false")
+      val f1 = (x: String) => if (x.toBoolean) CssStyleName("f1-true") else CssStyleName("f1-false")
       val f2 = (x: Int) => CssStyleName(s"f2-$x")
 
-      val p1 = Property(false)
+      val p1 = Property("false")
       val p2 = Property(Option(10))
 
       val el = div(
@@ -41,7 +40,12 @@ class CssViewTest extends UdashFrontendTest {
       el.classList should contain("f1-false")
       el.classList should contain("f2-10")
 
-      p1.set(true)
+      p1.set(null)
+
+      el.classList.length should be(1)
+      el.classList should contain("f2-10")
+
+      p1.set("true")
 
       el.classList.length should be(2)
       el.classList should contain("f1-true")
@@ -64,7 +68,7 @@ class CssViewTest extends UdashFrontendTest {
       el.classList should contain("f1-true")
       el.classList should contain("f2-5")
 
-      p1.set(false)
+      p1.set("false")
 
       el.classList.length should be(2)
       el.classList should contain("f1-false")
