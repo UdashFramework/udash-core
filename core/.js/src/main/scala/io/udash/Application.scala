@@ -9,16 +9,16 @@ import org.scalajs.dom.Element
 import scala.reflect.ClassTag
 
 /**
-  * Root application which is used to start single instance of app.
-  *
-  * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
-  * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
-  * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
-  */
+ * Root application which is used to start single instance of app.
+ *
+ * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
+ * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
+ * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
+ */
 class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-  urlChangeProvider: UrlChangeProvider = WindowUrlFragmentChangeProvider
+  urlChangeProvider: UrlChangeProvider = new WindowUrlFragmentChangeProvider
 ) extends CrossLogging {
 
   private var rootElement: Element = _
@@ -27,10 +27,10 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
   private lazy val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
   /**
-    * Starts the application using selected element as root.
-    *
-    * @param attachElement Root element of application.
-    */
+   * Starts the application using selected element as root.
+   *
+   * @param attachElement Root element of application.
+   */
   final def run(attachElement: Element): Unit = {
     rootElement = attachElement
 
@@ -48,11 +48,11 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
   }
 
   /**
-    * Registers callback which will be called after routing failure.
-    *
-    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
-    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
-    */
+   * Registers callback which will be called after routing failure.
+   *
+   * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+   * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+   */
   def onRoutingFailure(listener: routingFailureListeners.CallbackType): Registration =
     routingFailureListeners.register(listener)
 
@@ -62,13 +62,14 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
   }
 
   /**
-    * Changes application routing state to the provided one.
-    *
-    * @param state New application routing state,
-    */
-  def goTo(state: HierarchyRoot): Unit = {
+   * Changes application routing state to the provided one.
+   *
+   * @param state          New application routing state,
+   * @param replaceCurrent indicates whether new state should replace the current one in history
+   */
+  def goTo(state: HierarchyRoot, replaceCurrent: Boolean = false): Unit = {
     val url = routingRegistry.matchState(state)
-    urlChangeProvider.changeFragment(url)
+    urlChangeProvider.changeFragment(url, replaceCurrent)
   }
 
   /** Redirects to selected URL. */
@@ -76,16 +77,16 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : Pr
     urlChangeProvider.changeUrl(url)
 
   /**
-    * Register callback for routing state change.
-    *
-    * @param callback Callback getting newState and oldState as arguments.
-    */
+   * Register callback for routing state change.
+   *
+   * @param callback Callback getting newState and oldState as arguments.
+   */
   def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Unit): Registration =
     routingEngine.onStateChange(callback)
 
   /**
-    * @return URL matched to the provided state.
-    */
+   * @return URL matched to the provided state.
+   */
   def matchState(state: HierarchyRoot): Url =
     routingRegistry.matchState(state)
 
