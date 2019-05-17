@@ -23,7 +23,7 @@ object Launcher {
   private lazy val viewFactoryRegistry = new StatesToViewFactoryDef
 
   implicit val applicationInstance = new Application[RoutingState](
-    routingRegistry, viewFactoryRegistry, WindowUrlPathChangeProvider
+    routingRegistry, viewFactoryRegistry, new WindowUrlPathChangeProvider
   ) with UrlLogging[RoutingState] {
     override protected def log(url: String, referrer: Option[String]): Unit =
       UrlLoggingDemoService.log(url, referrer)

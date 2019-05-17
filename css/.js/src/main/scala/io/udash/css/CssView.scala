@@ -1,50 +1,38 @@
-package io.udash.css
+package io.udash
+package css
 
-import io.udash.ReadableProperty
 import io.udash.bindings.modifiers.{Binding, EmptyModifier}
 import org.scalajs.dom.Element
-
-import scala.scalajs.js
 import scalatags.JsDom.all.Modifier
-import scalatags.text.Builder
 
-import js.JSConverters._
+import scala.annotation.tailrec
 
 /** Contains integration of CSS structures with Scalatags. */
-trait CssView {
-  implicit def style2Mod(s: CssStyle): Modifier = new CssView.StyleModifier(js.Array(s))
-  implicit def styles2Mod(s: CssStyle*): Modifier = new CssView.StyleModifier(s.toJSArray)
-  implicit def style2TextMod(s: CssStyle): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(js.Array(s))
-  implicit def styles2TextMod(s: CssStyle*): scalatags.Text.all.Modifier = new CssView.TextStyleModifier(s.toJSArray)
+trait CssView extends CssText {
 
-  implicit def elementOps(element: Element): CssView.ElementOps =
-    new CssView.ElementOps(element)
+  import CssView._
 
-  implicit def styleOps(style: CssStyle): CssView.StyleOps =
-    new CssView.StyleOps(style)
+  implicit def style2Mod(style: CssStyle): Modifier = new StyleModifier(style)
+  implicit def styles2Mod(styles: CssStyle*): Modifier = new StyleModifier(styles: _*)
+  implicit def elementOps(element: Element): ElementOps = new ElementOps(element)
+  implicit def styleOps(style: CssStyle): StyleOps = new StyleOps(style)
+  implicit def styleFactoryOps[T](factory: T => CssStyle): StyleFactoryOps[T] = new StyleFactoryOps[T](factory)
 }
 
 object CssView extends CssView {
-  private class StyleModifier(styles: js.Array[CssStyle]) extends Modifier {
+  private final class StyleModifier(styles: CssStyle*) extends Modifier {
     override def applyTo(t: Element): Unit =
       styles.foreach(_.addTo(t))
   }
 
-  private class TextStyleModifier(styles: js.Array[CssStyle]) extends scalatags.Text.all.Modifier {
-    override def applyTo(t: Builder): Unit =
-      styles.foreach { s =>
-        t.appendAttr("class", Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", "")))
-      }
-  }
-
-  implicit class ElementOps(private val element: Element) extends AnyVal {
+  final class ElementOps(private val element: Element) extends AnyVal {
     def styles(styles: CssStyle*): Element = {
       styles.foreach(_.addTo(element))
       element
     }
   }
 
-  implicit class StyleOps(private val style: CssStyle) extends AnyVal {
+  final class StyleOps(private val style: CssStyle) extends AnyVal {
     def addTo(element: Element): Unit =
       style.classNames.foreach(element.classList.add)
 
@@ -52,9 +40,8 @@ object CssView extends CssView {
       val cl = element.classList
       cl.remove(style.className)
       style.commonPrefixClass.foreach { prefixClass =>
-        def removePrefix(i: Int = 0): Boolean =
-          if (i >= cl.length) true
-          else !cl(i).startsWith(s"$prefixClass-") && removePrefix(i + 1)
+        @tailrec def removePrefix(i: Int = 0): Boolean =
+          i >= cl.length || (!cl(i).startsWith(s"$prefixClass-") && removePrefix(i + 1))
         if (removePrefix()) {
           cl.remove(prefixClass)
         }
@@ -69,19 +56,19 @@ object CssView extends CssView {
       )
 
     def styleIf(condition: Boolean): Modifier = {
-      if (condition) new StyleModifier(js.Array(style))
+      if (condition) new StyleModifier(style)
       else new EmptyModifier[Element]
     }
   }
 
-  implicit class StyleFactoryOps[T](private val factory: T => CssStyle) extends AnyVal {
-    def reactiveApply(p: ReadableProperty[T]): Binding =
-      reactiveOptionApply(p.transform(Some.apply))
+  final class StyleFactoryOps[T](private val factory: T => CssStyle) extends AnyVal {
+    def reactiveApply(property: ReadableProperty[T]): Binding =
+      reactiveOptionApply(property.transform(Option.apply))
 
-    def reactiveOptionApply(p: ReadableProperty[Option[T]]): Binding = new Binding {
+    def reactiveOptionApply(property: ReadableProperty[Option[T]]): Binding = new Binding {
       private var prevStyle: CssStyle = _
       override def applyTo(el: Element): Unit = {
-        propertyListeners += p.listen(t => {
+        propertyListeners += property.listen(t => {
           if (prevStyle != null) {
             prevStyle.classNames.foreach(el.classList.remove)
           }
