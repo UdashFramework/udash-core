@@ -1958,6 +1958,78 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       )
     }
 
+    //todo https://github.com/UdashFramework/udash-core/issues/282
+    "avoid multiple updates in produceWithNested on transformed properties" ignore {
+      val p = Property(2)
+      val s = Property(3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p.transform(_ + 1)) { case (v, nested) =>
+          div(
+            nested(produce(s) { v2 =>
+              fired += v -> v2
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(20)
+        s.set(30)
+      }
+
+      CallbackSequencer().sequence {
+        s.set(300)
+        p.set(200)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (3, 3),
+        (21, 30),
+        (21, 300),
+        (201, 300)
+      )
+    }
+
+    "avoid multiple updates in produceWithNested on combined properties" ignore {
+      val p = Property(2)
+      val c = Property(1)
+      val s = Property(3)
+
+      val fired = ListBuffer.empty[(Int, Int)]
+
+      div(
+        produceWithNested(p.combine(c)(_ + _)) { case (v, nested) =>
+          div(
+            nested(produce(s) { v2 =>
+              fired += v -> v2
+              div().render
+            })
+          ).render
+        }
+      ).render
+
+      CallbackSequencer().sequence {
+        p.set(20)
+        s.set(30)
+      }
+
+      CallbackSequencer().sequence {
+        s.set(300)
+        p.set(200)
+      }
+
+      fired.result() should contain theSameElementsInOrderAs Seq(
+        (3, 3),
+        (21, 30),
+        (21, 300),
+        (201, 300)
+      )
+    }
+
     "avoid multiple updates in produceWithNested on SeqProperties" in {
       val p = Property(1)
       val s = SeqProperty(1, 2, 3)
