@@ -18,6 +18,7 @@ class FrontendFormsView extends FinalView with CssView {
   private val (textInputDemo, textInputSnippet) = TextInputDemo.demoWithSnippet()
   private val (textAreaDemo, textAreaSnippet) = TextAreaDemo.demoWithSnippet()
   private val (checkboxDemo, checkboxSnippet) = CheckboxDemo.demoWithSnippet()
+  private val (checkButtonsDemo, checkButtonsSnippet) = CheckButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -62,33 +63,8 @@ class FrontendFormsView extends FinalView with CssView {
       "a decorator method. The decorator gets ", i("Seq[(Input, String)]"), ", where the Input generates a checkbox and the String ",
       "is the bound value. This generates a Scalatags template containing the checkboxes."
     ),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
-        |val favoriteFruitsStrings = favoriteFruits.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  CheckButtons(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(
-        |    (els: Seq[(Input, String)]) => span(
-        |      els.map { case (i: Input, l: String) => label(i, l) }
-        |    )
-        |  ).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new CheckButtonsDemoComponent),
+    checkButtonsSnippet,
+    ForceBootstrap(checkButtonsDemo),
     h3("RadioButtons"),
     p(
       "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ", i("Property"), ", ",

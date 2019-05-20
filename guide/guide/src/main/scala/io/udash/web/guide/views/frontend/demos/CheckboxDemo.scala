@@ -22,7 +22,7 @@ object CheckboxDemo extends AutoDemo with CssView {
       (b: Boolean) => if (b) "Yes" else "No"
     )
 
-    def inputs() = div(BootstrapStyles.Grid.row)(
+    def checkboxes() = div(BootstrapStyles.Grid.row)(
       div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           UdashInputGroup.prependText("Property A:"),
@@ -46,7 +46,7 @@ object CheckboxDemo extends AutoDemo with CssView {
       )
     )
 
-    (inputs(), inputs())
+    (checkboxes(), checkboxes())
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
