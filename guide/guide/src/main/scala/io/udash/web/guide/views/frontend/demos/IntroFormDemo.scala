@@ -1,7 +1,5 @@
 package io.udash.web.guide.views.frontend.demos
 
-import java.{lang => jl}
-
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
@@ -23,6 +21,8 @@ object IntroFormDemo extends AutoDemo with CssView {
   object IntroFormDemoModel extends HasModelPropertyCreator[IntroFormDemoModel]
 
   private val (rendered, source) = {
+    import java.{lang => jl}
+
     /** The form's model structure.
       * case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
       * object IntroFormDemoModel extends HasModelPropertyCreator[IntroFormDemoModel]

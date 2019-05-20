@@ -7,15 +7,15 @@ import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos._
-
 import scalatags.JsDom
 
 case object FrontendFilesViewFactory extends StaticViewFactory[FrontendFilesState.type](() => new FrontendFilesView)
 
 class FrontendFilesView extends FinalView {
+  import JsDom.all._
   import io.udash.web.guide.Context._
 
-  import JsDom.all._
+  private val (fileInputDemo, fileInputSnippet) = FileInputDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Files upload"),
@@ -26,23 +26,9 @@ class FrontendFilesView extends FinalView {
     p("You can find a working demo application in the ", a(href := References.UdashFilesDemoRepo, target := "_blank")("Udash Demos"), " repositiory."),
     h3("Frontend forms"),
     p(i("FileInput"), " is the file HTML input wrapper providing a property containing selected files. "),
-    CodeBlock(
-      """import org.scalajs.dom.File
-        |val acceptMultipleFiles: Property[Boolean] = Property(true)
-        |val selectedFiles: SeqProperty[File] = SeqProperty(Seq.empty)
-        |
-        |div(
-        |  FileInput("files", acceptMultipleFiles, selectedFiles)(),
-        |  h4("Selected files"),
-        |  ul(GuideStyles.defaultList)(
-        |    repeat(selectedFiles) { file =>
-        |      li(file.get.name).render
-        |    }
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
+    fileInputSnippet,
     p("Take a look at the following live demo:"),
-    ForceBootstrap(new FileInputDemoComponent().getTemplate),
+    ForceBootstrap(fileInputDemo),
     p(i("FileUploader"), " is a class taking the server URL as a constructor argument and containing two methods:"),
     CodeBlock(
       """def upload(input: html.Input): ReadableModelProperty[FileUploadModel]
