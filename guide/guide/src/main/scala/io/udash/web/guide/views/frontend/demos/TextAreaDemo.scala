@@ -3,16 +3,17 @@ package io.udash.web.guide.views.frontend.demos
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
-import io.udash.web.commons.views.Component
+import io.udash.css.CssView
 import io.udash.web.guide.styles.partials.GuideStyles
+import io.udash.web.guide.views.ext.demo.AutoDemo
 import scalatags.JsDom
 
-class TextAreaDemoComponent extends Component {
+object TextAreaDemo extends AutoDemo with CssView {
   import JsDom.all._
 
-  val text: Property[String] = Property("")
+  private val (rendered, source) = {
+    val text: Property[String] = Property("")
 
-  override def getTemplate: Modifier = div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
     form(BootstrapStyles.containerFluid)(
       div(BootstrapStyles.Grid.row)(
         div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -26,5 +27,9 @@ class TextAreaDemoComponent extends Component {
         )
       )
     )
-  )
+  }.withSourceCode
+
+  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
+    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines.drop(1))
+  }
 }

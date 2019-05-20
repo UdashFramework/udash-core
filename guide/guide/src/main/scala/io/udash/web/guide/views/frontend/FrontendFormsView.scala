@@ -16,6 +16,7 @@ class FrontendFormsView extends FinalView with CssView {
   import io.udash.web.guide.Context._
 
   private val (textInputDemo, textInputSnippet) = TextInputDemo.demoWithSnippet()
+  private val (textAreaDemo, textAreaSnippet) = TextAreaDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -44,16 +45,8 @@ class FrontendFormsView extends FinalView with CssView {
     ForceBootstrap(textInputDemo),
     h3("TextArea"),
     p("Below you can find a similar example, this time with text areas."),
-    CodeBlock(
-      """val text: Property[String] = Property("")
-        |
-        |form(
-        |  TextArea(text).render,
-        |  TextArea(text).render,
-        |  TextArea(text).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new TextAreaDemoComponent),
+    textAreaSnippet,
+    ForceBootstrap(textAreaDemo),
     h3("Checkbox"),
     p(
       "Below you can find the example of creating a single checkbox. Notice that the third property contains String, so it uses ",
