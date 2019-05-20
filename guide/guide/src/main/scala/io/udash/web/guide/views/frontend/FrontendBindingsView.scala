@@ -19,6 +19,7 @@ class FrontendBindingsView extends FinalView with CssView {
   val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
   val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
   val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
+  val (bindValidationDemo, bindValidationSnippet) = BindValidationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -73,33 +74,8 @@ class FrontendBindingsView extends FinalView with CssView {
     bindAttributeSnippet,
     bindAttributeDemo,
     h3("Validation"),
-    CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |integers.addValidator((element: Seq[Int]) => {
-        |  val zipped = element.toStream
-        |    .slice(0, element.size-1)
-        |    .zip(element.toStream.drop(1))
-        |  if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-        |  else Invalid("Sequence is not sorted!")
-        |})
-        |
-        |div(
-        |  "Integers: ",
-        |  span((attr("data-valid") := true).attrIf(
-        |    integers.valid.transform(_ == Valid)
-        |  ))(repeat(integers)(p => span(s"${p.get}, ").render)), br,
-        |  "Is sorted: ",
-        |  valid(integers)(
-        |    {
-        |      case Valid => span(id := "validation-demo-result")("Yes").render
-        |      case Invalid(_) => span(id := "validation-demo-result")("No").render
-        |    },
-        |    progressBuilder = _ => span("Validation in progress...").render,
-        |    errorBuilder = _ => span("Validation error...").render
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    new BindValidationDemoComponent,
+    bindValidationSnippet,
+    bindValidationDemo,
     p(
       "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
       "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."
