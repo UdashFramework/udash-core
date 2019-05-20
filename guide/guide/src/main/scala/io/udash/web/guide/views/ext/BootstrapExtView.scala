@@ -6,6 +6,7 @@ import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.BootstrapDemos
+import io.udash.web.guide.views.ext.demo.bootstrap.{DatePickerDemo, IconsDemo, StaticsDemo}
 import io.udash.web.guide.views.{References, Versions}
 import scalatags.JsDom
 
@@ -14,6 +15,10 @@ case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.
 
 class BootstrapExtView extends FinalView {
   import JsDom.all._
+
+  private val (staticsDemo, staticsSnippet) = StaticsDemo.demoWithSnippet()
+  private val (iconsDemo, iconsSnippet) = IconsDemo.demoWithSnippet()
+  private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -29,91 +34,18 @@ class BootstrapExtView extends FinalView {
       i("BootstrapStyles"), " import ", i("io.udash.css.CssView._"), ". It enables implicit conversion ",
       "from these styles into Scalatags modifiers."
     ),
-    CodeBlock(
-      s"""import io.udash.css.CssView._
-         |
-         |div(BootstrapStyles.Grid.row, GuideStyles.frame)(
-         |  div(BootstrapStyles.Grid.col(9), wellStyles,
-         |    BootstrapStyles.Spacing.margin(
-         |      side = Side.Bottom, size = SpacingSize.Normal
-         |    )
-         |  )(
-         |    ".col-xs-9"
-         |  ),
-         |  div(BootstrapStyles.Grid.col(4), wellStyles)(
-         |    ".col-xs-4", br,
-         |    "Since 9 + 4 = 13 > 12, this 4-column-wide div",
-         |    "gets wrapped onto a new line as one contiguous unit."
-         |  ),
-         |  div(BootstrapStyles.Grid.col(6), wellStyles)(
-         |    ".col-xs-6", br,
-         |    "Subsequent columns continue along the new line."
-         |  )
-         |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.statics()
-    ),
+    staticsSnippet,
+    ForceBootstrap(staticsDemo),
     h2("Components"),
     p("The ", i("UdashBootstrapComponent"), " hierarchy enables you to seamlessly use Bootstrap components and integrate ",
       "them with your Udash app, both in a completely type-safe way."),
     h3("Glyphicons & FontAwesome"),
     p("The icons from ", i("Glyphicons"), " and ", i("FontAwesome"), " packages are accessible in ", i("Icons"), " object."),
-    CodeBlock(
-      s"""UdashBootstrap.loadFontAwesome(),
-         |
-         |UdashButtonToolbar()(
-         |  UdashButtonGroup()(
-         |    Seq(
-         |      UdashIcons.FontAwesome.Solid.alignLeft,
-         |      UdashIcons.FontAwesome.Solid.alignCenter,
-         |      UdashIcons.FontAwesome.Solid.alignRight,
-         |      UdashIcons.FontAwesome.Solid.alignJustify
-         |    ).map(icon => UdashButton()(i(icon)).render): _*,
-         |  ).render,
-         |  UdashButtonGroup()(
-         |    Seq(
-         |      UdashIcons.FontAwesome.Brands.bitcoin,
-         |      UdashIcons.FontAwesome.Solid.euroSign,
-         |      UdashIcons.FontAwesome.Solid.dollarSign,
-         |      UdashIcons.FontAwesome.Brands.superpowers
-         |    ).map(icon => UdashButton()(i(icon)).render): _*,
-         |  ).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.icons()
-    ),
+    iconsSnippet,
+    ForceBootstrap(iconsDemo),
     h3("Date Picker"),
-    CodeBlock(
-      s"""import java.{util => ju}
-         |val date = Property[Option[ju.Date]](Some(new ju.Date()))
-         |
-         |val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-         |  format = "MMMM Do YYYY, hh:mm a",
-         |  locale = Some("en_GB"),
-         |  showClear = true
-         |))
-         |
-         |val disableWeekends = Property(false)
-         |disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
-         |  case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
-         |  case false => Seq.empty
-         |}
-         |
-         |val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)()
-         |
-         |div(
-         |  UdashDatePicker.loadBootstrapDatePickerStyles(),
-         |  UdashInputGroup()(
-         |    UdashInputGroup.input(picker.render),
-         |    UdashInputGroup.addon(bind(date.transform(_.toString)))
-         |  ).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.datePicker()
-    ),
+    datePickerSnippet,
+    ForceBootstrap(datePickerDemo),
     p("It is possible to create a date range selector from two pickers."),
     CodeBlock(
       s"""import java.{util => ju}
