@@ -14,12 +14,12 @@ class FrontendBindingsView extends FinalView with CssView {
   import Context._
   import JsDom.all._
 
-  val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
-  val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
-  val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
-  val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
-  val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
-  val (bindValidationDemo, bindValidationSnippet) = BindValidationDemo.demoWithSnippet()
+  private val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
+  private val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
+  private val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
+  private val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
+  private val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
+  private val (bindValidationDemo, bindValidationSnippet) = BindValidationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),

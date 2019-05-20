@@ -7,15 +7,15 @@ import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
-
 import scalatags.JsDom
 
 case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
 class FrontendFormsView extends FinalView with CssView {
+  import JsDom.all._
   import io.udash.web.guide.Context._
 
-  import JsDom.all._
+  private val (textInputDemo, textInputSnippet) = TextInputDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -40,32 +40,8 @@ class FrontendFormsView extends FinalView with CssView {
       "The below example presents how easily you can bind your properties to HTML input elements. ", i("TextInput"), " takes ",
       "a property which should be bound to an input and takes care of updating a field and property after every change."
     ),
-    CodeBlock(
-      """val name: Property[String] = Property("")
-        |val password: Property[String] = Property("")
-        |val age: Property[Int] = Property(1)
-        |
-        |form(
-        |  div(
-        |    "Name: ",
-        |    TextInput(name)(placeholder := "Input your name...").render,
-        |    span(bind(name))
-        |  ),
-        |  div(
-        |    "Password: ",
-        |    PasswordInput(password)(placeholder := "Input your password...").render,
-        |    span(bind(password))
-        |  ),
-        |  div(
-        |    "Age: ",
-        |    NumberInput(
-        |      age.transform(_.toString, Integer.parseInt)
-        |    )(placeholder := "Input your age...").render,
-        |    span(bind(age))
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new TextInputDemoComponent),
+    textInputSnippet,
+    ForceBootstrap(textInputDemo),
     h3("TextArea"),
     p("Below you can find a similar example, this time with text areas."),
     CodeBlock(
