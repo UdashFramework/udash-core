@@ -20,6 +20,7 @@ class FrontendFormsView extends FinalView with CssView {
   private val (checkboxDemo, checkboxSnippet) = CheckboxDemo.demoWithSnippet()
   private val (checkButtonsDemo, checkButtonsSnippet) = CheckButtonsDemo.demoWithSnippet()
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
+  private val (selectDemo, selectSnippet) = SelectDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -75,29 +76,8 @@ class FrontendFormsView extends FinalView with CssView {
     ForceBootstrap(radioButtonsDemo),
     h3("Select"),
     p("The HTML select element might be used in two ways: with or without multi selection. Below you can find examples of both usages."),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
-        |val favoriteFruitString = favoriteFruit.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  Select(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new SelectDemoComponent),
+    selectSnippet,
+    ForceBootstrap(selectDemo),
     h4("Select with multiple selected values"),
     p("Notice that the only difference is the type of the used property."),
     CodeBlock(
