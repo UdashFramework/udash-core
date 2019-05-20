@@ -21,7 +21,6 @@ import io.udash.bootstrap.modal.UdashModal
 import io.udash.bootstrap.nav.{UdashNav, UdashNavbar}
 import io.udash.bootstrap.pagination.UdashPagination
 import io.udash.bootstrap.progressbar.UdashProgressBar
-import io.udash.bootstrap.table.UdashTable
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils.BootstrapStyles._
 import io.udash.bootstrap.utils._
@@ -45,48 +44,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.Context._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def tables(): dom.Element = {
-    val responsive = Property[Option[ResponsiveBreakpoint]](Some(ResponsiveBreakpoint.All))
-    val dark = Property(false)
-    val striped = Property(true)
-    val bordered = Property(true)
-    val hover = Property(true)
-    val small = Property(false)
-
-    val darkButton = UdashButton.toggle(active = dark)("Dark theme")
-    val stripedButton = UdashButton.toggle(active = striped)("Striped")
-    val borderedButton = UdashButton.toggle(active = bordered)("Bordered")
-    val hoverButton = UdashButton.toggle(active = hover)("Hover")
-    val smallButton = UdashButton.toggle(active = small)("Small")
-
-    val items = SeqProperty(
-      Seq.fill(7)((Random.nextDouble(), Random.nextDouble(), Random.nextDouble()))
-    )
-    val table = UdashTable(
-      items, responsive, dark,
-      striped = striped,
-      bordered = bordered,
-      hover = hover,
-      small = small
-    )(
-      headerFactory = Some(_ => tr(ISeq("x", "y", "z").map(header => th(b(header)))).render),
-      rowFactory = (el, nested) => tr(
-        nested(produce(el)(v => ISeq(v._1, v._2, v._3).map(td(_).render)))
-      ).render
-    )
-
-    div(GuideStyles.frame)(
-      UdashButtonGroup(justified = true.toProperty)(
-        darkButton.render,
-        stripedButton.render,
-        borderedButton.render,
-        hoverButton.render,
-        smallButton.render
-      ).render,
-      table.render
-    ).render
-  }
 
   def dropdown(): dom.Element = {
     val url = Url(BootstrapExtState.url)

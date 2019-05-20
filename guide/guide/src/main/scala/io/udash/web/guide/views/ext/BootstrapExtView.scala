@@ -6,7 +6,7 @@ import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.BootstrapDemos
-import io.udash.web.guide.views.ext.demo.bootstrap.{DatePickerDemo, DateRangePickerDemo, IconsDemo, StaticsDemo}
+import io.udash.web.guide.views.ext.demo.bootstrap._
 import io.udash.web.guide.views.{References, Versions}
 import scalatags.JsDom
 
@@ -20,6 +20,7 @@ class BootstrapExtView extends FinalView {
   private val (iconsDemo, iconsSnippet) = IconsDemo.demoWithSnippet()
   private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
   private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
+  private val (tableDemo, tableSnippet) = TableDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -51,51 +52,8 @@ class BootstrapExtView extends FinalView {
     dateRangePickerSnippet,
     ForceBootstrap(dateRangePickerDemo),
     h3("Tables"),
-    CodeBlock(
-      s"""val responsive = Property[Option[ResponsiveBreakpoint]](Some(ResponsiveBreakpoint.All))
-         |val dark = Property(false)
-         |val striped = Property(true)
-         |val bordered = Property(true)
-         |val hover = Property(true)
-         |val small = Property(false)
-         |
-         |val darkButton = UdashButton.toggle(active = dark)("Dark theme")
-         |val stripedButton = UdashButton.toggle(active = striped)("Striped")
-         |val borderedButton = UdashButton.toggle(active = bordered)("Bordered")
-         |val hoverButton = UdashButton.toggle(active = hover)("Hover")
-         |val smallButton = UdashButton.toggle(active = small)("Small")
-         |
-         |val items = SeqProperty(
-         |  Seq.fill(7)((Random.nextDouble(), Random.nextDouble(), Random.nextDouble()))
-         |)
-         |
-         |val table = UdashTable(
-         |  items, responsive, dark,
-         |  striped = striped,
-         |  bordered = bordered,
-         |  hover = hover,
-         |  small = small
-         |)(
-         |  headerFactory = Some(_ => tr(Seq("x", "y", "z").map(header => th(b(header)))).render),
-         |  rowFactory = (el, nested) => tr(
-         |    nested(produce(el)(v => Seq(v._1, v._2, v._3).map(td(_).render)))
-         |  ).render
-         |)
-         |
-         |div(
-         |  UdashButtonGroup(justified = true.toProperty)(
-         |    darkButton.render,
-         |    stripedButton.render,
-         |    borderedButton.render,
-         |    hoverButton.render,
-         |    smallButton.render
-         |  ).render,
-         |  table.render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.tables()
-    ),
+    tableSnippet,
+    ForceBootstrap(tableDemo),
     h3("Dropdowns"),
     p("You can create dynamic dropdowns using ", i("SeqProperty"), "-based ", i("UdashDropdown"),
       ". It allows listening on item selection and using custom item renderers."),
