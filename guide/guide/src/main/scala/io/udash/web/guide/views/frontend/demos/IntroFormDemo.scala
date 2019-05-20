@@ -7,8 +7,8 @@ import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.css.CssView
 import io.udash.web.guide.components.BootstrapUtils
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.ext.demo.AutoDemo
 import scalatags.JsDom
 
 import scala.collection.mutable

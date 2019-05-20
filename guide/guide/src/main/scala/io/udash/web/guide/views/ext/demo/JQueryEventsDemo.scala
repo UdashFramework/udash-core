@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext.demo
 import io.udash._
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
 import io.udash.css.CssView
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom

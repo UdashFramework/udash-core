@@ -1,4 +1,4 @@
-package io.udash.web.guide.views.ext.demo
+package io.udash.web.guide.demos
 
 import com.avsystem.commons.SharedExtensions
 import io.udash.web.commons.components.CodeBlock

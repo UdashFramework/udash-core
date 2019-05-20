@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext.demo
 import io.udash.css.CssView
 import io.udash.i18n._
 import io.udash.web.guide.components.BootstrapUtils
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom

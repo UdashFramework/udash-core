@@ -2,8 +2,8 @@ package io.udash.web.guide.views.frontend.demos
 
 import io.udash._
 import io.udash.css.CssView
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.ext.demo.AutoDemo
 import org.scalajs.dom
 import scalatags.JsDom
 

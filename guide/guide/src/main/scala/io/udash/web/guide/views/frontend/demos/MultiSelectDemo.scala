@@ -4,8 +4,8 @@ import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.ext.demo.AutoDemo
 import scalatags.JsDom
 
 object MultiSelectDemo extends AutoDemo with CssView {

@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext.demo
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
