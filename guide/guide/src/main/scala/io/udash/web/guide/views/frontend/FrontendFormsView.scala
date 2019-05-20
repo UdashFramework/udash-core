@@ -17,6 +17,7 @@ class FrontendFormsView extends FinalView with CssView {
 
   private val (textInputDemo, textInputSnippet) = TextInputDemo.demoWithSnippet()
   private val (textAreaDemo, textAreaSnippet) = TextAreaDemo.demoWithSnippet()
+  private val (checkboxDemo, checkboxSnippet) = CheckboxDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -52,22 +53,8 @@ class FrontendFormsView extends FinalView with CssView {
       "Below you can find the example of creating a single checkbox. Notice that the third property contains String, so it uses ",
       "property transformation for checkbox binding. "
     ),
-    CodeBlock(
-      """val propA: Property[Boolean] = Property(true)
-        |val propB: Property[Boolean] = Property(false)
-        |val propC: Property[String] = Property("Yes")
-        |val propCAsBoolean = propC.transform(
-        |  (s: String) => if (s.equalsIgnoreCase("yes")) true else false,
-        |  (b: Boolean) => if (b) "Yes" else "No"
-        |)
-        |
-        |form(
-        |  Checkbox(propA).render, " A -> ", bind(propA),
-        |  Checkbox(propB).render, " B -> ", bind(propB),
-        |  Checkbox(propCAsBoolean).render, " C -> ", bind(propC)
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new CheckboxDemoComponent),
+    checkboxSnippet,
+    ForceBootstrap(checkboxDemo),
     h3("CheckButtons"),
     p(
       "The below example shows how to create a sequence of checkboxes for a provided sequence of possible values and bind them ",
