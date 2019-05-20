@@ -18,6 +18,7 @@ class FrontendBindingsView extends FinalView with CssView {
   val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
   val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
   val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
+  val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -69,15 +70,8 @@ class FrontendBindingsView extends FinalView with CssView {
       i("Attr.bind(ReadableProperty[String])"), " synchronises attribute value with the property. ",
       i("AttrPair.attrIf(ReadableProperty[Boolean])"), " adds attribute if the property value is ", i("true"), " and removes it otherwise. "
     ),
-    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
-                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
-                |
-                |div(
-                |  span("Visible: ", bind(visible), " -> "),
-                |  span((style := "display: none;").attrIfNot(visible))("Show/hide")
-                |)""".stripMargin
-    )(GuideStyles),
-    new BindAttributeDemoComponent,
+    bindAttributeSnippet,
+    bindAttributeDemo,
     h3("Validation"),
     CodeBlock(
       """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
