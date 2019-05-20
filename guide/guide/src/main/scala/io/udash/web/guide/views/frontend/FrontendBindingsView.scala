@@ -17,6 +17,7 @@ class FrontendBindingsView extends FinalView with CssView {
   val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
   val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
   val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
+  val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -60,15 +61,8 @@ class FrontendBindingsView extends FinalView with CssView {
       "This binding method takes two arguments: ", i("Property[Boolean]"), " and ", i("Seq[dom.Element]"), ". ",
       "If value of the property is ", i("true"), " it shows all passed elements and hides them otherwise."
     ),
-    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
-                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
-                |
-                |div(
-                |  span("Visible: ", bind(visible), " -> "),
-                |  showIf(visible)(span("Show/hide").render)
-                |)""".stripMargin
-    )(GuideStyles),
-    new ShowIfDemo,
+    showIfSnippet,
+    showIfDemo,
     h3("Attribute bindings"),
     p(
       "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
