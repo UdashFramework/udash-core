@@ -21,6 +21,7 @@ class BootstrapExtView extends FinalView {
   private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
   private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
   private val (tableDemo, tableSnippet) = TableDemo.demoWithSnippet()
+  private val (dropdownsDemo, dropdownsSnippet) = DropdownsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -59,47 +60,8 @@ class BootstrapExtView extends FinalView {
       ". It allows listening on item selection and using custom item renderers."),
     p("The example below shows a simple dropup using default renderer and item styles. A new item is added every 5 seconds, ",
       "item selections are recorded and displayed underneath."),
-    CodeBlock(
-      s"""|val items = SeqProperty[UdashDropdown.DefaultDropdownItem](Seq(
-          |  UdashDropdown.DropdownHeader("Start"),
-          |  UdashDropdown.DropdownLink("Intro", Url(IntroState.url)),
-          |  UdashDropdown.DropdownDisabled(UdashDropdown.DropdownLink("Test Disabled", url)),
-          |  UdashDropdown.DropdownDivider,
-          |  UdashDropdown.DropdownHeader("Dynamic")
-          |))
-          |
-          |val clicks = SeqProperty[String](Seq.empty)
-          |var i = 1
-          |val appendHandler = window.setInterval(() => {
-          |  items.append(UdashDropdown.DropdownLink(s"Test $i", url))
-          |  i += 1
-          |}, 5000)
-          |window.setTimeout(() => window.clearInterval(appendHandler), 60000)
-          |
-          |val dropdown = UdashDropdown(items)(
-          |  UdashDropdown.defaultItemFactory,
-          |  _ => Seq[Modifier]("Dropdown ", BootstrapStyles.Button.color(Color.Primary))
-          |)
-          |val dropup = UdashDropdown(items, UdashDropdown.Direction.Up.toProperty)(
-          |  UdashDropdown.defaultItemFactory, _ => "Dropup "
-          |)
-          |val listener = {
-          |  case UdashDropdown.DropdownEvent.SelectionEvent(_, item) =>
-          |    clicks.append(item.toString)
-          |  case ev: DropdownEvent[_, _] =>
-          |    logger.info(ev.toString)
-          |}
-          |dropdown.listen(listener)
-          |dropup.listen(listener)
-          |
-          |div(
-          |  div(BootstrapStyles.Grid.colXs6)(dropdown.render),
-          |  div(BootstrapStyles.Grid.colXs6)(dropup.render)
-          |).render""".stripMargin
-    )(GuideStyles),
-    div(cls := "bootstrap")( //force Boostrap styles
-      BootstrapDemos.dropdown()
-    ),
+    dropdownsSnippet,
+    ForceBootstrap(dropdownsDemo),
     h3("Button"),
     p("Bootstrap buttons are easy to use as ", i("UdashButton"), "s. They support click listening, ",
       "provide type-safe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),

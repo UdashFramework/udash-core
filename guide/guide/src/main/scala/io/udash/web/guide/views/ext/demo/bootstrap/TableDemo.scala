@@ -55,9 +55,9 @@ object TableDemo extends AutoDemo with CssView {
         borderedButton.render,
         hoverButton.render,
         smallButton.render
-      ).render,
-      table.render
-    ).render
+      ),
+      table
+    )
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
