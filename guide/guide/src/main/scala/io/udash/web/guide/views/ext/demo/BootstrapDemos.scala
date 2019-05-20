@@ -44,42 +44,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def buttonsDemo(): dom.Element = {
-    val smallBtn = Some(Size.Small).toProperty[Option[Size]]
-    val disabledButtons = Property(Set.empty[Int])
-    def disabled(idx: Int): ReadableProperty[Boolean] = disabledButtons.transform(_.contains(idx))
-
-    val buttons = Color.values.map(color =>
-      UdashButton(color.toProperty, smallBtn, disabled = disabled(color.ordinal))(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
-    )
-
-    val clicks = SeqProperty[String](Seq.empty)
-    buttons.foreach(_.listen {
-      case UdashButton.ButtonClickEvent(source, _) => clicks.append(source.render.textContent)
-    })
-
-    val push = UdashButton(size = Some(Size.Large).toProperty[Option[Size]], block = true.toProperty)("Disable random buttons!")
-    push.listen { case UdashButton.ButtonClickEvent(_, _) =>
-      clicks.set(Seq.empty)
-
-      val disabledCount = Random.nextInt(buttons.size + 1)
-      disabledButtons.set(Seq.fill(disabledCount)(Random.nextInt(buttons.size)).toSet)
-    }
-
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        push.render,
-      ),
-      div(GlobalStyles.centerBlock, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        buttons.map(_.render)
-      ),
-      h4("Clicks: "),
-      produce(clicks)(seq =>
-        ul(wellStyles)(seq.map(li(_))).render
-      )
-    ).render
-  }
-
   def toggleButton(): dom.Element = {
     val buttons = Color.values.map { color =>
       color.name -> {

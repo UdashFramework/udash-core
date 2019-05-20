@@ -22,6 +22,7 @@ class BootstrapExtView extends FinalView {
   private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
   private val (tableDemo, tableSnippet) = TableDemo.demoWithSnippet()
   private val (dropdownsDemo, dropdownsSnippet) = DropdownsDemo.demoWithSnippet()
+  private val (buttonsDemo, buttonsSnippet) = ButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -67,37 +68,8 @@ class BootstrapExtView extends FinalView {
       "provide type-safe style & size classes and a ", i("Property"), "-based mechanism for activation and disabling."),
     p("This example shows a variety of available button options. Small button indicators register their clicks and are ",
       "randomly set as active or disabled by the block button action, which also clears the click history."),
-    CodeBlock(
-      s"""|val smallBtn = Some(Size.Small).toProperty[Option[Size]]
-          |val disabledButtons = Property(Set.empty[Int])
-          |def disabled(idx: Int): ReadableProperty[Boolean] = disabledButtons.transform(_.contains(idx))
-          |
-          |val buttons = Color.values.map(color =>
-          |  UdashButton(color.toProperty, smallBtn, disabled = disabled(color.ordinal))(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
-          |)
-          |
-          |val clicks = SeqProperty[String](Seq.empty)
-          |buttons.foreach(_.listen {
-          |  case UdashButton.ButtonClickEvent(source, _) => clicks.append(source.render.textContent)
-          |})
-          |
-          |val push = UdashButton(size = Some(Size.Large).toProperty[Option[Size]], block = true.toProperty)(
-          |  "Disable random buttons!"
-          |)
-          |push.listen { case UdashButton.ButtonClickEvent(_, _) =>
-          |  clicks.set(Seq.empty)
-          |  val disabledCount = Random.nextInt(buttons.size + 1)
-          |  disabledButtons.set(Seq.fill(disabledCount)(Random.nextInt(buttons.size)).toSet)
-          |}
-          |
-          |div(
-          |  push.render,
-          |  buttons.map(_.render)
-          |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.buttonsDemo()
-    ),
+    buttonsSnippet,
+    ForceBootstrap(buttonsDemo),
     p("The example below presents helper method for creating toggle buttons."),
     CodeBlock(
       s"""|val buttons = Color.values.map { color =>
