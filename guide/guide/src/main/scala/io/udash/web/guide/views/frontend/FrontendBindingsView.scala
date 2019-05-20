@@ -16,6 +16,9 @@ class FrontendBindingsView extends FinalView with CssView {
 
   import JsDom.all._
 
+  val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
+  val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
+
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
     p(
@@ -36,32 +39,12 @@ class FrontendBindingsView extends FinalView with CssView {
       li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
     h3("bind"),
-    CodeBlock(
-      """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-        |
-        |val name: Property[String] = Property[String](names.next())
-        |div("Name: ", bind(name)).render
-        |
-        |dom.window.setInterval(() => name.set(names.next()), 500)""".stripMargin
-    )(GuideStyles),
-    new BindDemoComponent,
+    bindSnippet,
+    bindDemo,
     p("As you can see the ", i("bind"), " method automatically updates displayed name on every change of the property value."),
     h3("produce"),
-    CodeBlock(
-      """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-        |val name: Property[String] = Property[String](names.next())
-        |val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |
-        |div(
-        |  "Name: ",
-        |  produce(name)(value => b(value).render), br,
-        |  "Integers: ",
-        |  produce(integers)((seq: Seq[Int]) =>
-        |    seq.map(p => span(s"$p, ").render)
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    new ProduceDemoComponent,
+    produceSnippet,
+    produceDemo,
     p(
       "The above example presents two variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
       " method, but you can provide a custom DOM element builder. "
