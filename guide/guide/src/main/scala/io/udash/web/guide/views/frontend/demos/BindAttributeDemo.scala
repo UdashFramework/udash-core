@@ -14,14 +14,13 @@ object BindAttributeDemo extends AutoDemo with CssView {
     val visible: Property[Boolean] = Property[Boolean](true)
     dom.window.setInterval(() => visible.set(!visible.get), 1000)
 
-    val element = Seq(
+    p(
       span("Visible: ", bind(visible), " -> "),
       span((style := "display: none;").attrIfNot(visible))("Show/hide")
     )
-    element
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "bind-attr-demo", GuideStyles.frame)(rendered), source.lines.slice(1, source.lines.size - 2))
+    (div(id := "bind-attr-demo", GuideStyles.frame)(rendered), source.lines.drop(1))
   }
 }

@@ -22,7 +22,15 @@ object BindValidationDemo extends AutoDemo with CssView {
       else Invalid("Sequence is not sorted!")
     })
 
-    val element = Seq[Modifier](
+    dom.window.setInterval(() => {
+      val s: Int = integers.get.size
+      val idx = Random.nextInt(s)
+      val amount = Random.nextInt(s - idx) + 1
+      val count = Random.nextInt(5)
+      integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
+    }, 2000)
+
+    p(
       "Integers: ",
       span(
         id := "validation-demo-integers",
@@ -40,19 +48,10 @@ object BindValidationDemo extends AutoDemo with CssView {
         errorBuilder = _ => span("Validation error...").render
       )
     )
-
-    dom.window.setInterval(() => {
-      val s: Int = integers.get.size
-      val idx = Random.nextInt(s)
-      val amount = Random.nextInt(s - idx) + 1
-      val count = Random.nextInt(5)
-      integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
-    }, 2000)
-
-    element
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "validation-demo", GuideStyles.frame)(rendered), source.lines.slice(1, source.lines.size - 10))
+    (div(id := "validation-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 10) ++
+      source.lines.slice(source.lines.size - 19, source.lines.size - 1))
   }
 }

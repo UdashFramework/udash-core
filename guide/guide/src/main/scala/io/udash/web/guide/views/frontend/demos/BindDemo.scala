@@ -16,11 +16,10 @@ object BindDemo extends AutoDemo with CssView {
     val name: Property[String] = Property[String](names.next())
     dom.window.setInterval(() => name.set(names.next()), 500)
 
-    val element = p("Name: ", bind(name))
-    element
+    p("Name: ", bind(name))
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "bind-demo", GuideStyles.frame)(rendered), source.lines.slice(1, source.lines.size - 2))
+    (div(id := "bind-demo", GuideStyles.frame)(rendered), source.lines.drop(1))
   }
 }

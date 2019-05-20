@@ -17,17 +17,6 @@ object ProduceDemo extends AutoDemo with CssView {
     val name: Property[String] = Property[String](names.next())
     val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
 
-    val element = p(
-      "Name: ",
-      produce(name)(value => b(id := "produce-demo-name")(value).render), br,
-      "Integers: ",
-      span(id := "produce-demo-integers")(
-        produce(integers) { seq: Seq[Int] =>
-          seq.map(p => span(GuideStyles.highlightRed)(s"$p, ").render)
-        }
-      )
-    )
-
     dom.window.setInterval(() => {
       name.set(names.next())
 
@@ -38,10 +27,20 @@ object ProduceDemo extends AutoDemo with CssView {
       integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
     }, 2000)
 
-    element
+    p(
+      "Name: ",
+      produce(name)(value => b(id := "produce-demo-name")(value).render), br,
+      "Integers: ",
+      span(id := "produce-demo-integers")(
+        produce(integers) { seq: Seq[Int] =>
+          seq.map(p => span(GuideStyles.highlightRed)(s"$p, ").render)
+        }
+      )
+    )
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "produce-demo", GuideStyles.frame)(rendered), source.lines.slice(1, source.lines.size - 12))
+    (div(id := "produce-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 5) ++
+      source.lines.slice(source.lines.size - 11, source.lines.size - 1))
   }
 }
