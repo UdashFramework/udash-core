@@ -6,7 +6,7 @@ import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.BootstrapDemos
-import io.udash.web.guide.views.ext.demo.bootstrap.{DatePickerDemo, IconsDemo, StaticsDemo}
+import io.udash.web.guide.views.ext.demo.bootstrap.{DatePickerDemo, DateRangePickerDemo, IconsDemo, StaticsDemo}
 import io.udash.web.guide.views.{References, Versions}
 import scalatags.JsDom
 
@@ -19,6 +19,7 @@ class BootstrapExtView extends FinalView {
   private val (staticsDemo, staticsSnippet) = StaticsDemo.demoWithSnippet()
   private val (iconsDemo, iconsSnippet) = IconsDemo.demoWithSnippet()
   private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
+  private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -47,44 +48,8 @@ class BootstrapExtView extends FinalView {
     datePickerSnippet,
     ForceBootstrap(datePickerDemo),
     p("It is possible to create a date range selector from two pickers."),
-    CodeBlock(
-      s"""import java.{util => ju}
-         |
-         |val now = new ju.Date().getTime
-         |val sevenDays = TimeUnit.DAYS.toMillis(7)
-         |val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
-         |val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
-         |
-         |val fromPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-         |  format = "MMMM Do YYYY",
-         |  locale = Some("en_GB")
-         |))
-         |
-         |val toPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-         |  format = "D MMMM YYYY",
-         |  locale = Some("pl")
-         |))
-         |
-         |val fromPicker: UdashDatePicker = UdashDatePicker(from, fromPickerOptions)()
-         |val toPicker: UdashDatePicker = UdashDatePicker(to, toPickerOptions)()
-         |
-         |UdashDatePicker.dateRange(
-         |  fromPicker, toPicker
-         |)(fromPickerOptions, toPickerOptions)
-         |
-         |div(
-         |  UdashDatePicker.loadBootstrapDatePickerStyles(),
-         |  UdashInputGroup()(
-         |    UdashInputGroup.addon("From"),
-         |    UdashInputGroup.input(fromPicker.render),
-         |    UdashInputGroup.addon("to"),
-         |    UdashInputGroup.input(toPicker.render)
-         |  ).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.datePickerRange()
-    ),
+    dateRangePickerSnippet,
+    ForceBootstrap(dateRangePickerDemo),
     h3("Tables"),
     CodeBlock(
       s"""val responsive = Property[Option[ResponsiveBreakpoint]](Some(ResponsiveBreakpoint.All))
