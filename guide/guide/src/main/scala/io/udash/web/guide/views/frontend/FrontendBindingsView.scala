@@ -6,18 +6,17 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object FrontendBindingsViewFactory extends StaticViewFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
 class FrontendBindingsView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
   val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
+  val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -50,15 +49,8 @@ class FrontendBindingsView extends FinalView with CssView {
       " method, but you can provide a custom DOM element builder. "
     ),
     h3("repeat"),
-    CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |
-        |val template: Element = div(
-        |  "Integers: ",
-        |  repeat(integers)(p => span(s"${p.get}, ").render)
-        |).render""".stripMargin
-    )(GuideStyles),
-    new RepeatDemoComponent,
+    repeatSnippet,
+    repeatDemo,
     p("Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
       "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"),
       " method updates only changed elements of the sequence. To make it easier to notice, every added element is highlighted. "
@@ -76,7 +68,7 @@ class FrontendBindingsView extends FinalView with CssView {
                 |  showIf(visible)(span("Show/hide").render)
                 |)""".stripMargin
     )(GuideStyles),
-    new ShowIfDemoComponent,
+    new ShowIfDemo,
     h3("Attribute bindings"),
     p(
       "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
