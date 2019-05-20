@@ -12,7 +12,7 @@ object MultiSelectDemo extends AutoDemo with CssView {
 
   import JsDom.all._
 
-  private val ((firstMultiselect, secondMultiselect), source) = {
+  private val ((firstMultiSelect, secondMultiSelect), source) = {
     sealed trait Fruit
     case object Apple extends Fruit
     case object Orange extends Fruit
@@ -28,7 +28,7 @@ object MultiSelectDemo extends AutoDemo with CssView {
       }
     )
 
-    def multiselect() = UdashInputGroup()(
+    def multiSelect() = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.select(
         Select(
@@ -38,14 +38,14 @@ object MultiSelectDemo extends AutoDemo with CssView {
       UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
     )
 
-    (multiselect(), multiselect())
+    (multiSelect(), multiSelect())
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
     (div(id := "multi-select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.Grid.row)(firstMultiselect),
-        div(BootstrapStyles.Grid.row)(secondMultiselect)
+        div(BootstrapStyles.Grid.row)(firstMultiSelect),
+        div(BootstrapStyles.Grid.row)(secondMultiSelect)
       )
     ), source.lines.slice(1, source.lines.size - 3))
   }
