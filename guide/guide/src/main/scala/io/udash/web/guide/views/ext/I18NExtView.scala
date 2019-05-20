@@ -16,6 +16,10 @@ final class I18NExtView extends FinalView with CssView {
   import Context._
   import JsDom.all._
 
+  private val (frontendTranslationsDemo, frontendTranslationsSnippet) = FrontendTranslationsDemo.demoWithSnippet()
+  private val (remoteTranslationsDemo, remoteTranslationsSnippet) = RemoteTranslationsDemo.demoWithSnippet()
+  private val (dynamicTranslationsDemo, dynamicTranslationsSnippet) = DynamicRemoteTranslationsDemo.demoWithSnippet()
+
   override def getTemplate: Modifier = div(
     h1("Udash i18n"),
     p(
@@ -73,70 +77,12 @@ final class I18NExtView extends FinalView with CssView {
       i("LocalTranslationProvider"), " was prepared for frontend-only applications. It takes a map from ",
       i("Lang"), " to ", i("Bundle"), ". Each bundle provides mapping from translation keys to translation templates."
     ),
-    CodeBlock(
-      s"""import io.udash.i18n._
-         |
-         |object FrontendTranslationProvider {
-         |  import io.udash.guide.Context._
-         |
-         |  private val translations = Map(
-         |    Lang("en") -> Bundle(BundleHash("enHash"), Map(
-         |      "auth.loginLabel" -> "Username",
-         |      "auth.passwordLabel" -> "Password",
-         |      "auth.login.buttonLabel" -> "Sign in",
-         |      "auth.login.retriesLeft" -> "{} retries left",
-         |      "auth.login.retriesLeftOne" -> "1 retry left",
-         |      "auth.register.buttonLabel" -> "Sign up"
-         |    ))
-         |  )
-         |
-         |  def apply(): LocalTranslationProvider =
-         |    new LocalTranslationProvider(translations)
-         |}
-         |
-         |object FrontendTranslationsDemo {
-         |  import scalatags.JsDom.all._
-         |
-         |  def apply(): dom.Element = {
-         |    import io.udash.guide.Context._
-         |    implicit val translationProvider = FrontendTranslationProvider()
-         |    implicit val lang = Lang("en")
-         |    div(
-         |      ul(
-         |        li(
-         |          "auth.loginLabel: ",
-         |          translated(Translations.auth.loginLabel())
-         |        ),
-         |        li(
-         |          "auth.passwordLabel: ",
-         |          translated(Translations.auth.passwordLabel())
-         |        ),
-         |        li(
-         |          "auth.login.buttonLabel: ",
-         |          translated(Translations.auth.login.buttonLabel())
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeft: ",
-         |          translated(Translations.auth.login.retriesLeft(3))
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeftOne: ",
-         |          translated(Translations.auth.login.retriesLeftOne())
-         |        ),
-         |        li(
-         |          "auth.register.buttonLabel: ",
-         |          translated(Translations.auth.register.buttonLabel())
-         |        )
-         |      )
-         |    ).render
-         |  }
-         |}""".stripMargin
-    )(GuideStyles),
+    frontendTranslationsSnippet,
     p(
       "Take a look at the example below. As you can see in the code sample, it uses ",
       i("translated"), " method to bind translation into DOM hierarchy. "
     ),
-    ForceBootstrap(FrontendTranslationsDemo()),
+    ForceBootstrap(frontendTranslationsDemo),
     h3("RemoteTranslationProvider"),
     p(
       "If your application is using the Udash RPC system, you can provide translations from the server side application. ",
@@ -188,52 +134,9 @@ final class I18NExtView extends FinalView with CssView {
       i("RemoteTranslationProvider"), ". This provider loads required translation templates from server ",
       "and caches them in provided storage. In the example below it is a browser local storage which keeps cached values for 6 hours."
     ),
-    CodeBlock(
-      s"""import io.udash.i18n._
-         |
-         |object RemoteTranslationsDemo {
-         |  import scalatags.JsDom.all._
-         |
-         |  def apply(): dom.Element = {
-         |    import io.udash.guide.Context._
-         |    implicit val translationProvider =
-         |      new RemoteTranslationProvider(serverRpc.translations(),
-         |      Some(LocalStorage), 6 hours
-         |    )
-         |    implicit val lang = Lang("pl")
-         |    div(
-         |      ul(
-         |        li(
-         |          "auth.loginLabel: ",
-         |          translated(Translations.auth.loginLabel())
-         |        ),
-         |        li(
-         |          "auth.passwordLabel: ",
-         |          translated(Translations.auth.passwordLabel())
-         |        ),
-         |        li(
-         |          "auth.login.buttonLabel: ",
-         |          translated(Translations.auth.login.buttonLabel())
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeft: ",
-         |          translated(Translations.auth.login.retriesLeft(3))
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeftOne: ",
-         |          translated(Translations.auth.login.retriesLeftOne())
-         |        ),
-         |        li(
-         |          "auth.register.buttonLabel: ",
-         |          translated(Translations.auth.register.buttonLabel())
-         |        )
-         |      )
-         |    ).render
-         |  }
-         |}""".stripMargin
-    )(GuideStyles),
+    remoteTranslationsSnippet,
     p("Take a look at the example below."),
-    ForceBootstrap(RemoteTranslationsDemo()),
+    ForceBootstrap(remoteTranslationsDemo),
     h2("Translations binding"),
     p(
       "All translations are resolved asynchronously, so they cannot be statically added into DOM hierarchy. The Udash i18n plugin ",
@@ -258,54 +161,9 @@ final class I18NExtView extends FinalView with CssView {
       ),
       "Take a look at the example below: "
     ),
-    CodeBlock(
-      s"""import io.udash.i18n._
-         |
-         |object RemoteTranslationsDemo {
-         |  import scalatags.JsDom.all._
-         |
-         |  def apply(): dom.Element = {
-         |    import io.udash.guide.Context._
-         |    implicit val translationProvider =
-         |      new RemoteTranslationProvider(serverRpc.translations(),
-         |      Some(LocalStorage), 6 hours
-         |    )
-         |    implicit val lang = LangProperty(Lang("en"))
-         |    div(
-         |      button(onclick := ((_: Event) => lang.set(Lang("en"))))("EN"),
-         |      button(onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
-         |      ul(
-         |        li(
-         |          "auth.loginLabel: ",
-         |          translatedDynamic(Translations.auth.loginLabel)(_.apply()))
-         |        ),
-         |        li(
-         |          "auth.passwordLabel: ",
-         |          translatedDynamic(Translations.auth.passwordLabel)(_.apply()))
-         |        ),
-         |        li(
-         |          "auth.login.buttonLabel: ",
-         |          translatedDynamic(Translations.auth.login.buttonLabel)(_.apply()))
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeft: ",
-         |          translatedDynamic(Translations.auth.login.retriesLeft)(_.apply(3)))
-         |        ),
-         |        li(
-         |          "auth.login.retriesLeftOne: ",
-         |          translatedDynamic(Translations.auth.login.retriesLeftOne)(_.apply()))
-         |        ),
-         |        li(
-         |          "auth.register.buttonLabel: ",
-         |          translatedDynamic(Translations.auth.register.buttonLabel)(_.apply()))
-         |        )
-         |      )
-         |    ).render
-         |  }
-         |}""".stripMargin
-    )(GuideStyles),
+    dynamicTranslationsSnippet,
     p("Now you can change the translation language without redrawing the whole component, as presented in the following live example."),
-    ForceBootstrap(DynamicRemoteTranslationsDemo()),
+    ForceBootstrap(dynamicTranslationsDemo),
     h2("What's next?"),
     p(
       "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
