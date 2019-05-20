@@ -2,7 +2,6 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -21,6 +20,7 @@ class FrontendFormsView extends FinalView with CssView {
   private val (checkButtonsDemo, checkButtonsSnippet) = CheckButtonsDemo.demoWithSnippet()
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
   private val (selectDemo, selectSnippet) = SelectDemo.demoWithSnippet()
+  private val (multiSelectDemo, multiSelectSnippet) = MultiSelectDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -80,29 +80,8 @@ class FrontendFormsView extends FinalView with CssView {
     ForceBootstrap(selectDemo),
     h4("Select with multiple selected values"),
     p("Notice that the only difference is the type of the used property."),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
-        |val favoriteFruitsStrings = favoriteFruits.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  Select(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new MultiSelectDemoComponent),
+    multiSelectSnippet,
+    ForceBootstrap(multiSelectDemo),
     h2("What's next?"),
     p(
       "Now you know everything you need to start frontend development using Udash. ",
