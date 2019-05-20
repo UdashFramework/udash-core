@@ -19,6 +19,7 @@ class FrontendFormsView extends FinalView with CssView {
   private val (textAreaDemo, textAreaSnippet) = TextAreaDemo.demoWithSnippet()
   private val (checkboxDemo, checkboxSnippet) = CheckboxDemo.demoWithSnippet()
   private val (checkButtonsDemo, checkButtonsSnippet) = CheckButtonsDemo.demoWithSnippet()
+  private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -70,33 +71,8 @@ class FrontendFormsView extends FinalView with CssView {
       "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ", i("Property"), ", ",
       "not with a ", i("SeqProperty"), ", so only one value can be selected. "
     ),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
-        |val favoriteFruitString = favoriteFruit.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  RadioButtons(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(
-        |    (els: Seq[(Input, String)]) => span(
-        |      els.map { case (i: Input, l: String) => label(i, l) }
-        |    )
-        |  ).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new RadioButtonsDemoComponent),
+    radioButtonsSnippet,
+    ForceBootstrap(radioButtonsDemo),
     h3("Select"),
     p("The HTML select element might be used in two ways: with or without multi selection. Below you can find examples of both usages."),
     CodeBlock(
