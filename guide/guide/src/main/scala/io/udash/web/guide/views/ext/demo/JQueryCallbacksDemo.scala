@@ -1,36 +1,37 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash.bootstrap.button.UdashButton
+import io.udash.css.CssView
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.wrappers.jquery._
-import org.scalajs.dom
+import scalatags.JsDom
 
 import scala.scalajs.js
 
-object JQueryCallbacksDemo {
-  import io.udash.css.CssView._
-  import scalatags.JsDom.all._
+object JQueryCallbacksDemo extends AutoDemo with CssView {
 
-  val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
-  callbacks.add((t: (Int, Int)) => {
-    val (a, b) = t
-    jQ("#jquery-callbacks-demo #plus").append(li(s"$a + $b = ${a + b}").render)
-  })
-  callbacks.add((t: (Int, Int)) => {
-    val (a, b) = t
-    jQ("#jquery-callbacks-demo #minus").append(li(s"$a - $b = ${a - b}").render)
-  })
-  callbacks.add((t: (Int, Int)) => {
-    val (a, b) = t
-    jQ("#jquery-callbacks-demo #mul").append(li(s"$a * $b = ${a * b}").render)
-  })
-  callbacks.add((t: (Int, Int)) => {
-    val (a, b) = t
-    jQ("#jquery-callbacks-demo #div").append(li(s"$a / $b = ${a / b}").render)
-  })
+  import JsDom.all._
 
-  def apply(): dom.Element = {
-    div(id := "jquery-callbacks-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+  private val (rendered, source) = {
+    val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
+    callbacks.add((t: (Int, Int)) => {
+      val (a, b) = t
+      jQ("#jquery-callbacks-demo #plus").append(li(s"$a + $b = ${a + b}").render)
+    })
+    callbacks.add((t: (Int, Int)) => {
+      val (a, b) = t
+      jQ("#jquery-callbacks-demo #minus").append(li(s"$a - $b = ${a - b}").render)
+    })
+    callbacks.add((t: (Int, Int)) => {
+      val (a, b) = t
+      jQ("#jquery-callbacks-demo #mul").append(li(s"$a * $b = ${a * b}").render)
+    })
+    callbacks.add((t: (Int, Int)) => {
+      val (a, b) = t
+      jQ("#jquery-callbacks-demo #div").append(li(s"$a / $b = ${a / b}").render)
+    })
+
+    div(
       "Plus:",
       ul(id := "plus"),
       "Minus:",
@@ -51,5 +52,9 @@ object JQueryCallbacksDemo {
         }))
       ).render
     ).render
+  }.withSourceCode
+
+  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
+    (div(id := "jquery-callbacks-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines.drop(1))
   }
 }
