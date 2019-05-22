@@ -272,7 +272,6 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
         }
         r <- Future {
           name.listenersCount() should be(0)
-          name.valid.listenersCount() should be(0)
           form.listenersCount() should be(0)
           form.validationProperties.size should be(0)
         }

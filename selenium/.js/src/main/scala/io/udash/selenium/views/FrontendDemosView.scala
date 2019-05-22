@@ -13,7 +13,6 @@ class FrontendDemosView extends FinalView with CssView {
     h3("Frontend demos"),
     new BindAttributeDemoComponent().getTemplate, hr,
     new BindDemoComponent().getTemplate, hr,
-    new BindValidationDemoComponent().getTemplate, hr,
     new CheckboxDemoComponent().getTemplate, hr,
     new CheckButtonsDemoComponent().getTemplate, hr,
     new FileInputDemoComponent().getTemplate, hr,
