@@ -3,7 +3,6 @@ package io.udash.bindings
 import com.avsystem.commons.misc.Opt
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, HasCssName, PropertyOps}
 import io.udash.bindings.modifiers._
-import io.udash.properties.ValidationResult
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
@@ -11,7 +10,6 @@ import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
-import scala.concurrent.Future
 import scala.scalajs.js
 
 trait Bindings {
@@ -316,47 +314,6 @@ trait Bindings {
                                                    customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
                                                   (builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
-
-  /**
-    * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
-    * to customize what HTML elements should be shown.
-    *
-    * @param property        Property to bind.
-    * @param progressBuilder     Builder which is called when validation process is started. It will also give you an access to future of
-    *                        validation results.
-    * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
-    * @param errorBuilder    Builder which is called, when validation process fails.
-    * @return Modifier for validation logic.
-    */
-  def valid[A](property: ReadableProperty[A])
-              (completeBuilder: ValidationResult => Seq[Node],
-               progressBuilder: Future[ValidationResult] => Seq[Node] = null,
-               errorBuilder: Throwable => Seq[Node] = null): Binding =
-    new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder))
-
-  /**
-    * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
-    * to customize what HTML elements should be shown.<br/><br/>
-    *
-    * The builders take nested bindings interceptor - it should be used if you want to create another binding inside
-    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-    *
-    * @param property              Property to bind.
-    * @param progressBuilder       Builder which is called when validation process is started. It will also give you an access to future of
-    *                              validation results.
-    * @param completeBuilder       Builder which is called when validation process is completed. It will give an access to validation results.
-    * @param errorBuilder          Builder which is called, when validation process fails.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
-    *                              if it did not replace elements in DOM. Is such a case the default implementation
-    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for validation logic.
-    */
-  def validWithNested[A](property: ReadableProperty[A])
-                        (completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
-                         progressBuilder: (Future[ValidationResult], Binding.NestedInterceptor) => Seq[Node] = null,
-                         errorBuilder: (Throwable, Binding.NestedInterceptor) => Seq[Node] = null,
-                         customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace): Binding =
-    new ValidationValueModifier(property, Option(progressBuilder), completeBuilder, Option(errorBuilder), customElementsReplace)
 
   implicit def toAttrOps(attr: Attr): AttrOps =
     new AttrOps(attr)

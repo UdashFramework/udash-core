@@ -4,8 +4,6 @@ package single
 import com.avsystem.commons.misc.Opt
 import io.udash.utils.Registration
 
-import scala.concurrent.Future
-
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties] class TransformedReadableProperty[A, B](
   override protected val origin: ReadableProperty[A],
@@ -77,8 +75,6 @@ private[properties] class TransformedProperty[A, B](
   transformer: A => B, revert: B => A
 ) extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
-  protected var originValidatorRegistration: Registration = _
-
   override def set(t: B, force: Boolean = false): Unit =
     origin.set(revert(t), force)
 
@@ -87,35 +83,6 @@ private[properties] class TransformedProperty[A, B](
 
   override def touch(): Unit =
     origin.touch()
-
-  private def initOriginValidator(): Unit = {
-    if (originValidatorRegistration == null || !originValidatorRegistration.isActive) {
-      super.clearValidators()
-      originValidatorRegistration = origin.addValidator(new Validator[A] {
-        override def apply(element: A): Future[ValidationResult] = {
-          import Validator._
-
-          import scala.concurrent.ExecutionContext.Implicits.global
-
-          val transformedValue = transformer(element)
-          Future.sequence(
-            validators.map(_.apply(transformedValue)).toSeq
-          ).foldValidationResult
-        }
-      })
-    }
-  }
-
-  override def addValidator(v: Validator[B]): Registration = {
-    initOriginValidator()
-    super.addValidator(v)
-  }
-
-  override def clearValidators(): Unit = {
-    originValidatorRegistration = null
-    super.clearValidators()
-    origin.clearValidators()
-  }
 
   override def clearListeners(): Unit = {
     originListenerRegistration = null

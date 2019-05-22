@@ -9,7 +9,6 @@ import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import scalatags.JsDom.all._
 
-import scala.collection.mutable
 import scala.util.Random
 
 /** The form's model structure. */

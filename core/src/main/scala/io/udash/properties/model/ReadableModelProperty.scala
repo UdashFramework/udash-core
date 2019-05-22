@@ -5,8 +5,6 @@ import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{AbstractReadableProperty, CastableReadableProperty, Property, ReadableProperty}
 import io.udash.utils.CrossCollections
 
-import scala.concurrent.Future
-
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
   /** Returns child ModelProperty[B]. */
@@ -34,23 +32,6 @@ trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
 private[properties] trait AbstractReadableModelProperty[A]
   extends AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
   protected val properties = CrossCollections.createDictionary[Property[_]]
-
-  /**
-    * ModelProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
-    *
-    * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed.
-    */
-  override def isValid: Future[ValidationResult] = {
-    import Validator._
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    if (validationResult == null) {
-      validationResult = Future.sequence(
-        (Iterator(super.isValid) ++ properties.values.iterator.map(p => p.isValid)).toSeq
-      ).foldValidationResult
-    }
-    validationResult
-  }
 
   override lazy val readable: ReadableModelProperty[A] =
     new ReadableWrapper[A](this)

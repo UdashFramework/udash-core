@@ -4,7 +4,7 @@ package form
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
-import io.udash.bindings.modifiers.Binding
+import io.udash.bindings.modifiers.{Binding, EmptyModifier}
 import io.udash.bootstrap.form.UdashForm.{HorizontalLayoutSettings, ValidationTrigger}
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils._
@@ -17,10 +17,7 @@ import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
-import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, DurationLong}
-import scala.util.{Failure, Success}
 
 final class UdashForm private(
   formStyle: Option[CssStyle],
@@ -724,8 +721,6 @@ final class UdashForm private(
         div(BootstrapStyles.Grid.col(size, breakpoint))(content)
     }
   }
-
-  private[form] val validationProperties: mutable.Set[Property[Option[ValidationResult]]] = mutable.Set.empty
 
   def clearValidationResults(): Unit = {
     validationProperties.foreach(_.set(None))

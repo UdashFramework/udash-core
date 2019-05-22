@@ -34,8 +34,6 @@ import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
 import scalatags.JsDom
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 

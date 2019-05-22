@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 package form
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.css.CssStyle
 import org.scalajs.dom
@@ -9,8 +8,6 @@ import org.scalajs.dom._
 import org.scalajs.dom.html.Form
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
-
-import scala.util.{Failure, Success}
 
 final class UdashForm private(formStyle: Option[CssStyle], override val componentId: ComponentId)
                              (content: Modifier*) extends UdashBootstrapComponent {
@@ -25,23 +22,6 @@ final class UdashForm private(formStyle: Option[CssStyle], override val componen
 
 object UdashForm {
   import io.udash.css.CssView._
-
-  /** Binds provided `property` validation result to element Bootstrap validation style. */
-  def validation(property: ReadableProperty[_]): Modifier =
-    property.reactiveApply((el, _) => {
-      import BootstrapStyles.Form._
-
-      Seq(hasSuccess, hasError, hasWarning).foreach(_.removeFrom(el))
-
-      property.isValid.onCompleteNow {
-        case Success(Valid) =>
-          hasSuccess.addTo(el)
-        case Success(Invalid(_)) =>
-          hasError.addTo(el)
-        case Failure(_) =>
-          hasWarning.addTo(el)
-      }
-    })
 
   /**
     * Creates standard form with provided content. <br/>
