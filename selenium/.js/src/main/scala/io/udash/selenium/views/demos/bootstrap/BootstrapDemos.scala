@@ -473,11 +473,11 @@ object BootstrapDemos extends CrossLogging {
           labelContent = Some(_ => "User name")
         ),
         factory.input.formGroup()(
-          input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toDouble, _.toInt),
-          )()(age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid).render,
+          input = _ => factory.input.numberInput(user.subProp(_.age).transform(_.toDouble, _.toInt))()(
+            Validator(age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid)
+          ).render,
           labelContent = Some(_ => "Age"),
-          invalidFeedback = Some(_ => "Age should be a non-negative integer!"),
+          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.radioButtons(
