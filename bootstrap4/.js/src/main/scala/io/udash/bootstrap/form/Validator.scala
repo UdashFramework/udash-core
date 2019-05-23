@@ -3,8 +3,6 @@ package bootstrap.form
 
 import com.avsystem.commons._
 
-import scala.annotation.tailrec
-
 trait ValidationError {
   def message: String
 }
@@ -35,18 +33,12 @@ object Validator {
   def apply[ArgumentType](f: ArgumentType => ValidationResult): Validator[ArgumentType] =
     new FunctionValidator(f)
 
-  implicit final class FutureOps[T](private val future: Future[T]) extends AnyVal {
-    def foldValidationResult(implicit ev: T =:= Seq[ValidationResult]): Future[ValidationResult] = {
-      @tailrec
-      def reduce(acc: Seq[ValidationError], results: Seq[ValidationResult]): ValidationResult = results match {
-        case Seq() =>
-          if (acc.isEmpty) Valid
-          else Invalid(acc)
-        case Seq(Valid, tl@_*) => reduce(acc, tl)
-        case Seq(Invalid(errors), tl@_*) => reduce(acc ++ errors, tl)
+  implicit final class FutureValidationOps[T](private val future: Future[Seq[ValidationResult]]) extends AnyVal {
+    def foldValidationResult: Future[ValidationResult] = {
+      future.mapNow { s =>
+        val errors = s.iterator.flatCollect { case Invalid(results) => results }
+        if (errors.isEmpty) Valid else Invalid(errors.toSeq)
       }
-
-      future.mapNow(s => reduce(Nil, s))
     }
   }
 }
