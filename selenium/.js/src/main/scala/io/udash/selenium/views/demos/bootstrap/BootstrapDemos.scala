@@ -17,7 +17,7 @@ import io.udash.bootstrap.datepicker.UdashDatePicker
 import io.udash.bootstrap.dropdown.UdashDropdown
 import io.udash.bootstrap.dropdown.UdashDropdown.{DefaultDropdownItem, DropdownEvent}
 import io.udash.bootstrap.form.UdashForm.ValidationTrigger
-import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+import io.udash.bootstrap.form._
 import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
@@ -465,13 +465,6 @@ object BootstrapDemos extends CrossLogging {
     }
 
     val user = ModelProperty.blank[UserModel]
-    user.subProp(_.age).addValidator(new Validator[Int] {
-      override def apply(element: Int): Future[ValidationResult] =
-        Future {
-          if (element < 0) Invalid("Age should be a non-negative integer!")
-          else Valid
-        }
-    })
 
     div(
       UdashForm()(factory => Seq(
@@ -481,10 +474,11 @@ object BootstrapDemos extends CrossLogging {
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toString, _.toInt)
+            user.subProp(_.age).transform(_.toDouble, _.toInt),
+            validator = Validator(age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid)
           )().render,
           labelContent = Some(_ => "Age"),
-          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
+          invalidFeedback = Some(_ => "Age should be a non-negative integer!"),
         ),
         factory.input.formGroup()(
           input = _ => factory.input.radioButtons(

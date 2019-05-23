@@ -4,11 +4,12 @@ import java.{lang => jl}
 
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.form.UdashInputGroup
+import io.udash.bootstrap.form.{DefaultValidationError, Invalid, UdashInputGroup, Valid}
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import scalatags.JsDom.all._
 
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 /** The form's model structure. */
@@ -30,19 +31,6 @@ class IntroFormDemoComponent extends CssView {
       val model = ModelProperty(
         IntroFormDemoModel(0, 10, 42)
       )
-
-      // model validation
-      model.addValidator { element: IntroFormDemoModel =>
-        val errors = mutable.ArrayBuffer[String]()
-        if (element.minimum > element.maximum)
-          errors += "Minimum is bigger than maximum!"
-        if (element.minimum > element.between)
-          errors += "Minimum is bigger than your value!"
-        if (element.between > element.maximum)
-          errors += "Maximum is smaller than your value!"
-        if (errors.isEmpty) Valid
-        else Invalid(errors.map(DefaultValidationError))
-      }
 
       val presenter = new IntroFormDemoPresenter(model)
       val view = new IntroFormDemoView(model, presenter)
@@ -81,6 +69,18 @@ class IntroFormDemoComponent extends CssView {
     private val between = model.subProp(_.between).transform(i2s, s2i)
     private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
 
+    private val validation = model.transform { element: IntroFormDemoModel =>
+      val errors = ArrayBuffer[String]()
+      if (element.minimum > element.maximum)
+        errors += "Minimum is bigger than maximum!"
+      if (element.minimum > element.between)
+        errors += "Minimum is bigger than your value!"
+      if (element.between > element.maximum)
+        errors += "Maximum is smaller than your value!"
+      if (errors.isEmpty) Valid
+      else Invalid(errors.map(DefaultValidationError))
+    }
+
     // Button from Udash Bootstrap wrapper
     private val randomizeButton = UdashButton(
       buttonStyle = BootstrapStyles.Color.Primary.toProperty,
@@ -115,7 +115,7 @@ class IntroFormDemoComponent extends CssView {
       h3("Is valid?", BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Top)),
       p(id := "valid")(
         // validation binding - waits for model changes and updates the view
-        valid(model) {
+        produce(validation) {
           case Valid => span("Yes").render
           case Invalid(errors) => Seq(
             span("No, because:"),

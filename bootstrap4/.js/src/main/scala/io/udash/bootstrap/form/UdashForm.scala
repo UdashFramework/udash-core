@@ -1,10 +1,11 @@
 package io.udash.bootstrap
 package form
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
-import io.udash.bindings.modifiers.{Binding, EmptyModifier}
+import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.form.UdashForm.{HorizontalLayoutSettings, ValidationTrigger}
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils._
@@ -130,17 +131,16 @@ final class UdashForm private(
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = inputValidationTrigger,
+        validator: Validator[String] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
-      )(
-        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
-      ): UdashBootstrapComponent = {
+      )(inputModifier: Option[Binding.NestedInterceptor => Modifier] = None): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             TextInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(property, validationTrigger, externalBinding),
+              validationModifier(property, validationTrigger, validator, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
@@ -165,17 +165,16 @@ final class UdashForm private(
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = inputValidationTrigger,
+        validator: Validator[String] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
-      )(
-        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
-      ): UdashBootstrapComponent = {
+      )(inputModifier: Option[Binding.NestedInterceptor => Modifier] = None): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             PasswordInput(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(property, validationTrigger, externalBinding),
+              validationModifier(property, validationTrigger, validator, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
@@ -196,21 +195,20 @@ final class UdashForm private(
         *                          Use the provided interceptor to properly clean up bindings inside the content.
         */
       def numberInput(
-        property: Property[String],
+        property: Property[Double],
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = inputValidationTrigger,
+        validator: Validator[Double] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
-      )(
-        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
-      ): UdashBootstrapComponent = {
+      )(inputModifier: Option[Binding.NestedInterceptor => Modifier] = None): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
-            NumberInput(property, debounce)(
+            NumberInput(property.transform(_.toString, _.toDouble), debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(property, validationTrigger, externalBinding),
+              validationModifier(property, validationTrigger, validator, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
@@ -238,10 +236,9 @@ final class UdashForm private(
         maxValue: ReadableProperty[Double] = 100d.toProperty,
         valueStep: ReadableProperty[Double] = 1d.toProperty,
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[Double] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
-      )(
-        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
-      ): UdashBootstrapComponent = {
+      )(inputModifier: Option[Binding.NestedInterceptor => Modifier] = None): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             RangeInput(value, minValue, maxValue, valueStep)(
@@ -249,7 +246,7 @@ final class UdashForm private(
               BootstrapStyles.Form.controlRange,
               BootstrapStyles.Form.customRange,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(value, validationTrigger, externalBinding)
+              validationModifier(value, validationTrigger, validator, externalBinding)
             ), inputId
           )
         )
@@ -273,17 +270,16 @@ final class UdashForm private(
         debounce: Duration = 20 millis,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = inputValidationTrigger,
+        validator: Validator[String] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
-      )(
-        inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
-      ): UdashBootstrapComponent = {
+      )(inputModifier: Option[Binding.NestedInterceptor => Modifier] = None): UdashBootstrapComponent = {
         externalBinding(
           new InputComponent(
             TextArea(property, debounce)(
               id := inputId,
               BootstrapStyles.Form.control,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(property, validationTrigger, externalBinding),
+              validationModifier(property, validationTrigger, validator, externalBinding),
               (BootstrapStyles.Form.size _).reactiveOptionApply(size)
             ), inputId
           )
@@ -318,6 +314,7 @@ final class UdashForm private(
         acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = inputValidationTrigger,
+        validator: Validator[Seq[File]] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
       )(
         inputName: String,
@@ -332,7 +329,7 @@ final class UdashForm private(
             id := inputId,
             BootstrapStyles.Form.customFileInput,
             inputModifier.map(_.apply(nestedInterceptor)),
-            validationModifier(selectedFiles, validationTrigger, nestedInterceptor),
+            validationModifier(selectedFiles, validationTrigger, validator, nestedInterceptor),
             (BootstrapStyles.Form.size _).reactiveOptionApply(size)
           )
 
@@ -366,6 +363,7 @@ final class UdashForm private(
         options: ReadableSeqProperty[T],
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[T] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
@@ -378,7 +376,7 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(selectedItem, validationTrigger, externalBinding),
+              validationModifier(selectedItem, validationTrigger, validator, externalBinding),
               nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
             ), inputId
           )
@@ -404,6 +402,7 @@ final class UdashForm private(
         options: ReadableSeqProperty[T],
         size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[Seq[T]] = Validator.Default,
         inputId: ComponentId = ComponentId.newId()
       )(
         itemLabel: T => Modifier,
@@ -416,7 +415,7 @@ final class UdashForm private(
               id := inputId,
               BootstrapStyles.Form.customSelect,
               inputModifier.map(_.apply(externalBinding)),
-              validationModifier(selectedItems, validationTrigger, externalBinding),
+              validationModifier(selectedItems, validationTrigger, validator, externalBinding),
               nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
             ), inputId
           )
@@ -447,6 +446,7 @@ final class UdashForm private(
       def checkbox(
         property: Property[Boolean],
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[Boolean] = Validator.Default,
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
         inputId: ComponentId = ComponentId.newId(),
         groupId: ComponentId = ComponentId.newId()
@@ -461,7 +461,7 @@ final class UdashForm private(
             id := inputId,
             BootstrapStyles.Form.control,
             inputModifier.map(_.apply(nestedInterceptor)),
-            validationModifier(property, validationTrigger, nestedInterceptor)
+            validationModifier(property, validationTrigger, validator, nestedInterceptor)
           ))
 
           override val componentId: ComponentId = groupId
@@ -509,6 +509,7 @@ final class UdashForm private(
         options: ReadableSeqProperty[T],
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[Seq[T]] = Validator.Default,
         groupId: ComponentId = ComponentId.newId()
       )(
         inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -516,9 +517,9 @@ final class UdashForm private(
         validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
         invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
       ): UdashBootstrapComponent = {
-        externalBinding(new ButtonsComponent[T](
+        externalBinding(new ButtonsComponent[T, Seq[T]](
           selectedItems, decorator => CheckButtons(selectedItems, options)(decorator),
-          BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
+          BootstrapStyles.Form.customCheckbox, inline, validationTrigger, validator, groupId
         )(inputModifier, labelContent, validFeedback, invalidFeedback))
       }
 
@@ -552,6 +553,7 @@ final class UdashForm private(
         options: ReadableSeqProperty[T],
         inline: ReadableProperty[Boolean] = UdashBootstrap.False,
         validationTrigger: ValidationTrigger = selectValidationTrigger,
+        validator: Validator[T] = Validator.Default,
         groupId: ComponentId = ComponentId.newId()
       )(
         inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -559,15 +561,15 @@ final class UdashForm private(
         validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
         invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
       ): UdashBootstrapComponent = {
-        externalBinding(new ButtonsComponent[T](
+        externalBinding(new ButtonsComponent[T, T](
           selectedItem, decorator => RadioButtons(selectedItem, options)(decorator),
-          BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
+          BootstrapStyles.Form.customRadio, inline, validationTrigger, validator, groupId
         )(inputModifier, labelContent, validFeedback, invalidFeedback))
       }
 
-      private def validationModifier(
-        property: ReadableProperty[_], validationTrigger: ValidationTrigger, nested: Binding.NestedInterceptor,
-        groupValidationTrigger: Option[Property[Int]] = None // value change on this property should trigger validation
+      private def validationModifier[ArgumentType](
+        property: ReadableProperty[ArgumentType], validationTrigger: ValidationTrigger, validator: Validator[ArgumentType],
+        nested: Binding.NestedInterceptor, groupValidationTrigger: Option[Property[Int]] = None // value change on this property should trigger validation
       ): Modifier = {
         def groupTrigger(startValidation: () => Any) = new Binding {
           override def applyTo(t: Element): Unit = {
@@ -582,7 +584,7 @@ final class UdashForm private(
         def startValidation(validationResult: Property[Option[ValidationResult]], triggerGroup: Boolean): Unit = {
           if (triggerGroup) groupValidationTrigger.foreach { p => p.set(p.get + 1) }
           validationResult.set(None)
-          property.isValid onComplete {
+          validator(property.get).onCompleteNow {
             case Success(r) => validationResult.set(Some(r))
             case Failure(ex) =>
               logger.error("Validation failed.", ex)
@@ -668,12 +670,13 @@ final class UdashForm private(
         override val render: Element = input.render
       }
 
-      private class ButtonsComponent[T : PropertyCreator](
-        selected: Property[_],
+      private class ButtonsComponent[T: PropertyCreator, SelectedType](
+        selected: Property[SelectedType],
         input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
         inputDecorationClass: CssStyle,
         inline: ReadableProperty[Boolean],
         validationTrigger: ValidationTrigger,
+        validator: Validator[SelectedType],
         groupId: ComponentId
       )(
         inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
@@ -687,7 +690,7 @@ final class UdashForm private(
             Seq[Modifier](
               BootstrapStyles.Form.customControlInput,
               inputModifier(item, idx, nestedInterceptor),
-              validationModifier(selected, validationTrigger, nestedInterceptor, groupValidationTrigger)
+              validationModifier(selected, validationTrigger, validator, nestedInterceptor, groupValidationTrigger)
             ).applyTo(singleInput)
             div(
               singleInput,
@@ -721,6 +724,8 @@ final class UdashForm private(
         div(BootstrapStyles.Grid.col(size, breakpoint))(content)
     }
   }
+
+  private[form] val validationProperties: MSet[Property[Option[ValidationResult]]] = MSet.empty
 
   def clearValidationResults(): Unit = {
     validationProperties.foreach(_.set(None))
