@@ -16,7 +16,7 @@ class RoutingLoggerDemoComponent extends CssView {
     ) { factory =>
       factory.input.checkbox(UrlLoggingDemoService.enabled, inline = true.toProperty, inputId = ComponentId("turn-on-logger"))(
         labelContent = Some(_ => "Turn on frontend routing logger")
-      )
+      )()
     },
     ul(id := "routing-history")(
       repeatWithNested(UrlLoggingDemoService.loadHistory) { case (item, nested) =>

@@ -122,25 +122,25 @@ object BootstrapDemos extends CrossLogging {
         selectValidationTrigger = ValidationTrigger.None
       ) { factory => Seq[Modifier](
         factory.input.formGroup()(
-          input = _ => factory.input.textInput(pickerOptions.subProp(_.format))().render,
+          input = _ => factory.input.textInput(pickerOptions.subProp(_.format))()().render,
           labelContent = Some(_ => "Date format")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.select(
             pickerOptions.subProp(_.locale).transform[String]((_: Option[String]).get, Some(_: String)),
             Seq("en_GB", "pl", "ru", "af").toSeqProperty
-          )(span(_)).render,
+          )(span(_))().render,
           labelContent = Some(_ => "Locale")
         ),
         factory.input.checkbox(disableWeekends)(
           labelContent = Some(_ => "Disable weekends")
-        ),
+        )(),
         factory.input.checkbox(pickerOptions.subProp(_.showTodayButton))(
           labelContent = Some(_ => "Show `today` button")
-        ),
+        )(),
         factory.input.checkbox(pickerOptions.subProp(_.showClose))(
           labelContent = Some(_ => "Show `close` button")
-        ),
+        )(),
         UdashButtonGroup()(
           factory.externalBinding(showButton).render,
           factory.externalBinding(hideButton).render,
@@ -469,14 +469,13 @@ object BootstrapDemos extends CrossLogging {
     div(
       UdashForm()(factory => Seq(
         factory.input.formGroup()(
-          input = _ => factory.input.textInput(user.subProp(_.name))().render,
+          input = _ => factory.input.textInput(user.subProp(_.name))()().render,
           labelContent = Some(_ => "User name")
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
             user.subProp(_.age).transform(_.toDouble, _.toInt),
-            validator = Validator(age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid)
-          )().render,
+          )()(Validator(age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid)).render,
           labelContent = Some(_ => "Age"),
           invalidFeedback = Some(_ => "Age should be a non-negative integer!"),
         ),
@@ -486,7 +485,7 @@ object BootstrapDemos extends CrossLogging {
             Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
             inline = true.toProperty,
             validationTrigger = UdashForm.ValidationTrigger.None
-          )(labelContent = (item, _, _) => Some(shirtSizeToLabel(item))).render,
+          )(labelContent = (item, _, _) => Some(shirtSizeToLabel(item)))().render,
           labelContent = Some(_ => "Shirt size")
         ),
         factory.disabled()(_ => UdashButton()("Send").render)
@@ -505,12 +504,12 @@ object BootstrapDemos extends CrossLogging {
       )(factory => Seq(
         UdashInputGroup()(
           UdashInputGroup.prependText("Search: "),
-          UdashInputGroup.input(factory.input.textInput(search)().render),
+          UdashInputGroup.input(factory.input.textInput(search)()().render),
           UdashInputGroup.appendButton(UdashButton()(_ => span(FontAwesome.Solid.search)).render)
         ).render.styles(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Right)),
         UdashInputGroup()(
           UdashInputGroup.prependText("Something: "),
-          UdashInputGroup.input(factory.input.textInput(something)().render)
+          UdashInputGroup.input(factory.input.textInput(something)()().render)
         ).render
       )).render
     ).render

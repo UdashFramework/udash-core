@@ -34,7 +34,7 @@ class MultiSelectDemoComponent extends CssView {
           UdashInputGroup.select(
             factory.input.multiSelect(
               favoriteFruits, Seq[Fruit](Apple, Orange, Banana).toSeqProperty
-            )(itemLabel = item => item.toString).render
+            )(itemLabel = item => item.toString)().render
           ),
           UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
         )

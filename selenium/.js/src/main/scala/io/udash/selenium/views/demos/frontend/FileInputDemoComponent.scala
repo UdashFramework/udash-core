@@ -20,7 +20,7 @@ class FileInputDemoComponent extends CssView {
     ) { factory =>
       factory.input.fileInput(selectedFiles, acceptMultipleFiles)(
         "files", labelContent = _ => Some("Select files...")
-      )
+      )()
     },
     h4("Selected files", BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Top)),
     ul(

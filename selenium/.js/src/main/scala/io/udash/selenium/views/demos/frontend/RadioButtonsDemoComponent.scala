@@ -34,7 +34,7 @@ class RadioButtonsDemoComponent extends CssView {
           UdashInputGroup.appendCheckbox(
             factory.input.radioButtons(
               favoriteFruit, Seq[Fruit](Apple, Orange, Banana).toSeqProperty, inline = true.toProperty
-            )(labelContent = (item, _, _) => Some(Seq[Modifier](item.toString, id := s"radio-label-${item.toString}")))
+            )(labelContent = (item, _, _) => Some(Seq[Modifier](item.toString, id := s"radio-label-${item.toString}")))()
           ),
           UdashInputGroup.appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
         )

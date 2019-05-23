@@ -32,7 +32,7 @@ class CheckboxDemoComponent extends CssView {
         UdashInputGroup()(
           UdashInputGroup.prependText("Property A:"),
           UdashInputGroup.appendCheckbox(
-            factory.input.checkbox(propA, inputId = ComponentId("checkbox-demo-a"))()
+            factory.input.checkbox(propA, inputId = ComponentId("checkbox-demo-a"))()()
           ),
           UdashInputGroup.appendText(bind(propA))
         ).render
@@ -41,7 +41,7 @@ class CheckboxDemoComponent extends CssView {
         UdashInputGroup()(
           UdashInputGroup.prependText("Property B:"),
           UdashInputGroup.appendCheckbox(
-            factory.input.checkbox(propB, inputId = ComponentId("checkbox-demo-b"))()
+            factory.input.checkbox(propB, inputId = ComponentId("checkbox-demo-b"))()()
           ),
           UdashInputGroup.appendText(bind(propB))
         ).render
@@ -50,7 +50,7 @@ class CheckboxDemoComponent extends CssView {
         UdashInputGroup()(
           UdashInputGroup.prependText("Property C:"),
           UdashInputGroup.appendCheckbox(
-            factory.input.checkbox(propCAsBoolean, inputId = ComponentId("checkbox-demo-c"))()
+            factory.input.checkbox(propCAsBoolean, inputId = ComponentId("checkbox-demo-c"))()()
           ),
           UdashInputGroup.appendText(bind(propC))
         ).render

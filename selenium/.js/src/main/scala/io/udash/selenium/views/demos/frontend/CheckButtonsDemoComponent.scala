@@ -34,7 +34,7 @@ class CheckButtonsDemoComponent extends CssView {
           UdashInputGroup.appendCheckbox(
             factory.input.checkButtons(
               favoriteFruits, Seq[Fruit](Apple, Orange, Banana).toSeqProperty, inline = true.toProperty
-            )(labelContent = (item, _, _) => Some(Seq[Modifier](item.toString, id := s"check-label-${item.toString}")))
+            )(labelContent = (item, _, _) => Some(Seq[Modifier](item.toString, id := s"check-label-${item.toString}")))()
           ),
           UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
         )

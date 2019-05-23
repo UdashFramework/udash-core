@@ -18,13 +18,13 @@ class TextAreaDemoComponent extends CssView {
     ) { factory =>
       div(BootstrapStyles.Grid.row)(
         div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
-          factory.input.textArea(text)()
+          factory.input.textArea(text)()()
         ),
         div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
-          factory.input.textArea(text)()
+          factory.input.textArea(text)()()
         ),
         div(BootstrapStyles.Grid.col(4, BootstrapStyles.ResponsiveBreakpoint.Medium))(
-          factory.input.textArea(text)()
+          factory.input.textArea(text)()()
         )
       )
     }

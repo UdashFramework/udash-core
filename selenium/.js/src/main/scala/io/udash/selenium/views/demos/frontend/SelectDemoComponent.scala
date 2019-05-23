@@ -34,7 +34,7 @@ class SelectDemoComponent extends CssView {
           UdashInputGroup.select(
             factory.input.select(
               favoriteFruit, Seq[Fruit](Apple, Orange, Banana).toSeqProperty
-            )(itemLabel = item => item.toString).render
+            )(itemLabel = item => item.toString)().render
           ),
           UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
         )
