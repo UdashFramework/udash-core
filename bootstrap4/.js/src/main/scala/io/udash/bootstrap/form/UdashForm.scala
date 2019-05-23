@@ -573,7 +573,7 @@ final class UdashForm private(
         def startValidation(validationResult: Property[Option[ValidationResult]], triggerGroup: Boolean): Unit = {
           if (triggerGroup) groupValidationTrigger.foreach { p => p.set(p.get + 1) }
           validationResult.set(None)
-          validator(property.get).onCompleteNow {
+          validator(property.get).onComplete {
             case Success(r) => validationResult.set(Some(r))
             case Failure(ex) =>
               logger.error("Validation failed.", ex)

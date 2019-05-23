@@ -3,6 +3,20 @@ package bootstrap.form
 
 import com.avsystem.commons._
 
+trait Validation extends Any {
+  def onComplete[U](f: Try[ValidationResult] => U): Unit
+}
+
+object Validation {
+  implicit final class DirectValidation(private val result: ValidationResult) extends AnyVal with Validation {
+    override def onComplete[U](f: Try[ValidationResult] => U): Unit = f(Success(result))
+  }
+
+  implicit final class FutureValidation(private val result: Future[ValidationResult]) extends AnyVal with Validation {
+    override def onComplete[U](f: Try[ValidationResult] => U): Unit = result.onCompleteNow(f)
+  }
+}
+
 trait ValidationError {
   def message: String
 }
@@ -20,18 +34,13 @@ object Invalid {
 }
 
 trait Validator[-ArgumentType] {
-  def apply(element: ArgumentType): Future[ValidationResult]
+  def apply(element: ArgumentType): Validation
 }
 
 object Validator {
-  final val Default: Validator[Any] = _ => Future.successful(Valid)
-
-  final class FunctionValidator[ArgumentType](f: ArgumentType => ValidationResult) extends Validator[ArgumentType] {
-    override def apply(element: ArgumentType): Future[ValidationResult] = f(element).evalFuture
+  object Default extends Validator[Any] {
+    override def apply(element: Any): Validation = Valid
   }
-
-  def apply[ArgumentType](f: ArgumentType => ValidationResult): Validator[ArgumentType] =
-    new FunctionValidator(f)
 
   implicit final class FutureValidationOps[T](private val future: Future[Seq[ValidationResult]]) extends AnyVal {
     def foldValidationResult: Future[ValidationResult] = {
