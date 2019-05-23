@@ -20,7 +20,6 @@ class FrontendBindingsTest extends SeleniumTest {
         driver.findElementById("bind-demo")
         driver.findElementById("produce-demo")
         driver.findElementById("repeat-demo")
-        driver.findElementById("validation-demo")
       }
     }
 
@@ -73,29 +72,6 @@ class FrontendBindingsTest extends SeleniumTest {
         checkName("Bryan")
         checkIntegers()
       }
-    }
-
-    "contain working validation demo" in {
-      def validation = driver.findElementById("validation-demo")
-
-      def collectIntegers(container: WebElement): Seq[Int] = {
-        container.findElements(new ByCssSelector("*")).asScala.foldLeft(Seq[Int]())((result, el) =>
-          result :+ Integer.parseInt(el.getText.stripSuffix(","))
-        )
-      }
-
-      var prevIntegers = Seq[Int]()
-      def checkIntegers() = {
-        eventually {
-          val integers = collectIntegers(validation.findElement(new ById("validation-demo-integers")))
-          val result = validation.findElement(new ById("validation-demo-result")).getText
-          prevIntegers shouldNot be(integers)
-          result should be(if (integers == integers.sorted) "Yes" else "No")
-          prevIntegers = integers
-        }
-      }
-
-      for (_ <- 1 to 5) checkIntegers()
     }
 
     "contain working repeat demo" in {
