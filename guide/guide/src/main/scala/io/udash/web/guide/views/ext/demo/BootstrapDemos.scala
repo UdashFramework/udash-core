@@ -44,16 +44,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def staticButtonsGroup(): dom.Element = {
-    div(GuideStyles.frame)(
-      UdashButtonGroup(vertical = true.toProperty)(
-        UdashButton(buttonStyle = Color.Primary.toProperty)("Button 1").render,
-        UdashButton()("Button 2").render,
-        UdashButton()("Button 3").render
-      ).render
-    ).render
-  }
-
   def buttonToolbar(): dom.Element = {
     val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
     div(GuideStyles.frame)(

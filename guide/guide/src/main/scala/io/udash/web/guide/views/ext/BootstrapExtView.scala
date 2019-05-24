@@ -24,6 +24,7 @@ class BootstrapExtView extends FinalView {
   private val (dropdownsDemo, dropdownsSnippet) = DropdownsDemo.demoWithSnippet()
   private val (buttonsDemo, buttonsSnippet) = ButtonsDemo.demoWithSnippet()
   private val (toggleButtonsDemo, toggleButtonsSnippet) = ToggleButtonsDemo.demoWithSnippet()
+  private val (staticButtonsGroupDemo, staticButtonsGroupSnippet) = StaticButtonsGroupDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -76,19 +77,8 @@ class BootstrapExtView extends FinalView {
     ForceBootstrap(toggleButtonsDemo),
     h3("Button groups"),
     p("There are many ways of creating a button group. The first example presents static API usage:"),
-    CodeBlock(
-      s"""div(
-         |  UdashButtonGroup(vertical = true.toProperty)(
-         |    UdashButton(buttonStyle = Color.Primary.toProperty)("Button 1").render,
-         |    UdashButton()("Button 2").render,
-         |    UdashButton()("Button 3").render
-         |  ).render
-         |).render
-         |""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.staticButtonsGroup()
-    ),
+    staticButtonsGroupSnippet,
+    ForceBootstrap(staticButtonsGroupDemo),
     p("It is also possible to create reactive groups and toolbars:"),
     CodeBlock(
       s"""val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
