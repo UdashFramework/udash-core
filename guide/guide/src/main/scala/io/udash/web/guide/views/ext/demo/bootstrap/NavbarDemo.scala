@@ -32,8 +32,11 @@ object NavbarDemo extends AutoDemo with CrossLogging with CssView {
       def content: String
     }
     object NavbarPanel extends HasModelPropertyCreator[NavbarPanel]
-    final case class DefaultNavbarPanel(override val title: String, override val content: String) extends NavbarPanel
-     */
+    final case class DefaultNavbarPanel(
+      override val title: String,
+      override val content: String
+    ) extends NavbarPanel
+    */
 
     val panels = SeqProperty[NavbarPanel](
       DefaultNavbarPanel("Title 1", "Content of panel 1..."),
@@ -41,7 +44,9 @@ object NavbarDemo extends AutoDemo with CrossLogging with CssView {
       DefaultNavbarPanel("Title 3", "Content of panel 3..."),
       DefaultNavbarPanel("Title 4", "Content of panel 4...")
     )
-    panels.append(DefaultNavbarPanel("Title 5", "Content of panel 5..."))
+    panels.append(
+      DefaultNavbarPanel("Title 5", "Content of panel 5...")
+    )
 
     div(
       UdashNavbar()(

@@ -17,18 +17,28 @@ object CheckboxButtonsDemo extends AutoDemo with CrossLogging with CssView {
   import JsDom.all._
 
   private val (rendered, source) = {
-    val options = SeqProperty[String]("Checkbox 1", "Checkbox 2", "Checkbox 3")
+    val options = SeqProperty[String](
+      "Checkbox 1", "Checkbox 2", "Checkbox 3"
+    )
     val selected = SeqProperty[String](options.get.head)
 
     div(
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+      div(BootstrapStyles.Spacing.margin(
+        side = Side.Bottom,
+        size = SpacingSize.Normal
+      ))(
         UdashButtonGroup.checkboxes(selected, options)().render
       ),
       h4("Is active: "),
       div(wellStyles)(
         repeatWithNested(options) { (option, nested) =>
-          val checked = selected.transform((_: Seq[String]).contains(option.get))
-          div(nested(bind(option)), ": ", nested(bind(checked))).render
+          val checked = selected.transform(
+            (_: Seq[String]).contains(option.get)
+          )
+          div(
+            nested(bind(option)), ": ",
+            nested(bind(checked))
+          ).render
         }
       )
     )

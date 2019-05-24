@@ -20,15 +20,20 @@ object DatePickerDemo extends AutoDemo with CssView {
     import java.{util => ju}
     val date = Property[Option[ju.Date]](Some(new ju.Date()))
 
-    val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-      format = "MMMM Do YYYY, hh:mm a",
-      locale = Some("en_GB"),
-      showClear = true
-    ))
+    val pickerOptions = ModelProperty(
+      new UdashDatePicker.DatePickerOptions(
+        format = "MMMM Do YYYY, hh:mm a",
+        locale = Some("en_GB"),
+        showClear = true
+      )
+    )
 
     val disableWeekends = Property(false)
     disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
-      case true => Seq(UdashDatePicker.DayOfWeek.Saturday, UdashDatePicker.DayOfWeek.Sunday)
+      case true => Seq(
+        UdashDatePicker.DayOfWeek.Saturday,
+        UdashDatePicker.DayOfWeek.Sunday
+      )
       case false => Seq.empty
     }
 
@@ -36,9 +41,12 @@ object DatePickerDemo extends AutoDemo with CssView {
 
     val events = SeqProperty[String](Seq.empty)
     picker.listen {
-      case UdashDatePicker.DatePickerEvent.Show(_) => events.append("Widget shown")
-      case UdashDatePicker.DatePickerEvent.Hide(_, date) => events.append(s"Widget hidden with date: $date")
-      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) => events.append(s"Widget change from $oldDate to $date")
+      case UdashDatePicker.DatePickerEvent.Show(_) =>
+        events.append("Widget shown")
+      case UdashDatePicker.DatePickerEvent.Hide(_, date) =>
+        events.append(s"Widget hidden with date: $date")
+      case UdashDatePicker.DatePickerEvent.Change(_, date, oldDate) =>
+        events.append(s"Widget change from $oldDate to $date")
     }
 
     val datePicker = div(
@@ -64,12 +72,16 @@ object DatePickerDemo extends AutoDemo with CssView {
       UdashForm() { factory =>
         Seq[Modifier](
           factory.input.formGroup()(
-            input = _ => factory.input.textInput(pickerOptions.subProp(_.format))().render,
+            input = _ => factory.input.textInput(
+              pickerOptions.subProp(_.format)
+            )().render,
             labelContent = Some(_ => "Date format")
           ),
           factory.input.formGroup()(
             input = _ => factory.input.select(
-              pickerOptions.subProp(_.locale).transform[String]((_: Option[String]).get, Some(_: String)),
+              pickerOptions.subProp(_.locale).transform[String](
+                (_: Option[String]).get, Some(_: String)
+              ),
               Seq("en_GB", "pl", "ru", "af").toSeqProperty
             )(span(_)).render,
             labelContent = Some(_ => "Locale")

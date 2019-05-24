@@ -20,13 +20,25 @@ object ToggleButtonsDemo extends AutoDemo with CrossLogging with CssView {
     val buttons = Color.values.map { color =>
       color.name -> {
         val active = Property(false)
-        val btn = UdashButton.toggle(active, color.toProperty[Color])(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
+        val btn = UdashButton.toggle(
+          active,
+          color.toProperty[Color]
+        )(_ => Seq[Modifier](
+          color.name,
+          GlobalStyles.smallMargin
+        ))
         (active, btn)
       }
     }
 
     div(
-      div(GlobalStyles.centerBlock, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
+      div(
+        GlobalStyles.centerBlock,
+        BootstrapStyles.Spacing.margin(
+          side = Side.Bottom,
+          size = SpacingSize.Normal
+        )
+      )(
         buttons.map { case (_, (_, btn)) => btn.render }
       ),
       h4("Is active: "),

@@ -17,7 +17,9 @@ object RadioButtonsDemo extends AutoDemo with CrossLogging with CssView {
   import JsDom.all._
 
   private val (rendered, source) = {
-    val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
+    val options = SeqProperty[String](
+      "Radio 1", "Radio 2", "Radio 3"
+    )
     val selected = Property[String](options.get.head)
 
     div(

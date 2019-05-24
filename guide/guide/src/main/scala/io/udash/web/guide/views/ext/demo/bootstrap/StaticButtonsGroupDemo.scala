@@ -17,7 +17,7 @@ object StaticButtonsGroupDemo extends AutoDemo with CrossLogging with CssView {
   private val (rendered, source) = {
     div(
       UdashButtonGroup(vertical = true.toProperty)(
-        UdashButton(buttonStyle = Color.Primary.toProperty)("Button 1").render,
+        UdashButton(Color.Primary.toProperty)("Button 1").render,
         UdashButton()("Button 2").render,
         UdashButton()("Button 3").render
       )

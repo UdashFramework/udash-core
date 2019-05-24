@@ -33,8 +33,11 @@ object NavsDemo extends AutoDemo with CrossLogging with CssView {
       def content: String
     }
     object NavPanel extends HasModelPropertyCreator[NavPanel]
-    final case class DefaultNavPanel(override val title: String, override val content: String) extends NavPanel
-     */
+    final case class DefaultNavPanel(
+      override val title: String,
+      override val content: String
+    ) extends NavPanel
+    */
 
     val panels = SeqProperty[NavPanel](
       DefaultNavPanel("Title 1", "Content of panel 1..."),
@@ -52,7 +55,9 @@ object NavsDemo extends AutoDemo with CrossLogging with CssView {
           href := "",
           onclick :+= ((_: Event) => selected.set(panel.get), true)
         )(nested(bind(panel.asModel.subProp(_.title)))).render,
-        isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
+        isActive = panel => panel.combine(selected)((panel, selected) =>
+          panel.title == selected.title
+        )
       ),
       div(wellStyles)(
         bind(selected.asModel.subProp(_.content))
