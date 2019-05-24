@@ -34,6 +34,7 @@ class BootstrapExtView extends FinalView {
   private val (inlineFormDemo, inlineFormSnippet) = InlineFormDemo.demoWithSnippet()
   private val (navsDemo, navsSnippet) = NavsDemo.demoWithSnippet()
   private val (navbarDemo, navbarSnippet) = NavbarDemo.demoWithSnippet()
+  private val (navigationDemo, navigationSnippet) = UdashNavigationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -122,39 +123,8 @@ class BootstrapExtView extends FinalView {
     navbarSnippet,
     ForceBootstrap(navbarDemo),
     p("The following example presents a navbar with a dropdown item. It uses menu of this guide."),
-    CodeBlock(
-      s"""def linkFactory(l: MenuLink, dropdown: Boolean = true) =
-         |  a(
-         |    href := l.state.url,
-         |    BootstrapStyles.Dropdown.item.styleIf(dropdown),
-         |    BootstrapStyles.Navigation.link.styleIf(!dropdown)
-         |  )(span(l.name)).render
-         |
-          |val panels = SeqProperty[MenuEntry](mainMenuEntries.slice(0, 4))
-         |div(
-         |  UdashNavbar(darkStyle = true.toProperty, backgroundStyle = BootstrapStyles.Color.Dark.toProperty)(
-         |    _ => UdashNav(panels)(
-         |      elemFactory = (panel, nested) => div(nested(produce(panel) {
-         |        case MenuContainer(name, children) =>
-         |          val childrenProperty = SeqProperty(children)
-         |          UdashDropdown(childrenProperty, buttonToggle = false.toProperty)(
-         |            (item: Property[MenuLink], _) => linkFactory(item.get),
-         |            _ => span(name, " ")
-         |          ).render.setup(_.firstElementChild.applyTags(BootstrapStyles.Navigation.link))
-         |        case link: MenuLink => linkFactory(link, dropdown = false)
-         |      })).render,
-         |      isDropdown = _.transform {
-         |        case MenuContainer(_, _) => true
-         |        case MenuLink(_, _) => false
-         |      }
-         |    ),
-         |    span("Udash"),
-         |  ).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.udashNavigation()
-    ),
+    navigationSnippet,
+    ForceBootstrap(navigationDemo),
     h3("Breadcrumbs"),
     CodeBlock(
       s"""

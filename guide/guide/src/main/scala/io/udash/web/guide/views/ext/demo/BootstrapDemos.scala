@@ -12,11 +12,9 @@ import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.dropdown.UdashDropdown
 import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
-import io.udash.bootstrap.nav.{UdashNav, UdashNavbar}
 import io.udash.bootstrap.pagination.UdashPagination
 import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
@@ -26,7 +24,6 @@ import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
 import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.guide.components.{MenuContainer, MenuEntry, MenuLink}
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 import scalatags.JsDom
@@ -37,40 +34,8 @@ import scala.util.Random
 object BootstrapDemos extends CrossLogging with CssView {
 
   import JsDom.all._
-  import io.udash.web.guide.Context._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def udashNavigation(): dom.Element = {
-    def linkFactory(l: MenuLink, dropdown: Boolean = true) =
-      a(
-        href := l.state.url,
-        BootstrapStyles.Dropdown.item.styleIf(dropdown),
-        BootstrapStyles.Navigation.link.styleIf(!dropdown)
-      )(span(l.name)).render
-
-    val panels = SeqProperty[MenuEntry](mainMenuEntries.slice(0, 4))
-    div(GuideStyles.frame)(
-      UdashNavbar(darkStyle = true.toProperty, backgroundStyle = BootstrapStyles.Color.Dark.toProperty)(
-        _ => UdashNav(panels)(
-          elemFactory = (panel, nested) => div(nested(produce(panel) {
-            case MenuContainer(name, children) =>
-              val childrenProperty = SeqProperty(children)
-              UdashDropdown(childrenProperty, buttonToggle = false.toProperty)(
-                (item: Property[MenuLink], _) => linkFactory(item.get),
-                _ => span(name, " ")
-              ).render.setup(_.firstElementChild.applyTags(BootstrapStyles.Navigation.link))
-            case link: MenuLink => linkFactory(link, dropdown = false)
-          })).render,
-          isDropdown = _.transform {
-            case MenuContainer(_, _) => true
-            case MenuLink(_, _, _) => false
-          }
-        ),
-        span("Udash"),
-      ).render
-    ).render
-  }
 
   def breadcrumbs(): dom.Element = {
     import UdashBreadcrumbs._
