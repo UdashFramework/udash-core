@@ -15,32 +15,14 @@ object LabelsDemo extends AutoDemo with CrossLogging with CssView {
 
   private val (rendered, source) = {
     div(
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Primary.toProperty
-      )(_ => "Primary"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Secondary.toProperty,
-        pillStyle = true.toProperty
-      )(_ => "Secondary Pill"), " ",
-      UdashBadge.link(
-        Property("https://udash.io/"),
-        badgeStyle = BootstrapStyles.Color.Success.toProperty
-      )(_ => "Success Link"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Danger.toProperty
-      )(_ => "Danger"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Warning.toProperty
-      )(_ => "Warning"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Info.toProperty
-      )(_ => "Info"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Light.toProperty
-      )(_ => "Light"), " ",
-      UdashBadge(
-        badgeStyle = BootstrapStyles.Color.Dark.toProperty
-      )(_ => "Dark"), " ",
+      UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary"), " ",
+      UdashBadge(BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill"), " ",
+      UdashBadge.link(Property("https://udash.io/"), BootstrapStyles.Color.Success.toProperty)(_ => "Success Link"), " ",
+      UdashBadge(BootstrapStyles.Color.Danger.toProperty)(_ => "Danger"), " ",
+      UdashBadge(BootstrapStyles.Color.Warning.toProperty)(_ => "Warning"), " ",
+      UdashBadge(BootstrapStyles.Color.Info.toProperty)(_ => "Info"), " ",
+      UdashBadge(BootstrapStyles.Color.Light.toProperty)(_ => "Light"), " ",
+      UdashBadge(BootstrapStyles.Color.Dark.toProperty)(_ => "Dark"), " ",
     )
   }.withSourceCode
 

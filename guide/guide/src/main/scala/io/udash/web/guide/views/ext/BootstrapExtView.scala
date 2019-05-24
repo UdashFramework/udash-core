@@ -38,6 +38,7 @@ class BootstrapExtView extends FinalView {
   private val (breadcrumbsDemo, breadcrumbsSnippet) = BreadcrumbsDemo.demoWithSnippet()
   private val (paginationDemo, paginationSnippet) = PaginationDemo.demoWithSnippet()
   private val (labelsDemo, labelsSnippet) = LabelsDemo.demoWithSnippet()
+  private val (badgesDemo, badgesSnippet) = BadgesDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -138,23 +139,8 @@ class BootstrapExtView extends FinalView {
     labelsSnippet,
     ForceBootstrap(labelsDemo),
     h3("Badges"),
-    CodeBlock(
-      s"""
-         |val counter = Property(0)
-         |window.setInterval(() => counter.set(counter.get + 1), 3000)
-         |div(GuideStyles.frame)(
-         |  div(
-         |    UdashButton(
-         |      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
-         |      size = Some(BootstrapStyles.Size.Large).toProperty
-         |    )(_ => Seq[Modifier]("Button ", UdashBadge()(nested => nested(bind(counter))).render)
-              ).render
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.badges()
-    ),
+    badgesSnippet,
+    ForceBootstrap(badgesDemo),
     h3("Jumbotron"),
     p("A lightweight, flexible component that can optionally extend the entire viewport to showcase key content on your site."),
     CodeBlock(
