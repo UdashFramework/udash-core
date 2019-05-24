@@ -28,6 +28,7 @@ class BootstrapExtView extends FinalView {
   private val (buttonToolbarDemo, buttonToolbarSnippet) = ButtonToolbarDemo.demoWithSnippet()
   private val (checkboxButtonsDemo, checkboxButtonsSnippet) = CheckboxButtonsDemo.demoWithSnippet()
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
+  private val (buttonDropdownDemo, buttonDropdownSnippet) = ButtonDropdownDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -93,35 +94,8 @@ class BootstrapExtView extends FinalView {
     ForceBootstrap(radioButtonsDemo),
     h3("Button dropdowns"),
     p("The ", i("UdashDropdown"), " component can be used as part of a button group."),
-    CodeBlock(
-      s"""import UdashButtonGroup._
-         |val items = SeqProperty[DefaultDropdownItem](
-         |  UdashDropdown.DefaultDropdownItem.Header("Start"),
-         |  UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#")),
-         |  UdashDropdown.DefaultDropdownItem.Disabled(
-         |    UdashDropdown.DefaultDropdownItem.Link("Test Disabled", Url("#"))
-         |  ),
-         |  UdashDropdown.DefaultDropdownItem.Divider,
-         |  UdashDropdown.DefaultDropdownItem.Header("End"),
-         |  UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#"))
-         |)
-         |div(
-         |  UdashButtonToolbar()(
-         |    UdashButtonGroup()(
-         |      UdashButton()("Button").render,
-         |      UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "").render,
-         |      UdashDropdown(items, dropDirection = UdashDropdown.Direction.Up.toProperty)(
-         |        UdashDropdown.defaultItemFactory, _ => ""
-         |      ).render
-         |    ).render,
-         |    UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "Dropdown ").render
-         |  ).render
-         |).render
-       """.stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.buttonDropdown()
-    ),
+    buttonDropdownSnippet,
+    ForceBootstrap(buttonDropdownDemo),
     h3("Input groups"),
     p(
       i("UdashInputGroup"), " groups input elements into one component. It also provides convinient methods for creating the elements structure: ",

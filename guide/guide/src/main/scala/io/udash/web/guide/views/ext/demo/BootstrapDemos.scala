@@ -13,7 +13,6 @@ import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.dropdown.UdashDropdown
-import io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem
 import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
 import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
@@ -43,27 +42,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.Context._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def buttonDropdown(): dom.Element = {
-    val items = SeqProperty[DefaultDropdownItem](
-      UdashDropdown.DefaultDropdownItem.Header("Start"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#")),
-      UdashDropdown.DefaultDropdownItem.Disabled(UdashDropdown.DefaultDropdownItem.Link("Test Disabled", Url("#"))),
-      UdashDropdown.DefaultDropdownItem.Divider,
-      UdashDropdown.DefaultDropdownItem.Header("End"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#"))
-    )
-    div(GuideStyles.frame)(
-      UdashButtonToolbar()(
-        UdashButtonGroup()(
-          UdashButton()("Button").render,
-          UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "").render,
-          UdashDropdown(items, dropDirection = UdashDropdown.Direction.Up.toProperty)(UdashDropdown.defaultItemFactory, _ => "").render
-        ).render,
-        UdashDropdown(items)(UdashDropdown.defaultItemFactory, _ => "Dropdown ").render
-      ).render
-    ).render
-  }
 
   def inputGroups(): dom.Element = {
     val vanityUrl = Property.blank[String]
