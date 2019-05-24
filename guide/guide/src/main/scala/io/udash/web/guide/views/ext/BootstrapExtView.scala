@@ -33,6 +33,7 @@ class BootstrapExtView extends FinalView {
   private val (simpleFormDemo, simpleFormSnippet) = SimpleFormDemo.demoWithSnippet()
   private val (inlineFormDemo, inlineFormSnippet) = InlineFormDemo.demoWithSnippet()
   private val (navsDemo, navsSnippet) = NavsDemo.demoWithSnippet()
+  private val (navbarDemo, navbarSnippet) = NavbarDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -118,41 +119,8 @@ class BootstrapExtView extends FinalView {
     navsSnippet,
     ForceBootstrap(navsDemo),
     h3("Navbar"),
-    CodeBlock(
-      s"""
-         |trait Panel {
-         |  def title: String
-         |  def content: String
-         |}
-         |object Panel extends HasModelPropertyCreator[Panel]
-         |final case class DefaultPanel(override val title: String, override val content: String) extends Panel
-         |val panels = SeqProperty[Panel](
-         |  DefaultPanel("Title 1", "Content of panel 1..."),
-         |  DefaultPanel("Title 2", "Content of panel 2..."),
-         |  DefaultPanel("Title 3", "Content of panel 3..."),
-         |  DefaultPanel("Title 4", "Content of panel 4...")
-         |)
-         |panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
-         |div(
-         |  UdashNavbar()(
-         |    _ => UdashNav(panels)(
-         |      elemFactory = (panel, nested) => a(
-         |        BootstrapStyles.Navigation.link,
-         |        href := "",
-         |        onclick :+= ((_: Event) => true)
-         |      )(
-         |        nested(bind(panel.asModel.subProp(_.title)))
-         |      ).render,
-         |      isActive = el => el.transform(_.title.endsWith("1")),
-         |      isDisabled = el => el.transform(_.title.endsWith("5"))
-         |    ),
-         |    span("Udash"),
-         |  ).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.navbars()
-    ),
+    navbarSnippet,
+    ForceBootstrap(navbarDemo),
     p("The following example presents a navbar with a dropdown item. It uses menu of this guide."),
     CodeBlock(
       s"""def linkFactory(l: MenuLink, dropdown: Boolean = true) =
