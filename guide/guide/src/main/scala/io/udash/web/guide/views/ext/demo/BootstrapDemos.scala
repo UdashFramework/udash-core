@@ -11,9 +11,7 @@ import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
-import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
-import io.udash.bootstrap.utils.BootstrapStyles._
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
@@ -31,40 +29,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def progressBar(): dom.Element = {
-    val showPercentage = Property(true)
-    val animate = Property(true)
-    val value = Property(50)
-    div(GuideStyles.frame)(
-      div(
-        UdashButtonGroup()(
-          UdashButton.toggle(active = showPercentage)("Show percentage").render,
-          UdashButton.toggle(active = animate)("Animate").render
-        ).render
-      ), br,
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        UdashProgressBar(value, showPercentage, barStyle = Some(BootstrapStyles.Color.Success).toProperty)().render
-      ),
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        UdashProgressBar(value, showPercentage, stripped = true.toProperty)(
-          (value, min, max, nested) => Seq[Modifier](
-            nested(bind(value.combine(min)(_ - _).combine(max.combine(min)(_ - _))(_ * 100 / _))),
-            " percent"
-          )
-        ).render
-      ),
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        UdashProgressBar(value, showPercentage, stripped = true.toProperty, animated = animate,
-          barStyle = Some(BootstrapStyles.Color.Danger).toProperty)().render,
-      ),
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        NumberInput(value.transform(_.toString, Integer.parseInt))(
-          BootstrapStyles.Form.control, placeholder := "Percentage"
-        )
-      )
-    ).render
-  }
 
   def listGroup(): dom.Element = {
     val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
