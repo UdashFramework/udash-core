@@ -32,7 +32,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 import scalatags.JsDom
 
-import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 
@@ -42,65 +41,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.Context._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  sealed trait ShirtSize
-  case object Small extends ShirtSize
-  case object Medium extends ShirtSize
-  case object Large extends ShirtSize
-
-
-  trait UserModel {
-    def name: String
-    def age: Int
-    def shirtSize: ShirtSize
-  }
-  object UserModel extends HasModelPropertyCreator[UserModel] {
-    implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
-      override def name: String = ""
-      override def age: Int = 25
-      override def shirtSize: ShirtSize = Medium
-    })
-  }
-
-  def simpleForm(): dom.Element = {
-    def shirtSizeToLabel(size: ShirtSize): String = size match {
-      case Small => "S"
-      case Medium => "M"
-      case Large => "L"
-    }
-
-    val user = ModelProperty.blank[UserModel]
-    user.subProp(_.age).addValidator(new Validator[Int] {
-      override def apply(element: Int): Future[ValidationResult] =
-        Future {
-          if (element < 0) Invalid("Age should be a non-negative integer!")
-          else Valid
-        }
-    })
-
-    div(GuideStyles.frame)(
-      UdashForm()(factory => Seq(
-        factory.input.formGroup()(
-          input = _ => factory.input.textInput(user.subProp(_.name))().render,
-          labelContent = Some(_ => "User name": Modifier)
-        ),
-        factory.input.formGroup()(
-          input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toString, _.toInt),
-          )().render,
-          labelContent = Some(_ => "Age": Modifier),
-          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
-        ),
-        factory.input.radioButtons(
-          user.subProp(_.shirtSize),
-          Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
-          inline = true.toProperty,
-          validationTrigger = UdashForm.ValidationTrigger.None
-        )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
-        factory.disabled()(_ => UdashButton()("Send").render)
-      )).render
-    ).render
-  }
 
   def inlineForm(): dom.Element = {
     val search = Property.blank[String]

@@ -30,6 +30,7 @@ class BootstrapExtView extends FinalView {
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
   private val (buttonDropdownDemo, buttonDropdownSnippet) = ButtonDropdownDemo.demoWithSnippet()
   private val (inputGroupDemo, inputGroupSnippet) = InputGroupDemo.demoWithSnippet()
+  private val (simpleFormDemo, simpleFormSnippet) = SimpleFormDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -106,56 +107,8 @@ class BootstrapExtView extends FinalView {
     ForceBootstrap(inputGroupDemo),
     h3("Forms"),
     p(i("UdashForm"), " provides a lot of convenience methods for creating forms."),
-    CodeBlock(
-      s"""/** Omitting: ShirtSize, shirtSizeToLabel, labelToShirtSize */
-         |trait UserModel {
-         |  def name: String
-         |  def age: Int
-         |  def shirtSize: ShirtSize
-         |}
-         |object UserModel extends HasModelPropertyCreator[UserModel] {
-         |  implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
-         |    override def name: String = ""
-         |    override def age: Int = 25
-         |    override def shirtSize: ShirtSize = Medium
-         |  })
-         |}
-         |
-          |val user = ModelProperty.blank[UserModel]
-         |user.subProp(_.age).addValidator(new Validator[Int] {
-         |  override def apply(element: Int): Future[ValidationResult] =
-         |    Future {
-         |      if (element < 0) Invalid("Age should be a non-negative integer!")
-         |      else Valid
-         |    }
-         |})
-         |
-          |div(
-         |  UdashForm()(factory => Seq(
-         |    factory.input.formGroup()(
-         |      input = _ => factory.input.textInput(user.subProp(_.name))().render,
-         |      labelContent = Some(_ => "User name": Modifier)
-         |    ),
-         |    factory.input.formGroup()(
-         |      input = _ => factory.input.numberInput(
-         |        user.subProp(_.age).transform(_.toString, _.toInt),
-         |      )().render,
-         |      labelContent = Some(_ => "Age": Modifier),
-         |      invalidFeedback = Some(_ => "Age should be a non-negative integer!")
-         |    ),
-         |    factory.input.radioButtons(
-         |      user.subProp(_.shirtSize),
-         |      Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
-         |      inline = true.toProperty,
-         |      validationTrigger = UdashForm.ValidationTrigger.None
-         |    )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
-         |    factory.disabled()(_ => UdashButton()("Send").render)
-         |  )).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.simpleForm()
-    ),
+    simpleFormSnippet,
+    ForceBootstrap(simpleFormDemo),
     p("It is also possible to create an ", i("inline"), " or ", i("horizontal"), " form."),
     CodeBlock(
       s"""val search = Property.blank[String]
