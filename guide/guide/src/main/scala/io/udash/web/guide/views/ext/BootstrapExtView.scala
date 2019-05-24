@@ -35,6 +35,7 @@ class BootstrapExtView extends FinalView {
   private val (navsDemo, navsSnippet) = NavsDemo.demoWithSnippet()
   private val (navbarDemo, navbarSnippet) = NavbarDemo.demoWithSnippet()
   private val (navigationDemo, navigationSnippet) = UdashNavigationDemo.demoWithSnippet()
+  private val (breadcrumbsDemo, breadcrumbsSnippet) = BreadcrumbsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -126,29 +127,8 @@ class BootstrapExtView extends FinalView {
     navigationSnippet,
     ForceBootstrap(navigationDemo),
     h3("Breadcrumbs"),
-    CodeBlock(
-      s"""
-         |import UdashBreadcrumbs._
-         |val pages = SeqProperty[Breadcrumb](
-         |  new Breadcrumb("Udash", Url("http://udash.io/")),
-         |  new Breadcrumb("Dev's Guide", Url("http://guide.udash.io/")),
-         |  new Breadcrumb("Extensions", Url("http://guide.udash.io/")),
-         |  new Breadcrumb("Bootstrap wrapper", Url("http://guide.udash.io/ext/bootstrap"))
-         |).readable
-         |val breadcrumbs = UdashBreadcrumbs(pages)(
-         |  (pageProperty, nested) => nested(produce(pageProperty) { page =>
-         |    if (pages.get.last == page) JsDom.StringFrag(page.name).render
-         |    else a(href := page.link)(page.name).render
-         |  }),
-         |  pages.get.last == _
-         |)
-         |div(
-         |  breadcrumbs.render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.breadcrumbs()
-    ),
+    breadcrumbsSnippet,
+    ForceBootstrap(breadcrumbsDemo),
     h3("Pagination"),
     CodeBlock(
       s"""import UdashPagination._
