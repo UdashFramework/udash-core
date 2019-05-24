@@ -32,6 +32,7 @@ class BootstrapExtView extends FinalView {
   private val (inputGroupDemo, inputGroupSnippet) = InputGroupDemo.demoWithSnippet()
   private val (simpleFormDemo, simpleFormSnippet) = SimpleFormDemo.demoWithSnippet()
   private val (inlineFormDemo, inlineFormSnippet) = InlineFormDemo.demoWithSnippet()
+  private val (navsDemo, navsSnippet) = NavsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -114,38 +115,8 @@ class BootstrapExtView extends FinalView {
     inlineFormSnippet,
     ForceBootstrap(inlineFormDemo),
     h3("Navs"),
-    CodeBlock(
-      s"""trait Panel {
-         |  def title: String
-         |  def content: String
-         |}
-         |object Panel extends HasModelPropertyCreator[Panel]
-         |final case class DefaultPanel(override val title: String, override val content: String) extends Panel
-         |val panels = SeqProperty[Panel](
-         |  DefaultPanel("Title 1", "Content of panel 1..."),
-         |  DefaultPanel("Title 2", "Content of panel 2..."),
-         |  DefaultPanel("Title 3", "Content of panel 3..."),
-         |  DefaultPanel("Title 4", "Content of panel 4...")
-         |)
-         |val selected = Property[Panel](panels.elemProperties.head.get)
-         |panels.append(DefaultPanel("Title 5", "Content of panel 5..."))
-         |div(
-         |  UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
-         |    elemFactory = (panel, nested) => a(
-         |      BootstrapStyles.Navigation.link,
-         |      href := "",
-         |      onclick :+= ((_: Event) => selected.set(panel.get), true)
-         |    )(nested(bind(panel.asModel.subProp(_.title)))).render,
-         |    isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
-         |  ).render,
-         |  div(wellStyles)(
-         |    bind(selected.asModel.subProp(_.content))
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.navs()
-    ),
+    navsSnippet,
+    ForceBootstrap(navsDemo),
     h3("Navbar"),
     CodeBlock(
       s"""

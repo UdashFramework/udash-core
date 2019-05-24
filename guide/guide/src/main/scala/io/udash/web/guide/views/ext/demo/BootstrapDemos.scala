@@ -41,38 +41,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  trait NavPanel {
-    def title: String
-    def content: String
-  }
-  object NavPanel extends HasModelPropertyCreator[NavPanel]
-  final case class DefaultNavPanel(override val title: String, override val content: String) extends NavPanel
-
-  def navs(): dom.Element = {
-
-    val panels = SeqProperty[NavPanel](
-      DefaultNavPanel("Title 1", "Content of panel 1..."),
-      DefaultNavPanel("Title 2", "Content of panel 2..."),
-      DefaultNavPanel("Title 3", "Content of panel 3..."),
-      DefaultNavPanel("Title 4", "Content of panel 4...")
-    )
-    val selected = Property[NavPanel](panels.elemProperties.head.get)
-    panels.append(DefaultNavPanel("Title 5", "Content of panel 5..."))
-    div(GuideStyles.frame)(
-      UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
-        elemFactory = (panel, nested) => a(
-          BootstrapStyles.Navigation.link,
-          href := "",
-          onclick :+= ((_: Event) => selected.set(panel.get), true)
-        )(nested(bind(panel.asModel.subProp(_.title)))).render,
-        isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title)
-      ).render,
-      div(wellStyles)(
-        bind(selected.asModel.subProp(_.content))
-      )
-    ).render
-  }
-
   trait NavbarPanel {
     def title: String
     def content: String
