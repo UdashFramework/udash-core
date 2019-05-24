@@ -48,6 +48,7 @@ class BootstrapExtView extends FinalView {
   private val (simpleModalDemo, simpleModalSnippet) = SimpleModalDemo.demoWithSnippet()
   private val (tooltipsDemo, tooltipsSnippet) = TooltipsDemo.demoWithSnippet()
   private val (popoversDemo, popoversSnippet) = PopoversDemo.demoWithSnippet()
+  private val (simpleCollapseDemo, simpleCollapseSnippet) = SimpleCollapseDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -195,34 +196,8 @@ class BootstrapExtView extends FinalView {
       i("toggle"), ", ", i("open"), " and ", i("close"), " for manual manipulation and ",
       i("toggleButtonAttrs"), " for easy creation of toggle button."
     ),
-    CodeBlock(
-      s"""|val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
-          |val collapse = UdashCollapse()(
-          |  div(wellStyles)(
-          |    ul(repeat(events)(event => li(event.get.toString).render))
-          |  )
-          |)
-          |collapse.listen { case ev => events.append(ev) }
-          |val toggleButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)(
-          |  _ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle...")
-          |)
-          |val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-          |openAndCloseButton.listen { case _ =>
-          |  collapse.show()
-          |  window.setTimeout(() => collapse.hide(), 2000)
-          |}
-          |
-          |div(
-          |  UdashButtonGroup(justified = true.toProperty)(
-          |    toggleButton.render,
-          |    openAndCloseButton.render
-          |  ).render,
-          |  collapse.render
-          |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.simpleCollapse()
-    ),
+    simpleCollapseSnippet,
+    ForceBootstrap(simpleCollapseDemo),
     p(
       i("UdashAccordion"), " internally uses ", i("UdashCollapse"), ". It provides ",
       i("collapseOf"), " method for obtaining ", i("UdashCollapse"), " created for selected element."

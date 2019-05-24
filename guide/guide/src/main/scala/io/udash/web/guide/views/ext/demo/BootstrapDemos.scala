@@ -6,7 +6,6 @@ import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
@@ -21,34 +20,6 @@ object BootstrapDemos extends CrossLogging with CssView {
 
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
-  import org.scalajs.dom._
-
-  def simpleCollapse(): dom.Element = {
-    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
-    val collapse = UdashCollapse()(
-      div(wellStyles)(
-        ul(repeat(events)(event => li(event.get.toString).render))
-      )
-    )
-    collapse.listen { case ev => events.append(ev) }
-
-    val toggleButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)(
-      _ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle...")
-    )
-    val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-    openAndCloseButton.listen { case _ =>
-      collapse.show()
-      window.setTimeout(() => collapse.hide(), 2000)
-    }
-
-    div(GuideStyles.frame)(
-      UdashButtonGroup(justified = true.toProperty)(
-        toggleButton.render,
-        openAndCloseButton.render
-      ).render,
-      collapse.render
-    ).render
-  }
 
   def accordionCollapse(): dom.Element = {
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
