@@ -7,7 +7,7 @@ import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
+import io.udash.bootstrap.tooltip.UdashPopover
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
@@ -25,42 +25,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def tooltips(): dom.Element = {
-    import scala.concurrent.duration.DurationInt
-    val tooltipContainerId = ComponentId("tooltip-container")
-    val label1 = UdashBadge()(_ => Seq[Modifier]("Tooltip on hover with delay", GlobalStyles.smallMargin)).render
-    UdashTooltip(
-      trigger = Seq(UdashTooltip.Trigger.Hover),
-      delay = UdashTooltip.Delay(500 millis, 250 millis),
-      title = (_) => "Tooltip...",
-      container = Option(s"#$tooltipContainerId")
-    )(label1)
-
-    val label2 = UdashBadge()(_ => Seq[Modifier]("Tooltip on click", GlobalStyles.smallMargin)).render
-    UdashTooltip(
-      trigger = Seq(UdashTooltip.Trigger.Click),
-      delay = UdashTooltip.Delay(0 millis, 250 millis),
-      placement = (_, _) => Seq(UdashTooltip.Placement.Bottom),
-      title = (_) => "Tooltip 2...",
-      container = Option(s"#$tooltipContainerId")
-    )(label2)
-
-    val label3 = UdashBadge()(_ => Seq[Modifier]("Tooltip with JS toggler", GlobalStyles.smallMargin)).render
-    val label3Tooltip = UdashTooltip(
-      trigger = Seq(UdashTooltip.Trigger.Manual),
-      placement = (_, _) => Seq(UdashTooltip.Placement.Right),
-      title = (_) => "Tooltip 3...",
-      container = Option(s"#$tooltipContainerId")
-    )(label3)
-
-    val button = UdashButton()("Toggle tooltip")
-    button.listen { case _ => label3Tooltip.toggle() }
-
-    div(GuideStyles.frame, id := tooltipContainerId)(
-      label1, label2, label3, button.render
-    ).render
-  }
 
   def popovers(): dom.Element = {
     import scala.concurrent.duration.DurationInt
