@@ -36,6 +36,7 @@ class BootstrapExtView extends FinalView {
   private val (navbarDemo, navbarSnippet) = NavbarDemo.demoWithSnippet()
   private val (navigationDemo, navigationSnippet) = UdashNavigationDemo.demoWithSnippet()
   private val (breadcrumbsDemo, breadcrumbsSnippet) = BreadcrumbsDemo.demoWithSnippet()
+  private val (paginationDemo, paginationSnippet) = PaginationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -130,42 +131,8 @@ class BootstrapExtView extends FinalView {
     breadcrumbsSnippet,
     ForceBootstrap(breadcrumbsDemo),
     h3("Pagination"),
-    CodeBlock(
-      s"""import UdashPagination._
-         |
-          |val showArrows = Property(true)
-         |val highlightActive = Property(true)
-         |val toggleArrows = UdashButton.toggle(active = showArrows)("Toggle arrows")
-         |val toggleHighlight = UdashButton.toggle(active = highlightActive)("Toggle highlight")
-         |
-          |val pages = SeqProperty(0 to 7)
-         |val selected = Property(0)
-         |val pagination = UdashPagination(
-         |  pages, selected,
-         |  showArrows = showArrows, highlightActive = highlightActive
-         |)(defaultPageFactory).render.setup(_.firstElementChild.applyTags(
-         |  BootstrapStyles.Flex.justifyContent(
-         |    BootstrapStyles.FlexContentJustification.Center
-         |  )
-         |))
-         |div(
-         |  div(BootstrapStyles.Spacing.margin(
-         |    side = Side.Bottom, size = SpacingSize.Normal
-         |  ))(
-         |    UdashButtonGroup()(
-         |      toggleArrows.render,
-         |      toggleHighlight.render
-         |    ).render
-         |  ),
-         |  div(BootstrapStyles.Spacing.margin(
-         |    side = Side.Bottom, size = SpacingSize.Normal
-         |  ))("Selected page index: ", bind(selected)),
-         |  div(pagination)
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.pagination()
-    ),
+    paginationSnippet,
+    ForceBootstrap(paginationDemo),
     h3("Labels"),
     CodeBlock(
       s"""UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render,

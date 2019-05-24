@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.ext.demo
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap._
@@ -14,7 +13,6 @@ import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
-import io.udash.bootstrap.pagination.UdashPagination
 import io.udash.bootstrap.progressbar.UdashProgressBar
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils.BootstrapStyles._
@@ -35,40 +33,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def pagination(): dom.Element = {
-    import UdashPagination._
-
-    val showArrows = Property(true)
-    val highlightActive = Property(true)
-    val toggleArrows = UdashButton.toggle(active = showArrows)("Toggle arrows")
-    val toggleHighlight = UdashButton.toggle(active = highlightActive)("Toggle highlight")
-
-    val pages = SeqProperty(0 to 7)
-    val selected = Property(0)
-    val pagination = UdashPagination(
-      pages, selected,
-      showArrows = showArrows, highlightActive = highlightActive
-    )(defaultPageFactory).render.setup(_.firstElementChild.applyTags(
-      BootstrapStyles.Flex.justifyContent(
-        BootstrapStyles.FlexContentJustification.Center
-      )
-    ))
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Bottom, size = SpacingSize.Normal
-      ))(
-        UdashButtonGroup()(
-          toggleArrows.render,
-          toggleHighlight.render
-        ).render
-      ),
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Bottom, size = SpacingSize.Normal
-      ))("Selected page index: ", bind(selected)),
-      div(pagination)
-    ).render
-  }
 
   def labels(): dom.Element = {
     div(GuideStyles.frame)(
