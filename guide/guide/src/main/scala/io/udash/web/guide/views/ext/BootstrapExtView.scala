@@ -47,6 +47,7 @@ class BootstrapExtView extends FinalView {
   private val (responsiveEmbedDemo, responsiveEmbedSnippet) = ResponsiveEmbedDemo.demoWithSnippet()
   private val (simpleModalDemo, simpleModalSnippet) = SimpleModalDemo.demoWithSnippet()
   private val (tooltipsDemo, tooltipsSnippet) = TooltipsDemo.demoWithSnippet()
+  private val (popoversDemo, popoversSnippet) = PopoversDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -186,54 +187,8 @@ class BootstrapExtView extends FinalView {
     tooltipsSnippet,
     ForceBootstrap(tooltipsDemo),
     h3("Popovers"),
-    CodeBlock(
-      s"""
-         |import scala.concurrent.duration.DurationInt
-         |val popoverContainerId = ComponentId("popover-container")
-         |val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", GlobalStyles.smallMargin)).render
-         |UdashPopover(
-         |  trigger = Seq(UdashPopover.Trigger.Hover),
-         |  delay = UdashPopover.Delay(500 millis, 250 millis),
-         |  title = (_) => "Popover...",
-         |  content = (_) => "Content...",
-         |  container = Option("#" + popoverContainerId)
-         |)(label1)
-         |val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.smallMargin)).render
-         |UdashPopover(
-         |  trigger = Seq(UdashPopover.Trigger.Click),
-         |  delay = UdashPopover.Delay(0 millis, 250 millis),
-         |  placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
-         |  title = (_) => "Popover 2...",
-         |  content = (_) => "Content...",
-         |  container = Option("#" + popoverContainerId)
-         |)(label2)
-         |val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalStyles.smallMargin)).render
-         |val label3Tooltip = UdashPopover(
-         |  trigger = Seq(UdashPopover.Trigger.Manual),
-         |  placement = (_, _) => Seq(UdashPopover.Placement.Left),
-         |  html = true,
-         |  title = (_) => "Popover 3...",
-         |  content = (_) => {
-         |    import scalatags.Text.all._
-         |    Seq(
-         |      p("HTML content..."),
-         |      ul(li("Item 1"), li("Item 2"), li("Item 3"))
-         |    ).render
-         |  },
-         |  container = Option("#" + popoverContainerId)
-         |)(label3)
-         |
-         |val button = UdashButton()("Toggle popover")
-         |button.listen { case _ => label3Tooltip.toggle() }
-         |
-         |div(id := popoverContainerId)(
-         |  label1, label2, label3, button.render
-         |).render
-       """.stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.popovers()
-    ),
+    popoversSnippet,
+    ForceBootstrap(popoversDemo),
     h3("Collapse"),
     p(
       i("UdashCollapse"), " represents element with toggle behaviour. It provides methods ",

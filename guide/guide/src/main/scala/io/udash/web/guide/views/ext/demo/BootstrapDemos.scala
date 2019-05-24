@@ -2,17 +2,14 @@ package io.udash.web.guide.views.ext.demo
 
 import io.udash._
 import io.udash.bootstrap._
-import io.udash.bootstrap.badge.UdashBadge
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.tooltip.UdashPopover
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
-import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import org.scalajs.dom
 import scalatags.JsDom
@@ -25,52 +22,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def popovers(): dom.Element = {
-    import scala.concurrent.duration.DurationInt
-    val popoverContainerId = ComponentId("popover-container")
-    val label1 = UdashBadge()(_ => Seq[Modifier]("Popover on hover with delay", GlobalStyles.smallMargin)).render
-    UdashPopover(
-      trigger = Seq(UdashPopover.Trigger.Hover),
-      delay = UdashPopover.Delay(500 millis, 250 millis),
-      title = (_) => "Popover...",
-      content = (_) => "Content...",
-      container = Option(s"#$popoverContainerId")
-    )(label1)
-
-    val label2 = UdashBadge()(_ => Seq[Modifier]("Popover on click", GlobalStyles.smallMargin)).render
-    UdashPopover(
-      trigger = Seq(UdashPopover.Trigger.Click),
-      delay = UdashPopover.Delay(0 millis, 250 millis),
-      placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
-      title = (_) => "Popover 2...",
-      content = (_) => "Content...",
-      container = Option(s"#$popoverContainerId")
-    )(label2)
-
-    val label3 = UdashBadge()(_ => Seq[Modifier]("Popover with JS toggler", GlobalStyles.smallMargin)).render
-    val label3Tooltip = UdashPopover(
-      trigger = Seq(UdashPopover.Trigger.Manual),
-      placement = (_, _) => Seq(UdashPopover.Placement.Left),
-      html = true,
-      title = (_) => "Popover 3...",
-      content = (_) => {
-        import scalatags.Text.all._
-        Seq(
-          p("HTML content..."),
-          ul(li("Item 1"), li("Item 2"), li("Item 3"))
-        ).render
-      },
-      container = Option(s"#$popoverContainerId")
-    )(label3)
-
-    val button = UdashButton()("Toggle popover")
-    button.listen { case _ => label3Tooltip.toggle() }
-
-    div(GuideStyles.frame, id := popoverContainerId)(
-      label1, label2, label3, button.render
-    ).render
-  }
 
   def simpleCollapse(): dom.Element = {
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
