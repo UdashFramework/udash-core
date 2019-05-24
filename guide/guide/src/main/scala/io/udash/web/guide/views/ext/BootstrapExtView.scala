@@ -5,7 +5,6 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.views.ext.demo.BootstrapDemos
 import io.udash.web.guide.views.ext.demo.bootstrap._
 import io.udash.web.guide.views.{References, Versions}
 import scalatags.JsDom
@@ -50,6 +49,7 @@ class BootstrapExtView extends FinalView {
   private val (popoversDemo, popoversSnippet) = PopoversDemo.demoWithSnippet()
   private val (simpleCollapseDemo, simpleCollapseSnippet) = SimpleCollapseDemo.demoWithSnippet()
   private val (accordionCollapseDemo, accordionCollapseSnippet) = AccordionDemo.demoWithSnippet()
+  private val (carouselDemo, carouselSnippet) = CarouselDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -210,52 +210,8 @@ class BootstrapExtView extends FinalView {
       i("UdashCarousel"), " is a slideshow component. It exposes its state (slides, current view) through ", i("Properties"),
       " and can be cycled through programatically."
     ),
-    CodeBlock(
-      s"""def newSlide(): UdashCarouselSlide = UdashCarouselSlide(
-         |  Url("/assets/images/ext/bootstrap/carousel.jpg")
-         |)(
-         |  h3(randomString()),
-         |  p(randomString())
-         |)
-         |val slides = SeqProperty[UdashCarouselSlide]((1 to 5).map(_ => newSlide()))
-         |val active = Property(true)
-         |import scala.concurrent.duration._
-         |val carousel = UdashCarousel(
-         |  slides = slides,
-         |  activeSlide = Property(1),
-         |  animationOptions = Property(AnimationOptions(interval = 2 seconds, keyboard = false, active = active.get))
-         |) { case (slide, nested) => nested(produce(slide)(_.render)) }
-         |val prevButton = UdashButton()("Prev")
-         |val nextButton = UdashButton()("Next")
-         |val prependButton = UdashButton()("Prepend")
-         |val appendButton = UdashButton()("Append")
-         |prevButton.listen { case _ => carousel.previousSlide() }
-         |nextButton.listen { case _ => carousel.nextSlide() }
-         |prependButton.listen { case _ => slides.prepend(newSlide()) }
-         |appendButton.listen { case _ => slides.append(newSlide()) }
-         |active.listen(b => if (b) carousel.cycle() else carousel.pause())
-         |div(
-         |  div(
-         |    UdashButtonToolbar()(
-         |      UdashButton.toggle(active = active)("Run animation").render,
-         |      UdashButtonGroup()(
-         |        prevButton.render,
-         |        nextButton.render
-         |      ).render,
-         |      UdashButtonGroup()(
-         |        prependButton.render,
-         |        appendButton.render
-         |      ).render
-         |    ).render
-         |  ),
-         |  div(
-         |    carousel.render
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.carousel()
-    ),
+    carouselSnippet,
+    ForceBootstrap(carouselDemo),
     h2("What's next?"),
     p("You can check the code for this page on our ", a(href := References.UdashGuideRepo)("GitHub repository"),
       ". It contains all the examples above and more, since UdashBootstrap is heavily used in the Udash Guide.")
