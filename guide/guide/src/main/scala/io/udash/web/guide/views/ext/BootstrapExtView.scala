@@ -23,6 +23,7 @@ class BootstrapExtView extends FinalView {
   private val (tableDemo, tableSnippet) = TableDemo.demoWithSnippet()
   private val (dropdownsDemo, dropdownsSnippet) = DropdownsDemo.demoWithSnippet()
   private val (buttonsDemo, buttonsSnippet) = ButtonsDemo.demoWithSnippet()
+  private val (toggleButtonsDemo, toggleButtonsSnippet) = ToggleButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -71,24 +72,8 @@ class BootstrapExtView extends FinalView {
     buttonsSnippet,
     ForceBootstrap(buttonsDemo),
     p("The example below presents helper method for creating toggle buttons."),
-    CodeBlock(
-      s"""|val buttons = Color.values.map { color =>
-          |  color.name -> {
-          |    val active = Property(false)
-          |    val btn = UdashButton.toggle(active, color.toProperty[Color])(_ =>
-          |      Seq[Modifier](color.name, GlobalStyles.smallMargin)
-          |    )
-          |    (active, btn)
-          |  }
-          |}
-          |
-          |div(
-          |  buttons.map(_.render)
-          |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.toggleButton()
-    ),
+    toggleButtonsSnippet,
+    ForceBootstrap(toggleButtonsDemo),
     h3("Button groups"),
     p("There are many ways of creating a button group. The first example presents static API usage:"),
     CodeBlock(

@@ -44,28 +44,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def toggleButton(): dom.Element = {
-    val buttons = Color.values.map { color =>
-      color.name -> {
-        val active = Property(false)
-        val btn = UdashButton.toggle(active, color.toProperty[Color])(_ => Seq[Modifier](color.name, GlobalStyles.smallMargin))
-        (active, btn)
-      }
-    }
-
-    div(GuideStyles.frame)(
-      div(GlobalStyles.centerBlock, BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        buttons.map { case (_, (_, btn)) => btn.render }
-      ),
-      h4("Is active: "),
-      div(wellStyles)(
-        buttons.map({ case (name, (active, _)) =>
-          span(s"$name: ", bind(active), br)
-        }).toSeq
-      )
-    ).render
-  }
-
   def staticButtonsGroup(): dom.Element = {
     div(GuideStyles.frame)(
       UdashButtonGroup(vertical = true.toProperty)(
