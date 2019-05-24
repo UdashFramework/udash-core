@@ -5,11 +5,9 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap._
 import io.udash.bootstrap.badge.UdashBadge
 import io.udash.bootstrap.button._
-import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
@@ -29,25 +27,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def cards(): dom.Element = {
-    val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
-    div(GuideStyles.frame)(
-      UdashCard(
-        borderColor = Some(BootstrapStyles.Color.Success).toProperty,
-        textColor = Some(BootstrapStyles.Color.Primary).toProperty,
-      )(factory => Seq(
-        factory.header("Card heading"),
-        factory.body("Some default panel content here. Nulla vitae elit libero, a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam id dolor id nibh ultricies vehicula ut id elit."),
-        factory.listGroup(nested => {
-          val group = UdashListGroup(news)((news, nested) => li(nested(bind(news))).render)
-          nested(group)
-          group
-        }),
-        factory.footer("Card footer")
-      )).render
-    ).render
-  }
 
   def responsiveEmbed(): dom.Element = {
     div(GuideStyles.frame)(

@@ -43,6 +43,7 @@ class BootstrapExtView extends FinalView {
   private val (alertsDemo, alertsSnippet) = AlertsDemo.demoWithSnippet()
   private val (progressBarDemo, progressBarSnippet) = ProgressBarDemo.demoWithSnippet()
   private val (listGroupDemo, listGroupSnippet) = ListGroupDemo.demoWithSnippet()
+  private val (cardsDemo, cardsSnippet) = CardsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -163,27 +164,8 @@ class BootstrapExtView extends FinalView {
     listGroupSnippet,
     ForceBootstrap(listGroupDemo),
     h3("Card"),
-    CodeBlock(
-      s"""val news = SeqProperty[String]("Title 1", "Title 2", "Title 3")
-         |div(
-         |  UdashCard(
-         |    borderColor = Some(BootstrapStyles.Color.Success).toProperty,
-         |    textColor = Some(BootstrapStyles.Color.Primary).toProperty,
-         |  )(factory => Seq(
-         |    factory.header("Card heading"),
-         |    factory.body("Content..."),
-         |    factory.listGroup(nested => {
-         |      val group = UdashListGroup(news)((news, nested) => li(nested(bind(news))).render)
-         |      nested(group)
-         |      group
-         |    }),
-         |    factory.footer("Card footer")
-         |  )).render
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.cards()
-    ),
+    cardsSnippet,
+    ForceBootstrap(cardsDemo),
     h3("Responsive embed"),
     CodeBlock(
       s"""div(
