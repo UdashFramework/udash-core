@@ -40,6 +40,7 @@ class BootstrapExtView extends FinalView {
   private val (labelsDemo, labelsSnippet) = LabelsDemo.demoWithSnippet()
   private val (badgesDemo, badgesSnippet) = BadgesDemo.demoWithSnippet()
   private val (jumbotronDemo, jumbotronSnippet) = JumbotronDemo.demoWithSnippet()
+  private val (alertsDemo, alertsSnippet) = AlertsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -149,40 +150,8 @@ class BootstrapExtView extends FinalView {
     h3("Alerts"),
     p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with type-safe styling and ",
       i("Property"), "-based dismissal mechanism."),
-    CodeBlock(
-      s"""|val dismissed = SeqProperty[String](Seq.empty)
-          |def randomDismissible(): dom.Element = {
-          |  val title = randomString()
-          |  val alert = DismissibleUdashAlert(
-          |    alertStyle = BootstrapStyles.Color.values(Random.nextInt(BootstrapStyles.Color.values.size)).toProperty
-          |  )(title)
-          |  alert.dismissed.listen(_ => dismissed.append(title))
-          |  alert.render
-          |}
-          |val alerts = div(GlobalStyles.centerBlock)(
-          |  UdashAlert(alertStyle = BootstrapStyles.Color.Info.toProperty)("info").render,
-          |  UdashAlert(alertStyle = BootstrapStyles.Color.Success.toProperty)("success").render,
-          |  UdashAlert(alertStyle = BootstrapStyles.Color.Warning.toProperty)("warning").render,
-          |  UdashAlert(alertStyle = BootstrapStyles.Color.Danger.toProperty)("danger").render
-          |).render
-          |val create = UdashButton()("Create dismissible alert")
-          |create.listen { case _ => alerts.appendChild(randomDismissible()) }
-          |div(
-          |  alerts,
-          |  create.render,
-          |  div(BootstrapStyles.Spacing.margin(
-          |    side = Side.Top, size = SpacingSize.Normal
-          |  ))(
-          |    h4("Dismissed: "),
-          |    div(wellStyles)(produce(dismissed)(seq =>
-          |      ul(seq.map(click => li(click))).render
-          |    ))
-          |  )
-          |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.alerts()
-    ),
+    alertsSnippet,
+    ForceBootstrap(alertsDemo),
     h3("Progress bars"),
     p("The ", i("UdashProgressBar"), " component provides a simple way to use built-in Bootstrap progress bars ",
       "with custom stringifiers and ", i("Property"), "-controlled value, percentage showing and animation."),

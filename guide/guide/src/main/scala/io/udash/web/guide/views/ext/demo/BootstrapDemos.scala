@@ -3,7 +3,6 @@ package io.udash.web.guide.views.ext.demo
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap._
-import io.udash.bootstrap.alert.{DismissibleUdashAlert, UdashAlert}
 import io.udash.bootstrap.badge.UdashBadge
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.card.UdashCard
@@ -32,38 +31,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def alerts(): dom.Element = {
-    val dismissed = SeqProperty[String](Seq.empty)
-    def randomDismissible(): dom.Element = {
-      val title = randomString()
-      val alert = DismissibleUdashAlert(
-        alertStyle = BootstrapStyles.Color.values(Random.nextInt(BootstrapStyles.Color.values.size)).toProperty
-      )(title)
-      alert.dismissed.listen(_ => dismissed.append(title))
-      alert.render
-    }
-    val alerts = div(GlobalStyles.centerBlock)(
-      UdashAlert(alertStyle = BootstrapStyles.Color.Info.toProperty)("info").render,
-      UdashAlert(alertStyle = BootstrapStyles.Color.Success.toProperty)("success").render,
-      UdashAlert(alertStyle = BootstrapStyles.Color.Warning.toProperty)("warning").render,
-      UdashAlert(alertStyle = BootstrapStyles.Color.Danger.toProperty)("danger").render
-    ).render
-    val create = UdashButton()("Create dismissible alert")
-    create.listen { case _ => alerts.appendChild(randomDismissible()) }
-    div(GuideStyles.frame)(
-      alerts,
-      create.render,
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Top, size = SpacingSize.Normal
-      ))(
-        h4("Dismissed: "),
-        div(wellStyles)(produce(dismissed)(seq =>
-          ul(seq.map(click => li(click))).render
-        ))
-      )
-    ).render
-  }
 
   def progressBar(): dom.Element = {
     val showPercentage = Property(true)
