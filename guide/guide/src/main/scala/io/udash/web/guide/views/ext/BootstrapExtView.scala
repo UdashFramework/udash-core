@@ -44,6 +44,7 @@ class BootstrapExtView extends FinalView {
   private val (progressBarDemo, progressBarSnippet) = ProgressBarDemo.demoWithSnippet()
   private val (listGroupDemo, listGroupSnippet) = ListGroupDemo.demoWithSnippet()
   private val (cardsDemo, cardsSnippet) = CardsDemo.demoWithSnippet()
+  private val (responsiveEmbedDemo, responsiveEmbedSnippet) = ResponsiveEmbedDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -167,21 +168,8 @@ class BootstrapExtView extends FinalView {
     cardsSnippet,
     ForceBootstrap(cardsDemo),
     h3("Responsive embed"),
-    CodeBlock(
-      s"""div(
-         |  div(BootstrapStyles.EmbedResponsive.responsive,
-         |      BootstrapStyles.EmbedResponsive.embed16by9)(
-         |    iframe(BootstrapStyles.EmbedResponsive.item, src := "...")
-         |  ),
-         |  div(BootstrapStyles.EmbedResponsive.responsive,
-         |      BootstrapStyles.EmbedResponsive.embed4by3)(
-         |    iframe(BootstrapStyles.EmbedResponsive.item, src := "...")
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.responsiveEmbed()
-    ),
+    responsiveEmbedSnippet,
+    ForceBootstrap(responsiveEmbedDemo),
     h3("Modals"),
     p(
       "The modal window constructor takes three optional methods as the arguments. The first one is used to create ",

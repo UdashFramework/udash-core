@@ -28,17 +28,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def responsiveEmbed(): dom.Element = {
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.EmbedResponsive.responsive, BootstrapStyles.EmbedResponsive.embed16by9, GlobalStyles.smallMargin)(
-        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
-      ),
-      div(BootstrapStyles.EmbedResponsive.responsive, BootstrapStyles.EmbedResponsive.embed4by3, GlobalStyles.smallMargin)(
-        iframe(BootstrapStyles.EmbedResponsive.item, src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0")
-      )
-    ).render
-  }
-
   def simpleModal(): dom.Element = {
     val events = SeqProperty.blank[UdashModal.ModalEvent]
     val header = (_: Binding.NestedInterceptor) => div("Modal events").render
