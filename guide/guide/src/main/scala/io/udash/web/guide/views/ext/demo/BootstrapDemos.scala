@@ -5,7 +5,6 @@ import io.udash.bootstrap._
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
-import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.css.CssView
 import io.udash.logging.CrossLogging
 import io.udash.properties.seq.SeqProperty
@@ -19,26 +18,6 @@ import scala.util.Random
 object BootstrapDemos extends CrossLogging with CssView {
 
   import JsDom.all._
-  import io.udash.web.guide.components.BootstrapUtils._
-
-  def accordionCollapse(): dom.Element = {
-    val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
-    val news = SeqProperty[String](
-      "Title 1", "Title 2", "Title 3"
-    )
-
-    val accordion = UdashAccordion(news)(
-      (news, _) => span(news.get).render,
-      (_, _) => div(wellStyles)(ul(repeat(events)(event => li(event.get.toString).render))).render
-    )
-
-    val accordionElement = accordion.render
-    news.elemProperties.map(accordion.collapseOf)
-      .filter(_.isDefined)
-      .foreach(_.get.listen { case ev => events.append(ev) })
-
-    div(GuideStyles.frame)(accordionElement).render
-  }
 
   def carousel(): dom.Element = {
     def newSlide(): UdashCarouselSlide = UdashCarouselSlide(

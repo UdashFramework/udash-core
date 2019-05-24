@@ -49,6 +49,7 @@ class BootstrapExtView extends FinalView {
   private val (tooltipsDemo, tooltipsSnippet) = TooltipsDemo.demoWithSnippet()
   private val (popoversDemo, popoversSnippet) = PopoversDemo.demoWithSnippet()
   private val (simpleCollapseDemo, simpleCollapseSnippet) = SimpleCollapseDemo.demoWithSnippet()
+  private val (accordionCollapseDemo, accordionCollapseSnippet) = AccordionDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -202,27 +203,8 @@ class BootstrapExtView extends FinalView {
       i("UdashAccordion"), " internally uses ", i("UdashCollapse"), ". It provides ",
       i("collapseOf"), " method for obtaining ", i("UdashCollapse"), " created for selected element."
     ),
-    CodeBlock(
-      s"""val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
-         |val news = SeqProperty[String](
-         |  "Title 1", "Title 2", "Title 3"
-         |)
-         |
-          |val accordion = UdashAccordion(news)(
-         |  (news, _) => span(news.get).render,
-         |  (_, _) => div(wellStyles)(ul(repeat(events)(event => li(event.get.toString).render))).render
-         |)
-         |
-          |val accordionElement = accordion.render
-         |news.elemProperties.map(accordion.collapseOf)
-         |  .filter(_.isDefined)
-         |  .foreach(_.get.listen { case ev => events.append(ev) })
-         |div(accordionElement).render
-       """.stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.accordionCollapse()
-    ),
+    accordionCollapseSnippet,
+    ForceBootstrap(accordionCollapseDemo),
     h3("Carousel"),
     p(
       i("UdashCarousel"), " is a slideshow component. It exposes its state (slides, current view) through ", i("Properties"),
