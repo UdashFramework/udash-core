@@ -45,6 +45,7 @@ class BootstrapExtView extends FinalView {
   private val (listGroupDemo, listGroupSnippet) = ListGroupDemo.demoWithSnippet()
   private val (cardsDemo, cardsSnippet) = CardsDemo.demoWithSnippet()
   private val (responsiveEmbedDemo, responsiveEmbedSnippet) = ResponsiveEmbedDemo.demoWithSnippet()
+  private val (simpleModalDemo, simpleModalSnippet) = SimpleModalDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -178,45 +179,8 @@ class BootstrapExtView extends FinalView {
     p(
       "The ", i("UdashModal"), " class exposes methods for opening/hiding window. It is also possible to listen on window's events."
     ),
-    CodeBlock(
-      s"""|val events = SeqProperty.blank[UdashModal.ModalEvent]
-          |val header = (_: Binding.NestedInterceptor) => div("Modal events").render
-          |val body = (nested: Binding.NestedInterceptor) => div(BootstrapStyles.Spacing.margin())(
-          |  ul(nested(repeat(events)(event => li(event.get.toString).render)))
-          |).render
-          |val footer = (_: Binding.NestedInterceptor) => div(
-          |  UdashButton()(_ => Seq[Modifier](UdashModal.CloseButtonAttr, "Close")).render,
-          |  UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Something...").render
-          |).render
-          |
-          |val modal = UdashModal(modalSize = Some(BootstrapStyles.Size.Large).toProperty)(
-          |  headerFactory = Some(header),
-          |  bodyFactory = Some(body),
-          |  footerFactory = Some(footer)
-          |)
-          |modal.listen { case ev => events.append(ev) }
-          |
-          |val openModalButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Show modal...")
-          |openModalButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
-          |  modal.show()
-          |}
-          |val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-          |openAndCloseButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
-          |  modal.show()
-          |  window.setTimeout(() => modal.hide(), 2000)
-          |}
-          |
-          |div(
-          |  modal.render,
-          |  UdashButtonGroup()(
-          |    openModalButton.render,
-          |    openAndCloseButton.render
-          |  ).render
-          |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.simpleModal()
-    ),
+    simpleModalSnippet,
+    ForceBootstrap(simpleModalDemo),
     h3("Tooltips"),
     CodeBlock(
       s"""|import scala.concurrent.duration.DurationInt

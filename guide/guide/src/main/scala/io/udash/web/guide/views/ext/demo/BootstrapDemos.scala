@@ -1,14 +1,12 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash._
-import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap._
 import io.udash.bootstrap.badge.UdashBadge
 import io.udash.bootstrap.button._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.modal.UdashModal
 import io.udash.bootstrap.tooltip.{UdashPopover, UdashTooltip}
 import io.udash.bootstrap.utils._
 import io.udash.css.CssView
@@ -27,42 +25,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def simpleModal(): dom.Element = {
-    val events = SeqProperty.blank[UdashModal.ModalEvent]
-    val header = (_: Binding.NestedInterceptor) => div("Modal events").render
-    val body = (nested: Binding.NestedInterceptor) => div(wellStyles, BootstrapStyles.Spacing.margin())(
-      ul(nested(repeat(events)(event => li(event.get.toString).render)))
-    ).render
-    val footer = (_: Binding.NestedInterceptor) => div(
-      UdashButton()(_ => Seq[Modifier](UdashModal.CloseButtonAttr, "Close")).render,
-      UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Something...").render
-    ).render
-
-    val modal = UdashModal(modalSize = Some(BootstrapStyles.Size.Large).toProperty)(
-      headerFactory = Some(header),
-      bodyFactory = Some(body),
-      footerFactory = Some(footer)
-    )
-    modal.listen { case ev => events.append(ev) }
-
-    val openModalButton = UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty)("Show modal...")
-    openModalButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
-      modal.show()
-    }
-    val openAndCloseButton = UdashButton()("Open and close after 2 seconds...")
-    openAndCloseButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
-      modal.show()
-      window.setTimeout(() => modal.hide(), 2000)
-    }
-    div(GuideStyles.frame)(
-      modal.render,
-      UdashButtonGroup()(
-        openModalButton.render,
-        openAndCloseButton.render
-      ).render
-    ).render
-  }
 
   def tooltips(): dom.Element = {
     import scala.concurrent.duration.DurationInt
