@@ -29,6 +29,7 @@ class BootstrapExtView extends FinalView {
   private val (checkboxButtonsDemo, checkboxButtonsSnippet) = CheckboxButtonsDemo.demoWithSnippet()
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
   private val (buttonDropdownDemo, buttonDropdownSnippet) = ButtonDropdownDemo.demoWithSnippet()
+  private val (inputGroupDemo, inputGroupSnippet) = InputGroupDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -101,28 +102,8 @@ class BootstrapExtView extends FinalView {
       i("UdashInputGroup"), " groups input elements into one component. It also provides convinient methods for creating the elements structure: ",
       i("input"), " for wrapping input elements, ", i("addon"), " for text elements and ", i("buttons"), " buttons."
     ),
-    CodeBlock(
-      s"""val vanityUrl = Property.blank[String]
-         |val buttonDisabled = Property(true)
-         |vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
-         |val button = UdashButton()("Clear")
-         |button.listen { case _ => vanityUrl.set("") }
-         |div(
-         |  label("Your URL"),
-         |  UdashInputGroup(groupSize = Some(BootstrapStyles.Size.Large).toProperty)(
-         |    UdashInputGroup.prependText("https://example.com/users/", bind(vanityUrl)),
-         |    UdashInputGroup.input(TextInput(vanityUrl)().render),
-         |    UdashInputGroup.append(
-         |      UdashButton(disabled = buttonDisabled)("Go!").render,
-         |      button.render
-         |    )
-         |  ).render
-         |).render
-         |""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.inputGroups()
-    ),
+    inputGroupSnippet,
+    ForceBootstrap(inputGroupDemo),
     h3("Forms"),
     p(i("UdashForm"), " provides a lot of convenience methods for creating forms."),
     CodeBlock(

@@ -43,25 +43,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def inputGroups(): dom.Element = {
-    val vanityUrl = Property.blank[String]
-    val buttonDisabled = Property(true)
-    vanityUrl.listen(v => buttonDisabled.set(v.isEmpty))
-    val button = UdashButton()("Clear")
-    button.listen { case _ => vanityUrl.set("") }
-    div(GuideStyles.frame)(
-      label("Your URL"),
-      UdashInputGroup(groupSize = Some(BootstrapStyles.Size.Large).toProperty)(
-        UdashInputGroup.prependText("https://example.com/users/", bind(vanityUrl)),
-        UdashInputGroup.input(TextInput(vanityUrl)().render),
-        UdashInputGroup.append(
-          UdashButton(disabled = buttonDisabled)("Go!").render,
-          button.render
-        )
-      ).render
-    ).render
-  }
-
   sealed trait ShirtSize
   case object Small extends ShirtSize
   case object Medium extends ShirtSize
