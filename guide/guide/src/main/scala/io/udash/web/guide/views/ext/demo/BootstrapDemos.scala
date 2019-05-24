@@ -13,7 +13,6 @@ import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
 import io.udash.bootstrap.dropdown.UdashDropdown
-import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
 import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
@@ -41,23 +40,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.Context._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def inlineForm(): dom.Element = {
-    val search = Property.blank[String]
-    val something = Property.blank[String]
-    div(GuideStyles.frame)(
-      UdashForm(inline = true)(factory => Seq(
-        UdashInputGroup()(
-          UdashInputGroup.prependText("Search: "),
-          UdashInputGroup.input(factory.input.textInput(search)().render)
-        ).render,
-        UdashInputGroup()(
-          UdashInputGroup.prependText("Something: "),
-          UdashInputGroup.input(factory.input.textInput(something)().render)
-        ).render,
-      )).render
-    ).render
-  }
 
   trait NavPanel {
     def title: String

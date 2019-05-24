@@ -31,6 +31,7 @@ class BootstrapExtView extends FinalView {
   private val (buttonDropdownDemo, buttonDropdownSnippet) = ButtonDropdownDemo.demoWithSnippet()
   private val (inputGroupDemo, inputGroupSnippet) = InputGroupDemo.demoWithSnippet()
   private val (simpleFormDemo, simpleFormSnippet) = SimpleFormDemo.demoWithSnippet()
+  private val (inlineFormDemo, inlineFormSnippet) = InlineFormDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -110,24 +111,8 @@ class BootstrapExtView extends FinalView {
     simpleFormSnippet,
     ForceBootstrap(simpleFormDemo),
     p("It is also possible to create an ", i("inline"), " or ", i("horizontal"), " form."),
-    CodeBlock(
-      s"""val search = Property.blank[String]
-         |val something = Property.blank[String]
-         |
-         |UdashForm(inline = true)(factory => Seq(
-         |  UdashInputGroup()(
-         |    UdashInputGroup.prependText("Search: "),
-         |    UdashInputGroup.input(factory.input.textInput(search)().render)
-         |  ).render,
-         |  UdashInputGroup()(
-         |    UdashInputGroup.prependText("Something: "),
-         |    UdashInputGroup.input(factory.input.textInput(something)().render)
-         |  ).render,
-         |)).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.inlineForm()
-    ),
+    inlineFormSnippet,
+    ForceBootstrap(inlineFormDemo),
     h3("Navs"),
     CodeBlock(
       s"""trait Panel {
