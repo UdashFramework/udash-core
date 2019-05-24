@@ -25,6 +25,7 @@ class BootstrapExtView extends FinalView {
   private val (buttonsDemo, buttonsSnippet) = ButtonsDemo.demoWithSnippet()
   private val (toggleButtonsDemo, toggleButtonsSnippet) = ToggleButtonsDemo.demoWithSnippet()
   private val (staticButtonsGroupDemo, staticButtonsGroupSnippet) = StaticButtonsGroupDemo.demoWithSnippet()
+  private val (buttonToolbarDemo, buttonToolbarSnippet) = ButtonToolbarDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -80,23 +81,8 @@ class BootstrapExtView extends FinalView {
     staticButtonsGroupSnippet,
     ForceBootstrap(staticButtonsGroupDemo),
     p("It is also possible to create reactive groups and toolbars:"),
-    CodeBlock(
-      s"""val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
-         |UdashButtonToolbar.reactive(groups)((p: CastableProperty[Seq[Int]], nested) => {
-         |  val range = p.asSeq[Int]
-         |  val group = UdashButtonGroup.reactive(range, size = Some(Size.Large).toProperty[Option[Size]]) {
-         |    case (element, nested) =>
-         |      val btn = UdashButton()(_ => nested(bind(element)))
-         |      nested(btn)
-         |      btn.render
-         |  }
-         |  nested(group)
-         |  group.render
-         |}).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.buttonToolbar()
-    ),
+    buttonToolbarSnippet,
+    ForceBootstrap(buttonToolbarDemo),
     p("Use ", i("checkboxes"), " method in order to create a group of buttons behaving as checkboxes:"),
     CodeBlock(
       s"""import UdashButtonGroup._
