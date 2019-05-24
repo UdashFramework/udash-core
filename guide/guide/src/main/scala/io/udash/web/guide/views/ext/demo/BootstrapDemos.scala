@@ -34,21 +34,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def labels(): dom.Element = {
-    div(GuideStyles.frame)(
-      div(
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill").render, " ",
-        UdashBadge.link(Property("https://udash.io/"), badgeStyle = BootstrapStyles.Color.Success.toProperty)(_ => "Success Link").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Danger.toProperty)(_ => "Danger").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render, " ",
-        UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render, " ",
-      )
-    ).render
-  }
-
   def badges(): dom.Element = {
     val counter = Property(0)
     window.setInterval(() => counter.set(counter.get + 1), 3000)

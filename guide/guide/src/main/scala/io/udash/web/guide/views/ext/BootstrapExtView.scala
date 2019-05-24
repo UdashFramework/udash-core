@@ -37,6 +37,7 @@ class BootstrapExtView extends FinalView {
   private val (navigationDemo, navigationSnippet) = UdashNavigationDemo.demoWithSnippet()
   private val (breadcrumbsDemo, breadcrumbsSnippet) = BreadcrumbsDemo.demoWithSnippet()
   private val (paginationDemo, paginationSnippet) = PaginationDemo.demoWithSnippet()
+  private val (labelsDemo, labelsSnippet) = LabelsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -134,19 +135,8 @@ class BootstrapExtView extends FinalView {
     paginationSnippet,
     ForceBootstrap(paginationDemo),
     h3("Labels"),
-    CodeBlock(
-      s"""UdashBadge(badgeStyle = BootstrapStyles.Color.Primary.toProperty)(_ => "Primary").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill").render,
-         |UdashBadge.link(Property("https://udash.io/"), badgeStyle = BootstrapStyles.Color.Success.toProperty)(_ =>"Success Link").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Danger.toProperty)(_ => "Danger").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Warning.toProperty)(_ => "Warning").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Info.toProperty)(_ => "Info").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Light.toProperty)(_ => "Light").render,
-         |UdashBadge(badgeStyle = BootstrapStyles.Color.Dark.toProperty)(_ => "Dark").render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.labels()
-    ),
+    labelsSnippet,
+    ForceBootstrap(labelsDemo),
     h3("Badges"),
     CodeBlock(
       s"""
