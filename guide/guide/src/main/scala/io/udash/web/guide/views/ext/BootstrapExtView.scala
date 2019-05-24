@@ -26,6 +26,7 @@ class BootstrapExtView extends FinalView {
   private val (toggleButtonsDemo, toggleButtonsSnippet) = ToggleButtonsDemo.demoWithSnippet()
   private val (staticButtonsGroupDemo, staticButtonsGroupSnippet) = StaticButtonsGroupDemo.demoWithSnippet()
   private val (buttonToolbarDemo, buttonToolbarSnippet) = ButtonToolbarDemo.demoWithSnippet()
+  private val (checkboxButtonsDemo, checkboxButtonsSnippet) = CheckboxButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -84,26 +85,8 @@ class BootstrapExtView extends FinalView {
     buttonToolbarSnippet,
     ForceBootstrap(buttonToolbarDemo),
     p("Use ", i("checkboxes"), " method in order to create a group of buttons behaving as checkboxes:"),
-    CodeBlock(
-      s"""import UdashButtonGroup._
-         |val options = SeqProperty[String]("Checkbox 1", "Checkbox 2", "Checkbox 3")
-         |val selected = SeqProperty[String](options.get.head)
-         |div(
-         |  div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-         |    UdashButtonGroup.checkboxes(selected, options)().render
-         |  ),
-         |  h4("Is active: "),
-         |  div(wellStyles)(
-         |    repeatWithNested(options) { (option, nested) =>
-         |      val checked = selected.transform((_: Seq[String]).contains(option.get))
-         |      div(nested(bind(option)), ": ", nested(bind(checked))).render
-         |    }
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.checkboxButtons()
-    ),
+    checkboxButtonsSnippet,
+    ForceBootstrap(checkboxButtonsDemo),
     p("The following example presents a group of buttons behaving as radio buttons:"),
     CodeBlock(
       s"""import UdashButtonGroup._
