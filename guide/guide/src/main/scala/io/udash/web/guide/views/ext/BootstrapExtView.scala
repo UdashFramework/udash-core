@@ -27,6 +27,7 @@ class BootstrapExtView extends FinalView {
   private val (staticButtonsGroupDemo, staticButtonsGroupSnippet) = StaticButtonsGroupDemo.demoWithSnippet()
   private val (buttonToolbarDemo, buttonToolbarSnippet) = ButtonToolbarDemo.demoWithSnippet()
   private val (checkboxButtonsDemo, checkboxButtonsSnippet) = CheckboxButtonsDemo.demoWithSnippet()
+  private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -88,26 +89,8 @@ class BootstrapExtView extends FinalView {
     checkboxButtonsSnippet,
     ForceBootstrap(checkboxButtonsDemo),
     p("The following example presents a group of buttons behaving as radio buttons:"),
-    CodeBlock(
-      s"""import UdashButtonGroup._
-         |val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
-         |val selected = Property[String](options.get.head)
-         |div(
-         |  div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-         |    UdashButtonGroup.radio(selected, options)().render
-         |  ),
-         |  h4("Is active: "),
-         |  div(wellStyles)(
-         |    repeatWithNested(options) { (option, nested) =>
-         |      val checked = selected.transform(_ == option.get)
-         |      div(nested(bind(option)), ": ", nested(bind(checked))).render
-         |    }
-         |  )
-         |).render""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(
-      BootstrapDemos.radioButtons()
-    ),
+    radioButtonsSnippet,
+    ForceBootstrap(radioButtonsDemo),
     h3("Button dropdowns"),
     p("The ", i("UdashDropdown"), " component can be used as part of a button group."),
     CodeBlock(

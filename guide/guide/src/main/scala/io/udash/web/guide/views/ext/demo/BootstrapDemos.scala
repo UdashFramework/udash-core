@@ -44,23 +44,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
 
-  def radioButtons(): dom.Element = {
-    val options = SeqProperty[String]("Radio 1", "Radio 2", "Radio 3")
-    val selected = Property[String](options.get.head)
-    div(GuideStyles.frame)(
-      div(BootstrapStyles.Spacing.margin(side = Side.Bottom, size = SpacingSize.Normal))(
-        UdashButtonGroup.radio(selected, options)().render
-      ),
-      h4("Is active: "),
-      div(wellStyles)(
-        repeatWithNested(options) { (option, nested) =>
-          val checked = selected.transform(_ == option.get)
-          div(nested(bind(option)), ": ", nested(bind(checked))).render
-        }
-      )
-    ).render
-  }
-
   def buttonDropdown(): dom.Element = {
     val items = SeqProperty[DefaultDropdownItem](
       UdashDropdown.DefaultDropdownItem.Header("Start"),
