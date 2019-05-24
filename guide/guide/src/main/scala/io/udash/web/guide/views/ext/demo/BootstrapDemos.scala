@@ -10,7 +10,6 @@ import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
 import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
-import io.udash.bootstrap.jumbotron.UdashJumbotron
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.modal.UdashModal
 import io.udash.bootstrap.progressbar.UdashProgressBar
@@ -33,18 +32,6 @@ object BootstrapDemos extends CrossLogging with CssView {
   import JsDom.all._
   import io.udash.web.guide.components.BootstrapUtils._
   import org.scalajs.dom._
-
-  def badges(): dom.Element = {
-    val counter = Property(0)
-    window.setInterval(() => counter.set(counter.get + 1), 3000)
-    div(GuideStyles.frame)(
-      div(
-        UdashButton(buttonStyle = BootstrapStyles.Color.Primary.toProperty, size = Some(BootstrapStyles.Size.Large).toProperty)(
-          _ => Seq[Modifier]("Button ", UdashBadge()(nested => nested(bind(counter))).render)
-        ).render
-      )
-    ).render
-  }
 
   def alerts(): dom.Element = {
     val dismissed = SeqProperty[String](Seq.empty)
@@ -379,13 +366,6 @@ object BootstrapDemos extends CrossLogging with CssView {
       )
     ).render
   }
-
-  def jumbotron(): dom.Element =
-    UdashJumbotron()( _ => Seq[Modifier](
-      h1("Jumbo poem!"),
-      p("One component to rule them all, one component to find them, one component to bring them all and in the darkness bind them."),
-      UdashButton(buttonStyle = Color.Info.toProperty, size = Some(Size.Large).toProperty[Option[Size]])(_ => "Click").render
-    )).render
 
   private def randomString(): String = Random.nextLong().toString
 }

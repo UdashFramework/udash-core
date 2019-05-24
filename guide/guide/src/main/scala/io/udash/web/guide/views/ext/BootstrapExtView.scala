@@ -39,6 +39,7 @@ class BootstrapExtView extends FinalView {
   private val (paginationDemo, paginationSnippet) = PaginationDemo.demoWithSnippet()
   private val (labelsDemo, labelsSnippet) = LabelsDemo.demoWithSnippet()
   private val (badgesDemo, badgesSnippet) = BadgesDemo.demoWithSnippet()
+  private val (jumbotronDemo, jumbotronSnippet) = JumbotronDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash Bootstrap Components"),
@@ -143,16 +144,8 @@ class BootstrapExtView extends FinalView {
     ForceBootstrap(badgesDemo),
     h3("Jumbotron"),
     p("A lightweight, flexible component that can optionally extend the entire viewport to showcase key content on your site."),
-    CodeBlock(
-      s"""UdashJumbotron()( _ => Seq[Modifier](
-         |  h1("Jumbo poem!"),
-         |  p("One component to rule them all, one component to find them, one component to bring them all and in the darkness bind them."),
-         |  UdashButton(buttonStyle = Color.Info.toProperty, size = Some(Size.Large).toProperty[Option[Size]])(_ => "Click").render
-         |)).render""".stripMargin
-    )(GuideStyles),
-    div(cls := "bootstrap")(
-      BootstrapDemos.jumbotron()
-    ),
+    jumbotronSnippet,
+    div(cls := "bootstrap")(jumbotronDemo),
     h3("Alerts"),
     p("The ", i("UdashAlert")," component supports both regular and dismissible Bootstrap alerts with type-safe styling and ",
       i("Property"), "-based dismissal mechanism."),
