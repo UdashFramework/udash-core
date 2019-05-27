@@ -475,5 +475,31 @@ class ModelPropertyTest extends UdashCoreTest {
       t.subProp(_.x).set(new Test.A("qwe"))
       t.subProp(_.x).get.a should be("qwe")
     }
+
+    "handle Seq aliases" in {
+      val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
+
+      mp.subSeq(_.s1).get.head shouldBe "abc"
+      mp.subProp(_.s1).get.head shouldBe "abc"
+
+      mp.subSeq(_.s2).get.head shouldBe "def"
+      mp.subProp(_.s2).get.head shouldBe "def"
+
+      mp.subSeq(_.s3).get.head shouldBe 1
+
+      mp.subSeq(_.s4).get.head shouldBe "123"
+    }
   }
+
+  type SeqAlias[A] = Seq[A]
+  type VectorAlias[A] = Vector[A]
+  type IntSeq[A] = Seq[Int]
+  type WeirdSeq[A, B] = Seq[B]
+  case class AliasedSeqModel(
+    s1: SeqAlias[String],
+    s2: VectorAlias[String],
+    s3: IntSeq[String],
+    s4: WeirdSeq[Int, String]
+  )
+  object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 }

@@ -2,7 +2,6 @@ package io.udash.properties
 
 import com.avsystem.commons._
 import com.github.ghik.silencer.silent
-import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
@@ -1434,14 +1433,6 @@ class SeqPropertyTest extends UdashCoreTest {
       indexed.get should be(numbers.get.zipWithIndex)
     }
 
-    "handle Seq aliases" in {
-      val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
-      mp.subSeq(_.s1).get.head shouldBe "abc"
-      mp.subSeq(_.s2).get.head shouldBe "def"
-      mp.subSeq(_.s3).get.head shouldBe 1
-      mp.subSeq(_.s4).get.head shouldBe "123"
-    }
-
     "cancel listeners in a callback" in {
       val t = SeqProperty(42, 0, 99)
       val regs = mutable.ArrayBuffer.empty[Registration]
@@ -1468,18 +1459,6 @@ class SeqPropertyTest extends UdashCoreTest {
       results should contain theSameElementsInOrderAs Seq("1")
     }
   }
-
-  type SeqAlias[A] = Seq[A]
-  type VectorAlias[A] = Vector[A]
-  type IntSeq[A] = Seq[Int]
-  type WeirdSeq[A, B] = Seq[B]
-  case class AliasedSeqModel(
-    s1: SeqAlias[String],
-    s2: VectorAlias[String],
-    s3: IntSeq[String],
-    s4: WeirdSeq[Int, String]
-  )
-  object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 
   "Seq[Property]" should {
     "combine into ReadableSeqProperty" in {
