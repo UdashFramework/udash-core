@@ -8,29 +8,24 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   import c.universe._
 
-  val Package = q"_root_.io.udash.properties"
-  val IsModelPropertyTemplateCls = tq"$Package.IsModelPropertyTemplate"
-
-  val PropertyCreatorCls = tq"$Package.PropertyCreator"
-  val SeqPropertyCreatorCls = tq"$Package.SeqPropertyCreator"
-  val SinglePropertyCreatorCls = tq"$Package.SinglePropertyCreator"
-  val PropertyCreatorCompanion = q"$Package.PropertyCreator"
-  val ModelPropertyCreatorCls = tq"$Package.ModelPropertyCreator"
-
-  val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
-  val CastableReadablePropertyCls = tq"$Package.single.CastableReadableProperty"
-  val PropertyCls = tq"$Package.single.Property"
-  val ReadableSeqPropertyCls = tq"$Package.seq.ReadableSeqProperty"
-  val SeqPropertyCls = tq"$Package.seq.SeqProperty"
-  val ReadableModelPropertyCls = tq"$Package.model.ReadableModelProperty"
-  val ModelPropertyCls = tq"$Package.model.ModelProperty"
-  val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
-  val CastablePropertyCls = tq"$Package.single.CastableProperty"
-  val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
-
-  private lazy val SeqTpe = typeOf[Seq[_]]
-  private lazy val MutableSeqTpe = typeOf[scala.collection.mutable.Seq[_]]
-  private lazy val topLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
+  private final lazy val Package = q"_root_.io.udash.properties"
+  private final lazy val IsModelPropertyTemplateCls = tq"$Package.IsModelPropertyTemplate"
+  private final lazy val PropertyCreatorCls = tq"$Package.PropertyCreator"
+  private final lazy val SeqPropertyCreatorCls = tq"$Package.SeqPropertyCreator"
+  private final lazy val PropertyCreatorCompanion = q"$Package.PropertyCreator"
+  private final lazy val ModelPropertyCreatorCls = tq"$Package.ModelPropertyCreator"
+  private final lazy val ReadablePropertyCls = tq"$Package.single.ReadableProperty"
+  private final lazy val CastableReadablePropertyCls = tq"$Package.single.CastableReadableProperty"
+  private final lazy val PropertyCls = tq"$Package.single.Property"
+  private final lazy val ReadableSeqPropertyCls = tq"$Package.seq.ReadableSeqProperty"
+  private final lazy val SeqPropertyCls = tq"$Package.seq.SeqProperty"
+  private final lazy val ReadableModelPropertyCls = tq"$Package.model.ReadableModelProperty"
+  private final lazy val ModelPropertyCls = tq"$Package.model.ModelProperty"
+  private final lazy val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
+  private final lazy val CastablePropertyCls = tq"$Package.single.CastableProperty"
+  private final lazy val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
+  private final lazy val SeqTpe = typeOf[Seq[_]]
+  private final lazy val TopLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
 
   private def fixOverride(s: Symbol) =
     if (s.isTerm && s.asTerm.isOverloaded) {
@@ -41,7 +36,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     s :: s.overrides.map(fixOverride)
 
   private def isFromTopLevelType(symbol: Symbol) =
-    withOverrides(symbol).exists(topLevelSymbols contains _.owner)
+    withOverrides(symbol).exists(TopLevelSymbols contains _.owner)
 
   //Checks, if symbol is abstract method
   private def isAbstractMethod(symbol: Symbol): Boolean =
@@ -68,6 +63,10 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   private def hasModelPropertyCreator(valueType: Type): Boolean =
     c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$valueType]]", silent = true) != EmptyTree
+
+  private def isSeqPropertyTpe(tpe: Type): Boolean = {
+    tpe <:< SeqTpe && tpe.map(_.dealias).typeArgs.lengthCompare(1) == 0
+  }
 
   //Checks, if trait is valid ModelProperty template
   private def doesMeetTraitModelRequirements(tpe: Type): Boolean = {
@@ -131,7 +130,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val isClass: Boolean = valueType.typeSymbol.isClass
     val isTrait = isClass && valueType.typeSymbol.asClass.isTrait
     val isNotSealedTrait = isClass && !valueType.typeSymbol.asClass.isSealed
-    val isNotSeq = !(valueType <:< SeqTpe) && !(valueType <:< MutableSeqTpe)
+    val isNotSeq = !(valueType <:< SeqTpe)
 
     lazy val isValidModelClass: Boolean = doesMeetClassModelRequirements(valueType)
 
@@ -203,13 +202,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   private def generateModelProperty(tpe: Type): c.Tree = {
-    def reifySeqTpe(tpe: Type): Type = {
-      if (tpe <:< SeqTpe) {
-        val dealiased = tpe.map(_.dealias).baseType(SeqTpe.typeSymbol)
-        getType(tq"$ScalaPkg.Seq[${dealiased.typeArgs.head}]")
-      } else tpe
-    }
-
     def impl(members: Map[TermName, Type], getCreator: Tree): Tree = {
       q"""
         new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()) {
@@ -219,7 +211,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           case (name, returnTpe) =>
             val dealiased = returnTpe.map(_.dealias)
             val reifiedCreatorTpe = getType(
-              if (returnTpe <:< SeqTpe) {
+              if (isSeqPropertyTpe(returnTpe)) {
                 val seqTpe = dealiased.baseType(SeqTpe.typeSymbol)
                 tq"$SeqPropertyCreatorCls[${seqTpe.typeArgs.head}, ${dealiased.typeConstructor}]"
               }
@@ -237,11 +229,11 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           protected def internalSet(newValue: $tpe, withCallbacks: Boolean, force: Boolean): Unit = {
             ..${
         members.map { case (name, returnTpe) =>
-          val reifiedReturnTpe = reifySeqTpe(returnTpe)
+          val dealiased = returnTpe.map(_.dealias)
           q"""
                   setSubProp(
-                    getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}),
-                    if (newValue != null) newValue.$name else null.asInstanceOf[$reifiedReturnTpe],
+                    getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}),
+                    if (newValue != null) newValue.$name else null.asInstanceOf[$dealiased],
                     withCallbacks, force
                   )
                 """
@@ -263,13 +255,12 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
           order.map { name =>
             val returnTpe = members(name)
-            val dealiasedReturnType = returnTpe.map(_.dealias)
-            val reifiedReturnTpe = reifySeqTpe(returnTpe)
-            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe) {
-              q"""getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${dealiasedReturnType.typeConstructor}]"""
+            val dealiased = returnTpe.map(_.dealias)
+            if (isSeqPropertyTpe(returnTpe)) {
+              q"""getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get.to[${dealiased.typeConstructor}]"""
             }
             else {
-              q"""getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+              q"""getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
             }
           }
         }
@@ -283,12 +274,11 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           new $tpe {
             ..${
           members.map { case (name, returnTpe) =>
-            val reifiedReturnTpe = reifySeqTpe(returnTpe)
-            val dealiasedReturnType = returnTpe.map(_.dealias)
-            if (returnTpe <:< SeqTpe && reifiedReturnTpe != returnTpe) {
-              q"""override val $name: $returnTpe = getSubProperty[$reifiedReturnTpe](${q"_.$name"}, ${name.toString}).get.to[${dealiasedReturnType.typeConstructor}]"""
+            val dealiased = returnTpe.map(_.dealias)
+            if (isSeqPropertyTpe(returnTpe)) {
+              q"""override val $name: $dealiased = getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get.to[${dealiased.typeConstructor}]"""
             } else {
-              q"""override val $name: $returnTpe = getSubProperty[$returnTpe](${q"_.$name"}, ${name.toString}).get"""
+              q"""override val $name: $dealiased = getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
             }
           }
         }
@@ -368,9 +358,9 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val parts = parsePath(modelPath)
 
     def genTree(source: List[(Type, TermName)], targetTree: Tree): Tree = source match {
-      case (resultType, term) :: _ if resultType.typeConstructor <:< SeqTpe.typeConstructor =>
-        val dealiased = resultType.map(_.dealias)
-        q"""$targetTree.getSubSeq[${dealiased.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
+      case (resultType, term) :: _ if isSeqPropertyTpe(resultType) =>
+        val seqTpe = resultType.map(_.dealias).baseType(SeqTpe.typeSymbol)
+        q"""$targetTree.getSubSeq[${seqTpe.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: Nil if hasModelPropertyCreator(resultType) =>
         q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: tail if hasModelPropertyCreator(resultType) =>
