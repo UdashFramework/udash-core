@@ -217,16 +217,16 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
         members.map {
           case (name, returnTpe) =>
-            val reifiedReturnTpe = reifySeqTpe(returnTpe)
+            val dealiased = returnTpe.map(_.dealias)
             val reifiedCreatorTpe = getType(
               if (returnTpe <:< SeqTpe) {
-                val dealiased = returnTpe.map(_.dealias).baseType(SeqTpe.typeSymbol)
-                tq"$SeqPropertyCreatorCls[${dealiased.typeArgs.head}]"
+                val seqTpe = dealiased.baseType(SeqTpe.typeSymbol)
+                tq"$SeqPropertyCreatorCls[${seqTpe.typeArgs.head}, ${dealiased.typeConstructor}]"
               }
-              else tq"$PropertyCreatorCls[$reifiedReturnTpe]"
+              else tq"$PropertyCreatorCls[$returnTpe]"
             )
 
-            q"""properties(${name.toString}) = implicitly[$reifiedCreatorTpe].newProperty(null.asInstanceOf[$reifiedReturnTpe], this)"""
+            q"""properties(${name.toString}) = implicitly[$reifiedCreatorTpe].newProperty(null.asInstanceOf[$dealiased], this)"""
         }
       }
           }
