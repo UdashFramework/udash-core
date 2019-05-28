@@ -45,6 +45,9 @@ class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
     new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
 }
+object SeqPropertyCreator {
+  implicit def materializeSeq[T: PropertyCreator]: SeqPropertyCreator[T] = new SeqPropertyCreator[T]
+}
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
 abstract class ModelPropertyCreator[T] extends PropertyCreator[T]
