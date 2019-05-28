@@ -476,18 +476,34 @@ class ModelPropertyTest extends UdashCoreTest {
       t.subProp(_.x).get.a should be("qwe")
     }
 
-    "handle Seq aliases" in {
+    "handle Seq subclasses and aliases" in {
       val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
 
-      mp.subSeq(_.s1).get.head shouldBe "abc"
-      mp.subProp(_.s1).get.head shouldBe "abc"
+      mp.subSeq(_.s1).get shouldBe Seq("abc")
+      mp.subProp(_.s1).get shouldBe Vector("abc")
 
-      mp.subSeq(_.s2).get.head shouldBe "def"
-      mp.subProp(_.s2).get.head shouldBe "def"
+      mp.subSeq(_.s2).get shouldBe Seq("def")
+      mp.subProp(_.s2).get shouldBe Vector("def")
 
-      mp.subSeq(_.s3).get.head shouldBe 1
+      mp.subSeq(_.s3).get shouldBe Seq(1)
+      mp.subProp(_.s3).get shouldBe Vector(1)
 
-      mp.subSeq(_.s4).get.head shouldBe "123"
+      mp.subSeq(_.s4).get shouldBe Seq("123")
+      mp.subProp(_.s4).get shouldBe Vector("123")
+
+      val zipped = mp.subSeq(_.s1).zip(mp.subSeq(_.s2))(_ + _)
+      zipped.get shouldBe Seq("abcdef")
+
+      mp.subSeq(_.s2).prepend("abc")
+      mp.subSeq(_.s2).get shouldBe Seq("abc", "def")
+      mp.subProp(_.s2).get shouldBe Vector("abc", "def")
+      zipped.get shouldBe Seq("abcabc")
+
+      mp.subProp(_.s2).set(Vector("xyz"))
+
+      mp.subSeq(_.s2).get shouldBe Seq("xyz")
+      mp.subProp(_.s2).get shouldBe Vector("xyz")
+      zipped.get shouldBe Seq("abcxyz")
     }
   }
 
