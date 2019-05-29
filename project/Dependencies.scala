@@ -5,7 +5,7 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.8"
-  val silencerVersion = "1.3.4"
+  val silencerVersion = "1.4.0"
 
   val jqueryWrapperVersion = "3.0.1"
   val jqueryVersion = "3.3.1"
