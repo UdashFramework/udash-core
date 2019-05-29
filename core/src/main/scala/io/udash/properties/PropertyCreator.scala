@@ -37,19 +37,20 @@ object PropertyCreator extends PropertyCreatorImplicits {
   implicit val String: PropertyCreator[String] = new SinglePropertyCreator[String]
 }
 
-class SinglePropertyCreator[T] extends PropertyCreator[T] {
+final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
-class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]])
+final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]])
   extends PropertyCreator[SeqTpe[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[T]] =
     new DirectSeqPropertyImpl[T, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[T]]]
 }
+
 object SeqPropertyCreator {
   implicit def materializeSeq[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]]): SeqPropertyCreator[T, SeqTpe] =
-    new SeqPropertyCreator[T, SeqTpe]
+  macro io.udash.macros.PropertyMacros.reifySeqPropertyCreator[T, SeqTpe]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")

@@ -65,7 +65,10 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$valueType]]", silent = true) != EmptyTree
 
   private def isSeqPropertyTpe(tpe: Type): Boolean = {
-    tpe <:< SeqTpe && tpe.map(_.dealias).typeArgs.lengthCompare(1) == 0
+    val dealiased = tpe.map(_.dealias)
+    dealiased.typeConstructor <:< SeqTpe.typeConstructor && {
+      dealiased.typeArgs.lengthCompare(1) == 0 ^ dealiased.typeParams.lengthCompare(1) == 0
+    }
   }
 
   //Checks, if trait is valid ModelProperty template
@@ -297,9 +300,13 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     q"${reifySubProperty[A, B](f)}.asInstanceOf[$ModelPropertyCls[$resultType]]"
   }
 
-  def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
+  private def subSeqValidation(leafTpe: Type): Unit = {
+    if (!isSeqPropertyTpe(leafTpe)) c.abort(c.enclosingPosition, s"$leafTpe is not a valid subSeq type")
+  }
+
+  def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag, SeqTpe[_]](f: c.Tree)(ev: c.Tree, cbf: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
-    q"${reifySubProperty[A, B](f)}.asInstanceOf[$SeqPropertyCls[$resultType, $PropertyCls[$resultType] with $CastablePropertyCls[$resultType]]]"
+    q"${reifySubProperty[A, B](f, subSeqValidation)}.asInstanceOf[$SeqPropertyCls[$resultType, $PropertyCls[$resultType] with $CastablePropertyCls[$resultType]]]"
   }
 
   def reifyRoSubProp[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
@@ -314,32 +321,36 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
   def reifyRoSubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree)(ev: c.Tree): c.Tree = {
     val resultType = weakTypeOf[B]
-    q"${reifySubProperty[A, B](f)}.asInstanceOf[$ReadableSeqPropertyCls[$resultType, $CastableReadablePropertyCls[$resultType]]]"
+    q"${reifySubProperty[A, B](f, subSeqValidation)}.asInstanceOf[$ReadableSeqPropertyCls[$resultType, $CastableReadablePropertyCls[$resultType]]]"
   }
 
-  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree): c.Tree = {
+  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree, leafValidation: Type => Unit = _ => ()): c.Tree = {
     val model = c.prefix
     val modelPath = getModelPath(f)
 
-    def checkIfIsValidPath(tree: Tree): Boolean = tree match {
-      case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
-        true
-      case Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
-        checkIfIsValidPath(next)
-      case Select(next, t) =>
-        c.abort(c.enclosingPosition,
-          s"""
-             |The path must consist of ModelProperties and only leaf can be a Property, ModelProperty or SeqProperty.
-             | * ${next.tpe.widen} ${if (hasModelPropertyCreator(next.tpe.widen)) "is" else "is NOT"} a ModelProperty
-             | * $t ${if (isValidSubproperty(next.tpe, t)) "is" else "is NOT"} a valid subproperty (abstract val/def for trait based model or constructor element for (case) class based model)
-             |
+    def checkIfIsValidPath(tree: Tree, validation: Type => Unit = _ => ()): Boolean = {
+      tree match {
+        case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
+          validation(next.tpe.member(t).typeSignature.finalResultType)
+          true
+        case Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
+          validation(next.tpe.member(t).typeSignature.finalResultType)
+          checkIfIsValidPath(next)
+        case Select(next, t) =>
+          c.abort(c.enclosingPosition,
+            s"""
+               |The path must consist of ModelProperties and only leaf can be a Property, ModelProperty or SeqProperty.
+               | * ${next.tpe.widen} ${if (hasModelPropertyCreator(next.tpe.widen)) "is" else "is NOT"} a ModelProperty
+               | * $t ${if (isValidSubproperty(next.tpe, t)) "is" else "is NOT"} a valid subproperty (abstract val/def for trait based model or constructor element for (case) class based model)
+               |
              |""".stripMargin
-        )
-      case _ =>
-        c.abort(c.enclosingPosition, s"The path must consist of ModelProperties and leaf can be a simple Property, ModelProperty or SeqProperty.")
+          )
+        case _ =>
+          c.abort(c.enclosingPosition, s"The path must consist of ModelProperties and leaf can be a simple Property, ModelProperty or SeqProperty.")
+      }
     }
 
-    checkIfIsValidPath(modelPath)
+    checkIfIsValidPath(modelPath, leafValidation)
 
     def parsePath(tree: Tree): List[(Type, TermName)] = {
       def symbolPath(t: Tree): List[Symbol] = t match {
@@ -384,6 +395,17 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
         }
       }
     }"""
+  }
+
+  def reifySeqPropertyCreator[A: c.WeakTypeTag, B[A] <: Seq[A]](ev: c.Tree, cbf: c.Tree)(implicit tt: c.WeakTypeTag[B[A]]): c.Tree = {
+    val elemTpe = weakTypeOf[A]
+    val seqTpe = weakTypeOf[B[A]]
+    if (isSeqPropertyTpe(seqTpe)) {
+      val dealiased = seqTpe.map(_.dealias)
+      q"new $SeqPropertyCreatorCls[$elemTpe, $dealiased]()($ev, $cbf)"
+    } else {
+      c.abort(c.enclosingPosition, s"$seqTpe cannot be used in SeqProperties")
+    }
   }
 
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {
