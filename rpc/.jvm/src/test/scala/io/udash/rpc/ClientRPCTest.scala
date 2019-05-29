@@ -1,6 +1,5 @@
 package io.udash.rpc
 
-import com.github.ghik.silencer.silent
 import io.udash.rpc.internals.BroadcastManager
 import io.udash.testing.UdashRpcBackendTest
 import org.atmosphere.cpr._
@@ -18,7 +17,6 @@ class ClientRPCTest extends UdashRpcBackendTest {
         val broadcasterFactory = new BroadcasterFactoryMock(broadcaster)
         val metaBroadcaster = new DefaultMetaBroadcaster
 
-        @silent
         val rpc = createClientRpc(ClientId("id123")).remoteRpc
 
         BroadcastManager.init(broadcasterFactory, metaBroadcaster)
@@ -39,7 +37,6 @@ class ClientRPCTest extends UdashRpcBackendTest {
         val broadcaster = new BroadcasterMock
         val broadcasterFactory = new BroadcasterFactoryMock(broadcaster)
         val metaBroadcaster = new MetaBroadcasterMock
-        @silent
         val rpc = createClientRpc(AllClients).remoteRpc
 
         BroadcastManager.init(broadcasterFactory, metaBroadcaster)
@@ -58,7 +55,6 @@ class ClientRPCTest extends UdashRpcBackendTest {
       BroadcastManager.synchronized {
         BroadcastManager.init(null, null)
 
-        @silent
         val rpc = createClientRpc(AllClients).remoteRpc
         intercept[IllegalArgumentException] {
           rpc.handle
@@ -75,7 +71,6 @@ class ClientRPCTest extends UdashRpcBackendTest {
   }
 
   def createDefaultClientRPC(target: ClientRPCTarget): DefaultClientRPC[TestClientRPC] = {
-    @silent
     val r = new DefaultClientRPC[TestClientRPC](target)
     r
   }
