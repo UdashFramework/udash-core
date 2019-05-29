@@ -49,8 +49,9 @@ final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit
 }
 
 object SeqPropertyCreator {
-  implicit def materializeSeq[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]]): SeqPropertyCreator[T, SeqTpe] =
-  macro io.udash.macros.PropertyMacros.reifySeqPropertyCreator[T, SeqTpe]
+  implicit def materializeSeq[T: PropertyCreator, SeqTpe[T] <: Seq[T]](
+    implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]]
+  ): SeqPropertyCreator[T, SeqTpe] = macro io.udash.macros.PropertyMacros.reifySeqPropertyCreator[T, SeqTpe]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
