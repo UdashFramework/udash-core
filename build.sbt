@@ -37,6 +37,7 @@ val commonSettings = Seq(
     "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator",
+    "-P:silencer:checkUnused",
   ),
   scalacOptions ++= {
     if (scalaBinaryVersion.value == "2.12") Seq(
