@@ -5,7 +5,7 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.8"
-  val silencerVersion = "1.3.4"
+  val silencerVersion = "1.4.1"
 
   val jqueryWrapperVersion = "3.0.1"
   val jqueryVersion = "3.3.1"
@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.6"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.34.19"
+  val avsCommonsVersion = "1.34.20"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.3"
@@ -27,7 +27,7 @@ object Dependencies {
 
   val sttpVersion = "1.5.17"
 
-  val scalaLoggingVersion = "3.9.0"
+  val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.18.v20190429" // Tests only
 

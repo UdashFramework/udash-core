@@ -1,7 +1,6 @@
 package io.udash.properties
 
 import com.avsystem.commons._
-import com.github.ghik.silencer.silent
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
@@ -490,9 +489,8 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      val states = mutable.ArrayBuffer.empty[Seq[Int]]: @silent
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]:
-      @silent
+      val states = mutable.ArrayBuffer.empty[Seq[Int]]
+      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
 
       ensureNoListeners(p)
 
