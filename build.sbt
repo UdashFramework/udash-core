@@ -134,7 +134,10 @@ lazy val udash = project.in(file("."))
   .aggregate(
     `udash-jvm`, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
   )
-  .settings(aggregateProjectSettings)
+  .settings(
+    aggregateProjectSettings,
+    ideSkipProject := false,
+  )
 
 //for simplifying Travis build matrix
 lazy val `udash-jvm` = project.in(file(".jvm"))
