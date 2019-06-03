@@ -1,4 +1,5 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.sbtplugin.JSModuleID
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys.scalaVersion
 import sbt._
@@ -153,7 +154,7 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+  val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
       minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js"
@@ -184,4 +185,7 @@ object Dependencies {
     "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
     "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
+
+  val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+
 }

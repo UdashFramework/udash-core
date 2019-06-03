@@ -57,7 +57,7 @@ val commonSettings = Seq(
   autoAPIMappings := true
 )
 
-val commonJSSettings = Seq(
+val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / parallelExecution := false,
   Test / scalaJSStage := FastOptStage,
@@ -110,18 +110,14 @@ def jvmProject(proj: Project): Project =
 def jsProject(proj: Project): Project =
   proj.in(proj.base / ".js")
     .enablePlugins(ScalaJSPlugin)
-    .settings(
-      commonSettings,
-      commonJSSettings
-    )
+    .settings(commonJsSettings)
 
 def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
   jsProj.in(jvmProj.base / ".js")
     .enablePlugins(ScalaJSPlugin)
     .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
     .settings(
-      commonSettings,
-      commonJSSettings,
+      commonJsSettings,
 
       moduleName := (jvmProj / moduleName).value,
       sourceDirsSettings(_.getParentFile),
@@ -284,58 +280,87 @@ val compileAndOptimizeStatics = taskKey[File](
   "Compiles and optimizes JavaScript files and copies all assets to the target directory."
 )
 
-val seleniumStaticsRoot = "UdashStatics/WebContent"
 
-lazy val `selenium-js` = jsProjectFor(project, selenium)
-  .dependsOn(
-    `core-js` % CompileAndTest, `rpc-js` % CompileAndTest, `rest-js` % CompileAndTest,
-    `css-js` % CompileAndTest, `auth-js` % CompileAndTest, `i18n-js` % CompileAndTest,
-    bootstrap4 % CompileAndTest
-  )
-  .settings(
-    noPublishSettings,
+def frontendProject(proj: Project)(
+  staticsRoot: String, cssRenderer: Option[(Project, String)], jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]
+) = {
+  proj
+    .enablePlugins(ScalaJSPlugin /*, SbtWeb*/)
+    .settings(commonJsSettings)
+    .settings(
+      noPublishSettings,
 
-    Compile / emitSourceMaps := true,
-    Compile / scalaJSUseMainModuleInitializer := true,
+      jsDependencies ++= jsDeps.value,
+      Compile / emitSourceMaps := true,
+      Compile / scalaJSUseMainModuleInitializer := true,
 
-    Compile / copyAssets := {
-      IO.copyDirectory(
-        sourceDirectory.value / "main/assets",
-        target.value / s"$seleniumStaticsRoot/assets"
-      )
-      IO.copyFile(
-        sourceDirectory.value / "main/assets/index.html",
-        target.value / s"$seleniumStaticsRoot/index.html"
-      )
-    },
+      //      Assets / LessKeys.less / includeFilter := "assets.less",
+      //      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets"/ "styles",
 
-    // Compiles JS files without full optimizations
-    compileStatics := {
-      (Compile / fastOptJS / target).value / "UdashStatics"
-    },
-    compileStatics := compileStatics.dependsOn(
-      Compile / fastOptJS, Compile / copyAssets
-    ).value,
+      Compile / copyAssets := {
+        val udashStatics = target.value / staticsRoot
+        val assets = udashStatics / "assets"
+        //        IO.copyDirectory(
+        //          (commons / sourceDirectory).value / "main" / "assets",
+        //          assets
+        //        )
+        IO.copyDirectory(
+          sourceDirectory.value / "main" / "assets",
+          assets
+        )
+        IO.move(
+          assets / "index.html",
+          udashStatics / "index.html"
+        )
+        IO.delete(assets / "assets.less")
+      },
 
-    // Compiles JS files with full optimizations
-    compileAndOptimizeStatics := {
-      (Compile / fullOptJS / target).value / "UdashStatics"
-    },
-    compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-      Compile / fullOptJS, Compile / copyAssets
-    ).value,
+      // Compiles CSS files and put them in the target directory
+      cssDir := (Compile / target).value / staticsRoot / "styles",
+      compileCss := cssRenderer.map { case (rendererProject, rendererClass) => Def.taskDyn {
+        val dir = (Compile / cssDir).value
+        val path = dir.absolutePath
+        dir.mkdirs()
+        (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
+      }
+      }.getOrElse({}),
 
-    // Target files for Scala.js plugin
-    Compile / fastOptJS / artifactPath :=
-      (Compile / fastOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / fullOptJS / artifactPath :=
-      (Compile / fullOptJS / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend.js",
-    Compile / packageJSDependencies / artifactPath :=
-      (Compile / packageJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js",
-    Compile / packageMinifiedJSDependencies / artifactPath :=
-      (Compile / packageMinifiedJSDependencies / target).value /
-        seleniumStaticsRoot / "scripts" / "frontend-deps.js"
-  )
+      // Compiles JS files without full optimizations
+      compileStatics := {
+        (Compile / fastOptJS / target).value / "UdashStatics"
+      },
+      compileStatics := compileStatics.dependsOn(
+        Compile / fastOptJS, Compile / copyAssets, Compile / compileCss
+      ).value,
+
+      // Compiles JS files with full optimizations
+      compileAndOptimizeStatics := {
+        (Compile / fullOptJS / target).value / "UdashStatics"
+      },
+      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
+        Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
+      ).value,
+
+      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
+      skip in (Compile / packageJSDependencies) := true,
+      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
+
+      // Target files for Scala.js plugin
+      Compile / fastOptJS / artifactPath :=
+        (Compile / fastOptJS / target).value /
+          staticsRoot / "scripts" / "frontend.js",
+      Compile / fullOptJS / artifactPath :=
+        (Compile / fullOptJS / target).value /
+          staticsRoot / "scripts" / "frontend.js",
+      Compile / packageJSDependencies / artifactPath :=
+        (Compile / packageJSDependencies / target).value /
+          staticsRoot / "scripts" / "frontend-deps.js",
+      Compile / packageMinifiedJSDependencies / artifactPath :=
+        (Compile / packageMinifiedJSDependencies / target).value /
+          staticsRoot / "scripts" / "frontend-deps.js"
+    )
+}
+
+lazy val `selenium-js` =
+  frontendProject(jsProjectFor(project, selenium))("UdashStatics/WebContent", None, Dependencies.seleniumJsDeps)
+    .dependsOn(`rest-js`, `css-js`, `auth-js`, `i18n-js`, bootstrap4)
