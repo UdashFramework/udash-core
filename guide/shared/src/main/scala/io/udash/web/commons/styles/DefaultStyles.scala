@@ -163,7 +163,7 @@ trait DefaultStyles extends CssBase {
 
     unsafeRoot("object[type='image/svg+xml']") (
       display.block,
-      pointerEvents := none
+      pointerEvents.none
     ),
 
     unsafeRoot("input") (

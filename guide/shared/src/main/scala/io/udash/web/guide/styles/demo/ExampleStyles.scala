@@ -23,7 +23,7 @@ object ExampleStyles extends CssBase {
     borderStyle.solid,
     borderColor.transparent,
     borderRadius(4 px),
-    userSelect := none,
+    userSelect.none,
     overflow.hidden
   )
 
@@ -81,7 +81,7 @@ object ExampleStyles extends CssBase {
     borderRadius(4 px),
     borderColor(c"#CCCCCC"),
     cursor.pointer,
-    userSelect := none,
+    userSelect.none,
 
     &.hover (
       textDecoration := none

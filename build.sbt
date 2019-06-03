@@ -13,7 +13,6 @@ inThisBuild(Seq(
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
 val CompileAndTest = "test->test;compile->compile"
-val TestAll = "test->test"
 
 // Settings for JS tests run in browser
 val browserCapabilities: Capabilities = {
@@ -76,7 +75,6 @@ val noPublishSettings = Seq(
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
-  ideSkipProject := true,
   crossScalaVersions := Nil,
 )
 
@@ -127,17 +125,18 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
     )
 
 lazy val udash = project.in(file("."))
-  .aggregate(
-    `udash-jvm`, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
-  )
-  .settings(
-    aggregateProjectSettings,
-    ideSkipProject := false,
-  )
+  .aggregate(`udash-jvm`, `udash-js`, guide)
+  .settings(aggregateProjectSettings)
 
-//for simplifying Travis build matrix
+//for simplifying Travis build matrix and project dependencies
 lazy val `udash-jvm` = project.in(file(".jvm"))
   .aggregate(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+  .dependsOn(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+  .settings(aggregateProjectSettings)
+
+lazy val `udash-js` = project.in(file(".js"))
+  .aggregate(macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts)
+  .dependsOn(macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
@@ -246,7 +245,7 @@ lazy val charts = jsProject(project)
   )
 
 lazy val benchmarks = jsProject(project)
-  .dependsOn(`core-js`, `i18n-js`, `css-js`)
+  .dependsOn(`udash-js`)
   .settings(
     noPublishSettings,
 
@@ -255,10 +254,7 @@ lazy val benchmarks = jsProject(project)
   )
 
 lazy val selenium = jvmProject(project)
-  .dependsOn(
-    core % CompileAndTest, rpc % CompileAndTest, rest % CompileAndTest,
-    css % CompileAndTest, auth % CompileAndTest, i18n % CompileAndTest
-  )
+  .dependsOn(`udash-jvm`)
   .settings(
     noPublishSettings,
 
@@ -280,6 +276,15 @@ val compileAndOptimizeStatics = taskKey[File](
   "Compiles and optimizes JavaScript files and copies all assets to the target directory."
 )
 
+lazy val guide = project.in(file("guide"))
+  .aggregate(`guide-shared`, `guide-shared-js`)
+  .settings(
+    aggregateProjectSettings,
+    ideSkipProject := true,
+  )
+
+lazy val `guide-shared` = jvmProject(project.in(file("guide/shared"))).dependsOn(`udash-jvm`)
+lazy val `guide-shared-js` = jsProjectFor(project, `guide-shared`).dependsOn(`udash-js`)
 
 def frontendProject(proj: Project)(
   staticsRoot: String, cssRenderer: Option[(Project, String)], jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]
@@ -363,4 +368,4 @@ def frontendProject(proj: Project)(
 
 lazy val `selenium-js` =
   frontendProject(jsProjectFor(project, selenium))("UdashStatics/WebContent", None, Dependencies.seleniumJsDeps)
-    .dependsOn(`rest-js`, `css-js`, `auth-js`, `i18n-js`, bootstrap4)
+    .dependsOn(`udash-js`)
