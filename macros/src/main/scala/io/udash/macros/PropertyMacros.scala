@@ -324,17 +324,17 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     q"${reifySubProperty[A, B](f, subSeqValidation)}.asInstanceOf[$ReadableSeqPropertyCls[$resultType, $CastableReadablePropertyCls[$resultType]]]"
   }
 
-  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree, leafValidation: Type => Unit = _ => ()): c.Tree = {
+  private def reifySubProperty[A: c.WeakTypeTag, B: c.WeakTypeTag](f: c.Tree, onLeafType: Type => Unit = _ => ()): c.Tree = {
     val model = c.prefix
     val modelPath = getModelPath(f)
 
-    def checkIfIsValidPath(tree: Tree, validation: Type => Unit = _ => ()): Boolean = {
+    def checkIfIsValidPath(tree: Tree, onFirstType: Type => Unit = _ => ()): Boolean = {
       tree match {
         case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
-          validation(next.tpe.member(t).typeSignature.finalResultType)
+          onFirstType(next.tpe.member(t).typeSignature.finalResultType)
           true
         case Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
-          validation(next.tpe.member(t).typeSignature.finalResultType)
+          onFirstType(next.tpe.member(t).typeSignature.finalResultType)
           checkIfIsValidPath(next)
         case Select(next, t) =>
           c.abort(c.enclosingPosition,
@@ -350,7 +350,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
       }
     }
 
-    checkIfIsValidPath(modelPath, leafValidation)
+    checkIfIsValidPath(modelPath, onLeafType)
 
     def parsePath(tree: Tree): List[(Type, TermName)] = {
       def symbolPath(t: Tree): List[Symbol] = t match {
