@@ -31,6 +31,10 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.18.v20190429" // Tests only
+  val typesafeConfigVersion = "1.3.3" // Tests only
+  val flexmarkVersion = "0.40.32" // Tests only
+  val logbackVersion = "1.2.3" // Tests only
+  val springVersion = "4.3.23.RELEASE"
 
   val scalatestVersion = "3.0.7"
   val bootstrapVersion = "3.3.7-1"
@@ -177,12 +181,19 @@ object Dependencies {
     "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 
-  val seleniumJvmDeps = Def.setting(Seq(
+  val backendDeps = Def.setting(Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+    "ch.qos.logback" % "logback-classic" % logbackVersion,
+
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
-    "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
+
+    "com.typesafe" % "config" % typesafeConfigVersion,
+    "org.springframework" % "spring-beans" % springVersion,
+    "com.avsystem.commons" %% "commons-spring" % avsCommonsVersion,
+
+    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion,
     "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
 

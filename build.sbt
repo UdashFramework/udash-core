@@ -262,7 +262,7 @@ lazy val selenium = jvmProject(project)
     Test / compile := (Test / compile)
       .dependsOn(LocalProject("selenium-js") / compileStatics).value,
 
-    libraryDependencies ++= Dependencies.seleniumJvmDeps.value
+    libraryDependencies ++= Dependencies.backendDeps.value,
   )
 
 // Custom SBT tasks
@@ -277,7 +277,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`)
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -285,6 +285,12 @@ lazy val guide = project.in(file("guide"))
 
 lazy val `guide-shared` = jvmProject(project.in(file("guide/shared"))).dependsOn(`udash-jvm`)
 lazy val `guide-shared-js` = jsProjectFor(project, `guide-shared`).dependsOn(`udash-js`)
+lazy val `guide-backend` =
+  jvmProject(project.in(file("guide/backend")))
+    .dependsOn(`guide-shared`)
+    .settings(
+      libraryDependencies ++= Dependencies.backendDeps.value,
+    )
 
 def frontendProject(proj: Project)(
   staticsRoot: String, cssRenderer: Option[(Project, String)], jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]
