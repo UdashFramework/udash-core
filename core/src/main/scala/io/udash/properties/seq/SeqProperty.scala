@@ -5,15 +5,15 @@ import io.udash.properties.single.{AbstractProperty, CastableProperty, Property}
 
 object SeqProperty {
   /** Creates a blank DirectSeqProperty[T]. */
-  def blank[T](implicit pc: SeqPropertyCreator[T], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+  def blank[T](implicit pc: SeqPropertyCreator[T, Seq], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.blank[Seq[T]](pc, blank).asSeq[T]
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T: SeqPropertyCreator](item: T, more: T*): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](item: T, more: T*)(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
     apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](init: Seq[T])(implicit pc: SeqPropertyCreator[T]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](init: Seq[T])(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
     Property[Seq[T]](init)(pc).asSeq[T]
 }
 

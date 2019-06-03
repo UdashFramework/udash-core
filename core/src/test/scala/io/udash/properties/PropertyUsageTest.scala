@@ -2,6 +2,8 @@ package io.udash.properties
 
 import io.udash.testing.UdashCoreTest
 
+import scala.xml.Document
+
 class PropertyUsageTest extends UdashCoreTest {
   // DO NOT REMOVE THESE IMPORTS!
   import io.udash.properties.model._
@@ -124,7 +126,7 @@ class PropertyUsageTest extends UdashCoreTest {
   }
 
   object ClassModel {
-    case class T(i: Int, t: T, s: Seq[String])
+    case class T(i: Int, t: T, s: Seq[String], fixedSeq: Document)
     object T extends HasModelPropertyCreator[T]
   }
 
@@ -189,6 +191,18 @@ class PropertyUsageTest extends UdashCoreTest {
         |val t: ReadableModelProperty[ClassModel.T] = p.subModel(_.t)
         |val s: SeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
         |""".stripMargin should compile
+    }
+
+    "not allow subSeq calls to fixed-param Seq types" in {
+      """
+        |val p: ModelProperty[ClassModel.T] = ModelProperty(null: ClassModel.T)
+        |p.subSeq(_.fixedSeq)
+        |""".stripMargin shouldNot compile
+
+      """
+        |val p: ModelProperty[ClassModel.T] = ModelProperty(null: ClassModel.T)
+        |p.roSubSeq(_.fixedSeq)
+        |""".stripMargin shouldNot compile
     }
   }
 

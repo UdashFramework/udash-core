@@ -4,7 +4,10 @@ import io.udash.properties.single.{CastableProperty, ReadableProperty}
 import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.CrossCollections
 
-private[properties] class DirectSeqPropertyImpl[A: PropertyCreator](val parent: ReadableProperty[_], override val id: PropertyId)
+import scala.collection.generic.CanBuildFrom
+
+private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: Seq[T]](
+  val parent: ReadableProperty[_], override val id: PropertyId)(implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
@@ -36,6 +39,5 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator](val parent: 
   override def touch(): Unit =
     replace(0, properties.length, get: _*)
 
-  def get: Seq[A] =
-    properties.map(_.get)
+  def get: SeqTpe[A] = properties.map(_.get).to[SeqTpe]
 }
