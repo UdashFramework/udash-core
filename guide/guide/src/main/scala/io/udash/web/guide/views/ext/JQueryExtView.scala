@@ -7,7 +7,6 @@ import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
 import io.udash.web.guide.views.{References, Versions}
-
 import scalatags.JsDom
 
 case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](() => new JQueryExtView)
@@ -15,6 +14,9 @@ case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](
 
 class JQueryExtView extends FinalView {
   import JsDom.all._
+
+  private val (jQueryEventsDemo, jQueryEventsSnippet) = JQueryEventsDemo.demoWithSnippet()
+  private val (jQueryCallbacksDemo, jQueryCallbacksSnippet) = JQueryCallbacksDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash jQuery wrapper"),
@@ -47,64 +49,17 @@ class JQueryExtView extends FinalView {
     )(GuideStyles),
     h2("jQuery event handlers"),
     p("The below example presents events handling with jQuery wrapper: "),
-    CodeBlock(
-      s"""val onCallback = (_: Element, _: JQueryEvent) =>
-         |  jQ(".demo ul").append(li("This will be added on every click").render)
-         |val oneCallback = (_: Element, _: JQueryEvent) =>
-         |  jQ(".demo ul").append(li("This will be added only once").render)
-         |
-         |val content = div(cls := "demo")(
-         |  ul(),
-         |  button(id := "click")("Click me"),
-         |  button(
-         |    id := "off",
-         |    onclick :+= ((_: Event) =>
-         |      jQ(".demo #click")
-         |        .off(EventName.click, onCallback)
-         |        .off(EventName.click, oneCallback)
-         |    )
-         |  )("Off")
-         |).render
-         |
-         |jQ(".demo #click")
-         |  .on(EventName.click, onCallback)
-         |  .one(EventName.click, oneCallback)""".stripMargin
-    )(GuideStyles),
+    jQueryEventsSnippet,
     p(
       "Notice that if you want to use the ", i("off()"), " method, then you have to pass exactly the same object ",
       "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
       "they create new object every time."
     ),
-    ForceBootstrap(JQueryEventsDemo()),
+    ForceBootstrap(jQueryEventsDemo),
     h2("jQuery callbacks"),
     p("The wrapper provides also typed API for the jQuery callbacks mechanism: "),
-    CodeBlock(
-      s"""val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
-         |callbacks.add((t: (Int, Int)) => {
-         |  val (a, b) = t
-         |  jQ("#plus").append(li(s"${"$a + $b = ${a + b}"}").render)
-         |})
-         |callbacks.add((t: (Int, Int)) => {
-         |  val (a, b) = t
-         |  jQ("#minus").append(li(s"${"$a - $b = ${a - b}"}").render)
-         |})
-         |callbacks.add((t: (Int, Int)) => {
-         |  val (a, b) = t
-         |  jQ("#mul").append(li(s"${"$a * $b = ${a * b}"}").render)
-         |})
-         |callbacks.add((t: (Int, Int)) => {
-         |  val (a, b) = t
-         |  jQ("#div").append(li(s"${"$a / $b = ${a / b}"}").render)
-         |})
-         |
-         |callbacks.fire(1, 1)
-         |callbacks.fire(3, 3)
-         |callbacks.fire(7, 4)
-         |
-         |callbacks.disable()
-         |callbacks.fire(1, 2)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(JQueryCallbacksDemo()),
+    jQueryCallbacksSnippet,
+    ForceBootstrap(jQueryCallbacksDemo),
     h2("What's next?"),
     p(
       "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), ". ",

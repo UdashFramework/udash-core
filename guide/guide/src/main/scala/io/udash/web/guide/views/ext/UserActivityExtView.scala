@@ -9,9 +9,9 @@ import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
+import scalatags.JsDom
 
 import scala.util.{Failure, Success}
-import scalatags.JsDom
 
 class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserActivityExtState.type] with CrossLogging {
 
@@ -41,8 +41,9 @@ case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.
 
 class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
   import Context._
-
   import JsDom.all._
+
+  val (urlLoggingDemo, urlLoggingSnippet) = UrlLoggingDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h1("Udash user activity monitoring"),
@@ -67,20 +68,9 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
           |    UrlLoggingDemo.log(url, referrer)
           |}""".stripMargin
     )(GuideStyles),
-    CodeBlock(
-      s"""object UrlLoggingDemo {
-          |  import io.udash.web.guide.Context._
-          |
-          |  val enabled = Property(false)
-          |  val history = SeqProperty[(String, Option[String])](ListBuffer.empty)
-          |  enabled.listen(b => if(!b) history.set(ListBuffer.empty))
-          |
-          |  def log(url: String, referrer: Option[String]): Unit =
-          |    if(enabled.get) history.append((url, referrer))
-          |}""".stripMargin
-    )(GuideStyles),
+    urlLoggingSnippet,
     p("to see it in action just enable logging below, switch to another chapter and come back here."), br,
-    ForceBootstrap(UrlLoggingDemo()),
+    ForceBootstrap(urlLoggingDemo),
     h2("RPC call logging"),
     p("Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
       i("CallLogging"), " into your ", i("ExposesServerRPC"), ", e.g.: "),

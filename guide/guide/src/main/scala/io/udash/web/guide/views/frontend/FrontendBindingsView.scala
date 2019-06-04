@@ -6,15 +6,20 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object FrontendBindingsViewFactory extends StaticViewFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
 class FrontendBindingsView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
+
+  private val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
+  private val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
+  private val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
+  private val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
+  private val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
+  private val (bindValidationDemo, bindValidationSnippet) = BindValidationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -36,46 +41,19 @@ class FrontendBindingsView extends FinalView with CssView {
       li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
     h3("bind"),
-    CodeBlock(
-      """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-        |
-        |val name: Property[String] = Property[String](names.next())
-        |div("Name: ", bind(name)).render
-        |
-        |dom.window.setInterval(() => name.set(names.next()), 500)""".stripMargin
-    )(GuideStyles),
-    new BindDemoComponent,
+    bindSnippet,
+    bindDemo,
     p("As you can see the ", i("bind"), " method automatically updates displayed name on every change of the property value."),
     h3("produce"),
-    CodeBlock(
-      """val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
-        |val name: Property[String] = Property[String](names.next())
-        |val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |
-        |div(
-        |  "Name: ",
-        |  produce(name)(value => b(value).render), br,
-        |  "Integers: ",
-        |  produce(integers)((seq: Seq[Int]) =>
-        |    seq.map(p => span(s"$p, ").render)
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    new ProduceDemoComponent,
+    produceSnippet,
+    produceDemo,
     p(
       "The above example presents two variants of the ", i("produce"), " method. This is very similar to the ", i("bind"),
       " method, but you can provide a custom DOM element builder. "
     ),
     h3("repeat"),
-    CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |
-        |val template: Element = div(
-        |  "Integers: ",
-        |  repeat(integers)(p => span(s"${p.get}, ").render)
-        |).render""".stripMargin
-    )(GuideStyles),
-    new RepeatDemoComponent,
+    repeatSnippet,
+    repeatDemo,
     p("Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
       "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"),
       " method updates only changed elements of the sequence. To make it easier to notice, every added element is highlighted. "
@@ -85,58 +63,19 @@ class FrontendBindingsView extends FinalView with CssView {
       "This binding method takes two arguments: ", i("Property[Boolean]"), " and ", i("Seq[dom.Element]"), ". ",
       "If value of the property is ", i("true"), " it shows all passed elements and hides them otherwise."
     ),
-    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
-                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
-                |
-                |div(
-                |  span("Visible: ", bind(visible), " -> "),
-                |  showIf(visible)(span("Show/hide").render)
-                |)""".stripMargin
-    )(GuideStyles),
-    new ShowIfDemoComponent,
+    showIfSnippet,
+    showIfDemo,
     h3("Attribute bindings"),
     p(
       "Udash provides extension methods on Scalatags ", i("Attr"), " and ", i("AttrPair"), ". ",
       i("Attr.bind(ReadableProperty[String])"), " synchronises attribute value with the property. ",
       i("AttrPair.attrIf(ReadableProperty[Boolean])"), " adds attribute if the property value is ", i("true"), " and removes it otherwise. "
     ),
-    CodeBlock("""val visible: Property[Boolean] = Property[Boolean](true)
-                |dom.window.setInterval(() => visible.set(!visible.get), 1000)
-                |
-                |div(
-                |  span("Visible: ", bind(visible), " -> "),
-                |  span((style := "display: none;").attrIfNot(visible))("Show/hide")
-                |)""".stripMargin
-    )(GuideStyles),
-    new BindAttributeDemoComponent,
+    bindAttributeSnippet,
+    bindAttributeDemo,
     h3("Validation"),
-    CodeBlock(
-      """val integers: SeqProperty[Int] = SeqProperty[Int](1,2,3,4)
-        |integers.addValidator((element: Seq[Int]) => {
-        |  val zipped = element.toStream
-        |    .slice(0, element.size-1)
-        |    .zip(element.toStream.drop(1))
-        |  if (zipped.forall { case (x: Int, y: Int) => x <= y } ) Valid
-        |  else Invalid("Sequence is not sorted!")
-        |})
-        |
-        |div(
-        |  "Integers: ",
-        |  span((attr("data-valid") := true).attrIf(
-        |    integers.valid.transform(_ == Valid)
-        |  ))(repeat(integers)(p => span(s"${p.get}, ").render)), br,
-        |  "Is sorted: ",
-        |  valid(integers)(
-        |    {
-        |      case Valid => span(id := "validation-demo-result")("Yes").render
-        |      case Invalid(_) => span(id := "validation-demo-result")("No").render
-        |    },
-        |    progressBuilder = _ => span("Validation in progress...").render,
-        |    errorBuilder = _ => span("Validation error...").render
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    new BindValidationDemoComponent,
+    bindValidationSnippet,
+    bindValidationDemo,
     p(
       "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
       "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."

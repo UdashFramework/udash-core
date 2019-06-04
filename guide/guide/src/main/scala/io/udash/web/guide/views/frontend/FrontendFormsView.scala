@@ -2,20 +2,25 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
-
 import scalatags.JsDom
 
 case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
 class FrontendFormsView extends FinalView with CssView {
+  import JsDom.all._
   import io.udash.web.guide.Context._
 
-  import JsDom.all._
+  private val (textInputDemo, textInputSnippet) = TextInputDemo.demoWithSnippet()
+  private val (textAreaDemo, textAreaSnippet) = TextAreaDemo.demoWithSnippet()
+  private val (checkboxDemo, checkboxSnippet) = CheckboxDemo.demoWithSnippet()
+  private val (checkButtonsDemo, checkButtonsSnippet) = CheckButtonsDemo.demoWithSnippet()
+  private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
+  private val (selectDemo, selectSnippet) = SelectDemo.demoWithSnippet()
+  private val (multiSelectDemo, multiSelectSnippet) = MultiSelectDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -40,65 +45,19 @@ class FrontendFormsView extends FinalView with CssView {
       "The below example presents how easily you can bind your properties to HTML input elements. ", i("TextInput"), " takes ",
       "a property which should be bound to an input and takes care of updating a field and property after every change."
     ),
-    CodeBlock(
-      """val name: Property[String] = Property("")
-        |val password: Property[String] = Property("")
-        |val age: Property[Int] = Property(1)
-        |
-        |form(
-        |  div(
-        |    "Name: ",
-        |    TextInput(name)(placeholder := "Input your name...").render,
-        |    span(bind(name))
-        |  ),
-        |  div(
-        |    "Password: ",
-        |    PasswordInput(password)(placeholder := "Input your password...").render,
-        |    span(bind(password))
-        |  ),
-        |  div(
-        |    "Age: ",
-        |    NumberInput(
-        |      age.transform(_.toString, Integer.parseInt)
-        |    )(placeholder := "Input your age...").render,
-        |    span(bind(age))
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new TextInputDemoComponent),
+    textInputSnippet,
+    ForceBootstrap(textInputDemo),
     h3("TextArea"),
     p("Below you can find a similar example, this time with text areas."),
-    CodeBlock(
-      """val text: Property[String] = Property("")
-        |
-        |form(
-        |  TextArea(text).render,
-        |  TextArea(text).render,
-        |  TextArea(text).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new TextAreaDemoComponent),
+    textAreaSnippet,
+    ForceBootstrap(textAreaDemo),
     h3("Checkbox"),
     p(
       "Below you can find the example of creating a single checkbox. Notice that the third property contains String, so it uses ",
       "property transformation for checkbox binding. "
     ),
-    CodeBlock(
-      """val propA: Property[Boolean] = Property(true)
-        |val propB: Property[Boolean] = Property(false)
-        |val propC: Property[String] = Property("Yes")
-        |val propCAsBoolean = propC.transform(
-        |  (s: String) => if (s.equalsIgnoreCase("yes")) true else false,
-        |  (b: Boolean) => if (b) "Yes" else "No"
-        |)
-        |
-        |form(
-        |  Checkbox(propA).render, " A -> ", bind(propA),
-        |  Checkbox(propB).render, " B -> ", bind(propB),
-        |  Checkbox(propCAsBoolean).render, " C -> ", bind(propC)
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new CheckboxDemoComponent),
+    checkboxSnippet,
+    ForceBootstrap(checkboxDemo),
     h3("CheckButtons"),
     p(
       "The below example shows how to create a sequence of checkboxes for a provided sequence of possible values and bind them ",
@@ -106,115 +65,23 @@ class FrontendFormsView extends FinalView with CssView {
       "a decorator method. The decorator gets ", i("Seq[(Input, String)]"), ", where the Input generates a checkbox and the String ",
       "is the bound value. This generates a Scalatags template containing the checkboxes."
     ),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
-        |val favoriteFruitsStrings = favoriteFruits.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  CheckButtons(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(
-        |    (els: Seq[(Input, String)]) => span(
-        |      els.map { case (i: Input, l: String) => label(i, l) }
-        |    )
-        |  ).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new CheckButtonsDemoComponent),
+    checkButtonsSnippet,
+    ForceBootstrap(checkButtonsDemo),
     h3("RadioButtons"),
     p(
       "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ", i("Property"), ", ",
       "not with a ", i("SeqProperty"), ", so only one value can be selected. "
     ),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
-        |val favoriteFruitString = favoriteFruit.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  RadioButtons(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(
-        |    (els: Seq[(Input, String)]) => span(
-        |      els.map { case (i: Input, l: String) => label(i, l) }
-        |    )
-        |  ).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new RadioButtonsDemoComponent),
+    radioButtonsSnippet,
+    ForceBootstrap(radioButtonsDemo),
     h3("Select"),
     p("The HTML select element might be used in two ways: with or without multi selection. Below you can find examples of both usages."),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
-        |val favoriteFruitString = favoriteFruit.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  Select(
-        |    favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new SelectDemoComponent),
+    selectSnippet,
+    ForceBootstrap(selectDemo),
     h4("Select with multiple selected values"),
     p("Notice that the only difference is the type of the used property."),
-    CodeBlock(
-      """sealed trait Fruit
-        |case object Apple extends Fruit
-        |case object Orange extends Fruit
-        |case object Banana extends Fruit
-        |
-        |val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
-        |val favoriteFruitsStrings = favoriteFruits.transform(
-        |  (f: Fruit) => f.toString,
-        |  (s: String) => s match {
-        |    case "Apple" => Apple
-        |    case "Orange" => Orange
-        |    case "Banana" => Banana
-        |  }
-        |)
-        |
-        |form(
-        |  Select(
-        |    favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        |  )(Select.defaultLabel).render
-        |)""".stripMargin
-    )(GuideStyles),
-    ForceBootstrap(new MultiSelectDemoComponent),
+    multiSelectSnippet,
+    ForceBootstrap(multiSelectDemo),
     h2("What's next?"),
     p(
       "Now you know everything you need to start frontend development using Udash. ",
