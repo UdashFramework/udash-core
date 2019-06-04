@@ -1,6 +1,7 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import org.scalajs.sbtplugin.JSModuleID
 
 name := "udash"
 
@@ -60,6 +61,7 @@ val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / parallelExecution := false,
   Test / scalaJSStage := FastOptStage,
+  Test / scalaJSUseMainModuleInitializer := false,
   Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
@@ -298,6 +300,7 @@ lazy val `guide-backend` =
     )
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
+    .enablePlugins(SbtWeb)
     .dependsOn(`guide-shared-js`)
     .settings(libraryDependencies ++= Dependencies.guideFrontendDeps.value)
 lazy val `guide-homepage` =
@@ -305,14 +308,14 @@ lazy val `guide-homepage` =
     "UdashStatics/WebContent/homepage",
     Dependencies.homepageJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
-    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
+  ).settings(
+    Assets / LessKeys.less / sourceDirectories += (`guide-commons` / sourceDirectory).value / "main" / "assets" / "styles",
   )
 
 def frontendExecutable(proj: Project)(
   staticsRoot: String,
-  jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]],
+  jsDeps: Def.Initialize[Seq[JSModuleID]],
   cssRenderer: Option[(Project, String)] = None,
-  additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
 ) = {
   proj
     .enablePlugins(ScalaJSPlugin, SbtWeb)
@@ -330,7 +333,6 @@ def frontendExecutable(proj: Project)(
       Compile / copyAssets := {
         val udashStatics = target.value / staticsRoot
         val assets = udashStatics / "assets"
-        additionalAssetsDirectory.value.foreach(IO.copyDirectory(_, assets))
         IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
         IO.move(assets / "index.html", udashStatics / "index.html")
         IO.delete(assets / "assets.less")
