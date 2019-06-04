@@ -67,6 +67,12 @@ val commonJsSettings = commonSettings ++ Seq(
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
   scalacOptions += "-P:scalajs:sjsDefinedByDefault",
+
+  //library CSS settings
+  LessKeys.cleancss in Assets := true,
+  LessKeys.compress in Assets := true,
+  LessKeys.strictMath in Assets := true,
+  LessKeys.verbose in Assets := true,
 )
 
 val noPublishSettings = Seq(
@@ -267,7 +273,6 @@ lazy val selenium = jvmProject(project)
 
 // Custom SBT tasks
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")
-val cssDir = settingKey[File]("Target for `compileCss` task.")
 val compileCss = taskKey[Unit]("Compiles CSS files.")
 val compileStatics = taskKey[File](
   "Compiles JavaScript files and copies all assets to the target directory."
@@ -291,17 +296,26 @@ lazy val `guide-backend` =
     .settings(
       libraryDependencies ++= Dependencies.backendDeps.value,
     )
-lazy val `guide-commons` = 
+lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
     .dependsOn(`guide-shared-js`)
-  .settings(libraryDependencies ++= Dependencies.guideFrontendDeps.value)
-lazy val `guide-homepage` = jsProject(project.in(file("guide/homepage"))).dependsOn(`guide-commons`)
+    .settings(libraryDependencies ++= Dependencies.guideFrontendDeps.value)
+lazy val `guide-homepage` =
+  frontendExecutable(jsProject(project.in(file("guide/homepage"))).dependsOn(`guide-commons`))(
+    "UdashStatics/WebContent/homepage",
+    Dependencies.homepageJsDeps,
+    Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
+    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
+  )
 
-def frontendProject(proj: Project)(
-  staticsRoot: String, cssRenderer: Option[(Project, String)], jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]
+def frontendExecutable(proj: Project)(
+  staticsRoot: String,
+  jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]],
+  cssRenderer: Option[(Project, String)] = None,
+  additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
 ) = {
   proj
-    .enablePlugins(ScalaJSPlugin /*, SbtWeb*/)
+    .enablePlugins(ScalaJSPlugin, SbtWeb)
     .settings(commonJsSettings)
     .settings(
       noPublishSettings,
@@ -310,36 +324,27 @@ def frontendProject(proj: Project)(
       Compile / emitSourceMaps := true,
       Compile / scalaJSUseMainModuleInitializer := true,
 
-      //      Assets / LessKeys.less / includeFilter := "assets.less",
-      //      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets"/ "styles",
+      Assets / LessKeys.less / includeFilter := "assets.less",
+      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
 
       Compile / copyAssets := {
         val udashStatics = target.value / staticsRoot
         val assets = udashStatics / "assets"
-        //        IO.copyDirectory(
-        //          (commons / sourceDirectory).value / "main" / "assets",
-        //          assets
-        //        )
-        IO.copyDirectory(
-          sourceDirectory.value / "main" / "assets",
-          assets
-        )
-        IO.move(
-          assets / "index.html",
-          udashStatics / "index.html"
-        )
+        additionalAssetsDirectory.value.foreach(IO.copyDirectory(_, assets))
+        IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
+        IO.move(assets / "index.html", udashStatics / "index.html")
         IO.delete(assets / "assets.less")
       },
 
       // Compiles CSS files and put them in the target directory
-      cssDir := (Compile / target).value / staticsRoot / "styles",
-      compileCss := cssRenderer.map { case (rendererProject, rendererClass) => Def.taskDyn {
-        val dir = (Compile / cssDir).value
-        val path = dir.absolutePath
-        dir.mkdirs()
-        (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
-      }
-      }.getOrElse({}),
+      compileCss := Def.taskDyn {
+        cssRenderer.map { case (rendererProject, rendererClass) =>
+          val dir = (Compile / target).value / staticsRoot / "styles"
+          val path = dir.absolutePath
+          dir.mkdirs()
+          (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
+        }.getOrElse(Def.task(()))
+      }.value,
 
       // Compiles JS files without full optimizations
       compileStatics := {
@@ -378,5 +383,5 @@ def frontendProject(proj: Project)(
 }
 
 lazy val `selenium-js` =
-  frontendProject(jsProjectFor(project, selenium))("UdashStatics/WebContent", None, Dependencies.seleniumJsDeps)
+  frontendExecutable(jsProjectFor(project, selenium))("UdashStatics/WebContent", Dependencies.seleniumJsDeps)
     .dependsOn(`udash-js`)
