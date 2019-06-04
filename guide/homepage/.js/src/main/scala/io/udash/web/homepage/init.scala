@@ -13,7 +13,7 @@ object Context {
   private val routingRegistry = new RoutingRegistryDef
   private val viewFactoriesRegistry = new StatesToViewFactoryDef
 
-  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoriesRegistry, WindowUrlPathChangeProvider)
+  implicit val applicationInstance = new Application[RoutingState](routingRegistry, viewFactoriesRegistry, new WindowUrlPathChangeProvider)
 }
 
 object Init extends CrossLogging {

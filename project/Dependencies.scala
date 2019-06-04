@@ -21,21 +21,22 @@ object Dependencies {
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.3"
 
-  val upickleVersion = "0.7.4" // Tests only
-  val circeVersion = "0.11.1" // Tests only
-  val circeDerivationVersion = "0.12.0-M1" // Tests only
-  val monixVersion = "3.0.0-RC2" // Tests only
+  val upickleVersion = "0.7.4"
+  val circeVersion = "0.11.1"
+  val circeDerivationVersion = "0.12.0-M1"
+  val monixVersion = "3.0.0-RC2"
 
   val sttpVersion = "1.5.17"
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "9.4.18.v20190429" // Tests only
-  val typesafeConfigVersion = "1.3.3" // Tests only
-  val flexmarkVersion = "0.40.32" // Tests only
-  val logbackVersion = "1.2.3" // Tests only
+  val jettyVersion = "9.4.18.v20190429"
+  val typesafeConfigVersion = "1.3.3"
+  val flexmarkVersion = "0.40.32"
+  val logbackVersion = "1.2.3"
   val springVersion = "4.3.23.RELEASE"
   val fontAwesomeVersion = "5.6.3"
+  val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.0.7"
   val bootstrapVersion = "3.3.7-1"
@@ -202,6 +203,10 @@ object Dependencies {
 
   val guideFrontendDeps = Def.setting(Seq(
     "org.webjars" % "font-awesome" % fontAwesomeVersion,
+  ))
+
+  val homepageJsDeps = Def.setting(Seq[JSModuleID](
+    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
   ))
 
 }
