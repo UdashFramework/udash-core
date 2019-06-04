@@ -277,7 +277,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`)
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -291,6 +291,10 @@ lazy val `guide-backend` =
     .settings(
       libraryDependencies ++= Dependencies.backendDeps.value,
     )
+lazy val `guide-commons` = 
+  jsProject(project.in(file("guide/commons")))
+    .dependsOn(`guide-shared-js`)
+  .settings(libraryDependencies ++= Dependencies.guideFrontendDeps.value)
 
 def frontendProject(proj: Project)(
   staticsRoot: String, cssRenderer: Option[(Project, String)], jsDeps: Def.Initialize[Seq[org.scalajs.sbtplugin.JSModuleID]]

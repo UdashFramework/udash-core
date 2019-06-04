@@ -35,6 +35,7 @@ object Dependencies {
   val flexmarkVersion = "0.40.32" // Tests only
   val logbackVersion = "1.2.3" // Tests only
   val springVersion = "4.3.23.RELEASE"
+  val fontAwesomeVersion = "5.6.3"
 
   val scalatestVersion = "3.0.7"
   val bootstrapVersion = "3.3.7-1"
@@ -198,5 +199,9 @@ object Dependencies {
   ))
 
   val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+
+  val guideFrontendDeps = Def.setting(Seq(
+    "org.webjars" % "font-awesome" % fontAwesomeVersion,
+  ))
 
 }
