@@ -293,19 +293,29 @@ lazy val guide = project.in(file("guide"))
     ideSkipProject := true,
   )
 
-lazy val `guide-shared` = jvmProject(project.in(file("guide/shared"))).dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-lazy val `guide-shared-js` = jsProjectFor(project, `guide-shared`).dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+lazy val `guide-shared` =
+  jvmProject(project.in(file("guide/shared")))
+    .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+    .settings(noPublishSettings)
+lazy val `guide-shared-js` =
+  jsProjectFor(project, `guide-shared`)
+    .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+    .settings(noPublishSettings)
 lazy val `guide-backend` =
   jvmProject(project.in(file("guide/backend")))
     .dependsOn(`guide-shared`)
     .settings(
+      noPublishSettings,
       libraryDependencies ++= Dependencies.backendDeps.value,
     )
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
     .enablePlugins(SbtWeb)
     .dependsOn(`guide-shared-js`)
-    .settings(libraryDependencies ++= Dependencies.guideFrontendDeps.value)
+    .settings(
+      noPublishSettings,
+      libraryDependencies ++= Dependencies.guideFrontendDeps.value
+    )
 lazy val `guide-homepage` =
   frontendExecutable(jsProject(project.in(file("guide/homepage"))).dependsOn(`guide-commons`))(
     "UdashStatics/WebContent/homepage",
