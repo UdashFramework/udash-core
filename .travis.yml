@@ -18,6 +18,7 @@ script:
 
 jdk:
   - oraclejdk8
+
 scala:
   - 2.11.12
   - 2.12.8
@@ -37,6 +38,11 @@ env:
   - TEST_PACKAGE="benchmarks/compile"
   - TEST_PACKAGE="selenium/test"
   - TEST_PACKAGE="doc"
+
+matrix:
+  include:
+    - scala: 2.12.8
+      env: TEST_PACKAGE="guide/compile guide/compileStatics"
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
