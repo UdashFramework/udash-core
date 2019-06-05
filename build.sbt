@@ -144,10 +144,10 @@ lazy val `udash-jvm` = project.in(file(".jvm"))
   .settings(aggregateProjectSettings)
 
 lazy val jsLibraries = Seq[ProjectReference](
-  macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
+  macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts
 )
 lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(jsLibraries: _*)
+  .aggregate(jsLibraries :+ (bootstrap: ProjectReference): _*)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
