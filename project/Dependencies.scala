@@ -44,6 +44,7 @@ object Dependencies {
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
   val momentJsVersion = "2.22.2"
+  val highchartsVersion = "5.0.14"
 
   val seleniumVersion = "3.12.0"
   val scalaJsBenchmarkVersion = "0.2.5"
@@ -200,8 +201,24 @@ object Dependencies {
   ))
 
   val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
-  
-  val guideJsDeps = Def.setting(Seq[JSModuleID]())
+
+  val guideJsDeps = Def.setting(Seq[JSModuleID](
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+    ProvidedJS / "prism.js",
+
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
+      minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
+      minified s"$highchartsVersion/highcharts-3d.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-more.src.js"
+      minified s"$highchartsVersion/highcharts-more.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/exporting.src.js"
+      minified s"$highchartsVersion/modules/exporting.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/drilldown.src.js"
+      minified s"$highchartsVersion/modules/drilldown.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/heatmap.src.js"
+      minified s"$highchartsVersion/modules/heatmap.js" dependsOn s"$highchartsVersion/highcharts.src.js"
+  ))
 
   val guideFrontendDeps = Def.setting(Seq(
     "org.webjars" % "font-awesome" % fontAwesomeVersion,

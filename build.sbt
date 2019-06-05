@@ -309,22 +309,21 @@ lazy val `guide-homepage` =
     "UdashStatics/WebContent/homepage",
     Dependencies.homepageJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
-  ).settings(
-    Assets / LessKeys.less / sourceDirectories += (`guide-commons` / sourceDirectory).value / "main" / "assets" / "styles",
+    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
 lazy val `guide-guide` =
   frontendExecutable(jsProject(project.in(file("guide/guide"))).dependsOn(`guide-commons`))(
     "UdashStatics/WebContent/guide",
     Dependencies.guideJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.GuideCssRenderer")),
-  ).settings(
-    Assets / LessKeys.less / sourceDirectories += (`guide-commons` / sourceDirectory).value / "main" / "assets" / "styles",
+    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
 
 def frontendExecutable(proj: Project)(
   staticsRoot: String,
   jsDeps: Def.Initialize[Seq[JSModuleID]],
   cssRenderer: Option[(Project, String)] = None,
+  additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
 ) = {
   proj
     .enablePlugins(ScalaJSPlugin, SbtWeb)
@@ -342,6 +341,7 @@ def frontendExecutable(proj: Project)(
       Compile / copyAssets := {
         val udashStatics = target.value / staticsRoot
         val assets = udashStatics / "assets"
+        additionalAssetsDirectory.value.foreach(IO.copyDirectory(_, assets))
         IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
         IO.move(assets / "index.html", udashStatics / "index.html")
         IO.delete(assets / "assets.less")
