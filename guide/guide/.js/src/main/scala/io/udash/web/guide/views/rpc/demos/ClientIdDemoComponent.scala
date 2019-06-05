@@ -45,7 +45,7 @@ class ClientIdDemoComponent extends Component {
     )(_ => "Load client id")
 
     loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
+      case UdashButton.ButtonClickEvent(_, _) =>
         loadIdButtonDisabled.set(true)
         presenter.onButtonClick()
     }

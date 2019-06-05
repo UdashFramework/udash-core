@@ -37,6 +37,7 @@ val commonSettings = Seq(
     "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator",
+    "-Yrangepos",
     "-P:silencer:checkUnused",
   ),
   scalacOptions ++= {
@@ -284,7 +285,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`)
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, `guide-guide`)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -308,6 +309,14 @@ lazy val `guide-homepage` =
     "UdashStatics/WebContent/homepage",
     Dependencies.homepageJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
+  ).settings(
+    Assets / LessKeys.less / sourceDirectories += (`guide-commons` / sourceDirectory).value / "main" / "assets" / "styles",
+  )
+lazy val `guide-guide` =
+  frontendExecutable(jsProject(project.in(file("guide/guide"))).dependsOn(`guide-commons`))(
+    "UdashStatics/WebContent/guide",
+    Dependencies.guideJsDeps,
+    Some((`guide-backend`, "io.udash.web.styles.GuideCssRenderer")),
   ).settings(
     Assets / LessKeys.less / sourceDirectories += (`guide-commons` / sourceDirectory).value / "main" / "assets" / "styles",
   )

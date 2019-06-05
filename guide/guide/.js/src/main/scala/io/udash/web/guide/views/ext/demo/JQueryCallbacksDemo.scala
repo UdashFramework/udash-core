@@ -45,11 +45,11 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
       UdashButton()(_ => Seq[Modifier](
         id := "fire", "Fire",
         onclick := (() => {
-          callbacks.fire(1, 1)
-          callbacks.fire(3, 3)
-          callbacks.fire(7, 4)
+          callbacks.fire((1, 1))
+          callbacks.fire((3, 3))
+          callbacks.fire((7, 4))
           callbacks.disable()
-          callbacks.fire(1, 2)
+          callbacks.fire((1, 2))
         }))
       ).render
     ).render

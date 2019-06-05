@@ -200,6 +200,8 @@ object Dependencies {
   ))
 
   val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+  
+  val guideJsDeps = Def.setting(Seq[JSModuleID]())
 
   val guideFrontendDeps = Def.setting(Seq(
     "org.webjars" % "font-awesome" % fontAwesomeVersion,

@@ -5,46 +5,51 @@ import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
+import io.udash.web.guide.demos.rpc.PingClient
 import io.udash.web.guide.styles.partials.GuideStyles
-
-import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-class PingPongCallDemoComponent extends Component {
-  import Context._
 
-  override def getTemplate: Modifier = PingPongCallDemoViewFactory()
+class PingPongPushDemoComponent extends Component {
 
-  object PingPongCallDemoViewFactory {
+  override def getTemplate: Modifier = PingPongPushDemoViewFactory()
+
+  object PingPongPushDemoViewFactory {
     def apply(): Modifier = {
       val clientId = Property[Int](0)
-      val presenter = new PingPongCallDemoPresenter(clientId)
-      new PingPongCallDemoView(clientId, presenter).render
+      val presenter = new PingPongPushDemoPresenter(clientId)
+      new PingPongPushDemoView(clientId, presenter).render
     }
   }
 
-  class PingPongCallDemoPresenter(model: Property[Int]) {
+  class PingPongPushDemoPresenter(model: Property[Int]) {
+    private var registered = false
+
     def onButtonClick(disabled: Property[Boolean]) = {
       disabled.set(true)
-      Context.serverRpc.demos.pingDemo.fPing(model.get) onComplete {
-        case Success(response) =>
-          model.set(response + 1)
-          disabled.set(false)
-        case Failure(ex) =>
-          model.set(-1)
+      registerCallback(disabled)
+      Context.serverRpc.demos.pingDemo.ping(model.get)
+    }
+
+    private def registerCallback(disabled: Property[Boolean]) = if (!registered) {
+      val listener: Int => Any = (id: Int) => {
+        model.set(id + 1)
+        disabled.set(false)
       }
+      PingClient.registerPongListener(listener)
+      registered = true
     }
   }
 
-  class PingPongCallDemoView(model: Property[Int], presenter: PingPongCallDemoPresenter) {
+  class PingPongPushDemoView(model: Property[Int], presenter: PingPongPushDemoPresenter) {
     import JsDom.all._
 
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
       buttonStyle = Color.Primary.toProperty,
       disabled = pingDisabled,
-      componentId = ComponentId("ping-pong-call-demo")
+      componentId = ComponentId("ping-pong-push-demo")
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
     pingButton.listen {

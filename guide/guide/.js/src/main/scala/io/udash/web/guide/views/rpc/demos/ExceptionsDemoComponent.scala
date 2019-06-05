@@ -97,19 +97,19 @@ class ExceptionsDemoComponent extends Component {
     )(_ => "Call unknown exception!")
 
     exceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
+      case UdashButton.ButtonClickEvent(_, _) =>
         exceptionButtonDisabled.set(true)
         presenter.exceptionCall()
     }
 
     translatableExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
+      case UdashButton.ButtonClickEvent(_, _) =>
         exceptionButtonDisabled.set(true)
         presenter.translatableExceptionCall()
     }
 
     unknownExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(btn, _) =>
+      case UdashButton.ButtonClickEvent(_, _) =>
         unknownExceptionButtonDisabled.set(true)
         presenter.unknownExceptionCall()
     }
