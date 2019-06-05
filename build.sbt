@@ -138,14 +138,16 @@ lazy val udash = project.in(file("."))
   .settings(aggregateProjectSettings)
 
 //for simplifying Travis build matrix and project dependencies
+lazy val jvmLibraries = Seq[ProjectReference](macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
 lazy val `udash-jvm` = project.in(file(".jvm"))
-  .aggregate(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
-  .dependsOn(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+  .aggregate(jvmLibraries: _*)
   .settings(aggregateProjectSettings)
 
+lazy val jsLibraries = Seq[ProjectReference](
+  macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
+)
 lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts)
-  .dependsOn(macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts)
+  .aggregate(jsLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
@@ -254,7 +256,7 @@ lazy val charts = jsProject(project)
   )
 
 lazy val benchmarks = jsProject(project)
-  .dependsOn(`udash-js`)
+  .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
   .settings(
     noPublishSettings,
 
@@ -263,7 +265,7 @@ lazy val benchmarks = jsProject(project)
   )
 
 lazy val selenium = jvmProject(project)
-  .dependsOn(`udash-jvm`)
+  .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
   .settings(
     noPublishSettings,
 
@@ -291,8 +293,8 @@ lazy val guide = project.in(file("guide"))
     ideSkipProject := true,
   )
 
-lazy val `guide-shared` = jvmProject(project.in(file("guide/shared"))).dependsOn(`udash-jvm`)
-lazy val `guide-shared-js` = jsProjectFor(project, `guide-shared`).dependsOn(`udash-js`)
+lazy val `guide-shared` = jvmProject(project.in(file("guide/shared"))).dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+lazy val `guide-shared-js` = jsProjectFor(project, `guide-shared`).dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
 lazy val `guide-backend` =
   jvmProject(project.in(file("guide/backend")))
     .dependsOn(`guide-shared`)
@@ -395,4 +397,4 @@ def frontendExecutable(proj: Project)(
 
 lazy val `selenium-js` =
   frontendExecutable(jsProjectFor(project, selenium))("UdashStatics/WebContent", Dependencies.seleniumJsDeps)
-    .dependsOn(`udash-js`)
+    .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
