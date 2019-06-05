@@ -1,0 +1,7 @@
+# based on https://github.com/travis-ci/travis-cookbooks/blob/master/cookbooks/travis_sbt_extras/templates/default/jvmopts.erb
+# using G1 and tweaking for VM equipped with 7.5G of RAM
+
+-Xms2048M
+-Xmx4096M
+-Xss6M
+-XX:+UseG1GC
