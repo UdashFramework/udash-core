@@ -10,6 +10,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import org.springframework.context.support.GenericApplicationContext
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxDriverLogLevel, FirefoxOptions}
 
 trait ServerConfig {
   def init(): Unit
@@ -51,7 +52,7 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
 
   val testingCtx = createTestingContext()
 
-  val driver: RemoteWebDriver = testingCtx.getBean(classOf[RemoteWebDriver])
+  val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN))
   driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
   driver.manage().window().setSize(new Dimension(1440, 800))
 

@@ -287,7 +287,8 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, `guide-guide`, `guide-packager`)
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, 
+    `guide-guide`, `guide-packager`, `guide-selenium`)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -297,10 +298,12 @@ lazy val `guide-shared` =
   jvmProject(project.in(file("guide/shared")))
     .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
     .settings(noPublishSettings)
+
 lazy val `guide-shared-js` =
   jsProjectFor(project, `guide-shared`)
     .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
     .settings(noPublishSettings)
+
 lazy val `guide-backend` =
   jvmProject(project.in(file("guide/backend")))
     .dependsOn(`guide-shared`)
@@ -309,6 +312,7 @@ lazy val `guide-backend` =
       libraryDependencies ++= Dependencies.backendDeps.value,
       Compile / mainClass := Some("io.udash.web.Launcher"),
     )
+
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
     .enablePlugins(SbtWeb)
@@ -324,6 +328,7 @@ lazy val `guide-homepage` =
     Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
     Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
+
 lazy val `guide-guide` =
   frontendExecutable(jsProject(project.in(file("guide/guide"))).dependsOn(`guide-commons`))(
     "UdashStatics/WebContent/guide",
@@ -332,14 +337,14 @@ lazy val `guide-guide` =
     Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
 
-lazy val `guide-packager` =
-  project
-    .in(file("guide/packager"))
+lazy val `guide-packager` = 
+  project.in(file("guide/packager"))
     .dependsOn(`guide-backend`)
     .enablePlugins(JavaServerAppPackaging)
-    .settings(noPublishSettings)
-    .settings(commonSettings)
     .settings(
+      noPublishSettings,
+      commonSettings,
+      
       normalizedName := "udash-guide",
       maintainer := "dawid.dworak@gmail.com",
 
@@ -358,6 +363,22 @@ lazy val `guide-packager` =
         val frontendStatics = (`guide-guide` / Compile / compileAndOptimizeStatics).value
         (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
       },
+    )
+
+lazy val `guide-selenium` =
+  jvmProject(project.in(file("guide/selenium")))
+    .dependsOn(`guide-backend`)
+    .settings(
+      noPublishSettings,
+
+      libraryDependencies ++= Dependencies.backendDeps.value,
+
+      Test / parallelExecution := false,
+
+      Test / compile := (Test / compile).dependsOn(
+        `guide-homepage` / Compile / compileStatics,
+        `guide-guide` / Compile / compileStatics,
+      ).value
     )
 
 def frontendExecutable(proj: Project)(

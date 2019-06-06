@@ -42,7 +42,7 @@ env:
 matrix:
   include:
     - scala: 2.12.8
-      env: TEST_PACKAGE="guide/compile guide/compileStatics"
+      env: TEST_PACKAGE="guide-selenium/test"
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
