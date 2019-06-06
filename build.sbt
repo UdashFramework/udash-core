@@ -1,5 +1,5 @@
 import org.openqa.selenium.Capabilities
-import org.openqa.selenium.firefox.FirefoxOptions
+import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
 
@@ -18,7 +18,7 @@ val CompileAndTest = "test->test;compile->compile"
 // Settings for JS tests run in browser
 val browserCapabilities: Capabilities = {
   // requires gecko driver, see https://github.com/mozilla/geckodriver
-  new FirefoxOptions().setHeadless(true)
+  new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN)
 }
 
 val commonSettings = Seq(

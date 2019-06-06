@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import io.udash.selenium.server.ApplicationServer
 import org.openqa.selenium.Dimension
-import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxDriverLogLevel, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -26,7 +26,7 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    _driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
+    _driver = new FirefoxDriver(new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN))
     _driver.manage().timeouts().implicitlyWait(500, TimeUnit.MILLISECONDS)
     _driver.manage().window().setSize(new Dimension(1440, 800))
 
