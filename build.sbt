@@ -287,7 +287,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, `guide-guide`)
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, `guide-guide`, `guide-packager`)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -307,6 +307,7 @@ lazy val `guide-backend` =
     .settings(
       noPublishSettings,
       libraryDependencies ++= Dependencies.backendDeps.value,
+      Compile / mainClass := Some("io.udash.web.Launcher"),
     )
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
@@ -330,6 +331,34 @@ lazy val `guide-guide` =
     Some((`guide-backend`, "io.udash.web.styles.GuideCssRenderer")),
     Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
+
+lazy val `guide-packager` =
+  project
+    .in(file("guide/packager"))
+    .dependsOn(`guide-backend`)
+    .enablePlugins(JavaServerAppPackaging)
+    .settings(noPublishSettings)
+    .settings(commonSettings)
+    .settings(
+      normalizedName := "udash-guide",
+      maintainer := "dawid.dworak@gmail.com",
+
+      Compile / mainClass := (`guide-backend` / Compile / mainClass).value,
+
+      // add homepage statics to the package
+      Universal / mappings ++= {
+        import Path.relativeTo
+        val frontendStatics = (`guide-homepage` / Compile / compileAndOptimizeStatics).value
+        (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
+      },
+
+      // add guide statics to the package
+      Universal / mappings ++= {
+        import Path.relativeTo
+        val frontendStatics = (`guide-guide` / Compile / compileAndOptimizeStatics).value
+        (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
+      },
+    )
 
 def frontendExecutable(proj: Project)(
   staticsRoot: String,
