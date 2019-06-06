@@ -2,6 +2,6 @@
 # using G1 and tweaking for VM equipped with 7.5G of RAM
 
 -Xms1024M
--Xmx4096M
+-Xmx3072M
 -Xss4M
 -XX:+UseG1GC
