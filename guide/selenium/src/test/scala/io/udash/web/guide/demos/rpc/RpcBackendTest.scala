@@ -5,7 +5,7 @@ import io.udash.web.SeleniumTest
 class RpcBackendTest extends SeleniumTest {
   val rpcBackendUrl = "/rpc/client-server"
 
-  "Rpcbackend view" should {
+  "RpcBackend view" should {
     driver.get(server.createUrl(rpcBackendUrl))
 
     "contain example button" in {

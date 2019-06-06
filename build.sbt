@@ -264,18 +264,6 @@ lazy val benchmarks = jsProject(project)
     Compile / scalaJSUseMainModuleInitializer := true,
   )
 
-lazy val selenium = jvmProject(project)
-  .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-  .settings(
-    noPublishSettings,
-
-    Test / parallelExecution := false,
-    Test / compile := (Test / compile)
-      .dependsOn(LocalProject("selenium-js") / compileStatics).value,
-
-    libraryDependencies ++= Dependencies.backendDeps.value,
-  )
-
 // Custom SBT tasks
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")
 val compileCss = taskKey[Unit]("Compiles CSS files.")
@@ -454,7 +442,3 @@ def frontendExecutable(proj: Project)(
           staticsRoot / "scripts" / "frontend-deps.js"
     )
 }
-
-lazy val `selenium-js` =
-  frontendExecutable(jsProjectFor(project, selenium))("UdashStatics/WebContent", Dependencies.seleniumJsDeps)
-    .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)

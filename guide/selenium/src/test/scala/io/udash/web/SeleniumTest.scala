@@ -10,7 +10,6 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import org.springframework.context.support.GenericApplicationContext
-import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxDriverLogLevel, FirefoxOptions}
 
 trait ServerConfig {
   def init(): Unit
@@ -48,15 +47,15 @@ class InternalServerConfig extends ServerConfig {
 }
 
 abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with Eventually {
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
-  val testingCtx = createTestingContext()
+  private val testingCtx = createTestingContext()
 
-  val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN))
+  protected val driver: RemoteWebDriver = testingCtx.getBean(classOf[RemoteWebDriver])
   driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
   driver.manage().window().setSize(new Dimension(1440, 800))
 
-  val server: ServerConfig = testingCtx.getBean(classOf[ServerConfig])
+  protected val server: ServerConfig = testingCtx.getBean(classOf[ServerConfig])
   server.init()
 
   override protected def afterAll(): Unit = {

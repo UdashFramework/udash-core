@@ -36,7 +36,6 @@ env:
   - TEST_PACKAGE="bootstrap4/test"
   - TEST_PACKAGE="charts/test"
   - TEST_PACKAGE="benchmarks/compile"
-  - TEST_PACKAGE="selenium/test"
   - TEST_PACKAGE="doc"
 
 matrix:

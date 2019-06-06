@@ -1,6 +1,7 @@
 package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
+import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {
   val url = "/frontend/routing"
@@ -91,6 +92,36 @@ class FrontendRoutingTest extends SeleniumTest {
 
       init.getText should be("/frontend/routing")
       input.getAttribute("value") should be("It should not disappear... Selenium")
+    }
+
+    //todo migrate content from udash selenium or remove
+    "collect url changes" ignore {
+      driver.get(server.createUrl(url))
+
+      val demoContainer = driver.findElementById("routing-logger-demo")
+      val enableCheckbox = demoContainer.findElement(By.cssSelector("label[for=\"turn-on-logger\"]"))
+      val history = demoContainer.findElement(By.id("routing-history"))
+      val linkChanger = driver.findElementById("url-demo-link-input")
+
+      enableCheckbox.click()
+      history.getText should be("")
+
+      linkChanger.sendKeys("test")
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test"
+        )
+      }
+
+      linkChanger.clear()
+      linkChanger.sendKeys("qwe")
+
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test\n" +
+            "Some(/frontend/routing/test) -> /frontend/routing/qwe"
+        )
+      }
     }
   }
 }
