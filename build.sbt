@@ -84,6 +84,7 @@ val noPublishSettings = Seq(
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
+  ideSkipProject := true,
   crossScalaVersions := Nil,
 )
 
@@ -135,7 +136,10 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
 
 lazy val udash = project.in(file("."))
   .aggregate(`udash-jvm`, `udash-js`, guide)
-  .settings(aggregateProjectSettings)
+  .settings(
+    aggregateProjectSettings,
+    ideSkipProject := false,
+  )
 
 //for simplifying Travis build matrix and project dependencies
 lazy val jvmLibraries = Seq[ProjectReference](macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
