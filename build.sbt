@@ -88,26 +88,27 @@ val aggregateProjectSettings = noPublishSettings ++ Seq(
   crossScalaVersions := Nil,
 )
 
-def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
-  base / "src" / conf / "scala",
-  base / "src" / conf / s"scala-$scalaBinary",
-  base / "src" / conf / "java"
-)
+def sourceDirsSettings(baseMapper: File => File) = {
+  def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
+    base / "src" / conf / "scala",
+    base / "src" / conf / s"scala-$scalaBinary",
+    base / "src" / conf / "java"
+  )
 
-def mkResourceDirs(base: File, conf: String): Seq[File] = Seq(
-  base / "src" / conf / "resources"
-)
-
-def sourceDirsSettings(baseMapper: File => File) = Seq(
-  Compile / unmanagedSourceDirectories ++=
-    mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "main"),
-  Compile / unmanagedResourceDirectories ++=
-    mkResourceDirs(baseMapper(baseDirectory.value), "main"),
-  Test / unmanagedSourceDirectories ++=
-    mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "test"),
-  Test / unmanagedResourceDirectories ++=
-    mkResourceDirs(baseMapper(baseDirectory.value), "test"),
-)
+  def mkResourceDirs(base: File, conf: String): Seq[File] = Seq(
+    base / "src" / conf / "resources"
+  )
+  Seq(
+    Compile / unmanagedSourceDirectories ++=
+      mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "main"),
+    Compile / unmanagedResourceDirectories ++=
+      mkResourceDirs(baseMapper(baseDirectory.value), "main"),
+    Test / unmanagedSourceDirectories ++=
+      mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "test"),
+    Test / unmanagedResourceDirectories ++=
+      mkResourceDirs(baseMapper(baseDirectory.value), "test"),
+  )
+}
 
 def jvmProject(proj: Project): Project =
   proj.settings(
@@ -129,10 +130,76 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
 
       moduleName := (jvmProj / moduleName).value,
       sourceDirsSettings(_.getParentFile),
+
       // workaround for some cross-compilation problems in IntelliJ
-      libraryDependencies :=
-        (if (forIdeaImport) (jvmProj / libraryDependencies).value else Seq.empty) ++ libraryDependencies.value
+      libraryDependencies ++= (if (forIdeaImport) (jvmProj / libraryDependencies).value else Seq.empty)
     )
+
+def frontendExecutable(proj: Project)(
+  staticsRoot: String,
+  jsDeps: Def.Initialize[Seq[JSModuleID]],
+  cssRenderer: Option[(Project, String)] = None,
+  additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
+) = {
+  proj
+    .enablePlugins(ScalaJSPlugin, SbtWeb)
+    .settings(commonJsSettings)
+    .settings(
+      noPublishSettings,
+
+      jsDependencies ++= jsDeps.value,
+      Compile / emitSourceMaps := true,
+      Compile / scalaJSUseMainModuleInitializer := true,
+
+      Assets / LessKeys.less / includeFilter := "assets.less",
+      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
+
+      Compile / copyAssets := {
+        val udashStatics = target.value / staticsRoot
+        val assets = udashStatics / "assets"
+        additionalAssetsDirectory.value.foreach(IO.copyDirectory(_, assets))
+        IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
+        IO.move(assets / "index.html", udashStatics / "index.html")
+        IO.delete(assets / "assets.less")
+      },
+
+      // Compiles CSS files and put them in the target directory
+      compileCss := Def.taskDyn {
+        cssRenderer.map { case (rendererProject, rendererClass) =>
+          val dir = (Compile / target).value / staticsRoot / "styles"
+          val path = dir.absolutePath
+          dir.mkdirs()
+          (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
+        }.getOrElse(Def.task(()))
+      }.value,
+
+      // Compiles JS files without full optimizations
+      compileStatics := (Compile / fastOptJS / target).value / "UdashStatics",
+      compileStatics := compileStatics.dependsOn(
+        Compile / fastOptJS, Compile / copyAssets, Compile / compileCss
+      ).value,
+
+      // Compiles JS files with full optimizations
+      compileAndOptimizeStatics := (Compile / fullOptJS / target).value / "UdashStatics",
+      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
+        Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
+      ).value,
+
+      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
+      skip in (Compile / packageJSDependencies) := true,
+      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
+
+      // Target files for Scala.js plugin
+      Compile / fastOptJS / artifactPath :=
+        (Compile / fastOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
+      Compile / fullOptJS / artifactPath :=
+        (Compile / fullOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
+      Compile / packageJSDependencies / artifactPath :=
+        (Compile / packageJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js",
+      Compile / packageMinifiedJSDependencies / artifactPath :=
+        (Compile / packageMinifiedJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js"
+    )
+}
 
 lazy val udash = project.in(file("."))
   .aggregate(`udash-jvm`, `udash-js`, guide)
@@ -339,7 +406,6 @@ lazy val `guide-packager` =
       
       normalizedName := "udash-guide",
       maintainer := "dawid.dworak@gmail.com",
-
       Compile / mainClass := (`guide-backend` / Compile / mainClass).value,
 
       // add homepage statics to the package
@@ -372,77 +438,3 @@ lazy val `guide-selenium` =
         `guide-guide` / Compile / compileStatics,
       ).value
     )
-
-def frontendExecutable(proj: Project)(
-  staticsRoot: String,
-  jsDeps: Def.Initialize[Seq[JSModuleID]],
-  cssRenderer: Option[(Project, String)] = None,
-  additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
-) = {
-  proj
-    .enablePlugins(ScalaJSPlugin, SbtWeb)
-    .settings(commonJsSettings)
-    .settings(
-      noPublishSettings,
-
-      jsDependencies ++= jsDeps.value,
-      Compile / emitSourceMaps := true,
-      Compile / scalaJSUseMainModuleInitializer := true,
-
-      Assets / LessKeys.less / includeFilter := "assets.less",
-      Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
-
-      Compile / copyAssets := {
-        val udashStatics = target.value / staticsRoot
-        val assets = udashStatics / "assets"
-        additionalAssetsDirectory.value.foreach(IO.copyDirectory(_, assets))
-        IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
-        IO.move(assets / "index.html", udashStatics / "index.html")
-        IO.delete(assets / "assets.less")
-      },
-
-      // Compiles CSS files and put them in the target directory
-      compileCss := Def.taskDyn {
-        cssRenderer.map { case (rendererProject, rendererClass) =>
-          val dir = (Compile / target).value / staticsRoot / "styles"
-          val path = dir.absolutePath
-          dir.mkdirs()
-          (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
-        }.getOrElse(Def.task(()))
-      }.value,
-
-      // Compiles JS files without full optimizations
-      compileStatics := {
-        (Compile / fastOptJS / target).value / "UdashStatics"
-      },
-      compileStatics := compileStatics.dependsOn(
-        Compile / fastOptJS, Compile / copyAssets, Compile / compileCss
-      ).value,
-
-      // Compiles JS files with full optimizations
-      compileAndOptimizeStatics := {
-        (Compile / fullOptJS / target).value / "UdashStatics"
-      },
-      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-        Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
-      ).value,
-
-      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
-      skip in (Compile / packageJSDependencies) := true,
-      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
-
-      // Target files for Scala.js plugin
-      Compile / fastOptJS / artifactPath :=
-        (Compile / fastOptJS / target).value /
-          staticsRoot / "scripts" / "frontend.js",
-      Compile / fullOptJS / artifactPath :=
-        (Compile / fullOptJS / target).value /
-          staticsRoot / "scripts" / "frontend.js",
-      Compile / packageJSDependencies / artifactPath :=
-        (Compile / packageJSDependencies / target).value /
-          staticsRoot / "scripts" / "frontend-deps.js",
-      Compile / packageMinifiedJSDependencies / artifactPath :=
-        (Compile / packageMinifiedJSDependencies / target).value /
-          staticsRoot / "scripts" / "frontend-deps.js"
-    )
-}
