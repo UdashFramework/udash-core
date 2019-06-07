@@ -37,6 +37,7 @@ val commonSettings = Seq(
     "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator",
+    "-P:silencer:checkUnused",
   ),
   scalacOptions ++= {
     if (scalaBinaryVersion.value == "2.12") Seq(
@@ -72,6 +73,11 @@ val commonJSSettings = Seq(
 val noPublishSettings = Seq(
   publish / skip := true,
   doc := (doc / target).value,
+)
+
+val aggregateProjectSettings = noPublishSettings ++ Seq(
+  ideSkipProject := true,
+  crossScalaVersions := Nil,
 )
 
 def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
@@ -126,20 +132,17 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
 
 lazy val udash = project.in(file("."))
   .aggregate(
-    macros,
-    utils, `utils-js`,
-    core, `core-js`,
-    rpc, `rpc-js`,
-    rest, `rest-js`, `rest-jetty`,
-    i18n, `i18n-js`,
-    auth, `auth-js`,
-    css, `css-js`,
-    bootstrap, bootstrap4, charts
+    `udash-jvm`, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
   )
   .settings(
-    noPublishSettings,
-    crossScalaVersions := Nil,
+    aggregateProjectSettings,
+    ideSkipProject := false,
   )
+
+//for simplifying Travis build matrix
+lazy val `udash-jvm` = project.in(file(".jvm"))
+  .aggregate(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+  .settings(aggregateProjectSettings)
 
 lazy val macros = project
   .settings(

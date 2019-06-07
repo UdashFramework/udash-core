@@ -5,21 +5,16 @@ language: scala
 
 addons:
   firefox: latest
-  chrome: stable
 
 before_script:
-  # Install google-chrome-driver
-  - wget http://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip -d chromedriver
-  - export PATH=$PWD/chromedriver:$PATH
   # Install firefox-driver
-  - wget https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
   - mkdir geckodriver
-  - tar -xzf geckodriver-v0.21.0-linux64.tar.gz -C geckodriver
+  - tar -xzf geckodriver-v0.24.0-linux64.tar.gz -C geckodriver
   - export PATH=$PWD/geckodriver:$PATH
 
 script:
-  - xvfb-run sbt ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
+  - xvfb-run sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
 
 jdk:
   - oraclejdk8
@@ -28,13 +23,14 @@ scala:
   - 2.12.8
 
 env:
-  - TEST_PACKAGE="utils/test utils-js/test"
-  - TEST_PACKAGE="core/test core-js/test"
-  - TEST_PACKAGE="rpc/test rpc-js/test"
-  - TEST_PACKAGE="rest/test rest-js/test"
-  - TEST_PACKAGE="i18n/test i18n-js/test"
-  - TEST_PACKAGE="auth/test auth-js/test"
-  - TEST_PACKAGE="css/test css-js/test"
+  - TEST_PACKAGE="udash-jvm/test"
+  - TEST_PACKAGE="utils-js/test"
+  - TEST_PACKAGE="core-js/test"
+  - TEST_PACKAGE="rpc-js/test"
+  - TEST_PACKAGE="rest-js/test"
+  - TEST_PACKAGE="i18n-js/test"
+  - TEST_PACKAGE="auth-js/test"
+  - TEST_PACKAGE="css-js/test"
   - TEST_PACKAGE="bootstrap/test"
   - TEST_PACKAGE="bootstrap4/test"
   - TEST_PACKAGE="charts/test"
@@ -42,9 +38,16 @@ env:
   - TEST_PACKAGE="selenium/test"
   - TEST_PACKAGE="doc"
 
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
 cache:
   directories:
   - $HOME/.ivy2/cache
+  - $HOME/.m2
   - $HOME/.coursier/cache
-  - $HOME/.sbt/boot/
-  - $HOME/.sbt/launchers/
+  - $HOME/.cache
+  - $HOME/.sbt

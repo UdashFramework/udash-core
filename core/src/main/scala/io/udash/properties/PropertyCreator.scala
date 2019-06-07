@@ -4,6 +4,7 @@ import io.udash.properties.seq.DirectSeqPropertyImpl
 import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
 
 import scala.annotation.implicitNotFound
+import scala.collection.generic.CanBuildFrom
 
 trait PropertyCreator[T] {
   def newProperty(parent: ReadableProperty[_])(implicit blank: Blank[T]): CastableProperty[T] =
@@ -36,14 +37,21 @@ object PropertyCreator extends PropertyCreatorImplicits {
   implicit val String: PropertyCreator[String] = new SinglePropertyCreator[String]
 }
 
-class SinglePropertyCreator[T] extends PropertyCreator[T] {
+final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
-class SeqPropertyCreator[T : PropertyCreator] extends PropertyCreator[Seq[T]] {
-  protected def create(prt: ReadableProperty[_]): CastableProperty[Seq[T]] =
-    new DirectSeqPropertyImpl[T](prt, PropertyCreator.newID())
+final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]])
+  extends PropertyCreator[SeqTpe[T]] {
+  protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[T]] =
+    new DirectSeqPropertyImpl[T, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[T]]]
+}
+
+object SeqPropertyCreator {
+  implicit def materializeSeq[T: PropertyCreator, SeqTpe[T] <: Seq[T]](
+    implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]]
+  ): SeqPropertyCreator[T, SeqTpe] = macro io.udash.macros.PropertyMacros.reifySeqPropertyCreator[T, SeqTpe]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")

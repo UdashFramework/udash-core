@@ -18,7 +18,7 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
+  def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B, Seq]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
 
   /** Ensures read-only access to this property. */
@@ -42,6 +42,7 @@ private[properties] trait AbstractReadableModelProperty[A]
     */
   override def isValid: Future[ValidationResult] = {
     import Validator._
+
     import scala.concurrent.ExecutionContext.Implicits.global
 
     if (validationResult == null) {
