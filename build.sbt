@@ -21,6 +21,43 @@ val browserCapabilities: Capabilities = {
   new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN)
 }
 
+// Deployment configuration
+val deploymentConfiguration = Seq(
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false },
+
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  },
+
+  pomExtra := {
+    <url>https://github.com/UdashFramework/udash-core</url>
+      <licenses>
+        <license>
+          <name>Apache v.2 License</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:UdashFramework/udash-core.git</url>
+        <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>avsystem</id>
+          <name>AVSystem</name>
+          <url>http://www.avsystem.com/</url>
+        </developer>
+      </developers>
+  }
+)
+
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
   crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
@@ -56,7 +93,7 @@ val commonSettings = Seq(
   libraryDependencies ++= Dependencies.commonDeps.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
   autoAPIMappings := true
-)
+) ++ deploymentConfiguration
 
 val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
