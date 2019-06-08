@@ -165,13 +165,25 @@ lazy val `utils-js` = jsProjectFor(project, utils)
 lazy val core = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.coreJvmDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossDeps.value,
   )
 
 lazy val `core-js` = jsProjectFor(project, core)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.coreSjsDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossDeps.value,
+  )
+
+lazy val `core-cats` = jvmProject(project.in(core.base / "cats"))
+  .dependsOn(core % CompileAndTest)
+  .settings(
+    libraryDependencies ++= Dependencies.catsCrossDeps.value,
+  )
+
+lazy val `core-cats-js` = jsProjectFor(project, `core-cats`)
+  .dependsOn(`core-js` % CompileAndTest)
+  .settings(
+    libraryDependencies ++= Dependencies.catsCrossDeps.value,
   )
 
 lazy val rpc = jvmProject(project)

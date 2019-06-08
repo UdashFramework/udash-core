@@ -71,13 +71,13 @@ object Dependencies {
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
-  private val coreCrossDeps = Def.setting(Seq(
+  val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
-  val coreJvmDeps = coreCrossDeps
-
-  val coreSjsDeps = coreCrossDeps
+  val catsCrossDeps = Def.setting(Seq(
+    "org.typelevel" %%% "cats-core" % "2.0.0-M1"
+  ))
 
   private val rpcCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
