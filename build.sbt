@@ -1,5 +1,6 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
+import org.scalajs.jsenv.nodejs.NodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
 
@@ -97,10 +98,9 @@ val commonSettings = Seq(
 
 val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
-  Test / parallelExecution := false,
   Test / scalaJSStage := FastOptStage,
   Test / scalaJSUseMainModuleInitializer := false,
-  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
+  Test / jsEnv := new NodeJSEnv,
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -113,6 +113,11 @@ val commonJsSettings = commonSettings ++ Seq(
   LessKeys.compress in Assets := true,
   LessKeys.strictMath in Assets := true,
   LessKeys.verbose in Assets := true,
+)
+
+val testInBrowser = Seq(
+  Test / parallelExecution := false,
+  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
 )
 
 val noPublishSettings = Seq(
@@ -285,6 +290,7 @@ lazy val core = jvmProject(project)
 lazy val `core-js` = jsProjectFor(project, core)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
+    testInBrowser,
     libraryDependencies ++= Dependencies.coreSjsDeps.value,
   )
 
@@ -297,6 +303,7 @@ lazy val rpc = jvmProject(project)
 lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
+    testInBrowser,
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
     jsDependencies ++= Dependencies.rpcJsDeps.value,
   )
@@ -324,12 +331,14 @@ lazy val i18n = jvmProject(project)
 
 lazy val `i18n-js` = jsProjectFor(project, i18n)
   .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
+  .settings(testInBrowser)
 
 lazy val auth = jvmProject(project)
   .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
 
 lazy val `auth-js` = jsProjectFor(project, auth)
   .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
+  .settings(testInBrowser)
 
 lazy val css = jvmProject(project)
   .dependsOn(core % CompileAndTest)
@@ -340,12 +349,14 @@ lazy val css = jvmProject(project)
 lazy val `css-js` = jsProjectFor(project, css)
   .dependsOn(`core-js` % CompileAndTest)
   .settings(
+    testInBrowser,
     libraryDependencies ++= Dependencies.cssSjsDeps.value,
   )
 
 lazy val bootstrap = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
   .settings(
+    testInBrowser,
     libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
     jsDependencies ++= Dependencies.bootstrapJsDeps.value
   )
@@ -353,6 +364,7 @@ lazy val bootstrap = jsProject(project)
 lazy val bootstrap4 = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
   .settings(
+    testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
     jsDependencies ++= Dependencies.bootstrap4JsDeps.value
   )
