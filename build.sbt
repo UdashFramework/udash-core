@@ -132,7 +132,7 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
 
 lazy val udash = project.in(file("."))
   .aggregate(
-    `udash-jvm`, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
+    `udash-jvm`, `utils-js`, `core-js`, `core-cats-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap, bootstrap4, charts
   )
   .settings(
     aggregateProjectSettings,
@@ -141,7 +141,7 @@ lazy val udash = project.in(file("."))
 
 //for simplifying Travis build matrix
 lazy val `udash-jvm` = project.in(file(".jvm"))
-  .aggregate(macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+  .aggregate(macros, utils, core, `core-cats`, rpc, rest, `rest-jetty`, i18n, auth, css)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
