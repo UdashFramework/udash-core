@@ -41,7 +41,7 @@ trait Properties {
 
 object Properties extends Properties {
   class Any2Property[A] private[properties](private val value: A) extends AnyVal {
-    def toProperty[B >: A : PropertyCreator]: ReadableProperty[B] = new ImmutableProperty[B](value)
+    def toProperty[B >: A]: ReadableProperty[B] = new ImmutableProperty[B](value)
   }
 
   class Any2ModelProperty[A] private[properties](private val value: A) extends AnyVal {
