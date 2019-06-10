@@ -1,6 +1,6 @@
 package io.udash.properties.single
 import io.udash.properties.seq.ReadableSeqProperty
-import io.udash.properties.{PropertyCreator, PropertyId, ValidationResult}
+import io.udash.properties.{PropertyId, ValidationResult}
 import io.udash.utils.Registration
 
 import scala.concurrent.Future
@@ -20,7 +20,7 @@ private[properties] class ReadableWrapper[T](private val p: ReadableProperty[T])
   override protected[properties] def listenersUpdate(): Unit = p.listenersUpdate()
   override def transform[B](transformer: T => B): ReadableProperty[B] = p.transform(transformer)
 
-  override def transformToSeq[B: PropertyCreator](transformer: T => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B](transformer: T => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     p.transformToSeq(transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: T => B): Registration =

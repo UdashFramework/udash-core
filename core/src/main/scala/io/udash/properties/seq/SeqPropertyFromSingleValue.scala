@@ -127,7 +127,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     })
 }
 
-private[properties] class ReadableSeqPropertyFromSingleValue[A, B : PropertyCreator](
+private[properties] class ReadableSeqPropertyFromSingleValue[A, B](
   origin: ReadableProperty[A], transformer: A => Seq[B]
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer) {
   override def elemProperties: Seq[ReadableProperty[B]] = {

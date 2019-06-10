@@ -146,6 +146,7 @@ private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A
         touch()
       }
     }
-
   }
+
+  //def cmb[B, O](p: Property[B])(transformer: (A, B))
 }
