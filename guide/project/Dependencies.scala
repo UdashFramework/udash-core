@@ -24,7 +24,7 @@ object Dependencies {
   val FlexmarkVersion = "0.40.32"
 
   val seleniumVersion = "3.12.0"
-  val scalatestVersion = "3.0.7"
+  val scalatestVersion = "3.0.8"
 
   val crossDeps = Def.setting(Seq(
     "io.udash" %%% "udash-core" % udashVersion,
