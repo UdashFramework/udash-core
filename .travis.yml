@@ -20,10 +20,11 @@ jdk:
   - oraclejdk8
 
 scala:
-  - 2.11.12
   - 2.12.8
+  - 2.11.12
 
 env:
+  - TEST_PACKAGE="guide-selenium/test"
   - TEST_PACKAGE="udash-jvm/test"
   - TEST_PACKAGE="utils-js/test"
   - TEST_PACKAGE="core-js/test"
@@ -39,8 +40,8 @@ env:
   - TEST_PACKAGE="doc"
 
 matrix:
-  include:
-    - scala: 2.12.8
+  exclude:
+    - scala: 2.11.12
       env: TEST_PACKAGE="guide-selenium/test"
 
 before_cache:

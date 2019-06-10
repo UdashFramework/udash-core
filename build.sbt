@@ -295,7 +295,7 @@ lazy val `core-js` = jsProjectFor(project, core)
   )
 
 lazy val rpc = jvmProject(project)
-  .dependsOn(utils)
+  .dependsOn(utils % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcJvmDeps.value,
   )
