@@ -31,7 +31,7 @@ object Dependencies {
 
   val jettyVersion = "9.4.18.v20190429" // Tests only
 
-  val scalatestVersion = "3.0.7"
+  val scalatestVersion = "3.0.8"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
