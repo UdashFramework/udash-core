@@ -1,5 +1,4 @@
-package io.udash
-package cats
+package io.udash.cats
 
 import io.udash.properties.HasModelPropertyCreator
 
@@ -13,6 +12,10 @@ object CatsFun extends App {
     override def pure[A](x: A): ReadableProperty[A] = x.toProperty
     override def ap[A, B](ff: ReadableProperty[A => B])(fa: ReadableProperty[A]): ReadableProperty[B] =
       ff.combine(fa)((f, a) => f(a))
+  }
+
+  implicit val pInvariant: Invariant[Property] = new Invariant[Property] {
+    override def imap[A, B](fa: Property[A])(f: A => B)(g: B => A): Property[B] = fa.transform(f, g)
   }
 
   case class Test(i: Int, s: String)
