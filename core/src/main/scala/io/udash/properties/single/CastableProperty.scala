@@ -26,8 +26,8 @@ trait CastableProperty[A] extends CastableReadableProperty[A] with Property[A] {
   override def asModel(implicit ev: ModelPropertyCreator[A]): ModelProperty[A] = {
     this match {
       case mp: ModelProperty[A] => mp
-      case _ => throw new IllegalStateException("Property was created without provided ModelPropertyCreator in scope. " +
-        "Make sure it is uniformly available, e.g. in the companion object of the model class.")
+      case _ => throw new IllegalStateException(s"Property containing ${get.getClass} was created without provided " +
+        "ModelPropertyCreator in scope. Make sure it is uniformly available, e.g. in the companion object of the model class.")
     }
   }
 
