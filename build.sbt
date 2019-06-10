@@ -295,7 +295,7 @@ lazy val `core-js` = jsProjectFor(project, core)
   )
 
 lazy val rpc = jvmProject(project)
-  .dependsOn(utils % CompileAndTest)
+  .dependsOn(utils)
   .settings(
     libraryDependencies ++= Dependencies.rpcJvmDeps.value,
   )
@@ -334,10 +334,10 @@ lazy val `i18n-js` = jsProjectFor(project, i18n)
   .settings(testInBrowser)
 
 lazy val auth = jvmProject(project)
-  .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
+  .dependsOn(core % CompileAndTest, rpc)
 
 lazy val `auth-js` = jsProjectFor(project, auth)
-  .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
+  .dependsOn(`core-js` % CompileAndTest, `rpc-js`)
   .settings(testInBrowser)
 
 lazy val css = jvmProject(project)
@@ -354,7 +354,7 @@ lazy val `css-js` = jsProjectFor(project, css)
   )
 
 lazy val bootstrap = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
+  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
@@ -362,7 +362,7 @@ lazy val bootstrap = jsProject(project)
   )
 
 lazy val bootstrap4 = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js` % CompileAndTest, `i18n-js` % CompileAndTest)
+  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
@@ -370,7 +370,7 @@ lazy val bootstrap4 = jsProject(project)
   )
 
 lazy val charts = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest)
+  .dependsOn(`core-js`)
   .settings(
     libraryDependencies ++= Dependencies.chartsSjsDeps.value
   )
