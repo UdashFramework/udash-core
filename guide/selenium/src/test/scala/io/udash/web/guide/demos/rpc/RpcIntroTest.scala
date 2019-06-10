@@ -4,11 +4,9 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.WebElement
 
 class RpcIntroTest extends SeleniumTest {
-  val rpcIntroUrl = "/rpc"
+  override protected final val url = "/rpc"
 
   "RpcIntro view" should {
-    driver.get(server.createUrl(rpcIntroUrl))
-
     "contain two example buttons" in {
       eventually {
         driver.findElementById("ping-pong-call-demo")

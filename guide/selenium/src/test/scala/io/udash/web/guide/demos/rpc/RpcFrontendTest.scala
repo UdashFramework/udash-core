@@ -6,11 +6,9 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.WebElement
 
 class RpcFrontendTest extends SeleniumTest {
-  val rpcFrontendUrl = "/rpc/server-client"
+  override protected final val url = "/rpc/server-client"
 
   "RpcFrontend view" should {
-    driver.get(server.createUrl(rpcFrontendUrl))
-
     "contain example button" in {
       eventually {
         driver.findElementById("notifications-demo")
