@@ -7,9 +7,9 @@ import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 
-private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
+private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B, ElemType <: ReadableProperty[B]](
   origin: ReadableProperty[A], transformer: A => Seq[B]
-) extends AbstractReadableSeqProperty[B, ElemType] {
+)(implicit pc: PropertyCreator[B]) extends AbstractReadableSeqProperty[B, ElemType] {
 
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
@@ -60,7 +60,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
     val patch = if (transformed.size > current.size) {
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
-        PropertyCreator[B].newProperty(transformed(current.size + idx), this)
+        pc.newProperty(transformed(current.size + idx), this)
       }
       CrossCollections.replace(children, commonBegin, 0, added: _*)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
@@ -139,7 +139,7 @@ private[properties] class ReadableSeqPropertyFromSingleValue[A, B](
     p.readable
 }
 
-private[properties] class SeqPropertyFromSingleValue[A, B : PropertyCreator](
+private[properties] class SeqPropertyFromSingleValue[A, B](
   origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer)
   with AbstractSeqProperty[B, Property[B]] {

@@ -73,7 +73,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
     })
 }
 
-private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
+private[properties] class ZippedReadableSeqProperty[A, B, O](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O
@@ -107,7 +107,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
   }
 }
 
-private[properties] class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator](
+private[properties] class ZippedAllReadableSeqProperty[A, B, O](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B]

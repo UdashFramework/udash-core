@@ -1,12 +1,10 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import io.udash.properties.model.{ModelPropertyMacroApi, ReadableModelProperty}
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
-
-import scala.collection.immutable
-import scala.concurrent.Future
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
@@ -44,7 +42,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
 
-  override def transformToSeq[B](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty[B](transformer(value))
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
@@ -70,11 +68,8 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
-  def this(value: Seq[A]) = this(value match {
-    case v: immutable.Seq[A] => v
-    case _ => value.to[immutable.Seq]
-  })
+private[properties] class ImmutableSeqProperty[A](value: BSeq[A])
+  extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: Seq[ImmutableProperty[A]] =
     value.map(v => new ImmutableProperty(v))

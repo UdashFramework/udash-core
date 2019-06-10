@@ -1,12 +1,11 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
-import io.udash.properties.PropertyCreator
 import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 
-private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
+private[properties] class CombinedReadableSeqProperty[A, B, R](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
 ) extends CombinedProperty[Seq[A], B, Seq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))

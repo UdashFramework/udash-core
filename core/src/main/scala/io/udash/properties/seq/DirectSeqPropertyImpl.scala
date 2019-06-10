@@ -6,8 +6,8 @@ import io.udash.utils.CrossCollections
 
 import scala.collection.generic.CanBuildFrom
 
-private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: Seq[T]](
-  val parent: ReadableProperty[_], override val id: PropertyId)(implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
+private[properties] class DirectSeqPropertyImpl[A, SeqTpe[T] <: Seq[T]](
+  val parent: ReadableProperty[_], override val id: PropertyId)(implicit pc: PropertyCreator[A], cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
@@ -32,7 +32,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
   override def setInitValue(t: Seq[A]): Unit = {
     val newProperties = Option(t)
       .getOrElse(Seq.empty)
-      .map(value => PropertyCreator[A].newProperty(value, this))
+      .map(value => pc.newProperty(value, this))
     properties.insertAll(0, newProperties)
   }
 

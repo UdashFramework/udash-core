@@ -48,8 +48,8 @@ object Properties extends Properties {
     def toModelProperty[B >: A : ModelPropertyCreator]: ReadableModelProperty[B] = new ImmutableModelProperty[B](value)
   }
 
-  class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {
-    def toSeqProperty[B >: A : PropertyCreator]: ReadableSeqProperty[B] = new ImmutableSeqProperty[B](value)
+  class Any2SeqProperty[A] private[properties](private val value: BSeq[A]) extends AnyVal {
+    def toSeqProperty[B >: A]: ReadableSeqProperty[B] = new ImmutableSeqProperty[B](value)
   }
 
   class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[ReadableProperty[A]]) extends AnyVal {

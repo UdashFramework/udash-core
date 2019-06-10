@@ -48,18 +48,18 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType]
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
-  def combine[B, O : PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+  def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
     new CombinedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
-  def zip[B, O : PropertyCreator](
+  def zip[B, O](
     property: ReadableSeqProperty[B, ReadableProperty[B]]
   )(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
     new ZippedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
     * Uses `defaultA` and `defaultB` to fill smaller sequence. */
-  def zipAll[B, O: PropertyCreator](property: ReadableSeqProperty[B, ReadableProperty[B]])(
+  def zipAll[B, O](property: ReadableSeqProperty[B, ReadableProperty[B]])(
     combiner: (A, B) => O,
     defaultA: ReadableProperty[A],
     defaultB: ReadableProperty[B]
