@@ -7,11 +7,9 @@ import org.openqa.selenium.WebElement
 import scala.collection.JavaConverters._
 
 class FrontendBindingsTest extends SeleniumTest {
-  val url = "/frontend/bindings"
+  override protected final val url = "/frontend/bindings"
 
   "FrontendBinding view" should {
-    driver.get(server.createUrl(url))
-
     "contain demo elements" in {
       eventually {
         driver.findElementById("bind-demo")

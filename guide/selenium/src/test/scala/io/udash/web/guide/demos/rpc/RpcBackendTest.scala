@@ -1,13 +1,12 @@
 package io.udash.web.guide.demos.rpc
 
 import io.udash.web.SeleniumTest
+import org.scalatest.BeforeAndAfterEach
 
-class RpcBackendTest extends SeleniumTest {
-  val rpcBackendUrl = "/rpc/client-server"
+class RpcBackendTest extends SeleniumTest with BeforeAndAfterEach {
+  override protected final val url = "/rpc/client-server"
 
   "RpcBackend view" should {
-    driver.get(server.createUrl(rpcBackendUrl))
-
     "contain example button" in {
       eventually {
         driver.findElementById("client-id-demo")

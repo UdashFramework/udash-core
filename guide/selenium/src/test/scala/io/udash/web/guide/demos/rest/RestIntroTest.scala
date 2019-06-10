@@ -3,25 +3,21 @@ package web.guide.demos.rest
 
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ById, ByTagName}
+import org.scalatest.Ignore
 
 //todo migrate content from udash selenium or remove
+@Ignore
 class RestIntroTest extends SeleniumTest {
   val url = "/rest"
 
-  //  override protected def beforeAll(): Unit = {
-  //    super.beforeAll()
-  //    driver.get(server.createUrl(url))
-  //  }
-
   "RestIntro view" should {
-    "empty" in {}
-    "contain REST simple demo" ignore {
+    "contain REST simple demo" in {
       eventually {
         driver.findElementById("simple-rest-demo")
       }
     }
 
-    "receive response in demo" ignore {
+    "receive response in demo" in {
       val callDemo = driver.findElementById("simple-rest-demo")
       val stringButton = callDemo.findElement(new ById("simple-rest-demo-string-btn"))
       val intButton = callDemo.findElement(new ById("simple-rest-demo-int-btn"))

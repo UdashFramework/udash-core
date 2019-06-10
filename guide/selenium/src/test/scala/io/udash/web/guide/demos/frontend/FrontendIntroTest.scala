@@ -4,11 +4,9 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.ById
 
 class FrontendIntroTest extends SeleniumTest {
-  val url = "/frontend"
+  override protected final val url = "/frontend"
 
   "FrontendIntro view" should {
-    driver.get(server.createUrl(url))
-
     "contain demo element" in {
       eventually {
         driver.findElementById("frontend-intro-demo")

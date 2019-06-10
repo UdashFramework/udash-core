@@ -8,7 +8,7 @@ import org.openqa.selenium.Dimension
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, WordSpec}
 import org.springframework.context.support.GenericApplicationContext
 
 trait ServerConfig {
@@ -46,17 +46,28 @@ class InternalServerConfig extends ServerConfig {
   }
 }
 
-abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with Eventually {
+abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
   private val testingCtx = createTestingContext()
 
-  protected val driver: RemoteWebDriver = testingCtx.getBean(classOf[RemoteWebDriver])
+  protected final val driver: RemoteWebDriver = testingCtx.getBean(classOf[RemoteWebDriver])
   driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
   driver.manage().window().setSize(new Dimension(1440, 800))
 
-  protected val server: ServerConfig = testingCtx.getBean(classOf[ServerConfig])
-  server.init()
+  protected def url: String
+
+  private val server: ServerConfig = testingCtx.getBean(classOf[ServerConfig])
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    server.init()
+  }
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    driver.get(server.createUrl(url))
+  }
 
   override protected def afterAll(): Unit = {
     super.afterAll()

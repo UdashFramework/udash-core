@@ -4,11 +4,10 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {
-  val url = "/frontend/routing"
+  override protected final val url = "/frontend/routing"
 
   "FrontendRouting view" should {
     "contain demo element" in {
-      driver.get(server.createUrl(url))
       eventually {
         val link = driver.findElementById("url-demo-link")
         driver.findElementById("url-demo-link-apple")
@@ -21,7 +20,6 @@ class FrontendRoutingTest extends SeleniumTest {
     }
 
     "change URL without view redraw" in {
-      driver.get(server.createUrl(url))
       val link = driver.findElementById("url-demo-link")
       val input = driver.findElementById("url-demo-input")
 
@@ -64,7 +62,6 @@ class FrontendRoutingTest extends SeleniumTest {
     }
 
     "change URL basing on input without view redraw" in {
-      driver.get(server.createUrl(url))
       val link = driver.findElementById("url-demo-link")
       val input = driver.findElementById("url-demo-input")
 
@@ -96,8 +93,6 @@ class FrontendRoutingTest extends SeleniumTest {
 
     //todo migrate content from udash selenium or remove
     "collect url changes" ignore {
-      driver.get(server.createUrl(url))
-
       val demoContainer = driver.findElementById("routing-logger-demo")
       val enableCheckbox = demoContainer.findElement(By.cssSelector("label[for=\"turn-on-logger\"]"))
       val history = demoContainer.findElement(By.id("routing-history"))

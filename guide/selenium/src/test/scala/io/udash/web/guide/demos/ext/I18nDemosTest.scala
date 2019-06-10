@@ -6,11 +6,9 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
 
 class I18nDemosTest extends SeleniumTest {
-  val url = "/ext/i18n"
+  override protected final val url = "/ext/i18n"
 
   "I18n view" should {
-    driver.get(server.createUrl(url))
-
     "contain demo elements" in {
       eventually {
         driver.findElementById("frontend-translations-demo")

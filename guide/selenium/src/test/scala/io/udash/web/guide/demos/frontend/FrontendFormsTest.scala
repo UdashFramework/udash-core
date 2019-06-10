@@ -8,11 +8,9 @@ import scala.collection.JavaConverters._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {
-  val url = "/frontend/forms"
+  override protected final val url = "/frontend/forms"
 
   "FrontendForms view" should {
-    driver.get(server.createUrl(url))
-
     "contain demo elements" in {
       eventually {
         driver.findElementById("checkbox-demo")
