@@ -15,7 +15,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.6"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.34.20"
+  val avsCommonsVersion = "1.34.21"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.3"
@@ -31,7 +31,7 @@ object Dependencies {
 
   val jettyVersion = "9.4.18.v20190429" // Tests only
 
-  val scalatestVersion = "3.0.7"
+  val scalatestVersion = "3.0.8"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
