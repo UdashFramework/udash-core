@@ -40,7 +40,7 @@ object ProduceDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "produce-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 5) ++
-      source.lines.slice(source.lines.size - 11, source.lines.size - 1))
+    (div(id := "produce-demo", GuideStyles.frame)(rendered), source.linesIterator.slice(1, 5) ++
+      source.linesIterator.slice(source.linesIterator.size - 11, source.linesIterator.size - 1))
   }
 }

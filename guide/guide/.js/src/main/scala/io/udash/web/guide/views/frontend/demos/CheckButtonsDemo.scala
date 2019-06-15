@@ -50,6 +50,6 @@ object CheckButtonsDemo extends AutoDemo with CssView {
         div(BootstrapStyles.Grid.row)(div(firstCheckButtons)),
         div(BootstrapStyles.Grid.row)(div(secondCheckButtons))
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.linesIterator.slice(1, source.linesIterator.size - 3))
   }
 }

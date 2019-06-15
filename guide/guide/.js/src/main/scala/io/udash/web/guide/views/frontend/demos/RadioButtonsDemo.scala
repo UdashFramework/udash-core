@@ -49,6 +49,6 @@ object RadioButtonsDemo extends AutoDemo with CssView {
         div(BootstrapStyles.Grid.row)(firstRadioButtons),
         div(BootstrapStyles.Grid.row)(secondRadioButtons)
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.linesIterator.slice(1, source.linesIterator.size - 3))
   }
 }

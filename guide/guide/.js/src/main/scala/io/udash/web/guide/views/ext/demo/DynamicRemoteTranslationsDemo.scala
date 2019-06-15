@@ -71,6 +71,6 @@ object DynamicRemoteTranslationsDemo extends AutoDemo with CssView {
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
     (div(id := "dynamic-rpc-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      rendered), source.lines.drop(1))
+      rendered), source.linesIterator.drop(1))
   }
 }

@@ -47,6 +47,6 @@ object SelectDemo extends AutoDemo with CssView {
         div(BootstrapStyles.Grid.row)(firstSelect),
         div(BootstrapStyles.Grid.row)(secondSelect)
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.linesIterator.slice(1, source.linesIterator.size - 3))
   }
 }
