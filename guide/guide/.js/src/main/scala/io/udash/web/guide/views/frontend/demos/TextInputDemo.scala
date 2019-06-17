@@ -52,6 +52,6 @@ object TextInputDemo extends AutoDemo with CssView {
       form(BootstrapStyles.containerFluid)(
         firstInputs, br, secondInputs
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.linesIterator.slice(1, source.linesIterator.size - 3))
   }
 }

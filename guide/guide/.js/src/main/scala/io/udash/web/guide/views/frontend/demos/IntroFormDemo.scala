@@ -146,6 +146,6 @@ object IntroFormDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (rendered, source.lines.drop(1))
+    (rendered, source.linesIterator.drop(1))
   }
 }

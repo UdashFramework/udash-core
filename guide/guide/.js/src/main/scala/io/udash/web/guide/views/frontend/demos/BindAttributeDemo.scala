@@ -21,6 +21,6 @@ object BindAttributeDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "bind-attr-demo", GuideStyles.frame)(rendered), source.lines.drop(1))
+    (div(id := "bind-attr-demo", GuideStyles.frame)(rendered), source.linesIterator.drop(1))
   }
 }

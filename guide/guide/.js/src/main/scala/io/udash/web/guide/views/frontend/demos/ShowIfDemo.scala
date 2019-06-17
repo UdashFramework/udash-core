@@ -21,6 +21,6 @@ object ShowIfDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "show-if-demo", GuideStyles.frame)(rendered), source.lines.drop(1))
+    (div(id := "show-if-demo", GuideStyles.frame)(rendered), source.linesIterator.drop(1))
   }
 }

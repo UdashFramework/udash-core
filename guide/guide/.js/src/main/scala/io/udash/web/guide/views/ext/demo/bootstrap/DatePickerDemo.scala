@@ -111,7 +111,7 @@ object DatePickerDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (rendered, source.lines.slice(1, 32))
+    (rendered, source.linesIterator.slice(1, 32))
   }
 }
 

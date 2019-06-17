@@ -77,7 +77,7 @@ object SimpleModalDemo extends AutoDemo with CrossLogging with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+    (div(GuideStyles.frame)(rendered), source.linesIterator.drop(1))
   }
 }
 

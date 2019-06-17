@@ -51,7 +51,7 @@ object BindValidationDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "validation-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 10) ++
-      source.lines.slice(source.lines.size - 19, source.lines.size - 1))
+    (div(id := "validation-demo", GuideStyles.frame)(rendered), source.linesIterator.slice(1, 10) ++
+      source.linesIterator.slice(source.linesIterator.size - 19, source.linesIterator.size - 1))
   }
 }

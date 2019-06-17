@@ -35,7 +35,7 @@ object RepeatDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 3) ++
-      source.lines.slice(source.lines.size - 9, source.lines.size - 1))
+    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.linesIterator.slice(1, 3) ++
+      source.linesIterator.slice(source.linesIterator.size - 9, source.linesIterator.size - 1))
   }
 }

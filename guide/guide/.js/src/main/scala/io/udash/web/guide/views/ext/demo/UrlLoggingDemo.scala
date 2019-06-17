@@ -62,6 +62,6 @@ object UrlLoggingDemo extends AutoDemo {
         )
       ).render
 
-    (rendered, source.lines.slice(1, source.lines.size - 2))
+    (rendered, source.linesIterator.slice(1, source.linesIterator.size - 2))
   }
 }
