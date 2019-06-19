@@ -1,18 +1,17 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
 import io.udash.css.CssView
-import io.udash.logging.CrossLogging
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object InlineFormDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
+object InlineFormDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+    import scalatags.JsDom.all._
+
     val search = Property.blank[String]
     val something = Property.blank[String]
 
@@ -31,11 +30,11 @@ object InlineFormDemo extends AutoDemo with CrossLogging with CssView {
           )
         ).render,
       ))
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

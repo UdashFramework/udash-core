@@ -33,7 +33,7 @@ class BootstrapExtView extends FinalView {
   private val (inlineFormDemo, inlineFormSnippet) = InlineFormDemo.demoWithSnippet()
   private val (navsDemo, navsSnippet) = NavsDemo.demoWithSnippet()
   private val (navbarDemo, navbarSnippet) = NavbarDemo.demoWithSnippet()
-  private val (navigationDemo, navigationSnippet) = UdashNavigationDemo.demoWithSnippet()
+  private val (navigationDemo, navigationSnippet) = NavigationDemo.demoWithSnippet()
   private val (breadcrumbsDemo, breadcrumbsSnippet) = BreadcrumbsDemo.demoWithSnippet()
   private val (paginationDemo, paginationSnippet) = PaginationDemo.demoWithSnippet()
   private val (labelsDemo, labelsSnippet) = LabelsDemo.demoWithSnippet()

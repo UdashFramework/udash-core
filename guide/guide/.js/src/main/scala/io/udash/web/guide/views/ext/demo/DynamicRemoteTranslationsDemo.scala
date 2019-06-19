@@ -1,45 +1,46 @@
 package io.udash.web.guide.views.ext.demo
 
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.Color
-import io.udash.css.CssView
-import io.udash.i18n._
-import io.udash.web.guide.components.BootstrapUtils
 import io.udash.web.guide.demos.AutoDemo
-import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.Event
-import org.scalajs.dom.ext.LocalStorage
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
-
-object DynamicRemoteTranslationsDemo extends AutoDemo with CssView {
-  import scalatags.JsDom.all._
+object DynamicRemoteTranslationsDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    import io.udash.web.guide.Context._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import io.udash.i18n._
+    import io.udash.web.guide.Context.serverRpc
+    import io.udash.web.guide.demos.i18n.Translations
+    import org.scalajs.dom.Event
+    import org.scalajs.dom.ext.LocalStorage
+    import scalatags.JsDom.all._
 
-    implicit val translationProvider = new RemoteTranslationProvider(
-      serverRpc.demos.translations,
-      Some(LocalStorage),
-      6 hours
-    )
-    implicit val lang = LangProperty(Lang("en"))
+    import scala.concurrent.duration.DurationInt
+    import scala.language.postfixOps
+
+    implicit val translationProvider: RemoteTranslationProvider = {
+      new RemoteTranslationProvider(
+        serverRpc.demos.translations,
+        Some(LocalStorage),
+        6 hours
+      )
+    }
+
+    implicit val lang: LangProperty = LangProperty(Lang("en"))
 
     div(
       button(
-        BootstrapStyles.Button.btn,
-        BootstrapStyles.Button.color(Color.Primary)
+        Button.btn,
+        Button.color(Color.Primary)
       )(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
       button(
-        BootstrapStyles.Button.btn,
-        BootstrapStyles.Button.color(Color.Primary)
+        Button.btn,
+        Button.color(Color.Primary)
       )(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
-      div(BootstrapUtils.wellStyles, BootstrapStyles.Spacing.margin(
-        side = BootstrapStyles.Side.Top,
-        size = BootstrapStyles.SpacingSize.Normal
+      div(Card.card, Card.body, Background.color(Color.Light), Spacing.margin(
+        side = Side.Top,
+        size = SpacingSize.Normal
       ))(ul(
         li(
           "auth.loginLabel: ",
@@ -69,8 +70,15 @@ object DynamicRemoteTranslationsDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "dynamic-rpc-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (
+      div(
+        id := "dynamic-rpc-translations-demo",
+        GuideStyles.frame,
+        GuideStyles.useBootstrap
+      )(rendered),
+      source.lines
+    )
   }
 }

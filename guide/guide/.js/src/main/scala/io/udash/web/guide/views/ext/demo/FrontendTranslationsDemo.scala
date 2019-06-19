@@ -1,18 +1,18 @@
 package io.udash.web.guide.views.ext.demo
 
 import io.udash.css.CssView
-import io.udash.i18n._
 import io.udash.web.guide.components.BootstrapUtils
 import io.udash.web.guide.demos.AutoDemo
-import io.udash.web.guide.demos.i18n.Translations
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
 object FrontendTranslationsDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-
   private val (rendered, source) = {
+    import io.udash.i18n._
+    import io.udash.web.guide.demos.i18n.Translations
+    import scalatags.JsDom.all._
+
     object FrontendTranslationsProvider {
 
       private val translations = Map(
@@ -30,8 +30,10 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
         new LocalTranslationProvider(translations)
     }
 
-    implicit val translationProvider = FrontendTranslationsProvider()
-    implicit val lang = Lang("en")
+    implicit val translationProvider: LocalTranslationProvider = {
+      FrontendTranslationsProvider()
+    }
+    implicit val lang: Lang = Lang("en")
 
     div(
       ul(
@@ -63,8 +65,15 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(BootstrapUtils.wellStyles)(id := "frontend-translations-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (
+      div(
+        BootstrapUtils.wellStyles,
+        id := "frontend-translations-demo",
+        GuideStyles.frame,
+        GuideStyles.useBootstrap
+      )(rendered),
+      source.lines
+    )
   }
 }

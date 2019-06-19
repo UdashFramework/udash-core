@@ -1,32 +1,34 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-import scala.util.Random
-
-object RepeatDemo extends AutoDemo with CssView {
-
-  import JsDom.all._
+object RepeatDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    val integers: SeqProperty[Int] = SeqProperty[Int](1, 2, 3, 4)
+    import io.udash._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.window
+    import scalatags.JsDom.all._
 
-    dom.window.setInterval(() => {
-      val s: Int = integers.get.size
-      val idx = Random.nextInt(s)
-      val amount = Random.nextInt(s - idx) + 1
+    import scala.util.Random
+
+    val integers = SeqProperty(1, 2, 3, 4)
+
+    window.setInterval(() => {
+      val size = integers.get.size
+      val idx = Random.nextInt(size)
+      val amount = Random.nextInt(size - idx) + 1
       val count = Random.nextInt(5)
       integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
     }, 2000)
 
     p(
       "Integers: ",
-      span(id := "repeat-demo-integers")(repeat(integers)(p => span(GuideStyles.highlightRed)(s"${p.get}, ").render)), br,
+      span(id := "repeat-demo-integers")(repeat(integers)(p =>
+        span(GuideStyles.highlightRed)(s"${p.get}, ").render
+      )), br,
       "Integers (produce): ",
       produce(integers)((seq: Seq[Int]) => span(id := "repeat-demo-integers-produce")(
         seq.map(p => span(GuideStyles.highlightRed)(s"$p, "))
@@ -34,8 +36,8 @@ object RepeatDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 3) ++
-      source.lines.slice(source.lines.size - 9, source.lines.size - 1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.lines)
   }
 }

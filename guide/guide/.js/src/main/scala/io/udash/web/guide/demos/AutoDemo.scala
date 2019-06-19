@@ -10,7 +10,7 @@ trait AutoDemo extends SharedExtensions {
 
   final def demoWithSnippet(): (Modifier, Modifier) = {
     val (demo, code) = demoWithSource()
-    (demo, CodeBlock(code.map(_.drop(2)).mkString("\n"))(GuideStyles))
+    (demo, CodeBlock.lines(code.drop(1).map(_.drop(2)))(GuideStyles))
   }
 
   protected def demoWithSource(): (Modifier, Iterator[String])

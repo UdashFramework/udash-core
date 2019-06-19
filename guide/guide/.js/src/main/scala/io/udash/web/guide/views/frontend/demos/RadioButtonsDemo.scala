@@ -1,24 +1,26 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
-import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.html.Input
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object RadioButtonsDemo extends AutoDemo with CssView {
-  import JsDom.all._
+object RadioButtonsDemo extends AutoDemo {
 
   private val ((firstRadioButtons, secondRadioButtons), source) = {
+    import io.udash._
+    import io.udash.bootstrap.form.UdashInputGroup
+    import io.udash.bootstrap.form.UdashInputGroup._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.html.Input
+    import scalatags.JsDom.all._
+
     sealed trait Fruit
     case object Apple extends Fruit
     case object Orange extends Fruit
     case object Banana extends Fruit
 
-    val favoriteFruit: Property[Fruit] = Property[Fruit](Apple)
+    val favoriteFruit = Property[Fruit](Apple)
     val favoriteFruitString = favoriteFruit.transform(
       (f: Fruit) => f.toString,
       (s: String) => s match {
@@ -28,27 +30,31 @@ object RadioButtonsDemo extends AutoDemo with CssView {
       }
     )
 
-    def radioButtons() = UdashInputGroup()(
-      UdashInputGroup.prependText("Fruits:"),
-      UdashInputGroup.appendRadio(
+    def radioButtons: UdashInputGroup = UdashInputGroup()(
+      prependText("Fruits:"),
+      appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
           (els: Seq[(Input, String)]) => span(els.map {
-            case (i: Input, l: String) => label(BootstrapStyles.Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
+            case (i: Input, l: String) => label(Form.checkInline)(i, l)
           }).render
         ).render
       ),
-      UdashInputGroup.appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
+      appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
     )
 
-    (radioButtons(), radioButtons())
+    radioButtons.render
+
+    (radioButtons, radioButtons)
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
     (div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.Grid.row)(firstRadioButtons),
-        div(BootstrapStyles.Grid.row)(secondRadioButtons)
+      form(containerFluid)(
+        div(Grid.row)(firstRadioButtons),
+        div(Grid.row)(secondRadioButtons)
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.lines.take(source.lines.size - 2))
   }
 }

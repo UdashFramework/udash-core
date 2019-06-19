@@ -141,7 +141,7 @@ final class UdashDatePicker private[datepicker](
         case (horizontal, vertical) => js.Dictionary("horizontal" -> horizontal.name, "vertical" -> vertical.name)
       }.getOrElse(js.Dictionary("horizontal" -> Placement.AutoPlacement.name, "vertical" -> Placement.AutoPlacement.name)),
       "buttons" -> js.Dictionary(
-        "showTodayButton" -> options.showTodayButton,
+        "showToday" -> options.showToday,
         "showClear" -> options.showClear,
         "showClose" -> options.showClose
       )
@@ -350,18 +350,18 @@ object UdashDatePicker {
     * @param enabledDates        Disables selection of dates NOT in the array, e.g. holidays.
     * @param icons               Change the default icons for the pickers functions.
     * @param useStrict           Defines if moment should use strict date parsing when considering a date to be valid.
-    * @param sideBySide          Shows the picker side by side when using the time and date together.
-    * @param daysOfWeekDisabled  Disables the section of days of the week, e.g. weekends.
-    * @param calendarWeeks       Shows the week of the year to the left of first day of the week.
-    * @param viewMode            The default view to display when the picker is shown.
-    *                            Note: To limit the picker to selecting, for instance the year and month, use format: `MM/YYYY`
-    * @param toolbarPlacement    Changes the placement of the icon toolbar.
-    * @param showTodayButton     Show the "Today" button in the icon toolbar.
-    * @param showClear           Show the "Clear" button in the icon toolbar.
-    * @param showClose           Show the "Close" button in the icon toolbar.
-    * @param widgetPositioning   Position of datepicker widget.
-    * @param widgetParent        On picker show, places the widget at the identifier object if the element has css position: 'relative'.
-    * @param keepOpen            Will cause the date picker to stay open after selecting a date if no time components are being used.
+    * @param sideBySide         Shows the picker side by side when using the time and date together.
+    * @param daysOfWeekDisabled Disables the section of days of the week, e.g. weekends.
+    * @param calendarWeeks      Shows the week of the year to the left of first day of the week.
+    * @param viewMode           The default view to display when the picker is shown.
+    *                           Note: To limit the picker to selecting, for instance the year and month, use format: `MM/YYYY`
+    * @param toolbarPlacement   Changes the placement of the icon toolbar.
+    * @param showToday          Show the "Today" button in the icon toolbar.
+    * @param showClear          Show the "Clear" button in the icon toolbar.
+    * @param showClose          Show the "Close" button in the icon toolbar.
+    * @param widgetPositioning  Position of datepicker widget.
+    * @param widgetParent       On picker show, places the widget at the identifier object if the element has css position: 'relative'.
+    * @param keepOpen           Will cause the date picker to stay open after selecting a date if no time components are being used.
     * @param inline              Will display the picker inline without the need of a input field. This will also hide borders and shadows.
     * @param keepInvalid         Will cause the date picker to not revert or overwrite invalid dates.
     * @param ignoreReadonly      Allow date picker show event to fire even when the associated input element has the `readonly="readonly"` property.
@@ -392,7 +392,7 @@ object UdashDatePicker {
     val calendarWeeks: Boolean = false,
     val viewMode: ViewMode = ViewMode.Days,
     val toolbarPlacement: Option[UdashDatePicker.Placement.VerticalPlacement] = None,
-    val showTodayButton: Boolean = false,
+    val showToday: Boolean = false,
     val showClear: Boolean = false,
     val showClose: Boolean = false,
     val widgetPositioning: Option[(UdashDatePicker.Placement.HorizontalPlacement, UdashDatePicker.Placement.VerticalPlacement)] = None,
@@ -431,7 +431,7 @@ object UdashDatePicker {
       new DatePickerOptions(
         format, dayViewHeaderFormat, extraFormats, stepping, minDate, maxDate, useCurrent, collapse, locale,
         defaultDate, disabledDates, enabledDates, icons, useStrict, sideBySide, daysOfWeekDisabled, calendarWeeks,
-        viewMode, toolbarPlacement, showTodayButton, showClear, showClose, widgetPositioning, widgetParent, keepOpen,
+        viewMode, toolbarPlacement, showToday, showClear, showClose, widgetPositioning, widgetParent, keepOpen,
         inline, keepInvalid, ignoreReadonly, allowInputToggle, focusOnShow, enabledHours, disabledHours, viewDate, tooltips
       )
     }

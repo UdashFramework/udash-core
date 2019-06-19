@@ -1,28 +1,27 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.progressbar.UdashProgressBar
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.{Side, SpacingSize}
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object ProgressBarDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+object ProgressBarDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.button._
+    import io.udash.bootstrap.progressbar.UdashProgressBar
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssStyleName
+    import io.udash.css.CssView._
+    import scalatags.JsDom.all._
+
     val showPercentage = Property(true)
     val animate = Property(true)
     val value = Property(50)
 
-    def bottomMargin() = {
-      BootstrapStyles.Spacing.margin(
+    def bottomMargin: CssStyleName = {
+      Spacing.margin(
         side = Side.Bottom,
         size = SpacingSize.Normal
       )
@@ -39,17 +38,17 @@ object ProgressBarDemo extends AutoDemo with CrossLogging with CssView {
           )("Animate").render
         )
       ), br,
-      div(bottomMargin())(
+      div(bottomMargin)(
         UdashProgressBar(
-          value,
-          showPercentage,
-          barStyle = Some(BootstrapStyles.Color.Success).toProperty
+          progress = value,
+          showPercentage = showPercentage,
+          barStyle = Some(Color.Success).toProperty
         )()
       ),
-      div(bottomMargin())(
+      div(bottomMargin)(
         UdashProgressBar(
-          value,
-          showPercentage,
+          progress = value,
+          showPercentage = showPercentage,
           stripped = true.toProperty
         )(
           (value, min, max, nested) => Seq[Modifier](
@@ -59,24 +58,26 @@ object ProgressBarDemo extends AutoDemo with CrossLogging with CssView {
           )
         )
       ),
-      div(bottomMargin())(
+      div(bottomMargin)(
         UdashProgressBar(
-          value,
-          showPercentage,
-          stripped = true.toProperty, animated = animate,
-          barStyle = Some(BootstrapStyles.Color.Danger).toProperty
+          progress = value,
+          showPercentage = showPercentage,
+          stripped = true.toProperty,
+          animated = animate,
+          barStyle = Some(Color.Danger).toProperty
         )(),
       ),
-      div(bottomMargin())(
-        NumberInput(value.transform(_.toString, Integer.parseInt))(
-          BootstrapStyles.Form.control, placeholder := "Percentage"
+      div(bottomMargin)(
+        NumberInput(value.transform(_.toString, _.toInt))(
+          Form.control, placeholder := "Percentage"
         )
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

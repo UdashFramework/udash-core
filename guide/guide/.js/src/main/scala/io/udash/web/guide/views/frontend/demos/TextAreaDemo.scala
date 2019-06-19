@@ -1,35 +1,36 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
-import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object TextAreaDemo extends AutoDemo with CssView {
-  import JsDom.all._
+object TextAreaDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    val text: Property[String] = Property("")
+    import io.udash._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import scalatags.JsDom.all._
 
-    form(BootstrapStyles.containerFluid)(
-      div(BootstrapStyles.Grid.row)(
-        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
-          TextArea(text)(BootstrapStyles.Form.control)
+    val text = Property("")
+
+    form(containerFluid)(
+      div(Grid.row)(
+        div(Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(Form.control)
         ),
-        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
-          TextArea(text)(BootstrapStyles.Form.control)
+        div(Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(Form.control)
         ),
-        div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
-          TextArea(text)(BootstrapStyles.Form.control)
+        div(Grid.col(4, ResponsiveBreakpoint.Medium))(
+          TextArea(text)(Form.control)
         )
       )
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines)
   }
 }

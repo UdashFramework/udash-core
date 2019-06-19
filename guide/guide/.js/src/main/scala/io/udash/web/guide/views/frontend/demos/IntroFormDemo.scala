@@ -1,20 +1,11 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.Color
-import io.udash.css.CssView
-import io.udash.web.guide.components.BootstrapUtils
+import io.udash.HasModelPropertyCreator
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-import scala.collection.mutable
-import scala.util.Random
-
-object IntroFormDemo extends AutoDemo with CssView {
+object IntroFormDemo extends AutoDemo {
 
   case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 
@@ -22,6 +13,17 @@ object IntroFormDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import java.{lang => jl}
+
+    import io.udash._
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.form.UdashInputGroup
+    import io.udash.bootstrap.utils.BootstrapStyles
+    import io.udash.bootstrap.utils.BootstrapStyles.Color
+    import io.udash.css.CssView._
+    import io.udash.web.guide.components.BootstrapUtils
+
+    import scala.collection.mutable
+    import scala.util.Random
 
     /** The form's model structure.
       * case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
@@ -145,7 +147,7 @@ object IntroFormDemo extends AutoDemo with CssView {
     view.getTemplate
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (rendered, source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered, source.lines)
   }
 }

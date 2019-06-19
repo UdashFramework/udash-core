@@ -1,21 +1,20 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.badge.UdashBadge
-import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
-import io.udash.logging.CrossLogging
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.window
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object BadgesDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
+object BadgesDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.badge.UdashBadge
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.utils.BootstrapStyles
+    import org.scalajs.dom.window
+    import scalatags.JsDom.all._
+
     val counter = Property(0)
     window.setInterval(() => counter.set(counter.get + 1), 3000)
 
@@ -28,11 +27,11 @@ object BadgesDemo extends AutoDemo with CrossLogging with CssView {
         UdashBadge()(nested => nested(bind(counter))
         ).render
       ))
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

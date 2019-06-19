@@ -1,19 +1,19 @@
 package io.udash.web.guide.views.ext.demo
 
-import io.udash.bootstrap.button.UdashButton
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import scalatags.JsDom
-
-import scala.scalajs.js
+import scalatags.JsDom.all._
 
 object JQueryCallbacksDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-
   private val (rendered, source) = {
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.wrappers.jquery._
+    import scalatags.JsDom.all._
+
+    import scala.scalajs.js
+
     val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
     callbacks.add((t: (Int, Int)) => {
       val (a, b) = t
@@ -55,7 +55,14 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "jquery-callbacks-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (
+      div(
+        id := "jquery-callbacks-demo",
+        GuideStyles.frame,
+        GuideStyles.useBootstrap
+      )(rendered),
+      source.lines
+    )
   }
 }

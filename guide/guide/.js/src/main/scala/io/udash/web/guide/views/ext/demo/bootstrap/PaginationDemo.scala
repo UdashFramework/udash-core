@@ -1,24 +1,20 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.pagination.UdashPagination
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.{Side, SpacingSize}
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object PaginationDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+object PaginationDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    import UdashPagination._
+    import io.udash._
+    import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
+    import io.udash.bootstrap.pagination.UdashPagination
+    import io.udash.bootstrap.pagination.UdashPagination._
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import scalatags.JsDom.all._
 
     val showArrows = Property(true)
     val highlightActive = Property(true)
@@ -34,30 +30,32 @@ object PaginationDemo extends AutoDemo with CrossLogging with CssView {
     val pagination = UdashPagination(
       pages, selected,
       showArrows = showArrows, highlightActive = highlightActive
-    )(defaultPageFactory).render.setup(_.firstElementChild.applyTags(
-      BootstrapStyles.Flex.justifyContent(
-        BootstrapStyles.FlexContentJustification.Center
-      )
-    ))
+    )(defaultPageFactory).render
+    pagination.firstElementChild.applyTags(
+      Flex.justifyContent(FlexContentJustification.Center)
+    )
 
     div(
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Bottom, size = SpacingSize.Normal
+      div(Spacing.margin(
+        side = Side.Bottom,
+        size = SpacingSize.Normal
       ))(
         UdashButtonGroup()(
           toggleArrows.render,
           toggleHighlight.render
         )
       ),
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Bottom, size = SpacingSize.Normal
+      div(Spacing.margin(
+        side = Side.Bottom,
+        size = SpacingSize.Normal
       ))("Selected page index: ", bind(selected)),
       div(pagination)
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

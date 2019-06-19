@@ -1,31 +1,31 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup, UdashButtonToolbar}
-import io.udash.bootstrap.dropdown.UdashDropdown
-import io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem
 import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object ButtonDropdownDemo extends AutoDemo with CrossLogging with CssView {
+object ButtonDropdownDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+  import io.udash.web.guide.Context._
+  import io.udash.web.guide.{BootstrapExtState, IntroState}
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.button._
+    import io.udash.bootstrap.dropdown.UdashDropdown
+    import io.udash.bootstrap.dropdown.UdashDropdown._
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import scalatags.JsDom.all._
+
     val items = SeqProperty[DefaultDropdownItem](
-      UdashDropdown.DefaultDropdownItem.Header("Start"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#")),
-      UdashDropdown.DefaultDropdownItem.Disabled(
-        UdashDropdown.DefaultDropdownItem.Link("Test Disabled", Url("#"))
+      DefaultDropdownItem.Header("Start"),
+      DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
+      DefaultDropdownItem.Disabled(
+        DefaultDropdownItem.Link("Test Disabled", Url(BootstrapExtState.url))
       ),
-      UdashDropdown.DefaultDropdownItem.Divider,
-      UdashDropdown.DefaultDropdownItem.Header("End"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url("#"))
+      DefaultDropdownItem.Divider,
+      DefaultDropdownItem.Header("End"),
     )
 
     div(
@@ -33,21 +33,21 @@ object ButtonDropdownDemo extends AutoDemo with CrossLogging with CssView {
         UdashButtonGroup()(
           UdashButton()("Button").render,
           UdashDropdown(items)(
-            UdashDropdown.defaultItemFactory, _ => ""
+            defaultItemFactory, _ => ""
           ).render,
-          UdashDropdown(items, UdashDropdown.Direction.Up.toProperty)(
-            UdashDropdown.defaultItemFactory, _ => ""
+          UdashDropdown(items, Direction.Up.toProperty)(
+            defaultItemFactory, _ => ""
           ).render
         ).render,
         UdashDropdown(items)(
-          UdashDropdown.defaultItemFactory, _ => "Dropdown "
+          defaultItemFactory, _ => "Dropdown "
         ).render
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

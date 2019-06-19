@@ -1,23 +1,24 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash.bootstrap.button._
-import io.udash.bootstrap.datepicker.UdashDatePicker
-import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
 import io.udash.css.CssView
-import io.udash.properties.seq.SeqProperty
-import io.udash.web.guide.components.BootstrapUtils.wellStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.{ModelProperty, Property, bind, repeat, _}
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
 object DatePickerDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
-
   private val (rendered, source) = {
     import java.{util => ju}
+
+    import io.udash._
+    import io.udash.bootstrap.button._
+    import io.udash.bootstrap.datepicker.UdashDatePicker
+    import io.udash.bootstrap.form.UdashForm.ValidationTrigger
+    import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import scalatags.JsDom.all._
+
     val date = Property[Option[ju.Date]](Some(new ju.Date()))
 
     val pickerOptions = ModelProperty(
@@ -37,7 +38,7 @@ object DatePickerDemo extends AutoDemo with CssView {
       case false => Seq.empty
     }
 
-    val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)()
+    val picker = UdashDatePicker(date, pickerOptions)()
 
     val events = SeqProperty[String](Seq.empty)
     picker.listen {
@@ -49,14 +50,6 @@ object DatePickerDemo extends AutoDemo with CssView {
         events.append(s"Widget change from $oldDate to $date")
     }
 
-    val datePicker = div(
-      UdashDatePicker.loadBootstrapDatePickerStyles(),
-      UdashInputGroup()(
-        UdashInputGroup.input(picker.render),
-        UdashInputGroup.appendText(bind(date.transform(_.toString)))
-      ),
-    ).render
-
     val showButton = UdashButton()("Show")
     val hideButton = UdashButton()("Hide")
     val enableButton = UdashButton()("Enable")
@@ -66,8 +59,14 @@ object DatePickerDemo extends AutoDemo with CssView {
     enableButton.listen { case _ => picker.enable() }
     disableButton.listen { case _ => picker.disable() }
 
-    div(GuideStyles.frame)(
-      datePicker,
+    div(
+      div(
+        UdashDatePicker.loadBootstrapDatePickerStyles(),
+        UdashInputGroup()(
+          UdashInputGroup.input(picker.render),
+          UdashInputGroup.appendText(bind(date.transform(_.toString)))
+        ),
+      ).render,
       hr,
       UdashForm() { factory =>
         Seq[Modifier](
@@ -86,13 +85,13 @@ object DatePickerDemo extends AutoDemo with CssView {
             )(span(_)).render,
             labelContent = Some(_ => "Locale")
           ),
-          factory.input.checkbox(disableWeekends)(
-            labelContent = Some(_ => "Disable weekends")
+          factory.input.checkbox(disableWeekends, ValidationTrigger.None)(
+            labelContent = Some(_ => "Disable weekends"),
           ),
-          factory.input.checkbox(pickerOptions.subProp(_.showTodayButton))(
+          factory.input.checkbox(pickerOptions.subProp(_.showToday), ValidationTrigger.None)(
             labelContent = Some(_ => "Show `today` button")
           ),
-          factory.input.checkbox(pickerOptions.subProp(_.showClose))(
+          factory.input.checkbox(pickerOptions.subProp(_.showClose), ValidationTrigger.None)(
             labelContent = Some(_ => "Show `close` button")
           ),
           UdashButtonGroup()(
@@ -102,16 +101,16 @@ object DatePickerDemo extends AutoDemo with CssView {
             factory.externalBinding(disableButton).render
           ).render
         )
-      }.render,
+      },
       hr,
-      div(wellStyles)(
+      div(Card.card, Card.body, Background.color(Color.Light))(
         repeat(events)(ev => Seq(i(ev.get).render, br.render))
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (rendered, source.lines.slice(1, 32))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

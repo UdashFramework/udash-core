@@ -1,58 +1,53 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.modal.UdashModal
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
-import io.udash.web.guide.components.BootstrapUtils.wellStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.window
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object SimpleModalDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+object SimpleModalDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    val events = SeqProperty.blank[UdashModal.ModalEvent]
-    val header = { _: Binding.NestedInterceptor =>
-      div("Modal events").render
-    }
-    val body = { nested: Binding.NestedInterceptor =>
-      div(wellStyles, BootstrapStyles.Spacing.margin())(
-        ul(nested(repeat(events)(event =>
-          li(event.get.toString).render))
-        )
-      ).render
-    }
-    val footer = { _: Binding.NestedInterceptor =>
-      div(
-        UdashButton()(_ => Seq[Modifier](
-          UdashModal.CloseButtonAttr, "Close"
-        )).render,
-        UdashButton(
-          BootstrapStyles.Color.Primary.toProperty
-        )("Something...").render
-      ).render
-    }
+    import io.udash._
+    import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
+    import io.udash.bootstrap.modal.UdashModal
+    import io.udash.bootstrap.modal.UdashModal._
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.window
+    import scalatags.JsDom.all._
+
+    val events = SeqProperty.blank[ModalEvent]
 
     val modal = UdashModal(
-      Some(BootstrapStyles.Size.Large).toProperty
+      Some(Size.Large).toProperty
     )(
-      headerFactory = Some(header),
-      bodyFactory = Some(body),
-      footerFactory = Some(footer)
+      headerFactory = Some(_ => div("Modal events").render),
+      bodyFactory = Some { nested =>
+        div(
+          Spacing.margin(),
+          Card.card, Card.body, Background.color(Color.Light),
+        )(
+          ul(nested(repeat(events)(event =>
+            li(event.get.toString).render
+          )))
+        ).render
+      },
+      footerFactory = Some { _ =>
+        div(
+          UdashButton()(_ => Seq[Modifier](
+            UdashModal.CloseButtonAttr, "Close"
+          )).render,
+          UdashButton(
+            Color.Primary.toProperty
+          )("Something...").render
+        ).render
+      }
     )
     modal.listen { case ev => events.append(ev) }
 
     val openModalButton = UdashButton(
-      BootstrapStyles.Color.Primary.toProperty
+      Color.Primary.toProperty
     )("Show modal...")
     openModalButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>
@@ -73,11 +68,12 @@ object SimpleModalDemo extends AutoDemo with CrossLogging with CssView {
         openModalButton.render,
         openAndCloseButton.render
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

@@ -1,21 +1,21 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import java.util.concurrent.TimeUnit
 
-import io.udash.bootstrap.datepicker.UdashDatePicker
-import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.{ModelProperty, Property}
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
 object DateRangePickerDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-
   private val (rendered, source) = {
+    import java.util.concurrent.TimeUnit
     import java.{util => ju}
+
+    import io.udash._
+    import io.udash.bootstrap.datepicker.UdashDatePicker
+    import io.udash.bootstrap.form.UdashInputGroup
+    import scalatags.JsDom.all._
 
     val now = new ju.Date().getTime
     val sevenDays = TimeUnit.DAYS.toMillis(7)
@@ -44,12 +44,12 @@ object DateRangePickerDemo extends AutoDemo with CssView {
         UdashInputGroup.input(fromPicker.render),
         UdashInputGroup.appendText("to"),
         UdashInputGroup.input(toPicker.render)
-      ).render
-    )
+      )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (div(GuideStyles.frame)(rendered), source.lines)
   }
 }
 

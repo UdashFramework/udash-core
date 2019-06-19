@@ -1,7 +1,7 @@
 package io.udash.web.guide.components
 
 import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.{Color, SpacingSize}
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.css.CssStyleName
 
 object BootstrapUtils {
@@ -12,11 +12,10 @@ object BootstrapUtils {
     *
     * Source: https://getbootstrap.com/docs/3.3/components/#wells
     */
-  val wellStyles: Seq[CssStyleName] = Seq(
-    BootstrapStyles.Border.border(),
-    BootstrapStyles.Border.rounded(),
+  def wellStyles: Seq[CssStyleName] = Seq(
+    BootstrapStyles.Card.card,
+    BootstrapStyles.Card.body,
     BootstrapStyles.Background.color(Color.Light),
-    BootstrapStyles.Spacing.padding(size = SpacingSize.Normal),
   )
 
 }

@@ -1,19 +1,11 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.nav.{UdashNav, UdashNavbar}
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
+import io.udash.properties.HasModelPropertyCreator
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.Event
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object NavbarDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
+object NavbarDemo extends AutoDemo {
 
   trait NavbarPanel {
     def title: String
@@ -26,12 +18,21 @@ object NavbarDemo extends AutoDemo with CrossLogging with CssView {
   final case class DefaultNavbarPanel(override val title: String, override val content: String) extends NavbarPanel
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.nav.{UdashNav, UdashNavbar}
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.Event
+    import scalatags.JsDom.all._
+
     /*
     trait NavbarPanel {
       def title: String
       def content: String
     }
+
     object NavbarPanel extends HasModelPropertyCreator[NavbarPanel]
+
     final case class DefaultNavbarPanel(
       override val title: String,
       override val content: String
@@ -52,7 +53,7 @@ object NavbarDemo extends AutoDemo with CrossLogging with CssView {
       UdashNavbar()(
         _ => UdashNav(panels)(
           elemFactory = (panel, nested) => a(
-            BootstrapStyles.Navigation.link,
+            Navigation.link,
             href := "",
             onclick :+= ((_: Event) => true)
           )(
@@ -63,11 +64,12 @@ object NavbarDemo extends AutoDemo with CrossLogging with CssView {
         ),
         span("Udash"),
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

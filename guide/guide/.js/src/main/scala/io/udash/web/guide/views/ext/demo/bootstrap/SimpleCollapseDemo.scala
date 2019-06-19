@@ -1,34 +1,31 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.collapse.UdashCollapse
-import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
-import io.udash.web.guide.components.BootstrapUtils.wellStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.window
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object SimpleCollapseDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+object SimpleCollapseDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
+    import io.udash.bootstrap.collapse.UdashCollapse
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import org.scalajs.dom.window
+    import scalatags.JsDom.all._
+
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
     val collapse = UdashCollapse()(
-      div(wellStyles)(
+      div(Card.card, Card.body, Background.color(Color.Light))(
         ul(repeat(events)(event => li(event.get.toString).render))
       )
     )
     collapse.listen { case ev => events.append(ev) }
 
     val toggleButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty
+      buttonStyle = Color.Primary.toProperty
     )(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))
     val openAndCloseButton = UdashButton()(
       "Open and close after 2 seconds..."
@@ -47,8 +44,8 @@ object SimpleCollapseDemo extends AutoDemo with CrossLogging with CssView {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

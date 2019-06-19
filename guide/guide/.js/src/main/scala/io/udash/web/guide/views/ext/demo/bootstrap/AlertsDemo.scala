@@ -1,69 +1,71 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.alert.{DismissibleUdashAlert, UdashAlert}
-import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.{Side, SpacingSize}
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.properties.seq.SeqProperty
-import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.guide.components.BootstrapUtils.wellStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-import scala.util.Random
-
-object AlertsDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
+object AlertsDemo extends AutoDemo {
 
   private val (rendered, source) = {
-    val dismissed = SeqProperty[String](Seq.empty)
+    import io.udash._
+    import io.udash.bootstrap.alert._
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.Element
 
-    def randomDismissible(): dom.Element = {
+    import scala.util.Random
+
+    val dismissed = SeqProperty.blank[String]
+
+    def contentCentered: Seq[Modifier] = {
+      Seq(Display.flex(), Flex.justifyContent(FlexContentJustification.Center))
+    }
+
+    def randomDismissible: Element = {
       val title = Random.nextLong().toString
       val alert = DismissibleUdashAlert(
-        alertStyle = BootstrapStyles.Color.values(
-          Random.nextInt(BootstrapStyles.Color.values.size)
+        alertStyle = Color.values(
+          Random.nextInt(Color.values.size)
         ).toProperty
-      )(title)
+      )(div(title, contentCentered))
       alert.dismissed.listen(_ => dismissed.append(title))
       alert.render
     }
 
-    val alerts = div(GlobalStyles.centerBlock)(
-      UdashAlert(BootstrapStyles.Color.Info.toProperty)("info"),
-      UdashAlert(BootstrapStyles.Color.Success.toProperty)("success"),
-      UdashAlert(BootstrapStyles.Color.Warning.toProperty)("warning"),
-      UdashAlert(BootstrapStyles.Color.Danger.toProperty)("danger")
+    val alerts = div()(
+      UdashAlert(Color.Info.toProperty)(div("info", contentCentered)),
+      UdashAlert(Color.Success.toProperty)(div("success", contentCentered)),
+      UdashAlert(Color.Warning.toProperty)(div("warning", contentCentered)),
+      UdashAlert(Color.Danger.toProperty)(div("danger", contentCentered))
     ).render
 
     val create = UdashButton()("Create dismissible alert")
     create.listen { case _ =>
-      alerts.appendChild(randomDismissible())
+      alerts.appendChild(randomDismissible)
     }
 
     div(
       alerts,
       create,
-      div(BootstrapStyles.Spacing.margin(
-        side = Side.Top, size = SpacingSize.Normal
+      div(Spacing.margin(
+        side = Side.Top,
+        size = SpacingSize.Normal
       ))(
         h4("Dismissed: "),
-        div(wellStyles)(produce(dismissed)(seq =>
-          ul(seq.map(click => li(click))).render
-        ))
+        div(Card.card, Card.body, Background.color(Color.Light))(
+          produce(dismissed)(seq =>
+            ul(seq.map(li(_))).render
+          )
+        )
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

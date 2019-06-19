@@ -1,23 +1,22 @@
 package io.udash.web.guide.views.ext.demo
 
-import io.udash._
-import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.wrappers.jquery._
-import org.scalajs.dom
-import org.scalajs.dom.Event
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
 object JQueryEventsDemo extends AutoDemo with CssView {
 
-  import JsDom.all._
-
   private val (rendered, source) = {
-    val onCallback = (_: dom.Element, _: JQueryEvent) =>
+    import io.udash._
+    import io.udash.bootstrap.button._
+    import io.udash.wrappers.jquery._
+    import org.scalajs.dom._
+    import scalatags.JsDom.all._
+
+    val onCallback = (_: Element, _: JQueryEvent) =>
       jQ("#jquery-events-demo ul").append(li("This will be added on every click").render)
-    val oneCallback = (_: dom.Element, _: JQueryEvent) =>
+    val oneCallback = (_: Element, _: JQueryEvent) =>
       jQ("#jquery-events-demo ul").append(li("This will be added only once").render)
 
     val content = div(
@@ -43,7 +42,14 @@ object JQueryEventsDemo extends AutoDemo with CssView {
     content
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "jquery-events-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (
+      div(
+        id := "jquery-events-demo",
+        GuideStyles.frame,
+        GuideStyles.useBootstrap
+      )(rendered),
+      source.lines
+    )
   }
 }

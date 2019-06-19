@@ -1,25 +1,25 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom.html.Input
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object CheckButtonsDemo extends AutoDemo with CssView {
-
-  import JsDom.all._
+object CheckButtonsDemo extends AutoDemo {
 
   private val ((firstCheckButtons, secondCheckButtons), source) = {
+    import io.udash._
+    import io.udash.bootstrap.form.UdashInputGroup
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.html.Input
+    import scalatags.JsDom.all._
+
     sealed trait Fruit
     case object Apple extends Fruit
     case object Orange extends Fruit
     case object Banana extends Fruit
 
-    val favoriteFruits: SeqProperty[Fruit] = SeqProperty[Fruit](Apple, Banana)
+    val favoriteFruits = SeqProperty(Apple, Banana)
     val favoriteFruitsStrings = favoriteFruits.transform(
       (f: Fruit) => f.toString,
       (s: String) => s match {
@@ -29,27 +29,31 @@ object CheckButtonsDemo extends AutoDemo with CssView {
       }
     )
 
-    def checkButtons() = UdashInputGroup()(
+    def checkButtons: UdashInputGroup = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.appendCheckbox(
         CheckButtons(
           favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
         )((els: Seq[(Input, String)]) => span(els.map {
-          case (i: Input, l: String) => label(BootstrapStyles.Form.checkInline, attr("data-label") := l)(i, l)
+          case (i: Input, l: String) => label(Form.checkInline, attr("data-label") := l)(i, l)
         }).render).render
       ),
       UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
     )
 
-    (checkButtons(), checkButtons())
+    checkButtons.render
+
+    (checkButtons, checkButtons)
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
     (div(id := "check-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(BootstrapStyles.containerFluid)(
-        div(BootstrapStyles.Grid.row)(div(firstCheckButtons)),
-        div(BootstrapStyles.Grid.row)(div(secondCheckButtons))
+      form(containerFluid)(
+        div(Grid.row)(div(firstCheckButtons)),
+        div(Grid.row)(div(secondCheckButtons))
       )
-    ), source.lines.slice(1, source.lines.size - 3))
+    ), source.lines.take(source.lines.size - 2))
   }
 }

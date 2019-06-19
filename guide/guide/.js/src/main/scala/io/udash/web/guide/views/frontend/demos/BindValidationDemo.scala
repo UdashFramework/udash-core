@@ -1,28 +1,29 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import org.scalajs.dom
-import scalatags.JsDom
-
-import scala.util.Random
+import scalatags.JsDom.all._
 
 object BindValidationDemo extends AutoDemo with CssView {
-  import JsDom.all._
 
   private val (rendered, source) = {
-    val integers: SeqProperty[Int] = SeqProperty[Int](1, 2, 3, 4)
+    import io.udash._
+    import org.scalajs.dom.window
+    import scalatags.JsDom.all._
+
+    import scala.util.Random
+
+    val integers = SeqProperty(1, 2, 3, 4)
     integers.addValidator((element: Seq[Int]) => {
       val zipped = element.toStream
-        .slice(0, element.size - 1)
+        .take(element.size - 1)
         .zip(element.toStream.drop(1))
       if (zipped.forall { case (x: Int, y: Int) => x <= y }) Valid
       else Invalid("Sequence is not sorted!")
     })
 
-    dom.window.setInterval(() => {
+    window.setInterval(() => {
       val s: Int = integers.get.size
       val idx = Random.nextInt(s)
       val amount = Random.nextInt(s - idx) + 1
@@ -50,8 +51,13 @@ object BindValidationDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "validation-demo", GuideStyles.frame)(rendered), source.lines.slice(1, 10) ++
-      source.lines.slice(source.lines.size - 19, source.lines.size - 1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (
+      div(
+        id := "validation-demo",
+        GuideStyles.frame
+      )(rendered),
+      source.lines
+    )
   }
 }

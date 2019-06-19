@@ -3,7 +3,7 @@ package io.udash.web.guide.views
 object References {
   val UdashGeneratorDownload = "https://github.com/UdashFramework/udash-generator/releases/download/v0.5.0/udash-generator.zip"
   val UdashjQueryWrapperRepo = "https://github.com/UdashFramework/scala-js-jquery"
-  val UdashGuideRepo = "https://github.com/UdashFramework/udash-guide"
+  val UdashGuideRepo = "https://github.com/UdashFramework/udash-core/tree/master/guide"
   val UdashFilesDemoRepo = "https://github.com/UdashFramework/udash-demos/tree/master/file-upload"
 
   val AvScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"

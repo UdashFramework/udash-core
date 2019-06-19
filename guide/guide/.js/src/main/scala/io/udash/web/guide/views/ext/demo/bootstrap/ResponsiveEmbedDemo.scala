@@ -1,44 +1,43 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object ResponsiveEmbedDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
+object ResponsiveEmbedDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import scalatags.JsDom.all._
+
     div(
       div(
-        BootstrapStyles.EmbedResponsive.responsive,
-        BootstrapStyles.EmbedResponsive.embed16by9,
-        GlobalStyles.smallMargin
+        EmbedResponsive.responsive,
+        EmbedResponsive.embed16by9,
+        Spacing.margin(size = SpacingSize.Small)
       )(
         iframe(
-          BootstrapStyles.EmbedResponsive.item,
-          src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0"
+          EmbedResponsive.item,
+          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0"
         )
       ),
       div(
-        BootstrapStyles.EmbedResponsive.responsive,
-        BootstrapStyles.EmbedResponsive.embed4by3,
-        GlobalStyles.smallMargin
+        EmbedResponsive.responsive,
+        EmbedResponsive.embed4by3,
+        Spacing.margin(size = SpacingSize.Small)
       )(
         iframe(
-          BootstrapStyles.EmbedResponsive.item,
-          src := "http://www.youtube.com/embed/zpOULjyy-n8?rel=0"
+          EmbedResponsive.item,
+          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0"
         )
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

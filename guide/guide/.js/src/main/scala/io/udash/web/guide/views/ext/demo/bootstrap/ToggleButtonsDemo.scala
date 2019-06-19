@@ -1,31 +1,27 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.{Color, Side, SpacingSize}
-import io.udash.css.CssView
-import io.udash.logging.CrossLogging
-import io.udash.web.commons.styles.GlobalStyles
-import io.udash.web.guide.components.BootstrapUtils.wellStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object ToggleButtonsDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
+object ToggleButtonsDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import scalatags.JsDom.all._
+
     val buttons = Color.values.map { color =>
       color.name -> {
         val active = Property(false)
         val btn = UdashButton.toggle(
           active,
-          color.toProperty[Color]
+          color.toProperty
         )(_ => Seq[Modifier](
           color.name,
-          GlobalStyles.smallMargin
+          Spacing.margin(size = SpacingSize.ExtraSmall)
         ))
         (active, btn)
       }
@@ -33,8 +29,9 @@ object ToggleButtonsDemo extends AutoDemo with CrossLogging with CssView {
 
     div(
       div(
-        GlobalStyles.centerBlock,
-        BootstrapStyles.Spacing.margin(
+        Display.flex(),
+        Flex.justifyContent(FlexContentJustification.Center),
+        Spacing.margin(
           side = Side.Bottom,
           size = SpacingSize.Normal
         )
@@ -42,16 +39,17 @@ object ToggleButtonsDemo extends AutoDemo with CrossLogging with CssView {
         buttons.map { case (_, (_, btn)) => btn.render }
       ),
       h4("Is active: "),
-      div(wellStyles)(
+      div(Card.card, Card.body, Background.color(Color.Light))(
         buttons.map({ case (name, (active, _)) =>
           span(s"$name: ", bind(active), br)
         }).toSeq
       )
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.css.CssView._
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 

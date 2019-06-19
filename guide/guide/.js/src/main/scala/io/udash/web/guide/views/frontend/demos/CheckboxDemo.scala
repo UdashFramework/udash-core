@@ -1,59 +1,70 @@
 package io.udash.web.guide.views.frontend.demos
 
-import io.udash._
-import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
-import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-object CheckboxDemo extends AutoDemo with CssView {
-
-  import JsDom.all._
+object CheckboxDemo extends AutoDemo {
 
   private val ((firstCheckboxes, secondCheckboxes), source) = {
-    val propA: Property[Boolean] = Property(true)
-    val propB: Property[Boolean] = Property(false)
-    val propC: Property[String] = Property("Yes")
+    import io.udash._
+    import io.udash.bootstrap.form.UdashInputGroup
+    import io.udash.bootstrap.form.UdashInputGroup._
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    import org.scalajs.dom.html.Div
+    import scalatags.JsDom
+    import scalatags.JsDom.all._
+
+    val propA = Property(true)
+    val propB = Property(false)
+    val propC = Property("Yes")
     val propCAsBoolean = propC.transform(
       (s: String) => s.equalsIgnoreCase("yes"),
       (b: Boolean) => if (b) "Yes" else "No"
     )
 
-    def checkboxes() = div(BootstrapStyles.Grid.row)(
-      div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+    def checkboxes: JsDom.TypedTag[Div] = div(Grid.row)(
+      div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
-          UdashInputGroup.prependText("Property A:"),
-          UdashInputGroup.appendCheckbox(Checkbox(propA)(cls := "checkbox-demo-a").render),
-          UdashInputGroup.appendText(bind(propA))
+          prependText("Property A:"),
+          appendCheckbox(Checkbox(propA)(cls := "checkbox-demo-a").render),
+          appendText(bind(propA))
         ).render
       ),
-      div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+      div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
-          UdashInputGroup.prependText("Property B:"),
-          UdashInputGroup.appendCheckbox(Checkbox(propB)(cls := "checkbox-demo-b").render),
-          UdashInputGroup.appendText(bind(propB))
+          prependText("Property B:"),
+          appendCheckbox(Checkbox(propB)(cls := "checkbox-demo-b").render),
+          appendText(bind(propB))
         ).render
       ),
-      div(BootstrapStyles.Grid.col(4, ResponsiveBreakpoint.Medium))(
+      div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
-          UdashInputGroup.prependText("Property C:"),
-          UdashInputGroup.appendCheckbox(Checkbox(propCAsBoolean)(cls := "checkbox-demo-c").render),
-          UdashInputGroup.appendText(bind(propC))
+          prependText("Property C:"),
+          appendCheckbox(Checkbox(propCAsBoolean)(cls := "checkbox-demo-c").render),
+          appendText(bind(propC))
         ).render
       )
     )
 
-    (checkboxes(), checkboxes())
+    checkboxes.render
+
+    (checkboxes, checkboxes)
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(id := "checkbox-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(BootstrapStyles.containerFluid)(
-        firstCheckboxes, br, secondCheckboxes
-      )
-    ), source.lines.slice(1, source.lines.size - 3))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    import io.udash.bootstrap.utils.BootstrapStyles._
+    import io.udash.css.CssView._
+    (
+      div(
+        id := "checkbox-demo",
+        GuideStyles.frame,
+        GuideStyles.useBootstrap
+      )(
+        form(containerFluid)(
+          firstCheckboxes, br, secondCheckboxes
+        )
+      ), source.lines.take(source.lines.size - 2))
   }
 }

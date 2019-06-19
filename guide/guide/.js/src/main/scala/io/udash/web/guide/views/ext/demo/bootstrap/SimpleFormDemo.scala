@@ -1,21 +1,12 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-import io.udash._
-import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.form.UdashForm
 import io.udash.css.CssView
-import io.udash.logging.CrossLogging
+import io.udash.properties.{Blank, HasModelPropertyCreator}
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
+import scalatags.JsDom.all._
 
-import scala.concurrent.Future
-
-object SimpleFormDemo extends AutoDemo with CrossLogging with CssView {
-
-  import JsDom.all._
-  import io.udash.bootstrap.utils.BootstrapImplicits._
-  import io.udash.web.guide.Context._
+object SimpleFormDemo extends AutoDemo with CssView {
 
   sealed trait ShirtSize
 
@@ -44,10 +35,19 @@ object SimpleFormDemo extends AutoDemo with CrossLogging with CssView {
   }
 
   private val (rendered, source) = {
+    import io.udash._
+    import io.udash.bootstrap.button.UdashButton
+    import io.udash.bootstrap.form.UdashForm
+    import io.udash.bootstrap.utils.BootstrapImplicits._
+    import scalatags.JsDom.all._
+
     /*
     sealed trait ShirtSize
+
     case object Small extends ShirtSize
+
     case object Medium extends ShirtSize
+
     case object Large extends ShirtSize
 
     trait UserModel {
@@ -55,6 +55,7 @@ object SimpleFormDemo extends AutoDemo with CrossLogging with CssView {
       def age: Int
       def shirtSize: ShirtSize
     }
+
     object UserModel extends HasModelPropertyCreator[UserModel] {
       implicit val blank: Blank[UserModel] = Blank.Simple(new UserModel {
         override def name: String = ""
@@ -71,13 +72,10 @@ object SimpleFormDemo extends AutoDemo with CrossLogging with CssView {
     }
 
     val user = ModelProperty.blank[UserModel]
-    user.subProp(_.age).addValidator(new Validator[Int] {
-      override def apply(element: Int): Future[ValidationResult] =
-        Future {
-          if (element < 0) Invalid("Age should be a non-negative integer!")
-          else Valid
-        }
-    })
+    user.subProp(_.age).addValidator(
+      (element: Int) =>
+        if (element < 0) Invalid("Age should be a non-negative integer!") else Valid
+    )
 
     div(
       UdashForm()(factory => Seq(
@@ -93,18 +91,18 @@ object SimpleFormDemo extends AutoDemo with CrossLogging with CssView {
           invalidFeedback = Some(_ => "Age should be a non-negative integer!")
         ),
         factory.input.radioButtons(
-          user.subProp(_.shirtSize),
-          Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
+          selectedItem = user.subProp(_.shirtSize),
+          options = Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
           inline = true.toProperty,
           validationTrigger = UdashForm.ValidationTrigger.None
         )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
         factory.disabled()(_ => UdashButton()("Send").render)
       ))
-    )
+    ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (JsDom.all.Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines.drop(1))
+  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
   }
 }
 
