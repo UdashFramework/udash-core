@@ -397,17 +397,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     }"""
   }
 
-  def reifySeqPropertyCreator[A: c.WeakTypeTag, SeqTpe[A] <: Seq[A]](ev: c.Tree, cbf: c.Tree)(implicit tt: c.WeakTypeTag[SeqTpe[A]]): c.Tree = {
-    val elemTpe = weakTypeOf[A]
-    val seqTpe = weakTypeOf[SeqTpe[A]]
-    if (isSeqPropertyTpe(seqTpe)) {
-      val dealiased = seqTpe.map(_.dealias)
-      q"new $SeqPropertyCreatorCls[$elemTpe, $dealiased]()($ev, $cbf)"
-    } else {
-      c.abort(c.enclosingPosition, s"$seqTpe cannot be used in SeqProperties")
-    }
-  }
-
   def checkModelPropertyTemplate[A: c.WeakTypeTag]: c.Tree = {
     val tpe = weakTypeOf[A]
     if (doesMeetTraitModelRequirements(tpe) || doesMeetClassModelRequirements(tpe)) q"new $IsModelPropertyTemplateCls[$tpe]"

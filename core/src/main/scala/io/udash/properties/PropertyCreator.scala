@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import io.udash.properties.seq.DirectSeqPropertyImpl
 import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
 
@@ -35,6 +36,12 @@ object PropertyCreator extends PropertyCreatorImplicits {
   implicit val Byte: PropertyCreator[Byte] = new SinglePropertyCreator[Byte]
   implicit val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator[Boolean]
   implicit val String: PropertyCreator[String] = new SinglePropertyCreator[String]
+
+  implicit final def materializeBSeq[T: PropertyCreator]: SeqPropertyCreator[T, BSeq] = new SeqPropertyCreator
+  implicit final def materializeISeq[T: PropertyCreator]: SeqPropertyCreator[T, ISeq] = new SeqPropertyCreator
+  implicit final def materializeMSeq[T: PropertyCreator]: SeqPropertyCreator[T, MSeq] = new SeqPropertyCreator
+  implicit final def materializeVector[T: PropertyCreator]: SeqPropertyCreator[T, Vector] = new SeqPropertyCreator
+  implicit final def materializeList[T: PropertyCreator]: SeqPropertyCreator[T, List] = new SeqPropertyCreator
 }
 
 final class SinglePropertyCreator[T] extends PropertyCreator[T] {
@@ -46,12 +53,6 @@ final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit
   extends PropertyCreator[SeqTpe[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[T]] =
     new DirectSeqPropertyImpl[T, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[T]]]
-}
-
-object SeqPropertyCreator {
-  implicit def materializeSeq[T: PropertyCreator, SeqTpe[T] <: Seq[T]](
-    implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]]
-  ): SeqPropertyCreator[T, SeqTpe] = macro io.udash.macros.PropertyMacros.reifySeqPropertyCreator[T, SeqTpe]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")

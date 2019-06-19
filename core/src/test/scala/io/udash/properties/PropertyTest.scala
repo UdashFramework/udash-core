@@ -1118,17 +1118,16 @@ class PropertyTest extends UdashCoreTest {
       results should contain theSameElementsInOrderAs Seq("1")
     }
 
-    "lol" in {
-      Property[Seq[Int]](1 to 4).asSeq[Int]
+    "safely cast SeqProperty" in {
+      val sp = Property[Vector[Int]]((1 to 4).toVector).asSeq[Int]
+      sp.append(5)
+      sp.reversed().get shouldBe (5 to(1, -1))
     }
 
-    "lolvector" in {
-      Property[Vector[Int]](Vector(1, 2)).asSeq[Int]
-    }
-
-    "lolnested" in {
-      val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4))
-      groups.elemProperties.head.asSeq[Int]
+    "safely cast (nested) SeqProperty" in {
+      val sp = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4)).elemProperties.head.asSeq[Int]
+      sp.prepend(0)
+      sp.transform((_: Int) + 1).reversed().get shouldBe (5 to(1, -1))
     }
   }
 }
