@@ -1117,6 +1117,19 @@ class PropertyTest extends UdashCoreTest {
 
       results should contain theSameElementsInOrderAs Seq("1")
     }
+
+    "lol" in {
+      Property[Seq[Int]](1 to 4).asSeq[Int]
+    }
+
+    "lolvector" in {
+      Property[Vector[Int]](Vector(1, 2)).asSeq[Int]
+    }
+
+    "lolnested" in {
+      val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4))
+      groups.elemProperties.head.asSeq[Int]
+    }
   }
 }
 
