@@ -35,7 +35,7 @@ object IconsDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.css.CssView._
-    (div(GuideStyles.frame)(rendered), source.lines)
+    (div(GuideStyles.frame)(rendered), source.linesIterator)
   }
 }
 

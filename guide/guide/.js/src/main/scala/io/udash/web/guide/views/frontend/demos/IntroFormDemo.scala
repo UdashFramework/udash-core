@@ -148,6 +148,6 @@ object IntroFormDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (rendered, source.lines)
+    (rendered, source.linesIterator)
   }
 }

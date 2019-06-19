@@ -31,6 +31,6 @@ object TextAreaDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.css.CssView._
-    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.lines)
+    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.linesIterator)
   }
 }

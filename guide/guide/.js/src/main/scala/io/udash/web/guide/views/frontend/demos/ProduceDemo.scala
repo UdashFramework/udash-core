@@ -47,7 +47,7 @@ object ProduceDemo extends AutoDemo {
         id := "produce-demo",
         GuideStyles.frame
       )(rendered),
-      source.lines
+      source.linesIterator
     )
   }
 }

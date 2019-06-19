@@ -51,6 +51,6 @@ object SelectDemo extends AutoDemo {
         div(Grid.row)(firstSelect),
         div(Grid.row)(secondSelect)
       )
-    ), source.lines.take(source.lines.size - 2))
+    ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

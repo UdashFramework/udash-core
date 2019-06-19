@@ -78,7 +78,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
         GuideStyles.frame,
         GuideStyles.useBootstrap
       )(rendered),
-      source.lines
+      source.linesIterator
     )
   }
 }

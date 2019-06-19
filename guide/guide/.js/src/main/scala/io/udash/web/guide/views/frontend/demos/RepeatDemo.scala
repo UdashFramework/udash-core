@@ -38,6 +38,6 @@ object RepeatDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.css.CssView._
-    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.lines)
+    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.linesIterator)
   }
 }

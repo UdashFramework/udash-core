@@ -57,7 +57,7 @@ object BindValidationDemo extends AutoDemo with CssView {
         id := "validation-demo",
         GuideStyles.frame
       )(rendered),
-      source.lines
+      source.linesIterator
     )
   }
 }

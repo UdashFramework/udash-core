@@ -55,6 +55,6 @@ object RadioButtonsDemo extends AutoDemo {
         div(Grid.row)(firstRadioButtons),
         div(Grid.row)(secondRadioButtons)
       )
-    ), source.lines.take(source.lines.size - 2))
+    ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

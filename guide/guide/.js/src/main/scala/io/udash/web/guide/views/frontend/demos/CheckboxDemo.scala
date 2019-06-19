@@ -65,6 +65,6 @@ object CheckboxDemo extends AutoDemo {
         form(containerFluid)(
           firstCheckboxes, br, secondCheckboxes
         )
-      ), source.lines.take(source.lines.size - 2))
+      ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

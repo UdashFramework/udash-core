@@ -51,6 +51,6 @@ object MultiSelectDemo extends AutoDemo {
         div(Grid.row)(firstMultiSelect),
         div(Grid.row)(secondMultiSelect)
       )
-    ), source.lines.take(source.lines.size - 2))
+    ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

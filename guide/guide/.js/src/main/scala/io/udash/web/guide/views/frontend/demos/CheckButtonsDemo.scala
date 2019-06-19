@@ -54,6 +54,6 @@ object CheckButtonsDemo extends AutoDemo {
         div(Grid.row)(div(firstCheckButtons)),
         div(Grid.row)(div(secondCheckButtons))
       )
-    ), source.lines.take(source.lines.size - 2))
+    ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

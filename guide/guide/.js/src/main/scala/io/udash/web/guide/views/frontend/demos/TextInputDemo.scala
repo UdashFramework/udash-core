@@ -58,6 +58,6 @@ object TextInputDemo extends AutoDemo {
       form(containerFluid)(
         firstInputs, br, secondInputs
       )
-    ), source.lines.take(source.lines.size - 2))
+    ), source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

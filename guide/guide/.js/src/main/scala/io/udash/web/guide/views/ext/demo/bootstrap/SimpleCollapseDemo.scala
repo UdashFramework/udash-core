@@ -45,7 +45,7 @@ object SimpleCollapseDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }
 

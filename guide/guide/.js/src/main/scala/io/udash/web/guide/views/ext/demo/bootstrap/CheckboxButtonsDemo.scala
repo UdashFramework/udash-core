@@ -40,7 +40,7 @@ object CheckboxButtonsDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.css.CssView._
-    (rendered.setup(_.applyTags(GuideStyles.frame)), source.lines)
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }
 

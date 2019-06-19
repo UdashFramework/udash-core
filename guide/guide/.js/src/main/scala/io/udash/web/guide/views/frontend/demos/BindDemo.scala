@@ -26,7 +26,7 @@ object BindDemo extends AutoDemo with CssView {
         id := "bind-demo",
         GuideStyles.frame
       )(rendered),
-      source.lines
+      source.linesIterator
     )
   }
 }

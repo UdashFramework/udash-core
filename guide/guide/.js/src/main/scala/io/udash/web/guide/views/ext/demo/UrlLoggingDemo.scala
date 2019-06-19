@@ -66,6 +66,6 @@ object UrlLoggingDemo extends AutoDemo with CssView {
         )
       ).render
 
-    (rendered, source.lines.take(source.lines.size - 2))
+    (rendered, source.linesIterator.take(source.linesIterator.size - 2))
   }
 }

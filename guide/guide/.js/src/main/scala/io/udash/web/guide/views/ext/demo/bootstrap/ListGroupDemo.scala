@@ -42,7 +42,7 @@ object ListGroupDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.lines)
+    (div(GuideStyles.frame)(rendered), source.linesIterator)
   }
 }
 
