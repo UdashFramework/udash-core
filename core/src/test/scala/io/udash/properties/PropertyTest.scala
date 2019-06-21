@@ -1119,7 +1119,7 @@ class PropertyTest extends UdashCoreTest {
       results should contain theSameElementsInOrderAs Seq("1")
     }
 
-    "safely cast SeqProperty" in {
+    "safely cast to SeqProperty" in {
       val p = Property[Vector[Int]]((1 to 4).toVector)
 
       val sp = p.asSeq[Int]
@@ -1156,7 +1156,7 @@ class PropertyTest extends UdashCoreTest {
       p.get.head.y shouldBe 4
     }
 
-    "safely cast ModelProperty" in {
+    "safely cast to ModelProperty" in {
       val p = Property[M](M(4, 2))
 
       val mp = p.asModel
@@ -1177,7 +1177,7 @@ class PropertyTest extends UdashCoreTest {
       p.get shouldBe Simple(1, Simple(2, Simple(3, null)))
     }
 
-    "safely cast a seq nested in a model" in {
+    "safely cast SeqProperty nested in a model" in {
       val p = Property(SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(), null)), null)), null))
 
       val sp = p.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i)

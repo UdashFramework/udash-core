@@ -17,7 +17,7 @@ trait PropertyCreator[T] {
     prop
   }
 
-  def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
+  def newImmutableProperty(value: T): ImmutableProperty[T]
 
   protected def create(parent: ReadableProperty[_]): CastableProperty[T]
 }
@@ -30,14 +30,14 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
   def newID(): PropertyId = PropertyIdGenerator.next()
 
-  implicit val Double: PropertyCreator[Double] = new SinglePropertyCreator[Double]
-  implicit val Float: PropertyCreator[Float] = new SinglePropertyCreator[Float]
-  implicit val Long: PropertyCreator[Long] = new SinglePropertyCreator[Long]
-  implicit val Int: PropertyCreator[Int] = new SinglePropertyCreator[Int]
-  implicit val Short: PropertyCreator[Short] = new SinglePropertyCreator[Short]
-  implicit val Byte: PropertyCreator[Byte] = new SinglePropertyCreator[Byte]
-  implicit val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator[Boolean]
-  implicit val String: PropertyCreator[String] = new SinglePropertyCreator[String]
+  implicit final val Double: PropertyCreator[Double] = new SinglePropertyCreator[Double]
+  implicit final val Float: PropertyCreator[Float] = new SinglePropertyCreator[Float]
+  implicit final val Long: PropertyCreator[Long] = new SinglePropertyCreator[Long]
+  implicit final val Int: PropertyCreator[Int] = new SinglePropertyCreator[Int]
+  implicit final val Short: PropertyCreator[Short] = new SinglePropertyCreator[Short]
+  implicit final val Byte: PropertyCreator[Byte] = new SinglePropertyCreator[Byte]
+  implicit final val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator[Boolean]
+  implicit final val String: PropertyCreator[String] = new SinglePropertyCreator[String]
 
   implicit final def materializeBSeq[T: PropertyCreator]: SeqPropertyCreator[T, BSeq] = new SeqPropertyCreator
   implicit final def materializeISeq[T: PropertyCreator]: SeqPropertyCreator[T, ISeq] = new SeqPropertyCreator
@@ -49,6 +49,8 @@ object PropertyCreator extends PropertyCreatorImplicits {
 final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
+
+  override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
 
 final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
@@ -61,8 +63,13 @@ final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
-abstract class ModelPropertyCreator[T] extends PropertyCreator[T]
+abstract class ModelPropertyCreator[T] extends PropertyCreator[T] {
+  override final def newImmutableProperty(value: T): ImmutableModelProperty[T] = new ImmutableModelProperty[T](value)
+}
+
 object ModelPropertyCreator {
+  def apply[T](implicit ev: ModelPropertyCreator[T]): ModelPropertyCreator[T] = ev
+
   def materialize[T](implicit ev: IsModelPropertyTemplate[T]): ModelPropertyCreator[T] =
     macro io.udash.macros.PropertyMacros.reifyModelPropertyCreator[T]
 }

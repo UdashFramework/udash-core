@@ -37,7 +37,7 @@ trait ReadableSeqProperty[A, +ElemType <: ReadableProperty[A]] extends ReadableP
   /** Transforms ReadableSeqProperty[A] into ReadableSeqProperty[B].
     *
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableSeqProperty[A]. */
-  def transform[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]]
+  def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Creates `ReadableSeqProperty[A]` providing reversed order of elements from `this`. */
   def reversed(): ReadableSeqProperty[A, ReadableProperty[A]]
@@ -103,7 +103,7 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     validationResult
   }
 
-  override def transform[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer)
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =

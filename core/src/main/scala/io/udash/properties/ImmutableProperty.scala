@@ -66,10 +66,10 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: Seq[T]](value: SeqTpe[A])
+private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: Seq[T]](value: SeqTpe[A])
   extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
-  override lazy val elemProperties: Seq[ImmutableProperty[A]] = value.map(v => new ImmutableProperty(v))
+  override lazy val elemProperties: Seq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
 
   override def size: Int = value.size
   override def isEmpty: Boolean = value.isEmpty
@@ -79,7 +79,7 @@ private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: Seq[T]](value: Se
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
     ImmutableProperty.noopRegistration
 
-  override def transform[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty(value.map(transformer))
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
