@@ -51,7 +51,7 @@ class ImmutablePropertyTest extends UdashCoreTest {
 
   "ImmutableSeqProperty" should {
     "handle standard operations of ReadableSeqProperty" in {
-      val p: ReadableSeqProperty[Int, ReadableProperty[Int]] = new ImmutableSeqProperty[Int](Seq(1,2,3))
+      val p: ReadableSeqProperty[Int, ReadableProperty[Int]] = new ImmutableSeqProperty[Int, Seq](Seq(1, 2, 3))
 
       p.get should be(Seq(1,2,3))
       p.elemProperties.map(_.get) should be(Seq(1,2,3))

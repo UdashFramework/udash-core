@@ -350,9 +350,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val parts = parsePath(modelPath)
 
     def genTree(source: List[(Type, TermName)], targetTree: Tree): Tree = source match {
-      case (resultType, term) :: _ if isSeqPropertyTpe(resultType) =>
-        val seqTpe = resultType.map(_.dealias).baseType(SeqTpe.typeSymbol)
-        q"""$targetTree.getSubSeq[${seqTpe.typeArgs.head}](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: Nil if hasModelPropertyCreator(resultType) =>
         q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""
       case (resultType, term) :: tail if hasModelPropertyCreator(resultType) =>

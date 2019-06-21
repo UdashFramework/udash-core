@@ -24,7 +24,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     super.valueChanged()
   }
 
-  override def getSubProperty[T](getter: A => T, key: String): Property[T] = {
+  override def getSubProperty[T: PropertyCreator](getter: A => T, key: String): Property[T] = {
     if (!initialized) {
       initialized = true
       initialize()

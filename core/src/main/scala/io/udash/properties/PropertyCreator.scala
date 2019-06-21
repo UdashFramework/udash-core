@@ -17,6 +17,8 @@ trait PropertyCreator[T] {
     prop
   }
 
+  def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
+
   protected def create(parent: ReadableProperty[_]): CastableProperty[T]
 }
 
@@ -53,6 +55,9 @@ final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit
   extends PropertyCreator[SeqTpe[T]] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[T]] =
     new DirectSeqPropertyImpl[T, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[T]]]
+
+  override def newImmutableProperty(value: SeqTpe[T]): ImmutableProperty[SeqTpe[T]] =
+    new ImmutableSeqProperty[T, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[T]]]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
