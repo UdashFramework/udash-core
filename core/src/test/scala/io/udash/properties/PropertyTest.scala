@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import io.udash.properties.ReqModels.SimpleSeq
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
@@ -1119,15 +1120,71 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "safely cast SeqProperty" in {
-      val sp = Property[Vector[Int]]((1 to 4).toVector).asSeq[Int]
+      val p = Property[Vector[Int]]((1 to 4).toVector)
+
+      val sp = p.asSeq[Int]
       sp.append(5)
+
       sp.reversed().get shouldBe (5 to(1, -1))
+      sp.get shouldBe (1 to 5)
+      p.get shouldBe (1 to 5)
     }
 
-    "safely cast (nested) SeqProperty" in {
-      val sp = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4)).elemProperties.head.asSeq[Int]
+    "safely cast nested SeqProperty" in {
+      val p = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4)).elemProperties.head
+
+      val sp = p.asSeq[Int]
       sp.prepend(0)
+
       sp.transform((_: Int) + 1).reversed().get shouldBe (5 to(1, -1))
+      sp.get shouldBe (0 to 4)
+      p.get shouldBe (0 to 4)
+    }
+
+    "safely cast a model nested in a SeqProperty" in {
+      val p = SeqProperty[Seq[M]](Seq(M(4, 2))).elemProperties.head
+
+      val sp = p.asSeq
+      val mp = sp.elemProperties.head.asModel
+      mp.subProp(_.y).set(4)
+
+      mp.get.x shouldBe 4
+      mp.get.y shouldBe 4
+      sp.get.head.x shouldBe 4
+      sp.get.head.y shouldBe 4
+      p.get.head.x shouldBe 4
+      p.get.head.y shouldBe 4
+    }
+
+    "safely cast ModelProperty" in {
+      val p = Property[M](M(4, 2))
+
+      val mp = p.asModel
+      mp.subProp(_.y).set(4)
+
+      mp.get.x shouldBe 4
+      mp.get.y shouldBe 4
+    }
+
+    "safely cast nested ModelProperty" in {
+      import ReqModels.Simple
+
+      val p = Property[Simple](Simple(1, Simple(2, null)))
+
+      val nested = p.asModel.subProp(_.s.s)
+      nested.set(Simple(3, null))
+
+      p.get shouldBe Simple(1, Simple(2, Simple(3, null)))
+    }
+
+    "safely cast a seq nested in a model" in {
+      val p = Property(SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(), null)), null)), null))
+      println(p.get)
+
+      val sp = p.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i)
+      sp.append(SimpleSeq(Seq(), null))
+
+      p.get shouldBe SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(), null)), null)), null)), null)
     }
   }
 }
