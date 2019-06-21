@@ -28,7 +28,6 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
   def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ReadableProperty[T]
   def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T]
-  def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]]
 }
 
 private[properties] trait AbstractReadableModelProperty[A]

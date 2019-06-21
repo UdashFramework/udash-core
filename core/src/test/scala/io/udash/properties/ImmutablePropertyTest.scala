@@ -47,6 +47,13 @@ class ImmutablePropertyTest extends UdashCoreTest {
       p.roSubSeq(_.m.m.v).get shouldBe a[Vector[_]]
       p.roSubSeq(_.m.m.v).elemProperties.head.get should be(8)
     }
+
+    "handle nested model" in {
+      import io.udash.properties.Properties._
+      val p = Nested(Nested(null)).toModelProperty
+
+      p.roSubModel(_.s).roSubProp(_.s).get shouldBe null
+    }
   }
 
   "ImmutableSeqProperty" should {
@@ -69,6 +76,9 @@ class ImmutablePropertyTest extends UdashCoreTest {
 }
 
 object ImmutablePropertyTest {
+  case class Nested(s: Nested)
+  object Nested extends HasModelPropertyCreator[Nested]
+
   case class ModelEntity(s: String, i: Seq[Int], v: Vector[Int], m: ModelEntity)
   object ModelEntity extends HasModelPropertyCreator[ModelEntity]
 }

@@ -63,13 +63,6 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   private def hasModelPropertyCreator(valueType: Type): Boolean =
     c.typecheck(q"implicitly[$ModelPropertyCreatorCls[$valueType]]", silent = true) != EmptyTree
 
-  private def isSeqPropertyTpe(tpe: Type): Boolean = {
-    val dealiased = tpe.map(_.dealias)
-    dealiased.typeConstructor <:< SeqTpe.typeConstructor && {
-      dealiased.typeArgs.lengthCompare(1) == 0 ^ dealiased.typeParams.lengthCompare(1) == 0
-    }
-  }
-
   //Checks, if trait is valid ModelProperty template
   private def doesMeetTraitModelRequirements(tpe: Type): Boolean = {
     val isClass: Boolean = tpe.typeSymbol.isClass
@@ -282,7 +275,11 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   }
 
   private def subSeqValidation(leafTpe: Type): Unit = {
-    if (!isSeqPropertyTpe(leafTpe)) c.abort(c.enclosingPosition, s"$leafTpe is not a valid subSeq type")
+    val singleParamSeq: Boolean = {
+      val dealiased = leafTpe.map(_.dealias)
+      dealiased.typeConstructor <:< SeqTpe.typeConstructor && dealiased.typeConstructor.typeParams.lengthCompare(1) == 0
+    }
+    if (!singleParamSeq) c.abort(c.enclosingPosition, s"$leafTpe is not a valid subSeq type")
   }
 
   def reifySubSeq[A: c.WeakTypeTag, B: c.WeakTypeTag, SeqTpe[_]](f: c.Tree)(ev: c.Tree): c.Tree = {

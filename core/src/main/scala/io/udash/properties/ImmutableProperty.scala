@@ -63,9 +63,6 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
     new ImmutableModelProperty[T](getter(value))
 
-  override def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
-    new ImmutableSeqProperty[T, Seq](getter(value))
-
   override def readable: ReadableModelProperty[A] = this
 }
 

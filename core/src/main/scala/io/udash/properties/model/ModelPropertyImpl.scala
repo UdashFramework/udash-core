@@ -1,7 +1,6 @@
 package io.udash.properties
 package model
 
-import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
 
 
@@ -34,9 +33,6 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
 
   def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
     getSubProperty(getter, key).asInstanceOf[ReadableModelProperty[T]]
-
-  def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
-    getSubProperty(getter, key).asInstanceOf[ReadableSeqProperty[T, ReadableProperty[T]]]
 
   def touch(): Unit = CallbackSequencer().sequence {
     properties.values.foreach(_.touch())
