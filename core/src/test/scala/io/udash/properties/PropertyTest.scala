@@ -1179,7 +1179,6 @@ class PropertyTest extends UdashCoreTest {
 
     "safely cast a seq nested in a model" in {
       val p = Property(SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(), null)), null)), null))
-      println(p.get)
 
       val sp = p.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i).elemProperties.head.asModel.subSeq(_.i)
       sp.append(SimpleSeq(Seq(), null))

@@ -4,8 +4,6 @@ import io.udash.properties._
 import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single._
 
-import scala.collection.generic.CanBuildFrom
-
 object ModelProperty {
   /** Creates a blank ModelProperty[T].  */
   def blank[T: ModelPropertyCreator : Blank]: ModelProperty[T] =
@@ -30,7 +28,7 @@ trait ModelProperty[A] extends AbstractReadableModelProperty[A] with AbstractPro
     * there may be performance overhead while calling subSeq on fields of type more specific than scala.collection.Seq,
     * e.g. scala.collection.immutable.List or scala.collection.immutable.Seq */
   def subSeq[B, SeqTpe[B] <: Seq[B]](f: A => SeqTpe[B])(
-    implicit ev: SeqPropertyCreator[B, SeqTpe], cbf: CanBuildFrom[Nothing, B, SeqTpe[B]]
+    implicit ev: SeqPropertyCreator[B, SeqTpe]
   ): SeqProperty[B, CastableProperty[B]] = macro io.udash.macros.PropertyMacros.reifySubSeq[A, B, SeqTpe]
 }
 
