@@ -27,7 +27,7 @@ trait ModelProperty[A] extends AbstractReadableModelProperty[A] with AbstractPro
   /** Returns child DirectSeqProperty[B] of any Seq-like field. Note that due to SeqProperty mutable nature,
     * there may be performance overhead while calling subSeq on fields of type more specific than scala.collection.Seq,
     * e.g. scala.collection.immutable.List or scala.collection.immutable.Seq */
-  def subSeq[B, SeqTpe[B] <: Seq[B]](f: A => SeqTpe[B])(
+  def subSeq[B, SeqTpe[T] <: Seq[T]](f: A => SeqTpe[B])(
     implicit ev: SeqPropertyCreator[B, SeqTpe]
   ): SeqProperty[B, CastableProperty[B]] = macro io.udash.macros.PropertyMacros.reifySubSeq[A, B, SeqTpe]
 }

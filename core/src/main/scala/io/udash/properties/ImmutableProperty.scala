@@ -66,7 +66,7 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A, SeqTpe[A] <: Seq[A]](value: SeqTpe[A])
+private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: Seq[T]](value: SeqTpe[A])
   extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: Seq[ImmutableProperty[A]] = value.map(v => new ImmutableProperty(v))

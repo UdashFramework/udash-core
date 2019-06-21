@@ -51,13 +51,13 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
     new DirectPropertyImpl[T](prt, PropertyCreator.newID())
 }
 
-final class SeqPropertyCreator[T: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, T, SeqTpe[T]])
-  extends PropertyCreator[SeqTpe[T]] {
-  protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[T]] =
-    new DirectSeqPropertyImpl[T, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[T]]]
+final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
+  extends PropertyCreator[SeqTpe[A]] {
+  protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
+    new DirectSeqPropertyImpl[A, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]
 
-  override def newImmutableProperty(value: SeqTpe[T]): ImmutableProperty[SeqTpe[T]] =
-    new ImmutableSeqProperty[T, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[T]]]
+  override def newImmutableProperty(value: SeqTpe[A]): ImmutableProperty[SeqTpe[A]] =
+    new ImmutableSeqProperty[A, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[A]]]
 }
 
 @implicitNotFound("Class ${T} cannot be used as ModelProperty template. Add `extends HasModelPropertyCreator[${T}]` to companion object of ${T}.")
