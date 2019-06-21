@@ -249,12 +249,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
           order.map { name =>
             val returnTpe = members(name)
             val dealiased = returnTpe.map(_.dealias)
-            //            if (isSeqPropertyTpe(returnTpe)) {
-            //              q"""getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get.to[${dealiased.typeConstructor}]"""
-            //            }
-            //            else {
-              q"""getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
-            //            }
+            q"""getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
           }
         }
           )
@@ -268,11 +263,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
             ..${
           members.map { case (name, returnTpe) =>
             val dealiased = returnTpe.map(_.dealias)
-            //            if (isSeqPropertyTpe(returnTpe)) {
-            //              q"""override val $name: $dealiased = getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get.to[${dealiased.typeConstructor}]"""
-            //            } else {
-              q"""override val $name: $dealiased = getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
-            //            }
+            q"""override val $name: $dealiased = getSubProperty[$dealiased](${q"_.$name"}, ${name.toString}).get"""
           }
         }
         }"""
