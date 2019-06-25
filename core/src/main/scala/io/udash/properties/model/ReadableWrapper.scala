@@ -1,7 +1,7 @@
 package io.udash.properties.model
 
-import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{ReadableProperty, ReadableWrapper => SingleReadableWrapper}
+import io.udash.properties.{ModelPropertyCreator, PropertyCreator}
 
 private[properties] class ReadableWrapper[T](private val p: ReadableModelProperty[T] with ModelPropertyMacroApi[T])
   extends SingleReadableWrapper[T](p) with ModelPropertyMacroApi[T] {
@@ -9,7 +9,7 @@ private[properties] class ReadableWrapper[T](private val p: ReadableModelPropert
   override def getSubProperty[R: PropertyCreator](getter: T => R, key: String): ReadableProperty[R] =
     p.getSubProperty(getter, key)
 
-  override def getSubModel[R](getter: T => R, key: String): ReadableModelProperty[R] =
+  override def getSubModel[R: ModelPropertyCreator](getter: T => R, key: String): ReadableModelProperty[R] =
     p.getSubModel(getter, key)
 
   override def readable: ReadableModelProperty[T] = this

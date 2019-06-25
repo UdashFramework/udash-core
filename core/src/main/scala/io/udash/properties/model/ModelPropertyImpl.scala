@@ -31,7 +31,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_], override va
     properties(key).asInstanceOf[Property[T]]
   }
 
-  def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
+  def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T] =
     getSubProperty(getter, key).asInstanceOf[ReadableModelProperty[T]]
 
   def touch(): Unit = CallbackSequencer().sequence {

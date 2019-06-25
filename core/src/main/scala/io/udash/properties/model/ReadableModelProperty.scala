@@ -10,11 +10,11 @@ import scala.concurrent.Future
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[A] extends ReadableProperty[A] {
   /** Returns child ModelProperty[B]. */
-  def roSubModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ReadableModelProperty[B] =
+  def roSubModel[B: ModelPropertyCreator](f: A => B): ReadableModelProperty[B] =
     macro io.udash.macros.PropertyMacros.reifyRoSubModel[A, B]
 
   /** Returns child DirectProperty[B]. */
-  def roSubProp[B](f: A => B)(implicit ev: PropertyCreator[B]): ReadableProperty[B] =
+  def roSubProp[B: PropertyCreator](f: A => B): ReadableProperty[B] =
     macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
@@ -27,7 +27,7 @@ trait ReadableModelProperty[A] extends ReadableProperty[A] {
 
 trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
   def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ReadableProperty[T]
-  def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T]
+  def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T]
 }
 
 private[properties] trait AbstractReadableModelProperty[A]

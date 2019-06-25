@@ -57,11 +57,11 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
 private[properties] class ImmutableModelProperty[A](value: A)
   extends ImmutableProperty[A](value) with ModelPropertyMacroApi[A] {
 
-  override def getSubProperty[T](getter: A => T, key: String)(implicit ev: PropertyCreator[T]): ImmutableProperty[T] =
-    ev.newImmutableProperty(getter(value))
+  override def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ImmutableProperty[T] =
+    PropertyCreator[T].newImmutableProperty(getter(value))
 
-  override def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
-    new ImmutableModelProperty[T](getter(value))
+  override def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T] =
+    ModelPropertyCreator[T].newImmutableProperty(getter(value))
 
   override def readable: ReadableModelProperty[A] = this
 }

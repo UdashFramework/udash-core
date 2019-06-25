@@ -17,11 +17,11 @@ object ModelProperty {
 /** Property based on trait representing data model. */
 trait ModelProperty[A] extends AbstractReadableModelProperty[A] with AbstractProperty[A] {
   /** Returns child ModelProperty[B]. */
-  def subModel[B](f: A => B)(implicit ev: ModelPropertyCreator[B]): ModelProperty[B] =
+  def subModel[B: ModelPropertyCreator](f: A => B): ModelProperty[B] =
     macro io.udash.macros.PropertyMacros.reifySubModel[A, B]
 
   /** Returns child DirectProperty[B]. */
-  def subProp[B](f: A => B)(implicit ev: PropertyCreator[B]): Property[B] =
+  def subProp[B: PropertyCreator](f: A => B): Property[B] =
     macro io.udash.macros.PropertyMacros.reifySubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] of any Seq-like field. Note that due to SeqProperty mutable nature,

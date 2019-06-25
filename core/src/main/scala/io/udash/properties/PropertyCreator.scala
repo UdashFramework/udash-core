@@ -30,14 +30,14 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
   def newID(): PropertyId = PropertyIdGenerator.next()
 
-  implicit final val Double: PropertyCreator[Double] = new SinglePropertyCreator[Double]
-  implicit final val Float: PropertyCreator[Float] = new SinglePropertyCreator[Float]
-  implicit final val Long: PropertyCreator[Long] = new SinglePropertyCreator[Long]
-  implicit final val Int: PropertyCreator[Int] = new SinglePropertyCreator[Int]
-  implicit final val Short: PropertyCreator[Short] = new SinglePropertyCreator[Short]
-  implicit final val Byte: PropertyCreator[Byte] = new SinglePropertyCreator[Byte]
-  implicit final val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator[Boolean]
-  implicit final val String: PropertyCreator[String] = new SinglePropertyCreator[String]
+  implicit final val Double: PropertyCreator[Double] = new SinglePropertyCreator
+  implicit final val Float: PropertyCreator[Float] = new SinglePropertyCreator
+  implicit final val Long: PropertyCreator[Long] = new SinglePropertyCreator
+  implicit final val Int: PropertyCreator[Int] = new SinglePropertyCreator
+  implicit final val Short: PropertyCreator[Short] = new SinglePropertyCreator
+  implicit final val Byte: PropertyCreator[Byte] = new SinglePropertyCreator
+  implicit final val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator
+  implicit final val String: PropertyCreator[String] = new SinglePropertyCreator
 
   implicit final def materializeBSeq[T: PropertyCreator]: SeqPropertyCreator[T, BSeq] = new SeqPropertyCreator
   implicit final def materializeISeq[T: PropertyCreator]: SeqPropertyCreator[T, ISeq] = new SeqPropertyCreator
@@ -70,6 +70,6 @@ abstract class ModelPropertyCreator[T] extends PropertyCreator[T] {
 object ModelPropertyCreator {
   def apply[T](implicit ev: ModelPropertyCreator[T]): ModelPropertyCreator[T] = ev
 
-  def materialize[T](implicit ev: IsModelPropertyTemplate[T]): ModelPropertyCreator[T] =
+  def materialize[T: IsModelPropertyTemplate]: ModelPropertyCreator[T] =
     macro io.udash.macros.PropertyMacros.reifyModelPropertyCreator[T]
 }
