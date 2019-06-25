@@ -16,7 +16,6 @@ object CarouselDemo extends AutoDemo with CssView {
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration._
-    import scala.language.postfixOps
     import scala.util.Random
 
     def randomString(): String = {
@@ -35,7 +34,7 @@ object CarouselDemo extends AutoDemo with CssView {
     val slides = SeqProperty((1 to 5).map(_ => newSlide()))
     val active = Property(false)
     val animationOptions = active.transform(a => AnimationOptions(
-      interval = 2 seconds,
+      interval = 2.seconds,
       keyboard = false,
       active = a
     ))

@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.frontend.demos
 
+import io.udash.bootstrap.utils.BootstrapTags
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -35,7 +36,7 @@ object RadioButtonsDemo extends AutoDemo {
       appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
           (els: Seq[(Input, String)]) => span(els.map {
-            case (i: Input, l: String) => label(Form.checkInline)(i, l)
+            case (i: Input, l: String) => label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
           }).render
         ).render
       ),

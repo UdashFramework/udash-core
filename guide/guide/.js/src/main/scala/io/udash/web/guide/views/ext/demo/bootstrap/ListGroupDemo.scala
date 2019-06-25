@@ -10,16 +10,18 @@ object ListGroupDemo extends AutoDemo with CssView {
   private val (rendered, source) = {
     import io.udash._
     import io.udash.bootstrap.list.UdashListGroup
+    import io.udash.bootstrap.utils.BootstrapStyles
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssStyleName
     import org.scalajs.dom.window
+    import scalatags.JsDom.all._
 
     val news = SeqProperty("Title 1", "Title 2", "Title 3")
 
     def newsStyle(newsProperty: Property[String]): ReadableProperty[CssStyleName] = {
       newsProperty.transform(_.last match {
         case '1' => active
-        case '2' => disabled
+        case '2' => BootstrapStyles.disabled
         case '3' => List.color(Color.Success)
         case '4' => List.color(Color.Danger)
         case '5' => List.color(Color.Info)
@@ -42,7 +44,7 @@ object ListGroupDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.linesIterator)
+    (rendered.applyTags(GuideStyles.frame), source.linesIterator)
   }
 }
 

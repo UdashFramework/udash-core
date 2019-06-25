@@ -14,6 +14,7 @@ object AlertsDemo extends AutoDemo {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
     import org.scalajs.dom.Element
+    import scalatags.JsDom.all._
 
     import scala.util.Random
 

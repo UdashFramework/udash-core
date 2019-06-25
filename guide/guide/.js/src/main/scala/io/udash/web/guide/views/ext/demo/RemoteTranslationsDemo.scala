@@ -18,13 +18,12 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
     import scala.concurrent.duration.DurationInt
     import scala.language.postfixOps
 
-    implicit val translationProvider: RemoteTranslationProvider = {
+    implicit val translationProvider: RemoteTranslationProvider =
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
         Some(LocalStorage),
         6 hours
       )
-    }
 
     implicit val lang: Lang = Lang("pl")
 

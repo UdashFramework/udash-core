@@ -14,9 +14,9 @@ object PopoversDemo extends AutoDemo with CssView {
     import io.udash.bootstrap.tooltip.UdashPopover
     import io.udash.bootstrap.utils.BootstrapImplicits._
     import io.udash.bootstrap.utils.BootstrapStyles._
+    import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
-    import scala.language.postfixOps
 
     val popoverContainerId = ComponentId("popover-container")
     val label1 = UdashBadge()(_ => Seq[Modifier](
@@ -25,7 +25,7 @@ object PopoversDemo extends AutoDemo with CssView {
     )).render
     UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Hover),
-      delay = UdashPopover.Delay(500 millis, 250 millis),
+      delay = UdashPopover.Delay(500.millis, 250.millis),
       title = _ => "Popover...",
       content = _ => "Content...",
       container = Some(s"#$popoverContainerId")
@@ -37,7 +37,7 @@ object PopoversDemo extends AutoDemo with CssView {
     )).render
     UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Click),
-      delay = UdashPopover.Delay(0 millis, 250 millis),
+      delay = UdashPopover.Delay(0.millis, 250.millis),
       placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
       title = _ => "Popover 2...",
       content = _ => "Content...",

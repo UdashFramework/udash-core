@@ -30,9 +30,8 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
         new LocalTranslationProvider(translations)
     }
 
-    implicit val translationProvider: LocalTranslationProvider = {
+    implicit val translationProvider: LocalTranslationProvider =
       FrontendTranslationsProvider()
-    }
     implicit val lang: Lang = Lang("en")
 
     div(

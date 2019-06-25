@@ -12,8 +12,6 @@ object IntroFormDemo extends AutoDemo {
   object IntroFormDemoModel extends HasModelPropertyCreator[IntroFormDemoModel]
 
   private val (rendered, source) = {
-    import java.{lang => jl}
-
     import io.udash._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.form.UdashInputGroup
@@ -84,7 +82,7 @@ object IntroFormDemo extends AutoDemo {
       import scalatags.JsDom.all._
 
       private val i2s = (i: Int) => i.toString
-      private val s2i = (s: String) => jl.Float.parseFloat(s).toInt
+      private val s2i = (s: String) => s.toFloat.toInt
 
       // String representations of the model subproperties
       // These values are synchronised with the original value

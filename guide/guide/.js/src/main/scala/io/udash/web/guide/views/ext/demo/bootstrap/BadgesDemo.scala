@@ -11,7 +11,7 @@ object BadgesDemo extends AutoDemo with CssView {
     import io.udash._
     import io.udash.bootstrap.badge.UdashBadge
     import io.udash.bootstrap.button.UdashButton
-    import io.udash.bootstrap.utils.BootstrapStyles
+    import io.udash.bootstrap.utils.BootstrapStyles._
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
@@ -20,8 +20,8 @@ object BadgesDemo extends AutoDemo with CssView {
 
     div(
       UdashButton(
-        buttonStyle = BootstrapStyles.Color.Primary.toProperty,
-        size = Some(BootstrapStyles.Size.Large).toProperty
+        buttonStyle = Color.Primary.toProperty,
+        size = Some(Size.Large).toProperty
       )(_ => Seq[Modifier](
         "Button ",
         UdashBadge()(nested => nested(bind(counter))

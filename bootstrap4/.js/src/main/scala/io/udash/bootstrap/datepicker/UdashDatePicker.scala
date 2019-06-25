@@ -344,12 +344,12 @@ object UdashDatePicker {
     * @param maxDate             Prevents date/time selections after this date.
     * @param useCurrent          On show, will set the picker to the current date/time.
     * @param collapse            Using a Bootstraps collapse to switch between date/time pickers.
-    * @param locale              See <a href="http://momentjs.com/docs/#/i18n/">momentjs'</a> docs for valid locales.
-    * @param defaultDate         Sets the picker default date/time. Overrides `useCurrent`.
-    * @param disabledDates       Disables selection of dates in the array, e.g. holidays.
-    * @param enabledDates        Disables selection of dates NOT in the array, e.g. holidays.
-    * @param icons               Change the default icons for the pickers functions.
-    * @param useStrict           Defines if moment should use strict date parsing when considering a date to be valid.
+    * @param locale             See <a href="http://momentjs.com/docs/#/i18n/">momentjs'</a> docs for valid locales.
+    * @param defaultDate        Sets the picker default date/time. Overrides `useCurrent`.
+    * @param disabledDates      Disables selection of dates in the array, e.g. holidays.
+    * @param enabledDates       Disables selection of dates NOT in the array, e.g. holidays.
+    * @param icons              Change the default icons for the pickers functions.
+    * @param useStrict          Defines if moment should use strict date parsing when considering a date to be valid.
     * @param sideBySide         Shows the picker side by side when using the time and date together.
     * @param daysOfWeekDisabled Disables the section of days of the week, e.g. weekends.
     * @param calendarWeeks      Shows the week of the year to the left of first day of the week.
@@ -362,10 +362,10 @@ object UdashDatePicker {
     * @param widgetPositioning  Position of datepicker widget.
     * @param widgetParent       On picker show, places the widget at the identifier object if the element has css position: 'relative'.
     * @param keepOpen           Will cause the date picker to stay open after selecting a date if no time components are being used.
-    * @param inline              Will display the picker inline without the need of a input field. This will also hide borders and shadows.
-    * @param keepInvalid         Will cause the date picker to not revert or overwrite invalid dates.
-    * @param ignoreReadonly      Allow date picker show event to fire even when the associated input element has the `readonly="readonly"` property.
-    * @param allowInputToggle    If `true`, the picker will show on textbox focus and icon click when used in a button group.
+    * @param inline             Will display the picker inline without the need of a input field. This will also hide borders and shadows.
+    * @param keepInvalid        Will cause the date picker to not revert or overwrite invalid dates.
+    * @param ignoreReadonly     Allow date picker show event to fire even when the associated input element has the `readonly="readonly"` property.
+    * @param allowInputToggle   If `true`, the picker will show on textbox focus and icon click when used in a button group.
     * @param focusOnShow         If `false`, the textbox will not be given focus when the picker is shown
     * @param enabledHours        Will allow or disallow hour selections.
     * @param disabledHours       Will allow or disallow hour selections.

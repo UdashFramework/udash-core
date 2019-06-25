@@ -49,7 +49,7 @@ object DateRangePickerDemo extends AutoDemo with CssView {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.linesIterator)
+    (rendered.applyTags(GuideStyles.frame), source.linesIterator)
   }
 }
 

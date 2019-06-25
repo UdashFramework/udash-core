@@ -17,7 +17,6 @@ object TooltipsDemo extends AutoDemo {
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
-    import scala.language.postfixOps
 
     val tooltipContainerId = ComponentId("tooltip-container")
     val label1 = UdashBadge()(_ => Seq[Modifier](
@@ -26,7 +25,7 @@ object TooltipsDemo extends AutoDemo {
     )).render
     UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Hover),
-      delay = UdashTooltip.Delay(500 millis, 250 millis),
+      delay = UdashTooltip.Delay(500.millis, 250.millis),
       title = _ => "Tooltip...",
       container = Some(s"#$tooltipContainerId")
     )(label1)
@@ -37,7 +36,7 @@ object TooltipsDemo extends AutoDemo {
     )).render
     UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Click),
-      delay = UdashTooltip.Delay(0 millis, 250 millis),
+      delay = UdashTooltip.Delay(0.millis, 250.millis),
       placement = (_, _) => Seq(UdashTooltip.Placement.Bottom),
       title = _ => "Tooltip 2...",
       container = Some(s"#$tooltipContainerId")
