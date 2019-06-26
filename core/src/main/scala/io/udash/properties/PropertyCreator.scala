@@ -36,6 +36,7 @@ object PropertyCreator extends PropertyCreatorImplicits {
   implicit final val Int: PropertyCreator[Int] = new SinglePropertyCreator
   implicit final val Short: PropertyCreator[Short] = new SinglePropertyCreator
   implicit final val Byte: PropertyCreator[Byte] = new SinglePropertyCreator
+  implicit final val Char: PropertyCreator[Char] = new SinglePropertyCreator
   implicit final val Boolean: PropertyCreator[Boolean] = new SinglePropertyCreator
   implicit final val String: PropertyCreator[String] = new SinglePropertyCreator
 
@@ -55,8 +56,8 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
 
 final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
   extends PropertyCreator[SeqTpe[A]] {
-  protected def create(prt: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
-    new DirectSeqPropertyImpl[A, SeqTpe](prt, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]
+  protected def create(parent: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
+    new DirectSeqPropertyImpl[A, SeqTpe](parent, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]
 
   override def newImmutableProperty(value: SeqTpe[A]): ImmutableProperty[SeqTpe[A]] =
     new ImmutableSeqProperty[A, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[A]]]
