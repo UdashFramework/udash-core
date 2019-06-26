@@ -7,7 +7,6 @@ import scalatags.JsDom
 import scalatags.JsDom.GenericAttr
 import scalatags.JsDom.all._
 
-
 trait BootstrapImplicits {
   implicit val urlAttrValue: AttrValue[Url] = new AttrValue[Url] {
     def apply(t: Element, a: JsDom.Attr, v: Url): Unit =

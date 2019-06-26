@@ -3,6 +3,7 @@ package form
 
 import com.avsystem.commons._
 import io.udash._
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.css.CssStyle
 import org.scalajs.dom
 import org.scalajs.dom._

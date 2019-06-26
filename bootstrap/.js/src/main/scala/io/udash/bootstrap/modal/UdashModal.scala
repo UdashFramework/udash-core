@@ -2,9 +2,9 @@ package io.udash.bootstrap
 package modal
 
 import com.avsystem.commons.misc.AbstractCase
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
-import io.udash._
 
 import scala.scalajs.js
 

@@ -1,8 +1,8 @@
 package io.udash.selenium.views.demos.rest
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
-import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import io.udash.selenium.rpc.demos.rest.RestExampleClass

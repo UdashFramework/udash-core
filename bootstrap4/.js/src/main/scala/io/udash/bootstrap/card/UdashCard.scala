@@ -1,14 +1,14 @@
-package io.udash.bootstrap.card
+package io.udash.bootstrap
+package card
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.nav.UdashNav
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.css.CssView._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import io.udash.css.CssView._
 
 final class UdashCard private(
   backgroundColor: ReadableProperty[Option[BootstrapStyles.Color]],

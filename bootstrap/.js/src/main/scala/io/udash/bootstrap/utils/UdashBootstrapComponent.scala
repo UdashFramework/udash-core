@@ -1,6 +1,6 @@
 package io.udash.bootstrap
+package utils
 
-import io.udash.ComponentId
 import org.scalajs.dom.Element
 
 /** Base trait for Bootstrap components. */

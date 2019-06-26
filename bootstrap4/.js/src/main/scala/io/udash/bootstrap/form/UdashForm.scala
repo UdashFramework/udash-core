@@ -7,8 +7,7 @@ import io.udash.bindings.inputs.InputBinding
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.form.UdashForm.{HorizontalLayoutSettings, ValidationTrigger}
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
-import io.udash.bootstrap.utils._
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.properties.{PropertyCreator, seq}

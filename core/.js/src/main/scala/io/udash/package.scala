@@ -3,8 +3,7 @@ package io
 package object udash
   extends io.udash.bindings.Bindings
   with io.udash.properties.Properties
-  with io.udash.routing.Routing
-  with io.udash.component.Components {
+    with io.udash.routing.Routing {
 
   // Defaults
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]

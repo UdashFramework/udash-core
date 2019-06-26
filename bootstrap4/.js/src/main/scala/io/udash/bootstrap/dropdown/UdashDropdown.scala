@@ -6,13 +6,11 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bindings.modifiers.Binding.NestedInterceptor
 import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils._
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.properties.seq
 import io.udash.properties.single.ReadableProperty
 import io.udash.wrappers.jquery.JQuery
-import org.scalajs.dom.Element
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
 
 import scala.scalajs.js

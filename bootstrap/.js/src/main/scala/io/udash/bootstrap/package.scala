@@ -1,3 +1,5 @@
 package io.udash
 
-package object bootstrap extends BootstrapImplicits
+import io.udash.component.Components
+
+package object bootstrap extends Components

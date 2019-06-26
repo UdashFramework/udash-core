@@ -1,8 +1,8 @@
-package io.udash.bootstrap.jumbotron
+package io.udash.bootstrap
+package jumbotron
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._

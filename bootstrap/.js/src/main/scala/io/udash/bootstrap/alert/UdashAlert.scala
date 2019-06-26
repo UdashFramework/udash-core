@@ -3,6 +3,7 @@ package alert
 
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import org.scalajs.dom.Element
 import org.scalajs.dom.html.Div
 import scalatags.JsDom
