@@ -5,7 +5,6 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
 
-import scala.collection.immutable
 import scala.concurrent.Future
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
@@ -45,7 +44,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     new ImmutableProperty[B](transformer(value))
 
   override def transformToSeq[B: PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
-    new ImmutableSeqProperty[B](transformer(value))
+    new ImmutableSeqProperty[B, Seq](transformer(value))
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
     if (initUpdate) target.set(transformer(value))
@@ -58,26 +57,19 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
 private[properties] class ImmutableModelProperty[A](value: A)
   extends ImmutableProperty[A](value) with ModelPropertyMacroApi[A] {
 
-  override def getSubProperty[T](getter: A => T, key: String): ImmutableProperty[T] =
-    new ImmutableProperty[T](getter(value))
+  override def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ImmutableProperty[T] =
+    PropertyCreator[T].newImmutableProperty(getter(value))
 
-  override def getSubModel[T](getter: A => T, key: String): ReadableModelProperty[T] =
-    new ImmutableModelProperty[T](getter(value))
-
-  override def getSubSeq[T](getter: A => Seq[T], key: String): ReadableSeqProperty[T, ReadableProperty[T]] =
-    new ImmutableSeqProperty[T](getter(value))
+  override def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T] =
+    ModelPropertyCreator[T].newImmutableProperty(getter(value))
 
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
-  def this(value: Seq[A]) = this(value match {
-    case v: immutable.Seq[A] => v
-    case _ => value.to[immutable.Seq]
-  })
+private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: Seq[T]](value: SeqTpe[A])
+  extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
-  override lazy val elemProperties: Seq[ImmutableProperty[A]] =
-    value.map(v => new ImmutableProperty(v))
+  override lazy val elemProperties: Seq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
 
   override def size: Int = value.size
   override def isEmpty: Boolean = value.isEmpty
@@ -87,7 +79,7 @@ private[properties] class ImmutableSeqProperty[A](value: immutable.Seq[A]) exten
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
     ImmutableProperty.noopRegistration
 
-  override def transform[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty(value.map(transformer))
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
