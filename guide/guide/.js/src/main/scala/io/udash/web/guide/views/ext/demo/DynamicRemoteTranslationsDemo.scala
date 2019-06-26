@@ -17,13 +17,12 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
-    import scala.language.postfixOps
 
     implicit val translationProvider: RemoteTranslationProvider =
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
         Some(LocalStorage),
-        6 hours
+        6.hours
       )
 
     implicit val lang: LangProperty = LangProperty(Lang("en"))
