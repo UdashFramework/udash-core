@@ -1,9 +1,9 @@
 package io.udash.selenium.views.demos.rest
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.selenium.Launcher
 import scalatags.JsDom

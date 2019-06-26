@@ -1,4 +1,5 @@
-package io.udash.bootstrap.breadcrumb
+package io.udash.bootstrap
+package breadcrumb
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
@@ -37,7 +38,6 @@ final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] p
 }
 
 object UdashBreadcrumbs {
-  import io.udash.bootstrap.utils.BootstrapImplicits.urlAttrValue
   import scalatags.JsDom.all._
 
   /** A default breadcrumb model. */

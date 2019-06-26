@@ -1,4 +1,5 @@
-package io.udash.bootstrap.datepicker
+package io.udash.bootstrap
+package datepicker
 
 import java.{util => ju}
 
@@ -7,8 +8,7 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
-import io.udash.bootstrap.utils._
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags, UdashBootstrapComponent}
 import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.logging.CrossLogging

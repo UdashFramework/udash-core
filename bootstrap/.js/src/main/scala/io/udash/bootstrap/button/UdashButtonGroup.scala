@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package button
 
 import io.udash._
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.properties.{HasModelPropertyCreator, ModelPropertyCreator, seq}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._

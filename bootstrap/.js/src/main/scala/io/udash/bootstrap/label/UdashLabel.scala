@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package label
 
 import io.udash._
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 

@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package table
 
 import io.udash._
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.properties.seq
 import org.scalajs.dom._
 
