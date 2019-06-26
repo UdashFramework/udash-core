@@ -9,7 +9,7 @@ object Versions {
   val scalaJSSeleniumPluginVersion = "0.3.0"
 
   val jettyVersion = "9.4.15.v20190215"
-  val scalatestVersion = "3.0.7"
+  val scalatestVersion = "3.0.8"
   val bootstrapVersion = "3.3.7-1"
   val highchartsVersion = "5.0.10"
 }

@@ -410,18 +410,6 @@ class ModelPropertyTest extends UdashCoreTest {
       sub.get.x should be(7)
     }
 
-    "handle Seq[_]" in {
-      val mp = ModelProperty(Bla(Seq(1, 8L)))
-      val s = mp.subSeq(_.s)
-
-      s.get should contain inOrderOnly(1, 8L)
-
-      s.prepend("0")
-      s.replace(1, 2, 0.0, 7)
-
-      s.get should contain inOrderOnly("0", 0.0, 7)
-    }
-
     "handle generic types" in {
       object Outer {
         case class Bla[Type](x: Int, s: String, t: Type)

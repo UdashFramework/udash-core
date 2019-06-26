@@ -51,7 +51,7 @@ object CirceRestImplicits extends CirceRestImplicits
 
 trait CirceInstances[T] {
   @materializeWith(io.circe.derivation.`package`, "deriveEncoder")
-  def encoder: ObjectEncoder[T]
+  def encoder: Encoder.AsObject[T]
   @materializeWith(io.circe.derivation.`package`, "deriveDecoder")
   def decoder: Decoder[T]
 }
@@ -59,13 +59,13 @@ trait CirceInstances[T] {
 abstract class HasCirceCodec[T](
   implicit instances: MacroInstances[Unit, CirceInstances[T]]
 ) {
-  implicit final lazy val objectEncoder: ObjectEncoder[T] = instances((), this).encoder
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder
   implicit final lazy val decoder: Decoder[T] = instances((), this).decoder
 }
 
 trait CirceCustomizedInstances[T] {
   @materializeWith(io.circe.derivation.`package`, "deriveEncoder")
-  def encoder(nameTransform: String => String): ObjectEncoder[T]
+  def encoder(nameTransform: String => String): Encoder.AsObject[T]
   @materializeWith(io.circe.derivation.`package`, "deriveDecoder")
   def decoder(nameTransform: String => String): Decoder[T]
 }
@@ -73,7 +73,7 @@ trait CirceCustomizedInstances[T] {
 abstract class HasCirceCustomizedCodec[T](nameTransform: String => String)(
   implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]
 ) {
-  implicit final lazy val objectEncoder: ObjectEncoder[T] = instances((), this).encoder(nameTransform)
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform)
   implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform)
 }
 
