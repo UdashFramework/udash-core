@@ -383,16 +383,6 @@ object BootstrapStyles {
     def imgThumbnail = CssStyleName("img-thumbnail")
     def caption = CssStyleName("caption")
     def thumbnail = CssStyleName("thumbnail")
-
-    @deprecated("Use `UdashIcons.FontAwesome` styles instead.", "0.6.0")
-    def _fa = CssStyleName("fa")
-    @deprecated("Use `UdashIcons.Glyphicon` styles instead.", "0.6.0")
-    def _glyphicon = CssStyleName("glyphicon")
-
-    @deprecated("Use `UdashIcons.FontAwesome` instead.", "0.6.0")
-    def fa(name: String) = Seq(_fa, CssStyleName(s"fa-$name"))
-    @deprecated("Use `UdashIcons.FontAwesome` instead.", "0.6.0")
-    def glyphicon(name: String) = Seq(_glyphicon, CssStyleName(s"glyphicon-$name"))
   }
 
   object Navigation {
