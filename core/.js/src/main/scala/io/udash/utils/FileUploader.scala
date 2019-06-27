@@ -8,6 +8,7 @@ import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 import scala.scalajs.js
 
 class FileUploader(url: Url) {
+
   import FileUploader._
 
   /** Uploads files selected in provided `input`. */
@@ -17,46 +18,63 @@ class FileUploader(url: Url) {
       (0 until input.files.length).map(input.files.item)
     )
 
-  /** Uploads provided `files` in a field named `fieldName`. */
+  /** Uploads provided `files` in fields named `fieldName[]`. */
   def upload(
     fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty
   ): ReadableModelProperty[FileUploadModel] = {
-    val p = ModelProperty[FileUploadModel](
-      new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
-    )
-    val data = new FormData()
+    val data = createFormData(extraData)
 
-    extraData.foreach { case (key, value) => data.append(key, value) }
     files.foreach(file => {
       data.append(s"$fieldName[]", file)
-      p.subSeq(_.files).append(file)
     })
 
+    prepareAndSendXhrRequest(files, data)
+  }
+
+  /** Uploads provided `file` in a field named `fieldName`. */
+  def uploadFile(
+    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty
+  ): ReadableModelProperty[FileUploadModel] = {
+    val data = createFormData(extraData)
+    data.append(fieldName, file)
+
+    prepareAndSendXhrRequest(Seq(file), data)
+  }
+
+  private def createFormData(extraData: Map[js.Any, js.Any]) = {
+    val data = new FormData()
+    extraData.foreach { case (key, value) => data.append(key, value) }
+    data
+  }
+
+  private def prepareAndSendXhrRequest(files: Seq[File], data: FormData) = {
+    val fileUploadModel = ModelProperty[FileUploadModel](
+      new FileUploadModel(files, FileUploadState.InProgress, 0, 0, None)
+    )
     val xhr = new XMLHttpRequest
     xhr.upload.addEventListener("progress", (ev: ProgressEvent) =>
       if (ev.lengthComputable) {
-        p.subProp(_.bytesSent).set(ev.loaded)
-        p.subProp(_.bytesTotal).set(ev.total)
+        fileUploadModel.subProp(_.bytesSent).set(ev.loaded)
+        fileUploadModel.subProp(_.bytesTotal).set(ev.total)
       }
     )
-    xhr.addEventListener("load", (ev: Event) => {
-        p.subProp(_.response).set(Some(new HttpResponse(xhr)))
-        p.subProp(_.state).set(xhr.status / 100 match {
-          case 2 => FileUploadState.Completed
-          case _ => FileUploadState.Failed
-        })
-      }
+    xhr.addEventListener("load", (_: Event) => {
+      fileUploadModel.subProp(_.response).set(Some(new HttpResponse(xhr)))
+      fileUploadModel.subProp(_.state).set(xhr.status / 100 match {
+        case 2 => FileUploadState.Completed
+        case _ => FileUploadState.Failed
+      })
+    }
     )
-    xhr.addEventListener("error", (ev: Event) =>
-      p.subProp(_.state).set(FileUploadState.Failed)
+    xhr.addEventListener("error", (_: Event) =>
+      fileUploadModel.subProp(_.state).set(FileUploadState.Failed)
     )
-    xhr.addEventListener("abort", (ev: Event) =>
-      p.subProp(_.state).set(FileUploadState.Cancelled)
+    xhr.addEventListener("abort", (_: Event) =>
+      fileUploadModel.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)
     xhr.send(data)
-
-    p
+    fileUploadModel
   }
 }
 
