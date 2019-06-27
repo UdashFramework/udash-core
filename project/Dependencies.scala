@@ -31,8 +31,8 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.19.v20190610" // Tests only
-  val typesafeConfigVersion = "1.3.3"
-  val flexmarkVersion = "0.40.32"
+  val typesafeConfigVersion = "1.3.4"
+  val flexmarkVersion = "0.40.34"
   val logbackVersion = "1.2.3"
   val springVersion = "4.3.24.RELEASE"
   val fontAwesomeVersion = "5.6.3"
@@ -46,7 +46,7 @@ object Dependencies {
   val momentJsVersion = "2.22.2"
   val highchartsVersion = "5.0.14"
 
-  val seleniumVersion = "3.12.0"
+  val seleniumVersion = "3.141.59"
   val scalaJsBenchmarkVersion = "0.2.5"
 
   val compilerPlugins = Def.setting(Seq(
