@@ -34,7 +34,7 @@ object Dependencies {
   val typesafeConfigVersion = "1.3.4"
   val flexmarkVersion = "0.40.34"
   val logbackVersion = "1.2.3"
-  val springVersion = "4.3.23.RELEASE"
+  val springVersion = "4.3.24.RELEASE"
   val fontAwesomeVersion = "5.6.3"
   val svg4everybodyVersion = "2.1.9"
 
