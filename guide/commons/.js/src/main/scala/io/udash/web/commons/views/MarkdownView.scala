@@ -3,9 +3,8 @@ package io.udash.web.commons.views
 import com.avsystem.commons._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.alert.UdashAlert
-import io.udash.bootstrap.utils.BootstrapImplicits._
-import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.web.guide.markdown.{MarkdownPage, MarkdownPageRPC}
 import io.udash.web.guide.styles.MarkdownStyles
 

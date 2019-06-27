@@ -1,16 +1,16 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.demos.rpc.NotificationsClient
 import io.udash.web.guide.styles.partials.GuideStyles
-
-import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
+
+import scala.util.{Failure, Success}
 
 trait NotificationsDemoModel {
   def registered: Boolean
@@ -69,7 +69,7 @@ class NotificationsDemoComponent extends Component {
 
     val registerDisabled = Property(false)
     val registerButton = UdashButton(
-      buttonStyle = Color.Primary.toProperty,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = registerDisabled,
       componentId = ComponentId("notifications-demo")
     )(nested => nested(produce(model.subProp(_.registered))(

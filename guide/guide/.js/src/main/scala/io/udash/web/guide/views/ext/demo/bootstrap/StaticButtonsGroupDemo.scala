@@ -9,9 +9,9 @@ object StaticButtonsGroupDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles.Color
     import io.udash.bootstrap.button._
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import scalatags.JsDom.all._
 
     div(

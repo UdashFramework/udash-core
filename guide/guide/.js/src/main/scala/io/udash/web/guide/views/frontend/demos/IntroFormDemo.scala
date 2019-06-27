@@ -13,10 +13,9 @@ object IntroFormDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.form.UdashInputGroup
-    import io.udash.bootstrap.utils.BootstrapStyles
-    import io.udash.bootstrap.utils.BootstrapStyles.Color
     import io.udash.css.CssView._
     import io.udash.web.guide.components.BootstrapUtils
 
@@ -92,7 +91,7 @@ object IntroFormDemo extends AutoDemo {
 
       // Button from Udash Bootstrap wrapper
       private val randomizeButton = UdashButton(
-        buttonStyle = Color.Primary.toProperty,
+        buttonStyle = BootstrapStyles.Color.Primary.toProperty,
         componentId = ComponentId("randomize")
       )(_ => "Randomize")
 

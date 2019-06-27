@@ -11,12 +11,12 @@ object DatePickerDemo extends AutoDemo with CssView {
     import java.{util => ju}
 
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles._
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.datepicker.UdashDatePicker
     import io.udash.bootstrap.form.UdashForm.ValidationTrigger
     import io.udash.bootstrap.form.{UdashForm, UdashInputGroup}
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import scalatags.JsDom.all._
 
     val date = Property[Option[ju.Date]](Some(new ju.Date()))

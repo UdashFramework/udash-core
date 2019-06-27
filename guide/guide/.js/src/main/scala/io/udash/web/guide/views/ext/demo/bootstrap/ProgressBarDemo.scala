@@ -8,10 +8,10 @@ object ProgressBarDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles._
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.progressbar.UdashProgressBar
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssStyleName
     import io.udash.css.CssView._
     import scalatags.JsDom.all._

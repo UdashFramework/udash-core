@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.BootstrapStyles
-import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.logging.CrossLogging
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
@@ -107,7 +106,7 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
 
     val loadDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = Color.Primary.toProperty,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = loadDisabled,
       componentId = ComponentId("gencodec-demo")
     )(_ => "Send request")

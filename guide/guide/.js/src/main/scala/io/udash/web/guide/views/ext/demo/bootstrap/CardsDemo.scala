@@ -9,10 +9,10 @@ object CardsDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles.Color
     import io.udash.bootstrap.card.UdashCard
     import io.udash.bootstrap.list.UdashListGroup
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import scalatags.JsDom.all._
 
     val news = SeqProperty("Title 1", "Title 2", "Title 3")

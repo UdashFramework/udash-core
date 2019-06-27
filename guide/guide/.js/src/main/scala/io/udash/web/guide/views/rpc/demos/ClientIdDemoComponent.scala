@@ -1,16 +1,16 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.form.UdashInputGroup
-import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
-
-import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
+
+import scala.util.{Failure, Success}
 
 class ClientIdDemoComponent extends Component {
   import Context._
@@ -39,7 +39,7 @@ class ClientIdDemoComponent extends Component {
 
     val loadIdButtonDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = Color.Primary.toProperty,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = loadIdButtonDisabled,
       componentId = ComponentId("client-id-demo")
     )(_ => "Load client id")

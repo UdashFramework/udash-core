@@ -9,6 +9,7 @@ object JQueryEventsDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button._
     import io.udash.wrappers.jquery._
     import org.scalajs.dom._

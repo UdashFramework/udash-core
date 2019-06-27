@@ -1,15 +1,15 @@
 package io.udash.web.guide.views.rpc.demos
 
 import io.udash._
+import io.udash.bootstrap._
 import io.udash.bootstrap.button.UdashButton
-import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.Context
 import io.udash.web.guide.styles.partials.GuideStyles
-
-import scala.util.{Failure, Success}
 import scalatags.JsDom
 import scalatags.JsDom.all._
+
+import scala.util.{Failure, Success}
 
 class PingPongCallDemoComponent extends Component {
   import Context._
@@ -42,7 +42,7 @@ class PingPongCallDemoComponent extends Component {
 
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
-      buttonStyle = Color.Primary.toProperty,
+      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = pingDisabled,
       componentId = ComponentId("ping-pong-call-demo")
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))

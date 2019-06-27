@@ -9,10 +9,9 @@ object InputGroupDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.form.UdashInputGroup
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles
     import scalatags.JsDom.all._
 
     val vanityUrl = Property.blank[String]

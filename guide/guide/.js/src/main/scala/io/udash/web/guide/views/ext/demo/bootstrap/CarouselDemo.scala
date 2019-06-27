@@ -9,10 +9,10 @@ object CarouselDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup, UdashButtonToolbar}
     import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
     import io.udash.bootstrap.carousel.{UdashCarousel, UdashCarouselSlide}
-    import io.udash.bootstrap.utils.BootstrapImplicits._
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration._

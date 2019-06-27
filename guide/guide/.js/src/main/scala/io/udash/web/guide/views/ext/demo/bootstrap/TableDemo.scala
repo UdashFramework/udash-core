@@ -9,10 +9,10 @@ object TableDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles.ResponsiveBreakpoint
     import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
     import io.udash.bootstrap.table.UdashTable
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import scalatags.JsDom.all._
 
     import scala.util.Random

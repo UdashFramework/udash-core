@@ -7,8 +7,8 @@ import scalatags.JsDom.all._
 object IconsDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button._
-    import io.udash.bootstrap.utils.BootstrapImplicits._
     import io.udash.bootstrap.utils.UdashIcons
     import io.udash.css.CssView._
     import scalatags.JsDom.all._

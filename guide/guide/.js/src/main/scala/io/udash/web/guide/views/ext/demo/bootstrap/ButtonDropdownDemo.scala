@@ -12,10 +12,10 @@ object ButtonDropdownDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.dropdown.UdashDropdown
     import io.udash.bootstrap.dropdown.UdashDropdown._
-    import io.udash.bootstrap.utils.BootstrapImplicits._
     import scalatags.JsDom.all._
 
     val items = SeqProperty[DefaultDropdownItem](

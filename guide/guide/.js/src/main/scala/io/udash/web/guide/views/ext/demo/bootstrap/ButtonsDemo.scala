@@ -9,9 +9,9 @@ object ButtonsDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
+    import BootstrapStyles._
     import io.udash.bootstrap.button.UdashButton
-    import io.udash.bootstrap.utils.BootstrapImplicits._
-    import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssStyle
     import io.udash.css.CssView._
     import scalatags.JsDom.all._

@@ -9,9 +9,9 @@ object BreadcrumbsDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
     import io.udash._
+    import io.udash.bootstrap._
     import io.udash.bootstrap.breadcrumb.UdashBreadcrumbs
     import io.udash.bootstrap.breadcrumb.UdashBreadcrumbs._
-    import io.udash.bootstrap.utils.BootstrapImplicits._
     import scalatags.JsDom.all._
 
     val pages = SeqProperty[Breadcrumb](
