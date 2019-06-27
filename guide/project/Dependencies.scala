@@ -19,7 +19,7 @@ object Dependencies {
 
   val avsystemCommonsVersion = "1.34.18"
   val typesafeConfigVersion = "1.3.4"
-  val springVersion = "4.3.24.RELEASE"
+  val springVersion = "5.1.8.RELEASE"
 
   val flexmarkVersion = "0.50.4"
 
