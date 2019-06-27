@@ -15,7 +15,7 @@ object ButtonsStyle extends CssBase {
     cursor.pointer,
     whiteSpace.nowrap,
     textAlign.center,
-    userSelect := none,
+    userSelect.none,
     textDecoration := none,
     overflow.hidden,
 

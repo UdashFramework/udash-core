@@ -1,4 +1,5 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.sbtplugin.JSModuleID
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys.scalaVersion
 import sbt._
@@ -30,6 +31,12 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.19.v20190610" // Tests only
+  val typesafeConfigVersion = "1.3.3"
+  val flexmarkVersion = "0.40.32"
+  val logbackVersion = "1.2.3"
+  val springVersion = "4.3.23.RELEASE"
+  val fontAwesomeVersion = "5.6.3"
+  val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.0.8"
   val bootstrapVersion = "3.3.7-1"
@@ -37,6 +44,7 @@ object Dependencies {
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
   val momentJsVersion = "2.22.2"
+  val highchartsVersion = "5.0.14"
 
   val seleniumVersion = "3.12.0"
   val scalaJsBenchmarkVersion = "0.2.5"
@@ -153,7 +161,7 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  val bootstrap4JsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
+  val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
       minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js"
@@ -176,12 +184,48 @@ object Dependencies {
     "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 
-  val seleniumJvmDeps = Def.setting(Seq(
+  val backendDeps = Def.setting(Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
+    "ch.qos.logback" % "logback-classic" % logbackVersion,
+
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
-    "org.scalatest" %%% "scalatest" % scalatestVersion % Test,
+
+    "com.typesafe" % "config" % typesafeConfigVersion,
+    "org.springframework" % "spring-beans" % springVersion,
+    "com.avsystem.commons" %% "commons-spring" % avsCommonsVersion,
+
+    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion,
     "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
+
+  val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+
+  val guideJsDeps = Def.setting(Seq[JSModuleID](
+    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
+    ProvidedJS / "prism.js",
+
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
+      minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
+      minified s"$highchartsVersion/highcharts-3d.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-more.src.js"
+      minified s"$highchartsVersion/highcharts-more.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/exporting.src.js"
+      minified s"$highchartsVersion/modules/exporting.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/drilldown.src.js"
+      minified s"$highchartsVersion/modules/drilldown.js" dependsOn s"$highchartsVersion/highcharts.src.js",
+    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/heatmap.src.js"
+      minified s"$highchartsVersion/modules/heatmap.js" dependsOn s"$highchartsVersion/highcharts.src.js"
+  ))
+
+  val guideFrontendDeps = Def.setting(Seq(
+    "org.webjars" % "font-awesome" % fontAwesomeVersion,
+  ))
+
+  val homepageJsDeps = Def.setting(Seq[JSModuleID](
+    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
+  ))
+
 }

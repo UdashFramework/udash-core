@@ -5,11 +5,11 @@ import sbt._
 object Dependencies {
 
   val versionOfScala = "2.12.8"
-  val jettyVersion = "9.4.15.v20190215"
+  val jettyVersion = "9.4.18.v20190429"
 
-  val udashVersion = "0.8.0-RC1"
+  val udashVersion = "0.8.0-RC4"
   val udashJQueryVersion = "3.0.1"
-  val fontAwesomeVersion = "5.6.3"
+  val fontAwesomeVersion = "5.8.1"
   val jqueryVersion = "3.3.1"
   val highchartsVersion = "5.0.14"
   val svg4everybodyVersion = "2.1.9"
@@ -17,11 +17,11 @@ object Dependencies {
   val scalaLoggingVersion = "3.9.2"
   val logbackVersion = "1.2.3"
 
-  val avsystemCommonsVersion = "1.34.16"
-  val typesafeConfigVersion = "1.3.3"
-  val springVersion = "4.3.23.RELEASE"
+  val avsystemCommonsVersion = "1.34.18"
+  val typesafeConfigVersion = "1.3.4"
+  val springVersion = "4.3.24.RELEASE"
 
-  val FlexmarkVersion = "0.40.32"
+  val flexmarkVersion = "0.50.4"
 
   val seleniumVersion = "3.12.0"
   val scalatestVersion = "3.0.8"
@@ -31,7 +31,8 @@ object Dependencies {
     "io.udash" %%% "udash-rest" % udashVersion,
     "io.udash" %%% "udash-rpc" % udashVersion,
     "io.udash" %%% "udash-i18n" % udashVersion,
-    "io.udash" %%% "udash-css" % udashVersion
+    "io.udash" %%% "udash-css" % udashVersion,
+    "com.avsystem.commons" %%% "commons-core" % avsystemCommonsVersion, //todo remove in udash RC5
   ))
 
   val frontendDeps = Def.setting(Seq(
@@ -77,7 +78,7 @@ object Dependencies {
     "org.springframework" % "spring-beans" % springVersion,
     "com.avsystem.commons" %% "commons-spring" % avsystemCommonsVersion,
 
-    "com.vladsch.flexmark" % "flexmark-all" % FlexmarkVersion
+    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion
   ))
 
   val seleniumDeps = Def.setting(Seq(
