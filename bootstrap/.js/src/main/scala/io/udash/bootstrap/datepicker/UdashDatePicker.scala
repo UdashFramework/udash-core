@@ -1,11 +1,12 @@
-package io.udash.bootstrap.datepicker
+package io.udash.bootstrap
+package datepicker
 
 import java.{util => ju}
 
 import com.avsystem.commons.SharedExtensions._
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.bootstrap.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._

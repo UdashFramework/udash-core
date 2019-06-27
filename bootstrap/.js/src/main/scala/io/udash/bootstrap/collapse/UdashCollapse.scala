@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.AbstractCase
-import io.udash._
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._

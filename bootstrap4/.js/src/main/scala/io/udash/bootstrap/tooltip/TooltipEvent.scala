@@ -1,7 +1,7 @@
-package io.udash.bootstrap.tooltip
+package io.udash.bootstrap
+package tooltip
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import io.udash.component.ListenableEvent
 
 final case class TooltipEvent[TooltipType <: Tooltip[_, TooltipType]](
   override val source: TooltipType,

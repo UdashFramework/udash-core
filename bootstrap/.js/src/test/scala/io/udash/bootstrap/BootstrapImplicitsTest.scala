@@ -5,7 +5,7 @@ import io.udash.css.CssStyleName
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Element
 
-class BootstrapImplicitsTest extends UdashFrontendTest with BootstrapImplicits {
+class BootstrapImplicitsTest extends UdashFrontendTest {
   import io.udash.css.CssView._
 
   "StyleOps" should {

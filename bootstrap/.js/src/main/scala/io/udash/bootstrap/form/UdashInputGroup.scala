@@ -1,9 +1,9 @@
 package io.udash.bootstrap
 package form
 
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import io.udash._
 
 final class UdashInputGroup private(groupSize: InputGroupSize, override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent {

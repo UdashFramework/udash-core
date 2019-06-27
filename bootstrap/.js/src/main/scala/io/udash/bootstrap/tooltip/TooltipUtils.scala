@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 package tooltip
 
-import io.udash._
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import org.scalajs.dom
 

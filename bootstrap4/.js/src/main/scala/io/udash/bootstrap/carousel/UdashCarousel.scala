@@ -7,8 +7,7 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
-import io.udash.bootstrap.utils._
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
