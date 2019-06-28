@@ -227,10 +227,9 @@ object UdashForm {
     */
   def multipleFileInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
                (labelContent: Modifier*)
-               (name: String,
-                selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
+               (name: String, selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(
-      FileInput(selectedFiles, Property(true))(name, id := inputId, inputModifiers).render
+      FileInput(selectedFiles, true.toProperty)(name, id := inputId, inputModifiers).render
     )
 
   /**
