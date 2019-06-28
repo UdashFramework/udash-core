@@ -14,7 +14,7 @@ abstract class FileUploadServlet(fileFields: Set[String]) extends HttpServlet {
     import scala.collection.JavaConverters._
 
     request.getParts.asScala
-      .filter(part => fileFields.contains(part.getName.stripSuffix("[]")))
+      .filter(part => fileFields.contains(part.getName))
       .foreach(filePart => {
         val fileName = Paths.get(filePart.getSubmittedFileName).getFileName.toString
         val fileContent = filePart.getInputStream
