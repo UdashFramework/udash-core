@@ -5,10 +5,10 @@ exec scala "$0" "$@"
 /*
  * Shamelessly copied from https://github.com/akka/akka/blob/master/scripts/authors.scala
  * Usage:
- *    authors.scala tag1 tag2
+ *    authors.scala prevTag currTag
  *
  * or if on non unixy os:
- *    scala authors.scala tag1 tag2
+ *    scala authors.scala prevTag currTag
  *
  * requires scala 2.13.x+ and command line git on path
  */
@@ -65,6 +65,6 @@ val sorted = map.values.toSeq.sortBy(s => (s.commits, s.inserts + s.deletes)).re
 
 println("commits  added  removed")
 sorted.foreach { entry =>
-  println("%7d%7d%9d %s".format(entry.commits, entry.inserts, entry.deletes, entry.name))
+  println("%7d%7d%9d %s <%s>".format(entry.commits, entry.inserts, entry.deletes, entry.name, entry.email))
 }
 
