@@ -26,13 +26,13 @@ object Dependencies {
   val circeDerivationVersion = "0.12.0-M3" // Tests only
   val monixVersion = "3.0.0-RC2" // Tests only
 
-  val sttpVersion = "1.6.0"
+  val sttpVersion = "1.6.2"
 
   val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.19.v20190610" // Tests only
   val typesafeConfigVersion = "1.3.4"
-  val flexmarkVersion = "0.50.16"
+  val flexmarkVersion = "0.50.18"
   val logbackVersion = "1.2.3"
   val springVersion = "4.3.24.RELEASE"
   val fontAwesomeVersion = "5.6.3"
