@@ -181,13 +181,11 @@ trait Bindings {
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
     * For example:
-    * <pre>
+    * {{{
     * produceWithNested(property) { case (data, nested) =>
-    * div(data,
-    * nested(produce(anotherProperty) { innerData => span(innerData).render })
-    * ).render
+    *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
     * }
-    * </pre>
+    * }}}
     *
     * @param property              Property to bind.
     * @param builder               Element builder which will be used to create HTML element.
