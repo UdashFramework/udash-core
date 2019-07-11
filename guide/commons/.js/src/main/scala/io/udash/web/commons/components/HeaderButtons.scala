@@ -3,7 +3,8 @@ package io.udash.web.commons.components
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.components.HeaderButtonsStyles
 import io.udash.web.commons.views.{SVG, Size}
-
+import org.scalajs.dom.html.Div
+import scalatags.JsDom
 import scalatags.JsDom.all._
 
 trait HeaderButtons {
@@ -11,7 +12,7 @@ trait HeaderButtons {
 
   val buttonStyles: HeaderButtonsStyles
 
-  def buttons = {
+  def buttons: JsDom.TypedTag[Div] = {
     div(buttonStyles.headerRight)(
       ul(buttonStyles.headerSocial)(
         li(buttonStyles.headerSocialItem)(
@@ -25,11 +26,6 @@ trait HeaderButtons {
             SVG("github.svg#github", Size(33, 32))
           )
         ),
-        /*li(styles.headerSocialItem)(
-          a(href := ExternalUrls.todoMvc, styles.headerSocialLink, target := "_blank")(
-            SVG("todomvc.svg#todomvc", Size(34, 31))
-          )
-        ),*/
         li(buttonStyles.headerSocialItem)(
           a(href := ExternalUrls.stackoverflow, buttonStyles.headerSocialLink, target := "_blank")(
             SVG("stack.svg#stack", Size(29, 33))

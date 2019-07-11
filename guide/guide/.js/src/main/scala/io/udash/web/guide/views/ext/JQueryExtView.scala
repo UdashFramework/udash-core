@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
 import io.udash.web.guide.views.{References, Versions}

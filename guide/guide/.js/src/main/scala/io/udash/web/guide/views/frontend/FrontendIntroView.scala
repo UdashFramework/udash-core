@@ -2,8 +2,7 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.components.ForceBootstrap
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos.IntroFormDemo

@@ -2,8 +2,8 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
+import io.udash.web.commons.components.ForceBootstrap
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import scalatags.JsDom

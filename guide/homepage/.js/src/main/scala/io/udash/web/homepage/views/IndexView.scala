@@ -36,12 +36,12 @@ class IndexView(state: Property[IndexState]) extends FinalView {
   override def getTemplate: Modifier = content
 }
 
-private[views] object IndexView {
+private object IndexView {
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
   import scalatags.JsDom.tags2._
 
-  val sectionIntro = section(HomepageStyles.sectionIntro)(
+  private val sectionIntro = section(HomepageStyles.sectionIntro)(
     div(GlobalStyles.body, HomepageStyles.body)(
       div(HomepageStyles.introInner)(
         a(href := ExternalUrls.scalajs, HomepageStyles.introScala, target := "_blank")(
@@ -60,7 +60,7 @@ private[views] object IndexView {
     )
   )
 
-  val sectionFeatures = section(HomepageStyles.section)(
+  private val sectionFeatures = section(HomepageStyles.section)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1(
         "Combined forces", br(), "of Scala & JavaScript"
@@ -85,7 +85,7 @@ private[views] object IndexView {
     )
   )
 
-  val sectionMore = section(HomepageStyles.section)(
+  private val sectionMore = section(HomepageStyles.section)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1("Why Udash?"),
       ul(HomepageStyles.moreList)(
@@ -131,7 +131,7 @@ private[views] object IndexView {
     )
   )
 
-  def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
+  private def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1("Have a code preview"),
       new DemoComponent(state).getTemplate,
