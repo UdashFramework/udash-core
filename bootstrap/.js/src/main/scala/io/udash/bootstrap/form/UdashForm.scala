@@ -203,16 +203,33 @@ object UdashForm {
     *                            Take a look at `UdashForm.validation` - an example field validation implementation.
     * @param labelContent        The content of a label. If empty, the `label` won't be created.
     * @param name                Name of the input. This value will be assigned to the `name` attribute of the input.
-    * @param acceptMultipleFiles If true, input will accept multiple files.
-    * @param selectedFiles       Property which will be synchronised with the input content.
+    * @param selectedFile        Property which will be synchronised with the input content.
     * @param inputModifiers      Modifiers applied directly to the `input` element.
     */
   def fileInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
-               (labelContent: Modifier*)
-               (name: String, acceptMultipleFiles: ReadableProperty[Boolean],
-                selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
+    (labelContent: Modifier*)
+    (name: String,
+      selectedFile: Property[File], inputModifiers: Modifier*): Modifier =
     inputGroup(inputId, validation)(labelContent)(
-      FileInput(selectedFiles, acceptMultipleFiles)(name, id := inputId, inputModifiers).render
+      FileInput.single(selectedFile)(name, id := inputId, inputModifiers).render
+    )
+
+  /**
+    * Creates file input group with multiple file support.
+    *
+    * @param inputId             Id of the input DOM element.
+    * @param validation          Modifier applied to the created form group.
+    *                            Take a look at `UdashForm.validation` - an example field validation implementation.
+    * @param labelContent        The content of a label. If empty, the `label` won't be created.
+    * @param name                Name of the input. This value will be assigned to the `name` attribute of the input.
+    * @param selectedFiles       Property which will be synchronised with the input content.
+    * @param inputModifiers      Modifiers applied directly to the `input` element.
+    */
+  def multipleFileInput(inputId: ComponentId = ComponentId.newId(), validation: Option[Modifier] = None)
+               (labelContent: Modifier*)
+               (name: String, selectedFiles: SeqProperty[File], inputModifiers: Modifier*): Modifier =
+    inputGroup(inputId, validation)(labelContent)(
+      FileInput(selectedFiles, true.toProperty)(name, id := inputId, inputModifiers).render
     )
 
   /**

@@ -16,7 +16,7 @@ object Dependencies {
   val scalaCssVersion = "0.5.6"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.35.0"
+  val avsCommonsVersion = "1.36.0"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.3"
@@ -46,7 +46,7 @@ object Dependencies {
   val momentJsVersion = "2.22.2"
   val highchartsVersion = "5.0.14"
 
-  val seleniumVersion = "3.12.0"
+  val seleniumVersion = "3.141.59"
   val scalaJsBenchmarkVersion = "0.2.5"
 
   val compilerPlugins = Def.setting(Seq(

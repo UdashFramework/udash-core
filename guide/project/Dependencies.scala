@@ -23,7 +23,7 @@ object Dependencies {
 
   val flexmarkVersion = "0.50.4"
 
-  val seleniumVersion = "3.12.0"
+  val seleniumVersion = "3.141.59"
   val scalatestVersion = "3.0.8"
 
   val crossDeps = Def.setting(Seq(
