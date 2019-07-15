@@ -51,7 +51,7 @@ trait Bindings {
     * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
     * If property value is null, empty text node will be added.
     *
-    * @param property Property to bind.
+    * @param property `Property` to bind.
     * @return property binding.
     */
   def bind[T](property: ReadableProperty[T]): Binding =
@@ -60,8 +60,8 @@ trait Bindings {
   /**
     * Shows provided DOM elements only if property value is `true`.
     *
-    * @param property Property to check.
-    * @param elements Elements to show if property value is `true`.
+    * @param property `Property` to check.
+    * @param elements `Element`s to show if property value is `true`.
     * @return property binding.
     */
   def showIf(property: ReadableProperty[Boolean])(elements: Seq[Node]): Binding =
@@ -70,9 +70,9 @@ trait Bindings {
   /**
     * Shows provided DOM elements only if property value is `true`.
     *
-    * @param property              Property to check.
-    * @param elements              Elements to show if property value is `true`.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param property              `Property` to check.
+    * @param elements              `Element`s to show if property value is `true`.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return property binding.
@@ -84,9 +84,9 @@ trait Bindings {
   /**
     * Switches provided DOM elements depending on property value.
     *
-    * @param property     Property to check.
-    * @param elements     Elements to show if property value is `true`.
-    * @param elseElements Elements to show if property value is `false`.
+    * @param property     `Property` to check.
+    * @param elements     `Element`s to show if property value is `true`.
+    * @param elseElements `Element`s to show if property value is `false`.
     * @return property binding.
     */
   def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
@@ -95,10 +95,10 @@ trait Bindings {
   /**
     * Switches provided DOM elements depending on property value.
     *
-    * @param property              Property to check.
-    * @param elements              Elements to show if property value is `true`.
-    * @param elseElements          Elements to show if property value is `false`.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param property              `Property` to check.
+    * @param elements              `Element`s to show if property value is `true`.
+    * @param elseElements          `Element`s to show if property value is `false`.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return property binding.
@@ -115,19 +115,19 @@ trait Bindings {
     * Shows provided DOM elements only if the condition is satisfied.
     *
     * @param condition condition to check.
-    * @param elements  Elements to show if condition is satisfied.
-    * @return Modifier for correct elements.
+    * @param elements  `Element`s to show if condition is satisfied.
+    * @return `Modifier` for appropriate elements.
     */
   def showIf(condition: Boolean)(elements: Seq[Node]): Modifier[Element] =
     showIfElse(condition)(elements, Seq.empty)
 
   /**
-    * Switches provided DOM elements depending on condition value.
+    * Switches provided DOM elements depending on condition fulfillment.
     *
-    * @param condition    Property to check.
-    * @param elements     Elements to show if condition is satisfied.
-    * @param elseElements Elements to show if condition is not satisfied.
-    * @return Modifier for correct elements.
+    * @param condition    condition to check.
+    * @param elements     `Element`s to show if condition is satisfied.
+    * @param elseElements `Element`s to show if condition is not satisfied.
+    * @return `Modifier` for appropriate elements.
     */
   def showIfElse(condition: Boolean)(elements: Seq[Node], elseElements: Seq[Node]): Modifier[Element] = {
     import scalatags.JsDom.all._
@@ -138,10 +138,10 @@ trait Bindings {
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     * If property value is null, empty text node will be added as placeholder.
     *
-    * @param property  Property to bind.
-    * @param builder   Element builder which will be used to create HTML element.
-    * @param checkNull If it is true, then null value of property will result in rendering empty text node.
-    *                  If it is false, then null value has to be handled by builder.
+    * @param property  `Property` to bind.
+    * @param builder   `Element` builder which will be used to create HTML element.
+    * @param checkNull if it is true, then null value of property will result in rendering empty text node.
+    *                  if it is false, then null value has to be handled by builder.
     * @return property binding.
     */
   def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
@@ -155,18 +155,16 @@ trait Bindings {
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
     * For example:
-    * <pre>
+    * {{{
     * produceWithNested(property) { case (data, nested) =>
-    * div(data,
-    * nested(produce(anotherProperty) { innerData => span(innerData).render })
-    * ).render
+    *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
     * }
-    * </pre>
+    * }}}
     *
-    * @param property  Property to bind.
-    * @param builder   Element builder which will be used to create HTML element.
-    * @param checkNull If it is true, then null value of property will result in rendering empty text node.
-    *                  If it is false, then null value has to be handled by builder.
+    * @param property  `Property` to bind.
+    * @param builder   `Element` builder which will be used to create HTML element.
+    * @param checkNull if it is true, then null value of property will result in rendering empty text node.
+    *                  if it is false, then null value has to be handled by builder.
     * @return property binding.
     */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
@@ -187,11 +185,11 @@ trait Bindings {
     * }
     * }}}
     *
-    * @param property              Property to bind.
-    * @param builder               Element builder which will be used to create HTML element.
-    * @param checkNull             If it is true, then null value of property will result in rendering empty text node.
-    *                              If it is false, then null value has to be handled by builder.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element.
+    * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+    *                              if it is false, then null value has to be handled by builder.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return property binding.
@@ -204,8 +202,8 @@ trait Bindings {
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     * Notice that on every property change, whole element representing property will be rendered again.
     *
-    * @param property Property to bind.
-    * @param builder  Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @param property `Property` to bind.
+    * @param builder  `Element` builder which will be used to create HTML element. `Seq` passed to the builder cannot be null.
     * @return property binding.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
@@ -216,12 +214,12 @@ trait Bindings {
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     * Notice that on every property change, whole element representing property will be rendered again.
     *
-    * @param property              Property to bind.
-    * @param builder               Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for bounded property.
+    * @return property binding.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
     customElementsReplace: DOMManipulator.ReplaceMethod)
@@ -235,9 +233,9 @@ trait Bindings {
     * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
-    * @param property Property to bind.
-    * @param builder  Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
-    * @return Modifier for bounded property.
+    * @param property `Property` to bind.
+    * @param builder  `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @return property binding.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
     (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
@@ -250,12 +248,12 @@ trait Bindings {
     * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
-    * @param property              Property to bind.
-    * @param builder               Element builder which will be used to create HTML element. Seq passed to the builder can not be null.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for bounded property.
+    * @return property binding.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
     customElementsReplace: DOMManipulator.ReplaceMethod)
@@ -269,15 +267,15 @@ trait Bindings {
     * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
     * another binding method inside `builder`.
     *
-    * @param property              Property to bind.
-    * @param builder               Builder which is used for every element.
-    * @param customElementsInsert  Takes root element, ref node and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
     *                              if it does not insert elements in DOM. Is such a case the default implementation
     *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for repeat logic.
+    * @return property binding.
     */
   def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
@@ -295,15 +293,15 @@ trait Bindings {
     * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
-    * @param property              Property to bind.
-    * @param builder               Builder which is used for every element.
-    * @param customElementsInsert  Takes root element, ref node and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
     *                              if it does not insert elements in DOM. Is such a case the default implementation
     *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for repeat logic.
+    * @return property binding.
     */
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
@@ -321,15 +319,15 @@ trait Bindings {
     * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
-    * @param property              Property to bind.
-    * @param builder               Builder which is used for every element.
-    * @param customElementsInsert  Takes root element, ref node and new children. It should return `true`,
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
     *                              if it does not insert elements in DOM. Is such a case the default implementation
     *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for repeat logic.
+    * @return property binding.
     */
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
@@ -341,12 +339,12 @@ trait Bindings {
     * Use in order to add validation logic over property. As this modifier listens on property validation results, user is able
     * to customize what HTML elements should be shown.
     *
-    * @param property        Property to bind.
-    * @param progressBuilder Builder which is called when validation process is started. It will also give you an access to future of
+    * @param property        `Property` to bind.
+    * @param progressBuilder `Builder` which is called when validation process is started. It will also give you an access to future of
     *                        validation results.
-    * @param completeBuilder Builder which is called when validation process is completed. It will give an access to validation results.
-    * @param errorBuilder    Builder which is called, when validation process fails.
-    * @return Modifier for validation logic.
+    * @param completeBuilder `Builder` which is called when validation process is completed. It will give an access to validation results.
+    * @param errorBuilder    `Builder` which is called, when validation process fails.
+    * @return property binding.
     */
   def valid[A](property: ReadableProperty[A])
     (completeBuilder: ValidationResult => Seq[Node],
@@ -361,15 +359,15 @@ trait Bindings {
     * The builders take nested bindings interceptor - it should be used if you want to create another binding inside
     * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
     *
-    * @param property              Property to bind.
-    * @param progressBuilder       Builder which is called when validation process is started. It will also give you an access to future of
+    * @param property              `Property` to bind.
+    * @param progressBuilder       `Builder` which is called when validation process is started. It will also give you an access to future of
     *                              validation results.
-    * @param completeBuilder       Builder which is called when validation process is completed. It will give an access to validation results.
-    * @param errorBuilder          Builder which is called, when validation process fails.
-    * @param customElementsReplace Takes root element, old children and new children. It should return `true`,
+    * @param completeBuilder       `Builder` which is called when validation process is completed. It will give an access to validation results.
+    * @param errorBuilder          `Builder` which is called, when validation process fails.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
     *                              if it did not replace elements in DOM. Is such a case the default implementation
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-    * @return Modifier for validation logic.
+    * @return property binding.
     */
   def validWithNested[A](property: ReadableProperty[A])
     (completeBuilder: (ValidationResult, Binding.NestedInterceptor) => Seq[Node],
@@ -427,12 +425,12 @@ object Bindings extends Bindings {
       * If callback returns false, next callback in the queue will be invoked.
       */
     def :+=[T <: Event](callback: T => Boolean): Modifier[Element] = {
-      AttrPair(attr, callback, new AttrValue[Element, (T) => Boolean] {
+      AttrPair(attr, callback, new AttrValue[Element, T => Boolean] {
         override def apply(el: Element, attr: Attr, callback: T => Boolean): Unit = {
           val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
           val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
           if (existingCallbacks == null) {
-            dyn.updateDynamic(attr.name)((e: T) => if (callback(e)) e.preventDefault())
+            dyn.updateDynamic(attr.name) { e: T => if (callback(e)) e.preventDefault() }
           } else {
             dyn.updateDynamic(attr.name) { e: T =>
               val preventDefault = callback(e)
@@ -481,7 +479,7 @@ object Bindings extends Bindings {
       }
   }
 
-  final class AttrPairOps(private val attr: scalatags.generic.AttrPair[Element, _]) extends AnyVal { outer =>
+  final class AttrPairOps(private val attr: scalatags.generic.AttrPair[Element, _]) extends AnyVal {
     /** Sets attribute on element. */
     def applyTo(element: Element): Unit =
       attr.applyTo(element)
