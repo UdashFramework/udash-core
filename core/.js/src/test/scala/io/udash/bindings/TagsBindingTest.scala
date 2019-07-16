@@ -310,6 +310,34 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
     }
+
+    "provide value-based switcher" in {
+      val element = h1("Test")
+      val template = div(
+        span(),
+        showIf(true)(element.render),
+        span()
+      ).render
+      val template2 = div(showIf(true)(element.render)).render
+
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+
+      val template3 = div(
+        span(),
+        showIf(false)(element.render),
+        span()
+      ).render
+      val template4 = div(showIf(false)(element.render)).render
+
+      template3.textContent should be("")
+      template3.childElementCount shouldBe 2
+      template4.textContent should be("")
+      template4.childElementCount shouldBe 0
+    }
   }
 
   "showIfElse" should {
@@ -455,6 +483,36 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
       elementElse2.textContent should be("OLD")
+    }
+
+    "provide value-based switcher" in {
+      val element = h1("Test")
+      val elseElement = h1("Else")
+      val template = div(
+        span(),
+        showIfElse(true)(element.render, elseElement.render),
+        span()
+      ).render
+      val template2 = div(showIfElse(true)(element.render, elseElement.render)).render
+
+      template.textContent should be("Test")
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("Test")
+      template.childNodes(2).textContent should be("")
+      template2.textContent should be("Test")
+
+      val template3 = div(
+        span(),
+        showIfElse(false)(element.render, elseElement.render),
+        span()
+      ).render
+      val template4 = div(showIfElse(false)(element.render, elseElement.render)).render
+
+      template3.textContent should be("Else")
+      template3.childNodes(0).textContent should be("")
+      template3.childNodes(1).textContent should be("Else")
+      template3.childNodes(2).textContent should be("")
+      template4.textContent should be("Else")
     }
   }
 
