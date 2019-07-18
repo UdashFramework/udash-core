@@ -3,95 +3,9 @@ package io.udash.bootstrap.utils
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.css.CssStyleName
 
-object BootstrapStyles {
-  final class ResponsiveBreakpoint(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object ResponsiveBreakpoint extends AbstractValueEnumCompanion[ResponsiveBreakpoint] {
-    final val All: Value = new ResponsiveBreakpoint("")
-    final val Small: Value = new ResponsiveBreakpoint("-sm")
-    final val Medium: Value = new ResponsiveBreakpoint("-md")
-    final val Large: Value = new ResponsiveBreakpoint("-lg")
-    final val ExtraLarge: Value = new ResponsiveBreakpoint("-xl")
-    final val Print: Value = new ResponsiveBreakpoint("-print")
-  }
+trait BootstrapStyles {
 
-  final class Side(val classMarker: String, val longClassMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Side extends AbstractValueEnumCompanion[Side] {
-    final val All: Value = new Side("", "")
-    final val Top: Value = new Side("t", "-top")
-    final val Bottom: Value = new Side("b", "-bottom")
-    final val Left: Value = new Side("l", "-left")
-    final val Right: Value = new Side("r", "-right")
-    /**
-      * This value is not always supported by Bootstrap.
-      * It works with spacing, but you cannot use it with borders methods. <br/>
-      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
-      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
-      */
-    final val X: Value = new Side("x", "")
-    /**
-      * This value is not always supported by Bootstrap.
-      * It works with spacing, but you cannot use it with borders methods. <br/>
-      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
-      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
-      */
-    final val Y: Value = new Side("y", "")
-  }
-
-  final class Align(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Align extends AbstractValueEnumCompanion[Align] {
-    final val Left: Value = new Align("-left")
-    final val Right: Value = new Align("-right")
-    final val Center: Value = new Align("-center")
-  }
-
-  final class Color(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Color extends AbstractValueEnumCompanion[Color] {
-    final val Primary: Value = new Color("-primary")
-    final val Secondary: Value = new Color("-secondary")
-    final val Success: Value = new Color("-success")
-    final val Danger: Value = new Color("-danger")
-    final val Warning: Value = new Color("-warning")
-    final val Info: Value = new Color("-info")
-    final val Light: Value = new Color("-light")
-    final val Dark: Value = new Color("-dark")
-    final val White: Value = new Color("-white")
-    /** This value is only supported in buttons. */
-    final val Link: Value = new Color("-link")
-  }
-
-  final class Size(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Size extends AbstractValueEnumCompanion[Size] {
-    final val Small: Value = new Size("-sm")
-    final val Large: Value = new Size("-lg")
-  }
-
-  final class FlexContentJustification(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object FlexContentJustification extends AbstractValueEnumCompanion[FlexContentJustification] {
-    final val Around: Value = new FlexContentJustification("-around")
-    final val Between: Value = new FlexContentJustification("-between")
-    final val Center: Value = new FlexContentJustification("-center")
-    final val End: Value = new FlexContentJustification("-end")
-    final val Start: Value = new FlexContentJustification("-start")
-  }
-
-  final class FlexAlign(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object FlexAlign extends AbstractValueEnumCompanion[FlexAlign] {
-    final val Baseline: Value = new FlexAlign("-baseline")
-    final val Center: Value = new FlexAlign("-center")
-    final val End: Value = new FlexAlign("-end")
-    final val Start: Value = new FlexAlign("-start")
-    final val Stretch: Value = new FlexAlign("-stretch")
-  }
-
-  final class SpacingSize(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object SpacingSize extends AbstractValueEnumCompanion[SpacingSize] {
-    final val None: Value = new SpacingSize("-0")
-    final val ExtraSmall: Value = new SpacingSize("-1")
-    final val Small: Value = new SpacingSize("-2")
-    final val Normal: Value = new SpacingSize("-3")
-    final val Large: Value = new SpacingSize("-4")
-    final val ExtraLarge: Value = new SpacingSize("-5")
-  }
+  import BootstrapStyles._
 
   def active = CssStyleName("active")
   def affix = CssStyleName("affix")
@@ -670,5 +584,96 @@ object BootstrapStyles {
 
     def srOnly = CssStyleName("sr-only")
     def srOnlyFocusable = CssStyleName("sr-only-focusable")
+  }
+}
+
+object BootstrapStyles extends BootstrapStyles {
+  final class ResponsiveBreakpoint(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object ResponsiveBreakpoint extends AbstractValueEnumCompanion[ResponsiveBreakpoint] {
+    final val All: Value = new ResponsiveBreakpoint("")
+    final val Small: Value = new ResponsiveBreakpoint("-sm")
+    final val Medium: Value = new ResponsiveBreakpoint("-md")
+    final val Large: Value = new ResponsiveBreakpoint("-lg")
+    final val ExtraLarge: Value = new ResponsiveBreakpoint("-xl")
+    final val Print: Value = new ResponsiveBreakpoint("-print")
+  }
+
+  final class Side(val classMarker: String, val longClassMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Side extends AbstractValueEnumCompanion[Side] {
+    final val All: Value = new Side("", "")
+    final val Top: Value = new Side("t", "-top")
+    final val Bottom: Value = new Side("b", "-bottom")
+    final val Left: Value = new Side("l", "-left")
+    final val Right: Value = new Side("r", "-right")
+    /**
+      * This value is not always supported by Bootstrap.
+      * It works with spacing, but you cannot use it with borders methods. <br/>
+      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
+      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+      */
+    final val X: Value = new Side("x", "")
+    /**
+      * This value is not always supported by Bootstrap.
+      * It works with spacing, but you cannot use it with borders methods. <br/>
+      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
+      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+      */
+    final val Y: Value = new Side("y", "")
+  }
+
+  final class Align(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Align extends AbstractValueEnumCompanion[Align] {
+    final val Left: Value = new Align("-left")
+    final val Right: Value = new Align("-right")
+    final val Center: Value = new Align("-center")
+  }
+
+  final class Color(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Color extends AbstractValueEnumCompanion[Color] {
+    final val Primary: Value = new Color("-primary")
+    final val Secondary: Value = new Color("-secondary")
+    final val Success: Value = new Color("-success")
+    final val Danger: Value = new Color("-danger")
+    final val Warning: Value = new Color("-warning")
+    final val Info: Value = new Color("-info")
+    final val Light: Value = new Color("-light")
+    final val Dark: Value = new Color("-dark")
+    final val White: Value = new Color("-white")
+    /** This value is only supported in buttons. */
+    final val Link: Value = new Color("-link")
+  }
+
+  final class Size(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object Size extends AbstractValueEnumCompanion[Size] {
+    final val Small: Value = new Size("-sm")
+    final val Large: Value = new Size("-lg")
+  }
+
+  final class FlexContentJustification(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object FlexContentJustification extends AbstractValueEnumCompanion[FlexContentJustification] {
+    final val Around: Value = new FlexContentJustification("-around")
+    final val Between: Value = new FlexContentJustification("-between")
+    final val Center: Value = new FlexContentJustification("-center")
+    final val End: Value = new FlexContentJustification("-end")
+    final val Start: Value = new FlexContentJustification("-start")
+  }
+
+  final class FlexAlign(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object FlexAlign extends AbstractValueEnumCompanion[FlexAlign] {
+    final val Baseline: Value = new FlexAlign("-baseline")
+    final val Center: Value = new FlexAlign("-center")
+    final val End: Value = new FlexAlign("-end")
+    final val Start: Value = new FlexAlign("-start")
+    final val Stretch: Value = new FlexAlign("-stretch")
+  }
+
+  final class SpacingSize(val classMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object SpacingSize extends AbstractValueEnumCompanion[SpacingSize] {
+    final val None: Value = new SpacingSize("-0")
+    final val ExtraSmall: Value = new SpacingSize("-1")
+    final val Small: Value = new SpacingSize("-2")
+    final val Normal: Value = new SpacingSize("-3")
+    final val Large: Value = new SpacingSize("-4")
+    final val ExtraLarge: Value = new SpacingSize("-5")
   }
 }
