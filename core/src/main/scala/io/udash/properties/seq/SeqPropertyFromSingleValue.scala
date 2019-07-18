@@ -19,8 +19,8 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   protected var lastOriginValue: Opt[A] = Opt.empty
 
   override def get: Seq[B] = {
-    updateIfNeeded()
-    children.map(_.get)
+    if (originListenerRegistration == null || !originListenerRegistration.isActive) transformer(origin.get)
+    else children.map(_.get)
   }
 
   override def listen(valueListener: Seq[B] => Any, initUpdate: Boolean): Registration = {
