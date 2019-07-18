@@ -846,6 +846,23 @@ class PropertyTest extends UdashCoreTest {
       p.get should be("4,-4,2,-2")
     }
 
+    "transform SeqProperty to SeqProperty" in {
+      class ClazzModel(val p: Int)
+      val p = SeqProperty(new ClazzModel(42))
+      var fromListen = Seq.empty[Int]
+
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: Seq[ClazzModel]) => v.map(_.p))
+      s.get shouldBe Seq(42)
+
+      s.listen(fromListen = _, initUpdate = true)
+      println("after listen")
+      fromListen shouldBe Seq(42)
+
+      p.set(p.get :+ new ClazzModel(66))
+      s.get shouldBe Seq(42, 66)
+      fromListen shouldBe Seq(42, 66)
+    }
+
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
       val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
