@@ -8,7 +8,7 @@ import io.udash.utils.{CrossCollections, Registration}
 import scala.collection.mutable
 
 private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
-  origin: ReadableProperty[A], transformer: A => Seq[B]
+  origin: ReadableProperty[A], transformer: A => Seq[B], listenChildren: Boolean
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
   override final val id: PropertyId = PropertyCreator.newID()
@@ -19,23 +19,23 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
-  override def get: Seq[B] = {
+  override final def get: Seq[B] = {
     if ((originListenerRegistration == null || !originListenerRegistration.isActive) && childrenRegistrations.isEmpty)
       transformer(origin.get)
     else children.map(_.get)
   }
 
-  override def listen(valueListener: Seq[B] => Any, initUpdate: Boolean): Registration = {
+  override final def listen(valueListener: Seq[B] => Any, initUpdate: Boolean): Registration = {
     initOriginListeners()
     super.listen(valueListener, initUpdate)
   }
 
-  override def listenOnce(valueListener: Seq[B] => Any): Registration = {
+  override final def listenOnce(valueListener: Seq[B] => Any): Registration = {
     initOriginListeners()
     super.listenOnce(valueListener)
   }
 
-  override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
+  override final def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
     super.listenStructure(structureListener)
   }
@@ -64,12 +64,12 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
         PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
-      childrenRegistrations ++= added.map(p => p.id -> p.listen(_ => valueChanged()))
+      if (listenChildren) childrenRegistrations ++= added.map(p => p.id -> p.listen(_ => valueChanged()))
       CrossCollections.replace(children, commonBegin, 0, added: _*)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
-      removed.iterator.map(p => childrenRegistrations.remove(p.id).get).foreach(_.cancel())
+      if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p.id).get.cancel())
       CrossCollections.replace(children, commonBegin, current.size - transformed.size)
       Some(Patch[ElemType](commonBegin, removed.map(toElemProp), Seq(), transformed.isEmpty))
     } else None
@@ -85,14 +85,14 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
   protected def toElemProp(p: Property[B]): ElemType
 
-  protected def updateIfNeeded(): Unit = {
+  private def updateIfNeeded(): Unit = {
     if (originListenerRegistration == null) {
       val originValue = origin.get
       if (!lastOriginValue.contains(originValue)) update(originValue)
     }
   }
 
-  protected def initOriginListeners(): Unit = {
+  private def initOriginListeners(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
       updateIfNeeded()
@@ -100,7 +100,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     }
   }
 
-  protected def killOriginListeners(): Unit = {
+  private def killOriginListeners(): Unit = {
     if (originListenerRegistration != null && listeners.isEmpty
       && structureListeners.isEmpty && children.forall(_.listenersCount() == 0)) {
       originListenerRegistration.cancel()
@@ -108,17 +108,17 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     }
   }
 
-  override protected[properties] def listenersUpdate(): Unit = {
+  override final protected[properties] def listenersUpdate(): Unit = {
     super.listenersUpdate()
     initOriginListeners()
     killOriginListeners()
   }
 
-  override protected def wrapListenerRegistration(reg: Registration): Registration =
+  override final protected def wrapListenerRegistration(reg: Registration): Registration =
     super.wrapListenerRegistration(new Registration {
       override def restart(): Unit = {
         initOriginListeners()
-        if (childrenRegistrations.isEmpty) {
+        if (listenChildren && childrenRegistrations.isEmpty) {
           childrenRegistrations ++= children.map(p => p.id -> p.listen(_ => valueChanged()))
         }
         reg.restart()
@@ -126,8 +126,10 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
       override def cancel(): Unit = {
         reg.cancel()
-        childrenRegistrations.valuesIterator.foreach(_.cancel())
-        childrenRegistrations.clear()
+        if (listenChildren) {
+          childrenRegistrations.valuesIterator.foreach(_.cancel())
+          childrenRegistrations.clear()
+        }
         killOriginListeners()
       }
 
@@ -135,7 +137,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
         reg.isActive
     })
 
-  override def elemProperties: Seq[ElemType] = {
+  override final def elemProperties: Seq[ElemType] = {
     updateIfNeeded()
     children.map(toElemProp)
   }
@@ -143,7 +145,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
 private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
   origin: ReadableProperty[A], transformer: A => Seq[B]
-) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer) {
+) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer, listenChildren = false) {
 
   override protected def toElemProp(p: Property[B]): ReadableProperty[B] =
     p.readable
@@ -151,7 +153,7 @@ private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: Propert
 
 private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator](
   origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A
-) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer)
+) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer, listenChildren = true)
   with AbstractSeqProperty[B, Property[B]] {
 
   protected def toElemProp(p: Property[B]): Property[B] = p
@@ -164,7 +166,7 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   }
 
   override def replace(idx: Int, amount: Int, values: B*): Unit = {
-    val current = mutable.ListBuffer(get: _*)
+    val current = get.to[mutable.ListBuffer]
     current.remove(idx, amount)
     current.insertAll(idx, values)
     origin.set(revert(current))

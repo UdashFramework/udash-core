@@ -2099,10 +2099,9 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
           div(
             nested(repeatWithNested(s) { (p2, nested) =>
               div(nested(produce(p2) { v2 =>
-                fired += v1 -> p2.get
+                fired += v1 -> v2
                 div((v1 -> v2).toString()).render
               })).render
-
             })
           ).render
         }
