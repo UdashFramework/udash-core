@@ -214,9 +214,15 @@ trait BootstrapStyles {
 
     def fill(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-fill")
-    def grow(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+
+    def grow0(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-grow-0")
+    def grow1(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-grow-1")
-    def shrink(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+
+    def shrink0(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"flex${breakpoint.classMarker}-shrink-0")
+    def shrink1(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-shrink-1")
 
     def autoMargin(side: Side = Side.All) = CssStyleName(s"m${side.classMarker}-auto")
@@ -427,6 +433,11 @@ trait BootstrapStyles {
 
     def expand(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"navbar-expand${breakpoint.classMarker}")
+  }
+
+  object Overflow {
+    def auto = CssStyleName("overflow-auto")
+    def hidden = CssStyleName("overflow-hidden")
   }
 
   object Pagination {
