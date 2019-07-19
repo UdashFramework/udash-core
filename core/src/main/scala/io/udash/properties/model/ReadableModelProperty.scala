@@ -8,7 +8,7 @@ import io.udash.utils.CrossCollections
 import scala.concurrent.Future
 
 /** Property based on trait representing data model. Read only access. */
-trait ReadableModelProperty[A] extends ReadableProperty[A] {
+trait ReadableModelProperty[+A] extends ReadableProperty[A] {
   /** Returns child ModelProperty[B]. */
   def roSubModel[B: ModelPropertyCreator](f: A => B): ReadableModelProperty[B] =
     macro io.udash.macros.PropertyMacros.reifyRoSubModel[A, B]
