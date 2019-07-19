@@ -83,8 +83,8 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     */
   def apply(
     animation: Boolean = true,
-    boundary: String = "scrollParent",
-    container: Option[String] = None,
+    boundary: String | dom.Node = "scrollParent",
+    container: Option[String | dom.Node] = None,
     content: dom.Node => String | dom.Node = _ => "",
     delay: Delay = Delay(0 millis, 0 millis),
     html: Boolean = false,
