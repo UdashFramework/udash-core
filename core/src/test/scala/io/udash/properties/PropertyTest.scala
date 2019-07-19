@@ -663,8 +663,7 @@ class PropertyTest extends UdashCoreTest {
 
       elemListeners.foreach(_._2.cancel())
 
-      //todo https://github.com/UdashFramework/udash-core/issues/272 seems impossible to do correctly with current design
-      // p.listenersCount() should be(0)
+      p.listenersCount() should be(0)
 
       p.set("1,2,3")
       s.get should be(Seq(1, 2, 3))
@@ -839,8 +838,7 @@ class PropertyTest extends UdashCoreTest {
       p.listenersCount() should be(1)
       elemListeners.foreach(_._2.cancel())
 
-      //todo https://github.com/UdashFramework/udash-core/issues/272 seems impossible to do correctly with current design
-      // p.listenersCount() should be(0)
+      p.listenersCount() should be(0)
 
       p.set("1,-1,2,-2")
       s.get should be(Seq(1, -1, 2, -2))
