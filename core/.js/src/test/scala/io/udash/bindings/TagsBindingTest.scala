@@ -2097,9 +2097,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(nested(produce(p2) { v2 =>
+                fired += v1 -> v2
+                div((v1 -> v2).toString()).render
+              })).render
             })
           ).render
         }
@@ -2130,9 +2132,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (vs, nested) =>
+              div(
+                nested(produce(vs) { v2 =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }
@@ -2160,11 +2166,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val fired = ListBuffer.empty[(Int, Int)]
 
       div(
-        repeatWithNested(p) { case (v1, nested) =>
+        repeatWithNested(p) { case (p1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1.get -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(
+                nested(produce(p1.combine(p2)(_ -> _)) { case (v1, v2) =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }
