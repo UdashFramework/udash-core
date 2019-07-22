@@ -112,29 +112,6 @@ trait Bindings {
     )
 
   /**
-    * Shows provided DOM elements only if the condition is satisfied.
-    *
-    * @param condition condition to check.
-    * @param elements  `Element`s to show if condition is satisfied.
-    * @return `Modifier` for appropriate elements.
-    */
-  def showIf(condition: Boolean)(elements: Seq[Node]): Modifier[Element] =
-    showIfElse(condition)(elements, Seq.empty)
-
-  /**
-    * Switches provided DOM elements depending on condition fulfillment.
-    *
-    * @param condition    condition to check.
-    * @param elements     `Element`s to show if condition is satisfied.
-    * @param elseElements `Element`s to show if condition is not satisfied.
-    * @return `Modifier` for appropriate elements.
-    */
-  def showIfElse(condition: Boolean)(elements: Seq[Node], elseElements: Seq[Node]): Modifier[Element] = {
-    import scalatags.JsDom.all._
-    if (condition) elements else elseElements
-  }
-
-  /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
     * If property value is null, empty text node will be added as placeholder.
     *
