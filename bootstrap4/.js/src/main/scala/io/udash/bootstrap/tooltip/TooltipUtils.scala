@@ -44,15 +44,23 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
 }
 
 abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
-  case class Delay(show: Duration, hide: Duration) extends AbstractCase
+  final case class Delay(show: Duration, hide: Duration) extends AbstractCase
 
-  final class Placement(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Placement extends AbstractValueEnumCompanion[Placement] {
-    final val Auto: Value = new Placement("auto")
-    final val Top: Value = new Placement("top")
-    final val Bottom: Value = new Placement("bottom")
-    final val Left: Value = new Placement("left")
-    final val Right: Value = new Placement("right")
+  trait Placement {
+    def jsValue: js.Any
+  }
+  final class StaticPlacement(val value: String) extends Placement {
+    override def jsValue: js.Any = value
+  }
+  object Placement {
+    final val Auto = new StaticPlacement("auto")
+    final val Top = new StaticPlacement("top")
+    final val Bottom = new StaticPlacement("bottom")
+    final val Left = new StaticPlacement("left")
+    final val Right = new StaticPlacement("right")
+    def dynamic(f: (dom.Node, dom.Node) => Placement): Placement = new Placement {
+      override def jsValue: js.Function2[dom.Node, dom.Node, Placement] = f
+    }
   }
 
   final class Trigger(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -85,13 +93,13 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     animation: Boolean = true,
     boundary: String | dom.Node = "scrollParent",
     container: Option[String | dom.Node] = None,
-    content: dom.Node => String | dom.Node = _ => "",
+    content: js.Function1[dom.Node, String] | dom.Node = ((_: dom.Node) => ""): js.Function1[dom.Node, String],
     delay: Delay = Delay(0 millis, 0 millis),
     html: Boolean = false,
     offset: String = "0",
-    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    placement: Placement = defaultPlacement,
     template: Option[String] = None,
-    title: dom.Node => String | dom.Node = _ => "",
+    title: String | js.Function1[dom.Node, String] | dom.Node = "",
     trigger: Seq[Trigger] = defaultTrigger
   )(el: dom.Node): TooltipType =
     initTooltip(
@@ -99,13 +107,13 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
         "animation" -> animation,
         "boundary" -> boundary,
         "container" -> container.getOrElse(false),
-        "content" -> js.ThisFunction.fromFunction1(content),
+        "content" -> content,
         "delay" -> js.Dictionary("show" -> delay.show.toMillis, "hide" -> delay.hide.toMillis),
         "html" -> html,
         "offset" -> offset,
-        "placement" -> scalajs.js.Any.fromFunction2((popover: dom.Node, trigger: dom.Node) => placement(popover, trigger).map(_.jsValue).mkString(" ")),
+        "placement" -> placement.jsValue,
         "template" -> template.getOrElse(defaultTemplate),
-        "title" -> js.ThisFunction.fromFunction1(title),
+        "title" -> title,
         "trigger" -> trigger.map(_.jsValue).mkString(" ")
       )
     )(el)
@@ -136,13 +144,25 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     delay: Delay = Delay(0 millis, 0 millis),
     html: Boolean = false,
     offset: String = "0",
-    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    placement: Placement = defaultPlacement,
     template: Option[String] = None,
     title: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
     trigger: Seq[Trigger] = defaultTrigger
   )(el: dom.Node)(implicit langProperty: LangProperty, translationProvider: TranslationProvider): TooltipType = {
-
-    val tp = apply(animation, boundary, container, _ => "", delay, html, offset, placement, template, _ => "", trigger)(el)
+    import scalatags.JsDom.all.stringFrag
+    val tp = apply(
+      animation = animation,
+      boundary = boundary,
+      container = container,
+      content = "".render,
+      delay = delay,
+      html = html,
+      offset = offset,
+      placement = placement,
+      template = template,
+      title = "",
+      trigger = trigger
+    )(el)
 
     var lastContent = ""
     var lastTitle = ""
@@ -170,7 +190,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
   }
 
   protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): TooltipType
-  protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement]
+  protected val defaultPlacement: Placement
   protected val defaultTemplate: String
   protected val defaultTrigger: Seq[Trigger]
 }
