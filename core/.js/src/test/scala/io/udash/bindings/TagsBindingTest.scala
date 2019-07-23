@@ -776,6 +776,28 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       oldCounter should be(4)
     }
+
+    "handle SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div></div>"
+
+      p.set(Seq("A", "B", "C"))
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle non-empty SeqFrag update" in {
+      val p = SeqProperty("A", "B", "C")
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+
+      p.set(Seq("D", "E", "F"))
+
+      template.outerHTML shouldBe "<div>DEF</div>"
+    }
   }
 
   "produce for SeqProperty" should {
