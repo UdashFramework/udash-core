@@ -777,7 +777,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       oldCounter should be(4)
     }
 
-    "handle SeqFrag update" in {
+    "handle standalone SeqFrag update" in {
       val p = SeqProperty.blank[String]
       val template = div(produce(p)(s => s.render)).render
 
@@ -786,6 +786,18 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.set(Seq("A", "B", "C"))
 
       template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => Seq(
+        "test".render,
+        s.render
+      ))).render
+      template.outerHTML shouldBe "<div>test</div>"
+
+      p.set(Seq("A", "B", "C"))
+      template.outerHTML shouldBe "<div>testABC</div>"
     }
 
     "handle non-empty SeqFrag update" in {
