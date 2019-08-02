@@ -35,13 +35,8 @@ object JettyRestClient {
   ): RawRest.HandleRequest =
     RawRest.safeHandle { request =>
       callback =>
-        val urlBuilder = new StringBuilder
-        urlBuilder.append(PlainValue.encodePath(request.parameters.path))
-        if (request.parameters.query.nonEmpty) {
-          urlBuilder.append("?")
-        }
-        urlBuilder.append(RawQueryValue.encodeQuery(request.parameters.query))
-        val httpReq = client.newRequest(urlBuilder.result()).method(request.method.name)
+        val url = request.parameters.toUri(baseUrl)
+        val httpReq = client.newRequest(url).method(request.method.name)
 
         request.parameters.headers.entries.foreach {
           case (name, PlainValue(value)) => httpReq.header(name, value)

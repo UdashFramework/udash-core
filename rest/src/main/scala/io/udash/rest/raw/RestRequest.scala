@@ -26,6 +26,20 @@ final case class RestParameters(
   @multi @tagged[Query] query: Mapping[RawQueryValue] = Mapping.empty,
   @multi @tagged[Cookie] cookies: Mapping[PlainValue] = Mapping.empty
 ) {
+
+  /**
+    * Appends path and query parameters to given base URI. Base URI must not contain query parameters.
+    */
+  def toUri(baseUri: String): String = {
+    val builder = new StringBuilder(baseUri.stripSuffix("/"))
+    PlainValue.encodePath(path, builder)
+    if (query.nonEmpty) {
+      builder.append("?")
+    }
+    RawQueryValue.encodeQuery(query, builder)
+    builder.result()
+  }
+
   def append(method: RestMethodMetadata[_], otherParameters: RestParameters): RestParameters =
     RestParameters(
       path ::: method.applyPathParams(otherParameters.path),

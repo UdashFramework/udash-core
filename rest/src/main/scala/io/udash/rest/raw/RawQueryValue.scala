@@ -49,15 +49,16 @@ sealed abstract class RawQueryValue {
 
   def toList: List[Opt[String]] = iterator.toList
 
-  def encodeParam(name: String): String = {
-    val encName = urlEncode(name)
-    val sb = new StringBuilder
+  def encodeParam(name: String): String =
+    encodeParam(name, new StringBuilder).result()
 
-    def append(enc: Opt[String]): Unit = enc match {
+  def encodeParam(name: String, sb: StringBuilder): StringBuilder = {
+    val encName = urlEncode(name)
+    def append(enc: Opt[String]): StringBuilder = enc match {
       case Opt.Empty => sb.append(encName)
       case Opt(v) => sb.append(encName).append("=").append(v)
     }
-    @tailrec def loop(rqv: RawQueryValue): Unit = rqv match {
+    @tailrec def loop(rqv: RawQueryValue): StringBuilder = rqv match {
       case Single(v) => append(v)
       case Repeated(h, t) =>
         append(h)
@@ -65,7 +66,6 @@ sealed abstract class RawQueryValue {
         loop(t)
     }
     loop(this)
-    sb.result()
   }
 
   def exploded: RawQueryValue = RawQueryValue.fromRaw {
@@ -108,7 +108,19 @@ object RawQueryValue {
     URLEncoder.decode(str, plusAsSpace = true)
 
   def encodeQuery(query: Mapping[RawQueryValue]): String =
-    query.entries.iterator.map { case (name, rqv) => rqv.encodeParam(name) }.mkString("&")
+    encodeQuery(query, new StringBuilder).result()
+
+  def encodeQuery(query: Mapping[RawQueryValue], builder: StringBuilder): StringBuilder = {
+    val it = query.entries.iterator
+    if (it.hasNext) {
+      val (name, rqv) = it.next()
+      rqv.encodeParam(name, builder)
+      it.foreach { case (name, rqv) =>
+        rqv.encodeParam(name, builder.append("&"))
+      }
+    }
+    builder
+  }
 
   def decodeQuery(queryString: String): Mapping[RawQueryValue] = {
     def splitPart(part: String): (String, String) = part.split("=", 2) match {

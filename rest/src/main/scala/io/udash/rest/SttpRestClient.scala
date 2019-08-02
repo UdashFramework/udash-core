@@ -3,8 +3,6 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
-import com.softwaremill.sttp.Uri.QueryFragment.Plain
-import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
 import io.udash.rest.raw._
 
@@ -30,14 +28,9 @@ object SttpRestClient {
     asHandleRequest(uri"$baseUri")
 
   private def toSttpRequest(baseUri: Uri, request: RestRequest): Request[Array[Byte], Nothing] = {
-    val uri = baseUri |>
-      (u => u.copy(path = u.path ++
-        request.parameters.path.map(_.value))) |>
-      (u => u.copy(queryFragments = u.queryFragments ++
-        request.parameters.query.entries.iterator.map {
-          case (k, rqv) => Plain(rqv.encodeParam(k), QueryFragmentEncoding.Relaxed)
-        }.toList
-      ))
+    val tmpUri = uri"${request.parameters.toUri(s"tmp://tmp")}"
+    val uri = baseUri |> (u =>
+      u.copy(path = u.path ++ tmpUri.path, queryFragments = u.queryFragments ++ tmpUri.queryFragments))
 
     val contentHeaders = request.body match {
       case HttpBody.Empty => Nil

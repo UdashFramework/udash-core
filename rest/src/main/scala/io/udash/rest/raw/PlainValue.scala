@@ -19,5 +19,10 @@ object PlainValue extends (String => PlainValue) {
     }
 
   def encodePath(path: List[PlainValue]): String =
-    path.iterator.map(pv => URLEncoder.encode(pv.value, spaceAsPlus = false)).mkString("/", "/", "")
+    encodePath(path, new StringBuilder).result()
+
+  def encodePath(path: List[PlainValue], sb: StringBuilder): StringBuilder = {
+    path.foreach(pv => sb.append("/").append(URLEncoder.encode(pv.value, spaceAsPlus = false)))
+    sb
+  }
 }
