@@ -145,12 +145,12 @@ object HttpBody extends HttpBodyLowPrio {
 
   def json(json: JsonValue): HttpBody = textual(json.value, JsonType)
 
-  def createFormBody(values: Mapping[PlainValue]): HttpBody =
-    if (values.isEmpty) HttpBody.Empty else textual(PlainValue.encodeQuery(values), FormType)
+  def createFormBody(values: Mapping[RawQueryValue]): HttpBody =
+    if (values.isEmpty) HttpBody.Empty else textual(RawQueryValue.encodeQuery(values), FormType)
 
-  def parseFormBody(body: HttpBody): Mapping[PlainValue] = body match {
-    case HttpBody.Empty => Mapping.empty[PlainValue]
-    case _ => PlainValue.decodeQuery(body.readForm())
+  def parseFormBody(body: HttpBody): Mapping[RawQueryValue] = body match {
+    case HttpBody.Empty => Mapping.empty[RawQueryValue]
+    case _ => RawQueryValue.decodeQuery(body.readForm())
   }
 
   def createJsonBody(fields: Mapping[JsonValue]): HttpBody =

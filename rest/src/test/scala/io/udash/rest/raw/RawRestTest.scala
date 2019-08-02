@@ -59,6 +59,13 @@ trait RootApi {
   def subApi(id: Int, @Query query: String): UserApi
   def fail: Future[Unit]
   def failMore: Future[Unit]
+
+  @GET def multiquery(
+    @Query ids: List[String],
+    @Query @explode exp: List[String]
+  ): Future[String]
+
+  @GET def flag(@Query @flag flag: Boolean): Future[Boolean]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
@@ -75,7 +82,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   def repr(req: RestRequest): String = {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
     val queryRepr = req.parameters.query.entries.iterator
-      .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
+      .map({ case (k, rqv) => rqv.encodeParam(k) }).mkStringOrEmpty("?", "&", "")
     val hasHeaders = req.parameters.headers.nonEmpty || req.parameters.cookies.nonEmpty
     val cookieHeader = Opt(req.parameters.cookies).filter(_.nonEmpty)
       .map(cs => "Cookie" -> PlainValue(cs.iterator.map({ case (n, PlainValue(v)) => s"$n=$v" }).mkString("; ")))
@@ -106,6 +113,9 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def multiquery(ids: List[String], exp: List[String]): Future[String] =
+      Future.successful((ids ++ exp).mkString("."))
+    def flag(flag: Boolean): Future[Boolean] = Future.successful(flag)
   }
 
   var trafficLog: String = _
@@ -240,6 +250,42 @@ class RawRestTest extends FunSuite with ScalaFutures {
         |""".stripMargin)
   }
 
+  test("multi-valued query parameters") {
+    testRestCall(_.multiquery(Nil, Nil),
+      """-> GET /multiquery?ids=
+        |<- 200 application/json;charset=utf-8
+        |""
+        |""".stripMargin)
+
+    testRestCall(_.multiquery(List("a"), List("b")),
+      """-> GET /multiquery?ids=a&exp=b
+        |<- 200 application/json;charset=utf-8
+        |"a.b"
+        |""".stripMargin)
+
+    testRestCall(_.multiquery(List("a,b", "c"), List("d,e", "f")),
+      """-> GET /multiquery?ids=a%2Cb,c&exp=d%2Ce&exp=f
+        |<- 200 application/json;charset=utf-8
+        |"a,b.c.d,e.f"
+        |""".stripMargin)
+  }
+
+  test("flag parameters") {
+    testRestCall(_.flag(true),
+      """-> GET /flag?flag
+        |<- 200 application/json;charset=utf-8
+        |true
+        |""".stripMargin
+    )
+
+    testRestCall(_.flag(false),
+      """-> GET /flag
+        |<- 200 application/json;charset=utf-8
+        |false
+        |""".stripMargin
+    )
+  }
+
   test("OPTIONS") {
     val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
     val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
@@ -247,7 +293,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   test("HEAD") {
-    val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
+    val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> RawQueryValue.plain("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.empty)
     assertRawExchange(request, response)

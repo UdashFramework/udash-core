@@ -9,7 +9,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
 
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, tailrec}
 
 sealed abstract class RestMethodCall {
   val pathParams: List[PlainValue]
@@ -72,7 +72,7 @@ trait RawRest {
   def handleForm(
     @methodName name: String,
     @composite parameters: RestParameters,
-    @multi @tagged[Body] body: Mapping[PlainValue]
+    @multi @tagged[Body] body: Mapping[RawQueryValue]
   ): Async[RestResponse]
 
   @multi @tried
@@ -110,7 +110,7 @@ trait RawRest {
       case NonFatal(cause) => throw new InvalidRpcCall(s"Invalid HTTP body: ${cause.getMessage}", cause)
     }
 
-    def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
+    @tailrec def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
       case PrefixCall(pathParams, pm) :: tail =>
         rawRest.prefix(pm.name, parameters.copy(path = pathParams)) match {
           case Success(nextRawRest) => resolveCall(nextRawRest, tail)
@@ -320,7 +320,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
       doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
-    def handleForm(name: String, parameters: RestParameters, body: Mapping[PlainValue]): Async[RestResponse] =
+    def handleForm(name: String, parameters: RestParameters, body: Mapping[RawQueryValue]): Async[RestResponse] =
       doHandle("handleForm", name, parameters, HttpBody.createFormBody(body))
 
     def handleCustom(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =

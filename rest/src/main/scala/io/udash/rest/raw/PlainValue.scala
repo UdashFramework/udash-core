@@ -20,22 +20,4 @@ object PlainValue extends (String => PlainValue) {
 
   def encodePath(path: List[PlainValue]): String =
     path.iterator.map(pv => URLEncoder.encode(pv.value, spaceAsPlus = false)).mkString("/", "/", "")
-
-  final val FormKVSep = "="
-  final val FormKVPairSep = "&"
-
-  def encodeQuery(query: Mapping[PlainValue]): String =
-    query.entries.iterator.map { case (name, PlainValue(value)) =>
-      s"${URLEncoder.encode(name, spaceAsPlus = true)}$FormKVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
-    }.mkString(FormKVPairSep)
-
-  def decodeQuery(queryString: String): Mapping[PlainValue] = {
-    val builder = Mapping.newBuilder[PlainValue]
-    queryString.split(FormKVPairSep).iterator.filter(_.nonEmpty).map(_.split(FormKVSep, 2)).foreach {
-      case Array(name, value) => builder +=
-        URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
-      case _ => throw new IllegalArgumentException(s"invalid query string $queryString")
-    }
-    builder.result()
-  }
 }

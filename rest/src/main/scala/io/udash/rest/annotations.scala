@@ -3,7 +3,11 @@ package rest
 
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
+import com.avsystem.commons.misc.Opt
 import com.avsystem.commons.rpc._
+import com.avsystem.commons.serialization.transientDefault
+import io.udash.rest.openapi.Parameter
+import io.udash.rest.openapi.adjusters.ParameterAdjuster
 import io.udash.rest.raw._
 
 /**
@@ -283,4 +287,59 @@ class addRequestHeader(name: String, value: String) extends RequestAdjuster {
   */
 class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
   def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
+}
+
+/**
+  * May be applied on [[Query]] parameters which are collections (e.g. `List[String]`). Encoding then changes
+  * from single comma-separated value into multiple repeated values.
+  *
+  * @example
+  * {{{
+  * def fetch(@Query @explode ids: List[Int]): Future[List[String]]
+  * }}}
+  *
+  * When passing a `List(1,2,3)` as the `ids` argument, normally (without `@explode`) it would be encoded as
+  * query parameter `"ids=1,2,3"` but when `@explode` is applied it becomes `"ids=1&ids=2&ids=3"`.
+  *
+  * NOTE: Even with `@explode` annotation, it's not possible to express a collection containing single element with
+  * empty string representation. This means that `"ids="` will always be interpreted as empty list.
+  */
+class explode extends RealSymAnnotation with AnnotationAggregate with ParameterAdjuster
+  with EncodingInterceptor[RawQueryValue, RawQueryValue]
+  with DecodingInterceptor[RawQueryValue, RawQueryValue] {
+
+  def toOriginalRaw(newRaw: RawQueryValue): RawQueryValue = newRaw.exploded
+  def toNewRaw(raw: RawQueryValue): RawQueryValue = raw.unexploded
+
+  def adjustParameter(parameter: Parameter): Parameter = parameter.copy(explode = true)
+
+  @transientDefault @rawWhenAbsent(RawQueryValue.Single(Opt.Empty))
+  type Implied
+}
+
+/**
+  * May be applied on [[Query]] parameters typed as `Boolean` or other type which is represented as
+  * `"true"` or `"false"` plain value. This causes the `true` value to be replaced with a simple flag in the query
+  * string and `false` value to be completely omitted.
+  *
+  * @example
+  * {{{
+  * def doSomething(@Query @flag good: Boolean): Future[Unit]
+  * }}}
+  *
+  * The default serialization (without `@flag`) is `"good=true"` or `"good=false"`. When the `@flag` annotation is
+  * applied then `true` value is represented simply as `"good"` in query string and `false` is represented as a
+  * complete absence of this parameter in the query string.
+  */
+class flag extends RealSymAnnotation with AnnotationAggregate
+  with EncodingInterceptor[RawQueryValue, RawQueryValue]
+  with DecodingInterceptor[RawQueryValue, RawQueryValue] {
+
+  def toOriginalRaw(newRaw: RawQueryValue): RawQueryValue =
+    RawQueryValue.Single(newRaw.first.filter(_ != "true"))
+  def toNewRaw(raw: RawQueryValue): RawQueryValue =
+    RawQueryValue.Single(raw.first orElse Opt("true"))
+
+  @transientDefault @rawWhenAbsent(RawQueryValue.plain("false"))
+  type Implied
 }

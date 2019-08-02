@@ -12,8 +12,8 @@ import org.eclipse.jetty.client.api.Result
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesContentProvider, StringContentProvider}
 import org.eclipse.jetty.http.{HttpHeader, MimeTypes}
 
-import scala.util.{Failure, Success}
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object JettyRestClient {
   final val DefaultMaxResponseLength = 2 * 1024 * 1024
@@ -35,13 +35,14 @@ object JettyRestClient {
   ): RawRest.HandleRequest =
     RawRest.safeHandle { request =>
       callback =>
-        val path = baseUrl + PlainValue.encodePath(request.parameters.path)
-        val httpReq = client.newRequest(baseUrl).method(request.method.name)
-
-        httpReq.path(path)
-        request.parameters.query.entries.foreach {
-          case (name, PlainValue(value)) => httpReq.param(name, value)
+        val urlBuilder = new StringBuilder
+        urlBuilder.append(PlainValue.encodePath(request.parameters.path))
+        if (request.parameters.query.nonEmpty) {
+          urlBuilder.append("?")
         }
+        urlBuilder.append(RawQueryValue.encodeQuery(request.parameters.query))
+        val httpReq = client.newRequest(urlBuilder.result()).method(request.method.name)
+
         request.parameters.headers.entries.foreach {
           case (name, PlainValue(value)) => httpReq.header(name, value)
         }

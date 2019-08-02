@@ -7,7 +7,7 @@ import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.openapi._
-import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
+import io.udash.rest.raw._
 
 trait CodecWithStructure[T] {
   def codec: GenCodec[T]
@@ -61,6 +61,12 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
     AsRaw.fromTransparentWrapping
 
   implicit def plainAsReal(implicit wrappedAsRaw: AsReal[PlainValue, Wrapped]): AsReal[PlainValue, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def rawQueryAsRaw(implicit wrappedAsRaw: AsRaw[RawQueryValue, Wrapped]): AsRaw[RawQueryValue, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def rawQueryAsReal(implicit wrappedAsRaw: AsReal[RawQueryValue, Wrapped]): AsReal[RawQueryValue, T] =
     AsReal.fromTransparentWrapping
 
   implicit def jsonAsRaw(implicit wrappedAsRaw: AsRaw[JsonValue, Wrapped]): AsRaw[JsonValue, T] =

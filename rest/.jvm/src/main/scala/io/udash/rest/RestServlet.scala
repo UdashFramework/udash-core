@@ -74,7 +74,7 @@ class RestServlet(
     // can't use request.getPathInfo because it decodes the URL before we can split it
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
     val path = PlainValue.decodePath(request.getRequestURI.stripPrefix(pathPrefix))
-    val query = request.getQueryString.opt.map(PlainValue.decodeQuery).getOrElse(Mapping.empty)
+    val query = request.getQueryString.opt.map(RawQueryValue.decodeQuery).getOrElse(Mapping.empty)
     val headersBuilder = IMapping.newBuilder[PlainValue]
     request.getHeaderNames.asScala.foreach { headerName =>
       if (!headerName.equalsIgnoreCase(CookieHeader)) { // cookies are separate, don't include them into header params

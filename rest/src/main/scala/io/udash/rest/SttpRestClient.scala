@@ -3,7 +3,7 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
-import com.softwaremill.sttp.Uri.QueryFragment.KeyValue
+import com.softwaremill.sttp.Uri.QueryFragment.Plain
 import com.softwaremill.sttp.Uri.QueryFragmentEncoding
 import com.softwaremill.sttp._
 import io.udash.rest.raw._
@@ -35,7 +35,7 @@ object SttpRestClient {
         request.parameters.path.map(_.value))) |>
       (u => u.copy(queryFragments = u.queryFragments ++
         request.parameters.query.entries.iterator.map {
-          case (k, PlainValue(v)) => KeyValue(k, v, QueryFragmentEncoding.All, QueryFragmentEncoding.All)
+          case (k, rqv) => Plain(rqv.encodeParam(k), QueryFragmentEncoding.Relaxed)
         }.toList
       ))
 

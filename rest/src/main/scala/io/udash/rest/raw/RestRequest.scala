@@ -23,7 +23,7 @@ object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
 final case class RestParameters(
   @multi @tagged[Path] path: List[PlainValue] = Nil,
   @multi @tagged[Header] headers: IMapping[PlainValue] = IMapping.empty,
-  @multi @tagged[Query] query: Mapping[PlainValue] = Mapping.empty,
+  @multi @tagged[Query] query: Mapping[RawQueryValue] = Mapping.empty,
   @multi @tagged[Cookie] cookies: Mapping[PlainValue] = Mapping.empty
 ) {
   def append(method: RestMethodMetadata[_], otherParameters: RestParameters): RestParameters =
@@ -41,10 +41,10 @@ final case class RestParameters(
     copy(headers = headers.append(name, PlainValue(value)))
 
   def query(name: String, value: String): RestParameters =
-    copy(query = query.append(name, PlainValue(value)))
+    copy(query = query.append(name, RawQueryValue.plain(value)))
 
   def cookie(name: String, value: String): RestParameters =
-    copy(query = cookies.append(name, PlainValue(value)))
+    copy(cookies = cookies.append(name, PlainValue(value)))
 }
 object RestParameters {
   final val Empty = RestParameters()
