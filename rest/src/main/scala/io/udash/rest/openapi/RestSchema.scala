@@ -167,15 +167,18 @@ trait RestMediaTypes[T] {
   /**
     * @param schemaTransform Should be used if [[RestMediaTypes]] is being built based on [[RestSchema]] for
     *                        the same type. The transformation may adjust the schema and give it a different name.
+    *                        This transformation is usually used when there's a type that wraps another type and wants
+    *                        to reuse [[RestMediaTypes]] of the wrapped type but also introduces some schema
+    *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
     */
-  def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType]
+  def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType]
 }
 object RestMediaTypes {
   def apply[T](implicit r: RestMediaTypes[T]): RestMediaTypes[T] = r
 
   implicit val ByteArrayMediaTypes: RestMediaTypes[Array[Byte]] =
     new RestMediaTypes[Array[Byte]] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[Array[Byte]] => RestSchema[_]): Map[String, MediaType] = {
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] = {
         val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
         Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
       }
@@ -183,7 +186,7 @@ object RestMediaTypes {
 
   implicit def fromSchema[T: RestSchema]: RestMediaTypes[T] =
     new RestMediaTypes[T] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType] =
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] =
         Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
     }
 
@@ -204,8 +207,11 @@ trait RestResponses[T] {
   /**
     * @param schemaTransform Should be used if [[RestResponses]] is being built based on [[RestSchema]] for
     *                        the same type. The transformation may adjust the schema and give it a different name.
+    *                        This transformation is usually used when there's a type that wraps another type and wants
+    *                        to reuse [[RestResponses]] of the wrapped type but also introduces some schema
+    *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
     */
-  def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses
+  def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses
 }
 object RestResponses {
   def apply[T](implicit r: RestResponses[T]): RestResponses[T] = r
@@ -214,7 +220,7 @@ object RestResponses {
 
   implicit val UnitResponses: RestResponses[Unit] =
     new RestResponses[Unit] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[Unit] => RestSchema[_]): Responses =
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
         Responses(byStatusCode = Map(
           204 -> RefOr(Response(description = SuccessDescription))
         ))
@@ -222,7 +228,7 @@ object RestResponses {
 
   implicit def fromMediaTypes[T: RestMediaTypes]: RestResponses[T] =
     new RestResponses[T] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
         Responses(byStatusCode = Map(
           200 -> RefOr(Response(
             description = SuccessDescription,
@@ -280,7 +286,7 @@ trait RestRequestBody[T] {
     * @param schemaTransform Should be used if [[RestRequestBody]] is being built based on [[RestSchema]] for
     *                        the same type. The transformation may adjust the schema and give it a different name.
     */
-  def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Opt[RefOr[RequestBody]]
+  def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]]
 }
 object RestRequestBody {
   def apply[T](implicit r: RestRequestBody[T]): RestRequestBody[T] = r
@@ -294,13 +300,13 @@ object RestRequestBody {
     )))
 
   implicit val UnitRequestBody: RestRequestBody[Unit] = new RestRequestBody[Unit] {
-    def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[Unit] => RestSchema[_]): Opt[RefOr[RequestBody]] =
+    def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] =
       Opt.Empty
   }
 
   implicit def fromMediaTypes[T: RestMediaTypes]: RestRequestBody[T] =
     new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
+      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
         val mediaTypes = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
         Opt(RefOr(RequestBody(content = mediaTypes, required = true)))
       }

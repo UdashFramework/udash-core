@@ -5,6 +5,7 @@ package raw
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import io.udash.rest.util.WithHeaders
 import org.scalactic.source.Position
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
@@ -59,6 +60,8 @@ trait RootApi {
   def subApi(id: Int, @Query query: String): UserApi
   def fail: Future[Unit]
   def failMore: Future[Unit]
+
+  @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
@@ -106,6 +109,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]] =
+      Future.successful(WithHeaders((), headers.toList))
   }
 
   var trafficLog: String = _
@@ -238,6 +243,17 @@ class RawRestTest extends FunSuite with ScalaFutures {
         |<- 200 application/octet-stream
         |0505050505
         |""".stripMargin)
+  }
+
+  test("response with headers") {
+    testRestCall(_.echoHeaders(IListMap("X-A" -> "a", "X-B" -> "b")),
+      """-> POST /echoHeaders application/json;charset=utf-8
+        |{"X-A":"a","X-B":"b"}
+        |<- 204
+        |X-A: a
+        |X-B: b
+        |""".stripMargin
+    )
   }
 
   test("OPTIONS") {
