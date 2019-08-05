@@ -86,19 +86,19 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
 
   implicit def restMediaTypes(implicit wrappedMediaTypes: RestMediaTypes[Wrapped]): RestMediaTypes[T] =
     new RestMediaTypes[T] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Map[String, MediaType] =
+      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] =
         wrappedMediaTypes.mediaTypes(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
     }
 
   implicit def restRequestBody(implicit wrappedBody: RestRequestBody[Wrapped]): RestRequestBody[T] =
     new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Opt[RefOr[RequestBody]] =
+      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] =
         wrappedBody.requestBody(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
     }
 
   implicit def restResponses(implicit wrappedResponses: RestResponses[Wrapped]): RestResponses[T] =
     new RestResponses[T] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[T] => RestSchema[_]): Responses =
+      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
         wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
     }
 }
