@@ -10,17 +10,13 @@ import scala.scalajs.js
 
 private[bindings]
 trait ValueModifier[T] extends Binding with DOMManipulator {
+
   import Bindings._
 
   protected def property: ReadableProperty[T]
   protected def builder: (T, Binding.NestedInterceptor) => Seq[Node]
   protected def checkNull: Boolean
   protected def listen(callback: T => Unit): Registration
-
-  private def childrenCopy(node: Node): Iterator[Node] = {
-    //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
-    js.Dynamic.global.Array.prototype.slice.call(node.childNodes).asInstanceOf[js.Array[Node]].iterator
-  }
 
   override def applyTo(t: Element): Unit = {
     var elements: Seq[Node] = Seq.empty
@@ -36,7 +32,9 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
           .getOrElse(emptyStringNode())
 
       elements = newEls.iterator.flatMap {
-        case fragment: DocumentFragment => childrenCopy(fragment)
+        case fragment: DocumentFragment =>
+          //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
+          js.Dynamic.global.Array.prototype.slice.call(fragment.childNodes).asInstanceOf[js.Array[Node]].iterator
         case node => Iterator(node)
       }.toSeq
 
