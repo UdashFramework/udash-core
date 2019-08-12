@@ -422,7 +422,7 @@ object UdashIcons {
       def wikipediaW: CssStyle = fab("wikipedia-w")
       def windows: CssStyle = fab("windows")
       def wix: CssStyle = fab("wix")
-      def wizardsOfTheCoast : CssStyle = fab("wizards-of-the-coast ")
+      def wizardsOfTheCoast: CssStyle = fab("wizards-of-the-coast")
       def wolfPackBattalion: CssStyle = fab("wolf-pack-battalion")
       def wordpress: CssStyle = fab("wordpress")
       def wordpressSimple: CssStyle = fab("wordpress-simple")

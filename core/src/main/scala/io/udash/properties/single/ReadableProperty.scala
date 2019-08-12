@@ -9,7 +9,7 @@ import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 
 /** Base interface of every Property in Udash. */
-trait ReadableProperty[A] {
+trait ReadableProperty[+A] {
   /** Unique property ID. */
   val id: PropertyId
 

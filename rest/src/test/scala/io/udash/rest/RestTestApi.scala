@@ -38,7 +38,7 @@ object CustomResp {
     resp => CustomResp(resp.headers("X-Value").value)
   )
   implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {
-    def responses(resolver: SchemaResolver, schemaTransform: RestSchema[CustomResp] => RestSchema[_]): Responses =
+    def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
       Responses(byStatusCode = Map(200 -> RefOr(Response(
         description = "Custom response",
         headers = Map("X-Value" -> RefOr(OASHeader(

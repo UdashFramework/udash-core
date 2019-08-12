@@ -776,6 +776,51 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       oldCounter should be(4)
     }
+
+    "handle standalone SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div></div>"
+
+      p.set(Seq("A", "B", "C"))
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => Seq(
+        "test".render,
+        s.render
+      ))).render
+      template.outerHTML shouldBe "<div>test</div>"
+
+      p.set(Seq("A", "B", "C"))
+      template.outerHTML shouldBe "<div>testABC</div>"
+    }
+
+    "handle nested SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => Seq(
+        Seq(s.render).render
+      ).render)).render
+      template.outerHTML shouldBe "<div></div>"
+
+      p.set(Seq("A", "B", "C"))
+      template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle non-empty SeqFrag update" in {
+      val p = SeqProperty("A", "B", "C")
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+
+      p.set(Seq("D", "E", "F"))
+
+      template.outerHTML shouldBe "<div>DEF</div>"
+    }
   }
 
   "produce for SeqProperty" should {
@@ -2039,9 +2084,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(nested(produce(p2) { v2 =>
+                fired += v1 -> v2
+                div((v1 -> v2).toString()).render
+              })).render
             })
           ).render
         }
@@ -2072,9 +2119,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (vs, nested) =>
+              div(
+                nested(produce(vs) { v2 =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }
@@ -2102,11 +2153,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val fired = ListBuffer.empty[(Int, Int)]
 
       div(
-        repeatWithNested(p) { case (v1, nested) =>
+        repeatWithNested(p) { case (p1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1.get -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(
+                nested(produce(p1.combine(p2)(_ -> _)) { case (v1, v2) =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }
