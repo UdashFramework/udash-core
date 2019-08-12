@@ -95,7 +95,7 @@ object SeriesFunnel {
             color: js.UndefOr[Color] = js.undefined,
             colors: js.UndefOr[Seq[Color]] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesFunnelData | Double] = Seq.empty,
+            data: Seq[Double | SeriesFunnelData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesConnectorDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,

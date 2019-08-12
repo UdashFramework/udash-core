@@ -113,7 +113,7 @@ object SeriesBoxplot {
             colors: js.UndefOr[Seq[Color]] = js.undefined,
             crisp: js.UndefOr[Boolean] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesBoxplotData] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesBoxplotData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,
