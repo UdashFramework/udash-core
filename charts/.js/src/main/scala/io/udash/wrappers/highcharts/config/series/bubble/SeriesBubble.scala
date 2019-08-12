@@ -154,7 +154,7 @@ object SeriesBubble {
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
             dashStyle: js.UndefOr[DashStyle] = js.undefined,
-            data: Seq[SeriesBubbleData | Double] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesBubbleData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             displayNegative: js.UndefOr[Boolean] = js.undefined,

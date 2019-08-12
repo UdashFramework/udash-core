@@ -63,7 +63,7 @@ object SeriesSolidgauge {
             className: js.UndefOr[String] = js.undefined,
             color: js.UndefOr[Color] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesSolidgaugeData | Double] = Seq.empty,
+            data: Seq[Double | SeriesSolidgaugeData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             enableMouseTracking: js.UndefOr[Boolean] = js.undefined,
