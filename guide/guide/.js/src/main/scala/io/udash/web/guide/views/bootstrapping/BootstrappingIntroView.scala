@@ -24,7 +24,7 @@ class BootstrappingIntroView extends FinalView with CssView {
         "It is useful when you want to use data models both in frontend and backend. Udash uses this module to e.g. share RPC interfaces."
       ),
       li(
-        "backend - contains ", a(href := RpcIntroState.url)("RPC"), "implementation and the whole backend application logic. ",
+        "backend - contains ", a(href := RpcIntroState.url)("RPC"), " implementation and the whole backend application logic. ",
         "It is compiled to bytecode only. You can write your backend logic like database access, services layer etc. there."
       ),
       li(

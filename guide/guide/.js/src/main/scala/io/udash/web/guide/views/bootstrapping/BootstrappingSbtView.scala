@@ -51,7 +51,7 @@ final class BootstrappingSbtView extends FinalView with CssView {
       )(GuideStyles),
       h3("Advanced project setup"),
       p(
-        "You can see the generated ", i("build.sbt"), " ", a(href := ExternalUrls.udashG8Build)("template"), " below."
+        "You can see the generated ", a(href := ExternalUrls.udashG8Build)(i("build.sbt"), " template"), " below."
       ),
       CodeBlock.reactive(g8buildContent, b("Loading..."))(GuideStyles),
       p(
