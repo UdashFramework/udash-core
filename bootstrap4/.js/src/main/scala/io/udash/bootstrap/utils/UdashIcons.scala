@@ -131,6 +131,7 @@ object UdashIcons {
       def confluence: CssStyle = fab("confluence")
       def connectdevelop: CssStyle = fab("connectdevelop")
       def contao: CssStyle = fab("contao")
+      def cottonBureau: CssStyle = fab("cotton-bureau")
       def cpanel: CssStyle = fab("cpanel")
       def creativeCommons: CssStyle = fab("creative-commons")
       def creativeCommonsBy: CssStyle = fab("creative-commons-by")
