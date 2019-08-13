@@ -214,7 +214,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendMVPState.url)("Model, View, Presenter & ViewFactory"), " chapter to ",
-      "learn more about the ", a(href := References.MvpPattern)("MVP pattern"), " variation used in Udash."
+      "learn more about the ", a(href := References.MvpPattern, target := "_blank")("MVP pattern"), " variation used in Udash."
     )
   )
 }

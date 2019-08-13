@@ -53,7 +53,7 @@ final class BootstrappingSbtView extends FinalView with CssView {
       p(
         "You can see the generated ", a(href := ExternalUrls.udashG8Build)(i("build.sbt"), " template"), " below."
       ),
-      CodeBlock.reactive(g8buildContent, b("Loading..."))(GuideStyles),
+      CodeBlock.reactive(g8buildContent, "Loading...")(GuideStyles),
       p(
         "You don't have to use ", a(href := JettyHomepage)("Jetty"), " as webserver nor to use ",
         a(href := BootstrapHomepage)("Twitter bootstrap"), " for frontend components. Anyway it is recommended to use ",

@@ -9,7 +9,7 @@ object References {
   val HighchartsHomepage = "http://www.highcharts.com/"
   val HighchartsLicense = "https://shop.highsoft.com/highcharts"
   val JettyHomepage = "http://www.eclipse.org/jetty/"
-  val MvpPattern = "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter"
+  val MvpPattern = "https://martinfowler.com/eaaDev/uiArchs.html#Model-view-presentermvp"
   val SbtHomepage = "http://www.scala-sbt.org/"
   val SbtScalaJsPluginHomepage = "http://www.scala-js.org/doc/sbt-plugin.html"
   val ScalaCssHomepage = "https://github.com/japgolly/scalacss"
