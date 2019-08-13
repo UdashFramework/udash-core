@@ -93,7 +93,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     animation: Boolean = true,
     boundary: String | dom.Node = "scrollParent",
     container: Option[String | dom.Node] = None,
-    content: js.Function1[dom.Node, String] | dom.Node = ((_: dom.Node) => ""): js.Function1[dom.Node, String],
+    content: js.Function1[dom.Node, String] | dom.Node = io.udash.emptyStringNode(),
     delay: Delay = Delay(0 millis, 0 millis),
     html: Boolean = false,
     offset: String = "0",
