@@ -310,34 +310,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
     }
-
-    "provide value-based switcher" in {
-      val element = h1("Test")
-      val template = div(
-        span(),
-        showIf(true)(element.render),
-        span()
-      ).render
-      val template2 = div(showIf(true)(element.render)).render
-
-      template.textContent should be("Test")
-      template.childNodes(0).textContent should be("")
-      template.childNodes(1).textContent should be("Test")
-      template.childNodes(2).textContent should be("")
-      template2.textContent should be("Test")
-
-      val template3 = div(
-        span(),
-        showIf(false)(element.render),
-        span()
-      ).render
-      val template4 = div(showIf(false)(element.render)).render
-
-      template3.textContent should be("")
-      template3.childElementCount shouldBe 2
-      template4.textContent should be("")
-      template4.childElementCount shouldBe 0
-    }
   }
 
   "showIfElse" should {
@@ -483,36 +455,6 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
       elementElse2.textContent should be("OLD")
-    }
-
-    "provide value-based switcher" in {
-      val element = h1("Test")
-      val elseElement = h1("Else")
-      val template = div(
-        span(),
-        showIfElse(true)(element.render, elseElement.render),
-        span()
-      ).render
-      val template2 = div(showIfElse(true)(element.render, elseElement.render)).render
-
-      template.textContent should be("Test")
-      template.childNodes(0).textContent should be("")
-      template.childNodes(1).textContent should be("Test")
-      template.childNodes(2).textContent should be("")
-      template2.textContent should be("Test")
-
-      val template3 = div(
-        span(),
-        showIfElse(false)(element.render, elseElement.render),
-        span()
-      ).render
-      val template4 = div(showIfElse(false)(element.render, elseElement.render)).render
-
-      template3.textContent should be("Else")
-      template3.childNodes(0).textContent should be("")
-      template3.childNodes(1).textContent should be("Else")
-      template3.childNodes(2).textContent should be("")
-      template4.textContent should be("Else")
     }
   }
 
@@ -833,6 +775,51 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.textContent should be("true")
       template2.textContent should be("")
       oldCounter should be(4)
+    }
+
+    "handle standalone SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div></div>"
+
+      p.set(Seq("A", "B", "C"))
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => Seq(
+        "test".render,
+        s.render
+      ))).render
+      template.outerHTML shouldBe "<div>test</div>"
+
+      p.set(Seq("A", "B", "C"))
+      template.outerHTML shouldBe "<div>testABC</div>"
+    }
+
+    "handle nested SeqFrag update" in {
+      val p = SeqProperty.blank[String]
+      val template = div(produce(p)(s => Seq(
+        Seq(s.render).render
+      ).render)).render
+      template.outerHTML shouldBe "<div></div>"
+
+      p.set(Seq("A", "B", "C"))
+      template.outerHTML shouldBe "<div>ABC</div>"
+    }
+
+    "handle non-empty SeqFrag update" in {
+      val p = SeqProperty("A", "B", "C")
+      val template = div(produce(p)(s => s.render)).render
+
+      template.outerHTML shouldBe "<div>ABC</div>"
+
+      p.set(Seq("D", "E", "F"))
+
+      template.outerHTML shouldBe "<div>DEF</div>"
     }
   }
 
@@ -2097,9 +2084,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(nested(produce(p2) { v2 =>
+                fired += v1 -> v2
+                div((v1 -> v2).toString()).render
+              })).render
             })
           ).render
         }
@@ -2130,9 +2119,13 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       div(
         produceWithNested(p) { case (v1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1 -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (vs, nested) =>
+              div(
+                nested(produce(vs) { v2 =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }
@@ -2160,11 +2153,15 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val fired = ListBuffer.empty[(Int, Int)]
 
       div(
-        repeatWithNested(p) { case (v1, nested) =>
+        repeatWithNested(p) { case (p1, nested) =>
           div(
-            nested(repeat(s) { v2 =>
-              fired += v1.get -> v2.get
-              div().render
+            nested(repeatWithNested(s) { (p2, nested) =>
+              div(
+                nested(produce(p1.combine(p2)(_ -> _)) { case (v1, v2) =>
+                  fired += v1 -> v2
+                  (v1 -> v2).toString().render
+                })
+              ).render
             })
           ).render
         }

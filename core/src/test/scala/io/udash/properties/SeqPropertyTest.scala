@@ -403,33 +403,40 @@ class SeqPropertyTest extends UdashCoreTest {
     }
 
     "transform into another SeqProperty" in {
-      val p = SeqProperty[Int](1, 2, 3)
+      class BadEquals(val v: Int)
+      val init: Seq[BadEquals] = (1 to 3).map(new BadEquals(_))
+      val p = SeqProperty[BadEquals](init)
+
       val t = p.transform[T](
-        (i: Int) => TC1(i),
+        (i: BadEquals) => TC1(i.v),
         (t: T) => t match {
-          case TC1(i) => i
-          case _: T => 0
+          case TC1(i) => new BadEquals(i)
+          case _: T => new BadEquals(0)
         }
       )
 
-      p.get should be(Seq(1, 2, 3))
+      p.get.map(_.v) should be(Seq(1, 2, 3))
       t.get should be(Seq(TC1(1), TC1(2), TC1(3)))
 
       t.prepend(TC1(0))
 
-      p.get should be(Seq(0, 1, 2, 3))
+      p.get.map(_.v) should be(Seq(0, 1, 2, 3))
       t.get should be(Seq(TC1(0), TC1(1), TC1(2), TC1(3)))
 
-      p.append(4)
+      p.append(new BadEquals(4))
 
-      p.get should be(Seq(0, 1, 2, 3, 4))
+      p.get.map(_.v) should be(Seq(0, 1, 2, 3, 4))
       t.get should be(Seq(TC1(0), TC1(1), TC1(2), TC1(3), TC1(4)))
 
       t.set(Seq(TO1, TO2))
 
       t.get should be(Seq(TC1(0), TC1(0))) // Again notice that you wont get inserted values, because they were transformed.
-      p.get should be(Seq(0, 0))
+      p.get.map(_.v) should be(Seq(0, 0))
       t.get should be(Seq(TC1(0), TC1(0)))
+
+      t.elemProperties.foreach(_.set(TC1(42)))
+      p.get.map(_.v) should be(Seq(42, 42))
+      t.get should be(Seq(TC1(42), TC1(42)))
     }
 
     "return immutable sequence from get" in {

@@ -34,7 +34,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel10 = UdashCarousel.default(slides(), activeSlide = Property(10))()
       val carousel9 = UdashCarousel.default(slides(), activeSlide = Property(9))()
       val carouselNegative = UdashCarousel.default(slides(), activeSlide = Property(-4))()
-      val carouselEmpty = UdashCarousel.default(SeqProperty.blank, activeSlide = Property(7))()
+      val carouselEmpty = UdashCarousel.default(SeqProperty.blank[UdashCarouselSlide], activeSlide = Property(7))()
       carousel4.activeSlide.get shouldBe 4
       carousel0.activeSlide.get shouldBe 0
       carousel11.activeSlide.get shouldBe 9

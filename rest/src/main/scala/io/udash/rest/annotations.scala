@@ -158,7 +158,8 @@ class CustomBody extends SomeBodyTag
   *
   * By default, parameters of a prefix method are interpreted as URL path fragments. Their values are encoded as
   * [[io.udash.rest.raw.PlainValue PlainValue]] and appended to URL path. Alternatively, each parameter may also be
-  * explicitly annotated with [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
+  * explicitly annotated with [[io.udash.rest.Header Header]], [[io.udash.rest.Query Query]] or
+  * [[io.udash.rest.Cookie Cookie]].
   *
   * NOTE: REST method is interpreted as prefix method by default which means that there is no need to apply
   * [[io.udash.rest.Prefix Prefix]] annotation explicitly unless you want to specify a custom path.
@@ -217,7 +218,7 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with NonBodyTag
 
 /**
-  * REST method parameterrs annotated with [[io.udash.rest.Query Query]] will be encoded as
+  * REST method parameterrs annotated with [[io.udash.rest.Cookie Cookie]] will be encoded as
   * [[io.udash.rest.raw.PlainValue PlainValue]] and sent as cookie values (using `Cookie` HTTP header).
   * Cookie parameter values must not contain ';' character (semicolon).
   */
