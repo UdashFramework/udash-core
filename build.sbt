@@ -443,6 +443,19 @@ lazy val `guide-guide` =
     Dependencies.guideJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.GuideCssRenderer")),
     Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
+  ).settings(
+    Compile / copyAssets := {
+      // (Compile / copyAssets) logic already defined within `frontendExecutable` should be executed first
+      (Compile / copyAssets).value
+      // font-awesome WebJar is required on the classpath to execute the next step
+      (Assets / WebKeys.webJars).value
+      // copying font-awesome webfonts to a location required by font-awesome styles 
+      // (appropriate CSS file is inlined by less within UdashStatics/WebContent/guide/assets/styles/assets.min.css)
+      IO.copyDirectory(
+        (Assets / WebKeys.webJarsDirectory).value / "lib/font-awesome/webfonts",
+        target.value / "UdashStatics/WebContent/guide/assets/webfonts"
+      )
+    },
   )
 
 lazy val `guide-packager` = 
