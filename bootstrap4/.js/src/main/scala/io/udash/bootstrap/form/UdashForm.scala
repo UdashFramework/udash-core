@@ -40,7 +40,7 @@ final class UdashForm private(
   override val render: Form =
     form(formStyle)(
       onsubmit :+= { _: Event => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
-      content(new FormElementsFactory(nestedInterceptor, inputValidationTrigger, selectValidationTrigger))
+      content(new FormElementsFactory(nestedInterceptor, inputValidationTrigger, selectValidationTrigger, this))
     ).render
 }
 
@@ -136,6 +136,12 @@ final class FormElementsFactory(
 
   import io.udash.css.CssView._
 
+  /** Use this method to bond the external binding's lifecycle with the lifecycle of the elements created via this factory. */
+  def externalBinding[T <: Binding](binding: T): T = {
+    nestedInterceptor(binding)
+    binding
+  }
+
   /**
     * Wrapper for disabled elements.
     *
@@ -183,7 +189,7 @@ final class FormElementsFactory(
       invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
       helpText: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new UdashBootstrapComponent {
+      externalBinding(new UdashBootstrapComponent {
         override val render: Element = horizontal match {
           case None =>
             val inputEl = input(nestedInterceptor)
@@ -213,7 +219,7 @@ final class FormElementsFactory(
         }
 
         override val componentId: ComponentId = groupId
-      }
+      })
     }
 
     /**
@@ -238,7 +244,7 @@ final class FormElementsFactory(
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         TextInput(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
@@ -246,7 +252,7 @@ final class FormElementsFactory(
           validationModifier(property, validationTrigger, nestedInterceptor),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -271,7 +277,7 @@ final class FormElementsFactory(
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         PasswordInput(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
@@ -279,7 +285,7 @@ final class FormElementsFactory(
           validationModifier(property, validationTrigger, nestedInterceptor),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -304,7 +310,7 @@ final class FormElementsFactory(
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         NumberInput(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
@@ -312,7 +318,7 @@ final class FormElementsFactory(
           validationModifier(property, validationTrigger, nestedInterceptor),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -340,7 +346,7 @@ final class FormElementsFactory(
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         RangeInput(value, minValue, maxValue, valueStep)(
           id := inputId,
           BootstrapStyles.Form.controlRange,
@@ -348,7 +354,7 @@ final class FormElementsFactory(
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(value, validationTrigger, nestedInterceptor)
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -373,7 +379,7 @@ final class FormElementsFactory(
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         TextArea(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
@@ -381,7 +387,7 @@ final class FormElementsFactory(
           validationModifier(property, validationTrigger, nestedInterceptor),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -420,7 +426,7 @@ final class FormElementsFactory(
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
       invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new UdashBootstrapComponent {
+      externalBinding(new UdashBootstrapComponent {
         private val input = FileInput(selectedFiles, acceptMultipleFiles)(
           inputName,
           id := inputId,
@@ -438,7 +444,7 @@ final class FormElementsFactory(
           validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(nestedInterceptor))),
           invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(nestedInterceptor)))
         ).render
-      }
+      })
     }
 
     /**
@@ -465,7 +471,7 @@ final class FormElementsFactory(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         Select(selectedItem, options)(
           itemLabel,
           id := inputId,
@@ -474,7 +480,7 @@ final class FormElementsFactory(
           validationModifier(selectedItem, validationTrigger, nestedInterceptor),
           nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -501,7 +507,7 @@ final class FormElementsFactory(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new InputComponent(
+      externalBinding(new InputComponent(
         Select(selectedItems, options)(
           itemLabel,
           id := inputId,
@@ -510,7 +516,7 @@ final class FormElementsFactory(
           validationModifier(selectedItems, validationTrigger, nestedInterceptor),
           nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
-      )
+      ))
     }
 
     /**
@@ -546,7 +552,7 @@ final class FormElementsFactory(
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
       invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
     ): UdashBootstrapComponent = {
-      new UdashBootstrapComponent {
+      externalBinding(new UdashBootstrapComponent {
         private val input = nestedInterceptor(Checkbox(property)(
           id := inputId,
           BootstrapStyles.Form.control,
@@ -566,7 +572,7 @@ final class FormElementsFactory(
           validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(nestedInterceptor))),
           invalidFeedback.map(content => div(BootstrapStyles.Form.invalidFeedback)(content(nestedInterceptor)))
         ).render
-      }
+      })
     }
 
     /**
@@ -606,10 +612,10 @@ final class FormElementsFactory(
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
     ): UdashBootstrapComponent = {
-      new ButtonsComponent[T](
+      externalBinding(new ButtonsComponent[T](
         selectedItems, decorator => CheckButtons(selectedItems, options)(decorator),
         BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
-      )(inputModifier, labelContent, validFeedback, invalidFeedback)
+      )(inputModifier, labelContent, validFeedback, invalidFeedback))
     }
 
     /**
@@ -649,10 +655,10 @@ final class FormElementsFactory(
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
     ): UdashBootstrapComponent = {
-      new ButtonsComponent[T](
+      externalBinding(new ButtonsComponent[T](
         selectedItem, decorator => RadioButtons(selectedItem, options)(decorator),
         BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
-      )(inputModifier, labelContent, validFeedback, invalidFeedback)
+      )(inputModifier, labelContent, validFeedback, invalidFeedback))
     }
 
     private class InputComponent(in: InputBinding[_ <: Element], inputId: ComponentId) extends UdashBootstrapComponent {
