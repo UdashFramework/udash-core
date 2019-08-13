@@ -61,10 +61,10 @@ class ChartsExtView extends FinalView {
          |"org.webjars" % "highcharts" % highchartsVarsion / s"${"$highchartsVarsion"}/modules/drilldown.src.js" minified s"${"$highchartsVarsion"}/modules/drilldown.js" dependsOn s"${"$highchartsVarsion"}/highcharts.src.js",
          |"org.webjars" % "highcharts" % highchartsVarsion / s"${"$highchartsVarsion"}/modules/heatmap.src.js" minified s"${"$highchartsVarsion"}/modules/heatmap.js" dependsOn s"${"$highchartsVarsion"}/highcharts.src.js"""".stripMargin
     )(GuideStyles),
-    p("The wrapper provides a typed equivalent of the ", a(href := References.HighchartsHomepage)("Highcharts"), " API."),
+    p("The wrapper provides a typed equivalent of the ", a(href := References.HighchartsHomepage, target := "_blank")("Highcharts"), " API."),
     p(
       "Remember that ", i("Highcharts"), " library is free for non-commercial use. Take a look at ",
-      a(href := References.HighchartsLicense)("licenses page"), "."
+      a(href := References.HighchartsLicense, target := "_blank")("licenses page"), "."
     ),
     h2("Examples"),
     p(

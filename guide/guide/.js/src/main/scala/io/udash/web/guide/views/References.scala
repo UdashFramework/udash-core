@@ -3,6 +3,7 @@ package io.udash.web.guide.views
 object References {
   val UdashjQueryWrapperRepo = "https://github.com/UdashFramework/scala-js-jquery"
   val UdashGuideRepo = "https://github.com/UdashFramework/udash-core/tree/master/guide"
+  val UdashG8Repo = "https://github.com/UdashFramework/udash.g8"
   val UdashFilesDemoRepo = "https://github.com/UdashFramework/udash-demos/tree/master/file-upload"
   val AvScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"
   val BootstrapHomepage = "http://getbootstrap.com/"

@@ -4,6 +4,8 @@ object ExternalUrls {
   val udashGitter = "https://gitter.im/UdashFramework/udash-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"
   val udashGithub = "https://github.com/UdashFramework/"
   val udashG8Build = "https://raw.githubusercontent.com/UdashFramework/udash.g8/master/src/main/g8/build.sbt"
+  val udashG8Plugins = "https://raw.githubusercontent.com/UdashFramework/udash.g8/master/src/main/g8/project/plugins.sbt"
+  val udashG8Index = "https://raw.githubusercontent.com/UdashFramework/udash.g8/master/src/main/g8/frontend/src/main/assets/index.html"
   val udashDemos = "https://github.com/UdashFramework/udash-demos"
   val stackoverflow = "http://stackoverflow.com/questions/tagged/udash"
   val avsystem = "http://www.avsystem.com/"

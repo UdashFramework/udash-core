@@ -9,20 +9,18 @@ import io.udash.web.guide.styles.demo.ExampleStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.wrappers.jquery._
-
 import scalatags.JsDom
 
 case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
 class FrontendTemplatesView extends FinalView with CssView {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
+  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = div(
     h2("Scalatags & UdashCSS"),
     p(
-      "Using ", a(href := References.ScalatagsHomepage)("ScalaTags"), " and ", i("UdashCSS"), " ",
+      "Using ", a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"), " and ", i("UdashCSS"), " ",
       "is the recommended way of creating and styling view templates. This part of the guide presents the most interesting parts ",
       "of these libraries. For more details refer to projects documentation."
     ),

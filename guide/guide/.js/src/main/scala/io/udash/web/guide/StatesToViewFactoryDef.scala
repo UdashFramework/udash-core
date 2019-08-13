@@ -19,6 +19,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case BootstrappingState => BootstrappingViewFactory
       case BootstrappingIntroState => BootstrappingIntroViewFactory
       case BootstrappingSbtState => BootstrappingSbtViewFactory
+      case AdvancedBootstrappingSbtState => AdvancedBootstrappingSbtViewFactory
       case BootstrappingRpcState => BootstrappingRpcViewFactory
       case BootstrappingFrontendState => BootstrappingFrontendViewFactory
       case BootstrappingBackendState => BootstrappingBackendViewFactory
@@ -51,7 +52,6 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
 
       case FaqState => FaqViewFactory
       case LicenseState => MarkdownPageViewFactory[LicenseState.type]()(Context.serverRpc.pages)
-
-      case _ => ErrorViewFactory
+      case ErrorState => ErrorViewFactory
     }
 }
