@@ -131,7 +131,7 @@ final class FormElementsFactory(
   nestedInterceptor: Binding.NestedInterceptor,
   inputValidationTrigger: ValidationTrigger,
   selectValidationTrigger: ValidationTrigger,
-  form: OptArg[UdashForm] = OptArg.Empty,
+  form: OptArg[UdashForm] = OptArg.Empty
 ) extends CrossLogging {
 
   import io.udash.css.CssView._
