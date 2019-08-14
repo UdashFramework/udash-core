@@ -35,10 +35,9 @@ trait BootstrapStyles {
 
   object Alert {
     def alert = CssStyleName("alert")
-
     def dismissible = CssStyleName("alert-dismissible")
+    def heading = CssStyleName("alert-heading")
     def link = CssStyleName("alert-link")
-
     def color(color: Color = Color.Secondary) =
       CssStyleName(s"alert${color.classMarker}")
   }
@@ -77,18 +76,14 @@ trait BootstrapStyles {
 
     def group = CssStyleName("btn-group")
     def groupVertical = CssStyleName("btn-group-vertical")
+    def groupToggle = CssStyleName("btn-group-toggle")
+    def groupSize(size: Size) = CssStyleName(s"btn-group${size.classMarker}")
 
-    def groupSize(size: Size) =
-      CssStyleName(s"btn-group${size.classMarker}")
+    def size(size: Size) = CssStyleName(s"btn${size.classMarker}")
 
-    def size(size: Size) =
-      CssStyleName(s"btn${size.classMarker}")
+    def color(color: Color = Color.Secondary) = CssStyleName(s"btn${color.classMarker}")
 
-    def color(color: Color = Color.Secondary) =
-      CssStyleName(s"btn${color.classMarker}")
-
-    def outline(color: Color = Color.Secondary) =
-      CssStyleName(s"btn-outline${color.classMarker}")
+    def outline(color: Color = Color.Secondary) = CssStyleName(s"btn-outline${color.classMarker}")
   }
 
   object Card {
@@ -184,6 +179,7 @@ trait BootstrapStyles {
     def divider = CssStyleName("dropdown-divider")
     def header = CssStyleName("dropdown-header")
     def item = CssStyleName("dropdown-item")
+    def itemText = CssStyleName("dropdown-item-text")
     def menu = CssStyleName("dropdown-menu")
     def menuRight = CssStyleName("dropdown-menu-right")
     def toggle = CssStyleName("dropdown-toggle")
@@ -477,6 +473,13 @@ trait BootstrapStyles {
     def striped = CssStyleName("progress-bar-striped")
   }
 
+  object Shadow {
+    def shadowNone = CssStyleName("shadow-none")
+    def shadowSmall = CssStyleName("shadow-sm")
+    def shadow = CssStyleName("shadow")
+    def shadowLarge = CssStyleName("shadow-lg")
+  }
+
   object Sizing {
     def widthAuto = CssStyleName("w-auto")
     def width25 = CssStyleName("w-25")
@@ -563,6 +566,11 @@ trait BootstrapStyles {
   }
 
   object Typography {
+    def display1 = CssStyleName("display1")
+    def display2 = CssStyleName("display2")
+    def display3 = CssStyleName("display3")
+    def display4 = CssStyleName("display4")
+
     def h1 = CssStyleName("h1")
     def h2 = CssStyleName("h2")
     def h3 = CssStyleName("h3")
