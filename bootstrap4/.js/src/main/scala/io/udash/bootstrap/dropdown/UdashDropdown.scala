@@ -22,7 +22,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   buttonToggle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
+  itemFactory: ItemType => Element,
   buttonContent: Binding.NestedInterceptor => Modifier,
   buttonFactory: (NestedInterceptor => Modifier) => UdashButton
 ) extends UdashBootstrapComponent
@@ -46,8 +46,8 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   def update(): Unit =
     jQSelector().dropdown("update")
 
-  private def withSelectionListener(elem: Element, item: ElemType): Element = {
-    nestedInterceptor(new JQueryOnBinding(jQ(elem), EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item.get))))
+  private def withSelectionListener(elem: Element, item: ItemType): Element = {
+    nestedInterceptor(new JQueryOnBinding(jQ(elem), EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item))))
     elem
   }
 
@@ -68,11 +68,13 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     )(
       nestedInterceptor(produceWithNested(buttonToggle) {
         case (true, nested) =>
-          val btn = buttonFactory { nested => Seq[Modifier](
-            BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
-            aria.haspopup := true, aria.expanded := false,
-            buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
-          )}
+          val btn = buttonFactory { nested =>
+            Seq[Modifier](
+              BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
+              aria.haspopup := true, aria.expanded := false,
+              buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
+            )
+          }
           nested(btn)
           btn.render
         case (false, nested) =>
@@ -85,13 +87,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         BootstrapStyles.Dropdown.menu,
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
         aria.labelledby := buttonId, id := menuId
-      )(
-        nestedInterceptor(
-          repeatWithNested(items) { case (item, nested) =>
-            withSelectionListener(itemFactory(item, nested), item)
-          }
-        )
-      )
+      )(nestedInterceptor(
+        produce(items.transform((item: ItemType) => withSelectionListener(itemFactory(item), item)))(el => el)
+      ))
     ).render
 
     val jQEl = jQ(el)
@@ -161,51 +159,51 @@ object UdashDropdown {
   }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(
-    item: ReadableProperty[DefaultDropdownItem],
-    nestedInterceptor: Binding.NestedInterceptor
-  ): Element = {
+  def defaultItemFactory(item: DefaultDropdownItem): Element = {
     import DefaultDropdownItem._
     import io.udash.css.CssView._
-    def itemFactory(item: DefaultDropdownItem): Element = item match {
+    item match {
       case Text(text) =>
         p(text).render
       case Link(title, url) =>
         a(BootstrapStyles.Dropdown.item, href := url.value)(title).render
       case Button(title, callback) =>
-        button(BootstrapStyles.Dropdown.item, onclick :+= ((_: Event) => { callback() }))(title).render
+        button(BootstrapStyles.Dropdown.item, onclick :+= ((_: Event) => {
+          callback()
+        }))(title).render
       case Header(title) =>
         h6(BootstrapStyles.Dropdown.header)(title).render
       case Disabled(item) =>
-        val res = itemFactory(item).styles(BootstrapStyles.disabled)
-        res.addEventListener("click", (ev: Event) => { ev.preventDefault(); ev.stopPropagation() })
+        val res = defaultItemFactory(item).styles(BootstrapStyles.disabled)
+        res.addEventListener("click", (ev: Event) => {
+          ev.preventDefault();
+          ev.stopPropagation()
+        })
         res
       case Raw(element) => element
       case Divider =>
         div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
-
-    span(nestedInterceptor(produce(item)(itemFactory))).render
   }
 
   /**
-    * Creates a dropdown component.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
-    *
-    * @param items          Data items which will be represented as the elements in this dropdown.
-    * @param dropDirection  A direction of the menu expansion.
-    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-    * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
-    * @param itemFactory    Creates DOM element for each item which is inserted into the dropdown menu.
-    *                       Use the provided interceptor to properly clean up bindings inside the content.
-    *                       Usually you should add the `BootstrapStyles.Dropdown.item` style to your element.
-    * @param buttonContent  Content of the element opening the dropdown.
-    *                       Use the provided interceptor to properly clean up bindings inside the content.
-    * @param buttonFactory  Allows to customize button options.
-    * @tparam ItemType A single element's type in the `items` sequence.
-    * @tparam ElemType A type of a property containing an element in the `items` sequence.
-    * @return A `UdashDropdown` component, call `render` to create a DOM element.
-    */
+   * Creates a dropdown component.
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
+   *
+   * @param items          Data items which will be represented as the elements in this dropdown.
+   * @param dropDirection  A direction of the menu expansion.
+   * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+   * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+   * @param itemFactory    Creates DOM element for each item which is inserted into the dropdown menu.
+   *                       Use the provided interceptor to properly clean up bindings inside the content.
+   *                       Usually you should add the `BootstrapStyles.Dropdown.item` style to your element.
+   * @param buttonContent  Content of the element opening the dropdown.
+   *                       Use the provided interceptor to properly clean up bindings inside the content.
+   * @param buttonFactory  Allows to customize button options.
+   * @tparam ItemType A single element's type in the `items` sequence.
+   * @tparam ElemType A type of a property containing an element in the `items` sequence.
+   * @return A `UdashDropdown` component, call `render` to create a DOM element.
+   */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
@@ -213,7 +211,7 @@ object UdashDropdown {
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
+    itemFactory: ItemType => Element,
     buttonContent: Binding.NestedInterceptor => Modifier,
     buttonFactory: (NestedInterceptor => Modifier) => UdashButton = UdashButton()
   ): UdashDropdown[ItemType, ElemType] = {
@@ -221,17 +219,17 @@ object UdashDropdown {
   }
 
   /**
-    * Creates a dropdown component with [[DefaultDropdownItem]] as items.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
-    *
-    * @param items          Data items which will be represented as the elements in this dropdown.
-    * @param dropDirection  A direction of the menu expansion.
-    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-    * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
-    * @param buttonContent  Content of the element opening the dropdown.
-    *                       Use the provided interceptor to properly clean up bindings inside the content.
-    * @return A `UdashDropdown` component, call `render` to create a DOM element.
-    */
+   * Creates a dropdown component with [[DefaultDropdownItem]] as items.
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/">Bootstrap Docs</a>.
+   *
+   * @param items          Data items which will be represented as the elements in this dropdown.
+   * @param dropDirection  A direction of the menu expansion.
+   * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
+   * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+   * @param buttonContent  Content of the element opening the dropdown.
+   *                       Use the provided interceptor to properly clean up bindings inside the content.
+   * @return A `UdashDropdown` component, call `render` to create a DOM element.
+   */
   def default[ElemType <: ReadableProperty[DefaultDropdownItem]](
     items: seq.ReadableSeqProperty[DefaultDropdownItem, ElemType],
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
