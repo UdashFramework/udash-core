@@ -57,7 +57,6 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
       id := componentId,
-      nestedInterceptor(BootstrapStyles.Button.group.styleIf(buttonToggle)),
       nestedInterceptor(
         ((direction: Direction) => direction match {
           case Direction.Up => BootstrapStyles.Dropdown.dropup
@@ -157,6 +156,7 @@ object UdashDropdown {
     case class Button(title: String, clickCallback: () => Any) extends DefaultDropdownItem
     case class Header(title: String) extends DefaultDropdownItem
     case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
+    case class Raw(element: Element) extends DefaultDropdownItem
     case object Divider extends DefaultDropdownItem
   }
 
@@ -180,6 +180,7 @@ object UdashDropdown {
         val res = itemFactory(item).styles(BootstrapStyles.disabled)
         res.addEventListener("click", (ev: Event) => { ev.preventDefault(); ev.stopPropagation() })
         res
+      case Raw(element) => element
       case Divider =>
         div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
