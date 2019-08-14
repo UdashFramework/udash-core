@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package tooltip
 
-import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.bootstrap.utils.BootstrapTags
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import io.udash.wrappers.jquery._
@@ -44,7 +44,13 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
 }
 
 abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
-  final case class Delay(show: Duration, hide: Duration) extends AbstractCase
+  trait Delay extends js.Object {
+    val show: Long
+    val hide: Long
+  }
+  object Delay {
+    def apply(show: Duration, hide: Duration): Delay = js.Dynamic.literal(show = show.toMillis, hide = hide.toMillis).asInstanceOf[Delay]
+  }
 
   trait Placement {
     def jsValue: js.Any
@@ -94,9 +100,9 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     boundary: String | dom.Node = "scrollParent",
     container: Option[String | dom.Node] = None,
     content: js.Function1[dom.Node, String] | dom.Node = io.udash.emptyStringNode(),
-    delay: Delay = Delay(0 millis, 0 millis),
+    delay: Delay | Long = Delay(0 millis, 0 millis),
     html: Boolean = false,
-    offset: String = "0",
+    offset: Int | String = "0",
     placement: Placement = defaultPlacement,
     template: Option[String] = None,
     title: String | js.Function1[dom.Node, String] | dom.Node = "",
@@ -108,7 +114,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
         "boundary" -> boundary,
         "container" -> container.getOrElse(false),
         "content" -> content,
-        "delay" -> js.Dictionary("show" -> delay.show.toMillis, "hide" -> delay.hide.toMillis),
+        "delay" -> delay,
         "html" -> html,
         "offset" -> offset,
         "placement" -> placement.jsValue,
@@ -141,9 +147,9 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     boundary: String = "scrollParent",
     container: Option[String] = None,
     content: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
-    delay: Delay = Delay(0 millis, 0 millis),
+    delay: Delay | Long = Delay(0 millis, 0 millis),
     html: Boolean = false,
-    offset: String = "0",
+    offset: Int | String = "0",
     placement: Placement = defaultPlacement,
     template: Option[String] = None,
     title: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
