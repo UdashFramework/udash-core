@@ -66,22 +66,12 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         }).reactiveApply(dropDirection)
       )
     )(
-      nestedInterceptor(produceWithNested(buttonToggle) {
-        case (true, nested) =>
-          val btn = buttonFactory { nested =>
-            Seq[Modifier](
-              BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
-              aria.haspopup := true, aria.expanded := false,
-              buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
-            )
-          }
-          nested(btn)
-          btn.render
-        case (false, nested) =>
-          a(
-            BootstrapStyles.Dropdown.toggle, id := buttonId, dataToggle := "dropdown",
-            aria.haspopup := true, aria.expanded := false, href := "#", buttonContent(nested)
-          ).render
+      nestedInterceptor(buttonFactory { nested =>
+        Seq[Modifier](
+          nested(BootstrapStyles.Dropdown.toggle.styleIf(buttonToggle)), id := buttonId, dataToggle := "dropdown",
+          aria.haspopup := true, aria.expanded := false,
+          buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
+        )
       }),
       div(
         BootstrapStyles.Dropdown.menu,
@@ -193,7 +183,7 @@ object UdashDropdown {
    * @param items          Data items which will be represented as the elements in this dropdown.
    * @param dropDirection  A direction of the menu expansion.
    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-   * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+   * @param buttonToggle   If true, the toggle arrow will be displayed.
    * @param itemFactory    Creates DOM element for each item which is inserted into the dropdown menu.
    *                       Use the provided interceptor to properly clean up bindings inside the content.
    *                       Usually you should add the `BootstrapStyles.Dropdown.item` style to your element.
@@ -225,7 +215,7 @@ object UdashDropdown {
    * @param items          Data items which will be represented as the elements in this dropdown.
    * @param dropDirection  A direction of the menu expansion.
    * @param rightAlignMenu If true, the menu will be aligned to the right side of button.
-   * @param buttonToggle   If false, the toggle button will be replaced with an `a` element.
+   * @param buttonToggle   If true, the toggle arrow will be displayed.
    * @param buttonContent  Content of the element opening the dropdown.
    *                       Use the provided interceptor to properly clean up bindings inside the content.
    * @return A `UdashDropdown` component, call `render` to create a DOM element.
