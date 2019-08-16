@@ -566,10 +566,10 @@ trait BootstrapStyles {
   }
 
   object Typography {
-    def display1 = CssStyleName("display1")
-    def display2 = CssStyleName("display2")
-    def display3 = CssStyleName("display3")
-    def display4 = CssStyleName("display4")
+    def display1 = CssStyleName("display-1")
+    def display2 = CssStyleName("display-2")
+    def display3 = CssStyleName("display-3")
+    def display4 = CssStyleName("display-4")
 
     def h1 = CssStyleName("h1")
     def h2 = CssStyleName("h2")
