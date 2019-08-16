@@ -5,6 +5,7 @@ import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
 import io.udash.bindings.modifiers.Binding
+import io.udash.bindings.modifiers.Binding.NestedInterceptor
 import io.udash.bootstrap.form.UdashForm.{HorizontalLayoutSettings, ValidationTrigger}
 import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
@@ -816,4 +817,13 @@ final class FormElementsFactory(
     def col(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All)(content: Modifier*): Modifier =
       div(BootstrapStyles.Grid.col(size, breakpoint))(content)
   }
+}
+
+object FormElementsFactory {
+  def apply(
+    nestedInterceptor: NestedInterceptor = identity,
+    inputValidationTrigger: ValidationTrigger = ValidationTrigger.None,
+    selectValidationTrigger: ValidationTrigger = ValidationTrigger.None,
+    form: OptArg[UdashForm] = OptArg.Empty
+  ): FormElementsFactory = new FormElementsFactory(nestedInterceptor, inputValidationTrigger, selectValidationTrigger, form)
 }
