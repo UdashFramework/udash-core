@@ -98,9 +98,9 @@ final class UdashDatePicker private[datepicker](
   }
 
   override def kill(): Unit = {
-    super.kill()
     deregisterSetupCallback(componentId)
     jQInput.datetimepicker("destroy")
+    super.kill()
   }
 
   private def optionsToJsDict(options: UdashDatePicker.DatePickerOptions): js.Dictionary[js.Any] = {
@@ -535,9 +535,9 @@ object UdashDatePicker {
   }
 
   import org.scalajs.dom.raw.{MutationObserver, MutationObserverInit, MutationRecord}
-  import scala.collection.mutable.{Set => MSet}
+  import scala.collection.mutable.{Map => MMap}
 
-  private val datePickerSetupCallbacks = MSet.empty[(ComponentId, () => Unit)]
+  private val datePickerSetupCallbacks = MMap.empty[ComponentId, () => Unit]
 
   // When a date picker gets appended to a DOM, its options and listeners should be initialized once again. Thus, all
   // nodes with mutated children are examined whether there is a date picker defined within a corresponding DOM
@@ -557,13 +557,13 @@ object UdashDatePicker {
     })
 
   def registerSetupCallback(id: ComponentId, callback: () => Unit): Unit = {
-    datePickerSetupCallbacks += ((id, callback))
     if (datePickerSetupCallbacks.isEmpty)
       datePickerMutationObserver.observe(document.body, MutationObserverInit(childList = true, subtree = true))
+    datePickerSetupCallbacks += (id -> callback)
   }
 
   def deregisterSetupCallback(id: ComponentId): Unit = {
-    datePickerSetupCallbacks.findOpt { case (pickerId, _) => pickerId == id }.foreach(datePickerSetupCallbacks -= _)
+    datePickerSetupCallbacks -= id
     if (datePickerSetupCallbacks.isEmpty)
       datePickerMutationObserver.disconnect()
   }
