@@ -95,7 +95,7 @@ object SeriesHeatmap {
             colsize: js.UndefOr[Double] = js.undefined,
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesHeatmapData] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesHeatmapData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             enableMouseTracking: js.UndefOr[Boolean] = js.undefined,

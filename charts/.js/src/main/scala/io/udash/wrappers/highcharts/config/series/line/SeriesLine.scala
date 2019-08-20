@@ -83,7 +83,7 @@ object SeriesLine {
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
             dashStyle: js.UndefOr[DashStyle] = js.undefined,
-            data: Seq[SeriesLineData | Double] = Seq.empty,
+            data: Seq[Double | js.Array[Double] | SeriesLineData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             enableMouseTracking: js.UndefOr[Boolean] = js.undefined,

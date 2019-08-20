@@ -13,7 +13,7 @@ import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery._
-import org.scalajs.dom.Element
+import org.scalajs.dom.{Element, document}
 
 import scala.scalajs.js
 import scala.scalajs.js.|
@@ -37,6 +37,38 @@ final class UdashDatePicker private[datepicker](
   ).render
   private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
 
+  locally {
+    registerSetupCallback(componentId, () => {
+      jQInput.datetimepicker(
+        optionsToJsDict(options.get)
+          .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
+      )
+
+      nestedInterceptor(new JQueryOnBinding(jQInput, "change.datetimepicker", (_: Element, event: JQueryEvent) => {
+        val dateOption = event.asInstanceOf[DatePickerChangeJQEvent].option
+          .flatMap(ev => sanitizeDate(ev.date))
+          .map(momentToDate)
+        val oldDateOption = date.get
+        if (dateOption != oldDateOption) {
+          dateOption match {
+            case Some(null) | None => date.set(None)
+            case _ => date.set(dateOption)
+          }
+          fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
+        }
+      }))
+      nestedInterceptor(new JQueryOnBinding(jQInput, "hide.datetimepicker", (_: Element, _: JQueryEvent) => {
+        fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
+      }))
+      nestedInterceptor(new JQueryOnBinding(jQInput, "show.datetimepicker", (_: Element, _: JQueryEvent) => {
+        fire(UdashDatePicker.DatePickerEvent.Show(this))
+      }))
+      nestedInterceptor(new JQueryOnBinding(jQInput, "error.datetimepicker", (_: Element, _: JQueryEvent) => {
+        fire(UdashDatePicker.DatePickerEvent.Error(this, date.get))
+      }))
+    })
+  }
+
   /** Shows date picker widget. */
   def show(): Unit =
     jQInput.datetimepicker("show")
@@ -57,47 +89,18 @@ final class UdashDatePicker private[datepicker](
   def disable(): Unit =
     jQInput.datetimepicker("disable")
 
-  val render: Element = {
-    jQInput.datetimepicker(optionsToJsDict(options.get))
-
-    propertyListeners += options.listen { opts =>
-      optionsToJsDict(opts).foreach { case (key, value) =>
-        jQInput.datetimepicker(key, value)
-      }
-    }
-
-    date.get.foreach(d => jQInput.datetimepicker("date", dateToMoment(d)))
-    propertyListeners += date.listen(op => op.foreach(d => jQInput.datetimepicker("date", dateToMoment(d))))
-
-    nestedInterceptor(new JQueryOnBinding(jQInput, "change.datetimepicker", (_: Element, ev: JQueryEvent) => {
-      val event = ev.asInstanceOf[DatePickerChangeJQEvent]
-      val dateOption = event.option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
-      val oldDateOption = date.get
-      if (dateOption != oldDateOption) {
-        dateOption match {
-          case Some(null) => date.set(None)
-          case Some(d) => date.set(Option(d))
-          case None => date.set(None)
-        }
-        fire(UdashDatePicker.DatePickerEvent.Change(this, dateOption, oldDateOption))
-      }
-    }))
-    nestedInterceptor(new JQueryOnBinding(jQInput, "hide.datetimepicker", (_: Element, ev: JQueryEvent) => {
-      fire(UdashDatePicker.DatePickerEvent.Hide(this, date.get))
-    }))
-    nestedInterceptor(new JQueryOnBinding(jQInput, "show.datetimepicker", (_: Element, ev: JQueryEvent) => {
-      fire(UdashDatePicker.DatePickerEvent.Show(this))
-    }))
-    nestedInterceptor(new JQueryOnBinding(jQInput, "error.datetimepicker", (_: Element, ev: JQueryEvent) => {
-      fire(UdashDatePicker.DatePickerEvent.Error(this, date.get))
-    }))
-
+  override val render: Element = {
+    propertyListeners += options.listen(opts =>
+      optionsToJsDict(opts).foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
+    )
+    propertyListeners += date.listen(optionalDate => optionalDate.foreach(date => jQInput.datetimepicker("date", dateToMoment(date))))
     inp
   }
 
   override def kill(): Unit = {
-    super.kill()
+    deregisterSetupCallback(componentId)
     jQInput.datetimepicker("destroy")
+    super.kill()
   }
 
   private def optionsToJsDict(options: UdashDatePicker.DatePickerOptions): js.Dictionary[js.Any] = {
@@ -531,4 +534,37 @@ object UdashDatePicker {
     def valueOf(): Double = js.native
   }
 
+  import org.scalajs.dom.raw.{MutationObserver, MutationObserverInit, MutationRecord}
+  import scala.collection.mutable.{Map => MMap}
+
+  private val datePickerSetupCallbacks = MMap.empty[ComponentId, () => Unit]
+
+  // When a date picker gets appended to a DOM, its options and listeners should be initialized once again. Thus, all
+  // nodes with mutated children are examined whether there is a date picker defined within a corresponding DOM
+  // subtree. It is also substantially possible for any date picker to be reported by more than one `MutationRecord`
+  // since the `subtree` switch of `MutationObserverInit` is on, thus only the first update is considered for each
+  // picker (note `exists` call) to avoid double initialization. This mutation observer is turned off when there are no
+  // components registered to be watched.
+  private val datePickerMutationObserver =
+    new MutationObserver((records: js.Array[MutationRecord], _: MutationObserver) => {
+      val addedNodes = records.flatMap(record => for {i <- 0 until record.addedNodes.length} yield record.addedNodes(i))
+      datePickerSetupCallbacks.foreach { case (pickerId, callback) =>
+        if (addedNodes.exists {
+          case element: Element => element.querySelector(s"#$pickerId") != null
+          case _ => false
+        }) callback()
+      }
+    })
+
+  def registerSetupCallback(id: ComponentId, callback: () => Unit): Unit = {
+    if (datePickerSetupCallbacks.isEmpty)
+      datePickerMutationObserver.observe(document.body, MutationObserverInit(childList = true, subtree = true))
+    datePickerSetupCallbacks += (id -> callback)
+  }
+
+  def deregisterSetupCallback(id: ComponentId): Unit = {
+    datePickerSetupCallbacks -= id
+    if (datePickerSetupCallbacks.isEmpty)
+      datePickerMutationObserver.disconnect()
+  }
 }
