@@ -25,7 +25,7 @@ object TooltipsDemo extends AutoDemo {
     UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Hover),
       delay = UdashTooltip.Delay(500.millis, 250.millis),
-      title = _ => "Tooltip...",
+      title = "Tooltip...",
       container = Some(s"#$tooltipContainerId")
     )(label1)
 
@@ -36,8 +36,8 @@ object TooltipsDemo extends AutoDemo {
     UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Click),
       delay = UdashTooltip.Delay(0.millis, 250.millis),
-      placement = (_, _) => Seq(UdashTooltip.Placement.Bottom),
-      title = _ => "Tooltip 2...",
+      placement = UdashTooltip.Placement.Bottom,
+      title = "Tooltip 2...",
       container = Some(s"#$tooltipContainerId")
     )(label2)
 
@@ -47,8 +47,8 @@ object TooltipsDemo extends AutoDemo {
     )).render
     val label3Tooltip = UdashTooltip(
       trigger = Seq(UdashTooltip.Trigger.Manual),
-      placement = (_, _) => Seq(UdashTooltip.Placement.Right),
-      title = _ => "Tooltip 3...",
+      placement = UdashTooltip.Placement.Right,
+      title = "Tooltip 3...",
       container = Some(s"#$tooltipContainerId")
     )(label3)
 
