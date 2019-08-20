@@ -137,7 +137,7 @@ object UdashDropdown {
   }
 
   /** Default dropdown elements. */
-  sealed trait DefaultDropdownItem
+  sealed trait DefaultDropdownItem extends AbstractCase
   object DefaultDropdownItem {
     case class Text(text: String) extends DefaultDropdownItem
     case class Link(title: String, url: Url) extends DefaultDropdownItem
@@ -154,7 +154,7 @@ object UdashDropdown {
     import io.udash.css.CssView._
     item match {
       case Text(text) =>
-        p(text).render
+        span(BootstrapStyles.Dropdown.itemText, text).render
       case Link(title, url) =>
         a(BootstrapStyles.Dropdown.item, href := url.value)(title).render
       case Button(title, callback) =>
