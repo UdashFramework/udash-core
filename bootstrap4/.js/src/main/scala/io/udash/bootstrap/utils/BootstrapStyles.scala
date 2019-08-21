@@ -300,6 +300,7 @@ trait BootstrapStyles {
     def col = CssStyleName("col")
     def formRow = CssStyleName("form-row")
     def row = CssStyleName("row")
+    def noGutters = CssStyleName("no-gutters")
 
     /** Supported size values: [1,12] */
     def col(size: Int, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
