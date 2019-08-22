@@ -34,7 +34,7 @@ This demo presents the usage of the other useful tools for building and deployin
 In the backend module the application uses Jetty and Spring to setup the server. 
 Each module contains tests based on ScalaTest and ScalaMock. The frontend and shared modules use 
 *scalajs-env-selenium* in order to run the tests compiled to JavaScript in a web browser. 
-The SBT configuration employs *SBT Native Packager* to provide easy deployment process.
+The sbt configuration employs *sbt Native Packager* to provide easy deployment process.
 
 ## What's next?
 

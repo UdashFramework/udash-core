@@ -40,7 +40,7 @@ class BootstrappingIntroView extends FinalView with CssView {
     h2("What's next?"),
     p(
       "If you want to know the details of Udash sbt configuration, you might be interested in ",
-      a(href := BootstrappingSbtState.url)("SBT configuration"), "."
+      a(href := BootstrappingSbtState.url)("sbt configuration"), "."
     )
   )
 }

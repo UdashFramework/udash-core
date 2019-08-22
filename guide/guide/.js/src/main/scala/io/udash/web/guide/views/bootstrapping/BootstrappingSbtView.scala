@@ -15,12 +15,12 @@ final class BootstrappingSbtView extends FinalView with CssView {
 
   override def getTemplate: Modifier =
     div(
-      h2("SBT commands"),
+      h2("sbt commands"),
       p("If you generated your project using the template, there are few sbt commands ready for you to use:"),
       ul(GuideStyles.defaultList)(
         li(i("compile"), " - compiles all your Scala sources (it does not produce JS files)."),
         li(i("copyAssets"), " - copies all your assets into target directory."),
-        li(i("compileStatics"), " - produces whole frontend application with full JS optimization (includes copyAssets)."),
+        li(i("compileStatics"), " - produces whole frontend application with fast JS optimization (includes copyAssets)."),
         li(i("compileAndOptimizeStatics"), " - as above but with full JS optimization."),
         li(i("run"), " - starts backend server."),
       ),
@@ -32,7 +32,7 @@ final class BootstrappingSbtView extends FinalView with CssView {
       ),
       h2("What's next?"),
       p(
-        "SBT configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
+        "sbt configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
         " in the ", b("shared"), " module."
       )
     )

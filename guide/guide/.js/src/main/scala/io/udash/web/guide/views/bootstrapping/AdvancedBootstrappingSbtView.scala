@@ -51,7 +51,7 @@ final class AdvancedBootstrappingSbtView extends FinalView with CssView {
       ),
       h2("What's next?"),
       p(
-        "SBT configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
+        "sbt configuration is ready, now it is time to prepare ", a(href := BootstrappingRpcState.url)("RPC interfaces"),
         " in the ", b("shared"), " module."
       )
     )

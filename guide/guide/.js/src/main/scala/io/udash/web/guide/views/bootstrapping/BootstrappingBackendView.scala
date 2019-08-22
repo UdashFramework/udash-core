@@ -5,28 +5,26 @@ import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-
 import scalatags.JsDom
 
 case object BootstrappingBackendViewFactory extends StaticViewFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
 class BootstrappingBackendView extends FinalView with CssView {
   import Context._
-  import io.udash.web.guide.views.References._
-
   import JsDom.all._
+  import io.udash.web.guide.views.References._
 
   override def getTemplate: Modifier = div(
     h2("Bootstrapping application backend"),
     p("This chapter covers:"),
     ul(GuideStyles.defaultList)(
       li("Implementation of the server-side RPC endpoint."),
-      li("Configuration of the ", a(href := JettyHomepage)("Jetty"), " webserver to handle RPC and static files requests."),
+      li("Configuration of the ", a(href := JettyHomepage, target := "_blank")("Jetty"), " webserver to handle RPC and static files requests."),
       li("Implementation of a simple system launcher.")
     ),
     p("The backend application is expected to serve static files like HTML, JS or images and handle RPC requests from client applications."),
     p(
-      "This guide uses ", a(href := JettyHomepage)("Jetty"), " as the webserver, but of course Udash does not depend on any webserver, " +
+      "This guide uses ", a(href := JettyHomepage, target := "_blank")("Jetty"), " as the webserver, but of course Udash does not depend on any webserver, " +
       "so you can use any implementation you like."
     ),
     h3("Server RPC implementation"),
