@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.bootstrap._
 import io.udash.web.guide.views.{References, Versions}
@@ -58,7 +57,7 @@ class BootstrapExtView extends FinalView {
     CodeBlock(
       s""""io.udash" %%% "udash-bootstrap" % "${Versions.udashVersion}"""".stripMargin
     )(GuideStyles),
-    p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage)("Twitter Bootstrap"), " API."),
+    p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage, target := "_blank")("Twitter Bootstrap"), " API."),
     h2("Statics"),
     p(
       "All Bootstrap tags and styles are available as UdashCSS styles. If you want to use ",
@@ -213,7 +212,7 @@ class BootstrapExtView extends FinalView {
     carouselSnippet,
     ForceBootstrap(carouselDemo),
     h2("What's next?"),
-    p("You can check the code for this page on our ", a(href := References.UdashGuideRepo)("GitHub repository"),
+    p("You can check the code for this page on our ", a(href := References.UdashGuideRepo, target := "_blank")("GitHub repository"),
       ". It contains all the examples above and more, since UdashBootstrap is heavily used in the Udash Guide.")
   )
 }

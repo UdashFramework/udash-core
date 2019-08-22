@@ -8,14 +8,12 @@ import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
-
 import scalatags.JsDom
 
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
 class BootstrappingFrontendView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -186,7 +184,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         ),
         li(
           i("NewsletterSubscribeView"), " creates an input and button template using the ",
-          a(href := References.ScalatagsHomepage)("Scalatags"), " project with some Udash extensions."
+          a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " project with some Udash extensions."
         ),
         li("View ignores child views, because it is the final view.")
       )

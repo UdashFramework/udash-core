@@ -2,20 +2,17 @@ package io.udash.web.guide.views.rpc
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos.NotificationsDemoComponent
-
 import scalatags.JsDom
 
 case object RpcServerClientViewFactory extends StaticViewFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
 class RpcServerClientView extends FinalView with CssView {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
+  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = div(
     h2("Server ➔ client communication"),

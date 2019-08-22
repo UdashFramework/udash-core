@@ -9,20 +9,18 @@ import io.udash.web.guide.styles.demo.ExampleStyles
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.wrappers.jquery._
-
 import scalatags.JsDom
 
 case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
 class FrontendTemplatesView extends FinalView with CssView {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
+  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = div(
     h2("Scalatags & UdashCSS"),
     p(
-      "Using ", a(href := References.ScalatagsHomepage)("ScalaTags"), " and ", i("UdashCSS"), " ",
+      "Using ", a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"), " and ", i("UdashCSS"), " ",
       "is the recommended way of creating and styling view templates. This part of the guide presents the most interesting parts ",
       "of these libraries. For more details refer to projects documentation."
     ),
@@ -85,7 +83,7 @@ class FrontendTemplatesView extends FinalView with CssView {
     )(GuideStyles),
     h2("UdashCSS"),
     p(
-      a(href := References.ScalaCssHomepage)("ScalaCSS"),
+      a(href := References.ScalaCssHomepage, target := "_blank")("ScalaCSS"),
       " is a library for creating CSS stylesheets with the Scala language. Using inline stylesheets is type-safe ",
       "and there is no need to manually manage class names. You can create your styles like in SASS/LESS, but you have the power ",
       "of Scala and your stylesheets can be generated dynamically (that is, you can change property values at runtime)."
@@ -419,7 +417,7 @@ class FrontendTemplatesView extends FinalView with CssView {
         |  }
         |}""".stripMargin
     )(GuideStyles),
-    p("Now you can configure a new SBT task to generate the CSS files: "),
+    p("Now you can configure a new sbt task to generate the CSS files: "),
     CodeBlock(
       """val cssDir = settingKey[File]("Target for `compileCss` task.")
         |val compileCss = taskKey[Unit]("Compiles CSS files.")

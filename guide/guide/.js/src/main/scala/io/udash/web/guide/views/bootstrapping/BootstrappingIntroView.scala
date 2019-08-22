@@ -19,16 +19,16 @@ class BootstrappingIntroView extends FinalView with CssView {
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_basic.png", "Basic modules structure.", GuideStyles.floatRight, GuideStyles.imgSmall, GuideStyles.imgIntro),
     ul(GuideStyles.defaultList)(
       li(
-        "shared - contains ", a(href := RpcIntroState.url)("RPC"), " interfaces, shared model and logic (e.g. model validation). ",
+        i("shared"), " - contains ", a(href := RpcIntroState.url)("RPC"), " interfaces, shared model and logic (e.g. model validation). ",
         "It is cross-compiled into JavaScript and JVM bytecode, so you can use it in the frontend and backend code. ",
         "It is useful when you want to use data models both in frontend and backend. Udash uses this module to e.g. share RPC interfaces."
       ),
       li(
-        "backend - contains ", a(href := RpcIntroState.url)("RPC"), "implementation and the whole backend application logic. ",
+        i("backend"), " - contains ", a(href := RpcIntroState.url)("RPC"), " implementation and the whole backend application logic. ",
         "It is compiled to bytecode only. You can write your backend logic like database access, services layer etc. there."
       ),
       li(
-        "frontend - contains frontend application code. It is compiled to JS only and packaged into two files: ",
+        i("frontend"), " - contains frontend application code. It is compiled to JS only and packaged into two files: ",
         i("frontend-deps.js"), " and ", i("frontend-impl.js"), "."
       )
     ),
@@ -39,8 +39,8 @@ class BootstrappingIntroView extends FinalView with CssView {
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "modules_extended.png", "More complex modules structure.", GuideStyles.imgBig, GuideStyles.frame),
     h2("What's next?"),
     p(
-      "If you want to prepare a custom project, you might be interested in ",
-      a(href := BootstrappingSbtState.url)("SBT configuration"), "."
+      "If you want to know the details of Udash sbt configuration, you might be interested in ",
+      a(href := BootstrappingSbtState.url)("sbt configuration"), "."
     )
   )
 }

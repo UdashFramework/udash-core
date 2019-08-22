@@ -7,14 +7,12 @@ import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object FrontendMVPViewFactory extends StaticViewFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
 class FrontendMVPView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -26,7 +24,7 @@ class FrontendMVPView extends FinalView with CssView {
         "it provides one and two-ways bindings to DOM elements."
       ),
       li(
-        "View - extends ", i("View"), " and creates a ", a(href := References.ScalatagsHomepage)("Scalatags"), " template ",
+        "View - extends ", i("View"), " and creates a ", a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " template ",
         "with a method getting a child view to render."
       ),
       li(
@@ -89,7 +87,7 @@ class FrontendMVPView extends FinalView with CssView {
     h3("View"),
     p(
       "The View implementation usually gets the Model and the Presenter as constructor arguments. They can be used ",
-      "in the ", a(href := References.ScalatagsHomepage)("Scalatags"), " template of a view as user interaction callbacks. ",
+      "in the ", a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " template of a view as user interaction callbacks. ",
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
     CodeBlock(

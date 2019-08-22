@@ -20,8 +20,6 @@ To compile and start the generated project run the following command inside the 
 
 ### What's inside?
 
-**Warning: we're in the process of updating the guide for Udash 0.8. Please refer to the template code for now.**
-
 The generator creates a simple chat application, which showcases the most important features of the Udash framework. 
 It uses properties, Bootstrap components, RPC with notifications from the server, translations and more.
 
@@ -36,7 +34,7 @@ This demo presents the usage of the other useful tools for building and deployin
 In the backend module the application uses Jetty and Spring to setup the server. 
 Each module contains tests based on ScalaTest and ScalaMock. The frontend and shared modules use 
 *scalajs-env-selenium* in order to run the tests compiled to JavaScript in a web browser. 
-The SBT configuration employs *SBT Native Packager* to provide easy deployment process.
+The sbt configuration employs *sbt Native Packager* to provide easy deployment process.
 
 ## What's next?
 
