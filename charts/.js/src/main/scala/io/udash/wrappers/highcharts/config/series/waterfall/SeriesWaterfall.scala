@@ -119,7 +119,7 @@ object SeriesWaterfall {
             crisp: js.UndefOr[Boolean] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
             dashStyle: js.UndefOr[DashStyle] = js.undefined,
-            data: Seq[SeriesWaterfallData | Double] = Seq.empty,
+            data: Seq[Double | js.Array[Double] | SeriesWaterfallData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,

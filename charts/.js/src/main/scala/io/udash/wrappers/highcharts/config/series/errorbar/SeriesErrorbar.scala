@@ -78,7 +78,7 @@ object SeriesErrorbar {
             colors: js.UndefOr[Seq[Color]] = js.undefined,
             crisp: js.UndefOr[Boolean] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesErrorbarData] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesErrorbarData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,

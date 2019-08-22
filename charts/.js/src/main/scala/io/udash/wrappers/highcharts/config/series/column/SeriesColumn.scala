@@ -90,7 +90,7 @@ object SeriesColumn {
             crisp: js.UndefOr[Boolean] = js.undefined,
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesColumnData | Double] = Seq.empty,
+            data: Seq[Double | js.Array[Double] | SeriesColumnData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,

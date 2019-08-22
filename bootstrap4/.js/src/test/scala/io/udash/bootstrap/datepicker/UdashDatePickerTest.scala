@@ -102,7 +102,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         ).render
       )
       noException shouldBe thrownBy {
-        jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt].datetimepicker("date", null)
+        jQ(() => jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt].datetimepicker("date", null))
       }
     }
 
@@ -125,7 +125,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
       for {
         _ <- {
-          pickerJQ.datetimepicker("date", "May 15th 2017, 10:59 am")
+          jQ(() => pickerJQ.datetimepicker("date", "May 15th 2017, 10:59 am"))
           retrying {
             // ignore time zone
             date.get.get.getTime should be > 1494763200000L
@@ -133,7 +133,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
           }
         }
         r <- {
-          pickerJQ.datetimepicker("date", null)
+          jQ(() => pickerJQ.datetimepicker("date", null))
           retrying {
             date.get should be(None)
           }
@@ -166,37 +166,37 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
       for {
         _ <- {
-          date.set(Some(new ju.Date(3000000000L)))
+          jQ(() => date.set(Some(new ju.Date(3000000000L))))
           retrying {
             (errorCounter, changeCounter) should be((0, 1))
           }
         }
         _ <- {
-          date.set(Some(new ju.Date(300000)))
+          jQ(() => date.set(Some(new ju.Date(300000))))
           retrying {
             (errorCounter, changeCounter) should be((1, 1))
           }
         }
         _ <- {
-          date.set(Some(new ju.Date(2000000000L)))
+          jQ(() => date.set(Some(new ju.Date(2000000000L))))
           retrying {
             (errorCounter, changeCounter) should be((1, 2))
           }
         }
         _ <- {
-          date.set(Some(new ju.Date(8000000000L)))
+          jQ(() => date.set(Some(new ju.Date(8000000000L))))
           retrying {
             (errorCounter, changeCounter) should be((2, 2))
           }
         }
         _ <- {
-          date.set(Some(new ju.Date(3000000000L)))
+          jQ(() => date.set(Some(new ju.Date(3000000000L))))
           retrying {
             (errorCounter, changeCounter) should be((2, 3))
           }
         }
         r <- {
-          date.set(Some(new ju.Date(4000000000L)))
+          jQ(() => date.set(Some(new ju.Date(4000000000L))))
           retrying {
             (errorCounter, changeCounter) should be((2, 4))
           }
@@ -262,4 +262,3 @@ private trait JQueryDatePickerExt extends JQuery {
   def datetimepicker(function: String): js.Any = js.native
   def datetimepicker(option: String, value: js.Any): JQueryDatePickerExt = js.native
 }
-
