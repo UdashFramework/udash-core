@@ -203,7 +203,15 @@ def frontendExecutable(proj: Project)(
         IO.copyDirectory(sourceDirectory.value / "main" / "assets", assets)
         IO.move(assets / "index.html", udashStatics / "index.html")
         IO.delete(assets / "assets.less")
+        // copying font-awesome webfonts to a location required by font-awesome styles
+        // (appropriate CSS file is inlined by less within UdashStatics/WebContent/guide/assets/styles/assets.min.css)
+        IO.copyDirectory(
+          (Assets / WebKeys.webJarsDirectory).value / WebKeys.webModulesLib.value / "font-awesome/webfonts",
+          assets / "webfonts"
+        )
       },
+      // a font-awesome WebJar is required on the classpath to execute the copyAssets task
+      Compile / copyAssets := (Compile / copyAssets).dependsOn(Assets / WebKeys.webJars).value,
 
       // Compiles CSS files and put them in the target directory
       compileCss := Def.taskDyn {
@@ -445,7 +453,7 @@ lazy val `guide-guide` =
     Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
   )
 
-lazy val `guide-packager` = 
+lazy val `guide-packager` =
   project.in(file("guide/packager"))
     .dependsOn(`guide-backend`)
     .enablePlugins(JavaServerAppPackaging)
