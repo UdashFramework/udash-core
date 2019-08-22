@@ -38,7 +38,7 @@ class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
         Iterator(
           valuesOfType[CssStyle](Brands).iterator,
           valuesOfType[CssStyle](Regular).iterator,
-          valuesOfType[CssStyle](Solid).iterator,
+          valuesOfType[CssStyle](Solid).iterator
         ).flatten.map { iconStyle =>
           val icon = i(iconStyle).render
           document.body.appendChild(icon)
