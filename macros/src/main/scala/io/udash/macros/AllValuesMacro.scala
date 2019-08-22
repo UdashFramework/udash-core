@@ -5,7 +5,7 @@ import com.avsystem.commons.macros.AbstractMacroCommons
 
 import scala.reflect.macros.blackbox
 
-// Placed under "tests" directory to avoid publishing and yet provide access across all Udash tests.
+// Although published within `macros` module, this macro is not intended to be used outside udash-core codebase.
 private[udash] class AllValuesMacro(override val c: blackbox.Context) extends AbstractMacroCommons(c) {
   import c.universe._
 

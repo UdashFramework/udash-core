@@ -13,6 +13,8 @@ import scalatags.JsDom.all._
 import scala.concurrent.Future
 
 class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
+  override protected def beforeAll(): Unit = document.body.appendChild(UdashBootstrap.loadFontAwesome())
+
   "Bootstrap icons" should {
     document.body.appendChild(UdashBootstrap.loadFontAwesome())
 

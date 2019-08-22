@@ -1,6 +1,5 @@
 package io.udash.testing
 
-import io.udash.macros.AllValuesMacro
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalatest.{Assertion, Matchers}
@@ -12,5 +11,5 @@ trait CoreTestUtils extends Matchers {
     seqProperty.elemProperties.map(_.listenersCount()).sum should be(0)
   }
 
-  def valuesOfType[ReturnType](obj: Any): List[ReturnType] = macro AllValuesMacro.ofType[ReturnType]
+  def valuesOfType[ReturnType](obj: Any): List[ReturnType] = macro io.udash.macros.AllValuesMacro.ofType[ReturnType]
 }
