@@ -34,7 +34,6 @@ object Dependencies {
   val typesafeConfigVersion = "1.3.4"
   val flexmarkVersion = "0.50.26"
   val logbackVersion = "1.2.3"
-  val springVersion = "4.3.25.RELEASE"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
@@ -193,8 +192,6 @@ object Dependencies {
     "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
-    "org.springframework" % "spring-beans" % springVersion,
-    "com.avsystem.commons" %% "commons-spring" % avsCommonsVersion,
 
     "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion,
     "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
