@@ -32,7 +32,7 @@ object Dependencies {
 
   val jettyVersion = "9.4.20.v20190813" // Tests only
   val typesafeConfigVersion = "1.3.4"
-  val flexmarkVersion = "0.50.26"
+  val flexmarkVersion = "0.50.30"
   val logbackVersion = "1.2.3"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
