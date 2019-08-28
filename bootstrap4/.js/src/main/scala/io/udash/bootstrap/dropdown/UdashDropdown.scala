@@ -22,7 +22,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   buttonToggle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  itemFactory: ItemType => Element,
+  itemFactory: (ItemType, Binding.NestedInterceptor) => Element,
   buttonContent: Binding.NestedInterceptor => Modifier,
   buttonFactory: (NestedInterceptor => Modifier) => UdashButton
 ) extends UdashBootstrapComponent
@@ -78,7 +78,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
         aria.labelledby := buttonId, id := menuId
       )(nestedInterceptor(
-        produce(items.transform((item: ItemType) => withSelectionListener(itemFactory(item), item)))(el => el)
+        produce(items.transform((item: ItemType) => withSelectionListener(itemFactory(item, nestedInterceptor), item)))(el => el)
       ))
     ).render
 
@@ -145,11 +145,12 @@ object UdashDropdown {
     case class Header(title: String) extends DefaultDropdownItem
     case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
     case class Raw(element: Element) extends DefaultDropdownItem
+    case class Dynamic(factory: Binding.NestedInterceptor => Element) extends DefaultDropdownItem
     case object Divider extends DefaultDropdownItem
   }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(item: DefaultDropdownItem): Element = {
+  def defaultItemFactory(item: DefaultDropdownItem, nested: Binding.NestedInterceptor): Element = {
     import DefaultDropdownItem._
     import io.udash.css.CssView._
     item match {
@@ -164,13 +165,14 @@ object UdashDropdown {
       case Header(title) =>
         h6(BootstrapStyles.Dropdown.header)(title).render
       case Disabled(item) =>
-        val res = defaultItemFactory(item).styles(BootstrapStyles.disabled)
+        val res = defaultItemFactory(item, nested).styles(BootstrapStyles.disabled)
         res.addEventListener("click", (ev: Event) => {
           ev.preventDefault();
           ev.stopPropagation()
         })
         res
       case Raw(element) => element
+      case Dynamic(produce) => produce(nested)
       case Divider =>
         div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
@@ -201,7 +203,7 @@ object UdashDropdown {
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: ItemType => Element,
+    itemFactory: (ItemType, Binding.NestedInterceptor) => Element,
     buttonContent: Binding.NestedInterceptor => Modifier,
     buttonFactory: (NestedInterceptor => Modifier) => UdashButton = UdashButton()
   ): UdashDropdown[ItemType, ElemType] = {
