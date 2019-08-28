@@ -35,7 +35,7 @@ object NavigationDemo extends AutoDemo {
         elemFactory = (panel, nested) => div(nested(produce(panel) {
           case MenuContainer(name, children) =>
             val dropdown = UdashDropdown(SeqProperty(children))(
-              linkFactory(_),
+              (link, _) => linkFactory(link),
               _ => span(name, " ")
             ).render
             dropdown.firstElementChild.applyTags(Navigation.link)
