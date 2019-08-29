@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package button
 
-import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton.{ButtonClickEvent, UdashButtonJQuery}
@@ -10,6 +10,7 @@ import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom
 import org.scalajs.dom._
 import scalatags.JsDom
+import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 import scala.scalajs.js
@@ -21,7 +22,8 @@ final class UdashButton private(
   block: ReadableProperty[Boolean],
   active: ReadableProperty[Boolean],
   disabled: ReadableProperty[Boolean],
-  override val componentId: ComponentId
+  override val componentId: ComponentId,
+  tag: UdashButton.ButtonTag
 )(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
   import io.udash.css.CssView._
 
@@ -42,9 +44,10 @@ final class UdashButton private(
       nestedInterceptor(JsDom.all.disabled.attrIf(disabled)) :: Nil
   }
 
-  override val render: dom.html.Button = {
-    button(id := componentId, tpe := "button")(classes: _*)(
-      onclick :+= ((me: MouseEvent) => fire(ButtonClickEvent(this, me)))
+  override val render: dom.html.Element = {
+    tag.value(id := componentId, tpe := "button")(classes: _*)(
+      //condition to support non-button tags
+      onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
     )(content(nestedInterceptor)).render
   }
 
@@ -60,6 +63,22 @@ final class UdashButton private(
 object UdashButton {
   final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent)
     extends AbstractCase with ListenableEvent[UdashButton]
+
+  /**
+   * Holds button enclosing tag options. Since buttons have their own click listeners implemented they can be enclosed
+   * in various tags, e.g.:
+   *
+   * - Button - encloses the button in <button></button> tags
+   * - Anchor - encloses the button in <a></a> tags. For this type of tags link options can be used to indicate the href
+   * to redirect user on click
+   * - Div    - encloses the button in <div></div> tags
+   */
+  final class ButtonTag(val value: TypedTag[dom.html.Element])(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  object ButtonTag extends AbstractValueEnumCompanion[ButtonTag] {
+    final val Button: Value = new ButtonTag(JsDom.all.button)
+    final val Anchor: Value = new ButtonTag(JsDom.all.a)
+    final val Div: Value = new ButtonTag(JsDom.all.div)
+  }
 
   /**
     * Creates a button component.
@@ -83,9 +102,10 @@ object UdashButton {
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     active: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.newId(),
+    tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton =
-    new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content)
+    new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
 
   /**
     * Creates a toggle button component.
@@ -108,9 +128,10 @@ object UdashButton {
     outline: ReadableProperty[Boolean] = UdashBootstrap.False,
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.newId(),
+    tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton = {
-    val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId)(content)
+    val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
     button.listen { case _ => active.set(!active.get) }
     button
   }

@@ -2,6 +2,7 @@ package io.udash.bootstrap.form
 
 import io.udash._
 import io.udash.bootstrap.UdashBootstrap
+import io.udash.bootstrap.form.UdashForm._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
@@ -11,7 +12,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.Future
 
 class UdashFormTest extends AsyncUdashCoreFrontendTest {
-  import UdashForm._
+  override protected def beforeAll(): Unit = jQ("body").append(UdashBootstrap.loadBootstrapStyles())
 
   "UdashForm component" should {
     jQ("body").append(UdashBootstrap.loadBootstrapStyles())

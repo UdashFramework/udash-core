@@ -1,27 +1,26 @@
 package io.udash.web
 
-import com.avsystem.commons.spring.HoconBeanDefinitionReader
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.web.server.ApplicationServer
-import org.springframework.context.support.GenericApplicationContext
 
 object Launcher extends LazyLogging {
   def main(args: Array[String]): Unit = {
     val startTime = System.nanoTime
 
-    val ctx = createApplicationContext()
-    ctx.getBean(classOf[ApplicationServer]).start()
+    createApplicationServer().start()
     
     val duration: Long = (System.nanoTime - startTime) / 1000000000
     logger.info(s"Udash Homepage & Dev's Guide started in ${duration}s.")
   }
 
-  def createApplicationContext(): GenericApplicationContext = {
-    val ctx = new GenericApplicationContext()
-    val bdr = new HoconBeanDefinitionReader(ctx)
-    bdr.loadBeanDefinitions(ConfigFactory.load("beans.conf"))
-    ctx.refresh()
-    ctx
+
+  private[udash] def createApplicationServer(): ApplicationServer = {
+    val serverConfig = ConfigFactory.load().getConfig("ui.server")
+    new ApplicationServer(
+      port = serverConfig.getInt("port"),
+      homepageResourceBase = serverConfig.getString("homepageResourceBase"),
+      guideResourceBase = serverConfig.getString("guideResourceBase")
+    )
   }
 }

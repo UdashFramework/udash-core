@@ -2,8 +2,7 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.components.ForceBootstrap
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos.IntroFormDemo
@@ -29,23 +28,23 @@ class FrontendIntroView extends FinalView with CssView {
     ),
     h3("A new hope"),
     p(
-      "The ", a(href := References.ScalaJsHomepage)("Scala.js"), " project tries to make developers lives easier. It brings the ",
-      "power of the ", a(href := References.ScalaHomepage)("Scala language"), " and compiles it to JavaScript. Thanks to this, ",
+      "The ", a(href := References.ScalaJsHomepage, target := "_blank")("Scala.js"), " project tries to make developers lives easier. It brings the ",
+      "power of the ", a(href := References.ScalaHomepage, target := "_blank")("Scala language"), " and compiles it to JavaScript. Thanks to this, ",
       "we can develop in a type-safe, modern, developer friendly language and publish a project as a website like with JavaScript. "
     ),
     p(
       "Udash framework provides tools to make web applications development with ",
-      a(href := References.ScalaJsHomepage)("Scala.js"), " fast and easy. You might have already read about Udash ",
+      a(href := References.ScalaJsHomepage, target := "_blank")("Scala.js"), " fast and easy. You might have already read about Udash ",
       a(href := RpcIntroState.url)("RPC"), " system. In this part of the guide you will read about: "
     ),
     ul(GuideStyles.defaultList)(
       li("Routing in Udash based applications."),
       li("The Properties mechanism for application modelling."),
       li(
-        a(href := References.ScalatagsHomepage)("ScalaTags"), " and ", a(href := References.ScalaCssHomepage)("ScalaCSS"),
+        a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"), " and ", a(href := References.ScalaCssHomepage, target := "_blank")("ScalaCSS"),
         " usage as HTML and CSS replacement."
       ),
-      li("The property bindings for ", a(href := References.ScalatagsHomepage)("ScalaTags"), ".")
+      li("The property bindings for ", a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"), ".")
     ),
     p("All these features will make your life as a frontend developer pleasant."),
     p("To start development import Udash classes as follows:"),

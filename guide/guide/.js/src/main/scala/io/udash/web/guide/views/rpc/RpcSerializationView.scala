@@ -2,33 +2,30 @@ package io.udash.web.guide.views.rpc
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.components.ForceBootstrap
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.GenCodecsDemoComponent
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object RpcSerializationViewFactory extends StaticViewFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
 class RpcSerializationView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
     h2("Serialization"),
     p(
       "Everything you send via RPC has to be serializable. Udash internally uses the ",
-      a(href := References.AvScalaCommonsGitHub)("AVSystem Scala Commons"), " library which supports serialization",
+      a(href := References.AvScalaCommonsGitHub, target := "_blank")("AVSystem Scala Commons"), " library which supports serialization",
       " of basic Scala types out of the box and provides utilities for the custom data types serialization. "
     ),
     h3("GenCodecs"),
     p(
       "Udash RPC uses the ", i("GenCodec"), " mechanism from the ",
-      a(href := References.AvScalaCommonsGitHub)("AVSystem Scala Commons"), " library for the data serialization. It provides ",
+      a(href := References.AvScalaCommonsGitHub, target := "_blank")("AVSystem Scala Commons"), " library for the data serialization. It provides ",
       "serialization for a basic Scala types like: int, float, string, etc. It also brings automatic generation of serializers ",
       "for the types which are one of: "
     ),
@@ -162,7 +159,7 @@ class RpcSerializationView extends FinalView with CssView {
     ),
     p(
       "In the Udash RPC repository you can find implementation based on the ",
-      a(href := References.UpickleHomepage)("uPickle"),
+      a(href := References.UpickleHomepage, target := "_blank")("uPickle"),
       " library."
     ),
     h2("What's next?"),

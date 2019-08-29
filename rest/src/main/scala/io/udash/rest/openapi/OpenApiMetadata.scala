@@ -148,7 +148,7 @@ final case class OpenApiPrefix[T](
         parameters = prefixParams ++ operation.parameters
       )
       val adjustedOperation = operationAdjusters.foldRight(prefixedOperation)(_ adjustOperation _)
-      val newPath = if(path == "/") pathPattern else if(pathPattern == "/") path else pathPattern + path
+      val newPath = if (path == "/") pathPattern else if (pathPattern == "/") path else pathPattern + path
       PathOperation(newPath, httpMethod, adjustedOperation, pathAdjusters ++ subAdjusters)
     }
   }
@@ -273,7 +273,7 @@ final case class OpenApiBody[T](
   @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
 ) extends TypedMetadata[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = {
-    def transformSchema(schema: RestSchema[T]): RestSchema[_] =
+    def transformSchema(schema: RestSchema[_]): RestSchema[_] =
       RestSchema.create(resolver => SchemaAdjuster.adjustRef(schemaAdjusters, resolver.resolve(schema)))
     restRequestBody.requestBody(resolver, transformSchema)
   }

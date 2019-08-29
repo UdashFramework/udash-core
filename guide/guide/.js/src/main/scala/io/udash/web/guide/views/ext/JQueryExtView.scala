@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.ext
 
 import io.udash._
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
 import io.udash.web.guide.views.{References, Versions}
@@ -62,7 +61,7 @@ class JQueryExtView extends FinalView {
     ForceBootstrap(jQueryCallbacksDemo),
     h2("What's next?"),
     p(
-      "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo)("GitHub repository"), ". ",
+      "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo, target := "_blank")("GitHub repository"), ". ",
       "It also contains an example application which presents more ways of working with this wrapper."
     )
   )

@@ -2,21 +2,18 @@ package io.udash.web.guide.views.rpc
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
-import io.udash.web.guide.components.ForceBootstrap
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.rpc.demos.{PingPongCallDemoComponent, PingPongPushDemoComponent}
-
 import scalatags.JsDom
 
 case object RpcIntroViewFactory extends StaticViewFactory[RpcIntroState.type](() => new RpcIntroView)
 
 class RpcIntroView extends FinalView with CssView {
-  import io.udash.web.guide.Context._
-
   import JsDom.all._
+  import io.udash.web.guide.Context._
 
   override def getTemplate: Modifier = div(
     h2("Introduction"),
@@ -27,7 +24,7 @@ class RpcIntroView extends FinalView with CssView {
     ),
     p(
       "The Udash project tries to make frontend applications as type-safe as possible. Thanks to the ",
-      a(href := References.ScalaJsHomepage)("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
+      a(href := References.ScalaJsHomepage, target := "_blank")("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
       "the client and server applications. Udash RPC uses this feature to share: "
     ),
     ul(GuideStyles.defaultList)(

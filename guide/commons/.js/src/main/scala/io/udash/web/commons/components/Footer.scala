@@ -26,10 +26,6 @@ object Footer {
             li(styles.navItem)(
               a(href := ExternalUrls.udashDemos, target := "_blank", GlobalStyles.underlineLink)("Demos on GitHub")
             ),
-            // TODO: unccoment
-            /*li(UdashGuideStyles.linkWrapper)(
-              a(href := ExternalUrls.todoMvc, target := "_blank", UdashGuideStyles.link)("Todomvc.com demo")
-            ),*/
             li(styles.navItem)(
               a(href := ExternalUrls.stackoverflow, target := "_blank", GlobalStyles.underlineLink)("StackOverflow questions")
             )

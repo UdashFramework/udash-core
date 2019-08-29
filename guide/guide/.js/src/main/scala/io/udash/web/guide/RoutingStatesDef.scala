@@ -37,6 +37,8 @@ case object BootstrappingIntroState extends FinalRoutingState(Some(Bootstrapping
 
 case object BootstrappingSbtState extends FinalRoutingState(Some(BootstrappingState))
 
+case object AdvancedBootstrappingSbtState extends FinalRoutingState(Some(BootstrappingState))
+
 case object BootstrappingRpcState extends FinalRoutingState(Some(BootstrappingState))
 
 case object BootstrappingBackendState extends FinalRoutingState(Some(BootstrappingState))

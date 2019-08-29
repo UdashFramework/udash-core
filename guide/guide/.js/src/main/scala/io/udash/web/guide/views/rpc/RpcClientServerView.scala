@@ -2,19 +2,16 @@ package io.udash.web.guide.views.rpc
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
-import io.udash.web.guide.components.ForceBootstrap
+import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos._
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object RpcClientServerViewFactory extends StaticViewFactory[RpcClientServerState.type](() => new RpcClientServerView)
 
 class RpcClientServerView extends FinalView with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(

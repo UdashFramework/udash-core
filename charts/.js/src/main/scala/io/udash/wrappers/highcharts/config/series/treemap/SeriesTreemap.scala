@@ -147,7 +147,7 @@ object SeriesTreemap {
             colors: js.UndefOr[Seq[Color]] = js.undefined,
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesTreemapData | Double] = Seq.empty,
+            data: Seq[Double | SeriesTreemapData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             enableMouseTracking: js.UndefOr[Boolean] = js.undefined,

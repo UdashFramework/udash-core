@@ -71,7 +71,7 @@ object SeriesGauge {
             className: js.UndefOr[String] = js.undefined,
             color: js.UndefOr[Color] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesGaugeData | Double] = Seq.empty,
+            data: Seq[Double | SeriesGaugeData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             dial: js.UndefOr[SeriesGaugeDial] = js.undefined,

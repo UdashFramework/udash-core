@@ -25,8 +25,8 @@ object PopoversDemo extends AutoDemo with CssView {
     UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Hover),
       delay = UdashPopover.Delay(500.millis, 250.millis),
-      title = _ => "Popover...",
-      content = _ => "Content...",
+      title = "Popover...",
+      content = "Content...".render,
       container = Some(s"#$popoverContainerId")
     )(label1)
 
@@ -37,9 +37,9 @@ object PopoversDemo extends AutoDemo with CssView {
     UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Click),
       delay = UdashPopover.Delay(0.millis, 250.millis),
-      placement = (_, _) => Seq(UdashPopover.Placement.Bottom),
-      title = _ => "Popover 2...",
-      content = _ => "Content...",
+      placement = UdashPopover.Placement.Bottom,
+      title = "Popover 2...",
+      content = "Content...".render,
       container = Some(s"#$popoverContainerId")
     )(label2)
 
@@ -49,15 +49,13 @@ object PopoversDemo extends AutoDemo with CssView {
     )).render
     val label3Tooltip = UdashPopover(
       trigger = Seq(UdashPopover.Trigger.Manual),
-      placement = (_, _) => Seq(UdashPopover.Placement.Left),
+      placement = UdashPopover.Placement.Left,
       html = true,
-      title = _ => "Popover 3...",
-      content = _ => {
-        Seq(
+      title = "Popover 3...",
+      content = Seq(
           p("HTML content..."),
           ul(li("Item 1"), li("Item 2"), li("Item 3"))
-        ).render
-      },
+      ).render,
       container = Some(s"#$popoverContainerId")
     )(label3)
 

@@ -43,7 +43,8 @@ object Context {
     MenuLink("Intro", IntroState),
     MenuContainer("Bootstrapping", Seq(
       MenuLink("Introduction", BootstrappingIntroState),
-      MenuLink("SBT configuration", BootstrappingSbtState),
+      MenuLink("sbt configuration", BootstrappingSbtState),
+      MenuLink("Advanced sbt configuration", AdvancedBootstrappingSbtState),
       MenuLink("Shared RPC", BootstrappingRpcState),
       MenuLink("Backend", BootstrappingBackendState),
       MenuLink("Frontend", BootstrappingFrontendState)

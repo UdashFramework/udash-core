@@ -99,7 +99,7 @@ object SeriesColumnrange {
             crisp: js.UndefOr[Boolean] = js.undefined,
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
-            data: Seq[SeriesColumnrangeData] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesColumnrangeData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesRangeDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             depth: js.UndefOr[Double] = js.undefined,
