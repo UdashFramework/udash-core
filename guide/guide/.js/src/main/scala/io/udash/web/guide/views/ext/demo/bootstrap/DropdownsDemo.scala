@@ -40,20 +40,8 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
     }, 5000)
     window.setTimeout(() => window.clearInterval(appendHandler), 60000)
 
-    val dropdown = UdashDropdown(items)(
-      UdashDropdown.defaultItemFactory,
-      _ => Seq[Modifier](
-        "Dropdown ",
-        Button.color(Color.Primary)
-      )
-    )
-    val dropup = UdashDropdown(
-      items,
-      UdashDropdown.Direction.Up.toProperty
-    )(
-      UdashDropdown.defaultItemFactory,
-      _ => "Dropup "
-    )
+    val dropdown = UdashDropdown.default(items)(_ => Seq[Modifier]("Dropdown ", Button.color(Color.Primary)))
+    val dropup = UdashDropdown.default(items, UdashDropdown.Direction.Up.toProperty)(_ => "Dropup ")
 
     Seq(dropdown, dropup).foreach(_.listen {
       case UdashDropdown.DropdownEvent.SelectionEvent(_, item) =>
