@@ -78,7 +78,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
         aria.labelledby := buttonId, id := menuId
       )(nestedInterceptor(
-        produce(items.transform((item: ItemType) => withSelectionListener(itemFactory(item, nestedInterceptor), item)))(el => el)
+        produceWithNested(items)((items, nested) => items.map(item => withSelectionListener(itemFactory(item, nested), item)))
       ))
     ).render
 
