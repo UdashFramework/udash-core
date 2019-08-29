@@ -268,7 +268,7 @@ lazy val jsLibraries = Seq[ProjectReference](
   macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts
 )
 lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(jsLibraries :+ (bootstrap: ProjectReference): _*)
+  .aggregate(jsLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
@@ -359,14 +359,6 @@ lazy val `css-js` = jsProjectFor(project, css)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.cssSjsDeps.value,
-  )
-
-lazy val bootstrap = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
-  .settings(
-    testInBrowser,
-    libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrapJsDeps.value
   )
 
 lazy val bootstrap4 = jsProject(project)
