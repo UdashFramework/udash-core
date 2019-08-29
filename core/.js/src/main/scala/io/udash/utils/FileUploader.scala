@@ -46,7 +46,7 @@ class FileUploader(url: Url) {
         p.subProp(_.bytesTotal).set(ev.total)
       }
     )
-    xhr.addEventListener("load", (ev: Event) => {
+    xhr.addEventListener("load", (_: Event) => {
         p.subProp(_.response).set(Some(new HttpResponse(xhr)))
         p.subProp(_.state).set(xhr.status / 100 match {
           case 2 => FileUploadState.Completed
@@ -54,10 +54,10 @@ class FileUploader(url: Url) {
         })
       }
     )
-    xhr.addEventListener("error", (ev: Event) =>
+    xhr.addEventListener("error", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
     )
-    xhr.addEventListener("abort", (ev: Event) =>
+    xhr.addEventListener("abort", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)

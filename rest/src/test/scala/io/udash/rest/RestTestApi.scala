@@ -123,7 +123,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
-    def neverGet: Future[Unit] = Promise[Unit].future // Future.never if it wasn't for Scala 2.11
+    def neverGet: Future[Unit] = Future.never
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))

@@ -2,6 +2,7 @@ package io.udash.macros
 
 import com.avsystem.commons.macros.AbstractMacroCommons
 
+import scala.annotation.tailrec
 import scala.reflect.macros.blackbox
 
 class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
@@ -306,6 +307,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val model = c.prefix
     val modelPath = getModelPath(f)
 
+    @tailrec
     def checkIfIsValidPath(tree: Tree, onFirstType: Type => Unit = _ => ()): Boolean = {
       tree match {
         case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
@@ -346,6 +348,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
 
     val parts = parsePath(modelPath)
 
+    @tailrec
     def genTree(source: List[(Type, TermName)], targetTree: Tree): Tree = source match {
       case (resultType, term) :: Nil if hasModelPropertyCreator(resultType) =>
         q"""$targetTree.getSubModel[$resultType](${q"_.$term"}, ${term.decodedName.toString})"""

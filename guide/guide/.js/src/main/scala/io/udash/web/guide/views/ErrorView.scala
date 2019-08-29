@@ -10,7 +10,6 @@ import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles}
 import io.udash.web.guide.{ErrorState, IntroState}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.tags2._
 
 object ErrorViewFactory extends StaticViewFactory[ErrorState.type](() => new ErrorView)
@@ -36,7 +35,7 @@ class ErrorView extends FinalView with CssView {
   private lazy val jqTemplate = jQ(content)
 
   val window = jQ(org.scalajs.dom.window)
-  window.on(EventName.resize, (element: Element, _: JQueryEvent) => onResize())
+  window.on(EventName.resize, (_: Element, _: JQueryEvent) => onResize())
   onResize()
 
   private def onResize(): Unit = {

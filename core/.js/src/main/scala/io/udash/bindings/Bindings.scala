@@ -39,12 +39,10 @@ trait Bindings {
     * Renders component with provided timeout.
     * It's useful to render heavy components after displaying the main view.
     */
-  def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = new Modifier[Element] {
-    override def applyTo(t: Element): Unit = {
-      val el = document.createElement("div")
-      t.appendChild(el)
-      window.setTimeout(() => t.replaceChildren(el, component), timeout)
-    }
+  def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
+    val el = document.createElement("div")
+    t.appendChild(el)
+    window.setTimeout(() => t.replaceChildren(el, component), timeout)
   }
 
   /**
@@ -402,18 +400,16 @@ object Bindings extends Bindings {
       * If callback returns false, next callback in the queue will be invoked.
       */
     def :+=[T <: Event](callback: T => Boolean): Modifier[Element] = {
-      AttrPair(attr, callback, new AttrValue[Element, T => Boolean] {
-        override def apply(el: Element, attr: Attr, callback: T => Boolean): Unit = {
-          val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
-          val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
-          if (existingCallbacks == null) {
-            dyn.updateDynamic(attr.name) { e: T => if (callback(e)) e.preventDefault() }
-          } else {
-            dyn.updateDynamic(attr.name) { e: T =>
-              val preventDefault = callback(e)
-              if (preventDefault) e.preventDefault()
-              else existingCallbacks(e)
-            }
+      AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Boolean) => {
+        val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
+        val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
+        if (existingCallbacks == null) {
+          dyn.updateDynamic(attr.name) { e: T => if (callback(e)) e.preventDefault() }
+        } else {
+          dyn.updateDynamic(attr.name) { e: T =>
+            val preventDefault = callback(e)
+            if (preventDefault) e.preventDefault()
+            else existingCallbacks(e)
           }
         }
       })
@@ -508,12 +504,8 @@ object Bindings extends Bindings {
 
     import scalatags.generic.{PixelStyle, Style}
 
-    implicit val StyleHasCssName: HasCssName[Style] = new HasCssName[Style] {
-      override def cssName(v: scalatags.generic.Style): String = v.cssName
-    }
-    implicit val PixelStyleHasCssName: HasCssName[PixelStyle] = new HasCssName[PixelStyle] {
-      override def cssName(v: scalatags.generic.PixelStyle): String = v.cssName
-    }
+    implicit val StyleHasCssName: HasCssName[Style] = _.cssName
+    implicit val PixelStyleHasCssName: HasCssName[PixelStyle] = _.cssName
   }
 
   @inline

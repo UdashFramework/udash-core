@@ -379,7 +379,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = SeqProperty[Int](1, 2, 3)
       val t = p.transform[Int](
         (s: Seq[Int]) => s.sum,
-        (i: Int) => (1 to i).toSeq
+        (i: Int) => (1 to i)
       )
 
       p.get should be(Seq(1, 2, 3))

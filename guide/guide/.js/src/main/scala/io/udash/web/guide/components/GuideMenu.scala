@@ -118,7 +118,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
     jQ(template).find(InactiveItemSelector).parent().find(s".${MenuStyles.subList.className}").stop().slideUp()
   }
 
-  private lazy val onMobileMenuClick: JQueryCallback = (jqThis: Element, jqEvent: JQueryEvent) => {
+  private lazy val onMobileMenuClick: JQueryCallback = (_: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
 
     toggleBooleanAttribute(jQ(s".${GuideStyles.menuWrapper.className}"), Attributes.data(Attributes.Active))

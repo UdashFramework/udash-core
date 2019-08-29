@@ -2,7 +2,6 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
-import com.avsystem.commons.misc.Opt
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
@@ -85,20 +84,14 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
     nameAndAdjusters.restSchema(wrappedSchema)
 
   implicit def restMediaTypes(implicit wrappedMediaTypes: RestMediaTypes[Wrapped]): RestMediaTypes[T] =
-    new RestMediaTypes[T] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] =
-        wrappedMediaTypes.mediaTypes(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      wrappedMediaTypes.mediaTypes(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
 
   implicit def restRequestBody(implicit wrappedBody: RestRequestBody[Wrapped]): RestRequestBody[T] =
-    new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] =
-        wrappedBody.requestBody(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      wrappedBody.requestBody(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
 
   implicit def restResponses(implicit wrappedResponses: RestResponses[Wrapped]): RestResponses[T] =
-    new RestResponses[T] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
-        wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
 }

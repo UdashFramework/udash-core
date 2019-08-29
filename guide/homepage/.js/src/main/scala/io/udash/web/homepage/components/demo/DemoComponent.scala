@@ -8,7 +8,6 @@ import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.DemoStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.all._
 import scalatags.generic.Attr
 
@@ -50,7 +49,7 @@ class DemoComponent(url: Property[IndexState]) extends Component {
 
     jqFiddleContainer
       .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
-        (el: Element) => {
+        (_: Element) => {
           jqFiddleContainer
             .html(entry.fiddle)
             .animate(Map[String, Any]("opacity" -> 1), 200)

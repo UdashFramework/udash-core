@@ -3,6 +3,8 @@ package io.udash.properties.seq
 import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
+import scala.collection.mutable
+
 private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {
 
@@ -75,7 +77,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
-  protected var transformedElements = CrossCollections.createArray[ElemType]
+  protected final var transformedElements: mutable.Buffer[ElemType] = CrossCollections.createArray[ElemType]
 
   protected def loadFromOrigin(): Seq[B]
   protected def elementsFromOrigin(): Seq[ElemType]
