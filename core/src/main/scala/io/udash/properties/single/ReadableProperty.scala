@@ -8,7 +8,7 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 
 /** Base interface of every Property in Udash. */
-trait ReadableProperty[A] {
+trait ReadableProperty[+A] {
   /** Unique property ID. */
   val id: PropertyId
 

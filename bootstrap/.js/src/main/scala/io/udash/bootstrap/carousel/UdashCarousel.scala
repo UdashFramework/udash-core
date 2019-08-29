@@ -6,7 +6,7 @@ import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
-import io.udash.bootstrap.utils.UdashIcons
+import io.udash.bootstrap.utils.{UdashBootstrapComponent, UdashIcons}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._

@@ -12,10 +12,12 @@ final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: Ht
   def header(name: String, value: String): RestResponse =
     copy(headers = headers.append(name, PlainValue(value)))
 
+  def isSuccess: Boolean =
+    code >= 200 && code < 300
   def toHttpError: HttpErrorException =
     HttpErrorException(code, body.textualContentOpt.toOptArg)
   def ensureNonError: RestResponse =
-    if (code >= 200 && code < 300) this else throw toHttpError
+    if (isSuccess) this else throw toHttpError
 }
 
 object RestResponse extends RestResponseLowPrio {

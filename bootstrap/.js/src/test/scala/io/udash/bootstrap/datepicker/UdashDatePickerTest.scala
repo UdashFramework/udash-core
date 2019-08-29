@@ -1,4 +1,5 @@
-package io.udash.bootstrap.datepicker
+package io.udash.bootstrap
+package datepicker
 
 import java.{util => ju}
 

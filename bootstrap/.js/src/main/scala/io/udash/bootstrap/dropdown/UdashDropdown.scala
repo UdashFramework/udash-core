@@ -4,6 +4,7 @@ package dropdown
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.{Element, Node}

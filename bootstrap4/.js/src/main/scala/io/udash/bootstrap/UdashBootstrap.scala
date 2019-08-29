@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 
 import io.udash._
-import io.udash.bootstrap.utils.BootstrapStyles
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
@@ -14,7 +13,7 @@ object UdashBootstrap {
 
   /** Loads FontAwesome styles. */
   def loadFontAwesome(): Element =
-    link(rel := "stylesheet", href := "https://use.fontawesome.com/releases/v5.2.0/css/all.css").render
+    link(rel := "stylesheet", href := "https://use.fontawesome.com/releases/v5.10.1/css/all.css").render
 
   /** Loads Bootstrap styles. */
   def loadBootstrapStyles(): Element =

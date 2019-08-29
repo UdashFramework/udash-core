@@ -84,7 +84,7 @@ object SeriesArearange {
             cropThreshold: js.UndefOr[Double] = js.undefined,
             cursor: js.UndefOr[String] = js.undefined,
             dashStyle: js.UndefOr[DashStyle] = js.undefined,
-            data: Seq[SeriesArearangeData] = Seq.empty,
+            data: Seq[js.Array[Double] | SeriesArearangeData] = Seq.empty,
             dataLabels: js.UndefOr[SeriesRangeDataLabels] = js.undefined,
             description: js.UndefOr[String] = js.undefined,
             enableMouseTracking: js.UndefOr[Boolean] = js.undefined,

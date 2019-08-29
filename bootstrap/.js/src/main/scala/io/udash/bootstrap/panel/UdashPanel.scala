@@ -1,9 +1,9 @@
 package io.udash.bootstrap
 package panel
 
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import io.udash._
 
 final class UdashPanel private(panelStyle: PanelStyle, override val componentId: ComponentId)(content: Modifier*)
   extends UdashBootstrapComponent {

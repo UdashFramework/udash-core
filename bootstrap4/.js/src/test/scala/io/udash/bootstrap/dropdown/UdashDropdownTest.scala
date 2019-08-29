@@ -136,14 +136,13 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       val el = dropdown.render
       jQ("body").append(el)
 
-
-      el.childNodes(1).childNodes(1).firstChild.nodeName should be("A")
+      el.childNodes(1).childNodes(1).nodeName should be("A")
 
       val tmp: DefaultDropdownItem = els.elemProperties(1).get
       els.elemProperties(1).set(DefaultDropdownItem.Divider)
-      el.childNodes(1).childNodes(1).firstChild.nodeName should be("DIV")
+      el.childNodes(1).childNodes(1).nodeName should be("DIV")
       els.elemProperties(1).set(tmp)
-      el.childNodes(1).childNodes(1).firstChild.nodeName should be("A")
+      el.childNodes(1).childNodes(1).nodeName should be("A")
     }
 
     "clean up property listeners" in {

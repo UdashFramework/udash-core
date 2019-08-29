@@ -1,8 +1,8 @@
-package io.udash.bootstrap.badge
+package io.udash.bootstrap
+package badge
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom.Element
 import scalatags.JsDom.TypedTag

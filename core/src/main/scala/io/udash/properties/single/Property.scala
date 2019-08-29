@@ -6,12 +6,12 @@ import io.udash.utils.Registration
 
 object Property {
   /** Creates a blank `DirectProperty[T]`.  */
-  def blank[T](implicit pc: PropertyCreator[T], blank: Blank[T]): CastableProperty[T] =
-    pc.newProperty(null)(blank)
+  def blank[T: PropertyCreator : Blank]: CastableProperty[T] =
+    PropertyCreator[T].newProperty(null)
 
   /** Creates `DirectProperty[T]` with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T]): CastableProperty[T] =
-    pc.newProperty(init, null)
+  def apply[T: PropertyCreator](init: T): CastableProperty[T] =
+    PropertyCreator[T].newProperty(init, null)
 }
 
 /** Property which can be modified. */

@@ -3,11 +3,9 @@ package io.udash.web.guide.demos.rpc
 import io.udash.web.SeleniumTest
 
 class RpcSerializationTest extends SeleniumTest {
-  val rpcFrontendUrl = "/rpc/serialization"
+  override protected final val url = "/rpc/serialization"
 
   "RpcSerialization view" should {
-    driver.get(server.createUrl(rpcFrontendUrl))
-
     "contain example button" in {
       eventually {
         driver.findElementById("gencodec-demo")

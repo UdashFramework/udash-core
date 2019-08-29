@@ -2,7 +2,6 @@ package io.udash.rpc
 
 import java.util.concurrent.TimeUnit
 
-import com.github.ghik.silencer.silent
 import io.udash.rpc.internals.UsesServerRPC
 import io.udash.testing.AsyncUdashFrontendTest
 
@@ -162,7 +161,6 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
 
   def createDefaultServerRpc(timeout: FiniteDuration): (MockServerConnector, DefaultServerRPC[TestRPC]) = {
     val connectorMock = new MockServerConnector
-    @silent
     val serverRPC = new DefaultServerRPC[TestRPC](connectorMock, timeout)
     (connectorMock, serverRPC)
   }

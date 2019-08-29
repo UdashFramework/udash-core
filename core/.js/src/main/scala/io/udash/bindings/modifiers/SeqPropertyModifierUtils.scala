@@ -8,8 +8,7 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
-private[bindings]
-trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
+private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
 
   protected val property: ReadableSeqProperty[T, E]
   protected def build(item: E): Seq[Node]

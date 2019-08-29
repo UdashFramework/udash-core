@@ -6,7 +6,6 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.card.UdashCard
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
 import io.udash.properties.seq
 import org.scalajs.dom._
 

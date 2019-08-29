@@ -1,12 +1,11 @@
 package io.udash.bootstrap
 
 import io.udash._
-import io.udash.bootstrap.utils.{BootstrapImplicits, BootstrapStyles}
 import io.udash.css.CssStyleName
 import io.udash.testing.UdashCoreFrontendTest
 import org.scalajs.dom.Element
 
-class BootstrapImplicitsTest extends UdashCoreFrontendTest with BootstrapImplicits {
+class BootstrapImplicitsTest extends UdashCoreFrontendTest {
   import io.udash.css.CssView._
 
   "StyleOps" should {

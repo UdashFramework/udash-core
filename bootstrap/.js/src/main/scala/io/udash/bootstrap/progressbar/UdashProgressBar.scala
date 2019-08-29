@@ -4,6 +4,7 @@ package progressbar
 import io.udash._
 import io.udash.bootstrap.progressbar.ProgressBarStyle.Default
 import io.udash.bootstrap.progressbar.UdashProgressBar.ValueStringifier
+import io.udash.bootstrap.utils.UdashBootstrapComponent
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._

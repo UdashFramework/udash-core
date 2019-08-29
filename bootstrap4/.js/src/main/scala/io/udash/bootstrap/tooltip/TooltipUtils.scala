@@ -1,9 +1,8 @@
 package io.udash.bootstrap
 package tooltip
 
-import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.bootstrap.utils.BootstrapTags
-import io.udash.component.{Listenable, ListenableEvent}
 import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -45,15 +44,29 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
 }
 
 abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
-  case class Delay(show: Duration, hide: Duration) extends AbstractCase
+  trait Delay extends js.Object {
+    val show: Long
+    val hide: Long
+  }
+  object Delay {
+    def apply(show: Duration, hide: Duration): Delay = js.Dynamic.literal(show = show.toMillis, hide = hide.toMillis).asInstanceOf[Delay]
+  }
 
-  final class Placement(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object Placement extends AbstractValueEnumCompanion[Placement] {
-    final val Auto: Value = new Placement("auto")
-    final val Top: Value = new Placement("top")
-    final val Bottom: Value = new Placement("bottom")
-    final val Left: Value = new Placement("left")
-    final val Right: Value = new Placement("right")
+  trait Placement {
+    def jsValue: js.Any
+  }
+  final class StaticPlacement(val value: String) extends Placement {
+    override def jsValue: js.Any = value
+  }
+  object Placement {
+    final val Auto = new StaticPlacement("auto")
+    final val Top = new StaticPlacement("top")
+    final val Bottom = new StaticPlacement("bottom")
+    final val Left = new StaticPlacement("left")
+    final val Right = new StaticPlacement("right")
+    def dynamic(f: (dom.Node, dom.Node) => Placement): Placement = new Placement {
+      override def jsValue: js.Function2[dom.Node, dom.Node, Placement] = f
+    }
   }
 
   final class Trigger(val jsValue: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -84,15 +97,15 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     */
   def apply(
     animation: Boolean = true,
-    boundary: String = "scrollParent",
-    container: Option[String] = None,
-    content: dom.Node => String | dom.Node = _ => "",
-    delay: Delay = Delay(0 millis, 0 millis),
+    boundary: String | dom.Node = "scrollParent",
+    container: Option[String | dom.Node] = None,
+    content: js.Function1[dom.Node, String] | dom.Node = io.udash.emptyStringNode(),
+    delay: Delay | Long = Delay(0 millis, 0 millis),
     html: Boolean = false,
-    offset: String = "0",
-    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    offset: Int | String = "0",
+    placement: Placement = defaultPlacement,
     template: Option[String] = None,
-    title: dom.Node => String | dom.Node = _ => "",
+    title: String | js.Function1[dom.Node, String] | dom.Node = "",
     trigger: Seq[Trigger] = defaultTrigger
   )(el: dom.Node): TooltipType =
     initTooltip(
@@ -100,13 +113,13 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
         "animation" -> animation,
         "boundary" -> boundary,
         "container" -> container.getOrElse(false),
-        "content" -> js.ThisFunction.fromFunction1(content),
-        "delay" -> js.Dictionary("show" -> delay.show.toMillis, "hide" -> delay.hide.toMillis),
+        "content" -> content,
+        "delay" -> delay,
         "html" -> html,
         "offset" -> offset,
-        "placement" -> scalajs.js.Any.fromFunction2((popover: dom.Node, trigger: dom.Node) => placement(popover, trigger).map(_.jsValue).mkString(" ")),
+        "placement" -> placement.jsValue,
         "template" -> template.getOrElse(defaultTemplate),
-        "title" -> js.ThisFunction.fromFunction1(title),
+        "title" -> title,
         "trigger" -> trigger.map(_.jsValue).mkString(" ")
       )
     )(el)
@@ -134,16 +147,28 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
     boundary: String = "scrollParent",
     container: Option[String] = None,
     content: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
-    delay: Delay = Delay(0 millis, 0 millis),
+    delay: Delay | Long = Delay(0 millis, 0 millis),
     html: Boolean = false,
-    offset: String = "0",
-    placement: (dom.Node, dom.Node) => Seq[Placement] = defaultPlacement,
+    offset: Int | String = "0",
+    placement: Placement = defaultPlacement,
     template: Option[String] = None,
     title: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
     trigger: Seq[Trigger] = defaultTrigger
   )(el: dom.Node)(implicit langProperty: LangProperty, translationProvider: TranslationProvider): TooltipType = {
-
-    val tp = apply(animation, boundary, container, _ => "", delay, html, offset, placement, template, _ => "", trigger)(el)
+    import scalatags.JsDom.all.stringFrag
+    val tp = apply(
+      animation = animation,
+      boundary = boundary,
+      container = container,
+      content = "".render,
+      delay = delay,
+      html = html,
+      offset = offset,
+      placement = placement,
+      template = template,
+      title = "",
+      trigger = trigger
+    )(el)
 
     var lastContent = ""
     var lastTitle = ""
@@ -171,7 +196,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
   }
 
   protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): TooltipType
-  protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement]
+  protected val defaultPlacement: Placement
   protected val defaultTemplate: String
   protected val defaultTrigger: Seq[Trigger]
 }
