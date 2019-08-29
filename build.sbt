@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.JSModuleID
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-SNAPSHOT",
+  version := "0.9.0-SNAPSHOT",
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
