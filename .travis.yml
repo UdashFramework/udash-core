@@ -21,7 +21,6 @@ jdk:
 
 scala:
   - 2.12.9
-  - 2.11.12
 
 env:
   - TEST_PACKAGE="guide-selenium/test"
@@ -33,16 +32,10 @@ env:
   - TEST_PACKAGE="i18n-js/test"
   - TEST_PACKAGE="auth-js/test"
   - TEST_PACKAGE="css-js/test"
-  - TEST_PACKAGE="bootstrap/test"
   - TEST_PACKAGE="bootstrap4/test"
   - TEST_PACKAGE="charts/compile"
   - TEST_PACKAGE="benchmarks/compile"
   - TEST_PACKAGE="doc"
-
-matrix:
-  exclude:
-    - scala: 2.11.12
-      env: TEST_PACKAGE="guide-selenium/test"
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates

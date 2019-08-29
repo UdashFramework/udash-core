@@ -61,7 +61,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
+  crossScalaVersions := Seq(Dependencies.versionOfScala /*, "2.13.0"*/),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -77,15 +77,11 @@ val commonSettings = Seq(
     "-Xlint:_,-missing-interpolator",
     "-Yrangepos",
     "-P:silencer:checkUnused",
+    "-Ywarn-unused:_,-explicits,-implicits",
+    "-Ybackend-parallelism", "8",
+    "-Ycache-plugin-class-loader:last-modified",
+    "-Ycache-macro-class-loader:last-modified"
   ),
-  scalacOptions ++= {
-    if (scalaBinaryVersion.value == "2.12") Seq(
-      "-Ywarn-unused:_,-explicits,-implicits",
-      "-Ybackend-parallelism", "4",
-      "-Ycache-plugin-class-loader:last-modified",
-      "-Ycache-macro-class-loader:last-modified"
-    ) else Seq.empty
-  },
   moduleName := "udash-" + moduleName.value,
   ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
