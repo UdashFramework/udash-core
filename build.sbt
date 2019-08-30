@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.JSModuleID
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-SNAPSHOT",
+  version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.8.0-SNAPSHOT"),
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
@@ -35,6 +35,13 @@ val deploymentConfiguration = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
+
+  credentials in Global += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    sys.env.getOrElse("SONATYPE_USERNAME", ""),
+    sys.env.getOrElse("SONATYPE_PASSWORD", "")
+  ),
 
   pomExtra := {
     <url>https://github.com/UdashFramework/udash-core</url>
