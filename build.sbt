@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.JSModuleID
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-SNAPSHOT",
+  version := "0.9.0-SNAPSHOT",
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
@@ -61,7 +61,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
+  crossScalaVersions := Seq(Dependencies.versionOfScala /*, "2.13.0"*/),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -77,15 +77,11 @@ val commonSettings = Seq(
     "-Xlint:_,-missing-interpolator",
     "-Yrangepos",
     "-P:silencer:checkUnused",
+    "-Ywarn-unused:_,-explicits,-implicits",
+    "-Ybackend-parallelism", "8",
+    "-Ycache-plugin-class-loader:last-modified",
+    "-Ycache-macro-class-loader:last-modified"
   ),
-  scalacOptions ++= {
-    if (scalaBinaryVersion.value == "2.12") Seq(
-      "-Ywarn-unused:_,-explicits,-implicits",
-      "-Ybackend-parallelism", "4",
-      "-Ycache-plugin-class-loader:last-modified",
-      "-Ycache-macro-class-loader:last-modified"
-    ) else Seq.empty
-  },
   moduleName := "udash-" + moduleName.value,
   ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
@@ -268,7 +264,7 @@ lazy val jsLibraries = Seq[ProjectReference](
   macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts
 )
 lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(jsLibraries :+ (bootstrap: ProjectReference): _*)
+  .aggregate(jsLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
@@ -359,14 +355,6 @@ lazy val `css-js` = jsProjectFor(project, css)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.cssSjsDeps.value,
-  )
-
-lazy val bootstrap = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
-  .settings(
-    testInBrowser,
-    libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrapJsDeps.value
   )
 
 lazy val bootstrap4 = jsProject(project)

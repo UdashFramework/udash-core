@@ -18,13 +18,13 @@ abstract class ViewContainer extends ContainerView {
 
     jqChild
       .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
-        (el: Element) => {
+        (_: Element) => {
           view match {
             case Some(view) =>
               jqChild.children().remove()
               view.getTemplate.applyTo(jqChild.toArray.head)
               jqChild.animate(Map[String, Any]("opacity" -> 1), 200, EasingFunction.swing,
-                (_) => js.Dynamic.global.Prism.highlightAll()
+                _ => js.Dynamic.global.Prism.highlightAll()
               )
             case None =>
               jqChild.html(null)

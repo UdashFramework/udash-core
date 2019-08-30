@@ -3,7 +3,7 @@ package rest.util
 
 import com.avsystem.commons.ISeq
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
-import io.udash.rest.openapi.{Responses, RestResponses, RestSchema, SchemaResolver}
+import io.udash.rest.openapi.{RestResponses, RestSchema, SchemaResolver}
 import io.udash.rest.raw.{HttpBody, IMapping, PlainValue, RestResponse}
 
 /**
@@ -29,8 +29,6 @@ object WithHeaders {
     }
 
   implicit def responses[T: RestResponses]: RestResponses[WithHeaders[T]] =
-    new RestResponses[WithHeaders[T]] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
-        RestResponses[T].responses(resolver, schemaTransform)
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      RestResponses[T].responses(resolver, schemaTransform)
 }

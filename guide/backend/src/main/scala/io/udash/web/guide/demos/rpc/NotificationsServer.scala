@@ -3,8 +3,8 @@ package io.udash.web.guide.demos.rpc
 import java.util.concurrent.TimeUnit
 import java.{time => jt}
 
-import io.udash.web.guide.rpc.ClientRPC
 import io.udash.rpc._
+import io.udash.web.guide.rpc.ClientRPC
 
 import scala.concurrent.Future
 
@@ -29,17 +29,15 @@ object NotificationsService {
     clients -= clientId
   }
 
-  backendExecutionContext.execute(new Runnable {
-    override def run(): Unit = {
-      while (true) {
-        val msg = jt.LocalDateTime.now().toString
-        clients.synchronized {
-          clients.foreach(clientId => {
-            ClientRPC(clientId).demos().notificationsDemo().notify(msg)
-          })
-        }
-        TimeUnit.SECONDS.sleep(1)
+  backendExecutionContext.execute(() => {
+    while (true) {
+      val msg = jt.LocalDateTime.now().toString
+      clients.synchronized {
+        clients.foreach(clientId => {
+          ClientRPC(clientId).demos().notificationsDemo().notify(msg)
+        })
       }
+      TimeUnit.SECONDS.sleep(1)
     }
   })
 }

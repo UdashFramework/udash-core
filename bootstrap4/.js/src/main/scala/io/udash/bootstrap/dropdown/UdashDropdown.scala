@@ -166,7 +166,7 @@ object UdashDropdown {
       case Disabled(item) =>
         val res = defaultItemFactory(item).styles(BootstrapStyles.disabled)
         res.addEventListener("click", (ev: Event) => {
-          ev.preventDefault();
+          ev.preventDefault()
           ev.stopPropagation()
         })
         res

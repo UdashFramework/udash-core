@@ -5,7 +5,7 @@ import io.udash._
 class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
   def matchUrl(url: Url): RoutingState = {
     val stripped = url.value.stripPrefix("/").stripSuffix("/")
-    url2State.applyOrElse("/" + stripped, (x: String) => ErrorState)
+    url2State.applyOrElse("/" + stripped, (_: String) => ErrorState)
   }
 
   def matchState(state: RoutingState): Url =

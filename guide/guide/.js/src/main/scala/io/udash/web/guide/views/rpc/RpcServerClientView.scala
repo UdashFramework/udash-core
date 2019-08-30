@@ -103,14 +103,14 @@ class RpcServerClientView extends FinalView with CssView {
         |    listeners += listener
         |    // register for server notifications
         |    if (listeners.size == 1) serverRpc.notificationsDemo().register()
-        |    else Future.successful(())
+        |    else Future.unit
         |  }
         |
         |  def unregisterListener(listener: (String) => Any): Future[Unit] = {
         |    listeners -= listener
         |    // unregister
         |    if (listeners.isEmpty) serverRpc.notificationsDemo().unregister()
-        |    else Future.successful(())
+        |    else Future.unit
         |  }
         |
         |  override def notify(msg: String): Unit = {

@@ -177,18 +177,14 @@ object RestMediaTypes {
   def apply[T](implicit r: RestMediaTypes[T]): RestMediaTypes[T] = r
 
   implicit val ByteArrayMediaTypes: RestMediaTypes[Array[Byte]] =
-    new RestMediaTypes[Array[Byte]] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] = {
-        val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
-        Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
-      }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) => {
+      val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
+      Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
     }
 
   implicit def fromSchema[T: RestSchema]: RestMediaTypes[T] =
-    new RestMediaTypes[T] {
-      def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType] =
-        Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
 
   @implicitNotFound("RestMediaTypes instance for ${T} not found, because:\n#{forSchema}")
   implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestMediaTypes[T]] =
@@ -219,23 +215,17 @@ object RestResponses {
   final val SuccessDescription = "Success"
 
   implicit val UnitResponses: RestResponses[Unit] =
-    new RestResponses[Unit] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
-        Responses(byStatusCode = Map(
-          204 -> RefOr(Response(description = SuccessDescription))
-        ))
-    }
+    (_: SchemaResolver, _: RestSchema[_] => RestSchema[_]) => Responses(byStatusCode = Map(
+      204 -> RefOr(Response(description = SuccessDescription))
+    ))
 
   implicit def fromMediaTypes[T: RestMediaTypes]: RestResponses[T] =
-    new RestResponses[T] {
-      def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
-        Responses(byStatusCode = Map(
-          200 -> RefOr(Response(
-            description = SuccessDescription,
-            content = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
-          ))
-        ))
-    }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) => Responses(byStatusCode = Map(
+      200 -> RefOr(Response(
+        description = SuccessDescription,
+        content = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
+      ))
+    ))
 
   @implicitNotFound("RestResponses instance for ${T} not found, because:\n#{forMediaTypes}")
   implicit def notFound[T](implicit forMediaTypes: ImplicitNotFound[RestMediaTypes[T]]): ImplicitNotFound[RestResponses[T]] =
@@ -299,17 +289,12 @@ object RestRequestBody {
       required = required
     )))
 
-  implicit val UnitRequestBody: RestRequestBody[Unit] = new RestRequestBody[Unit] {
-    def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] =
-      Opt.Empty
-  }
+  implicit val UnitRequestBody: RestRequestBody[Unit] = (_: SchemaResolver, _: RestSchema[_] => RestSchema[_]) => Opt.Empty
 
   implicit def fromMediaTypes[T: RestMediaTypes]: RestRequestBody[T] =
-    new RestRequestBody[T] {
-      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] = {
-        val mediaTypes = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
-        Opt(RefOr(RequestBody(content = mediaTypes, required = true)))
-      }
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) => {
+      val mediaTypes = RestMediaTypes[T].mediaTypes(resolver, schemaTransform)
+      Opt(RefOr(RequestBody(content = mediaTypes, required = true)))
     }
 
   @implicitNotFound("RestRequestBody instance for ${T} not found, because:\n#{forMediaTypes}")

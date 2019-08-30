@@ -14,7 +14,7 @@ private[inputs] class SelectBinding[T : PropertyCreator](
   onChange: Select => Event => Unit
 ) extends InputBinding[Select] {
   private val selector = select(selectModifiers)(
-    produce(options) { case opts =>
+    produce(options) { opts =>
       kill()
       refreshSelection(opts)
 

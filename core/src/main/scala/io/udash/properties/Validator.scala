@@ -24,14 +24,14 @@ trait Validator[ArgumentType] {
 }
 
 object Validator {
-  class FunctionValidator[ArgumentType](f: (ArgumentType) => ValidationResult) extends Validator[ArgumentType] {
+  class FunctionValidator[ArgumentType](f: ArgumentType => ValidationResult) extends Validator[ArgumentType] {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     override def apply(element: ArgumentType): Future[ValidationResult] =
       Future(f(element))
   }
 
-  def apply[ArgumentType](f: (ArgumentType) => ValidationResult): Validator[ArgumentType] =
+  def apply[ArgumentType](f: ArgumentType => ValidationResult): Validator[ArgumentType] =
     new FunctionValidator(f)
 
   implicit class FutureOps[T](private val future: Future[T]) extends AnyVal {

@@ -32,9 +32,7 @@ trait PermissionCombinator extends Any {
 
 object PermissionCombinator {
   /** PermissionCombinator always granting permission. */
-  val AllowAll: PermissionCombinator = new PermissionCombinator {
-    override def check(ctx: UserCtx): Boolean = true
-  }
+  val AllowAll: PermissionCombinator = _ => true
 
   /** PermissionCombinator granting permission only when all of given combinators do so. */
   def allOf(permissions: Permission*): PermissionCombinator = new PermissionCombinator {
