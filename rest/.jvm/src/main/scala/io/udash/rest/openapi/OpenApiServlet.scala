@@ -14,7 +14,10 @@ object OpenApiServlet {
     security: List[SecurityRequirement] = Nil,
     tags: List[Tag] = Nil,
     externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
-  ): OpenApiServlet = _ => implicitly[OpenApiMetadata[RestApi]].openapi(info, components, servers, security, tags, externalDocs)
+  ): OpenApiServlet = new OpenApiServlet {
+    protected def render(request: HttpServletRequest): OpenApi =
+      implicitly[OpenApiMetadata[RestApi]].openapi(info, components, servers, security, tags, externalDocs)
+  }
 }
 
 abstract class OpenApiServlet extends HttpServlet {
