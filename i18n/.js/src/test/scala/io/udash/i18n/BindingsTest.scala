@@ -137,8 +137,8 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
   "translatedDynamic" should {
     "put translation in DOM and update it after language change" in {
-      val en = LangProperty(Lang("en"))
-      val pl = LangProperty(Lang("pl"))
+      val en = Property(Lang("en"))
+      val pl = Property(Lang("pl"))
       val template = {
         implicit val langProperty = en
         div(
@@ -181,8 +181,8 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
   "translatedAttrDynamic" should {
     "put translation in DOM element attribute and update it after language change" in {
-      val en = LangProperty(Lang("en"))
-      val pl = LangProperty(Lang("pl"))
+      val en = Property(Lang("en"))
+      val pl = Property(Lang("pl"))
       val template = {
         implicit val langProperty = en
         div(
@@ -217,7 +217,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
     "be valid Property value" in {
       val en = Lang("en")
       val pl = Lang("pl")
-      implicit val lang = LangProperty(en)
+      implicit val lang = Property(en)
       val pKey1 = TranslationKey.key1[String]("tr1")
       val pKey2 = TranslationKey.key1[String]("tr3")
       val pKey3 = TranslationKey.key1[String]("tr1")

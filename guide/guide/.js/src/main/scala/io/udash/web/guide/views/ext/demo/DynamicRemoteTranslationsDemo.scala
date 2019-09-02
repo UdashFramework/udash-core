@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo
 
+import io.udash.properties.single.Property
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -25,7 +26,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
         6.hours
       )
 
-    implicit val lang: LangProperty = LangProperty(Lang("en"))
+    implicit val lang: Property[Lang] = Property(Lang("en"))
 
     div(
       button(
