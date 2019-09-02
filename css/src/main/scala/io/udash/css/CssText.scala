@@ -12,6 +12,6 @@ trait CssText {
 object CssText extends CssText {
   private final class TextStyleModifier(styles: CssStyle*) extends Modifier {
     override def applyTo(t: Builder): Unit =
-      styles.foreach { s => t.appendAttr(cls.name, Builder.GenericAttrValueSource(s.classNames.mkString(" ", " ", ""))) }
+      styles.foreach { s => t.appendAttr(cls.name, Builder.GenericAttrValueSource(s.classNames.mkString)) }
   }
 }
