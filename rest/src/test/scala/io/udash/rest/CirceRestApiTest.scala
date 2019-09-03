@@ -70,11 +70,13 @@ trait CirceCustomizedInstances[T] {
   def decoder(nameTransform: String => String, useDefaults: Boolean, discriminator: Option[String]): Decoder[T]
 }
 
-abstract class HasCirceCustomizedCodec[T](nameTransform: String => String)(
-  implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]
-) {
-  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform, None)
-  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform, true, None)
+abstract class HasCirceCustomizedCodec[T](
+  nameTransform: String => String,
+  useDefaults: Boolean = true,
+  discriminator: Option[String] = None
+)(implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]) {
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform, discriminator)
+  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform, useDefaults, discriminator)
 }
 
 case class CirceAddress(city: String, zip: String)
