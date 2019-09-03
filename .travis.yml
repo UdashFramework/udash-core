@@ -9,6 +9,9 @@ before_script:
   - mkdir geckodriver
   - tar -xzf geckodriver-v0.24.0-linux64.tar.gz -C geckodriver
   - export PATH=$PWD/geckodriver:$PATH
+  - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
+  - gpg --import travis/travis.gpg
+  - npm install jsdom
 
 script:
   - xvfb-run sbt -jvm-opts .jvmopts-travis "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
@@ -19,22 +22,26 @@ scala:
   - 2.12.9
   - 2.11.12
 
+stages:
+  - test
+  - name: release
+    if: tag =~ ^v
+
 env:
   matrix:
-    - TEST_PACKAGE="guide-selenium/test"
+    #- TEST_PACKAGE="guide-selenium/test"
     - TEST_PACKAGE="udash-jvm/test"
     - TEST_PACKAGE="utils-js/test"
-    - TEST_PACKAGE="core-js/test"
-    - TEST_PACKAGE="rpc-js/test"
-    - TEST_PACKAGE="rest-js/test"
-    - TEST_PACKAGE="i18n-js/test"
-    - TEST_PACKAGE="auth-js/test"
-    - TEST_PACKAGE="css-js/test"
-    - TEST_PACKAGE="bootstrap/test"
-    - TEST_PACKAGE="bootstrap4/test"
-    - TEST_PACKAGE="charts/compile"
-    - TEST_PACKAGE="benchmarks/compile"
-    - TEST_PACKAGE="doc"
+    #- TEST_PACKAGE="core-js/test"
+    #- TEST_PACKAGE="rpc-js/test"
+    #- TEST_PACKAGE="rest-js/test"
+    #- TEST_PACKAGE="i18n-js/test"
+    #- TEST_PACKAGE="auth-js/test"
+    #- TEST_PACKAGE="css-js/test"
+    #- TEST_PACKAGE="bootstrap/test"
+    #- TEST_PACKAGE="bootstrap4/test"
+    #- TEST_PACKAGE="charts/compile"
+    #- TEST_PACKAGE="benchmarks/compile"
 
   global:
     - secure: fdBpnGod9OiHppoTk8v1uDnHcaG8vzZiORpqVLP0DWVvsdGxCfc2njUStxyD5LrNNTChd0W2aj9Ahchg88mlatheNvP/lnLpoU+1PIDNvshUmhOIVW1HDn4kkJQ783DW/Ch5fhRwupzr0LyW6BY+Ip+P2HIP3x/27ls8OUoX3Dr32BDPaRBQXl3RtFiic+pj1waB2qFK4Wbf4vWT0pSACaJXUGBWJq5LQ6QyTQ+pOcVBX65ZrsX5X6bSrgYapmkBgiNR/+cO7RIXeusHYmc6bchC8t6Rm/DfLosmR1iYMPGvVhTWaWo5t5x/xBAnEzBbKCHV7aE32OH69ed64/CcqtsgzPTT38Y5tvMCbDcUS3EJAqN1xEXdFcMWKkY4xzU2nekAIBdl9PT8Er2i/CCnMzG6/kxVCbnDD+Ujts+yJmWJPZ1dYdGkhhjqs9hpbden7UeAiRswVBt7fjB+crbpJxtLtWdRdwJnrbE7HnpTohG5/tfzZK98rSXou4KfigXmRneiObrp7n1OOOAiy/J70JxiT9hzMBEQVya2shx0v1TZgN39RrvYzN1fWdtvfrVke8XwQnjGxzgtOilQWqqUzBo+p7zx+Q+WALTPv/sU4//gmQFfIimf3b90KbcwzcCh3MwnTfANx0iScc9FktxfDozRvE3RTM/IHDKf9TJgaN8=
@@ -47,22 +54,10 @@ matrix:
 
 jobs:
   include:
-    - if: tag =~ ^v
-      stage: publish
-      scala: 2.11.12
-      before_script:
-        - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
-        - gpg --import travis/travis.gpg
-      env: TEST_PACKAGE=none
-      script: test $TRAVIS_PULL_REQUEST = "false" && sbt ++$TRAVIS_SCALA_VERSION publishSigned sonatypeRelease
-    - if: tag =~ ^v
-      stage: publish
+    - stage: release
       scala: 2.12.9
-      before_script:
-        - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
-        - gpg --import travis/travis.gpg
       env: TEST_PACKAGE=none
-      script: test $TRAVIS_PULL_REQUEST = "false" && sbt ++$TRAVIS_SCALA_VERSION publishSigned sonatypeRelease
+      script: test $TRAVIS_PULL_REQUEST = "false" && sbt -jvm-opts .jvmopts-travis +publishSigned sonatypeBundleRelease
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
@@ -74,6 +69,5 @@ cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.m2
-    - $HOME/.coursier/cache
     - $HOME/.cache
     - $HOME/.sbt
