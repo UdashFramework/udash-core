@@ -6,7 +6,6 @@ import scalatags.text.Builder
 
 trait CssText {
   implicit def style2TextMod(s: CssStyle): Modifier = new CssText.TextStyleModifier(s)
-  implicit def styles2TextMod(s: CssStyle*): Modifier = new CssText.TextStyleModifier(s: _*)
 }
 
 object CssText extends CssText {
