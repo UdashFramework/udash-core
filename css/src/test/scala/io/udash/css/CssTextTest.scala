@@ -14,5 +14,10 @@ class CssTextTest extends UdashSharedTest {
       div(test1, test2, indent(2))("Test").render shouldBe
         "<div class=\"io-udash-css-StylesheetExample-test1 io-udash-css-StylesheetExample-test2 StylesheetExample-indent-2\">Test</div>"
     }
+
+    "separate class names by space" in {
+      val fontAwesomeStyle = CssStyleNameWithSharedCompanion("far", "fa", "fa-grin")
+      i(fontAwesomeStyle).render shouldBe "<i class=\"far fa-grin\"></i>"
+    }
   }
 }
