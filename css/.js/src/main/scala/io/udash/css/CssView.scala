@@ -13,7 +13,6 @@ trait CssView extends CssText {
   import CssView._
 
   implicit def style2Mod(style: CssStyle): Modifier = new StyleModifier(style)
-  implicit def styles2Mod(styles: CssStyle*): Modifier = new StyleModifier(styles: _*)
   implicit def elementOps(element: Element): ElementOps = new ElementOps(element)
   implicit def styleOps(style: CssStyle): StyleOps = new StyleOps(style)
   implicit def styleFactoryOps[T](factory: T => CssStyle): StyleFactoryOps[T] = new StyleFactoryOps[T](factory)
