@@ -42,11 +42,6 @@ object Validator {
     override def apply(element: Any): Validation = Valid
   }
 
-  //Scala 2.11
-  def apply[A](validation: A => Validation): Validator[A] = new Validator[A] {
-    override def apply(element: A): Validation = validation(element)
-  }
-
   implicit final class FutureValidationOps[T](private val future: Future[Seq[ValidationResult]]) extends AnyVal {
     def foldValidationResult: Future[ValidationResult] = {
       future.mapNow { s =>

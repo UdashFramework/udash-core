@@ -20,7 +20,7 @@ class FrontendPropertiesView extends FinalView with CssView {
     p(
       "Udash provides the powerful Properties mechanism for a data model management. ",
       "The Properties system wraps your data model, in order to enable ",
-      "convenient value change listening and validation. Take a look at the example below:"
+      "convenient value change listening. Take a look at the example below:"
     ),
     CodeBlock(
       """val username = Property.blank[String]
@@ -30,17 +30,7 @@ class FrontendPropertiesView extends FinalView with CssView {
         |  println(s"Username changed to: $name")
         |)
         |
-        |username.set("Udash")
-        |
-        |println(s"Starting validation of ${username.get}.")
-        |username.isValid onComplete {
-        |  case Success(Valid) =>
-        |    println("It is valid, because there is no validator on this property...")
-        |  case Success(Invalid(errors)) =>
-        |    println("...but it might be invalid, if only we had added any.")
-        |  case Failure(ex) =>
-        |    println("Validation process went wrong...")
-        |}""".stripMargin
+        |username.set("Udash")""".stripMargin
     )(GuideStyles),
     p("That was the simple example. Now it is time for something more complex:"),
     CodeBlock(
@@ -75,8 +65,8 @@ class FrontendPropertiesView extends FinalView with CssView {
     )(GuideStyles),
     h3("Types of Properties"),
     p(
-      i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value, ",
-      "check validation result or register a listener. ", i("Property"), " extends ", i("ReadableProperty"),
+      i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value ",
+      "or register a listener. ", i("Property"), " extends ", i("ReadableProperty"),
       " API with value changing methods. You can create ", i("Property"), " containing any type you want. ",
       "Remember: there is no guarantee that the ", i("get"), " method called twice will return the same object."
     ),
@@ -226,63 +216,6 @@ class FrontendPropertiesView extends FinalView with CssView {
         |ints.insert(0, Seq(1, 2, 3))           // fires both listeners
         |ints.elemProperties.head.set(5)        // prints only "listen"""".stripMargin
     )(GuideStyles),
-    h3("Properties validation"),
-    p("The Property provides three methods related to data model validation: "),
-    ul(GuideStyles.defaultList)(
-      li(i("addValidator"), " - adds a new validator to a property,"),
-      li(i("isValid"), " - returns Future containing the validation result,"),
-      li(i("valid"), " - returns property containing the validation result, which automatically updates after the original property revalidation."),
-    ),
-    p(
-      "You can remove validator by calling ", i(".cancel()"), " on ", i("Registration"), " object returned by the ",
-      i("addValidator"), " method or ", i(".clearValidators()"), " on target property."
-    ),
-    p("Every validator must extend ", i("Validator[T]"), ", where T is a data model type. For example:"),
-    CodeBlock(
-      """object UserNameValidator extends Validator[String] {
-        |  def apply(name: String): Future[ValidationResult] =
-        |    Future {
-        |      if (name.length >= 3) Valid
-        |      else Invalid(Seq("User name must contain at least 3 characters!"))
-        |    }
-        |}
-        |
-        |val comment = ModelProperty(
-        |  Comment(new User(1, ""), "", Seq.empty)
-        |)
-        |val name = comment.subProp(_.author.name)
-        |name.addValidator(UserNameValidator)
-        |name.set("A")
-        |name.isValid                         // returns Future(Invalid)
-        |comment.subProp(_.author).isValid    // returns Future(Invalid)
-        |comment.isValid                      // returns Future(Invalid)
-        |name.set("Abcde")
-        |name.isValid                         // returns Future(Valid)
-        |comment.subProp(_.author).isValid    // returns Future(Valid)
-        |comment.isValid                      // returns Future(Valid)""".stripMargin
-    )(GuideStyles),
-    p("You can also pass an anonymous function to the ", i("addValidator"), " method:"),
-    CodeBlock(
-      """val comment = ModelProperty(
-        |  Comment(new User(1, ""), "", Seq.empty)
-        |)
-        |val name = comment.subProp(_.author.name)
-        |name.addValidator((name: String) =>
-        |  if (name.length >= 3) Valid
-        |  else Invalid(Seq("User name must contain at least 3 characters!"))
-        |)
-        |name.set("A")
-        |name.isValid                         // returns Future(Invalid)""".stripMargin
-    )(GuideStyles),
-    p("As you can see, properties validity is considered in the context of whole hierarchy. A property is valid when:"),
-    ul(GuideStyles.defaultList)(
-      li(i("Property"), " - every added validator accepts a value,"),
-      li(i("ModelProperty"), " - every added validator accepts the value and all subproperties are valid,"),
-      li(i("SeqProperty"), " - every added validator accepts the value and all added properties are valid.")
-    ),
-    p("On value change all parent properties are automatically revalidated."),
-
-
     h3("Properties transformation"),
     p("You can also change the type of a property. Let's assume the ", i("User"), " model looks like below:"),
     CodeBlock(

@@ -24,7 +24,7 @@ trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 
-  /** Fires value change listeners with current value and clears validation result. */
+  /** Fires value change listeners with current value. */
   def touch(): Unit
 
   /** Removes all listeners from property. */
