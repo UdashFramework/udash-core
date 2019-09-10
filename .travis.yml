@@ -1,48 +1,63 @@
 sudo: required
 dist: trusty
-
 language: scala
-
 addons:
   firefox: latest
 
 before_script:
-  # Install firefox-driver
   - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
   - mkdir geckodriver
   - tar -xzf geckodriver-v0.24.0-linux64.tar.gz -C geckodriver
   - export PATH=$PWD/geckodriver:$PATH
+  - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
+  - gpg --import travis/travis.gpg
+  - npm install jsdom
 
 script:
   - xvfb-run sbt -jvm-opts .jvmopts-travis "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
 
-jdk:
-  - openjdk11
+jdk: openjdk11
 
 scala:
   - 2.12.9
   - 2.11.12
 
+stages:
+  - test
+  - name: release
+    if: tag =~ ^v
+
 env:
-  - TEST_PACKAGE="guide-selenium/test"
-  - TEST_PACKAGE="udash-jvm/test"
-  - TEST_PACKAGE="utils-js/test"
-  - TEST_PACKAGE="core-js/test"
-  - TEST_PACKAGE="rpc-js/test"
-  - TEST_PACKAGE="rest-js/test"
-  - TEST_PACKAGE="i18n-js/test"
-  - TEST_PACKAGE="auth-js/test"
-  - TEST_PACKAGE="css-js/test"
-  - TEST_PACKAGE="bootstrap/test"
-  - TEST_PACKAGE="bootstrap4/test"
-  - TEST_PACKAGE="charts/compile"
-  - TEST_PACKAGE="benchmarks/compile"
-  - TEST_PACKAGE="doc"
+  matrix:
+    - TEST_PACKAGE="guide-selenium/test"
+    - TEST_PACKAGE="udash-jvm/test"
+    - TEST_PACKAGE="utils-js/test"
+    - TEST_PACKAGE="core-js/test"
+    - TEST_PACKAGE="rpc-js/test"
+    - TEST_PACKAGE="rest-js/test"
+    - TEST_PACKAGE="i18n-js/test"
+    - TEST_PACKAGE="auth-js/test"
+    - TEST_PACKAGE="css-js/test"
+    - TEST_PACKAGE="bootstrap/test"
+    - TEST_PACKAGE="bootstrap4/test"
+    - TEST_PACKAGE="charts/compile"
+    - TEST_PACKAGE="benchmarks/compile"
+
+  global:
+    - secure: fdBpnGod9OiHppoTk8v1uDnHcaG8vzZiORpqVLP0DWVvsdGxCfc2njUStxyD5LrNNTChd0W2aj9Ahchg88mlatheNvP/lnLpoU+1PIDNvshUmhOIVW1HDn4kkJQ783DW/Ch5fhRwupzr0LyW6BY+Ip+P2HIP3x/27ls8OUoX3Dr32BDPaRBQXl3RtFiic+pj1waB2qFK4Wbf4vWT0pSACaJXUGBWJq5LQ6QyTQ+pOcVBX65ZrsX5X6bSrgYapmkBgiNR/+cO7RIXeusHYmc6bchC8t6Rm/DfLosmR1iYMPGvVhTWaWo5t5x/xBAnEzBbKCHV7aE32OH69ed64/CcqtsgzPTT38Y5tvMCbDcUS3EJAqN1xEXdFcMWKkY4xzU2nekAIBdl9PT8Er2i/CCnMzG6/kxVCbnDD+Ujts+yJmWJPZ1dYdGkhhjqs9hpbden7UeAiRswVBt7fjB+crbpJxtLtWdRdwJnrbE7HnpTohG5/tfzZK98rSXou4KfigXmRneiObrp7n1OOOAiy/J70JxiT9hzMBEQVya2shx0v1TZgN39RrvYzN1fWdtvfrVke8XwQnjGxzgtOilQWqqUzBo+p7zx+Q+WALTPv/sU4//gmQFfIimf3b90KbcwzcCh3MwnTfANx0iScc9FktxfDozRvE3RTM/IHDKf9TJgaN8=
+    - secure: JfVPHMqEITjrDqHbVkQZCR4VLtLUFchunlea7+JoIWpQ2o0RuSUA7jUk+bBG+Avj6qwYSu+1/wmTQY/xRQBTEDTiuf8CKROIX0sPeyTvTcGm31V0z+Ajxu7x4xmLH2hr4/9y35oAwqy0knBK84J3VZ6xGRKO3JQAnk/iotpb2uGj6wjso2rQnG56NNVuM/WIZ5BwRtJrCP7rbyOJTMMT639+ECrmppsEZnODqgARhe5PUT+DRn5MXvH0sayt38SukUkahD5qcnMthP3jbNkaMrZ0RlIAzbOQUvtzt1rwHjeo71V2Dd6q3kLworbkmbmmCbxd7DtWAmTcMir7+91hXLP6r+3q2YFh5juqXXFEDjox0Nqt1nl6sfHAJMEOIuji7XoJLSAK5nOY5OsFZ5WK/yF7JlllaBUFGIJOeQbf4k70Nr6nmer7iHrvaD3H2jhtkyp5cET/0hMNpo7jSnvoAk5l0eZhleWbTgwzbHpjjw/yDPKS+S+q+2DmtTrHcDa1Z79YHps/9hlryGM3kT3mCr2cwFP+aoPnXKGdPuiY95LcVPHeI8TKIopU3lOMXEPX1fTY/xNDauwl9zZfKm2dwJU9Qa3uF5NSgr0s0nzUuj4+VJlTr6tLREAEznPESTwmm9qlHrJPX4aXEDCxRdfgSRFsGoRTqkvoiwozdv8+Z1c=
 
 matrix:
   exclude:
     - scala: 2.11.12
       env: TEST_PACKAGE="guide-selenium/test"
+
+jobs:
+  include:
+    - stage: release
+      scala: 2.12.9
+      env: TEST_PACKAGE=none
+      script: test $TRAVIS_PULL_REQUEST = "false" && sbt -jvm-opts .jvmopts-travis +publishSigned sonatypeBundleRelease
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
@@ -52,8 +67,7 @@ before_cache:
 
 cache:
   directories:
-  - $HOME/.ivy2/cache
-  - $HOME/.m2
-  - $HOME/.coursier/cache
-  - $HOME/.cache
-  - $HOME/.sbt
+    - $HOME/.ivy2/cache
+    - $HOME/.m2
+    - $HOME/.cache
+    - $HOME/.sbt

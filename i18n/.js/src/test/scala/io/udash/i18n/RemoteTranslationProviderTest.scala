@@ -83,7 +83,9 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         t5 <- translator.translate("trMissing")
         _ <- retrying(t5.string should be("ERROR"))
         _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
-        r <- retrying(rpc.loadTranslationsForLangCalls should be(1))
+        //error fallback in io.udash.i18n.RemoteTranslationProvider.translate can add one
+        _ <- retrying(rpc.loadTranslationsForLangCalls should be > 0)
+        r <- retrying(rpc.loadTranslationsForLangCalls should be < 3)
       } yield r
     }
 
