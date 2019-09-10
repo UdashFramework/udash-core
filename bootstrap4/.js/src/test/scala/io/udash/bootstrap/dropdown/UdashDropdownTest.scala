@@ -87,7 +87,7 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
 
     "call listeners on element click" in {
       val els = SeqProperty(elements)
-      val dropdown = UdashDropdown(els)(UdashDropdown.defaultItemFactory, "Test")
+      val dropdown = UdashDropdown.default(els)("Test")
       val el = dropdown.render
       jQ("body").append(el)
 

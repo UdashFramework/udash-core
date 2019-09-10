@@ -9,7 +9,7 @@ import io.udash.bootstrap.button.UdashButton
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.properties.seq
 import io.udash.properties.single.ReadableProperty
-import io.udash.wrappers.jquery.JQuery
+import io.udash.wrappers.jquery._
 import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
 
@@ -22,7 +22,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   buttonToggle: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(
-  itemFactory: ItemType => Element,
+  itemBindingFactory: UdashDropdown[ItemType, ElemType] => Binding,
   buttonContent: Binding.NestedInterceptor => Modifier,
   buttonFactory: (NestedInterceptor => Modifier) => UdashButton
 ) extends UdashBootstrapComponent
@@ -31,7 +31,6 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import UdashDropdown._
   import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
   import io.udash.css.CssView._
-  import io.udash.wrappers.jquery._
 
   /** Dropdown menu list ID. */
   val menuId: ComponentId = componentId.subcomponent("menu")
@@ -45,11 +44,6 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   /** Updates the position of an element’s dropdown. */
   def update(): Unit =
     jQSelector().dropdown("update")
-
-  private def withSelectionListener(elem: Element, item: ItemType): Element = {
-    nestedInterceptor(new JQueryOnBinding(jQ(elem), EventName.click, (_: Element, _: JQueryEvent) => fire(SelectionEvent(this, item))))
-    elem
-  }
 
   propertyListeners += items.listen(_ => update())
 
@@ -77,9 +71,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         BootstrapStyles.Dropdown.menu,
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
         aria.labelledby := buttonId, id := menuId
-      )(nestedInterceptor(
-        produce(items.transform((item: ItemType) => withSelectionListener(itemFactory(item), item)))(el => el)
-      ))
+      )(nestedInterceptor(itemBindingFactory(this)))
     ).render
 
     val jQEl = jQ(el)
@@ -145,11 +137,12 @@ object UdashDropdown {
     case class Header(title: String) extends DefaultDropdownItem
     case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
     case class Raw(element: Element) extends DefaultDropdownItem
+    case class Dynamic(factory: Binding.NestedInterceptor => Element) extends DefaultDropdownItem
     case object Divider extends DefaultDropdownItem
   }
 
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
-  def defaultItemFactory(item: DefaultDropdownItem): Element = {
+  def defaultItemFactory(item: DefaultDropdownItem, nested: Binding.NestedInterceptor): Element = {
     import DefaultDropdownItem._
     import io.udash.css.CssView._
     item match {
@@ -164,13 +157,14 @@ object UdashDropdown {
       case Header(title) =>
         h6(BootstrapStyles.Dropdown.header)(title).render
       case Disabled(item) =>
-        val res = defaultItemFactory(item).styles(BootstrapStyles.disabled)
+        val res = defaultItemFactory(item, nested).styles(BootstrapStyles.disabled)
         res.addEventListener("click", (ev: Event) => {
           ev.preventDefault()
           ev.stopPropagation()
         })
         res
       case Raw(element) => element
+      case Dynamic(produce) => produce(nested)
       case Divider =>
         div(BootstrapStyles.Dropdown.divider, role := "separator").render
     }
@@ -201,11 +195,14 @@ object UdashDropdown {
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
     componentId: ComponentId = ComponentId.newId()
   )(
-    itemFactory: ItemType => Element,
+    itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     buttonContent: Binding.NestedInterceptor => Modifier,
     buttonFactory: (NestedInterceptor => Modifier) => UdashButton = UdashButton()
   ): UdashDropdown[ItemType, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemFactory, buttonContent, buttonFactory)
+    val itemBindingFactory = (dropdown: UdashDropdown[ItemType, ElemType]) => repeatWithNested(items) { case (item, nested) =>
+      withSelectionListener(itemFactory(item, nested), item.get, dropdown)
+    }
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(itemBindingFactory, buttonContent, buttonFactory)
   }
 
   /**
@@ -229,7 +226,16 @@ object UdashDropdown {
   )(
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[DefaultDropdownItem, ElemType] = {
-    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(defaultItemFactory, buttonContent, UdashButton())
+    val itemBindingFactory: UdashDropdown[DefaultDropdownItem, ElemType] => Binding = dropdown =>
+      produceWithNested(items)((items, nested) => items.map(item => withSelectionListener[DefaultDropdownItem, ElemType](defaultItemFactory(item, nested), item, dropdown)))
+    new UdashDropdown(items, dropDirection, rightAlignMenu, buttonToggle, componentId)(
+      itemBindingFactory, buttonContent, UdashButton()
+    )
+  }
+
+  private def withSelectionListener[ItemType, ElemType <: ReadableProperty[ItemType]](elem: Element, item: => ItemType, source: UdashDropdown[ItemType, ElemType]): Element = {
+    source.nestedInterceptor(new source.JQueryOnBinding(jQ(elem), EventName.click, (_: Element, _: JQueryEvent) => source.fire(DropdownEvent.SelectionEvent(source, item))))
+    elem
   }
 
   @js.native
