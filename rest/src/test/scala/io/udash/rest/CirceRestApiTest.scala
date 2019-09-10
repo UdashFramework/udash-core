@@ -65,16 +65,18 @@ abstract class HasCirceCodec[T](
 
 trait CirceCustomizedInstances[T] {
   @materializeWith(io.circe.derivation.`package`, "deriveEncoder")
-  def encoder(nameTransform: String => String): Encoder.AsObject[T]
+  def encoder(nameTransform: String => String, discriminator: Option[String]): Encoder.AsObject[T]
   @materializeWith(io.circe.derivation.`package`, "deriveDecoder")
-  def decoder(nameTransform: String => String): Decoder[T]
+  def decoder(nameTransform: String => String, useDefaults: Boolean, discriminator: Option[String]): Decoder[T]
 }
 
-abstract class HasCirceCustomizedCodec[T](nameTransform: String => String)(
-  implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]
-) {
-  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform)
-  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform)
+abstract class HasCirceCustomizedCodec[T](
+  nameTransform: String => String,
+  useDefaults: Boolean = true,
+  discriminator: Option[String] = None
+)(implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]) {
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform, discriminator)
+  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform, useDefaults, discriminator)
 }
 
 case class CirceAddress(city: String, zip: String)

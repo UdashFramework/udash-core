@@ -9,7 +9,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
 
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, tailrec}
 
 sealed abstract class RestMethodCall {
   val pathParams: List[PlainValue]
@@ -110,6 +110,7 @@ trait RawRest {
       case NonFatal(cause) => throw new InvalidRpcCall(s"Invalid HTTP body: ${cause.getMessage}", cause)
     }
 
+    @tailrec
     def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
       case PrefixCall(pathParams, pm) :: tail =>
         rawRest.prefix(pm.name, parameters.copy(path = pathParams)) match {

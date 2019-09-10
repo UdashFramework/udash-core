@@ -12,27 +12,27 @@ object Dependencies {
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.7"
-  val scalaTagsVersion = "0.6.8"
+  val scalaTagsVersion = "0.7.0"
   val scalaCssVersion = "0.5.6"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.39.0"
+  val avsCommonsVersion = "1.40.0"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.4"
 
-  val upickleVersion = "0.7.4" // Tests only
+  val upickleVersion = "0.7.5" // Tests only
   val circeVersion = "0.11.1" // Tests only
-  val circeDerivationVersion = "0.12.0-M3" // Tests only
+  val circeDerivationVersion = "0.12.0-M6" // Tests only
   val monixVersion = "3.0.0-RC2" // Tests only
 
-  val sttpVersion = "1.6.4"
+  val sttpVersion = "1.6.6"
 
   val scalaLoggingVersion = "3.9.2"
 
   val jettyVersion = "9.4.20.v20190813" // Tests only
   val typesafeConfigVersion = "1.3.4"
-  val flexmarkVersion = "0.50.30"
+  val flexmarkVersion = "0.50.36"
   val logbackVersion = "1.2.3"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"

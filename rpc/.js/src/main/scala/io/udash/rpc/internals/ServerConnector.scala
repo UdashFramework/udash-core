@@ -128,7 +128,7 @@ abstract class AtmosphereServerConnector(
       onClose = onClose,
       onClientTimeout = onClientTimeout,
       onMessage = (res: AtmosphereResponse) => handleMessage(res.responseBody),
-      onMessagePublished = (req: AtmosphereRequest, res: AtmosphereResponse) => handleMessage(req.responseBody)
+      onMessagePublished = (req: AtmosphereRequest, _: AtmosphereResponse) => handleMessage(req.responseBody)
     )
   }
 }

@@ -94,7 +94,7 @@ object Init {
 
   @JSExport
   def main(args: Array[String]): Unit = {
-    jQ((jThis: Element) => {
+    jQ((_: Element) => {
       val appRoot = jQ("#application").get(0).get
       applicationInstance.run(appRoot)
 

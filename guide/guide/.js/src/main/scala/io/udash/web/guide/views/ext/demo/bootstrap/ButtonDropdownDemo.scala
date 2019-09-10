@@ -32,16 +32,10 @@ object ButtonDropdownDemo extends AutoDemo with CssView {
       UdashButtonToolbar()(
         UdashButtonGroup()(
           UdashButton()("Button").render,
-          UdashDropdown(items)(
-            defaultItemFactory, _ => ""
-          ).render,
-          UdashDropdown(items, Direction.Up.toProperty)(
-            defaultItemFactory, _ => ""
-          ).render
+          UdashDropdown.default(items)(_ => "").render,
+          UdashDropdown.default(items, Direction.Up.toProperty)(_ => "").render
         ).render,
-        UdashDropdown(items)(
-          defaultItemFactory, _ => "Dropdown "
-        ).render
+        UdashDropdown.default(items)(_ => "Dropdown ").render
       )
     ).render
   }.withSourceCode

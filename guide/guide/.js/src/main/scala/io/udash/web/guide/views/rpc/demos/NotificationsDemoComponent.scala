@@ -39,27 +39,26 @@ class NotificationsDemoComponent extends Component {
   class NotificationsDemoPresenter(model: ModelProperty[NotificationsDemoModel]) {
     private val demoListener = (msg: String) => model.subProp(_.lastMessage).set(msg)
 
-    def onButtonClick(disabled: Property[Boolean]) = {
+    def onButtonClick(disabled: Property[Boolean]): Unit = {
       disabled.set(true)
-      model.subProp(_.registered).get match {
-        case false =>
-          NotificationsClient.registerListener(demoListener) onComplete {
-            case Success(_) =>
-              model.subProp(_.registered).set(true)
-              disabled.set(false)
-            case Failure(_) =>
-              model.subProp(_.registered).set(false)
-              disabled.set(false)
-          }
-        case true =>
-          NotificationsClient.unregisterListener(demoListener) onComplete {
-            case Success(_) =>
-              model.subProp(_.registered).set(false)
-              disabled.set(false)
-            case Failure(_) =>
-              model.subProp(_.registered).set(true)
-              disabled.set(false)
-          }
+      if (model.subProp(_.registered).get) {
+        NotificationsClient.unregisterListener(demoListener) onComplete {
+          case Success(_) =>
+            model.subProp(_.registered).set(false)
+            disabled.set(false)
+          case Failure(_) =>
+            model.subProp(_.registered).set(true)
+            disabled.set(false)
+        }
+      } else {
+        NotificationsClient.registerListener(demoListener) onComplete {
+          case Success(_) =>
+            model.subProp(_.registered).set(true)
+            disabled.set(false)
+          case Failure(_) =>
+            model.subProp(_.registered).set(false)
+            disabled.set(false)
+        }
       }
     }
   }

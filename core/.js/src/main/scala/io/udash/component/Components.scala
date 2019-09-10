@@ -7,7 +7,7 @@ trait Components {
 
   type Component = io.udash.component.Component
   type ComponentId = io.udash.component.ComponentId
-  val ComponentId = io.udash.component.ComponentId
+  final val ComponentId = io.udash.component.ComponentId
   type Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] = io.udash.component.Listenable[ComponentType, EventType]
   type ListenableEvent[ComponentType <: Listenable[ComponentType, _]] = io.udash.component.ListenableEvent[ComponentType]
 }

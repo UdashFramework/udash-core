@@ -7,10 +7,8 @@ import scalatags.JsDom.Modifier
 
 import scala.concurrent.Future
 
-import scala.concurrent.Future
-
 package object i18n {
-  type LangProperty = Property[Lang]
+  type LangProperty = ReadableProperty[Lang]
 
   implicit def langFromProperty(implicit property: LangProperty): Lang =
     property.get

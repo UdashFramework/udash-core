@@ -1,13 +1,13 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
-import org.scalajs.jsenv.nodejs.NodeJSEnv
+import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
 
 name := "udash"
 
 inThisBuild(Seq(
-  version := "0.8.0-SNAPSHOT",
+  version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.9.0-SNAPSHOT"),
   organization := "io.udash",
   cancelable := true,
   resolvers += Resolver.defaultLocal
@@ -28,13 +28,15 @@ val deploymentConfiguration = Seq(
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
 
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  },
+  sonatypeBundleDirectory := (ThisBuild / baseDirectory).value / target.value.getName / "sonatype-staging" / s"udash-${version.value}",
+  publishTo := sonatypePublishToBundle.value,
+
+  credentials in Global += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    sys.env.getOrElse("SONATYPE_USERNAME", ""),
+    sys.env.getOrElse("SONATYPE_PASSWORD", "")
+  ),
 
   pomExtra := {
     <url>https://github.com/UdashFramework/udash-core</url>
@@ -61,7 +63,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq("2.11.12", Dependencies.versionOfScala),
+  crossScalaVersions := Seq(Dependencies.versionOfScala /*, "2.13.0"*/),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -77,15 +79,11 @@ val commonSettings = Seq(
     "-Xlint:_,-missing-interpolator",
     "-Yrangepos",
     "-P:silencer:checkUnused",
+    "-Ywarn-unused:_,-explicits,-implicits",
+    "-Ybackend-parallelism", "8",
+    "-Ycache-plugin-class-loader:last-modified",
+    "-Ycache-macro-class-loader:last-modified"
   ),
-  scalacOptions ++= {
-    if (scalaBinaryVersion.value == "2.12") Seq(
-      "-Ywarn-unused:_,-explicits,-implicits",
-      "-Ybackend-parallelism", "4",
-      "-Ycache-plugin-class-loader:last-modified",
-      "-Ycache-macro-class-loader:last-modified"
-    ) else Seq.empty
-  },
   moduleName := "udash-" + moduleName.value,
   ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
@@ -100,7 +98,7 @@ val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / scalaJSStage := FastOptStage,
   Test / scalaJSUseMainModuleInitializer := false,
-  Test / jsEnv := new NodeJSEnv,
+  Test / jsEnv := new JSDOMNodeJSEnv,
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -188,6 +186,7 @@ def frontendExecutable(proj: Project)(
     .settings(commonJsSettings)
     .settings(
       noPublishSettings,
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
 
       jsDependencies ++= jsDeps.value,
       Compile / emitSourceMaps := true,
@@ -268,7 +267,7 @@ lazy val jsLibraries = Seq[ProjectReference](
   macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4, charts
 )
 lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(jsLibraries :+ (bootstrap: ProjectReference): _*)
+  .aggregate(jsLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val macros = project
@@ -311,7 +310,6 @@ lazy val rpc = jvmProject(project)
 lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    testInBrowser,
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
     jsDependencies ++= Dependencies.rpcJsDeps.value,
   )
@@ -339,14 +337,12 @@ lazy val i18n = jvmProject(project)
 
 lazy val `i18n-js` = jsProjectFor(project, i18n)
   .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
-  .settings(testInBrowser)
 
 lazy val auth = jvmProject(project)
   .dependsOn(core % CompileAndTest, rpc)
 
 lazy val `auth-js` = jsProjectFor(project, auth)
   .dependsOn(`core-js` % CompileAndTest, `rpc-js`)
-  .settings(testInBrowser)
 
 lazy val css = jvmProject(project)
   .dependsOn(core % CompileAndTest)
@@ -357,16 +353,7 @@ lazy val css = jvmProject(project)
 lazy val `css-js` = jsProjectFor(project, css)
   .dependsOn(`core-js` % CompileAndTest)
   .settings(
-    testInBrowser,
     libraryDependencies ++= Dependencies.cssSjsDeps.value,
-  )
-
-lazy val bootstrap = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
-  .settings(
-    testInBrowser,
-    libraryDependencies ++= Dependencies.bootstrapSjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrapJsDeps.value
   )
 
 lazy val bootstrap4 = jsProject(project)
@@ -413,18 +400,25 @@ lazy val guide = project.in(file("guide"))
 lazy val `guide-shared` =
   jvmProject(project.in(file("guide/shared")))
     .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-    .settings(noPublishSettings)
+    .settings(
+      noPublishSettings,
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
+    )
 
 lazy val `guide-shared-js` =
   jsProjectFor(project, `guide-shared`)
     .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-    .settings(noPublishSettings)
+    .settings(
+      noPublishSettings,
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
+    )
 
 lazy val `guide-backend` =
   jvmProject(project.in(file("guide/backend")))
     .dependsOn(`guide-shared`)
     .settings(
       noPublishSettings,
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
       libraryDependencies ++= Dependencies.backendDeps.value,
       Compile / mainClass := Some("io.udash.web.Launcher"),
     )
@@ -435,7 +429,8 @@ lazy val `guide-commons` =
     .dependsOn(`guide-shared-js`)
     .settings(
       noPublishSettings,
-      libraryDependencies ++= Dependencies.guideFrontendDeps.value
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
+      libraryDependencies ++= Dependencies.guideFrontendDeps.value,
     )
 lazy val `guide-homepage` =
   frontendExecutable(jsProject(project.in(file("guide/homepage"))).dependsOn(`guide-commons`))(
@@ -460,7 +455,8 @@ lazy val `guide-packager` =
     .settings(
       noPublishSettings,
       commonSettings,
-      
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
+
       normalizedName := "udash-guide",
       maintainer := "dawid.dworak@gmail.com",
       Compile / mainClass := (`guide-backend` / Compile / mainClass).value,
@@ -485,6 +481,7 @@ lazy val `guide-selenium` =
     .dependsOn(`guide-backend`)
     .settings(
       noPublishSettings,
+      crossScalaVersions := Seq(Dependencies.versionOfScala),
 
       libraryDependencies ++= Dependencies.backendDeps.value,
 
