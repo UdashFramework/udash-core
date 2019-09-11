@@ -272,6 +272,7 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
         r <- Future {
           name.listenersCount() should be(0)
           form.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
         }
       } yield r
     }
@@ -447,6 +448,7 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
           radioSelection.listenersCount() should be(0)
           checkboxesSelection.listenersCount() should be(0)
           inline.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
         }
       } yield r
     }
@@ -585,6 +587,7 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
         r <- retrying {
           singleSelection.listenersCount() should be(0)
           multiSelection.listenersCount() should be(0)
+          form.validationProperties.size should be(0)
           sizeProperty.listenersCount() should be(0)
         }
       } yield r
