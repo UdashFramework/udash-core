@@ -19,37 +19,35 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
 
     "apply validation on inputs" in {
       val name = Property("")
-      name.addValidator { value =>
-        if (value.length > 3) Valid
-        else Invalid("Name is too short.")
-      }
+      val validator: Validator[String] = value => if (value.length > 3) Valid else Invalid("Name is too short.")
+
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
-          nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
+          _ => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)(validator = validator).render,
           labelContent = Some(nested => span("Name: ", nested(bind(name)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
-          nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
+          _ => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)(validator = validator).render,
           labelContent = Some(nested => span("Name: ", nested(bind(name)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
-          nested => factory.input.textArea(name, validationTrigger = ValidationTrigger.OnSubmit)().render,
+          _ => factory.input.textArea(name, validationTrigger = ValidationTrigger.OnSubmit)(validator = validator).render,
           labelContent = Some(nested => span("Name: ", nested(bind(name)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
-          nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.None)().render,
+          _ => factory.input.textInput(name, validationTrigger = ValidationTrigger.None)(validator = validator).render,
           labelContent = Some(nested => span("Name: ", nested(bind(name)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("Name is too short."))
         ),
         factory.input.formGroup()(
-          nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnChange)().render,
+          _ => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnChange)(validator = validator).render,
           labelContent = Some(nested => span("Name: ", nested(bind(name)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("Name is too short."))
@@ -273,7 +271,6 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
         }
         r <- Future {
           name.listenersCount() should be(0)
-          name.valid.listenersCount() should be(0)
           form.listenersCount() should be(0)
           form.validationProperties.size should be(0)
         }
@@ -283,26 +280,20 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
     "apply validation on checkboxes and radios" in {
       val inline = Property(true)
       val radioSelection = Property(1)
-      radioSelection.addValidator { x =>
-        if (x % 2 == 0)  Valid
-        else Invalid("The number is not even")
-      }
       val checkboxesSelection = SeqProperty(1)
-      checkboxesSelection.addValidator { s =>
-        if (s.exists(_ % 2 == 1)) Invalid("One of the numbers is not even")
-        else Valid
-      }
 
       val form = UdashForm() { factory => Seq(
-        factory.input.radioButtons(radioSelection, Seq(1,2,3,4,5).toSeqProperty, inline)(
+        factory.input.radioButtons(radioSelection, Seq(1, 2, 3, 4, 5).toSeqProperty, inline)(
           labelContent = (v, _, _) => Some(span(v)),
           validFeedback = (_, idx, _) => if (idx == 4) Some(span("Looks good.")) else None,
-          invalidFeedback = (_, idx, _) => if (idx == 4) Some(span("The number is not even.")) else None
+          invalidFeedback = (_, idx, _) => if (idx == 4) Some(span("The number is not even.")) else None,
+          validator = x => if (x % 2 == 0) Valid else Invalid("The number is not even")
         ),
-        factory.input.checkButtons(checkboxesSelection, Seq(1,2,3,4,5).toSeqProperty, inline)(
+        factory.input.checkButtons(checkboxesSelection, Seq(1, 2, 3, 4, 5).toSeqProperty, inline)(
           labelContent = (v, _, _) => Some(span(v)),
           validFeedback = (_, idx, _) => if (idx == 4) Some(span("Looks good.")) else None,
-          invalidFeedback = (_, idx, _) => if (idx == 4) Some(span("One of the numbers is not even")) else None
+          invalidFeedback = (_, idx, _) => if (idx == 4) Some(span("One of the numbers is not even")) else None,
+          validator = s => if (s.exists(_ % 2 == 1)) Invalid("One of the numbers is not even") else Valid
         )
       )}
 
@@ -465,26 +456,24 @@ class UdashFormTest extends AsyncUdashCoreFrontendTest {
     "apply validation on select menu" in {
       import org.scalajs.dom.html.{Option => JSOption}
       val singleSelection = Property(1)
-      singleSelection.addValidator { x =>
-        if (x % 2 == 0)  Valid
-        else Invalid("The number is not even")
-      }
       val multiSelection = SeqProperty(1)
-      multiSelection.addValidator { s =>
-        if (s.exists(_ % 2 == 1)) Invalid("One of the numbers is not even")
-        else Valid
-      }
 
       val sizeProperty: ReadableProperty[Option[BootstrapStyles.Size]] = Property(Some(BootstrapStyles.Size.Small))
       val form = UdashForm() { factory => Seq(
         factory.input.formGroup()(
-          nested => factory.input.select(singleSelection, Seq(1,2,3,4,5).toSeqProperty, sizeProperty)(span(_)).render,
+          _ => factory.input.select(singleSelection, Seq(1, 2, 3, 4, 5).toSeqProperty, sizeProperty)(
+            span(_),
+            validator = x => if (x % 2 == 0) Valid else Invalid("The number is not even")
+          ).render,
           labelContent = Some(nested => span("Single select: ", nested(bind(singleSelection)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("The number is not even"))
         ),
         factory.input.formGroup()(
-          nested => factory.input.multiSelect(multiSelection, Seq(1,2,3,4,5).toSeqProperty, sizeProperty)(span(_)).render,
+          _ => factory.input.multiSelect(multiSelection, Seq(1, 2, 3, 4, 5).toSeqProperty, sizeProperty)(
+            span(_),
+            validator = s => if (s.exists(_ % 2 == 1)) Invalid("One of the numbers is not even") else Valid
+          ).render,
           labelContent = Some(nested => span("Multi select: ", nested(bind(multiSelection)))),
           validFeedback = Some(_ => span("Looks good.")),
           invalidFeedback = Some(_ => span("One of the numbers is not even"))

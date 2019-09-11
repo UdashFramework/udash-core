@@ -3,10 +3,9 @@ package io.udash.properties.single
 import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
-import io.udash.utils.{CrossCollections, Registration}
+import io.udash.utils.Registration
 
 import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[+A] {
@@ -28,12 +27,6 @@ trait ReadableProperty[+A] {
   /** Returns listeners count. */
   def listenersCount(): Int
 
-  /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
-  def isValid: Future[ValidationResult]
-
-  /** Property containing validation result. */
-  def valid: ReadableProperty[ValidationResult]
-
   /** Ensures read-only access to this property. */
   def readable: ReadableProperty[A]
 
@@ -45,9 +38,6 @@ trait ReadableProperty[+A] {
 
   /** This method should be called when the value has changed. */
   protected[properties] def valueChanged(): Unit
-
-  /** Triggers validation. */
-  protected[properties] def validate(): Unit
 
   /** This method should be called when the listener is registered or removed. */
   protected[properties] def listenersUpdate(): Unit
@@ -94,10 +84,6 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   protected[this] final val listeners: mutable.ArrayBuffer[A => Any] = mutable.ArrayBuffer.empty[A => Any]
   protected[this] final val oneTimeListeners: mutable.ArrayBuffer[Registration] = mutable.ArrayBuffer.empty[Registration]
 
-  protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
-  protected[this] var validationResult: Future[ValidationResult] = _
-
   protected def wrapListenerRegistration(reg: Registration): Registration = reg
   protected def wrapOneTimeListenerRegistration(reg: Registration): Registration = wrapListenerRegistration(reg)
 
@@ -127,11 +113,6 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     if (parent != null) parent.listenersUpdate()
   }
 
-  override def isValid: Future[ValidationResult] = {
-    if (validationResult == null) validate()
-    validationResult
-  }
-
   override lazy val readable: ReadableProperty[A] =
     new ReadableWrapper[A](this)
 
@@ -155,8 +136,6 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     }
   }
 
-  override lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
-
   protected[properties] override def fireValueListeners(): Unit = {
     val originalListeners = listeners.toSet
     CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
@@ -168,27 +147,8 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   }
 
   protected[properties] override def valueChanged(): Unit = {
-    validationResult = null
     fireValueListeners()
     if (parent != null) parent.valueChanged()
-  }
-
-  protected[properties] override def validate(): Unit = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    if (validators.nonEmpty) {
-      val p = Promise[ValidationResult]
-      validationResult = p.future
-      CallbackSequencer().queue(s"${this.id.toString}:fireValidation", () => {
-        import Validator._
-        val currentValue = this.get
-        val cpy = CrossCollections.copyArray(validators)
-        p.completeWith {
-          Future.sequence(
-            cpy.map(_ (currentValue)).toSeq
-          ).foldValidationResult
-        }
-      })
-    } else validationResult = Future.successful(Valid)
   }
 
 }

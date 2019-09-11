@@ -6,7 +6,6 @@ import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.Registration
 
 import scala.collection.mutable
-import scala.concurrent.Future
 
 /** Read-only interface of SeqProperty[A]. */
 trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends ReadableProperty[Seq[A]] {
@@ -87,20 +86,6 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     wrapStructureListenerRegistration(
       new MutableBufferRegistration(structureListeners, structureListener, Opt(listenersUpdate _))
     )
-  }
-
-  /** SeqProperty is valid if all validators return [[io.udash.properties.Valid]] and all subproperties are valid.
-    *
-    * @return Validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
-  override def isValid: Future[ValidationResult] = {
-    import Validator._
-
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    if (validationResult == null) {
-      validationResult = Future.sequence(Seq(super.isValid) ++ elemProperties.map(p => p.isValid)).foldValidationResult
-    }
-    validationResult
   }
 
   override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =

@@ -19,7 +19,6 @@ class FrontendBindingsView extends FinalView with CssView {
   private val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
   private val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
   private val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
-  private val (bindValidationDemo, bindValidationSnippet) = BindValidationDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -38,7 +37,6 @@ class FrontendBindingsView extends FinalView with CssView {
       li(i("repeat"), " - draws all elements of a ", i("SeqProperty"), " and updates the view on every sequence change."),
       li(i("showIf/showIfElse"), " - shows and hides elements depending on provided property value."),
       li(i("Attribute bindings"), " - on every change of the property updates a HTML attribute state."),
-      li(i("validation"), " - on every change of the property validates its value and calls the builder with the result.")
     ),
     h3("bind"),
     bindSnippet,
@@ -73,13 +71,6 @@ class FrontendBindingsView extends FinalView with CssView {
     ),
     bindAttributeSnippet,
     bindAttributeDemo,
-    h3("Validation"),
-    bindValidationSnippet,
-    bindValidationDemo,
-    p(
-      "The above example presents usage of validation result binding. On every change of the sequence content, validators are started ",
-      "and the result is passed to provided callbacks. It also adds a ", i("data-valid"), " attribute if numbers are sorted."
-    ),
     h2("Nested bindings"),
     p("Sometimes you want to create property binding inside another binding builder. For example:"),
     CodeBlock(

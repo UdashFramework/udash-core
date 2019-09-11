@@ -18,7 +18,6 @@ import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, DurationLong}
 import scala.util.{Failure, Success}
 
@@ -68,18 +67,18 @@ object UdashForm {
     /** The validation will be triggered on `blur` event on the input. */
     final val OnBlur: Value = new ValidationTrigger
     /** The validation will be triggered on the form `submit` event.
-      * Notice that the validation won't block the form submit. */
+     * Notice that the validation won't block the form submit. */
     final val OnSubmit: Value = new ValidationTrigger
   }
 
   /** Settings for the horizontal form layout.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/#horizontal-form">Bootstrap Docs</a>.
-    *
-    * @param labelWidth Width of the label column.
-    * @param inputWidth Width of the input column.
-    * @param breakpoint Breakpoint of the form's grid.
-    * @param labelSize  Size of the label text.
-    */
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/#horizontal-form">Bootstrap Docs</a>.
+   *
+   * @param labelWidth Width of the label column.
+   * @param inputWidth Width of the input column.
+   * @param breakpoint Breakpoint of the form's grid.
+   * @param labelSize  Size of the label text.
+   */
   final case class HorizontalLayoutSettings(
     labelWidth: Int = 4,
     inputWidth: Int = 8,
@@ -88,33 +87,33 @@ object UdashForm {
   ) extends AbstractCase
 
   /**
-    * Creates a standard form with a provided content. <br/>
-    * Example: <br/>
-    * <pre>
-    * UdashForm() { factory => Seq(
-    *   factory.input.formGroup()(
-    * nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
-    * labelContent = nested => Some(span("Name: ", nested(bind(name)))),
-    * validFeedback = _ => Some(span("Looks good.")),
-    * invalidFeedback = _ => Some(span("Name is too short."))
-    * ),
-    *   factory.input.formGroup()(
-    * nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
-    * labelContent = nested => Some(span("Password: ", nested(bind(name)))),
-    * validFeedback = _ => Some(span("Looks good.")),
-    * invalidFeedback = _ => Some(span("Name is too short."))
-    * )
-    * )}.render
-    * </pre>
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/">Bootstrap Docs</a>.
-    *
-    * @param inline                  If true, creates an inline form.
-    * @param inputValidationTrigger  Default validation trigger for text inputs in this form.
-    * @param selectValidationTrigger Default validation trigger for selectors like checkboxes or select inputs.
-    * @param componentId             An id of the root DOM node.
-    * @param content                 A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
-    * @return A `UdashForm` component, call `render` to create a DOM element.
-    */
+   * Creates a standard form with a provided content. <br/>
+   * Example: <br/>
+   * <pre>
+   * UdashForm() { factory => Seq(
+   *   factory.input.formGroup()(
+   * nested => factory.input.textInput(name, validationTrigger = ValidationTrigger.OnBlur)().render,
+   * labelContent = nested => Some(span("Name: ", nested(bind(name)))),
+   * validFeedback = _ => Some(span("Looks good.")),
+   * invalidFeedback = _ => Some(span("Name is too short."))
+   * ),
+   *   factory.input.formGroup()(
+   * nested => factory.input.passwordInput(name, validationTrigger = ValidationTrigger.Instant)().render,
+   * labelContent = nested => Some(span("Password: ", nested(bind(name)))),
+   * validFeedback = _ => Some(span("Looks good.")),
+   * invalidFeedback = _ => Some(span("Name is too short."))
+   * )
+   * )}.render
+   * </pre>
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/forms/">Bootstrap Docs</a>.
+   *
+   * @param inline                  If true, creates an inline form.
+   * @param inputValidationTrigger  Default validation trigger for text inputs in this form.
+   * @param selectValidationTrigger Default validation trigger for selectors like checkboxes or select inputs.
+   * @param componentId             An id of the root DOM node.
+   * @param content                 A factory of the form elements. All elements created with the factory will be cleaned up on the form cleanup.
+   * @return A `UdashForm` component, call `render` to create a DOM element.
+   */
   def apply(
     inline: Boolean = false,
     inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
@@ -144,10 +143,10 @@ final class FormElementsFactory(
   }
 
   /**
-    * Wrapper for disabled elements.
-    *
-    * @param disabled Property indicating if elements are disabled. You can change it anytime.
-    */
+   * Wrapper for disabled elements.
+   *
+   * @param disabled Property indicating if elements are disabled. You can change it anytime.
+   */
   def disabled(disabled: ReadableProperty[Boolean] = UdashBootstrap.True)(
     content: Binding.NestedInterceptor => Modifier
   ): Modifier = {
@@ -159,27 +158,27 @@ final class FormElementsFactory(
   /** Provides input elements factory methods. */
   object input {
     /**
-      * Creates a standard form group for the provided input. It contains a label and validation feedback elements.
-      * The group layout can be organized vertically or horizontally based on the provided options.
-      * You can wrap the result into grid elements in order to create more complex form layout.
-      *
-      * @param horizontal      Optional settings for a horizontal layout. If `None`, the layout will be organized vertically.
-      * @param groupId         Id of the root element.
-      * @param input           The input element. It can be wrapped into `UdashInputGroup` or any other decoration.
-      *                        Use the provided interceptor to properly clean up bindings inside the content.
-      * @param labelContent    Optional label content.
-      *                        It will be wrapped into `label` element with properly set `for` attribute.
-      *                        Use the provided interceptor to properly clean up bindings inside the content.
-      * @param validFeedback   Optional content of positive validation feedback.
-      *                        It will be wrapped into `div` element with `valid-feedback` style.
-      *                        Use the provided interceptor to properly clean up bindings inside the content.
-      * @param invalidFeedback Optional content of negative validation feedback.
-      *                        It will be wrapped into `div` element with `invalid-feedback` style.
-      *                        Use the provided interceptor to properly clean up bindings inside the content.
-      * @param helpText        Optional content of help text block.
-      *                        It will be wrapped into `div` element with `form-text text-muted` style.
-      *                        Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a standard form group for the provided input. It contains a label and validation feedback elements.
+     * The group layout can be organized vertically or horizontally based on the provided options.
+     * You can wrap the result into grid elements in order to create more complex form layout.
+     *
+     * @param horizontal      Optional settings for a horizontal layout. If `None`, the layout will be organized vertically.
+     * @param groupId         Id of the root element.
+     * @param input           The input element. It can be wrapped into `UdashInputGroup` or any other decoration.
+     *                        Use the provided interceptor to properly clean up bindings inside the content.
+     * @param labelContent    Optional label content.
+     *                        It will be wrapped into `label` element with properly set `for` attribute.
+     *                        Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validFeedback   Optional content of positive validation feedback.
+     *                        It will be wrapped into `div` element with `valid-feedback` style.
+     *                        Use the provided interceptor to properly clean up bindings inside the content.
+     * @param invalidFeedback Optional content of negative validation feedback.
+     *                        It will be wrapped into `div` element with `invalid-feedback` style.
+     *                        Use the provided interceptor to properly clean up bindings inside the content.
+     * @param helpText        Optional content of help text block.
+     *                        It will be wrapped into `div` element with `form-text text-muted` style.
+     *                        Use the provided interceptor to properly clean up bindings inside the content.
+     */
     def formGroup(
       horizontal: Option[HorizontalLayoutSettings] = None,
       groupId: ComponentId = ComponentId.newId()
@@ -224,18 +223,19 @@ final class FormElementsFactory(
     }
 
     /**
-      * Creates a text input with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param property          Property which will be synchronised with the input content and validated.
-      * @param debounce          Property update timeout after input changes.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a text input with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param property          Property which will be synchronised with the input content and validated.
+     * @param debounce          Property update timeout after input changes.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided text property
+     */
     def textInput(
       property: Property[String],
       debounce: Duration = 20 millis,
@@ -243,32 +243,34 @@ final class FormElementsFactory(
       validationTrigger: ValidationTrigger = inputValidationTrigger,
       inputId: ComponentId = ComponentId.newId()
     )(
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         TextInput(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor),
+          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
     }
 
     /**
-      * Creates a password input with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param property          Property which will be synchronised with the input content and validated.
-      * @param debounce          Property update timeout after input changes.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a password input with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param property          Property which will be synchronised with the input content and validated.
+     * @param debounce          Property update timeout after input changes.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided password property
+     */
     def passwordInput(
       property: Property[String],
       debounce: Duration = 20 millis,
@@ -276,67 +278,71 @@ final class FormElementsFactory(
       validationTrigger: ValidationTrigger = inputValidationTrigger,
       inputId: ComponentId = ComponentId.newId()
     )(
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         PasswordInput(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor),
+          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
     }
 
     /**
-      * Creates a number input with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param property          Property which will be synchronised with the input content and validated.
-      * @param debounce          Property update timeout after input changes.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a number input with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param property          Property which will be synchronised with the input content and validated.
+     * @param debounce          Property update timeout after input changes.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided number property
+     */
     def numberInput(
-      property: Property[String],
+      property: Property[Double],
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
       inputId: ComponentId = ComponentId.newId()
     )(
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
-        NumberInput(property, debounce)(
+        NumberInput(property.transform(_.toString, _.toDouble), debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor),
+          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
     }
 
     /**
-      * Creates a range input with a custom bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param value             Current value synchronised with the input.
-      *                          The value should be between `minValue` and `maxValue`. It should be also divisible by `valueStep`.
-      * @param minValue          The minimum value for this input, which must not be greater than its maximum (`maxValue` attribute) value.
-      * @param maxValue          The maximum value for the input. Must not be less than its minimum (`minValue` attribute) value.
-      * @param valueStep         Limit the increments at which a numeric value can be set.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a range input with a custom bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param value             Current value synchronised with the input.
+     *                          The value should be between `minValue` and `maxValue`. It should be also divisible by `valueStep`.
+     * @param minValue          The minimum value for this input, which must not be greater than its maximum (`maxValue` attribute) value.
+     * @param maxValue          The maximum value for the input. Must not be less than its minimum (`minValue` attribute) value.
+     * @param valueStep         Limit the increments at which a numeric value can be set.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided value property
+     */
     def rangeInput(
       value: Property[Double],
       minValue: ReadableProperty[Double] = 0d.toProperty,
@@ -345,7 +351,8 @@ final class FormElementsFactory(
       validationTrigger: ValidationTrigger = selectValidationTrigger,
       inputId: ComponentId = ComponentId.newId()
     )(
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         RangeInput(value, minValue, maxValue, valueStep)(
@@ -353,24 +360,25 @@ final class FormElementsFactory(
           BootstrapStyles.Form.controlRange,
           BootstrapStyles.Form.customRange,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(value, validationTrigger, nestedInterceptor)
+          validationModifier(value, validationTrigger, nestedInterceptor)(validator)
         ), inputId
       ))
     }
 
     /**
-      * Creates a text area with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param property          Property which will be synchronised with the input content and validated.
-      * @param debounce          Property update timeout after input changes.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a text area with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param property          Property which will be synchronised with the input content and validated.
+     * @param debounce          Property update timeout after input changes.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided text property
+     */
     def textArea(
       property: Property[String],
       debounce: Duration = 20 millis,
@@ -378,42 +386,44 @@ final class FormElementsFactory(
       validationTrigger: ValidationTrigger = inputValidationTrigger,
       inputId: ComponentId = ComponentId.newId()
     )(
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         TextArea(property, debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor),
+          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
     }
 
     /**
-      * Creates a file input with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * It creates the whole input compoennt including a label and validation feedback.
-      *
-      * @param selectedFiles       This property contains information about files selected by a user.
-      * @param acceptMultipleFiles Accepts more than one file if true.
-      * @param size                Size of the input.
-      * @param validationTrigger   Selects the event updating validation state of the input.
-      * @param inputId             Id of the input DOM element.
-      * @param inputName           Input element name.
-      * @param inputModifier       Modifiers applied directly to the `input` element.
-      *                            Use the provided interceptor to properly clean up bindings inside the content.
-      * @param labelContent        Required label content.
-      *                            It will be wrapped into `label` element with properly set `for` attribute.
-      *                            Use the provided interceptor to properly clean up bindings inside the content.
-      * @param validFeedback       Optional content of positive validation feedback.
-      *                            It will be wrapped into `div` element with `valid-feedback` style.
-      *                            Use the provided interceptor to properly clean up bindings inside the content.
-      * @param invalidFeedback     Optional content of negative validation feedback.
-      *                            It will be wrapped into `div` element with `invalid-feedback` style.
-      *                            Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a file input with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * It creates the whole input compoennt including a label and validation feedback.
+     *
+     * @param selectedFiles       This property contains information about files selected by a user.
+     * @param acceptMultipleFiles Accepts more than one file if true.
+     * @param size                Size of the input.
+     * @param validationTrigger   Selects the event updating validation state of the input.
+     * @param inputId             Id of the input DOM element.
+     * @param inputName           Input element name.
+     * @param inputModifier       Modifiers applied directly to the `input` element.
+     *                            Use the provided interceptor to properly clean up bindings inside the content.
+     * @param labelContent        Required label content.
+     *                            It will be wrapped into `label` element with properly set `for` attribute.
+     *                            Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validFeedback       Optional content of positive validation feedback.
+     *                            It will be wrapped into `div` element with `valid-feedback` style.
+     *                            Use the provided interceptor to properly clean up bindings inside the content.
+     * @param invalidFeedback     Optional content of negative validation feedback.
+     *                            It will be wrapped into `div` element with `invalid-feedback` style.
+     *                            Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator           Validator for provided files property
+     */
     def fileInput(
       selectedFiles: SeqProperty[File],
       acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
@@ -425,7 +435,8 @@ final class FormElementsFactory(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       labelContent: Binding.NestedInterceptor => Modifier = _ => "",
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
-      invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
+      invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[Seq[File]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new UdashBootstrapComponent {
         private val input = FileInput(selectedFiles, acceptMultipleFiles)(
@@ -433,7 +444,7 @@ final class FormElementsFactory(
           id := inputId,
           BootstrapStyles.Form.customFileInput,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(selectedFiles, validationTrigger, nestedInterceptor),
+          validationModifier(selectedFiles, validationTrigger, nestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         )
 
@@ -449,19 +460,20 @@ final class FormElementsFactory(
     }
 
     /**
-      * Creates a select menu with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param selectedItem      Property containing selected element.
-      * @param options           SeqProperty of available options.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param itemLabel         Provides options' labels.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a select menu with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param selectedItem      Property containing selected element.
+     * @param options           SeqProperty of available options.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param itemLabel         Provides options' labels.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided item property
+     */
     def select[T: PropertyCreator](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
@@ -470,7 +482,8 @@ final class FormElementsFactory(
       inputId: ComponentId = ComponentId.newId()
     )(
       itemLabel: T => Modifier,
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[T] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         Select(selectedItem, options)(
@@ -478,26 +491,27 @@ final class FormElementsFactory(
           id := inputId,
           BootstrapStyles.Form.customSelect,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(selectedItem, validationTrigger, nestedInterceptor),
+          validationModifier(selectedItem, validationTrigger, nestedInterceptor)(validator),
           nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
       ))
     }
 
     /**
-      * Creates a multiple select menu with a default bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * Use `formGroup` if you want to create an input with a label and validation feedback elements.
-      *
-      * @param selectedItems     Property containing selected elements.
-      * @param options           SeqProperty of available options.
-      * @param size              Size of the input.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param itemLabel         Provides options' labels.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a multiple select menu with a default bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * Use `formGroup` if you want to create an input with a label and validation feedback elements.
+     *
+     * @param selectedItems     Property containing selected elements.
+     * @param options           SeqProperty of available options.
+     * @param size              Size of the input.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param itemLabel         Provides options' labels.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided items property
+     */
     def multiSelect[T: PropertyCreator, ElemType <: Property[T]](
       selectedItems: seq.SeqProperty[T, ElemType],
       options: ReadableSeqProperty[T],
@@ -506,7 +520,8 @@ final class FormElementsFactory(
       inputId: ComponentId = ComponentId.newId()
     )(
       itemLabel: T => Modifier,
-      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None
+      inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[Seq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         Select(selectedItems, options)(
@@ -514,33 +529,34 @@ final class FormElementsFactory(
           id := inputId,
           BootstrapStyles.Form.customSelect,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(selectedItems, validationTrigger, nestedInterceptor),
+          validationModifier(selectedItems, validationTrigger, nestedInterceptor)(validator),
           nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
       ))
     }
 
     /**
-      * Creates a checkbox with a custom bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * It also creates a label and validation feedback elements for the checkbox.
-      *
-      * @param property          Property which will be synchronised with the checkbox state and validated.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param inputId           Id of the input DOM element.
-      * @param groupId           Id of the root element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param labelContent      Optional label content.
-      *                          It will be wrapped into `label` element with properly set `for` attribute.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param validFeedback     Optional content of positive validation feedback.
-      *                          It will be wrapped into `div` element with `valid-feedback` style.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param invalidFeedback   Optional content of negative validation feedback.
-      *                          It will be wrapped into `div` element with `invalid-feedback` style.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a checkbox with a custom bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * It also creates a label and validation feedback elements for the checkbox.
+     *
+     * @param property          Property which will be synchronised with the checkbox state and validated.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param inputId           Id of the input DOM element.
+     * @param groupId           Id of the root element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param labelContent      Optional label content.
+     *                          It will be wrapped into `label` element with properly set `for` attribute.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validFeedback     Optional content of positive validation feedback.
+     *                          It will be wrapped into `div` element with `valid-feedback` style.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param invalidFeedback   Optional content of negative validation feedback.
+     *                          It will be wrapped into `div` element with `invalid-feedback` style.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided checkbox state property
+     */
     def checkbox(
       property: Property[Boolean],
       validationTrigger: ValidationTrigger = selectValidationTrigger,
@@ -551,14 +567,15 @@ final class FormElementsFactory(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
-      invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None
+      invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
+      validator: Validator[Boolean] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new UdashBootstrapComponent {
         private val input = nestedInterceptor(Checkbox(property)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor)
+          validationModifier(property, validationTrigger, nestedInterceptor)(validator)
         ))
 
         override val componentId: ComponentId = groupId
@@ -577,30 +594,31 @@ final class FormElementsFactory(
     }
 
     /**
-      * Creates a checkboxes with a custom bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * It also creates a label and validation feedback elements for each checkbox.
-      *
-      * @param selectedItems     Property which will be synchronised with the checkbox state and validated.
-      * @param options           Seq of available options, one checkbox will be created for each option.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param groupId           Id of the root element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param labelContent      Optional label content.
-      *                          It will be wrapped into `label` element with properly set `for` attribute.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param validFeedback     Optional content of positive validation feedback.
-      *                          It will be wrapped into `div` element with `valid-feedback` style.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param invalidFeedback   Optional content of negative validation feedback.
-      *                          It will be wrapped into `div` element with `invalid-feedback` style.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates a checkboxes with a custom bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * It also creates a label and validation feedback elements for each checkbox.
+     *
+     * @param selectedItems     Property which will be synchronised with the checkbox state and validated.
+     * @param options           Seq of available options, one checkbox will be created for each option.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param groupId           Id of the root element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param labelContent      Optional label content.
+     *                          It will be wrapped into `label` element with properly set `for` attribute.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validFeedback     Optional content of positive validation feedback.
+     *                          It will be wrapped into `div` element with `valid-feedback` style.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param invalidFeedback   Optional content of negative validation feedback.
+     *                          It will be wrapped into `div` element with `invalid-feedback` style.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided checkbox states property
+     */
     def checkButtons[T: PropertyCreator](
       selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
       options: ReadableSeqProperty[T],
@@ -611,39 +629,41 @@ final class FormElementsFactory(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
-      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
+      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+      validator: Validator[Seq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
-      externalBinding(new ButtonsComponent[T](
-        selectedItems, decorator => CheckButtons(selectedItems, options)(decorator),
+      externalBinding(new ButtonsComponent(
+        selectedItems, CheckButtons(selectedItems, options)(_: Seq[(JSInput, T)] => Seq[Node]),
         BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
-      )(inputModifier, labelContent, validFeedback, invalidFeedback))
+      )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
 
     /**
-      * Creates radio buttons with a custom bootstrap styling and an optional validation callback which sets
-      * proper bootstrap classes: `is-valid` and `is-invalid`.
-      * It also creates a label and validation feedback elements for each radio button.
-      *
-      * @param selectedItem      Property which will be synchronised with the radio state and validated.
-      * @param options           Seq of available options, one button will be created for each option.
-      * @param validationTrigger Selects the event updating validation state of the input.
-      * @param groupId           Id of the root element.
-      * @param inputModifier     Modifiers applied directly to the `input` element.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param labelContent      Optional label content.
-      *                          It will be wrapped into `label` element with properly set `for` attribute.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param validFeedback     Optional content of positive validation feedback.
-      *                          It will be wrapped into `div` element with `valid-feedback` style.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      * @param invalidFeedback   Optional content of negative validation feedback.
-      *                          It will be wrapped into `div` element with `invalid-feedback` style.
-      *                          The factory takes item value and index as the arguments.
-      *                          Use the provided interceptor to properly clean up bindings inside the content.
-      */
+     * Creates radio buttons with a custom bootstrap styling and an optional validation callback which sets
+     * proper bootstrap classes: `is-valid` and `is-invalid`.
+     * It also creates a label and validation feedback elements for each radio button.
+     *
+     * @param selectedItem      Property which will be synchronised with the radio state and validated.
+     * @param options           Seq of available options, one button will be created for each option.
+     * @param validationTrigger Selects the event updating validation state of the input.
+     * @param groupId           Id of the root element.
+     * @param inputModifier     Modifiers applied directly to the `input` element.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param labelContent      Optional label content.
+     *                          It will be wrapped into `label` element with properly set `for` attribute.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validFeedback     Optional content of positive validation feedback.
+     *                          It will be wrapped into `div` element with `valid-feedback` style.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param invalidFeedback   Optional content of negative validation feedback.
+     *                          It will be wrapped into `div` element with `invalid-feedback` style.
+     *                          The factory takes item value and index as the arguments.
+     *                          Use the provided interceptor to properly clean up bindings inside the content.
+     * @param validator         Validator for provided item selection property
+     */
     def radioButtons[T: PropertyCreator](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
@@ -654,12 +674,13 @@ final class FormElementsFactory(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
-      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None
+      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
+      validator: Validator[T] = Validator.Default
     ): UdashBootstrapComponent = {
-      externalBinding(new ButtonsComponent[T](
-        selectedItem, decorator => RadioButtons(selectedItem, options)(decorator),
+      externalBinding(new ButtonsComponent(
+        selectedItem, RadioButtons(selectedItem, options)(_: Seq[(JSInput, T)] => Seq[Node]),
         BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
-      )(inputModifier, labelContent, validFeedback, invalidFeedback))
+      )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
 
     private class InputComponent(in: InputBinding[_ <: Element], inputId: ComponentId) extends UdashBootstrapComponent {
@@ -668,8 +689,8 @@ final class FormElementsFactory(
       override val render: Element = input.render
     }
 
-    private class ButtonsComponent[T: PropertyCreator](
-      selected: Property[_],
+    private class ButtonsComponent[T: PropertyCreator, SelectedType](
+      selected: Property[SelectedType],
       input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
       inputDecorationClass: CssStyle,
       inline: ReadableProperty[Boolean],
@@ -679,7 +700,8 @@ final class FormElementsFactory(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
-      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier]
+      invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier],
+      validator: Validator[SelectedType]
     ) extends UdashBootstrapComponent {
       private val inputs = nestedInterceptor(input { inputs =>
         val groupValidationTrigger = Some(Property(0))
@@ -687,7 +709,7 @@ final class FormElementsFactory(
           Seq[Modifier](
             BootstrapStyles.Form.customControlInput,
             inputModifier(item, idx, nestedInterceptor),
-            validationModifier(selected, validationTrigger, nestedInterceptor, groupValidationTrigger)
+            validationModifier(selected, validationTrigger, nestedInterceptor, groupValidationTrigger)(validator)
           ).applyTo(singleInput)
           div(
             singleInput,
@@ -705,10 +727,10 @@ final class FormElementsFactory(
       override val render: Element = div(id := groupId, inputs.render).render
     }
 
-    private def validationModifier(
-      property: ReadableProperty[_], validationTrigger: ValidationTrigger, nested: Binding.NestedInterceptor,
+    private def validationModifier[ArgumentType](
+      property: ReadableProperty[ArgumentType], validationTrigger: ValidationTrigger, nested: Binding.NestedInterceptor,
       groupValidationTrigger: Option[Property[Int]] = None // value change on this property should trigger validation
-    ): Modifier = {
+    )(validator: Validator[ArgumentType]): Modifier = {
       def groupTrigger(startValidation: () => Any) = new Binding {
         override def applyTo(t: Element): Unit = {
           groupValidationTrigger.foreach { p =>
@@ -722,7 +744,7 @@ final class FormElementsFactory(
       def startValidation(validationResult: Property[Option[ValidationResult]], triggerGroup: Boolean): Unit = {
         if (triggerGroup) groupValidationTrigger.foreach { p => p.set(p.get + 1) }
         validationResult.set(None)
-        property.isValid onComplete {
+        validator(property.get).onComplete {
           case Success(r) => validationResult.set(Some(r))
           case Failure(ex) =>
             logger.error("Validation failed.", ex)

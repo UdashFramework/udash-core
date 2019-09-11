@@ -1,11 +1,8 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
 import io.udash.properties._
 import io.udash.properties.seq.{SeqProperty, SeqPropertyFromSingleValue}
 import io.udash.utils.Registration
-
-import scala.util.{Failure, Success}
 
 object Property {
   /** Creates a blank `DirectProperty[T]`.  */
@@ -15,29 +12,6 @@ object Property {
   /** Creates `DirectProperty[T]` with initial value. */
   def apply[T: PropertyCreator](init: T): CastableProperty[T] =
     PropertyCreator[T].newProperty(init, null)
-
-  private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    private var initialized: Boolean = false
-    private var p: Property[ValidationResult] = _
-    private val listener = (_: A) => target.isValid onComplete {
-      case Success(result) => p.set(result)
-      case Failure(ex) => p.set(Invalid(ex.getMessage))
-    }
-
-    def property: ReadableProperty[ValidationResult] = {
-      if (!initialized) {
-        initialized = true
-        p = Property[ValidationResult](Valid)
-        listener(target.get)
-        target.listen(listener)
-      }
-      p.readable
-    }
-
-    def clear(): Unit =
-      if (p != null) p.set(Valid)
-  }
 }
 
 /** Property which can be modified. */
@@ -50,17 +24,8 @@ trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 
-  /** Fires value change listeners with current value and clears validation result. */
+  /** Fires value change listeners with current value. */
   def touch(): Unit
-
-  /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(v: Validator[A]): Registration
-
-  /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(f: A => ValidationResult): Registration
-
-  /** Removes all validators from property and clears current validation result. It does not fire validation process. */
-  def clearValidators(): Unit
 
   /** Removes all listeners from property. */
   def clearListeners(): Unit
@@ -100,20 +65,6 @@ trait Property[A] extends ReadableProperty[A] {
 
 /** Property which can be modified. */
 private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A] with Property[A] {
-  override def addValidator(v: Validator[A]): Registration = {
-    validators += v
-    validationResult = null
-    new MutableBufferRegistration(validators, v, Opt.empty)
-  }
-
-  override def addValidator(f: A => ValidationResult): Registration =
-    addValidator(Validator(f))
-
-  override def clearValidators(): Unit = {
-    validators.clear()
-    validationResult = null
-    validationProperty.clear()
-  }
 
   override def clearListeners(): Unit = {
     listenersUpdate()

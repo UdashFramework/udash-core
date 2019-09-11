@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.form.{Invalid, Valid}
 import io.udash.css.CssView
 import io.udash.properties.{Blank, HasModelPropertyCreator}
 import io.udash.web.guide.demos.AutoDemo
@@ -72,10 +73,6 @@ object SimpleFormDemo extends AutoDemo with CssView {
     }
 
     val user = ModelProperty.blank[UserModel]
-    user.subProp(_.age).addValidator(
-      (element: Int) =>
-        if (element < 0) Invalid("Age should be a non-negative integer!") else Valid
-    )
 
     div(
       UdashForm()(factory => Seq(
@@ -85,8 +82,8 @@ object SimpleFormDemo extends AutoDemo with CssView {
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toString, _.toInt),
-          )().render,
+            user.subProp(_.age).transform(_.toDouble, _.toInt),
+          )(validator = age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid).render,
           labelContent = Some(_ => "Age": Modifier),
           invalidFeedback = Some(_ => "Age should be a non-negative integer!")
         ),

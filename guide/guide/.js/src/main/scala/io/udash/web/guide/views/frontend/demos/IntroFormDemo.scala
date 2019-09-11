@@ -15,7 +15,7 @@ object IntroFormDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap._
     import io.udash.bootstrap.button.UdashButton
-    import io.udash.bootstrap.form.UdashInputGroup
+    import io.udash.bootstrap.form._
     import io.udash.css.CssView._
     import io.udash.web.guide.components.BootstrapUtils
 
@@ -37,23 +37,7 @@ object IntroFormDemo extends AutoDemo {
     class IntroFormDemoViewFactory extends ViewFactory[IntroFormDemoState.type] {
       override def create(): (View, Presenter[IntroFormDemoState.type]) = {
         // Main model of the view
-        val model = ModelProperty(
-          IntroFormDemoModel(0, 10, 42)
-        )
-
-        // model validation
-        model.addValidator { element: IntroFormDemoModel =>
-          val errors = mutable.ArrayBuffer[String]()
-          if (element.minimum > element.maximum)
-            errors += "Minimum is bigger than maximum!"
-          if (element.minimum > element.between)
-            errors += "Minimum is bigger than your value!"
-          if (element.between > element.maximum)
-            errors += "Maximum is smaller than your value!"
-          if (errors.isEmpty) Valid
-          else Invalid(errors.map(DefaultValidationError))
-        }
-
+        val model = ModelProperty(IntroFormDemoModel(0, 10, 42))
         val presenter = new IntroFormDemoPresenter(model)
         val view = new IntroFormDemoView(model, presenter)
         (view, presenter)
@@ -88,6 +72,18 @@ object IntroFormDemo extends AutoDemo {
       private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
       private val between = model.subProp(_.between).transform(i2s, s2i)
       private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
+
+      private val validation = model.transform { element: IntroFormDemoModel =>
+        val errors = mutable.ArrayBuffer[String]()
+        if (element.minimum > element.maximum)
+          errors += "Minimum is bigger than maximum!"
+        if (element.minimum > element.between)
+          errors += "Minimum is bigger than your value!"
+        if (element.between > element.maximum)
+          errors += "Maximum is smaller than your value!"
+        if (errors.isEmpty) Valid
+        else Invalid(errors.map(DefaultValidationError))
+      }
 
       // Button from Udash Bootstrap wrapper
       private val randomizeButton = UdashButton(
@@ -129,7 +125,7 @@ object IntroFormDemo extends AutoDemo {
         ))("Is valid?"),
         p(id := "valid", BootstrapUtils.wellStyles)(
           // validation binding - waits for model changes and updates the view
-          valid(model) {
+          produce(validation) {
             case Valid => span("Yes").render
             case Invalid(errors) => Seq(
               span("No, because:"),

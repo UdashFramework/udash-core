@@ -5,20 +5,12 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
 
-import scala.concurrent.Future
-
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
   override val id: PropertyId = PropertyCreator.newID()
 
   /** @return Current property value. */
   @inline override def get: A = value
-
-  /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
-  @inline override def isValid: Future[ValidationResult] = Future.successful(Valid)
-
-  /** Property containing validation result. */
-  @inline override def valid: ReadableProperty[ValidationResult] = ImmutableProperty.validProp
 
   /**
     * Registers listener which will be called on value change.
@@ -36,7 +28,6 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override protected[properties] def parent: ReadableProperty[_] = null
   override protected[properties] def fireValueListeners(): Unit = {}
   override protected[properties] def valueChanged(): Unit = {}
-  override protected[properties] def validate(): Unit = {}
   override protected[properties] def listenersUpdate(): Unit = {}
   override def listenersCount(): Int = 0
 
@@ -95,7 +86,6 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
 }
 
 private[properties] object ImmutableProperty {
-  val validProp: ImmutableProperty[ValidationResult] = new ImmutableProperty(Valid)
   val noopRegistration = new Registration {
     override def cancel(): Unit = {}
     override def restart(): Unit = {}
