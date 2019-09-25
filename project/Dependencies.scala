@@ -21,7 +21,7 @@ object Dependencies {
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.4"
 
-  val upickleVersion = "0.7.5" // Tests only
+  val upickleVersion = "0.8.0" // Tests only
   val circeVersion = "0.12.1" // Tests only
   val circeDerivationVersion = "0.12.0-M6" // Tests only
   val monixVersion = "3.0.0" // Tests only
