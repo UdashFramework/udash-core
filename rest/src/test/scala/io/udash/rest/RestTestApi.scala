@@ -8,8 +8,6 @@ import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
 
-import scala.concurrent.duration.{FiniteDuration, TimeUnit}
-
 @description("Entity identifier")
 case class RestEntityId(value: String) extends AnyVal
 object RestEntityId extends RestDataWrapperCompanion[String, RestEntityId]
@@ -57,18 +55,16 @@ object CustomResp {
 case class Bytes(bytes: Array[Byte]) extends AnyVal
 object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
 
-object FiniteDurationAU {
-  def apply(length: Long, unit: TimeUnit): FiniteDuration = FiniteDuration(length, unit)
-  def unapply(fd: FiniteDuration): Opt[(Long, TimeUnit)] = Opt((fd.length, fd.unit))
-
-  implicit val finiteDurationCodec: GenCodec[FiniteDuration] =
-    GenCodec.fromApplyUnapplyProvider[FiniteDuration](this)
-  implicit val finiteDurationSchema: RestSchema[FiniteDuration] =
-    RestStructure.fromApplyUnapplyProvider[FiniteDuration](this).standaloneSchema
+case class ThirdParty(thing: Int)
+object ThirdPartyImplicits {
+  implicit val thirdPartyCodec: GenCodec[ThirdParty] =
+    GenCodec.materialize[ThirdParty]
+  implicit val thirdPartySchema: RestSchema[ThirdParty] =
+    RestStructure.materialize[ThirdParty].standaloneSchema
 }
 
-case class Dur(dur: FiniteDuration)
-object Dur extends RestDataCompanionWithDeps[FiniteDurationAU.type, Dur]
+case class HasThirdParty(dur: ThirdParty)
+object HasThirdParty extends RestDataCompanionWithDeps[ThirdPartyImplicits.type, HasThirdParty]
 
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
@@ -132,7 +128,7 @@ trait RestTestApi {
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
   @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
   @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
-  @CustomBody def finiteDurationBody(dur: Dur): Future[Dur]
+  @CustomBody def thirdPartyBody(param: HasThirdParty): Future[HasThirdParty]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
@@ -158,7 +154,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
-    def finiteDurationBody(dur: Dur): Future[Dur] = Future.successful(dur)
+    def thirdPartyBody(dur: HasThirdParty): Future[HasThirdParty] = Future.successful(dur)
   }
 }
 

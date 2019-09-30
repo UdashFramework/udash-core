@@ -185,33 +185,6 @@
         }
       }
     },
-    "/finiteDurationBody": {
-      "post": {
-        "operationId": "finiteDurationBody",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Dur"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Dur"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/formPost": {
       "post": {
         "operationId": "formPost",
@@ -621,6 +594,33 @@
         }
       }
     },
+    "/thirdPartyBody": {
+      "post": {
+        "operationId": "thirdPartyBody",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HasThirdParty"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasThirdParty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trivialGet": {
       "get": {
         "operationId": "trivialGet",
@@ -751,42 +751,6 @@
         "format": "binary",
         "description": "binary bytes"
       },
-      "Dur": {
-        "type": "object",
-        "properties": {
-          "dur": {
-            "$ref": "#/components/schemas/FiniteDuration"
-          }
-        },
-        "required": [
-          "dur"
-        ]
-      },
-      "FiniteDuration": {
-        "type": "object",
-        "properties": {
-          "length": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unit": {
-            "type": "string",
-            "enum": [
-              "NANOSECONDS",
-              "MICROSECONDS",
-              "MILLISECONDS",
-              "SECONDS",
-              "MINUTES",
-              "HOURS",
-              "DAYS"
-            ]
-          }
-        },
-        "required": [
-          "length",
-          "unit"
-        ]
-      },
       "FlatBaseEntity": {
         "type": "object",
         "description": "Flat sealed entity with some serious cases",
@@ -809,6 +773,17 @@
             "SingletonEntity": "#/components/schemas/SingletonEntity"
           }
         }
+      },
+      "HasThirdParty": {
+        "type": "object",
+        "properties": {
+          "dur": {
+            "$ref": "#/components/schemas/ThirdParty"
+          }
+        },
+        "required": [
+          "dur"
+        ]
       },
       "RestEntity": {
         "type": "object",
@@ -882,6 +857,18 @@
         },
         "required": [
           "_case"
+        ]
+      },
+      "ThirdParty": {
+        "type": "object",
+        "properties": {
+          "thing": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "thing"
         ]
       },
       "taggedRestEntity": {
