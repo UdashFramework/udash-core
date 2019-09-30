@@ -13,7 +13,7 @@ object UdashBootstrap {
 
   /** Loads FontAwesome styles. */
   def loadFontAwesome(): Element =
-    link(rel := "stylesheet", href := "https://use.fontawesome.com/releases/v5.10.1/css/all.css").render
+    link(rel := "stylesheet", href := "https://use.fontawesome.com/releases/v5.11.2/css/all.css").render
 
   /** Loads Bootstrap styles. */
   def loadBootstrapStyles(): Element =
