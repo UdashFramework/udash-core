@@ -8,6 +8,8 @@ import org.scalactic.source.Position
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
 
+import scala.concurrent.duration._
+
 abstract class RestApiTest extends FunSuite with ScalaFutures {
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](RestTestApi.Impl)
@@ -72,6 +74,10 @@ trait RestApiTestScenarios extends RestApiTest {
 
   test("large binary request and response") {
     testCall(_.binaryEcho(Array.fill[Byte](1024 * 1024)(5)))
+  }
+
+  test("body using third party type") {
+    testCall(_.finiteDurationBody(Dur(15.seconds)))
   }
 }
 

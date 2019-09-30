@@ -3,10 +3,12 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.{flatten, whenAbsent}
+import com.avsystem.commons.serialization.{GenCodec, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
+
+import scala.concurrent.duration.{FiniteDuration, TimeUnit}
 
 @description("Entity identifier")
 case class RestEntityId(value: String) extends AnyVal
@@ -54,6 +56,19 @@ object CustomResp {
 @description("binary bytes")
 case class Bytes(bytes: Array[Byte]) extends AnyVal
 object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
+
+object FiniteDurationAU {
+  def apply(length: Long, unit: TimeUnit): FiniteDuration = FiniteDuration(length, unit)
+  def unapply(fd: FiniteDuration): Opt[(Long, TimeUnit)] = Opt((fd.length, fd.unit))
+
+  implicit val finiteDurationCodec: GenCodec[FiniteDuration] =
+    GenCodec.fromApplyUnapplyProvider[FiniteDuration](this)
+  implicit val finiteDurationSchema: RestSchema[FiniteDuration] =
+    RestStructure.fromApplyUnapplyProvider[FiniteDuration](this).standaloneSchema
+}
+
+case class Dur(dur: FiniteDuration)
+object Dur extends RestDataCompanionWithDeps[FiniteDurationAU.type, Dur]
 
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
@@ -117,6 +132,7 @@ trait RestTestApi {
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
   @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
   @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
+  @CustomBody def finiteDurationBody(dur: Dur): Future[Dur]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
@@ -142,6 +158,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
+    def finiteDurationBody(dur: Dur): Future[Dur] = Future.successful(dur)
   }
 }
 

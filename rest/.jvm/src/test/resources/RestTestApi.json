@@ -185,6 +185,33 @@
         }
       }
     },
+    "/finiteDurationBody": {
+      "post": {
+        "operationId": "finiteDurationBody",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Dur"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dur"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/formPost": {
       "post": {
         "operationId": "formPost",
@@ -723,6 +750,42 @@
         "type": "string",
         "format": "binary",
         "description": "binary bytes"
+      },
+      "Dur": {
+        "type": "object",
+        "properties": {
+          "dur": {
+            "$ref": "#/components/schemas/FiniteDuration"
+          }
+        },
+        "required": [
+          "dur"
+        ]
+      },
+      "FiniteDuration": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "NANOSECONDS",
+              "MICROSECONDS",
+              "MILLISECONDS",
+              "SECONDS",
+              "MINUTES",
+              "HOURS",
+              "DAYS"
+            ]
+          }
+        },
+        "required": [
+          "length",
+          "unit"
+        ]
       },
       "FlatBaseEntity": {
         "type": "object",
