@@ -73,6 +73,10 @@ trait RestApiTestScenarios extends RestApiTest {
   test("large binary request and response") {
     testCall(_.binaryEcho(Array.fill[Byte](1024 * 1024)(5)))
   }
+
+  test("body using third party type") {
+    testCall(_.thirdPartyBody(HasThirdParty(ThirdParty(5))))
+  }
 }
 
 class DirectRestApiTest extends RestApiTestScenarios {

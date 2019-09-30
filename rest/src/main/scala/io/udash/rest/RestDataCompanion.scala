@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
+import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
@@ -29,6 +30,19 @@ abstract class RestDataCompanion[T](implicit
 ) extends {
   implicit lazy val codec: GenCodec[T] = instances(DefaultRestImplicits, this).codec
   implicit lazy val restStructure: RestStructure[T] = instances(DefaultRestImplicits, this).structure
+  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
+}
+
+/**
+  * A version of [[RestDataCompanion]] which injects additional implicits into macro materialization.
+  * Implicits are imported from an object specified with type parameter `D`.
+  * It must be a singleton object type, i.e. `SomeObject.type`.
+  */
+abstract class RestDataCompanionWithDeps[D, T](implicit
+  deps: ValueOf[D], instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]]
+) extends {
+  implicit lazy val codec: GenCodec[T] = instances((DefaultRestImplicits, deps.value), this).codec
+  implicit lazy val restStructure: RestStructure[T] = instances((DefaultRestImplicits, deps.value), this).structure
   implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
 }
 

@@ -594,6 +594,33 @@
         }
       }
     },
+    "/thirdPartyBody": {
+      "post": {
+        "operationId": "thirdPartyBody",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HasThirdParty"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasThirdParty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trivialGet": {
       "get": {
         "operationId": "trivialGet",
@@ -747,6 +774,17 @@
           }
         }
       },
+      "HasThirdParty": {
+        "type": "object",
+        "properties": {
+          "dur": {
+            "$ref": "#/components/schemas/ThirdParty"
+          }
+        },
+        "required": [
+          "dur"
+        ]
+      },
       "RestEntity": {
         "type": "object",
         "description": "REST entity",
@@ -819,6 +857,18 @@
         },
         "required": [
           "_case"
+        ]
+      },
+      "ThirdParty": {
+        "type": "object",
+        "properties": {
+          "thing": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "thing"
         ]
       },
       "taggedRestEntity": {

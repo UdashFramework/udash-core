@@ -3,7 +3,7 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.{flatten, whenAbsent}
+import com.avsystem.commons.serialization.{GenCodec, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
@@ -54,6 +54,17 @@ object CustomResp {
 @description("binary bytes")
 case class Bytes(bytes: Array[Byte]) extends AnyVal
 object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
+
+case class ThirdParty(thing: Int)
+object ThirdPartyImplicits {
+  implicit val thirdPartyCodec: GenCodec[ThirdParty] =
+    GenCodec.materialize[ThirdParty]
+  implicit val thirdPartySchema: RestSchema[ThirdParty] =
+    RestStructure.materialize[ThirdParty].standaloneSchema
+}
+
+case class HasThirdParty(dur: ThirdParty)
+object HasThirdParty extends RestDataCompanionWithDeps[ThirdPartyImplicits.type, HasThirdParty]
 
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
@@ -117,6 +128,7 @@ trait RestTestApi {
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
   @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
   @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
+  @CustomBody def thirdPartyBody(param: HasThirdParty): Future[HasThirdParty]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
@@ -142,6 +154,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
+    def thirdPartyBody(dur: HasThirdParty): Future[HasThirdParty] = Future.successful(dur)
   }
 }
 
