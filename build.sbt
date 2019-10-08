@@ -195,6 +195,9 @@ def frontendExecutable(proj: Project)(
       Assets / LessKeys.less / includeFilter := "assets.less",
       Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
 
+      //fastOptJS invokes less, which would fail without additional assets (e.g. prism.css)
+      Assets / LessKeys.less := (Assets / LessKeys.less).dependsOn(Compile / copyAssets).value,
+
       Compile / copyAssets := {
         val udashStatics = target.value / staticsRoot
         val assets = udashStatics / "assets"
@@ -224,9 +227,7 @@ def frontendExecutable(proj: Project)(
 
       // Compiles JS files without full optimizations
       compileStatics := (Compile / fastOptJS / target).value / "UdashStatics",
-      compileStatics := compileStatics.dependsOn(
-        Compile / fastOptJS, Compile / copyAssets, Compile / compileCss
-      ).value,
+      compileStatics := compileStatics.dependsOn(Compile / fastOptJS, Compile / compileCss).value,
 
       // Compiles JS files with full optimizations
       compileAndOptimizeStatics := (Compile / fullOptJS / target).value / "UdashStatics",
