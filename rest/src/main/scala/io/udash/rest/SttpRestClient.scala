@@ -49,7 +49,7 @@ object SttpRestClient {
       .map { case (n, PlainValue(v)) => (n, v) }.toList
 
     val cookieHeaders = List(request.parameters.cookies).filter(_.nonEmpty)
-      .map(cookies => "Cookie" -> PlainValue.encodeCookies(cookies))
+      .map(cookies => RestServlet.CookieHeader -> PlainValue.encodeCookies(cookies))
 
     val paramsRequest =
       sttp.method(Method(request.method.name), uri)
