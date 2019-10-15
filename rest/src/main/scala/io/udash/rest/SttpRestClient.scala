@@ -11,6 +11,8 @@ import io.udash.rest.raw._
 import scala.concurrent.Future
 
 object SttpRestClient {
+  final val CookieHeader = "Cookie"
+
   def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
   /**
@@ -49,7 +51,7 @@ object SttpRestClient {
       .map { case (n, PlainValue(v)) => (n, v) }.toList
 
     val cookieHeaders = List(request.parameters.cookies).filter(_.nonEmpty)
-      .map(cookies => RestServlet.CookieHeader -> PlainValue.encodeCookies(cookies))
+      .map(cookies => CookieHeader -> PlainValue.encodeCookies(cookies))
 
     val paramsRequest =
       sttp.method(Method(request.method.name), uri)
