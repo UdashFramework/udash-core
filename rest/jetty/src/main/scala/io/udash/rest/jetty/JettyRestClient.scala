@@ -7,6 +7,7 @@ import java.nio.charset.Charset
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
+import io.udash.utils.URLEncoder
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Result
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesContentProvider, StringContentProvider}
@@ -46,7 +47,8 @@ object JettyRestClient {
           case (name, PlainValue(value)) => httpReq.header(name, value)
         }
         request.parameters.cookies.entries.foreach {
-          case (name, PlainValue(value)) => httpReq.cookie(new HttpCookie(name, value))
+          case (name, PlainValue(value)) => httpReq.cookie(new HttpCookie(
+            URLEncoder.encode(name, spaceAsPlus = true), URLEncoder.encode(value, spaceAsPlus = true)))
         }
 
         request.body match {

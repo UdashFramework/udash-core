@@ -20,13 +20,13 @@ object RestServlet {
   final val CookieHeader = "Cookie"
 
   /**
-    * Wraps an implementation of some REST API trait into a Java Servlet.
-    *
-    * @param apiImpl        implementation of some REST API trait
-    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
-    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
-    *                       if exceeded, `413 Payload Too Large` response will be sent back
-    */
+   * Wraps an implementation of some REST API trait into a Java Servlet.
+   *
+   * @param apiImpl        implementation of some REST API trait
+   * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
+   * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
+   *                       if exceeded, `413 Payload Too Large` response will be sent back
+   */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
@@ -74,7 +74,9 @@ class RestServlet(
     // can't use request.getPathInfo because it decodes the URL before we can split it
     val pathPrefix = request.getContextPath.orEmpty + request.getServletPath.orEmpty
     val path = PlainValue.decodePath(request.getRequestURI.stripPrefix(pathPrefix))
+
     val query = request.getQueryString.opt.map(PlainValue.decodeQuery).getOrElse(Mapping.empty)
+
     val headersBuilder = IMapping.newBuilder[PlainValue]
     request.getHeaderNames.asScala.foreach { headerName =>
       if (!headerName.equalsIgnoreCase(CookieHeader)) { // cookies are separate, don't include them into header params
@@ -82,11 +84,11 @@ class RestServlet(
       }
     }
     val headers = headersBuilder.result()
-    val cookiesBuilder = Mapping.newBuilder[PlainValue]
-    request.getCookies.opt.getOrElse(Array.empty).foreach { cookie =>
-      cookiesBuilder += cookie.getName -> PlainValue(cookie.getValue)
+
+    val cookies = request.getHeaders(CookieHeader).asScala.foldLeft(Mapping.empty[PlainValue]) {
+      (cookies, headerValue) => cookies ++ PlainValue.decodeCookies(headerValue)
     }
-    val cookies = cookiesBuilder.result()
+
     RestParameters(path, headers, query, cookies)
   }
 
