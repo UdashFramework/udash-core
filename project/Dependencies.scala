@@ -5,7 +5,7 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.9"
+  val versionOfScala = "2.12.10"
   val silencerVersion = "1.4.2"
 
   val jqueryWrapperVersion = "3.0.1"
@@ -16,22 +16,22 @@ object Dependencies {
   val scalaCssVersion = "0.5.6"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.40.1"
+  val avsCommonsVersion = "1.41.0"
 
   val atmosphereJSVersion = "2.3.8"
-  val atmosphereVersion = "2.5.4"
+  val atmosphereVersion = "2.5.5"
 
   val upickleVersion = "0.8.0" // Tests only
-  val circeVersion = "0.12.1" // Tests only
+  val circeVersion = "0.12.2" // Tests only
   val circeDerivationVersion = "0.12.0-M7" // Tests only
   val monixVersion = "3.0.0" // Tests only
 
-  val sttpVersion = "1.6.7"
+  val sttpVersion = "1.7.1"
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "9.4.21.v20190926" // Tests only
-  val typesafeConfigVersion = "1.3.4"
+  val jettyVersion = "9.4.20.v20190813" // Tests only
+  val typesafeConfigVersion = "1.4.0"
   val flexmarkVersion = "0.50.40"
   val logbackVersion = "1.2.3"
   val fontAwesomeVersion = "5.10.1"
