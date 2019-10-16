@@ -8,6 +8,7 @@ import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
+import io.udash.utils.URLEncoder
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 
@@ -85,9 +86,13 @@ class RestServlet(
     }
     val headers = headersBuilder.result()
 
-    val cookies = request.getHeaders(CookieHeader).asScala.foldLeft(Mapping.empty[PlainValue]) {
-      (cookies, headerValue) => cookies ++ PlainValue.decodeCookies(headerValue)
+    val cookiesBuilder = Mapping.newBuilder[PlainValue]
+    request.getCookies.opt.getOrElse(Array.empty).foreach { cookie =>
+      val cookieName = URLEncoder.decode(cookie.getName, plusAsSpace = true)
+      val cookieValue = URLEncoder.decode(cookie.getValue, plusAsSpace = true)
+      cookiesBuilder += cookieName -> PlainValue(cookieValue)
     }
+    val cookies = cookiesBuilder.result()
 
     RestParameters(path, headers, query, cookies)
   }
