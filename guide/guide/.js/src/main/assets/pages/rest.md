@@ -617,9 +617,10 @@ primitive types, its Java boxed counterparts, `String`, all `NamedEnum`s, Java e
 It's also easy to provide path/query/header serialization for any type which has a natural, unambiguous textual
 representation.
 
-Serialized values of path & query parameters are automatically URL-encoded when being embedded into
+Serialized values of path, query and cookie parameters are automatically URL-encoded when being embedded into
 HTTP requests. This means that serialization should not worry about that.
-Cookie parameter values must not contain ';' character (semicolon).
+URL-encoding is also applied to query and cookie parameter _names_, in both actual HTTP requests and
+[OpenAPI documents](#generating-openapi-30-specifications).
 
 ### Body parameter serialization
 

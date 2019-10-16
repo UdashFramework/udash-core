@@ -11,21 +11,23 @@ import io.udash.rest.raw._
 import scala.concurrent.Future
 
 object SttpRestClient {
+  final val CookieHeader = "Cookie"
+
   def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
   /**
-    * Creates a client instance of some REST API trait which translates method calls into HTTP requests
-    * to given URI using STTP.
-    */
+   * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+   * to given URI using STTP.
+   */
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String)(
     implicit backend: SttpBackend[Future, Nothing]
   ): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri))
 
   /**
-    * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
-    * a specified base URI using default HTTP client implementation (sttp).
-    */
+   * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
+   * a specified base URI using default HTTP client implementation (sttp).
+   */
   def asHandleRequest(baseUri: String)(implicit backend: SttpBackend[Future, Nothing]): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri")
 
@@ -45,17 +47,11 @@ object SttpRestClient {
         List((HeaderNames.ContentType, neBody.contentType))
     }
 
-    val paramHeaders = request.parameters.headers.entries.iterator.map {
-      case (n, PlainValue(v)) => (n, v)
-    }.toList
+    val paramHeaders = request.parameters.headers.entries.iterator
+      .map { case (n, PlainValue(v)) => (n, v) }.toList
 
-    val cookieHeaders = List(request.parameters.cookies.entries).filter(_.nonEmpty).map { cookies =>
-      "Cookie" -> cookies.iterator.map {
-        case (n, PlainValue(v)) =>
-          require(!v.contains(";"), s"invalid cookie: $n=$v")
-          s"$n=$v"
-      }.mkString(";")
-    }
+    val cookieHeaders = List(request.parameters.cookies).filter(_.nonEmpty)
+      .map(cookies => CookieHeader -> PlainValue.encodeCookies(cookies))
 
     val paramsRequest =
       sttp.method(Method(request.method.name), uri)
