@@ -7,6 +7,7 @@ import com.avsystem.commons.rpc._
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.raw._
 import io.udash.rest.{Header => HeaderAnnot, _}
+import io.udash.utils.URLEncoder
 
 import scala.annotation.implicitNotFound
 import scala.collection.mutable
@@ -250,7 +251,9 @@ final case class OpenApiParameter[T](
       case _: Cookie => Location.Cookie
     }
     val pathParam = in == Location.Path
-    val param = Parameter(info.name, in,
+    val urlEncodeName = in == Location.Query || in == Location.Cookie
+    val name = if(urlEncodeName) URLEncoder.encode(info.name, spaceAsPlus = true) else info.name
+    val param = Parameter(name, in,
       required = pathParam || !info.hasFallbackValue,
       schema = info.schema(resolver, withDefaultValue = !pathParam),
       // repeated query/cookie/header params are not supported for now so ensure `explode` is never assumed to be true
