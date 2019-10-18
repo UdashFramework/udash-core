@@ -5,7 +5,7 @@ import io.udash.web.guide.RootState
 
 object FaqViewFactory extends StaticViewFactory[RootState.type](() => new FaqView)
 
-class FaqView extends FinalView {
+class FaqView extends View {
   import scalatags.JsDom.all._
 
   private val content = div(

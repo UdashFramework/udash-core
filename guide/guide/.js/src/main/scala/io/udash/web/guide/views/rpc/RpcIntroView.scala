@@ -11,7 +11,7 @@ import scalatags.JsDom
 
 case object RpcIntroViewFactory extends StaticViewFactory[RpcIntroState.type](() => new RpcIntroView)
 
-class RpcIntroView extends FinalView with CssView {
+class RpcIntroView extends View with CssView {
   import JsDom.all._
   import io.udash.web.guide.Context._
 

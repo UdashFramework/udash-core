@@ -27,7 +27,7 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
   }
 }
 
-class FrontendRoutingView(url: Property[String]) extends FinalView with CssView {
+class FrontendRoutingView(url: Property[String]) extends View with CssView {
   import Context._
   import JsDom.all._
 

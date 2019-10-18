@@ -52,11 +52,6 @@ trait ContainerViewFactory[S <: ContainerState] extends ViewFactory[S] {
   override def create(): (ContainerView, Presenter[S])
 }
 
-/** [[ViewFactory]] creating [[FinalView]]. */
-trait FinalViewFactory[S <: FinalState] extends ViewFactory[S] {
-  override def create(): (FinalView, Presenter[S])
-}
-
 /**
   * Abstract view which should be used in order to implement View for [[io.udash.core.ViewFactory]].
   * The View implementation usually gets the model and the [[io.udash.core.Presenter]] as constructor arguments.
@@ -96,9 +91,6 @@ trait ContainerView extends View {
   }
 }
 
-/** A [[io.udash.core.View]] which does not have any child view. */
-trait FinalView extends View
-
 /** The class which should be used to present the state for [[io.udash.routing.RoutingEngine]]. */
 trait State {
   type HierarchyRoot <: State {type HierarchyRoot = State.this.HierarchyRoot}
@@ -106,8 +98,6 @@ trait State {
 }
 /** State related to [[ContainerView]]. */
 trait ContainerState extends State
-/** State related to [[FinalView]]. */
-trait FinalState extends State
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].

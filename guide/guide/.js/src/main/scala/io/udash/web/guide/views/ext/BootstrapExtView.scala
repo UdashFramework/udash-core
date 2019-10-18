@@ -11,7 +11,7 @@ import scalatags.JsDom
 case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.type](() => new BootstrapExtView)
 
 
-class BootstrapExtView extends FinalView {
+class BootstrapExtView extends View {
   import JsDom.all._
 
   private val (staticsDemo, staticsSnippet) = StaticsDemo.demoWithSnippet()

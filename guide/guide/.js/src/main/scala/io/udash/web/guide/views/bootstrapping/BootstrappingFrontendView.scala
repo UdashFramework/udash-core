@@ -12,7 +12,7 @@ import scalatags.JsDom
 
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
-class BootstrappingFrontendView extends FinalView with CssView {
+class BootstrappingFrontendView extends View with CssView {
   import Context._
   import JsDom.all._
 
@@ -154,7 +154,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |class NewsletterSubscribeView(
         |  model: ModelProperty[SubscribeModel],
         |  presenter: NewsletterSubscribePresenter
-        |) extends FinalView {
+        |) extends View {
         |  import scalatags.JsDom.all._
         |
         |  /** Renders view HTML code */
