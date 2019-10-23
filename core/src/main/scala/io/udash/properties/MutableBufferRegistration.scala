@@ -1,6 +1,6 @@
 package io.udash.properties
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons.Opt
 import io.udash.utils.Registration
 
 import scala.collection.mutable

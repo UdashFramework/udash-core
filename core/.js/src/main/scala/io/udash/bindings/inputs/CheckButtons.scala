@@ -1,5 +1,6 @@
 package io.udash.bindings.inputs
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
@@ -9,23 +10,23 @@ import scalatags.JsDom.all._
 
 /** Checkboxes for finite options with many elements selection. Bound to SeqProperty. */
 object CheckButtons {
-  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] =
+  def inputsOnlyDecorator[T]: BSeq[(JSInput, T)] => BSeq[Node] =
     RadioButtons.inputsOnlyDecorator
-  def spanWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
+  def spanWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
     RadioButtons.spanWithLabelDecorator(labelFactory)
-  def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
+  def divWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
     RadioButtons.divWithLabelDecorator(labelFactory)
 
   /**
-    * @param selectedItems  SeqProperty which is going to be bound to checkboxes
-    * @param options        Seq of available options, one checkbox will be created for each option.
-    * @param decorator      Function creating HTML element from checkboxes Seq.
-    * @param inputModifiers Modifiers to apply on each generated checkbox.
-    * @return HTML element created by decorator.
-    */
+   * @param selectedItems  SeqProperty which is going to be bound to checkboxes
+   * @param options        Seq of available options, one checkbox will be created for each option.
+   * @param decorator      Function creating HTML element from checkboxes Seq.
+   * @param inputModifiers Modifiers to apply on each generated checkbox.
+   * @return HTML element created by decorator.
+   */
   def apply[T: PropertyCreator](
     selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableSeqProperty[T]
-  )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
+  )(decorator: BSeq[(JSInput, T)] => BSeq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
       "checkbox",
       opt => selectedItems.transform(_.contains(opt)),

@@ -1,5 +1,6 @@
 package io.udash.bindings.modifiers
 
+import com.avsystem.commons._
 import org.scalajs.dom.Node
 
 private[bindings] trait DOMManipulator {
@@ -24,20 +25,20 @@ private[bindings] trait DOMManipulator {
     */
   def customElementsInsert: InsertMethod = DefaultElementInsert
 
-  protected def replace(root: Node)(oldElements: Seq[Node], newElements: Seq[Node]): Unit =
+  protected def replace(root: Node)(oldElements: BSeq[Node], newElements: BSeq[Node]): Unit =
     if (customElementsReplace(root, oldElements, newElements)) {
       root.replaceChildren(oldElements, newElements)
     }
 
-  protected def insert(root: Node)(before: Node, newElements: Seq[Node]): Unit =
+  protected def insert(root: Node)(before: Node, newElements: BSeq[Node]): Unit =
     if (customElementsInsert(root, before, newElements)) {
       newElements.foreach(root.insertBefore(_, before))
     }
 }
 
 private[bindings] object DOMManipulator {
-  type ReplaceMethod = (Node, Seq[Node], Seq[Node]) => Boolean
-  type InsertMethod = (Node, Node, Seq[Node]) => Boolean
+  type ReplaceMethod = (Node, BSeq[Node], BSeq[Node]) => Boolean
+  type InsertMethod = (Node, Node, BSeq[Node]) => Boolean
 
   final val DefaultElementReplace: ReplaceMethod = (_, _, _) => true
   final val DefaultElementInsert: InsertMethod = (_, _, _) => true

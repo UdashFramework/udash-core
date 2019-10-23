@@ -214,10 +214,10 @@ class SeqPropertyTest extends UdashCoreTest {
     "fire value listeners on structure change" in {
       val p = SeqProperty[Int](Seq(0, 0, 0))
 
-      val values = mutable.ArrayBuffer[Seq[Int]]()
-      val listener = (s: Seq[Int]) => values += s
-      val oneTimeValues = mutable.ArrayBuffer[Seq[Int]]()
-      val oneTImeListener = (s: Seq[Int]) => oneTimeValues += s
+      val values = mutable.ArrayBuffer[BSeq[Int]]()
+      val listener = (s: BSeq[Int]) => values += s
+      val oneTimeValues = mutable.ArrayBuffer[BSeq[Int]]()
+      val oneTImeListener = (s: BSeq[Int]) => oneTimeValues += s
 
       p.listen(listener, initUpdate = true)
       p.listenOnce(oneTImeListener)
@@ -269,8 +269,8 @@ class SeqPropertyTest extends UdashCoreTest {
     "fire value listeners on every child change" in {
       val p = SeqProperty.blank[Int]
 
-      val values = mutable.ArrayBuffer[Seq[Int]]()
-      val listener = (s: Seq[Int]) => values += s
+      val values = mutable.ArrayBuffer[BSeq[Int]]()
+      val listener = (s: BSeq[Int]) => values += s
 
       p.listen(listener)
 
@@ -378,7 +378,7 @@ class SeqPropertyTest extends UdashCoreTest {
     "transform into Property" in {
       val p = SeqProperty[Int](1, 2, 3)
       val t = p.transform[Int](
-        (s: Seq[Int]) => s.sum,
+        (s: BSeq[Int]) => s.sum,
         (i: Int) => (1 to i)
       )
 
@@ -404,7 +404,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "transform into another SeqProperty" in {
       class BadEquals(val v: Int)
-      val init: Seq[BadEquals] = (1 to 3).map(new BadEquals(_))
+      val init: BSeq[BadEquals] = (1 to 3).map(new BadEquals(_))
       val p = SeqProperty[BadEquals](init)
 
       val t = p.transform[T](
@@ -441,7 +441,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "return immutable sequence from get" in {
       val p = SeqProperty[Int](1, 2, 3)
-      p.replace(0, 3, p.get.map(_ + 1): _*)
+      p.replaceSeq(0, 3, p.get.map(_ + 1))
       p.get should be(Seq(2, 3, 4))
     }
 
@@ -496,7 +496,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      val states = mutable.ArrayBuffer.empty[Seq[Int]]
+      val states = mutable.ArrayBuffer.empty[BSeq[Int]]
       val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
 
       ensureNoListeners(p)
@@ -789,7 +789,7 @@ class SeqPropertyTest extends UdashCoreTest {
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
-      val listenCalls = mutable.ListBuffer[Seq[Int]]()
+      val listenCalls = mutable.ListBuffer[BSeq[Int]]()
       val r1 = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
@@ -878,9 +878,9 @@ class SeqPropertyTest extends UdashCoreTest {
       p.get should be(r.get.reverse)
       p.get should be(r2.get)
 
-      var pValue = Seq.empty[Int]
-      var rValue = Seq.empty[Int]
-      var r2Value = Seq.empty[Int]
+      var pValue = BSeq.empty[Int]
+      var rValue = BSeq.empty[Int]
+      var r2Value = BSeq.empty[Int]
       var pPatch: Patch[Property[Int]] = null
       var rPatch: Patch[Property[Int]] = null
       var r2Patch: Patch[Property[Int]] = null
@@ -946,9 +946,9 @@ class SeqPropertyTest extends UdashCoreTest {
       f.get should be(r.get.reverse)
       f.get should be(r2.get)
 
-      var fValue = Seq.empty[Int]
-      var rValue = Seq.empty[Int]
-      var r2Value = Seq.empty[Int]
+      var fValue = BSeq.empty[Int]
+      var rValue = BSeq.empty[Int]
+      var r2Value = BSeq.empty[Int]
       var fPatch: Patch[ReadableProperty[Int]] = null
       var rPatch: Patch[ReadableProperty[Int]] = null
       var r2Patch: Patch[ReadableProperty[Int]] = null

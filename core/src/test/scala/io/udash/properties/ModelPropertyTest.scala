@@ -440,7 +440,7 @@ class ModelPropertyTest extends UdashCoreTest {
 
       an[IllegalStateException] shouldBe thrownBy(p.asModel(ModelPropertyCreator.materialize))
 
-      val p2 = Property(Seq(1, 2, 3))(new SinglePropertyCreator[BSeq[Int]])
+      val p2 = Property(BSeq(1, 2, 3))(new SinglePropertyCreator[BSeq[Int]])
       an[IllegalStateException] shouldBe thrownBy(p2.asSeq)
     }
 

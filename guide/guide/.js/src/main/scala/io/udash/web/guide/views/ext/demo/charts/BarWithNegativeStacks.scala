@@ -38,7 +38,7 @@ object BarWithNegativeStacks {
     ),
     yAxis = Seq(
       YAxis(
-        labels = YAxisLabel(formatter = (data: AxisLabel.FormatterData[YAxis]) => Math.abs(data.value.asInstanceOf[Double]) + "%")
+        labels = YAxisLabel(formatter = (data: AxisLabel.FormatterData[YAxis]) => Math.abs(data.value.asInstanceOf[Double]).toString + "%")
       )
     ),
     tooltip = Tooltip(formatter = (data: Tooltip.FormatterData) => {

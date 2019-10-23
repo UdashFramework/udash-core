@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons._
 import io.udash.bindings.Bindings._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
@@ -11,7 +11,7 @@ import scala.scalajs.js
 private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
 
   protected val property: ReadableSeqProperty[T, E]
-  protected def build(item: E): Seq[Node]
+  protected def build(item: E): BSeq[Node]
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
@@ -54,7 +54,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
       // Add new elements
       val newElements = patch.added.map(build)
-      val newElementsFlatten: Seq[Node] = newElements.flatten
+      val newElementsFlatten: BSeq[Node] = newElements.flatten
       val insertBefore = root.childNodes(elementsBefore + firstIndex)
       if (insertBefore == null) replace(root)(Seq.empty, newElementsFlatten)
       else insert(root)(insertBefore, newElementsFlatten)
@@ -95,7 +95,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       }
 
       val sizeChange = patch.added.size - patch.removed.size
-      if (sizeChange > 0) producedElementsCount.insert(patch.idx, Seq.fill(sizeChange)(0): _*)
+      if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
       else producedElementsCount.remove(patch.idx, -sizeChange)
       newElements.zipWithIndex.foreach {
         case (res, idx) =>

@@ -68,7 +68,7 @@ object ButtonsDemo extends AutoDemo {
       )(buttons),
       h4("Clicks: "),
       produce(clicks)(seq =>
-        ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_))).render
+        ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_)).toSeq).render
       )
     ).render
   }.withSourceCode

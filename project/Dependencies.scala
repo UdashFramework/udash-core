@@ -17,8 +17,7 @@ object Dependencies {
   val scalaCssVersion = "0.6.0-RC1"
 
   val servletVersion = "4.0.1"
-  def avsCommonsVersion: Def.Initialize[String] =
-    Def.setting(if(scalaBinaryVersion.value == "2.13") "2.0.0-M3" else "1.42.0")
+  val avsCommonsVersion = "2.0.0-M3"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.9"
@@ -52,7 +51,7 @@ object Dependencies {
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
-    "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion.value
+    "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
@@ -65,11 +64,11 @@ object Dependencies {
 
   val macroDeps = Def.setting(Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion.value,
+    "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
 
   val utilsCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion.value,
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
@@ -108,7 +107,7 @@ object Dependencies {
   ))
 
   private val restCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion.value,
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
     "io.monix" %%% "monix" % monixVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,

@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.card.UdashCard
@@ -15,8 +16,8 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
   elements: seq.ReadableSeqProperty[ItemType, ElemType],
   override val componentId: ComponentId
 )(
-  heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
-  body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
+  heading: (ElemType, Binding.NestedInterceptor) => BSeq[Element],
+  body: (ElemType, Binding.NestedInterceptor) => BSeq[Element]
 ) extends UdashBootstrapComponent
   with Listenable[UdashAccordion[ItemType, ElemType], UdashAccordion.AccordionEvent[ItemType, ElemType]] {
 
@@ -46,7 +47,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
           val card = UdashCard() { factory =>
             val collapse = UdashCollapse()(_ => Seq(
               aria.labelledby := headingId, dataParent := s"#$componentId",
-              factory.body(nested => body(item, nested))
+              factory.body(nested => body(item, nested).toSeq)
             ))
 
             collapses(item) = collapse
@@ -57,7 +58,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
                 button(
                   BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
                   tpe := "button", dataToggle:= "collapse", href := s"#${collapse.componentId}",
-                  heading(item, nested)
+                  heading(item, nested).toSeq
                 )
               )
             )}
@@ -108,8 +109,8 @@ object UdashAccordion {
     elements: seq.ReadableSeqProperty[ItemType, ElemType],
     componentId: ComponentId = ComponentId.newId()
   )(
-    heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
-    body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
+    heading: (ElemType, Binding.NestedInterceptor) => BSeq[Element],
+    body: (ElemType, Binding.NestedInterceptor) => BSeq[Element]
   ): UdashAccordion[ItemType, ElemType] =
     new UdashAccordion(elements, componentId)(heading, body)
 }

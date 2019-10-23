@@ -1,7 +1,8 @@
 package io.udash.properties.seq
 
-import io.udash.properties.single.{CombinedProperty, ReadableProperty}
+import com.avsystem.commons._
 import io.udash.properties.PropertyCreator
+import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
@@ -9,7 +10,7 @@ import scala.collection.mutable
 private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
-) extends CombinedProperty[Seq[A], B, Seq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
+) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
   private var combinedChildren: mutable.Buffer[ReadableProperty[R]] = _
@@ -21,7 +22,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
       removed = originPatch.removed.indices.map(idx => combinedChildren(idx + originPatch.idx)),
       added = combinedNewChildren
     )
-    CrossCollections.replace(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren: _*)
+    CrossCollections.replaceSeq(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren)
     fireElementsListeners(mappedPatch, structureListeners)
   }
 
@@ -59,7 +60,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
         reg.isActive
     })
 
-  override def elemProperties: Seq[ReadableProperty[R]] =
+  override def elemProperties: BSeq[ReadableProperty[R]] =
     if (combinedChildren != null) combinedChildren
     else s.elemProperties.map(_.combine(p)(combiner))
 

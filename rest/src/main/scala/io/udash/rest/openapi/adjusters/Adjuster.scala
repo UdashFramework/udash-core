@@ -5,7 +5,6 @@ package adjusters
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.NotInheritedFromSealedTypes
 import com.avsystem.commons.meta.infer
-import com.avsystem.commons.misc.{Opt, OptArg}
 import com.avsystem.commons.rpc.AsRaw
 import io.udash.rest.raw._
 

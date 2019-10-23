@@ -1,16 +1,17 @@
 package io.udash.bindings.inputs
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Select
 import scalatags.JsDom.all._
 
-private[inputs] class SelectBinding[T : PropertyCreator](
+private[inputs] class SelectBinding[T: PropertyCreator](
   options: ReadableSeqProperty[T], label: T => Modifier, selectModifiers: Modifier*
 )(
   checkedIf: T => ReadableProperty[Boolean],
-  refreshSelection: Seq[T] => Unit,
+  refreshSelection: BSeq[T] => Unit,
   onChange: Select => Event => Unit
 ) extends InputBinding[Select] {
   private val selector = select(selectModifiers)(

@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
 import org.openqa.selenium.WebElement
 
-import scala.collection.JavaConverters._
+import com.avsystem.commons._
 
 class FrontendBindingsTest extends SeleniumTest {
   override protected final val url = "/frontend/bindings"

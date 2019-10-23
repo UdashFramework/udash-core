@@ -165,9 +165,9 @@ trait CssBase {
         renderer.apply(Vector(
           CssEntry.Keyframes(
             kfs.name,
-            kfs.frames.map { case (selector, style) =>
+            kfs.frames.iterator.map { case (selector, style) =>
               (selector, styleA(style)(Env.empty)): (KeyframeSelector, StyleStream)
-            }(collection.breakOut): ListMap[KeyframeSelector, StyleStream]
+            }.to(ListMap): ListMap[KeyframeSelector, StyleStream]
           )
         ))
       case CssFontFace(className, font) =>

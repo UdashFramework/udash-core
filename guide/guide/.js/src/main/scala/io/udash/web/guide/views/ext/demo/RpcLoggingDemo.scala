@@ -19,7 +19,7 @@ object RpcLoggingDemo {
       )("Load call list"),
       produce(model)(seq =>
         ul(
-          seq.map(call => li(call.toString)): _*
+          seq.map(call => li(call.toString)).toSeq: _*
         ).render
       )
     ).render

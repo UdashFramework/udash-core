@@ -19,7 +19,8 @@ case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
 
 class omit[T](value: => T) extends AnnotationAggregate {
-  @transientDefault @whenAbsent(value) type Implied
+  @transientDefault @whenAbsent(value)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 trait UserApi {
@@ -135,7 +136,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   def mkDeep(value: Any): Any = value match {
-    case arr: Array[_] => arr.deep
+    case arr: Array[_] => arr.iterator.map(mkDeep).to(IArraySeq)
     case _ => value
   }
 

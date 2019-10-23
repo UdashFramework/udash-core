@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.frontend.demos
 
+import com.avsystem.commons.BSeq
 import io.udash.bootstrap.utils.BootstrapTags
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -35,9 +36,9 @@ object RadioButtonsDemo extends AutoDemo {
       prependText("Fruits:"),
       appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
-          (els: Seq[(Input, String)]) => span(els.map {
+          (els: BSeq[(Input, String)]) => span(els.map {
             case (i: Input, l: String) => label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
-          }).render
+          }.toSeq).render
         ).render
       ),
       appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))

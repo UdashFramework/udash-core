@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package form
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
@@ -436,7 +437,7 @@ final class FormElementsFactory(
       labelContent: Binding.NestedInterceptor => Modifier = _ => "",
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
       invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
-      validator: Validator[Seq[File]] = Validator.Default
+      validator: Validator[BSeq[File]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new UdashBootstrapComponent {
         private val input = FileInput(selectedFiles, acceptMultipleFiles)(
@@ -521,7 +522,7 @@ final class FormElementsFactory(
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
-      validator: Validator[Seq[T]] = Validator.Default
+      validator: Validator[BSeq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         Select(selectedItems, options)(
@@ -630,10 +631,10 @@ final class FormElementsFactory(
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
-      validator: Validator[Seq[T]] = Validator.Default
+      validator: Validator[BSeq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new ButtonsComponent(
-        selectedItems, CheckButtons(selectedItems, options)(_: Seq[(JSInput, T)] => Seq[Node]),
+        selectedItems, CheckButtons(selectedItems, options)(_: BSeq[(JSInput, T)] => BSeq[Node]),
         BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
       )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
@@ -678,7 +679,7 @@ final class FormElementsFactory(
       validator: Validator[T] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new ButtonsComponent(
-        selectedItem, RadioButtons(selectedItem, options)(_: Seq[(JSInput, T)] => Seq[Node]),
+        selectedItem, RadioButtons(selectedItem, options)(_: BSeq[(JSInput, T)] => BSeq[Node]),
         BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
       )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
@@ -691,7 +692,7 @@ final class FormElementsFactory(
 
     private class ButtonsComponent[T: PropertyCreator, SelectedType](
       selected: Property[SelectedType],
-      input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
+      input: (BSeq[(JSInput, T)] => BSeq[Node]) => InputBinding[_ <: Element],
       inputDecorationClass: CssStyle,
       inline: ReadableProperty[Boolean],
       validationTrigger: ValidationTrigger,

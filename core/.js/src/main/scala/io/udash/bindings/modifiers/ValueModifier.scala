@@ -14,18 +14,18 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
   import Bindings._
 
   protected def property: ReadableProperty[T]
-  protected def builder: (T, Binding.NestedInterceptor) => Seq[Node]
+  protected def builder: (T, Binding.NestedInterceptor) => BSeq[Node]
   protected def checkNull: Boolean
   protected def listen(callback: T => Unit): Registration
 
   override def applyTo(t: Element): Unit = {
-    var elements: Seq[Node] = Seq.empty
+    var elements: BSeq[Node] = Seq.empty
 
     def rebuild(propertyValue: T): Unit = {
       killNestedBindings()
 
       val oldEls = elements
-      val newEls: Seq[Node] =
+      val newEls: BSeq[Node] =
         builder(propertyValue, nestedInterceptor)
           .optIf(!checkNull || propertyValue != null)
           .filter(_.nonEmpty)

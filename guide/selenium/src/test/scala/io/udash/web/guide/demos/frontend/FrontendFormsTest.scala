@@ -4,7 +4,7 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByClassName, ByCssSelector, ByTagName}
 import org.openqa.selenium.{By, Keys}
 
-import scala.collection.JavaConverters._
+import com.avsystem.commons._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {

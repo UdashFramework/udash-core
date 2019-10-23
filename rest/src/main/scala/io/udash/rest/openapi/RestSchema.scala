@@ -4,7 +4,7 @@ package rest.openapi
 import java.util.UUID
 
 import com.avsystem.commons._
-import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
+import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion}
 import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
 
@@ -14,20 +14,20 @@ import scala.collection.mutable
 @implicitNotFound("RestSchema for ${T} not found")
 trait RestSchema[T] { self =>
   /**
-    * Creates a [[Schema]] object or external schema reference.
-    * May use [[SchemaResolver]] to resolve any dependent `RestSchema` instances.
-    * This method should be called directly only by [[SchemaResolver]].
-    */
+   * Creates a [[Schema]] object or external schema reference.
+   * May use [[SchemaResolver]] to resolve any dependent `RestSchema` instances.
+   * This method should be called directly only by [[SchemaResolver]].
+   */
   def createSchema(resolver: SchemaResolver): RefOr[Schema]
 
   /**
-    * Optional name of the schema. When `RestSchema` is named, schema created by [[createSchema]] will be registered
-    * under that name in [[SchemaRegistry]] and ultimately included into [[Components]] of the [[OpenApi]] document.
-    * All direct usages of the schema in OpenAPI document will be replaced by a reference to
-    * the registered schema, i.e. `{"$$ref": "#/components/schemas/<schema-name>"}`.
-    *
-    * If schema is unnamed, it will be always inlined instead of being replaced by a reference.
-    */
+   * Optional name of the schema. When `RestSchema` is named, schema created by [[createSchema]] will be registered
+   * under that name in [[SchemaRegistry]] and ultimately included into [[Components]] of the [[OpenApi]] document.
+   * All direct usages of the schema in OpenAPI document will be replaced by a reference to
+   * the registered schema, i.e. `{"$$ref": "#/components/schemas/<schema-name>"}`.
+   *
+   * If schema is unnamed, it will be always inlined instead of being replaced by a reference.
+   */
   def name: Opt[String]
 
   def map[S](fun: RefOr[Schema] => Schema, newName: OptArg[String] = OptArg.Empty): RestSchema[S] =
@@ -156,21 +156,21 @@ object RestSchema {
 }
 
 /**
-  * Intermediate typeclass which serves as basis for [[RestResponses]] and [[RestRequestBody]].
-  * [[RestMediaTypes]] is derived by default from [[RestSchema]].
-  * It should be defined manually for every type which has custom serialization to
-  * [[io.udash.rest.raw.HttpBody HttpBody]] defined so that generated OpenAPI properly reflects that custom
-  * serialization format.
-  */
+ * Intermediate typeclass which serves as basis for [[RestResponses]] and [[RestRequestBody]].
+ * [[RestMediaTypes]] is derived by default from [[RestSchema]].
+ * It should be defined manually for every type which has custom serialization to
+ * [[io.udash.rest.raw.HttpBody HttpBody]] defined so that generated OpenAPI properly reflects that custom
+ * serialization format.
+ */
 @implicitNotFound("RestMediaTypes instance for ${T} not found")
 trait RestMediaTypes[T] {
   /**
-    * @param schemaTransform Should be used if [[RestMediaTypes]] is being built based on [[RestSchema]] for
-    *                        the same type. The transformation may adjust the schema and give it a different name.
-    *                        This transformation is usually used when there's a type that wraps another type and wants
-    *                        to reuse [[RestMediaTypes]] of the wrapped type but also introduces some schema
-    *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
-    */
+   * @param schemaTransform Should be used if [[RestMediaTypes]] is being built based on [[RestSchema]] for
+   *                        the same type. The transformation may adjust the schema and give it a different name.
+   *                        This transformation is usually used when there's a type that wraps another type and wants
+   *                        to reuse [[RestMediaTypes]] of the wrapped type but also introduces some schema
+   *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
+   */
   def mediaTypes(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Map[String, MediaType]
 }
 object RestMediaTypes {
@@ -192,21 +192,21 @@ object RestMediaTypes {
 }
 
 /**
-  * Typeclass which defines how an OpenAPI [[Responses]] Object will look like for a given type.
-  * By default, [[RestResponses]] is derived based on [[RestMediaTypes]] for that type which is itself derived by
-  * default from [[RestSchema]] for that type. It should be defined manually for every type which has custom
-  * serialization to [[io.udash.rest.raw.RestResponse RestResponse]] defined so that generated OpenAPI properly
-  * reflects that custom serialization format.
-  */
+ * Typeclass which defines how an OpenAPI [[Responses]] Object will look like for a given type.
+ * By default, [[RestResponses]] is derived based on [[RestMediaTypes]] for that type which is itself derived by
+ * default from [[RestSchema]] for that type. It should be defined manually for every type which has custom
+ * serialization to [[io.udash.rest.raw.RestResponse RestResponse]] defined so that generated OpenAPI properly
+ * reflects that custom serialization format.
+ */
 @implicitNotFound("RestResponses instance for ${T} not found")
 trait RestResponses[T] {
   /**
-    * @param schemaTransform Should be used if [[RestResponses]] is being built based on [[RestSchema]] for
-    *                        the same type. The transformation may adjust the schema and give it a different name.
-    *                        This transformation is usually used when there's a type that wraps another type and wants
-    *                        to reuse [[RestResponses]] of the wrapped type but also introduces some schema
-    *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
-    */
+   * @param schemaTransform Should be used if [[RestResponses]] is being built based on [[RestSchema]] for
+   *                        the same type. The transformation may adjust the schema and give it a different name.
+   *                        This transformation is usually used when there's a type that wraps another type and wants
+   *                        to reuse [[RestResponses]] of the wrapped type but also introduces some schema
+   *                        modifications. See [[io.udash.rest.RestDataWrapperCompanion]].
+   */
   def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses
 }
 object RestResponses {
@@ -233,21 +233,21 @@ object RestResponses {
 }
 
 /**
-  * Just like [[io.udash.rest.openapi.RestResponses RestResponses]],
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
-  * Responses Object will look like for an HTTP method which returns given type. The difference between
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]]
-  * is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
-  * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
-  * In such situation, [[io.udash.rest.openapi.RestResponses RestResponses]] must be provided for `T` while
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] is provided
-  * for `Future[T]` (or whatever async wrapper is used), based on the [[io.udash.rest.openapi.RestResponses RestResponses]]
-  * instance of `T`. You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
-  *
-  * [[io.udash.rest.openapi.RestResultType RestResultType]] for [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]]
-  * is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
-  * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
-  */
+ * Just like [[io.udash.rest.openapi.RestResponses RestResponses]],
+ * [[io.udash.rest.openapi.RestResultType RestResultType]] is a typeclass that defines how an OpenAPI
+ * Responses Object will look like for an HTTP method which returns given type. The difference between
+ * [[io.udash.rest.openapi.RestResultType RestResultType]] and [[io.udash.rest.openapi.RestResponses RestResponses]]
+ * is that [[io.udash.rest.openapi.RestResultType RestResultType]] is defined for full result
+ * type which usually is some kind of asynchronous wrapper over actual result type (e.g. `Future`).
+ * In such situation, [[io.udash.rest.openapi.RestResponses RestResponses]] must be provided for `T` while
+ * [[io.udash.rest.openapi.RestResultType RestResultType]] is provided
+ * for `Future[T]` (or whatever async wrapper is used), based on the [[io.udash.rest.openapi.RestResponses RestResponses]]
+ * instance of `T`. You can see an example of this in [[io.udash.rest.FutureRestImplicits FutureRestImplicits]].
+ *
+ * [[io.udash.rest.openapi.RestResultType RestResultType]] for [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]]
+ * is analogous to [[io.udash.rest.raw.HttpResponseType HttpResponseType]]
+ * for [[io.udash.rest.raw.RestMetadata RestMetadata]].
+ */
 final case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
   implicit def forAsyncEffect[F[_] : AsyncEffect, T: RestResponses]: RestResultType[F[T]] =
@@ -265,17 +265,17 @@ object RestResultType {
 }
 
 /**
-  * Typeclass which defines how OpenAPI [[RequestBody]] Object will look like for a Given type when that type is
-  * used as a type of [[io.udash.rest.Body Body]] parameter of a [[io.udash.rest.CustomBody CustomBody]] method.
-  * By default, [[RestRequestBody]] is derived from [[RestMediaTypes]] which by itself is derived by default
-  * from [[RestSchema]].
-  */
+ * Typeclass which defines how OpenAPI [[RequestBody]] Object will look like for a Given type when that type is
+ * used as a type of [[io.udash.rest.Body Body]] parameter of a [[io.udash.rest.CustomBody CustomBody]] method.
+ * By default, [[RestRequestBody]] is derived from [[RestMediaTypes]] which by itself is derived by default
+ * from [[RestSchema]].
+ */
 @implicitNotFound("RestRequestBody instance for ${T} not found")
 trait RestRequestBody[T] {
   /**
-    * @param schemaTransform Should be used if [[RestRequestBody]] is being built based on [[RestSchema]] for
-    *                        the same type. The transformation may adjust the schema and give it a different name.
-    */
+   * @param schemaTransform Should be used if [[RestRequestBody]] is being built based on [[RestSchema]] for
+   *                        the same type. The transformation may adjust the schema and give it a different name.
+   */
   def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]]
 }
 object RestRequestBody {
@@ -304,12 +304,12 @@ object RestRequestBody {
 
 trait SchemaResolver {
   /**
-    * Resolves a [[RestSchema]] instance into an actual [[Schema]] object or reference.
-    * If the schema is unnamed then this method will simply return the same value as [[RestSchema.createSchema]].
-    * If the schema is named, it may be internally registered under its name and a
-    * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#callbackObject Reference Object]]
-    * will be returned instead - see [[SchemaRegistry]].
-    */
+   * Resolves a [[RestSchema]] instance into an actual [[Schema]] object or reference.
+   * If the schema is unnamed then this method will simply return the same value as [[RestSchema.createSchema]].
+   * If the schema is named, it may be internally registered under its name and a
+   * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#callbackObject Reference Object]]
+   * will be returned instead - see [[SchemaRegistry]].
+   */
   def resolve(schema: RestSchema[_]): RefOr[Schema]
 }
 
@@ -335,10 +335,10 @@ object InliningResolver {
 }
 
 /**
-  * An implementation of [[SchemaResolver]] which registers named [[RestSchema]]s and replaces them with a
-  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject Reference Object]].
-  * All the registered schemas can then be extracted and listed in the [[Components]] object.
-  */
+ * An implementation of [[SchemaResolver]] which registers named [[RestSchema]]s and replaces them with a
+ * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject Reference Object]].
+ * All the registered schemas can then be extracted and listed in the [[Components]] object.
+ */
 final class SchemaRegistry(
   nameToRef: String => String = name => s"#/components/schemas/$name",
   initial: Iterable[(String, RefOr[Schema])] = Map.empty
@@ -347,7 +347,7 @@ final class SchemaRegistry(
   private[this] case class Entry(source: Opt[RestSchema[_]], schema: RefOr[Schema])
 
   private[this] val resolving = new MHashSet[String]
-  private[this] val registry = new mutable.OpenHashMap[String, MListBuffer[Entry]]
+  private[this] val registry = new mutable.HashMap[String, MListBuffer[Entry]]
     .setup(_ ++= initial.iterator.map { case (n, s) => (n, MListBuffer[Entry](Entry(Opt.Empty, s))) })
 
   def registeredSchemas: Map[String, RefOr[Schema]] =

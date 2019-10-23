@@ -1,6 +1,6 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.utils.Registration
 
 private[properties] class CombinedProperty[A, B, R](

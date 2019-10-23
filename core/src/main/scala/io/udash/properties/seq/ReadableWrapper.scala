@@ -1,15 +1,16 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{ReadableProperty, ReadableWrapper => SingleReadableWrapper}
 import io.udash.utils.Registration
 
 private[properties] class ReadableWrapper[T](private val p: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-  extends SingleReadableWrapper[Seq[T]](p) with ReadableSeqProperty[T, ReadableProperty[T]] {
+  extends SingleReadableWrapper[BSeq[T]](p) with ReadableSeqProperty[T, ReadableProperty[T]] {
 
   override def readable: ReadableSeqProperty[T, ReadableProperty[T]] = this
 
-  override def elemProperties: Seq[ReadableProperty[T]] =
+  override def elemProperties: BSeq[ReadableProperty[T]] =
     p.elemProperties.map(_.readable)
 
   override def listenStructure(structureListener: Patch[ReadableProperty[T]] => Any): Registration =

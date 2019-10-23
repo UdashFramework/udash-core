@@ -1,5 +1,6 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import io.udash.properties.ReqModels.SimpleSeq
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
@@ -511,7 +512,7 @@ class PropertyTest extends UdashCoreTest {
     "transform to ReadableSeqProperty" in {
       val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
-      def registerElementListener(props: Seq[ReadableProperty[_]]) =
+      def registerElementListener(props: BSeq[ReadableProperty[_]]) =
         props.foreach { p =>
           elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
         }
@@ -525,7 +526,7 @@ class PropertyTest extends UdashCoreTest {
       registerElementListener(s.elemProperties)
       p.listenersCount() should be(1)
 
-      var lastValue: Seq[Int] = null
+      var lastValue: BSeq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
       val r1 = s.listen(lastValue = _)
       val r2 = s.listenStructure { p =>
@@ -687,7 +688,7 @@ class PropertyTest extends UdashCoreTest {
     "transform to SeqProperty" in {
       val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
-      def registerElementListener(props: Seq[ReadableProperty[_]]): Unit =
+      def registerElementListener(props: BSeq[ReadableProperty[_]]): Unit =
         props.foreach { p =>
           elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
         }
@@ -695,14 +696,14 @@ class PropertyTest extends UdashCoreTest {
       val p = Property("1,2,3,4,5")
       val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
         (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
-        (s: Seq[Int]) => s.mkString(",")
+        (s: BSeq[Int]) => s.mkString(",")
       )
 
       p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
       p.listenersCount() should be(1)
 
-      var lastValue: Seq[Int] = null
+      var lastValue: BSeq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
       val r1 = s.listen(lastValue = _)
       val r2 = s.listenStructure(p => {
@@ -850,9 +851,9 @@ class PropertyTest extends UdashCoreTest {
     "transform SeqProperty to SeqProperty" in {
       class ClazzModel(val p: Int)
       val p = SeqProperty(new ClazzModel(42))
-      var fromListen = Seq.empty[Int]
+      var fromListen = BSeq.empty[Int]
 
-      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: Seq[ClazzModel]) => v.map(_.p))
+      val s: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformToSeq((v: BSeq[ClazzModel]) => v.map(_.p))
       p.get.map(_.p) shouldBe Seq(42)
       s.get shouldBe Seq(42)
 
@@ -867,10 +868,10 @@ class PropertyTest extends UdashCoreTest {
     "2-way transform SeqProperty to SeqProperty" in {
       class ClazzModel(val p: Int)
       val p = SeqProperty(new ClazzModel(42))
-      var fromListen = Seq.empty[Int]
+      var fromListen = BSeq.empty[Int]
 
       val s = p.transformToSeq(
-        (v: Seq[ClazzModel]) => v.map(_.p), (v: Seq[Int]) => v.map(new ClazzModel(_))
+        (v: BSeq[ClazzModel]) => v.map(_.p), (v: BSeq[Int]) => v.map(new ClazzModel(_))
       )
       p.get.map(_.p) shouldBe Seq(42)
       s.get shouldBe Seq(42)
@@ -889,7 +890,7 @@ class PropertyTest extends UdashCoreTest {
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
-      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: Seq[Int]) => v.map(_.toString).mkString(","))
+      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: BSeq[Int]) => v.map(_.toString).mkString(","))
 
       i.get should be(Seq(1, 2, 3, 4, 5, 6))
 
@@ -937,7 +938,7 @@ class PropertyTest extends UdashCoreTest {
       val source = SeqProperty(1, 2, 3)
       val transformed = source.transform((i: Int) => i * 2)
       val filtered = transformed.filter(_ < 10)
-      val sum = filtered.transform((s: Seq[Int]) => s.sum)
+      val sum = filtered.transform((s: BSeq[Int]) => s.sum)
 
       val target = Property(42)
       val targetWithoutInit = Property(42)
@@ -1116,7 +1117,7 @@ class PropertyTest extends UdashCoreTest {
       target.get should be(Seq(1, 2))
 
       //Init update
-      source.sync(target)((i: Int) => 1 to i, (s: Seq[Int]) => s.length)
+      source.sync(target)((i: Int) => 1 to i, (s: BSeq[Int]) => s.length)
 
       source.get should be(1)
       target.get should be(Seq(1))

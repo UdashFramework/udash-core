@@ -76,10 +76,9 @@ val commonSettings = Seq(
     "-language:experimental.macros",
     "-Xfuture",
     "-Xfatal-warnings",
-    "-Xlint:_,-missing-interpolator",
+    "-Xlint:_,-missing-interpolator,-unused",
     "-Yrangepos",
     "-P:silencer:checkUnused",
-    "-Ywarn-unused:_,-explicits,-implicits",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
     "-Ycache-macro-class-loader:last-modified"

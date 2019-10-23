@@ -1,6 +1,6 @@
 package io.udash.properties.seq
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.Registration
@@ -8,9 +8,9 @@ import io.udash.utils.Registration
 import scala.collection.mutable
 
 /** Read-only interface of SeqProperty[A]. */
-trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends ReadableProperty[Seq[A]] {
+trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends ReadableProperty[BSeq[A]] {
   /** @return Sequence of child properties. */
-  def elemProperties: Seq[ElemType]
+  def elemProperties: BSeq[ElemType]
 
   /** Registers listener, which will be called on every property structure change. */
   def listenStructure(structureListener: Patch[ElemType] => Any): Registration
@@ -72,7 +72,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
 }
 
 private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
-  extends AbstractReadableProperty[Seq[A]] with ReadableSeqProperty[A, ElemType] {
+  extends AbstractReadableProperty[BSeq[A]] with ReadableSeqProperty[A, ElemType] {
 
   protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = mutable.ArrayBuffer.empty
 

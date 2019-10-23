@@ -12,7 +12,7 @@ object BindDemo extends AutoDemo with CssView {
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
-    val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
+    val names = LazyList.continually(LazyList("John", "Amy", "Bryan", "Diana")).flatten.iterator
 
     val name = Property(names.next())
     window.setInterval(() => name.set(names.next()), 500)

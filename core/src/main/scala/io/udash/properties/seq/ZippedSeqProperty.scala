@@ -3,6 +3,7 @@ package io.udash.properties.seq
 import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.{CrossCollections, Registration}
+import com.avsystem.commons._
 
 import scala.collection.mutable
 
@@ -17,7 +18,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
       val els = children
       val removed = CrossCollections.slice(els, patch.idx, els.length)
       val added = updatedPart(idx)
-      CrossCollections.replace(els, idx, els.length - idx, added:_*)
+      CrossCollections.replaceSeq(els, idx, els.length - idx, added)
       if (added.nonEmpty || removed.nonEmpty) {
         val mappedPatch = Patch(patch.idx, removed, added, patch.clearsProperty)
         CallbackSequencer().queue(
@@ -28,16 +29,16 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
       }
     }
 
-  protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]]
+  protected def updatedPart(fromIdx: Int): BSeq[ReadableProperty[O]]
 
   protected def initOriginListeners(): Unit
   protected def killOriginListeners(): Unit
 
-  override def get: Seq[O] = {
+  override def get: BSeq[O] = {
     (if (children != null) children else updatedPart(0)).map(_.get)
   }
 
-  override def elemProperties: Seq[ReadableProperty[O]] = {
+  override def elemProperties: BSeq[ReadableProperty[O]] = {
     (if (children != null) children else updatedPart(0)).toVector
   }
 
@@ -46,12 +47,12 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
     super.listenStructure(structureListener)
   }
 
-  override def listen(valueListener: Seq[O] => Any, initUpdate: Boolean = false): Registration = {
+  override def listen(valueListener: BSeq[O] => Any, initUpdate: Boolean = false): Registration = {
     initOriginListeners()
     super.listen(valueListener, initUpdate)
   }
 
-  override def listenOnce(valueListener: Seq[O] => Any): Registration = {
+  override def listenOnce(valueListener: BSeq[O] => Any): Registration = {
     initOriginListeners()
     super.listenOnce(valueListener)
   }
@@ -82,7 +83,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
   private var sRegistration: Registration = _
   private var pRegistration: Registration = _
 
-  override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
+  override protected def updatedPart(fromIdx: Int): BSeq[ReadableProperty[O]] = {
     s.elemProperties.drop(fromIdx)
       .zip(p.elemProperties.drop(fromIdx))
       .map { case (x, y) => x.combine(y, this)(combiner) }
@@ -113,7 +114,7 @@ private[properties] class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator]
   combiner: (A, B) => O, defaultA: ReadableProperty[A], defaultB: ReadableProperty[B]
 ) extends ZippedReadableSeqProperty(s, p, combiner) {
 
-  override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
+  override protected def updatedPart(fromIdx: Int): BSeq[ReadableProperty[O]] = {
     s.elemProperties.drop(fromIdx)
       .zipAll(p.elemProperties.drop(fromIdx), defaultA, defaultB)
       .map { case (x, y) => x.combine(y, this)(combiner) }
@@ -125,7 +126,7 @@ private[properties] class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqPr
 
   private var registration: Registration = _
 
-  override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[(A, Int)]] = {
+  override protected def updatedPart(fromIdx: Int): BSeq[ReadableProperty[(A, Int)]] = {
     s.elemProperties.zipWithIndex.drop(fromIdx)
       .map { case (x, y) => x.transform(v => (v, y)) }
   }

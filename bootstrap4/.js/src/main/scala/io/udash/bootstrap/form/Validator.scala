@@ -27,7 +27,7 @@ case object Valid extends ValidationResult
 final case class Invalid[ErrorType <: ValidationError](errors: Seq[ErrorType]) extends ValidationResult
 object Invalid {
   def apply[ErrorType <: ValidationError](error: ErrorType, errors: ErrorType*): Invalid[ErrorType] =
-    Invalid(error +: errors.toSeq)
+    Invalid(error +: errors)
 
   def apply(error: String, errors: String*): Invalid[ValidationError] =
     this ((error +: errors).map(DefaultValidationError))

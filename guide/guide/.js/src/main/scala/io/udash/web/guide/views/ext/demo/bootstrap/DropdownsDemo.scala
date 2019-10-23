@@ -65,7 +65,7 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
       produce(clicks)(seq =>
         ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(click =>
           li(click)
-        ): _*).render
+        ).toSeq: _*).render
       )
     ).render
   }.withSourceCode

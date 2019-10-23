@@ -1,14 +1,14 @@
 package io.udash.properties
 package seq
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties.single._
 import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 
 private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
-  origin: ReadableProperty[A], transformer: A => Seq[B], listenChildren: Boolean
+  origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
   override final val id: PropertyId = PropertyCreator.newID()
@@ -19,18 +19,18 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
-  override final def get: Seq[B] = {
+  override final def get: BSeq[B] = {
     if ((originListenerRegistration == null || !originListenerRegistration.isActive) && childrenRegistrations.isEmpty)
       transformer(origin.get)
     else children.map(_.get)
   }
 
-  override final def listen(valueListener: Seq[B] => Any, initUpdate: Boolean): Registration = {
+  override final def listen(valueListener: BSeq[B] => Any, initUpdate: Boolean): Registration = {
     initOriginListeners()
     super.listen(valueListener, initUpdate)
   }
 
-  override final def listenOnce(valueListener: Seq[B] => Any): Registration = {
+  override final def listenOnce(valueListener: BSeq[B] => Any): Registration = {
     initOriginListeners()
     super.listenOnce(valueListener)
   }
@@ -65,7 +65,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
         PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
       if (listenChildren) childrenRegistrations ++= added.map(p => p.id -> p.listen(_ => valueChanged()))
-      CrossCollections.replace(children, commonBegin, 0, added: _*)
+      CrossCollections.replaceSeq(children, commonBegin, 0, added)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
@@ -137,14 +137,14 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
         reg.isActive
     })
 
-  override final def elemProperties: Seq[ElemType] = {
+  override final def elemProperties: BSeq[ElemType] = {
     updateIfNeeded()
     children.map(toElemProp)
   }
 }
 
 private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
-  origin: ReadableProperty[A], transformer: A => Seq[B]
+  origin: ReadableProperty[A], transformer: A => BSeq[B]
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer, listenChildren = false) {
 
   override protected def toElemProp(p: Property[B]): ReadableProperty[B] =
@@ -152,7 +152,7 @@ private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: Propert
 }
 
 private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator](
-  origin: Property[A], transformer: A => Seq[B], revert: Seq[B] => A
+  origin: Property[A], transformer: A => BSeq[B], revert: BSeq[B] => A
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer, listenChildren = true)
   with AbstractSeqProperty[B, Property[B]] {
 
@@ -165,17 +165,17 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
     super.valueChanged()
   }
 
-  override def replace(idx: Int, amount: Int, values: B*): Unit = {
-    val current = get.to[mutable.ListBuffer]
+  override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit = {
+    val current = get.to(mutable.ListBuffer)
     current.remove(idx, amount)
     current.insertAll(idx, values)
     origin.set(revert(current))
   }
 
-  override def set(t: Seq[B], force: Boolean = false): Unit =
+  override def set(t: BSeq[B], force: Boolean = false): Unit =
     origin.set(revert(t), force)
 
-  override def setInitValue(t: Seq[B]): Unit =
+  override def setInitValue(t: BSeq[B]): Unit =
     origin.setInitValue(revert(t))
 
   override def touch(): Unit =

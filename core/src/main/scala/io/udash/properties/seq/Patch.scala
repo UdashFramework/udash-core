@@ -1,6 +1,7 @@
 package io.udash.properties.seq
 
 import io.udash.properties.single.ReadableProperty
+import com.avsystem.commons._
 
 /**
   * Describes changes in SeqProperty structure.
@@ -10,4 +11,4 @@ import io.udash.properties.single.ReadableProperty
   * @param added Properties added on index `idx`.
   * @tparam P Contained properties type.
   */
-case class Patch[+P <: ReadableProperty[_]](idx: Int, removed: Seq[P], added: Seq[P], clearsProperty: Boolean)
+case class Patch[+P <: ReadableProperty[_]](idx: Int, removed: BSeq[P], added: BSeq[P], clearsProperty: Boolean)

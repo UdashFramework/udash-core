@@ -61,7 +61,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
                   refOpt
                 )
               )
-            }: _*).render
+            }.toSeq: _*).render
           )
         )
       ).render

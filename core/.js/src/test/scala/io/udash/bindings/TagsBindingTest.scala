@@ -2,7 +2,7 @@ package io.udash.bindings
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
@@ -277,7 +277,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "use custom elements replace method" in {
-      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+      def customReplace(res: Boolean) = (root: Node, oldEls: BSeq[Node], newEls: BSeq[Node]) => {
         oldEls.foreach(_.textContent = "OLD")
         res
       }
@@ -417,7 +417,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     }
 
     "use custom elements replace method" in {
-      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+      def customReplace(res: Boolean) = (root: Node, oldEls: BSeq[Node], newEls: BSeq[Node]) => {
         oldEls.foreach(_.textContent = "OLD")
         res
       }
@@ -746,7 +746,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "use custom elements replace method" in {
       var oldCounter = 0
-      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+      def customReplace(res: Boolean) = (root: Node, oldEls: BSeq[Node], newEls: BSeq[Node]) => {
         oldEls.foreach(_ => oldCounter += 1)
         res
       }
@@ -779,7 +779,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "handle standalone SeqFrag update" in {
       val p = SeqProperty.blank[String]
-      val template = div(produce(p)(s => s.render)).render
+      val template = div(produce(p)(s => s.toSeq.render)).render
 
       template.outerHTML shouldBe "<div></div>"
 
@@ -792,7 +792,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = SeqProperty.blank[String]
       val template = div(produce(p)(s => Seq(
         "test".render,
-        s.render
+        s.toSeq.render
       ))).render
       template.outerHTML shouldBe "<div>test</div>"
 
@@ -803,7 +803,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "handle nested SeqFrag update" in {
       val p = SeqProperty.blank[String]
       val template = div(produce(p)(s => Seq(
-        Seq(s.render).render
+        Seq(s.toSeq.render).render
       ).render)).render
       template.outerHTML shouldBe "<div></div>"
 
@@ -813,7 +813,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "handle non-empty SeqFrag update" in {
       val p = SeqProperty("A", "B", "C")
-      val template = div(produce(p)(s => s.render)).render
+      val template = div(produce(p)(s => s.toSeq.render)).render
 
       template.outerHTML shouldBe "<div>ABC</div>"
 
@@ -828,11 +828,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         span(),
-        produce(p)((s: Seq[Int]) => {
+        produce(p)((s: BSeq[Int]) => {
           div(s.map(v => {
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
+          }).toSeq).render
         }),
         span()
       ).render
@@ -870,11 +870,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "handle null value providing empty Seq to callback" in {
       val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
-        produce(p)((s: Seq[Int]) => {
+        produce(p)((s: BSeq[Int]) => {
           div(s.map(v => {
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
+          }).toSeq).render
         })
       ).render
 
@@ -919,18 +919,18 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
-        produce(p)((s: Seq[Int]) => {
+        produce(p)((s: BSeq[Int]) => {
           div(s.map(v => {
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
+          }).toSeq).render
         }),
         span("B"),
-        produce(p2)((s: Seq[Int]) => {
+        produce(p2)((s: BSeq[Int]) => {
           div(s.map(v => {
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
+          }).toSeq).render
         }),
         div("C")
       ).render
@@ -952,7 +952,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "work after moving element in DOM" in {
       val p = seq.SeqProperty[String]("A")
-      val b = span(produce(p)((v: Seq[String]) => span(v.mkString).render)).render
+      val b = span(produce(p)((v: BSeq[String]) => span(v.mkString).render)).render
       val template = div(b).render
       val template2 = emptyComponent()
 
@@ -1033,7 +1033,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "use custom elements replace method" in {
       var oldCounter = 0
-      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+      def customReplace(res: Boolean) = (root: Node, oldEls: BSeq[Node], newEls: BSeq[Node]) => {
         oldEls.foreach(_ => oldCounter += 1)
         res
       }
@@ -1749,12 +1749,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "use custom elements replace method" in {
       var oldCounter = 0
       var newCounter = 0
-      def customReplace(res: Boolean) = (root: Node, oldEls: Seq[Node], newEls: Seq[Node]) => {
+      def customReplace(res: Boolean) = (root: Node, oldEls: BSeq[Node], newEls: BSeq[Node]) => {
         oldEls.foreach(_ => oldCounter += 1)
         newEls.foreach(_ => newCounter += 1)
         res
       }
-      def customInsert(res: Boolean) = (root: Node, before: Node, newEls: Seq[Node]) => {
+      def customInsert(res: Boolean) = (root: Node, before: Node, newEls: BSeq[Node]) => {
         newEls.foreach(_ => newCounter += 1)
         res
       }

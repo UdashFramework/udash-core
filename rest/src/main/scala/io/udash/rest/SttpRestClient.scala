@@ -71,7 +71,7 @@ object SttpRestClient {
   private def fromSttpResponse(sttpResp: Response[Array[Byte]]): RestResponse =
     RestResponse(
       sttpResp.code,
-      IMapping(sttpResp.headers.iterator.map { case (n, v) => (n, PlainValue(v)) }.toList),
+      IMapping(sttpResp.headers.iterator.map { case (n, v) => (n, PlainValue(v)) }.toList: _*),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
         val mediaType = HttpBody.mediaTypeOf(contentType)
         HttpBody.charsetOf(contentType) match {

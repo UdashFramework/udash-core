@@ -52,9 +52,9 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
       val oldViewFactories =
         newStatePath
           .slice(samePath.size, samePath.size + toUpdateStatesSize)
-          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)(scala.collection.breakOut)
+          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)
       var i = samePath.size
-      statesMap.retain { (_, _) =>
+      statesMap.filterInPlace { (_, _) =>
         i -= 1
         i >= 0
       }

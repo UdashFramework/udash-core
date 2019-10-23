@@ -57,12 +57,12 @@ final case class OpenApiMetadata[T](
 
   def paths(resolver: SchemaResolver): Paths = {
     val operationIds = new mutable.HashSet[String]
-    val pathsMap = new MLinkedHashMap[String, mutable.OpenHashMap[HttpMethod, Operation]]
+    val pathsMap = new MLinkedHashMap[String, mutable.HashMap[HttpMethod, Operation]]
     // linked set to remove possible duplicates from prefix methods but to retain order
-    val pathAdjustersMap = new mutable.OpenHashMap[String, MLinkedHashSet[PathItemAdjuster]]
+    val pathAdjustersMap = new mutable.HashMap[String, MLinkedHashSet[PathItemAdjuster]]
     operations(resolver).foreach {
       case PathOperation(path, httpMethod, operation, pathAdjusters) =>
-        val opsMap = pathsMap.getOrElseUpdate(path, new mutable.OpenHashMap)
+        val opsMap = pathsMap.getOrElseUpdate(path, new mutable.HashMap)
         pathAdjustersMap.getOrElseUpdate(path, new MLinkedHashSet) ++= pathAdjusters
         opsMap(httpMethod) = operation
         operation.operationId.foreach { opid =>

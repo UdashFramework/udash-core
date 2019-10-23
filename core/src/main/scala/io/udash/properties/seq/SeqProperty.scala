@@ -1,28 +1,31 @@
 package io.udash.properties.seq
 
 import io.udash.properties._
+import com.avsystem.commons._
 import io.udash.properties.single.{AbstractProperty, CastableProperty, Property}
 
 object SeqProperty {
   /** Creates a blank DirectSeqProperty[T]. */
-  def blank[T](implicit pc: SeqPropertyCreator[T, Seq], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
-    Property.blank[Seq[T]](pc, blank).asSeq[T]
+  def blank[T](implicit pc: SeqPropertyCreator[T, BSeq], blank: Blank[BSeq[T]]): SeqProperty[T, CastableProperty[T]] =
+    Property.blank[BSeq[T]](pc, blank).asSeq[T]
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](item: T, more: T*)(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](item: T, more: T*)(implicit pc: SeqPropertyCreator[T, BSeq]): SeqProperty[T, CastableProperty[T]] =
     apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](init: Seq[T])(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
-    Property[Seq[T]](init)(pc).asSeq[T]
+  def apply[T](init: BSeq[T])(implicit pc: SeqPropertyCreator[T, BSeq]): SeqProperty[T, CastableProperty[T]] =
+    Property[BSeq[T]](init)(pc).asSeq[T]
 }
 
-trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[Seq[A]] {
+trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[BSeq[A]] {
   /** Replaces `amount` elements from index `idx` with provided `values`. */
-  def replace(idx: Int, amount: Int, values: A*): Unit
+  def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit
+  final def replace(idx: Int, amount: Int, values: A*): Unit = replaceSeq(idx, amount, values)
 
   /** Inserts `values` on index `idx`. */
-  def insert(idx: Int, values: A*): Unit
+  def insertSeq(idx: Int, values: BSeq[A]): Unit
+  final def insert(idx: Int, values: A*): Unit = insertSeq(idx, values)
 
   /** Removes `amount` elements starting from index `idx`. */
   def remove(idx: Int, amount: Int): Unit
@@ -31,10 +34,12 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   def remove(value: A): Unit
 
   /** Adds `values` at the begging of the sequence. */
-  def prepend(values: A*): Unit
+  def prependSeq(values: BSeq[A]): Unit
+  final def prepend(values: A*): Unit = prependSeq(values)
 
   /** Adds `values` at the end of the sequence. */
-  def append(values: A*): Unit
+  def appendSeq(values: BSeq[A]): Unit
+  final def append(values: A*): Unit = appendSeq(values)
 
   /** Removes all elements from this SeqProperty. */
   def clear(): Unit
@@ -49,9 +54,9 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
 }
 
 private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
-  extends AbstractReadableSeqProperty[A, ElemType] with AbstractProperty[Seq[A]] with SeqProperty[A, ElemType] {
+  extends AbstractReadableSeqProperty[A, ElemType] with AbstractProperty[BSeq[A]] with SeqProperty[A, ElemType] {
 
-  def insert(idx: Int, values: A*): Unit = replace(idx, 0, values: _*)
+  def insertSeq(idx: Int, values: BSeq[A]): Unit = replaceSeq(idx, 0, values)
 
   def remove(idx: Int, amount: Int): Unit = replace(idx, amount)
 
@@ -60,9 +65,9 @@ private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
     if (idx >= 0) replace(idx, 1)
   }
 
-  def prepend(values: A*): Unit = insert(0, values: _*)
+  def prependSeq(values: BSeq[A]): Unit = insertSeq(0, values)
 
-  def append(values: A*): Unit = insert(get.size, values: _*)
+  def appendSeq(values: BSeq[A]): Unit = insertSeq(get.size, values)
 
   def clear(): Unit = remove(0, size)
 

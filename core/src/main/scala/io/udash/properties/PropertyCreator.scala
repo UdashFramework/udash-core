@@ -5,7 +5,7 @@ import io.udash.properties.seq.DirectSeqPropertyImpl
 import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
 
 import scala.annotation.implicitNotFound
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat.Factory
 
 trait PropertyCreator[T] {
   def newProperty(parent: ReadableProperty[_])(implicit blank: Blank[T]): CastableProperty[T] =
@@ -54,7 +54,7 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
 
-final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
+final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](implicit fac: Factory[A, SeqTpe[A]])
   extends PropertyCreator[SeqTpe[A]] {
   protected def create(parent: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
     new DirectSeqPropertyImpl[A, SeqTpe](parent, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]
