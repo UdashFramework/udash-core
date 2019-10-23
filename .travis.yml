@@ -18,6 +18,7 @@ jdk: openjdk11
 
 scala:
   - 2.12.10
+  - 2.13.1
 
 stages:
   - test
@@ -45,7 +46,6 @@ env:
 jobs:
   include:
     - stage: release
-      scala: 2.12.9
       env: TEST_PACKAGE=none
       script:
         - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
