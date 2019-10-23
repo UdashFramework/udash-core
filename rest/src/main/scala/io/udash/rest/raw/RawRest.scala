@@ -284,7 +284,8 @@ object RawRest extends RawRpcCompanion[RawRest] {
               case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
               case m => List(m)
             } ++ Iterator(HttpMethod.OPTIONS)
-            val response = RestResponse(200, IMapping("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
+            val response = RestResponse(200,
+              IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
             RawRest.successfulAsync(response)
           case wireMethod =>
             val head = wireMethod == HttpMethod.HEAD

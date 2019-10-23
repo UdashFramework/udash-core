@@ -22,7 +22,7 @@ object RepeatDemo extends AutoDemo {
       val idx = Random.nextInt(size)
       val amount = Random.nextInt(size - idx) + 1
       val count = Random.nextInt(5)
-      integers.replace(idx, amount, LazyList.range(idx, idx + amount * count + 1, amount): _*)
+      integers.replace(idx, amount, Stream.range(idx, idx + amount * count + 1, amount): _*)
     }, 2000)
 
     p(

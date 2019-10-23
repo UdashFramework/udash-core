@@ -79,6 +79,7 @@ val commonSettings = Seq(
     "-Xlint:_,-missing-interpolator,-unused",
     "-Yrangepos",
     "-P:silencer:checkUnused",
+    "-P:AVSystemAnalyzer:-valueEnumExhaustiveMatch",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
     "-Ycache-macro-class-loader:last-modified"

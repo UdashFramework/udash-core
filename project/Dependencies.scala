@@ -1,11 +1,11 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import org.scalajs.sbtplugin.JSModuleID
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-import sbt.Keys.{scalaVersion, scalaBinaryVersion}
+import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.1"
+  val versionOfScala = "2.12.10"
   val silencerVersion = "1.4.4"
   val collectionCompatVersion = "2.1.2"
 
@@ -124,7 +124,7 @@ object Dependencies {
   ))
 
   val restSjsDeps = restCrossDeps
-  
+
   val restJettyDeps = Def.setting(Seq(
     "org.eclipse.jetty" % "jetty-client" % jettyVersion
   ))

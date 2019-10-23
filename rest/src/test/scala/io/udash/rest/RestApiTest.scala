@@ -24,7 +24,7 @@ abstract class RestApiTest extends FunSuite with ScalaFutures {
     )
 
   def mkDeep(value: Any): Any = value match {
-    case arr: Array[_] => arr.iterator.map(mkDeep).to(IArraySeq)
+    case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
     case _ => value
   }
 }

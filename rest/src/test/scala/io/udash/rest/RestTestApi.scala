@@ -34,7 +34,7 @@ case object SingletonEntity extends FlatBaseEntity
 case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
-    cr => RestResponse(200, IMapping("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
+    cr => RestResponse(200, IMapping.create("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
     resp => CustomResp(resp.headers("X-Value").value)
   )
   implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {

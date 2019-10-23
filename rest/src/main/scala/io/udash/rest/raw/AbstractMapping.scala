@@ -15,11 +15,11 @@ import scala.collection.mutable
  *
  * Mappings have O(1) prepend, append and concatenation operations.
  */
-final case class Mapping[V](entries: (String, V)*) extends AbstractMapping[V] {
+final case class Mapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = Mapping[V]
   def caseSensitive: Boolean = true
 
-  protected def createNew(entries: ISeq[(String, V)]): Mapping[V] = Mapping(entries: _*)
+  protected def createNew(entries: ISeq[(String, V)]): Mapping[V] = Mapping(entries)
 }
 object Mapping extends AbstractMappingCompanion[Mapping]
 
@@ -27,11 +27,11 @@ object Mapping extends AbstractMappingCompanion[Mapping]
  * A version of [[Mapping]] which is case-insensitive when looking up values by key.
  * Used primarily to represent [[io.udash.rest.Header Header]] parameter values.
  */
-final case class IMapping[V](entries: (String, V)*) extends AbstractMapping[V] {
+final case class IMapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = IMapping[V]
   def caseSensitive: Boolean = false
 
-  protected def createNew(entries: ISeq[(String, V)]): IMapping[V] = IMapping(entries: _*)
+  protected def createNew(entries: ISeq[(String, V)]): IMapping[V] = IMapping(entries)
 }
 object IMapping extends AbstractMappingCompanion[IMapping]
 
@@ -103,12 +103,13 @@ object AbstractMapping {
 }
 
 abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] { companion =>
-  def apply[V](entries: (String, V)*): M[V]
+  def apply[V](entries: ISeq[(String, V)]): M[V]
+  def create[V](entries: (String, V)*): M[V] = apply(entries.to(ISeq))
 
-  def empty[V]: M[V] = apply()
+  def empty[V]: M[V] = create()
 
   def newBuilder[V]: mutable.Builder[(String, V), M[V]] =
-    new MListBuffer[(String, V)].mapResult(res => apply(res: _*))
+    new MListBuffer[(String, V)].mapResult(create)
 
   private val reusableFactory = new CrossFactory[(String, Any), M[Any]] {
     def fromSpecific(it: IterableOnce[(String, Any)]): M[Any] = {

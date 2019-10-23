@@ -2,6 +2,7 @@ package io.udash.properties
 package seq
 
 import com.avsystem.commons._
+import scala.collection.compat._
 import io.udash.properties.single._
 import io.udash.utils.{CrossCollections, Registration}
 

@@ -17,7 +17,7 @@ case class WithHeaders[+T](value: T, headers: ISeq[(String, String)])
 object WithHeaders {
   implicit def asResponse[T](implicit wrapped: AsRaw[HttpBody, T]): AsRaw[RestResponse, WithHeaders[T]] = {
     case WithHeaders(value, headers) =>
-      val mapping = IMapping(headers.map({ case (n, v) => (n, PlainValue(v)) }): _*)
+      val mapping = IMapping(headers.map({ case (n, v) => (n, PlainValue(v)) }))
       wrapped.asRaw(value).defaultResponse.copy(headers = mapping).recoverHttpError
   }
 
