@@ -34,8 +34,8 @@ trait CastableProperty[A] extends CastableReadableProperty[A] with Property[A] {
 
   /** Safely casts `DirectProperty[Seq[A]]` to `DirectSeqProperty[A]` */
   override def asSeq[B](implicit sev: A <:< BSeq[B], ev: SeqPropertyCreator[B, BSeq]): SeqProperty[B, CastableProperty[B]] = {
-    this match {
-      case sp: this.type with SeqProperty[_, _] => sp.asInstanceOf[SeqProperty[B, CastableProperty[B]]]
+    (this: Any) match {
+      case sp: SeqProperty[_, _] => sp.asInstanceOf[SeqProperty[B, CastableProperty[B]]]
       case _ => throw new IllegalStateException("Property was created without provided SeqPropertyCreator in scope. " +
         "Make sure not to explicitly pass creators on property creation.")
     }
