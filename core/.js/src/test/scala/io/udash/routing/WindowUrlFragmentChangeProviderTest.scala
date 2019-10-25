@@ -25,9 +25,10 @@ class WindowUrlFragmentChangeProviderTest extends AsyncUdashFrontendTest {
 
       dom.window.history.back()
 
-      provider.currentFragment shouldBe originalFragment
-      dom.window.location.href shouldBe originalHref
-
+      retrying {
+        provider.currentFragment shouldBe originalFragment
+        dom.window.location.href shouldBe originalHref
+      }
     }
 
     "not modify history on fragment change" in {
@@ -36,9 +37,11 @@ class WindowUrlFragmentChangeProviderTest extends AsyncUdashFrontendTest {
 
       provider.changeFragment(Url(fragment), replaceCurrent = true)
 
-      provider.currentFragment.value shouldBe fragment
-      dom.window.location.hash shouldBe "#" + fragment
-      dom.window.history.length shouldBe historyLength
+      retrying {
+        provider.currentFragment.value shouldBe fragment
+        dom.window.location.hash shouldBe "#" + fragment
+        dom.window.history.length shouldBe historyLength
+      }
     }
   }
 }
