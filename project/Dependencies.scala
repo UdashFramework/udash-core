@@ -5,7 +5,7 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.1"
+  val versionOfScala = "2.12.10"
   val silencerVersion = "1.4.4"
   val collectionCompatVersion = "2.1.2"
 
