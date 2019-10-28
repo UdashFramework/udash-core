@@ -57,8 +57,9 @@ class I18nDemosTest extends SeleniumTest {
 
       def demo = driver.findElementById("dynamic-rpc-translations-demo")
 
-      val enButton = demo.findElement(new ById("enButton"))
-      val plButton = demo.findElement(new ById("plButton"))
+      val (enButton, plButton) = eventually {
+        (demo.findElement(new ById("enButton")), demo.findElement(new ById("plButton")))
+      }
 
       def elements = demo.findElements(new ByCssSelector("li"))
 
