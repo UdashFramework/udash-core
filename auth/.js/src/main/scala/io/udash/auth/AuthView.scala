@@ -13,7 +13,7 @@ trait AuthView {
     require(AllowAll, requireAuthenticated = true)(view)
 
   /** Renders provided view if user is authenticated or fallback view otherwise */
-  def requireWithFallback(permission: PermissionCombinator, requireAuthenticated: Boolean)
+  def requireWithFallback(permission: PermissionCombinator, requireAuthenticated: Boolean = false)
     (view: => Modifier, fallback: => Modifier)(implicit userCtx: UserCtx): Modifier =
     if (canRenderView(permission, requireAuthenticated)) view else fallback
 
