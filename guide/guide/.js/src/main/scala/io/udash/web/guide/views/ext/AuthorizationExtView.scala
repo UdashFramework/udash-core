@@ -5,15 +5,14 @@ import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
-
 import scalatags.JsDom
 
 case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
 
 
 class AuthorizationExtView extends FinalView with CssView {
-  import Context._
 
+  import Context._
   import JsDom.all._
 
   override def getTemplate: Modifier = div(
@@ -65,10 +64,12 @@ class AuthorizationExtView extends FinalView with CssView {
          |c4.check(userCtx) // == true""".stripMargin
     )(GuideStyles),
     h2("View elements authorization"),
-    p("The plugin provides ", i("AuthView"), " mixin, which contains two methods for user authorization: "),
+    p("The plugin provides ", i("AuthView"), " mixin, which contains four methods for user authorization: "),
     ul(GuideStyles.defaultList)(
       li(i("require"), " - renders provided view elements only if the user context has required permissions,"),
-      li(i("requireAuthenticated"), " - renders provided view elements only if user is authenticated.")
+      li(i("requireAuthenticated"), " - renders provided view elements only if user is authenticated,"),
+      li(i("requireWithFallback"), " - renders provided primary view elements if the user context has required permissions or provided fallback view elements otherwise,"),
+      li(i("requireAuthenticatedWithFallback"), " - renders provided primary view elements if user is authenticated or provided fallback view elements otherwise.")
     ),
     CodeBlock(
       s"""import scalatags.JsDom.all._
@@ -82,6 +83,16 @@ class AuthorizationExtView extends FinalView with CssView {
          |    },
          |    requireAuthenticated {
          |      span("This elements requires authenticated user context.")
+         |    },
+         |    requireWithFallback(P1.and(P2)) {
+         |      span("This element requires P1 and p2 permissions.")
+         |    } {
+         |      span("This is fallback view when user doesn't have required permissions")
+         |    },
+         |    requireAuthenticatedWithFallback {
+         |      span("This element requires authenticated user context.")
+         |    } {
+         |      span("This is fallback view when user context is not authenticated")
          |    }
          |  )
          |}
@@ -89,7 +100,7 @@ class AuthorizationExtView extends FinalView with CssView {
     )(GuideStyles),
     h2("RPC endpoints authorization"),
     p(
-      "Similar methods are available in ", i("AuthRequires"), " trait, but instead of filtering GUI elements these ",
+      "Similar methods to first two from ", i("AuthView"), " are available in ", i("AuthRequires"), " trait, but instead of filtering GUI elements these ",
       "methods throw exceptions: "
     ),
     ul(GuideStyles.defaultList)(
