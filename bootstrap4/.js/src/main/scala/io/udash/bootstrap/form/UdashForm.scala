@@ -634,7 +634,7 @@ final class FormElementsFactory(
       validator: Validator[BSeq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new ButtonsComponent(
-        selectedItems, CheckButtons(selectedItems, options)(_: BSeq[(JSInput, T)] => BSeq[Node]),
+        selectedItems, CheckButtons(selectedItems, options)(_: Seq[(JSInput, T)] => Seq[Node]),
         BootstrapStyles.Form.customCheckbox, inline, validationTrigger, groupId
       )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
@@ -679,7 +679,7 @@ final class FormElementsFactory(
       validator: Validator[T] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new ButtonsComponent(
-        selectedItem, RadioButtons(selectedItem, options)(_: BSeq[(JSInput, T)] => BSeq[Node]),
+        selectedItem, RadioButtons(selectedItem, options)(_: Seq[(JSInput, T)] => Seq[Node]),
         BootstrapStyles.Form.customRadio, inline, validationTrigger, groupId
       )(inputModifier, labelContent, validFeedback, invalidFeedback, validator))
     }
@@ -692,7 +692,7 @@ final class FormElementsFactory(
 
     private class ButtonsComponent[T: PropertyCreator, SelectedType](
       selected: Property[SelectedType],
-      input: (BSeq[(JSInput, T)] => BSeq[Node]) => InputBinding[_ <: Element],
+      input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
       inputDecorationClass: CssStyle,
       inline: ReadableProperty[Boolean],
       validationTrigger: ValidationTrigger,

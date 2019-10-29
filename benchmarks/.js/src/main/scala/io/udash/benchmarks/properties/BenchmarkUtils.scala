@@ -1,7 +1,7 @@
 package io.udash.benchmarks.properties
 
-import io.udash._
 import com.avsystem.commons._
+import io.udash._
 import japgolly.scalajs.benchmark.Benchmark
 
 import scala.util.Random
@@ -31,13 +31,6 @@ trait BenchmarkUtils {
   object ModelWithISeqItem extends HasModelPropertyCreator[ModelWithISeqItem] {
     def random: ModelWithISeqItem = ModelWithISeqItem(
       Random.nextInt(100), Random.nextString(5), 1 to Random.nextInt(100) + 100
-    )
-  }
-
-  case class ModelWithMSeqItem(i: Int, s: String, seq: MSeq[Int]) extends ModelWithSeqItem
-  object ModelWithMSeqItem extends HasModelPropertyCreator[ModelWithMSeqItem] {
-    def random: ModelWithMSeqItem = ModelWithMSeqItem(
-      Random.nextInt(100), Random.nextString(5), (1 to Random.nextInt(100) + 100).toBuffer
     )
   }
 

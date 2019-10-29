@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom.html.{Div, Input => JSInput}
@@ -11,11 +10,11 @@ import scalatags.JsDom.all._
   * Radio buttons group for finite options with one element selection.
   */
 object RadioButtons {
-  def inputsOnlyDecorator[T]: BSeq[(JSInput, T)] => BSeq[Node] =
+  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] =
     _.map { case (in, _) => in }
-  def spanWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
+  def spanWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     _.map { case (in, v) => span(in, label(labelFactory(v))).render }
-  def divWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
+  def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     _.map { case (in, v) => div(in, label(labelFactory(v))).render }
 
   /**
@@ -28,7 +27,7 @@ object RadioButtons {
     */
   def apply[T : PropertyCreator](
     selectedItem: Property[T], options: ReadableSeqProperty[T]
-  )(decorator: BSeq[(JSInput, T)] => BSeq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
+  )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
       "radio",
       opt => selectedItem.transform(_ == opt),

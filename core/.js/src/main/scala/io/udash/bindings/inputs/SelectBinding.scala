@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom.Event
@@ -11,7 +10,7 @@ private[inputs] class SelectBinding[T: PropertyCreator](
   options: ReadableSeqProperty[T], label: T => Modifier, selectModifiers: Modifier*
 )(
   checkedIf: T => ReadableProperty[Boolean],
-  refreshSelection: BSeq[T] => Unit,
+  refreshSelection: Seq[T] => Unit,
   onChange: Select => Event => Unit
 ) extends InputBinding[Select] {
   private val selector = select(selectModifiers)(
