@@ -79,7 +79,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
       "by a URL. The URL is resolved to a ", i("RoutingState"), " on every change. The application states structure is your decision, ",
       "Udash requires only that all states must extend ", i("State"),
       ". States tend to form a nested hierarchy. ",
-      "A ", i("ContainerState"), " is a state which can contain other ", i("State"), "s. ",
+      "A state can contain other ", i("State"), "s. ",
       "For example:"
     ),
     CodeBlock(
@@ -92,7 +92,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
         |}
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState
+        |) extends RoutingState(parentState)
         |
         |case object RootState extends ContainerRoutingState(None)
         |case class UsersListState(searchQuery: Option[String]) extends RoutingState(Some(RootState))

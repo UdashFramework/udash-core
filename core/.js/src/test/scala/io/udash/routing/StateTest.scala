@@ -1,6 +1,5 @@
 package io.udash.routing
 
-import io.udash._
 import io.udash.testing._
 
 class StateTest extends UdashFrontendTest with TestRouting {
@@ -11,7 +10,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -25,7 +24,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -37,7 +36,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState2(val parentState: Option[ContainerTestState2]) extends State {
           override type HierarchyRoot = TestState2
         }
-        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState) with ContainerState
+        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
         sealed abstract class FinalTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
 
         case object RootState2 extends ContainerTestState2(None)
@@ -51,7 +50,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -63,7 +62,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState2(val parentState: Option[ContainerTestState2]) extends State {
           override type HierarchyRoot = TestState2
         }
-        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState) with ContainerState
+        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
         sealed abstract class FinalTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
 
         case object RootState2 extends ContainerTestState2(None)
@@ -77,7 +76,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -89,7 +88,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState2(val parentState: Option[ContainerTestState2]) extends State {
           override type HierarchyRoot = TestState2
         }
-        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState) with ContainerState
+        sealed abstract class ContainerTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
         sealed abstract class FinalTestState2(parentState: Option[ContainerTestState2]) extends TestState2(parentState)
 
         case object RootState2 extends ContainerTestState2(None)
@@ -105,7 +104,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -119,7 +118,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[FinalTestState]) extends State {  // wrong parent type
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[FinalTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[FinalTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[FinalTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)
@@ -133,7 +132,7 @@ class StateTest extends UdashFrontendTest with TestRouting {
         sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
           override type HierarchyRoot = TestState
         }
-        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+        sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
         sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
         case object RootState extends ContainerTestState(None)

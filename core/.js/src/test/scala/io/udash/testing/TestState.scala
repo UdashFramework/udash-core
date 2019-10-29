@@ -5,7 +5,7 @@ import io.udash._
 sealed abstract class TestState(val parentState: Option[ContainerTestState]) extends State {
   override type HierarchyRoot = TestState
 }
-sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState) with ContainerState
+sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
 case class RootState(sth: Option[Int]) extends ContainerTestState(None)

@@ -22,7 +22,6 @@ package object udash
 
   type State = io.udash.core.State
   type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
-  type ContainerState = io.udash.core.ContainerState
 
   type RoutingRegistry[HierarchyRoot <: State] = io.udash.routing.RoutingRegistry[HierarchyRoot]
 

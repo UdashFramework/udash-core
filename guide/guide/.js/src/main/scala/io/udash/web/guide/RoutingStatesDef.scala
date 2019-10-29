@@ -10,7 +10,7 @@ sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState
   def url(implicit application: Application[RoutingState]): String =
     s"${application.matchState(this).value}"
 }
-sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with ContainerState
+sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState)
 sealed abstract class MarkdownState(final val page: MarkdownPage) extends RoutingState(Some(ContentState)) with MarkdownPageState
 object MarkdownState {
   def chapterFragment(chapterTitle: String): String =

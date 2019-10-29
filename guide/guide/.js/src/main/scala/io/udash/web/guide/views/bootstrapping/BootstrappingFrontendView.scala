@@ -34,7 +34,7 @@ class BootstrappingFrontendView extends View with CssView {
       "A Udash application is based on states. The application state determines the created ViewFactories structure and is determined ",
       "by a URL. The application states structure is your decision, Udash requires only that all states must extend ",
       i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
-      "A ", i("ContainerState"), " is a state which can contain other ", i("State"), "s. ",
+      "A state can contain other ", i("State"), "s. ",
       "For example:"
     ),
     CodeBlock(
@@ -48,7 +48,7 @@ class BootstrappingFrontendView extends View with CssView {
         |
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState
+        |) extends RoutingState(parentState)
         |
         |case object RootState extends ContainerRoutingState(None)
         |case object LandingPageState extends RoutingState(Some(RootState))

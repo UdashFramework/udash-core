@@ -6,7 +6,7 @@ sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState
   override type HierarchyRoot = RoutingState
   def url(implicit application: Application[RoutingState]): String = s"${application.matchState(this).value}"
 }
-sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState) with ContainerState
+sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState)
 
 case object RootState extends ContainerRoutingState(None)
 
