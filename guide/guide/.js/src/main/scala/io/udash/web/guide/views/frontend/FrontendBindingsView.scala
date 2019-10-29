@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object FrontendBindingsViewFactory extends StaticViewFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
-class FrontendBindingsView extends FinalView with CssView {
+class FrontendBindingsView extends View with CssView {
   import Context._
   import JsDom.all._
 

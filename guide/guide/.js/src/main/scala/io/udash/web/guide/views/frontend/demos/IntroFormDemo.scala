@@ -60,7 +60,7 @@ object IntroFormDemo extends AutoDemo {
         ))
     }
 
-    class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) extends FinalView {
+    class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) extends View {
 
       import scalatags.JsDom.all._
 

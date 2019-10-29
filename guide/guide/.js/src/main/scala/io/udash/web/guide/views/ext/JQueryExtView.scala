@@ -11,7 +11,7 @@ import scalatags.JsDom
 case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](() => new JQueryExtView)
 
 
-class JQueryExtView extends FinalView {
+class JQueryExtView extends View {
   import JsDom.all._
 
   private val (jQueryEventsDemo, jQueryEventsSnippet) = JQueryEventsDemo.demoWithSnippet()

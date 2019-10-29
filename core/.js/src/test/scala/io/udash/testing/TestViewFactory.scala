@@ -25,7 +25,7 @@ class TestView extends ContainerView {
   }
 }
 
-class TestFinalView extends FinalView {
+class TestFinalView extends View {
   import scalatags.JsDom.all._
   var renderingCounter = 0
 
