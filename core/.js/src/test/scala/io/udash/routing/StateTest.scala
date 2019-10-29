@@ -1,5 +1,6 @@
 package io.udash.routing
 
+import io.udash._
 import io.udash.testing._
 
 class StateTest extends UdashFrontendTest with TestRouting {
