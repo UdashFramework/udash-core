@@ -180,7 +180,7 @@ trait Bindings {
     * @return property binding.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-    (builder: BSeq[T] => BSeq[Node]): Binding =
+    (builder: Seq[T] => BSeq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
