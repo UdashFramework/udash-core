@@ -1,9 +1,9 @@
 package io.udash.web.guide.views
 
 import io.udash._
-import io.udash.web.guide.RootState
+import io.udash.web.guide.FaqState
 
-object FaqViewFactory extends StaticViewFactory[RootState.type](() => new FaqView)
+object FaqViewFactory extends StaticViewFactory[FaqState.type](() => new FaqView)
 
 class FaqView extends View {
   import scalatags.JsDom.all._
