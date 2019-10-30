@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.frontend.demos
 
-import com.avsystem.commons.BSeq
 import com.github.ghik.silencer.silent
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -32,8 +31,8 @@ object RepeatDemo extends AutoDemo {
         span(GuideStyles.highlightRed)(s"${p.get}, ").render
       )), br,
       "Integers (produce): ",
-      produce(integers)((seq: BSeq[Int]) => span(id := "repeat-demo-integers-produce")(
-        seq.map(p => span(GuideStyles.highlightRed)(s"$p, ")).toSeq
+      produce(integers)(seq => span(id := "repeat-demo-integers-produce")(
+        seq.map(p => span(GuideStyles.highlightRed)(s"$p, "))
       ).render)
     )
   }.withSourceCode

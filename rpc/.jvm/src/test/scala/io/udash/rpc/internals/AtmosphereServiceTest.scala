@@ -28,7 +28,7 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
   def createTestRPC(): (mutable.Builder[String, Seq[String]], DefaultExposesServerRPC[TestRPC]) = {
     val calls: mutable.Builder[String, Seq[String]] = Seq.newBuilder[String]
-    val impl = TestRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
+    val impl = TestRPC.rpcImpl((method: String, _: List[Any], _: Option[Any]) => {
       calls += method
     })
     val rpc: DefaultExposesServerRPC[TestRPC] = new DefaultExposesServerRPC[TestRPC](impl)

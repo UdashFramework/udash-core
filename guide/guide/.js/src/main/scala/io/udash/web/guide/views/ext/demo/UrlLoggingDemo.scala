@@ -52,7 +52,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
             )
           ),
           produce(history)(seq =>
-            div()(seq.map { case (url, refOpt) =>
+            div(seq.map { case (url, refOpt) =>
               div(Grid.row)(
                 div(Grid.col(4, ResponsiveBreakpoint.Medium))(
                   url
@@ -61,7 +61,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
                   refOpt
                 )
               )
-            }.toSeq: _*).render
+            }).render
           )
         )
       ).render

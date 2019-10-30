@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.frontend.demos
 
-import com.avsystem.commons.BSeq
 import com.github.ghik.silencer.silent
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -36,9 +35,7 @@ object ProduceDemo extends AutoDemo {
       produce(name)(value => b(id := "produce-demo-name")(value).render), br,
       "Integers: ",
       span(id := "produce-demo-integers")(
-        produce(integers) { seq: BSeq[Int] =>
-          span(GuideStyles.highlightRed)(seq.mkString(",")).render
-        }
+        produce(integers)(seq => span(GuideStyles.highlightRed)(seq.mkString(",")).render)
       )
     ).render
   }.withSourceCode

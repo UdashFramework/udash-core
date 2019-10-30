@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.frontend.demos
 
-import com.avsystem.commons.BSeq
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -35,9 +34,9 @@ object CheckButtonsDemo extends AutoDemo {
       UdashInputGroup.appendCheckbox(
         CheckButtons(
           favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )((els: BSeq[(Input, String)]) => span(els.map {
+        )(els => span(els.map {
           case (i: Input, l: String) => label(Form.checkInline, attr("data-label") := l)(i, l)
-        }.toSeq).render).render
+        }).render)
       ),
       UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
     )

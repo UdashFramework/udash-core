@@ -17,10 +17,6 @@ object RpcLoggingDemo {
         id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary),
         onclick :+= ((_: MouseEvent) => loadCalls(), true)
       )("Load call list"),
-      produce(model)(seq =>
-        ul(
-          seq.map(call => li(call.toString)).toSeq: _*
-        ).render
-      )
+      produce(model)(seq => ul(seq.map(call => li(call.toString))).render)
     ).render
 }
