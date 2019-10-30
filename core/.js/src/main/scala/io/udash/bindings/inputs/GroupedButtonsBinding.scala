@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.avsystem.commons.BSeq
 import io.udash._
 import io.udash.properties.PropertyCreator
 import org.scalajs.dom.html.{Div, Input => JSInput}
@@ -10,11 +9,11 @@ import scalatags.JsDom.all._
 import scala.util.Random
 
 private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
-  options: ReadableSeqProperty[T], decorator: BSeq[(JSInput, T)] => BSeq[Node], inputModifiers: Modifier*
+  options: ReadableSeqProperty[T], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
 )(
   inputTpe: String,
   checkedIf: T => ReadableProperty[Boolean],
-  refreshSelection: BSeq[T] => Unit,
+  refreshSelection: Seq[T] => Unit,
   onChange: (JSInput, T) => Event => Unit
 ) extends InputBinding[Div] {
   private val groupIdPrefix: Long = Random.nextLong

@@ -11,7 +11,7 @@ import scala.scalajs.js
 private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
 
   protected val property: ReadableSeqProperty[T, E]
-  protected def build(item: E): BSeq[Node]
+  protected def build(item: E): Seq[Node]
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
@@ -54,7 +54,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
       // Add new elements
       val newElements = patch.added.map(build)
-      val newElementsFlatten: BSeq[Node] = newElements.flatten
+      val newElementsFlatten: Seq[Node] = newElements.flatten
       val insertBefore = root.childNodes(elementsBefore + firstIndex)
       if (insertBefore == null) replace(root)(Seq.empty, newElementsFlatten)
       else insert(root)(insertBefore, newElementsFlatten)

@@ -1,9 +1,9 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
 import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.CrossCollections
-import com.avsystem.commons._
 
 import scala.collection.compat._
 
@@ -21,13 +21,13 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
 
     CrossCollections.replaceSeq(properties, idx, amount, newProperties)
 
-    fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty), structureListeners)
+    fireElementsListeners(Patch(idx, oldProperties.toSeq, newProperties.toSeq, properties.isEmpty), structureListeners)
     valueChanged()
   }
 
   override def set(t: BSeq[A], force: Boolean = false): Unit =
     if (force || t != get) {
-      replaceSeq(0, properties.length, Option(t).getOrElse(Seq.empty))
+      replaceSeq(0, properties.length, t.opt.iterator.flatMap(_.iterator).toSeq)
     }
 
   override def setInitValue(t: BSeq[A]): Unit = {
@@ -38,7 +38,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
   }
 
   override def touch(): Unit =
-    replaceSeq(0, properties.length, get)
+    replaceSeq(0, properties.length, get.toSeq)
 
   def get: SeqTpe[A] = properties.map(_.get).to(fac)
 }

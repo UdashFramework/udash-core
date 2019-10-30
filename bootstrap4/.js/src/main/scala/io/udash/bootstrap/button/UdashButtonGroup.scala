@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 package button
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
@@ -15,7 +14,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
   vertical: ReadableProperty[Boolean],
   justified: ReadableProperty[Boolean],
   override val componentId: ComponentId
-)(itemFactory: (ElemType, Binding.NestedInterceptor) => BSeq[Element]) extends UdashBootstrapComponent {
+)(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
@@ -87,7 +86,7 @@ object UdashButtonGroup {
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     componentId: ComponentId = ComponentId.newId()
-  )(itemFactory: (ElemType, Binding.NestedInterceptor) => BSeq[Element]): UdashButtonGroup[ItemType, ElemType] = {
+  )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]): UdashButtonGroup[ItemType, ElemType] = {
     new UdashButtonGroup[ItemType, ElemType](
       items, size, vertical, justified, componentId
     )(itemFactory)

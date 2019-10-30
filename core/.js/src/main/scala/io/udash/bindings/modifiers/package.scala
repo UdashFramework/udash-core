@@ -1,11 +1,10 @@
 package io.udash.bindings
 
-import com.avsystem.commons._
 import org.scalajs.dom.Node
 
 package object modifiers {
   implicit class ElementExts(private val el: Node) extends AnyVal {
-    def replaceChildren(oldChildren: BSeq[Node], newChildren: BSeq[Node]): Unit = {
+    def replaceChildren(oldChildren: Seq[Node], newChildren: Seq[Node]): Unit = {
       if (oldChildren == null || oldChildren.isEmpty) newChildren.foreach(el.appendChild)
       else {
         oldChildren.iterator.zip(newChildren.iterator).foreach { case (old, fresh) =>

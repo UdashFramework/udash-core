@@ -1,7 +1,6 @@
 package io.udash.bootstrap
 package button
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
@@ -12,7 +11,7 @@ import scalatags.JsDom.all._
 final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   val items: seq.ReadableSeqProperty[ItemType, ElemType],
   override val componentId: ComponentId
-)(itemFactory: (ElemType, Binding.NestedInterceptor) => BSeq[Element]) extends UdashBootstrapComponent {
+)(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
@@ -50,7 +49,7 @@ object UdashButtonToolbar {
    */
   def reactive[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()
-  )(itemFactory: (ElemType, Binding.NestedInterceptor) => BSeq[Element]): UdashButtonToolbar[ItemType, ElemType] = {
+  )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]): UdashButtonToolbar[ItemType, ElemType] = {
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
   }
 }

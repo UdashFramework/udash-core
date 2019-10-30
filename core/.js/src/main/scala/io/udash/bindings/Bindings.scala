@@ -24,8 +24,8 @@ trait Bindings {
   final val TextInput = inputs.TextInput
   final val RangeInput = inputs.RangeInput
 
-  implicit def seqFromNode(el: Node): BSeq[Node] = js.Array(el)
-  implicit def seqFromElement(el: Element): BSeq[Element] = js.Array(el)
+  implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
+  implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
   implicit def seqNodeFromOpt[T](el: Opt[T])(implicit ev: T => Modifier[Element]): Modifier[Element] =
     new JsDom.all.SeqNode(el.toSeq)
 
@@ -37,7 +37,7 @@ trait Bindings {
     * Renders component with provided timeout.
     * It's useful to render heavy components after displaying the main view.
     */
-  def queuedNode(component: => BSeq[Node], timeout: Int = 0): Modifier[Element] = t => {
+  def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
     val el = document.createElement("div")
     t.appendChild(el)
     window.setTimeout(() => t.replaceChildren(el, component), timeout)
@@ -60,7 +60,7 @@ trait Bindings {
     * @param elements `Element`s to show if property value is `true`.
     * @return property binding.
     */
-  def showIf(property: ReadableProperty[Boolean])(elements: BSeq[Node]): Binding =
+  def showIf(property: ReadableProperty[Boolean])(elements: Seq[Node]): Binding =
     showIfElse(property)(elements, Seq.empty)
 
   /**
@@ -74,7 +74,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: BSeq[Node]): Binding =
+    (elements: Seq[Node]): Binding =
     showIfElse(property, customElementsReplace)(elements, Seq.empty)
 
   /**
@@ -85,7 +85,7 @@ trait Bindings {
     * @param elseElements `Element`s to show if property value is `false`.
     * @return property binding.
     */
-  def showIfElse(property: ReadableProperty[Boolean])(elements: BSeq[Node], elseElements: BSeq[Node]): Binding =
+  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
     showIfElse(property, DOMManipulator.DefaultElementReplace)(elements, elseElements)
 
   /**
@@ -100,7 +100,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: BSeq[Node], elseElements: BSeq[Node]): Binding =
+    (elements: Seq[Node], elseElements: Seq[Node]): Binding =
     new PropertyModifier[Boolean](
       property,
       (show: Boolean, _) => if (show) elements else elseElements,
@@ -117,7 +117,7 @@ trait Bindings {
     *                  if it is false, then null value has to be handled by builder.
     * @return property binding.
     */
-  def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => BSeq[Node]): Binding =
+  def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull)
 
   /**
@@ -141,7 +141,7 @@ trait Bindings {
     * @return property binding.
     */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
-    (builder: (T, Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, DOMManipulator.DefaultElementReplace)
 
   /**
@@ -168,7 +168,7 @@ trait Bindings {
     * @return property binding.
     */
   def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
-    (builder: (T, Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
@@ -180,7 +180,7 @@ trait Bindings {
     * @return property binding.
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-    (builder: BSeq[T] => BSeq[Node]): Binding =
+    (builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
@@ -196,7 +196,7 @@ trait Bindings {
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
     customElementsReplace: DOMManipulator.ReplaceMethod)
-    (builder: BSeq[T] => BSeq[Node]): Binding =
+    (builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
@@ -211,7 +211,7 @@ trait Bindings {
     * @return property binding.
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
-    (builder: (BSeq[T], Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
 
   /**
@@ -230,7 +230,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
     customElementsReplace: DOMManipulator.ReplaceMethod)
-    (builder: (BSeq[T], Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
@@ -253,7 +253,7 @@ trait Bindings {
   def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
-    (builder: E => BSeq[Node]): Binding =
+    (builder: E => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
@@ -279,7 +279,7 @@ trait Bindings {
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
-    (builder: (E, Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (E, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
@@ -305,7 +305,7 @@ trait Bindings {
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
-    (builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => BSeq[Node]): Binding =
+    (builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqPropertyWithIndexModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   implicit def toAttrOps(attr: Attr): AttrOps = new AttrOps(attr)

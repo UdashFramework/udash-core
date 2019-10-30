@@ -1,6 +1,5 @@
 package io.udash.bindings.inputs
 
-import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
@@ -10,11 +9,11 @@ import scalatags.JsDom.all._
 
 /** Checkboxes for finite options with many elements selection. Bound to SeqProperty. */
 object CheckButtons {
-  def inputsOnlyDecorator[T]: BSeq[(JSInput, T)] => BSeq[Node] =
+  def inputsOnlyDecorator[T]: Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.inputsOnlyDecorator
-  def spanWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
+  def spanWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.spanWithLabelDecorator(labelFactory)
-  def divWithLabelDecorator[T](labelFactory: T => Modifier): BSeq[(JSInput, T)] => BSeq[Node] =
+  def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.divWithLabelDecorator(labelFactory)
 
   /**
@@ -26,7 +25,7 @@ object CheckButtons {
    */
   def apply[T: PropertyCreator](
     selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableSeqProperty[T]
-  )(decorator: BSeq[(JSInput, T)] => BSeq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
+  )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
       "checkbox",
       opt => selectedItems.transform(_.contains(opt)),

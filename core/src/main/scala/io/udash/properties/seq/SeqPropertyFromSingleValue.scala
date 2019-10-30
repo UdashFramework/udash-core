@@ -2,7 +2,6 @@ package io.udash.properties
 package seq
 
 import com.avsystem.commons._
-import scala.collection.compat._
 import io.udash.properties.single._
 import io.udash.utils.{CrossCollections, Registration}
 
@@ -72,7 +71,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
       if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p.id).get.cancel())
       CrossCollections.replace(children, commonBegin, current.size - transformed.size)
-      Some(Patch[ElemType](commonBegin, removed.map(toElemProp), Seq(), transformed.isEmpty))
+      Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq(), transformed.isEmpty))
     } else None
 
     CallbackSequencer().sequence {
@@ -167,6 +166,8 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   }
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit = {
+    import scala.collection.compat._
+
     val current = get.to(mutable.ListBuffer)
     current.remove(idx, amount)
     current.insertAll(idx, values)

@@ -42,7 +42,6 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
   implicit final def materializeBSeq[T: PropertyCreator]: SeqPropertyCreator[T, BSeq] = new SeqPropertyCreator
   implicit final def materializeISeq[T: PropertyCreator]: SeqPropertyCreator[T, ISeq] = new SeqPropertyCreator
-  implicit final def materializeMSeq[T: PropertyCreator]: SeqPropertyCreator[T, MSeq] = new SeqPropertyCreator
   implicit final def materializeVector[T: PropertyCreator]: SeqPropertyCreator[T, Vector] = new SeqPropertyCreator
   implicit final def materializeList[T: PropertyCreator]: SeqPropertyCreator[T, List] = new SeqPropertyCreator
 }
