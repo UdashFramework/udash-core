@@ -5,13 +5,11 @@ import io.udash.properties._
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.{CrossCollections, Registration}
 
-import scala.collection.mutable
-
 private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  protected var children: mutable.Buffer[ReadableProperty[O]] = _
+  protected var children: MBuffer[ReadableProperty[O]] = _
   protected final val originListener: Patch[ReadableProperty[_]] => Unit =
     (patch: Patch[ReadableProperty[_]]) => {
       val idx = patch.idx

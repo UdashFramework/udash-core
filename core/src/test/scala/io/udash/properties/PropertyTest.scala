@@ -8,7 +8,6 @@ import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
 
-import scala.collection.mutable
 import scala.util.Try
 
 class PropertyTest extends UdashCoreTest {
@@ -90,8 +89,8 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fire listeners on value change" in {
-      val values = mutable.ArrayBuffer[Any]()
-      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
+      val oneTimeValues = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
@@ -148,7 +147,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "fire listener callback when registered with initUpdate flag" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
       val p = Property[Int](5)
@@ -173,9 +172,9 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "transform and synchronize value" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
-      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val oneTimeValues = MArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](new C(1, "asd"))
@@ -510,7 +509,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "transform to ReadableSeqProperty" in {
-      val elemListeners = mutable.Map.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[PropertyId, Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]) =
         props.foreach { p =>
@@ -686,7 +685,7 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "transform to SeqProperty" in {
-      val elemListeners = mutable.Map.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[PropertyId, Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]): Unit =
         props.foreach { p =>
@@ -1137,8 +1136,8 @@ class PropertyTest extends UdashCoreTest {
 
     "cancel listeners in a callback" in {
       val t = Property(42)
-      val regs = mutable.ArrayBuffer.empty[Registration]
-      val results = mutable.ArrayBuffer.empty[String]
+      val regs = MArrayBuffer.empty[Registration]
+      val results = MArrayBuffer.empty[String]
 
       regs += t.listen { _ =>
         results += "1"

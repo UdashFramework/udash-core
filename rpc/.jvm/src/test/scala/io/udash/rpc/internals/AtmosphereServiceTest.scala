@@ -10,7 +10,6 @@ import io.udash.testing.UdashRpcBackendTest
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
 import org.atmosphere.cpr._
 
-import scala.collection.mutable
 import scala.language.reflectiveCalls
 import scala.util.{Failure, Success, Try}
 
@@ -26,8 +25,8 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
     (broadcaster, broadcasterFactory, metaBroadcaster)
   }
 
-  def createTestRPC(): (mutable.Builder[String, Seq[String]], DefaultExposesServerRPC[TestRPC]) = {
-    val calls: mutable.Builder[String, Seq[String]] = Seq.newBuilder[String]
+  def createTestRPC(): (MBuilder[String, Seq[String]], DefaultExposesServerRPC[TestRPC]) = {
+    val calls: MBuilder[String, Seq[String]] = Seq.newBuilder[String]
     val impl = TestRPC.rpcImpl((method: String, _: List[Any], _: Option[Any]) => {
       calls += method
     })

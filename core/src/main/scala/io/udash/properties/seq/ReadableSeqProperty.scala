@@ -5,8 +5,6 @@ import io.udash.properties._
 import io.udash.properties.single.{AbstractReadableProperty, ReadableProperty}
 import io.udash.utils.Registration
 
-import scala.collection.mutable
-
 /** Read-only interface of SeqProperty[A]. */
 trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends ReadableProperty[BSeq[A]] {
   /** @return Sequence of child properties. */
@@ -74,7 +72,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
 private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[BSeq[A]] with ReadableSeqProperty[A, ElemType] {
 
-  protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = mutable.ArrayBuffer.empty
+  protected[this] final val structureListeners: MBuffer[Patch[ElemType] => Any] = MArrayBuffer.empty
 
   override def structureListenersCount(): Int = structureListeners.size
   protected def wrapStructureListenerRegistration(reg: Registration): Registration =
@@ -101,7 +99,7 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     new ZippedWithIndexReadableSeqProperty[A](this)
 
   protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
-    patch: Patch[ItemType], structureListeners: mutable.Buffer[Patch[ItemType] => Any]
+    patch: Patch[ItemType], structureListeners: MBuffer[Patch[ItemType] => Any]
   ): Unit = {
     val originalListeners = structureListeners.toSet
     CallbackSequencer().queue(

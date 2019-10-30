@@ -18,7 +18,6 @@ import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
-import scala.collection.mutable
 import scala.concurrent.duration.{Duration, DurationLong}
 import scala.util.{Failure, Success}
 
@@ -32,7 +31,7 @@ final class UdashForm private(
 
   import io.udash.css.CssView._
 
-  private[form] val validationProperties: mutable.Set[Property[Option[ValidationResult]]] = mutable.Set.empty
+  private[form] val validationProperties: MSet[Property[Option[ValidationResult]]] = MSet.empty
 
   def clearValidationResults(): Unit = {
     validationProperties.foreach(_.set(None))

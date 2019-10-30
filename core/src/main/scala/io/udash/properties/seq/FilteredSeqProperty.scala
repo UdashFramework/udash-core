@@ -1,17 +1,15 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.{CrossCollections, Registration}
-import com.avsystem.commons._
-
-import scala.collection.mutable
 
 private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  private var lastValue: mutable.Buffer[ElemType] = _
-  private val originListeners: mutable.Buffer[Registration] = CrossCollections.createArray
+  private var lastValue: MBuffer[ElemType] = _
+  private val originListeners: MBuffer[Registration] = CrossCollections.createArray
 
   override protected def onListenerInit(): Unit = {
     super.onListenerInit()

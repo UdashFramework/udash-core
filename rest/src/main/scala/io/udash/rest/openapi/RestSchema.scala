@@ -9,7 +9,6 @@ import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
 
 import scala.annotation.implicitNotFound
-import scala.collection.mutable
 
 @implicitNotFound("RestSchema for ${T} not found")
 trait RestSchema[T] { self =>
@@ -347,7 +346,7 @@ final class SchemaRegistry(
   private[this] case class Entry(source: Opt[RestSchema[_]], schema: RefOr[Schema])
 
   private[this] val resolving = new MHashSet[String]
-  private[this] val registry = new mutable.HashMap[String, MListBuffer[Entry]]
+  private[this] val registry = new MHashMap[String, MListBuffer[Entry]]
     .setup(_ ++= initial.iterator.map { case (n, s) => (n, MListBuffer[Entry](Entry(Opt.Empty, s))) })
 
   def registeredSchemas: Map[String, RefOr[Schema]] =

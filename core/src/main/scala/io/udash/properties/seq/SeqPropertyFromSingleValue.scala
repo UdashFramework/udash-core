@@ -5,8 +5,6 @@ import com.avsystem.commons._
 import io.udash.properties.single._
 import io.udash.utils.{CrossCollections, Registration}
 
-import scala.collection.mutable
-
 private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
   origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
 ) extends AbstractReadableSeqProperty[B, ElemType] {
@@ -15,7 +13,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]
-  private final val childrenRegistrations = mutable.HashMap.empty[PropertyId, Registration]
+  private final val childrenRegistrations = MHashMap.empty[PropertyId, Registration]
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
@@ -168,7 +166,7 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit = {
     import scala.collection.compat._
 
-    val current = get.to(mutable.ListBuffer)
+    val current = get.to(MListBuffer)
     current.remove(idx, amount)
     current.insertAll(idx, values)
     origin.set(revert(current))

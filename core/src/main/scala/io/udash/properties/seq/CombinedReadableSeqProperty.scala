@@ -5,15 +5,13 @@ import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
-import scala.collection.mutable
-
 private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
 ) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
-  private var combinedChildren: mutable.Buffer[ReadableProperty[R]] = _
+  private var combinedChildren: MBuffer[ReadableProperty[R]] = _
   private var originListenerRegistration: Registration = _
 
   protected def originStructureListener(originPatch: Patch[ReadableProperty[A]]): Unit = {
@@ -29,7 +27,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   private def initOriginListener(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       structureListeners.clear()
-      val children: mutable.Buffer[ReadableProperty[R]] = CrossCollections.createArray
+      val children: MBuffer[ReadableProperty[R]] = CrossCollections.createArray
       s.elemProperties.foreach(sub => children += sub.combine(p)(combiner))
       combinedChildren = children
       originListenerRegistration = s.listenStructure(originStructureListener)

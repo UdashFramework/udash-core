@@ -2,12 +2,11 @@ package io.udash.i18n
 
 import java.{util => ju}
 
-import scala.collection.mutable
 import com.avsystem.commons._
 
 /** Loads translations from provided `java.util.ResourceBundles`. */
 class ResourceBundlesTranslationTemplatesProvider(bundles: Map[Lang, Seq[ju.ResourceBundle]]) extends TranslationTemplatesProvider {
-  private val cache: mutable.Map[Lang, Bundle] = mutable.Map.empty
+  private val cache: MMap[Lang, Bundle] = MMap.empty
 
   override def template(key: String)(implicit lang: Lang): String =
     bundle.translations(key)

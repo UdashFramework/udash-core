@@ -6,7 +6,6 @@ import com.avsystem.commons.collection.CrossFactory
 import io.udash.rest.raw.AbstractMapping.ConcatSeq
 
 import scala.collection.compat._
-import scala.collection.mutable
 
 /**
  * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
@@ -108,7 +107,7 @@ abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] { companion 
 
   def empty[V]: M[V] = create()
 
-  def newBuilder[V]: mutable.Builder[(String, V), M[V]] =
+  def newBuilder[V]: MBuilder[(String, V), M[V]] =
     new MListBuffer[(String, V)].mapResult(create)
 
   private val reusableFactory = new CrossFactory[(String, Any), M[Any]] {

@@ -6,7 +6,6 @@ import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
 
-import scala.collection.mutable
 import scala.util.Random
 
 class SeqPropertyTest extends UdashCoreTest {
@@ -214,9 +213,9 @@ class SeqPropertyTest extends UdashCoreTest {
     "fire value listeners on structure change" in {
       val p = SeqProperty[Int](Seq(0, 0, 0))
 
-      val values = mutable.ArrayBuffer[BSeq[Int]]()
+      val values = MArrayBuffer[BSeq[Int]]()
       val listener = (s: BSeq[Int]) => values += s
-      val oneTimeValues = mutable.ArrayBuffer[BSeq[Int]]()
+      val oneTimeValues = MArrayBuffer[BSeq[Int]]()
       val oneTImeListener = (s: BSeq[Int]) => oneTimeValues += s
 
       p.listen(listener, initUpdate = true)
@@ -269,7 +268,7 @@ class SeqPropertyTest extends UdashCoreTest {
     "fire value listeners on every child change" in {
       val p = SeqProperty.blank[Int]
 
-      val values = mutable.ArrayBuffer[BSeq[Int]]()
+      val values = MArrayBuffer[BSeq[Int]]()
       val listener = (s: BSeq[Int]) => values += s
 
       p.listen(listener)
@@ -298,7 +297,7 @@ class SeqPropertyTest extends UdashCoreTest {
     "fire structure listeners on structure change" in {
       val p = SeqProperty.blank[Int]
 
-      val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
+      val patches = MArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
 
       p.listenStructure(listener)
@@ -360,7 +359,7 @@ class SeqPropertyTest extends UdashCoreTest {
     "not fire structure listeners on child change" in {
       val p = SeqProperty.blank[Int]
 
-      val patches = mutable.ArrayBuffer[Patch[Property[Int]]]()
+      val patches = MArrayBuffer[Patch[Property[Int]]]()
       val listener = (s: Patch[Property[Int]]) => patches += s
 
       p.listenStructure(listener)
@@ -496,8 +495,8 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = SeqProperty[Int](1, 2, 3)
       val f = p.filter(_ % 2 == 0)
 
-      val states = mutable.ArrayBuffer.empty[BSeq[Int]]
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[Int]]]
+      val states = MArrayBuffer.empty[BSeq[Int]]
+      val patches = MArrayBuffer.empty[Patch[ReadableProperty[Int]]]
 
       ensureNoListeners(p)
 
@@ -789,7 +788,7 @@ class SeqPropertyTest extends UdashCoreTest {
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
-      val listenCalls = mutable.ListBuffer[BSeq[Int]]()
+      val listenCalls = MListBuffer[BSeq[Int]]()
       val r1 = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
@@ -1034,7 +1033,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
       numbers.append(10)
 
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
       val r1 = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
@@ -1192,7 +1191,7 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.remove(20)
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
 
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
       val r1 = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
@@ -1363,7 +1362,7 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(0)
 
-      val patches = mutable.ArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
+      val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
       val r1 = indexed.listenStructure(p => patches.append(p))
 
       numbers.listenersCount() should be(0)
@@ -1440,8 +1439,8 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "cancel listeners in a callback" in {
       val t = SeqProperty(42, 0, 99)
-      val regs = mutable.ArrayBuffer.empty[Registration]
-      val results = mutable.ArrayBuffer.empty[String]
+      val regs = MArrayBuffer.empty[Registration]
+      val results = MArrayBuffer.empty[String]
 
       regs += t.listenStructure { _ =>
         results += "1"

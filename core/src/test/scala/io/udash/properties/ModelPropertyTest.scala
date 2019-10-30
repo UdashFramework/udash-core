@@ -6,8 +6,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
 import io.udash.testing.UdashCoreTest
 
-import scala.collection.mutable
-
 class ModelPropertyTest extends UdashCoreTest {
   class C(val i: Int, val s: String) {
     var variable: Int = 7
@@ -94,9 +92,9 @@ class ModelPropertyTest extends UdashCoreTest {
     }
 
     "fire listeners on value change" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
-      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val oneTimeValues = MArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val p = ModelProperty(null: TT)
@@ -168,7 +166,7 @@ class ModelPropertyTest extends UdashCoreTest {
     }
 
     "transform and synchronize value" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
       val p = ModelProperty(null: TT)

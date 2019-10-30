@@ -15,7 +15,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
-  private val producedElementsCount = scala.collection.mutable.ArrayBuffer[Int]()
+  private val producedElementsCount = MArrayBuffer[Int]()
   protected val nestedBindingsByProperty: js.Dictionary[js.Array[Binding]] = js.Dictionary.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
