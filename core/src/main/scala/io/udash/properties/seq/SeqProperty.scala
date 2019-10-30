@@ -1,21 +1,21 @@
 package io.udash.properties.seq
 
-import io.udash.properties._
 import com.avsystem.commons._
+import io.udash.properties._
 import io.udash.properties.single.{AbstractProperty, CastableProperty, Property}
 
 object SeqProperty {
   /** Creates a blank DirectSeqProperty[T]. */
-  def blank[T](implicit pc: SeqPropertyCreator[T, BSeq], blank: Blank[BSeq[T]]): SeqProperty[T, CastableProperty[T]] =
-    Property.blank[BSeq[T]](pc, blank).asSeq[T]
+  def blank[T](implicit pc: SeqPropertyCreator[T, Seq], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
+    Property.blank[Seq[T]](pc, blank).asSeq[T]
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](item: T, more: T*)(implicit pc: SeqPropertyCreator[T, BSeq]): SeqProperty[T, CastableProperty[T]] =
+  def apply[T](item: T, more: T*)(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
     apply(item +: more)
 
   /** Creates a DirectSeqProperty[T] with initial value. */
-  def apply[T](init: BSeq[T])(implicit pc: SeqPropertyCreator[T, BSeq]): SeqProperty[T, CastableProperty[T]] =
-    Property[BSeq[T]](init)(pc).asSeq[T]
+  def apply[T](init: Seq[T])(implicit pc: SeqPropertyCreator[T, Seq]): SeqProperty[T, CastableProperty[T]] =
+    Property[Seq[T]](init)(pc).asSeq[T]
 }
 
 trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[BSeq[A]] {
