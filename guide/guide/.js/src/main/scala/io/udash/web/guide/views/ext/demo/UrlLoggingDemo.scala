@@ -11,11 +11,9 @@ object UrlLoggingDemo extends AutoDemo with CssView {
   private val ((enabled, history, add), source) = {
     import io.udash._
 
-    import scala.collection.mutable.ListBuffer
-
     val enabled = Property(false)
-    val history = SeqProperty[(String, Option[String])](ListBuffer.empty)
-    enabled.listen(b => if (!b) history.set(ListBuffer.empty))
+    val history = SeqProperty.blank[(String, Option[String])]
+    enabled.listen(b => if (!b) history.set(Seq.empty))
 
     def log(url: String, referrer: Option[String]): Unit = {
       if (enabled.get) history.append((url, referrer))

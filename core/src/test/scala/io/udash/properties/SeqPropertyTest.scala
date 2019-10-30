@@ -403,7 +403,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "transform into another SeqProperty" in {
       class BadEquals(val v: Int)
-      val init: BSeq[BadEquals] = (1 to 3).map(new BadEquals(_))
+      val init: Seq[BadEquals] = (1 to 3).map(new BadEquals(_))
       val p = SeqProperty[BadEquals](init)
 
       val t = p.transform[T](
