@@ -13,7 +13,7 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
 
   class TestVF(p: Presenter[TestStates]) extends ViewFactory[TestStates] {
     override def create(): (View, Presenter[TestStates]) =
-      (new FinalView {
+      (new View {
 
         import scalatags.JsDom.all._
 

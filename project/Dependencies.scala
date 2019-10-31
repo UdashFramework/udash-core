@@ -23,7 +23,7 @@ object Dependencies {
   val atmosphereVersion = "2.5.9"
 
   val upickleVersion = "0.8.0" // Tests only
-  val circeVersion = "0.12.2" // Tests only
+  val circeVersion = "0.12.3" // Tests only
   val circeDerivationVersion = "0.12.0-M7" // Tests only
   val monixVersion = "3.0.0" // Tests only
 
@@ -31,7 +31,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "9.4.21.v20190926"
+  val jettyVersion = "9.4.22.v20191022"
   val typesafeConfigVersion = "1.4.0"
   val flexmarkVersion = "0.50.42"
   val logbackVersion = "1.2.3"

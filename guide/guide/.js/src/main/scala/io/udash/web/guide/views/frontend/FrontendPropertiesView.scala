@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object FrontendPropertiesViewFactory extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
-class FrontendPropertiesView extends FinalView with CssView {
+class FrontendPropertiesView extends View with CssView {
 
   import JsDom.all._
   import io.udash.web.guide.Context._

@@ -27,7 +27,7 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
   }
 }
 
-class FrontendRoutingView(url: Property[String]) extends FinalView with CssView {
+class FrontendRoutingView(url: Property[String]) extends View with CssView {
   import Context._
   import JsDom.all._
 
@@ -79,7 +79,7 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
       "by a URL. The URL is resolved to a ", i("RoutingState"), " on every change. The application states structure is your decision, ",
       "Udash requires only that all states must extend ", i("State"),
       ". States tend to form a nested hierarchy. ",
-      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express the place of a state in the hierarchy. ",
+      "A state can contain other ", i("State"), "s. ",
       "For example:"
     ),
     CodeBlock(
@@ -87,20 +87,17 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
         |
         |sealed abstract class RoutingState(
         |  val parentState: Option[ContainerRoutingState]
-        |) extends State[RoutingState]
-        |
+        |)  extends State {
+        |  override type HierarchyRoot = RoutingState
+        |}
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState[RoutingState]
-        |
-        |sealed abstract class FinalRoutingState(
-        |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with FinalState[RoutingState]
+        |) extends RoutingState(parentState)
         |
         |case object RootState extends ContainerRoutingState(None)
-        |case class UsersListState(searchQuery: Option[String]) extends FinalRoutingState(Some(RootState))
-        |case class UserDetailsState(username: String) extends FinalRoutingState(Some(RootState))
-        |case object Dashboard extends FinalRoutingState(Some(RootState))""".stripMargin
+        |case class UsersListState(searchQuery: Option[String]) extends RoutingState(Some(RootState))
+        |case class UserDetailsState(username: String) extends RoutingState(Some(RootState))
+        |case object Dashboard extends RoutingState(Some(RootState))""".stripMargin
     )(GuideStyles),
     p(i("RoutingRegistry"), " is used to create a new application state on an URL change. For example:"),
     CodeBlock(

@@ -12,7 +12,7 @@ import scalatags.JsDom
 
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
-class BootstrappingFrontendView extends FinalView with CssView {
+class BootstrappingFrontendView extends View with CssView {
   import Context._
   import JsDom.all._
 
@@ -34,7 +34,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
       "A Udash application is based on states. The application state determines the created ViewFactories structure and is determined ",
       "by a URL. The application states structure is your decision, Udash requires only that all states must extend ",
       i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
-      "With ", i("ContainerState"), " and ", i("FinalState"), " you can express place of the state in the hierarchy. ",
+      "A state can contain other ", i("State"), "s. ",
       "For example:"
     ),
     CodeBlock(
@@ -48,17 +48,13 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState
-        |
-        |sealed abstract class FinalRoutingState(
-        |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with FinalState
+        |) extends RoutingState(parentState)
         |
         |case object RootState extends ContainerRoutingState(None)
-        |case object LandingPageState extends FinalRoutingState(Some(RootState))
+        |case object LandingPageState extends RoutingState(Some(RootState))
         |case object NewsletterState extends ContainerRoutingState(Some(RootState))
-        |case object SubscribeState extends FinalRoutingState(Some(NewsletterState))
-        |case object UnsubscribeState extends FinalRoutingState(Some(NewsletterState))""".stripMargin
+        |case object SubscribeState extends RoutingState(Some(NewsletterState))
+        |case object UnsubscribeState extends RoutingState(Some(NewsletterState))""".stripMargin
     )(GuideStyles),
     ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
     h3("Routing system"),
@@ -154,7 +150,7 @@ class BootstrappingFrontendView extends FinalView with CssView {
         |class NewsletterSubscribeView(
         |  model: ModelProperty[SubscribeModel],
         |  presenter: NewsletterSubscribePresenter
-        |) extends FinalView {
+        |) extends View {
         |  import scalatags.JsDom.all._
         |
         |  /** Renders view HTML code */

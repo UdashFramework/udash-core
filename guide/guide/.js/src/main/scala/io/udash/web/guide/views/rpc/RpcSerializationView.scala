@@ -11,7 +11,7 @@ import scalatags.JsDom
 
 case object RpcSerializationViewFactory extends StaticViewFactory[RpcSerializationState.type](() => new RpcSerializationView)
 
-class RpcSerializationView extends FinalView with CssView {
+class RpcSerializationView extends View with CssView {
   import Context._
   import JsDom.all._
 

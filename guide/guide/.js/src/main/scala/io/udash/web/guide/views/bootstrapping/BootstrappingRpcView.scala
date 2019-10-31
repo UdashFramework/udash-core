@@ -5,14 +5,12 @@ import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
-
 import scalatags.JsDom
 
 case object BootstrappingRpcViewFactory extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
-class BootstrappingRpcView extends FinalView with CssView {
+class BootstrappingRpcView extends View with CssView {
   import Context._
-
   import JsDom.all._
 
   override def getTemplate: Modifier = div(

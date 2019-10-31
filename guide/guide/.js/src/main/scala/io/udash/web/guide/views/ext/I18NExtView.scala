@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() => new I18NExtView)
 
-final class I18NExtView extends FinalView with CssView {
+final class I18NExtView extends View with CssView {
 
   import Context._
   import JsDom.all._

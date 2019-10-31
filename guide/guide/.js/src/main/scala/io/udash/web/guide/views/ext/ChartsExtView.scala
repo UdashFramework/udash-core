@@ -14,7 +14,7 @@ import scalatags.JsDom
 case object ChartsExtViewFactory extends StaticViewFactory[ChartsExtState.type](() => new ChartsExtView)
 
 
-class ChartsExtView extends FinalView {
+class ChartsExtView extends View {
   import Context._
   import JsDom.all._
   import io.udash.wrappers.highcharts.HighchartsUtils._

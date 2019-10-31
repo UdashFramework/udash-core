@@ -8,7 +8,7 @@ import scalatags.JsDom
 
 case object BootstrappingSbtViewFactory extends StaticViewFactory[BootstrappingSbtState.type](() => new BootstrappingSbtView)
 
-final class BootstrappingSbtView extends FinalView with CssView {
+final class BootstrappingSbtView extends View with CssView {
 
   import Context._
   import JsDom.all._

@@ -11,7 +11,7 @@ import scalatags.JsDom
 case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
 
 
-class AuthorizationExtView extends FinalView with CssView {
+class AuthorizationExtView extends View with CssView {
   import Context._
 
   import JsDom.all._
@@ -75,7 +75,7 @@ class AuthorizationExtView extends FinalView with CssView {
          |import io.udash._
          |import io.udash.auth._
          |
-         |class ExampleView(implicit ctx: UserCtx) extends FinalView with AuthView {
+         |class ExampleView(implicit ctx: UserCtx) extends View with AuthView {
          |  override def getTemplate: Modifier = div(
          |    require(P1.and(P2)) {
          |      span("This elements requires P1 and P2 permissions.")
