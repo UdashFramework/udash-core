@@ -87,7 +87,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
         |
         |sealed abstract class RoutingState(
         |  val parentState: Option[ContainerRoutingState]
-        |)  extends State {
+        |) extends State {
         |  override type HierarchyRoot = RoutingState
         |}
         |sealed abstract class ContainerRoutingState(
