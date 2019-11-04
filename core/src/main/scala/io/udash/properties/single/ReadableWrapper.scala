@@ -1,5 +1,6 @@
 package io.udash.properties.single
 
+import com.avsystem.commons._
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.Registration
@@ -16,7 +17,7 @@ private[properties] class ReadableWrapper[T](private val p: ReadableProperty[T])
   override protected[properties] def listenersUpdate(): Unit = p.listenersUpdate()
   override def transform[B](transformer: T => B): ReadableProperty[B] = p.transform(transformer)
 
-  override def transformToSeq[B: PropertyCreator](transformer: T => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B: PropertyCreator](transformer: T => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     p.transformToSeq(transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: T => B): Registration =

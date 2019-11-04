@@ -2,14 +2,11 @@ package io.udash.bindings
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash._
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Node
-
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
 
@@ -828,12 +825,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
         span(),
-        produce(p)((s: Seq[Int]) => {
-          div(s.map(v => {
+        produce(p)((s: Seq[Int]) =>
+          div(s.map(v =>
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
-        }),
+          )).render
+        ),
         span()
       ).render
 
@@ -870,12 +867,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
     "handle null value providing empty Seq to callback" in {
       val p = seq.SeqProperty[Int](1, 2, 3)
       val template = div(
-        produce(p)((s: Seq[Int]) => {
-          div(s.map(v => {
+        produce(p)((s: Seq[Int]) =>
+          div(s.map(v =>
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
-        })
+          )).render
+        )
       ).render
 
       template.childNodes(0).nodeName should be("DIV")
@@ -919,19 +916,19 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p2 = seq.SeqProperty[Int](3, 2, 1)
       val template = div(
         "A",
-        produce(p)((s: Seq[Int]) => {
-          div(s.map(v => {
+        produce(p)((s: Seq[Int]) =>
+          div(s.map(v =>
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
-        }),
+          )).render
+        ),
         span("B"),
-        produce(p2)((s: Seq[Int]) => {
-          div(s.map(v => {
+        produce(p2)((s: Seq[Int]) =>
+          div(s.map(v =>
             if (v % 2 == 0) b(v.toString).render
             else i(v.toString).render
-          })).render
-        }),
+          )).render
+        ),
         div("C")
       ).render
 
@@ -1578,7 +1575,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val todos = SeqProperty.blank[TodoElement]
 
       val done = todos.filter(CompletedTodosFilter.matcher)
-      val patches = scala.collection.mutable.ArrayBuffer.empty[Patch[_]]
+      val patches = MArrayBuffer.empty[Patch[_]]
       done.listenStructure(p => patches += p)
 
       todos.set(Seq(
@@ -1592,7 +1589,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       patches.size should be(0)
       patches.clear()
 
-      val repeats = mutable.ArrayBuffer[AtomicInteger]()
+      val repeats = MArrayBuffer[AtomicInteger]()
 
       val dom = div(
         produce(filter)(f => {
@@ -1979,7 +1976,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property(1)
       val s = Property(2)
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         produceWithNested(p) { (v1, nested) =>
@@ -2008,7 +2005,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property(2)
       val s = Property(3)
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         produceWithNested(p.transform(_ + 1)) { case (v, nested) =>
@@ -2044,7 +2041,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val c = Property(1)
       val s = Property(3)
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         produceWithNested(p.combine(c)(_ + _)) { case (v, nested) =>
@@ -2079,7 +2076,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property(1)
       val s = SeqProperty(1, 2, 3)
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         produceWithNested(p) { case (v1, nested) =>
@@ -2114,7 +2111,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val source = Property(1)
       val s = source.transformToSeq(i => Seq(i, i + 1, i + 2))
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         produceWithNested(p) { case (v1, nested) =>
@@ -2150,7 +2147,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = SeqProperty(1, 2, 3)
       val s = SeqProperty(1, 2, 3)
 
-      val fired = ListBuffer.empty[(Int, Int)]
+      val fired = MListBuffer.empty[(Int, Int)]
 
       div(
         repeatWithNested(p) { case (p1, nested) =>

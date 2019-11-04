@@ -502,7 +502,7 @@ class PropertyCreatorTest extends UdashCoreTest {
         |val s = p.subSeq(_.i)""".stripMargin shouldNot compile
 
       """object Model {
-        |  case class A(s: Seq[String], i: scala.collection.mutable.Seq[Int])
+        |  case class A(s: Seq[String], i: Seq[Int])
         |  object A {
         |    implicit val mpc: ModelPropertyCreator[A] = ModelPropertyCreator.materialize
         |  }

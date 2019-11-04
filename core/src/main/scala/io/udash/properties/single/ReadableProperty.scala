@@ -1,11 +1,9 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
 import io.udash.utils.Registration
-
-import scala.collection.mutable
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[+A] {
@@ -58,7 +56,7 @@ trait ReadableProperty[+A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
     */
-  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
+  def transformToSeq[B : PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Streams value changes to the `target` property.
     * It is not as strong relation as `transform`, because `target` can change value independently. */
@@ -81,8 +79,8 @@ trait ReadableProperty[+A] {
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] final val listeners: mutable.ArrayBuffer[A => Any] = mutable.ArrayBuffer.empty[A => Any]
-  protected[this] final val oneTimeListeners: mutable.ArrayBuffer[Registration] = mutable.ArrayBuffer.empty[Registration]
+  protected[this] final val listeners: MArrayBuffer[A => Any] = MArrayBuffer.empty
+  protected[this] final val oneTimeListeners: MArrayBuffer[Registration] = MArrayBuffer.empty
 
   protected def wrapListenerRegistration(reg: Registration): Registration = reg
   protected def wrapOneTimeListenerRegistration(reg: Registration): Registration = wrapListenerRegistration(reg)
@@ -119,7 +117,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
 
-  override def transformToSeq[B : PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B : PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {

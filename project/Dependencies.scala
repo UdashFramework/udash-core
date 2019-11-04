@@ -6,17 +6,18 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.10"
-  val silencerVersion = "1.4.2"
+  val silencerVersion = "1.4.4"
+  val collectionCompatVersion = "2.1.2"
 
-  val jqueryWrapperVersion = "3.0.1"
+  val jqueryWrapperVersion = "3.0.2"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.7"
   val scalaTagsVersion = "0.7.0"
-  val scalaCssVersion = "0.5.6"
+  val scalaCssVersion = "0.6.0-RC1"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.42.1"
+  val avsCommonsVersion = "2.0.0-M4"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.9"
@@ -46,15 +47,15 @@ object Dependencies {
   val highchartsVersion = "5.0.14"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.2.5"
+  val scalaJsBenchmarkVersion = "0.3.0-RC1"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-plugin" % silencerVersion,
+    "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-lib" % silencerVersion % Provided,
+    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -67,7 +68,8 @@ object Dependencies {
   ))
 
   val utilsCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
+    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
@@ -122,7 +124,7 @@ object Dependencies {
   ))
 
   val restSjsDeps = restCrossDeps
-  
+
   val restJettyDeps = Def.setting(Seq(
     "org.eclipse.jetty" % "jetty-client" % jettyVersion
   ))

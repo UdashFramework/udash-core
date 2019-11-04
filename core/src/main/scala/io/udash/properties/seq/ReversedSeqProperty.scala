@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.CrossCollections
 
@@ -7,8 +8,8 @@ private[properties] abstract class BaseReversedSeqProperty[A, ElemType <: Readab
   override protected val origin: OriginType
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] with ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
 
-  override protected def loadFromOrigin(): Seq[A] = origin.get.reverse
-  override protected def elementsFromOrigin(): Seq[ElemType] = origin.elemProperties.reverse
+  override protected def loadFromOrigin(): BSeq[A] = origin.get.reverse
+  override protected def elementsFromOrigin(): BSeq[ElemType] = origin.elemProperties.reverse
   override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Patch[ElemType] = {
     val transPatch = Patch[ElemType](
       origin.size - patch.idx - patch.added.size,
@@ -17,7 +18,7 @@ private[properties] abstract class BaseReversedSeqProperty[A, ElemType <: Readab
       patch.clearsProperty
     )
 
-    CrossCollections.replace(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added: _*)
+    CrossCollections.replaceSeq(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added)
     transPatch
   }
 }
@@ -30,15 +31,15 @@ private[properties] class ReversedSeqProperty[A](origin: SeqProperty[A, Property
     with ForwarderSeqProperty[A, A, Property[A], Property[A]]
     with AbstractSeqProperty[A, Property[A]] {
 
-    override def setInitValue(t: Seq[A]): Unit =
-      origin.setInitValue(t.reverse)
+  override def setInitValue(t: BSeq[A]): Unit =
+    origin.setInitValue(t.reverse)
 
-    override def set(t: Seq[A], force: Boolean = false): Unit =
-      origin.set(t.reverse, force)
+  override def set(t: BSeq[A], force: Boolean = false): Unit =
+    origin.set(t.reverse, force)
 
-    override def touch(): Unit =
-      origin.touch()
+  override def touch(): Unit =
+    origin.touch()
 
-    override def replace(idx: Int, amount: Int, values: A*): Unit =
-      origin.replace(origin.size - idx, amount, values.reverse: _*)
-  }
+  override def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit =
+    origin.replaceSeq(origin.size - idx, amount, values.reverse)
+}

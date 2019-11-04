@@ -63,7 +63,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala /*, "2.13.0"*/),
+  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.13.1"),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -76,14 +76,13 @@ val commonSettings = Seq(
     "-language:experimental.macros",
     "-Xfuture",
     "-Xfatal-warnings",
-    "-Xlint:_,-missing-interpolator",
+    "-Xlint:_,-missing-interpolator,-unused",
     "-Yrangepos",
-    "-P:silencer:checkUnused",
-    "-Ywarn-unused:_,-explicits,-implicits",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
     "-Ycache-macro-class-loader:last-modified"
   ),
+  scalacOptions ++= (if(scalaBinaryVersion.value == "2.13") Seq("-P:silencer:checkUnused") else Seq.empty),
   moduleName := "udash-" + moduleName.value,
   ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
@@ -391,7 +390,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, 
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`,
     `guide-guide`, `guide-packager`, `guide-selenium`)
   .settings(
     aggregateProjectSettings,

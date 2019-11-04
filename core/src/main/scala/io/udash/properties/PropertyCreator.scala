@@ -5,7 +5,7 @@ import io.udash.properties.seq.DirectSeqPropertyImpl
 import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
 
 import scala.annotation.implicitNotFound
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat.Factory
 
 trait PropertyCreator[T] {
   def newProperty(parent: ReadableProperty[_])(implicit blank: Blank[T]): CastableProperty[T] =
@@ -42,7 +42,6 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
   implicit final def materializeBSeq[T: PropertyCreator]: SeqPropertyCreator[T, BSeq] = new SeqPropertyCreator
   implicit final def materializeISeq[T: PropertyCreator]: SeqPropertyCreator[T, ISeq] = new SeqPropertyCreator
-  implicit final def materializeMSeq[T: PropertyCreator]: SeqPropertyCreator[T, MSeq] = new SeqPropertyCreator
   implicit final def materializeVector[T: PropertyCreator]: SeqPropertyCreator[T, Vector] = new SeqPropertyCreator
   implicit final def materializeList[T: PropertyCreator]: SeqPropertyCreator[T, List] = new SeqPropertyCreator
 }
@@ -54,7 +53,7 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
 
-final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: Seq[T]](implicit cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
+final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](implicit fac: Factory[A, SeqTpe[A]])
   extends PropertyCreator[SeqTpe[A]] {
   protected def create(parent: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
     new DirectSeqPropertyImpl[A, SeqTpe](parent, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]

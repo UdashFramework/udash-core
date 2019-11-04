@@ -3,7 +3,7 @@ package rest.openapi
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.positioned
-import com.avsystem.commons.meta.{Mapping => _, _}
+import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.AsRaw
 import com.avsystem.commons.serialization._
@@ -61,8 +61,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   object Case extends AdtMetadataCompanion[Case]
 
   /**
-    * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
-    */
+   * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
+   */
   @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
     @composite info: GenCaseInfo[T]
@@ -88,8 +88,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   }
 
   /**
-    * Will be inferred for types having apply/unapply(Seq) pair in their companion.
-    */
+   * Will be inferred for types having apply/unapply(Seq) pair in their companion.
+   */
   @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtParamMetadata @multi fields: List[Field[_]],
@@ -120,8 +120,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   object Record extends AdtMetadataCompanion[Record]
 
   /**
-    * Will be inferred for singleton types (objects).
-    */
+   * Will be inferred for singleton types (objects).
+   */
   @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: ValueOf[T],

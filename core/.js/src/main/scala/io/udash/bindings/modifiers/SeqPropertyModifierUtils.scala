@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons._
 import io.udash.bindings.Bindings._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
@@ -15,7 +15,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
-  private val producedElementsCount = scala.collection.mutable.ArrayBuffer[Int]()
+  private val producedElementsCount = MArrayBuffer[Int]()
   protected val nestedBindingsByProperty: js.Dictionary[js.Array[Binding]] = js.Dictionary.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
@@ -95,7 +95,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       }
 
       val sizeChange = patch.added.size - patch.removed.size
-      if (sizeChange > 0) producedElementsCount.insert(patch.idx, Seq.fill(sizeChange)(0): _*)
+      if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
       else producedElementsCount.remove(patch.idx, -sizeChange)
       newElements.zipWithIndex.foreach {
         case (res, idx) =>

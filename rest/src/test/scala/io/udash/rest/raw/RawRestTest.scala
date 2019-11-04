@@ -19,7 +19,8 @@ case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
 
 class omit[T](value: => T) extends AnnotationAggregate {
-  @transientDefault @whenAbsent(value) type Implied
+  @transientDefault @whenAbsent(value)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 trait UserApi {
@@ -135,7 +136,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   def mkDeep(value: Any): Any = value match {
-    case arr: Array[_] => arr.deep
+    case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
     case _ => value
   }
 
@@ -258,12 +259,12 @@ class RawRestTest extends FunSuite with ScalaFutures {
 
   test("OPTIONS") {
     val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
-    val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
+    val response = RestResponse(200, IMapping.create("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
     assertRawExchange(request, response)
   }
 
   test("HEAD") {
-    val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
+    val params = RestParameters(List(PlainValue("user")), query = Mapping.create("userId" -> PlainValue("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.empty)
     assertRawExchange(request, response)
@@ -272,7 +273,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("header case insensitivity") {
     val params = RestParameters(
       path = List(PlainValue("eatHeader")),
-      headers = IMapping("x-sTuFf" -> PlainValue("StUfF"))
+      headers = IMapping.create("x-sTuFf" -> PlainValue("StUfF"))
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))

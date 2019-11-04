@@ -1,5 +1,6 @@
 package io.udash.routing
 
+import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.properties.PropertyCreator
 import io.udash.utils.CallbacksHandler
@@ -52,12 +53,12 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
       val oldViewFactories =
         newStatePath
           .slice(samePath.size, samePath.size + toUpdateStatesSize)
-          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)(scala.collection.breakOut)
+          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)
       var i = samePath.size
       statesMap.retain { (_, _) =>
         i -= 1
         i >= 0
-      }
+      }: @silent("deprecated")
       statesMap ++= oldViewFactories
 
       val viewsToLeave = statesMap.values.map(_._1).toList

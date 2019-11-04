@@ -33,7 +33,7 @@ object ColumnRange {
       columnRange = SeriesColumnrange(
         dataLabels = SeriesRangeDataLabels(
           enabled = true,
-          formatter = (data: SeriesDataLabels.FormatterData) => data.y + "°C"
+          formatter = (data: SeriesDataLabels.FormatterData) => data.y.toString + "°C"
         )
       )
     ),

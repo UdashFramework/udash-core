@@ -35,10 +35,10 @@ object RadioButtonsDemo extends AutoDemo {
       prependText("Fruits:"),
       appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
-          (els: Seq[(Input, String)]) => span(els.map {
+          els => span(els.map {
             case (i: Input, l: String) => label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
           }).render
-        ).render
+        )
       ),
       appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
     )

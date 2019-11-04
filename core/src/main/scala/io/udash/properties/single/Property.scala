@@ -1,5 +1,6 @@
 package io.udash.properties.single
 
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.seq.{SeqProperty, SeqPropertyFromSingleValue}
 import io.udash.utils.Registration
@@ -48,7 +49,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]]
+  def transformToSeq[B : PropertyCreator](transformer: A => BSeq[B], revert: BSeq[B] => A): SeqProperty[B, Property[B]]
 
   /**
     * Bidirectionally synchronizes Property[B] with `this`. The transformed value is synchronized from `this`
@@ -75,7 +76,7 @@ private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A
   override def transform[B](transformer: A => B, revert: B => A): Property[B] =
     new TransformedProperty[A, B](this, transformer, revert)
 
-  override def transformToSeq[B : PropertyCreator](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+  override def transformToSeq[B : PropertyCreator](transformer: A => BSeq[B], revert: BSeq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
 
   override def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration = {

@@ -4,6 +4,7 @@ import io.udash.properties.model.{ModelPropertyMacroApi, ReadableModelProperty}
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
+import com.avsystem.commons._
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
@@ -34,8 +35,8 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
 
-  override def transformToSeq[B: PropertyCreator](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
-    new ImmutableSeqProperty[B, Seq](transformer(value))
+  override def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+    new ImmutableSeqProperty[B, BSeq](transformer(value))
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
     if (initUpdate) target.set(transformer(value))
@@ -57,10 +58,10 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: Seq[T]](value: SeqTpe[A])
-  extends ImmutableProperty[Seq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
+private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
+  extends ImmutableProperty[BSeq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
-  override lazy val elemProperties: Seq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
+  override lazy val elemProperties: BSeq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
 
   override def size: Int = value.size
   override def isEmpty: Boolean = value.isEmpty

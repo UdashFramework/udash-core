@@ -10,6 +10,7 @@
           <option value="io.udash.properties.model._" />
           <option value="io.udash.properties.seq._" />
           <option value="io.udash.properties.single._" />
+          <option value="scala.collection.compat._" />
         </array>
       </option>
       <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />

@@ -1,6 +1,6 @@
 package io.udash.web.guide.components
 
-import com.avsystem.commons.misc.OptArg
+import com.avsystem.commons.OptArg
 import io.udash._
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.MobileMenuStyles

@@ -6,7 +6,7 @@ import org.scalajs.dom
 
 class WindowUrlPathChangeProviderTest extends AsyncUdashFrontendTest {
   "WindowUrlPathChangeProvider" should {
-    val provider = new WindowUrlPathChangeProvider()
+    val provider = new routing.WindowUrlPathChangeProvider()
 
     "modify history on fragment change" in {
       val historyLength = dom.window.history.length

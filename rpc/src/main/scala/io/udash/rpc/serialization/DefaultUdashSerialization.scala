@@ -11,10 +11,10 @@ import scala.annotation.implicitNotFound
 
 trait DefaultUdashSerialization {
   implicit def genCodecBasedAsReal[T: GenCodec]: Fallback[AsReal[JsonStr, T]] =
-    Fallback(AsReal.create(jsonStr => JsonStringInput.read[T](jsonStr.json)))
+    Fallback(jsonStr => JsonStringInput.read[T](jsonStr.json))
 
   implicit def genCodecBasedAsRaw[T: GenCodec]: Fallback[AsRaw[JsonStr, T]] =
-    Fallback(AsRaw.create(value => JsonStr(JsonStringOutput.write[T](value))))
+    Fallback(value => JsonStr(JsonStringOutput.write[T](value)))
 
   @implicitNotFound("#{forGenCodec}")
   implicit def asRealNotFound[T](
