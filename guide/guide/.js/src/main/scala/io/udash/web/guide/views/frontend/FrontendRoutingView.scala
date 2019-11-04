@@ -87,15 +87,16 @@ class FrontendRoutingView(url: Property[String]) extends FinalView with CssView 
         |
         |sealed abstract class RoutingState(
         |  val parentState: Option[ContainerRoutingState]
-        |) extends State[RoutingState]
-        |
+        |) extends State {
+        |  override type HierarchyRoot = RoutingState
+        |}
         |sealed abstract class ContainerRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with ContainerState[RoutingState]
+        |) extends RoutingState(parentState) with ContainerState
         |
         |sealed abstract class FinalRoutingState(
         |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState) with FinalState[RoutingState]
+        |) extends RoutingState(parentState) with FinalState
         |
         |case object RootState extends ContainerRoutingState(None)
         |case class UsersListState(searchQuery: Option[String]) extends FinalRoutingState(Some(RootState))
