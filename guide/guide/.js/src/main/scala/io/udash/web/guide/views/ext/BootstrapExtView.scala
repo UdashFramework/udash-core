@@ -55,7 +55,7 @@ class BootstrapExtView extends View {
     h2("First steps"),
     p("To start development with the Bootstrap wrapper add the following line in you frontend module dependencies: "),
     CodeBlock(
-      s""""io.udash" %%% "udash-bootstrap" % "${Versions.udashVersion}"""".stripMargin
+      s""""io.udash" %%% "udash-bootstrap4" % "${Versions.udashVersion}"""".stripMargin
     )(GuideStyles),
     p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage, target := "_blank")("Twitter Bootstrap"), " API."),
     h2("Statics"),
