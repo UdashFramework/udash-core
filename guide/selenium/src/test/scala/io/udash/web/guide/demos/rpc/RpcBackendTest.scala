@@ -7,15 +7,9 @@ class RpcBackendTest extends SeleniumTest with BeforeAndAfterEach {
   override protected final val url = "/rpc/client-server"
 
   "RpcBackend view" should {
-    "contain example button" in {
-      eventually {
-        driver.findElementById("client-id-demo")
-      }
-    }
-
     "receive ClientId in demo" in {
-      val callDemo = driver.findElementById("client-id-demo")
-      var response = driver.findElementById("client-id-demo-response")
+      val callDemo = findElementById("client-id-demo")
+      var response = findElementById("client-id-demo-response")
 
       callDemo.isEnabled should be(true)
       response.getText.equalsIgnoreCase("???") should be(true)
@@ -23,7 +17,7 @@ class RpcBackendTest extends SeleniumTest with BeforeAndAfterEach {
       callDemo.click()
 
       eventually {
-        response = driver.findElementById("client-id-demo-response")
+        response = findElementById("client-id-demo-response")
         response.getText.startsWith("ClientId") should be(true)
         callDemo.isEnabled should be(false)
       }

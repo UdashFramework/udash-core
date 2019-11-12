@@ -9,14 +9,8 @@ class RpcFrontendTest extends SeleniumTest {
   override protected final val url = "/rpc/server-client"
 
   "RpcFrontend view" should {
-    "contain example button" in {
-      eventually {
-        driver.findElementById("notifications-demo")
-      }
-    }
-
     "receive msg every second after registration" in {
-      val callDemo = driver.findElementById("notifications-demo")
+      val callDemo = findElementById("notifications-demo")
 
       callDemo.isEnabled should be(true)
       var responseText = responseElement.getText.stripPrefix("Last message: ")
@@ -43,5 +37,5 @@ class RpcFrontendTest extends SeleniumTest {
     }
   }
 
-  private def responseElement: WebElement = driver.findElementById("notifications-demo-response")
+  private def responseElement: WebElement = findElementById("notifications-demo-response")
 }

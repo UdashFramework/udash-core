@@ -11,20 +11,9 @@ class FrontendFormsTest extends SeleniumTest {
   override protected final val url = "/frontend/forms"
 
   "FrontendForms view" should {
-    "contain demo elements" in {
-      eventually {
-        driver.findElementById("checkbox-demo")
-        driver.findElementById("check-buttons-demo")
-        driver.findElementById("multi-select-demo")
-        driver.findElementById("radio-buttons-demo")
-        driver.findElementById("select-demo")
-        driver.findElementById("text-area-demo")
-        driver.findElementById("inputs-demo")
-      }
-    }
 
     "contain working checkbox demo" in {
-      val checkboxes = driver.findElementById("checkbox-demo")
+      val checkboxes = findElementById("checkbox-demo")
 
       def clickAndCheck(propertyName: String, expect: String) = {
         val checkbox = checkboxes.findElement(new ByClassName(s"checkbox-demo-$propertyName"))
@@ -50,7 +39,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working check buttons demo" in {
-      val checkButtons = driver.findElementById("check-buttons-demo")
+      val checkButtons = findElementById("check-buttons-demo")
 
       def clickAndCheck(propertyName: String) = {
         val checkbox = checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
@@ -72,7 +61,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working multi select demo" in {
-      val multiSelect = driver.findElementById("multi-select-demo")
+      val multiSelect = findElementById("multi-select-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = multiSelect.findElement(new ByTagName("select"))
@@ -97,7 +86,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working radio buttons demo" in {
-      val radioButtons = driver.findElementById("radio-buttons-demo")
+      val radioButtons = findElementById("radio-buttons-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
@@ -121,7 +110,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working select demo" in {
-      val selectDemo = driver.findElementById("select-demo")
+      val selectDemo = findElementById("select-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = selectDemo.findElement(new ByTagName("select"))
@@ -145,7 +134,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working text area demo" in {
-      val textAreaDemo = driver.findElementById("text-area-demo")
+      val textAreaDemo = findElementById("text-area-demo")
 
       def typeAndCheck(text: String) = {
         val textArea = textAreaDemo.findElement(new ByTagName("textarea"))
@@ -164,7 +153,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working text input demo" in {
-      val inputsDemo = driver.findElementById("inputs-demo")
+      val inputsDemo = findElementById("inputs-demo")
 
       def typeAndCheck(text: String, tpe: String) = {
         val input = inputsDemo.findElement(new ByCssSelector(s"input[type=$tpe]"))
@@ -186,7 +175,7 @@ class FrontendFormsTest extends SeleniumTest {
 
     //todo migrate content from udash selenium or remove
     "contain working range input demo" ignore {
-      val demo = driver.findElementById("range-input-demo")
+      val demo = findElementById("range-input-demo")
 
       val minInput = demo.findElement(By.id("range-min"))
       val maxInput = demo.findElement(By.id("range-max"))

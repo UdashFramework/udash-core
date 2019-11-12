@@ -12,14 +12,13 @@ class FrontendBindingsTest extends SeleniumTest {
   "FrontendBinding view" should {
     "contain demo elements" in {
       eventually {
-        driver.findElementById("bind-demo")
-        driver.findElementById("produce-demo")
-        driver.findElementById("repeat-demo")
+        findElementById("bind-attr-demo")
+        findElementById("show-if-demo")
       }
     }
 
     "contain working bind demo" in {
-      def bind = driver.findElementById("bind-demo")
+      def bind = findElementById("bind-demo")
 
       def checkName(expect: String) = {
         eventually {
@@ -36,7 +35,7 @@ class FrontendBindingsTest extends SeleniumTest {
     }
 
     "contain working produce demo" in {
-      def produce = driver.findElementById("produce-demo")
+      def produce = findElementById("produce-demo")
 
       def checkName(expect: String) = {
         eventually {
@@ -70,7 +69,7 @@ class FrontendBindingsTest extends SeleniumTest {
     }
 
     "contain working repeat demo" in {
-      def validation = driver.findElementById("repeat-demo")
+      def validation = findElementById("repeat-demo")
 
       def collectIntegers(container: WebElement): String = {
         container.findElements(new ByCssSelector("*")).asScala.foldLeft("")((result, el) => result + el.getText)
