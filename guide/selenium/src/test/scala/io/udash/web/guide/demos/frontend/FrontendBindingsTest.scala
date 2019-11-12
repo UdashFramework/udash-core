@@ -10,6 +10,13 @@ class FrontendBindingsTest extends SeleniumTest {
   override protected final val url = "/frontend/bindings"
 
   "FrontendBinding view" should {
+    "contain demo elements" in {
+      eventually {
+        driver.findElementById("bind-attr-demo")
+        driver.findElementById("show-if-demo")
+      }
+    }
+
     "contain working bind demo" in {
       def bind = findElementById("bind-demo")
 
