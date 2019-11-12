@@ -7,14 +7,8 @@ class FrontendIntroTest extends SeleniumTest {
   override protected final val url = "/frontend"
 
   "FrontendIntro view" should {
-    "contain demo element" in {
-      eventually {
-        driver.findElementById("frontend-intro-demo")
-      }
-    }
-
     "give response on init values" in {
-      val demo = driver.findElementById("frontend-intro-demo")
+      val demo = findElementById("frontend-intro-demo")
       val valid = demo.findElement(new ById("valid"))
 
       eventually {
@@ -23,7 +17,7 @@ class FrontendIntroTest extends SeleniumTest {
     }
 
     "report invalid values" in {
-      val demo = driver.findElementById("frontend-intro-demo")
+      val demo = findElementById("frontend-intro-demo")
       val minimum = demo.findElement(new ById("minimum"))
       val between = demo.findElement(new ById("between"))
       val maximum = demo.findElement(new ById("maximum"))
@@ -80,7 +74,7 @@ class FrontendIntroTest extends SeleniumTest {
     }
 
     "randomize values on button click" in {
-      val demo = driver.findElementById("frontend-intro-demo")
+      val demo = findElementById("frontend-intro-demo")
       val randomizeButton = eventually { demo.findElement(new ById("randomize")) }
       val minimum = demo.findElement(new ById("minimum"))
       val between = demo.findElement(new ById("between"))

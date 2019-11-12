@@ -11,14 +11,8 @@ class RestIntroTest extends SeleniumTest {
   val url = "/rest"
 
   "RestIntro view" should {
-    "contain REST simple demo" in {
-      eventually {
-        driver.findElementById("simple-rest-demo")
-      }
-    }
-
     "receive response in demo" in {
-      val callDemo = driver.findElementById("simple-rest-demo")
+      val callDemo = findElementById("simple-rest-demo")
       val stringButton = callDemo.findElement(new ById("simple-rest-demo-string-btn"))
       val intButton = callDemo.findElement(new ById("simple-rest-demo-int-btn"))
       val classButton = callDemo.findElement(new ById("simple-rest-demo-class-btn"))

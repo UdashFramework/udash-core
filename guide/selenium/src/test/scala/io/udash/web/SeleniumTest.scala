@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit
 
 import com.avsystem.commons.spring.HoconBeanDefinitionReader
 import io.udash.web.server.ApplicationServer
-import org.openqa.selenium.Dimension
 import org.openqa.selenium.remote.RemoteWebDriver
+import org.openqa.selenium.{Dimension, WebElement}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, WordSpec}
@@ -54,6 +54,10 @@ abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAl
   protected final val driver: RemoteWebDriver = testingCtx.getBean(classOf[RemoteWebDriver])
   driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
   driver.manage().window().setSize(new Dimension(1440, 800))
+
+  protected final def findElementById(id: String): WebElement = eventually {
+    driver.findElementById(id)
+  }
 
   protected def url: String
 
