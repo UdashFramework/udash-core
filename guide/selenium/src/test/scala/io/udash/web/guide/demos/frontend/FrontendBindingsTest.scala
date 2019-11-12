@@ -12,8 +12,8 @@ class FrontendBindingsTest extends SeleniumTest {
   "FrontendBinding view" should {
     "contain demo elements" in {
       eventually {
-        driver.findElementById("bind-attr-demo")
-        driver.findElementById("show-if-demo")
+        findElementById("bind-attr-demo")
+        findElementById("show-if-demo")
       }
     }
 
