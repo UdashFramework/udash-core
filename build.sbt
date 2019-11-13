@@ -3,6 +3,7 @@ import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
+import sbt.Def
 
 name := "udash"
 
@@ -127,7 +128,7 @@ val aggregateProjectSettings = noPublishSettings ++ Seq(
   crossScalaVersions := Nil,
 )
 
-def sourceDirsSettings(baseMapper: File => File) = {
+def sourceDirsSettings(baseMapper: File => File): Seq[Def.Setting[Seq[File]]] = {
   def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
     base / "src" / conf / "scala",
     base / "src" / conf / s"scala-$scalaBinary",

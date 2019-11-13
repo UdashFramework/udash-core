@@ -15,7 +15,6 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
     import io.udash.bootstrap.dropdown.UdashDropdown
     import io.udash.bootstrap.dropdown.UdashDropdown._
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
@@ -69,7 +68,7 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
+
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

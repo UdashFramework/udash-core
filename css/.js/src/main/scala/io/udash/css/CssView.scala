@@ -7,31 +7,25 @@ import scalatags.JsDom.all.Modifier
 
 import scala.annotation.tailrec
 
-/** Contains integration of CSS structures with Scalatags. */
 trait CssView extends CssText {
-
   import CssView._
 
   implicit def style2Mod(style: CssStyle): Modifier = new StyleModifier(style)
-  implicit def elementOps(element: Element): ElementOps = new ElementOps(element)
   implicit def styleOps(style: CssStyle): StyleOps = new StyleOps(style)
   implicit def styleFactoryOps[T](factory: T => CssStyle): StyleFactoryOps[T] = new StyleFactoryOps[T](factory)
 }
 
 object CssView extends CssView {
-  private final class StyleModifier(styles: CssStyle*) extends Modifier {
-    override def applyTo(t: Element): Unit =
-      styles.foreach(_.addTo(t))
-  }
-
-  final class ElementOps(private val element: Element) extends AnyVal {
-    def styles(styles: CssStyle*): Element = {
-      styles.foreach(_.addTo(element))
-      element
-    }
+  private final class StyleModifier(style: CssStyle) extends Modifier {
+    override def applyTo(t: Element): Unit = style.addTo(t)
   }
 
   final class StyleOps(private val style: CssStyle) extends AnyVal {
+    def +:(element: Element): Element = {
+      addTo(element)
+      element
+    }
+
     def addTo(element: Element): Unit =
       style.classNames.foreach(element.classList.add)
 

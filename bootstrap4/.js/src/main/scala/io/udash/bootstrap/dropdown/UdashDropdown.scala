@@ -30,7 +30,6 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
   import UdashDropdown._
   import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
-  import io.udash.css.CssView._
 
   /** Dropdown menu list ID. */
   val menuId: ComponentId = componentId.subcomponent("menu")
@@ -144,7 +143,7 @@ object UdashDropdown {
   /** Renders DOM element for [[io.udash.bootstrap.dropdown.UdashDropdown.DefaultDropdownItem]]. */
   def defaultItemFactory(item: DefaultDropdownItem, nested: Binding.NestedInterceptor): Element = {
     import DefaultDropdownItem._
-    import io.udash.css.CssView._
+
     item match {
       case Text(text) =>
         span(BootstrapStyles.Dropdown.itemText, text).render
@@ -157,7 +156,7 @@ object UdashDropdown {
       case Header(title) =>
         h6(BootstrapStyles.Dropdown.header)(title).render
       case Disabled(item) =>
-        val res = defaultItemFactory(item, nested).styles(BootstrapStyles.disabled)
+        val res = defaultItemFactory(item, nested) +: BootstrapStyles.disabled
         res.addEventListener("click", (ev: Event) => {
           ev.preventDefault()
           ev.stopPropagation()

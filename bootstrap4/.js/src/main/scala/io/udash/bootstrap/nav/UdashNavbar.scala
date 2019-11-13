@@ -19,11 +19,9 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
 )(
   navigationFactory: Binding.NestedInterceptor => Modifier,
   brand: Modifier
-)
-  extends UdashBootstrapComponent {
+) extends UdashBootstrapComponent {
 
   import io.udash.bootstrap.utils.BootstrapTags._
-  import io.udash.css.CssView._
 
   private val collapseId = ComponentId.newId()
 
@@ -87,9 +85,9 @@ object UdashNavbar {
     navigationFactory: Binding.NestedInterceptor => UdashNav[ItemType, ElemType],
     brand: Modifier = ()
   ): UdashNavbar[ItemType, ElemType] = {
-    import io.udash.css.CssView._
+
     new UdashNavbar(expandBreakpoint, darkStyle, backgroundStyle, position, componentId)(
-      interceptor => navigationFactory(interceptor).render.styles(BootstrapStyles.NavigationBar.nav),
+      interceptor => navigationFactory(interceptor).render +: BootstrapStyles.NavigationBar.nav,
       brand
     )
   }

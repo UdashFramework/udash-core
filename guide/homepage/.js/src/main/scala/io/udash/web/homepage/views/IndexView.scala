@@ -6,9 +6,9 @@ import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.views.{Image, SVG, Size}
 import io.udash.web.homepage._
-import io.udash.web.homepage.components.Buttons
 import io.udash.web.homepage.components.demo.DemoComponent
-import io.udash.web.homepage.styles.partials.HomepageStyles
+import io.udash.web.homepage.styles.partials.{ButtonsStyle, HomepageStyles}
+import scalatags.JsDom
 
 case object IndexViewFactory extends ViewFactory[IndexState] {
   override def create(): (View, Presenter[IndexState]) = {
@@ -37,11 +37,20 @@ class IndexView(state: Property[IndexState]) extends View {
 }
 
 private object IndexView {
-  import io.udash.css.CssView._
-  import scalatags.JsDom.all._
-  import scalatags.JsDom.tags2._
 
-  private val sectionIntro = section(HomepageStyles.sectionIntro)(
+  import JsDom.all._
+
+  private def whiteBorderButton(link: String, label: String, xs: Modifier*): Modifier =
+    a(href := link, target := "_blank", ButtonsStyle.btnDefault, xs: Modifier)(
+      div(ButtonsStyle.btnDefaultInner)(label)
+    )
+
+  private def blackBorderButton(link: String, label: String, xs: Modifier*): Modifier =
+    a(href := link, target := "_blank", ButtonsStyle.btnDefault, ButtonsStyle.btnDefaultBlack, xs: Modifier)(
+      div(ButtonsStyle.btnDefaultInner, ButtonsStyle.btnDefaultInnerBlack)(label)
+    )
+
+  private val sectionIntro = JsDom.tags2.section(HomepageStyles.sectionIntro)(
     div(GlobalStyles.body, HomepageStyles.body)(
       div(HomepageStyles.introInner)(
         a(href := ExternalUrls.scalajs, HomepageStyles.introScala, target := "_blank")(
@@ -55,12 +64,12 @@ private object IndexView {
           span("framework for building", br(), "beautiful and maintainable", br()),
           span(GlobalStyles.grey)("Web Applications")
         ),
-        Buttons.whiteBorderButton(ExternalUrls.guide, "Start your project")
+        whiteBorderButton(ExternalUrls.guide, "Start your project")
       )
     )
   )
 
-  private val sectionFeatures = section(HomepageStyles.section)(
+  private val sectionFeatures = JsDom.tags2.section(HomepageStyles.section)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1(
         "Combined forces", br(), "of Scala & JavaScript"
@@ -85,7 +94,7 @@ private object IndexView {
     )
   )
 
-  private val sectionMore = section(HomepageStyles.section)(
+  private val sectionMore = JsDom.tags2.section(HomepageStyles.section)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1("Why Udash?"),
       ul(HomepageStyles.moreList)(
@@ -131,12 +140,12 @@ private object IndexView {
     )
   )
 
-  private def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
+  private def sectionDemo(state: Property[IndexState]) = JsDom.tags2.section(HomepageStyles.sectionDemo)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1("Have a code preview"),
       new DemoComponent(state).getTemplate,
       p(HomepageStyles.demoDescription)("It's free, try it now!"),
-      Buttons.blackBorderButton(ExternalUrls.guide, "Start your project")
+      blackBorderButton(ExternalUrls.guide, "Start your project")
     )
   )
 }

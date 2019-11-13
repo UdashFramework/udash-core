@@ -27,7 +27,6 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
   isDisabled: ElemType => ReadableProperty[Boolean],
   isDropdown: ElemType => ReadableProperty[Boolean]
 ) extends UdashBootstrapComponent {
-  import io.udash.css.CssView._
 
   override val render: Element = {
     ul(
@@ -67,7 +66,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
 }
 
 object UdashNav {
-  import io.udash.css.CssView._
+
 
   /** Default navigation model. */
   class NavItem(val name: String, val link: Url)

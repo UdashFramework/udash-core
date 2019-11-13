@@ -10,7 +10,6 @@ import org.scalajs.dom._
 import scalatags.JsDom.all._
 
 object RpcLoggingDemo {
-  import io.udash.css.CssView._
   def apply(model: ReadableSeqProperty[Call], loadCalls: () => Any): dom.Element =
     span(GuideStyles.frame, GuideStyles.useBootstrap)(
       button(

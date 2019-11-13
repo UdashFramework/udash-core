@@ -11,7 +11,6 @@ import scalatags.JsDom.tags2._
 object ContentViewFactory extends StaticViewFactory[ContentState.type](() => new ContentView)
 
 class ContentView extends ViewContainer {
-  import io.udash.css.CssView._
 
   import scalatags.JsDom.all._
 

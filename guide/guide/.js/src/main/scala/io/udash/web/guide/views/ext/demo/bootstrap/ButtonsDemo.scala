@@ -13,7 +13,6 @@ object ButtonsDemo extends AutoDemo {
     import BootstrapStyles._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.css.CssStyle
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     import scala.util.Random
@@ -74,7 +73,6 @@ object ButtonsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

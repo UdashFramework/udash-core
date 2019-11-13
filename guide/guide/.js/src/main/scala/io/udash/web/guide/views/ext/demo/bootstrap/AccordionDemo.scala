@@ -10,7 +10,6 @@ object AccordionDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.collapse.{UdashAccordion, UdashCollapse}
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val events = SeqProperty.blank[UdashCollapse.CollapseEvent]
@@ -33,7 +32,6 @@ object AccordionDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

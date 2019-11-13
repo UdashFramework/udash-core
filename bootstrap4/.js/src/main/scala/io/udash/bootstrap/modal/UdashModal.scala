@@ -24,7 +24,6 @@ final class UdashModal private(
 ) extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
 
   import UdashModal._
-  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
   import scalatags.JsDom.all._
 
@@ -44,7 +43,7 @@ final class UdashModal private(
       (bodyFactory, BootstrapStyles.Modal.body),
       (footerFactory, BootstrapStyles.Modal.footer)
     ).collect { case (Some(factory), styleName) =>
-      factory(nestedInterceptor).styles(styleName)
+      factory(nestedInterceptor) +: styleName
     }
 
     val el = div(

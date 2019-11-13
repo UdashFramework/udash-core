@@ -15,8 +15,6 @@ class UdashBadge private[badge](
 )(content: Binding.NestedInterceptor => Modifier)
   extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   protected def baseTag: TypedTag[Element] = span
 
   override val render: Element = {

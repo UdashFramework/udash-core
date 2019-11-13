@@ -45,7 +45,7 @@ final class MarkdownPresenter[T <: MarkdownPageState](
 }
 
 final class MarkdownView(model: ReadableModelProperty[MarkdownModel]) extends View {
-  import io.udash.css.CssView._
+
   import scalatags.JsDom.all._
 
   override val getTemplate: Modifier = ISeq(

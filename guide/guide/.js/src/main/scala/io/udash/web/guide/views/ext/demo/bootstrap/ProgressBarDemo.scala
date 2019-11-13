@@ -13,7 +13,6 @@ object ProgressBarDemo extends AutoDemo {
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.progressbar.UdashProgressBar
     import io.udash.css.CssStyleName
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val showPercentage = Property(true)
@@ -76,7 +75,6 @@ object ProgressBarDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

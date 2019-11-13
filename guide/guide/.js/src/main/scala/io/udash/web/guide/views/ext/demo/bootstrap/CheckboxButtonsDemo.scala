@@ -11,7 +11,6 @@ object CheckboxButtonsDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.button.UdashButtonGroup
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val options = SeqProperty("Checkbox 1", "Checkbox 2", "Checkbox 3")
@@ -40,7 +39,6 @@ object CheckboxButtonsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

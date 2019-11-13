@@ -8,7 +8,6 @@ object StaticsDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     div(Grid.row)(
@@ -37,7 +36,6 @@ object StaticsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

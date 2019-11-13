@@ -16,8 +16,6 @@ final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] p
   isActive: ItemType => Boolean
 ) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   override val render: Element = {
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2.nav

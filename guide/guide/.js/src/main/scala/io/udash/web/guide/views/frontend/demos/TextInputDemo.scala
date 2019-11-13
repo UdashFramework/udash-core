@@ -10,7 +10,6 @@ object TextInputDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.form.UdashInputGroup
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import org.scalajs.dom.html.Div
     import scalatags.JsDom
     import scalatags.JsDom.all._
@@ -53,7 +52,7 @@ object TextInputDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
+
     (div(id := "inputs-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(containerFluid)(
         firstInputs, br, secondInputs

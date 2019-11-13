@@ -25,7 +25,6 @@ final class UdashButton private(
   override val componentId: ComponentId,
   tag: UdashButton.ButtonTag
 )(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
-  import io.udash.css.CssView._
 
   private val classes: List[Modifier] = {
     (BootstrapStyles.Button.btn: Modifier) ::

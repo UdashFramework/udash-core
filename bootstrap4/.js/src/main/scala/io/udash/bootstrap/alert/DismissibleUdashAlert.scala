@@ -11,7 +11,6 @@ import scalatags.JsDom.all._
 final class DismissibleUdashAlert private[alert](
   alertStyle: ReadableProperty[BootstrapStyles.Color], override val componentId: ComponentId
 )(content: Binding.NestedInterceptor => Modifier) extends UdashAlertBase(alertStyle, componentId) {
-  import io.udash.css.CssView._
 
   private val _dismissed = Property[Boolean](false)
 

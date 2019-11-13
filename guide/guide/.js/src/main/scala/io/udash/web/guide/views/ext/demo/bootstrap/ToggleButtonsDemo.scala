@@ -10,7 +10,6 @@ object ToggleButtonsDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val buttons = Color.values.map { color =>
@@ -48,7 +47,6 @@ object ToggleButtonsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

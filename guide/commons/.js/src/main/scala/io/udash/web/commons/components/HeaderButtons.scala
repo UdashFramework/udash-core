@@ -8,7 +8,6 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 trait HeaderButtons {
-  import io.udash.css.CssView._
 
   val buttonStyles: HeaderButtonsStyles
 

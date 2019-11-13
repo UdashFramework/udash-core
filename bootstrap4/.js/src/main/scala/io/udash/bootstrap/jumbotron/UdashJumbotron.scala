@@ -12,8 +12,6 @@ final class UdashJumbotron private(
   override val componentId: ComponentId
 )(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   override val render: Element = {
     div(
       id := componentId,

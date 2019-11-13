@@ -21,7 +21,6 @@ final class UdashCollapse private(
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._
-  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 
   /** Toggle state of this collapse. */

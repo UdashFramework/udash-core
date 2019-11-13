@@ -27,7 +27,6 @@ final class UdashDatePicker private[datepicker](
 ) extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with CrossLogging {
 
   import UdashDatePicker._
-  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   private val inp = input(

@@ -10,7 +10,6 @@ object RadioButtonsDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val options = SeqProperty("Radio 1", "Radio 2", "Radio 3")
@@ -37,7 +36,6 @@ object RadioButtonsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

@@ -12,7 +12,6 @@ object TooltipsDemo extends AutoDemo {
     import io.udash.bootstrap.badge.UdashBadge
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.tooltip.UdashTooltip
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
@@ -61,7 +60,6 @@ object TooltipsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

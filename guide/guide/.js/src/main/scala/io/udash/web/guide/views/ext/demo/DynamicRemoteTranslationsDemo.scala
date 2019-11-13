@@ -9,7 +9,6 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import io.udash.i18n._
     import io.udash.web.guide.Context.serverRpc
     import io.udash.web.guide.demos.i18n.Translations
@@ -70,7 +69,6 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (
       div(
         id := "dynamic-rpc-translations-demo",

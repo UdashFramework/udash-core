@@ -12,7 +12,6 @@ object AlertsDemo extends AutoDemo {
     import BootstrapStyles._
     import io.udash.bootstrap.alert._
     import io.udash.bootstrap.button.UdashButton
-    import io.udash.css.CssView._
     import org.scalajs.dom.Element
     import scalatags.JsDom.all._
 
@@ -63,7 +62,6 @@ object AlertsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

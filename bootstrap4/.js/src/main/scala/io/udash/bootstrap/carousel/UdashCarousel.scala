@@ -33,7 +33,6 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import UdashCarousel._
   import io.udash.bootstrap.utils.BootstrapStyles.Carousel
   import io.udash.bootstrap.utils.BootstrapTags._
-  import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
 
   if (activeSlide.get >= slides.size) activeSlide.set(slides.size - 1)
@@ -300,7 +299,7 @@ object UdashCarousel {
   * @param caption Slide caption content.
   */
 case class UdashCarouselSlide(imgSrc: Url)(caption: Modifier*) {
-  import io.udash.css.CssView._
+
 
   lazy val render: Node = {
     Seq(

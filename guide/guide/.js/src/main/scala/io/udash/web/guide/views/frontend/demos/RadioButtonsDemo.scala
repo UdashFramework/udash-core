@@ -12,7 +12,6 @@ object RadioButtonsDemo extends AutoDemo {
     import io.udash.bootstrap.form.UdashInputGroup
     import io.udash.bootstrap.form.UdashInputGroup._
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import org.scalajs.dom.html.Input
     import scalatags.JsDom.all._
 
@@ -50,7 +49,7 @@ object RadioButtonsDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
+
     (div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(containerFluid)(
         div(Grid.row)(firstRadioButtons),
