@@ -274,10 +274,10 @@ class PropertyTest extends UdashCoreTest {
       val pageProperty = Property(1)
       val seenAllProperty = Property(false)
 
-      val totalPagesProperty = seenAllProperty.transform(all => {
+      val totalPagesProperty = seenAllProperty.transform { all =>
         counter += 1
         if (all) Some(pageProperty.get) else None
-      })
+      }
 
       val lastPageProperty = totalPagesProperty.combine(pageProperty) { (total, page) =>
         counter2 += 1
@@ -935,9 +935,9 @@ class PropertyTest extends UdashCoreTest {
 
     "stream value to another property" in {
       val source = SeqProperty(1, 2, 3)
-      val transformed = source.transform((i: Int) => i * 2)
+      val transformed = source.transformElements(_ * 2)
       val filtered = transformed.filter(_ < 10)
-      val sum = filtered.transform((s: BSeq[Int]) => s.sum)
+      val sum = filtered.transform(_.sum)
 
       val target = Property(42)
       val targetWithoutInit = Property(42)
@@ -1177,7 +1177,7 @@ class PropertyTest extends UdashCoreTest {
       val sp = p.asSeq[Int]
       sp.prepend(0)
 
-      sp.transform((_: Int) + 1).reversed().get shouldBe (5 to(1, -1))
+      sp.transformElements(_ + 1).reversed().get shouldBe (5 to(1, -1))
       sp.get shouldBe (0 to 4)
       p.get shouldBe (0 to 4)
     }

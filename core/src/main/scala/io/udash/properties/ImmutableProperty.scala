@@ -20,11 +20,11 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     */
   override def listen(valueListener: A => Any, initUpdate: Boolean): Registration = {
     if (initUpdate) valueListener(value)
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
-  override def listenOnce(valueListener: A => Any): Registration = ImmutableProperty.noopRegistration
+  override def listenOnce(valueListener: A => Any): Registration = ImmutableProperty.NoOpRegistration
 
   override protected[properties] def parent: ReadableProperty[_] = null
   override protected[properties] def fireValueListeners(): Unit = {}
@@ -40,7 +40,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
     if (initUpdate) target.set(transformer(value))
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
   }
 
   override def readable: ReadableProperty[A] = this
@@ -69,9 +69,9 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
   override def structureListenersCount(): Int = 0
 
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
 
-  override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformElements[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty(value.map(transformer))
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
@@ -87,7 +87,7 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
 }
 
 private[properties] object ImmutableProperty {
-  val noopRegistration = new Registration {
+  final val NoOpRegistration: Registration = new Registration {
     override def cancel(): Unit = {}
     override def restart(): Unit = {}
     override def isActive: Boolean = true
