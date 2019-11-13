@@ -1487,7 +1487,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
     "work with filtered transformed SeqProperty" in {
       val doubles = seq.SeqProperty[Double](1.5, 2.3, 3.7)
-      val ints = doubles.transformElements((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val ints = doubles.transformElements(_.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 
       val dom = div(

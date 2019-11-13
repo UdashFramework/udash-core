@@ -684,7 +684,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "be able to modify after transformation" in {
       val numbers = SeqProperty[Int](1, 2, 3)
-      val strings = numbers.transformElements((i: Int) => i.toString, (s: String) => Integer.parseInt(s))
+      val strings = numbers.transformElements(_.toString, (s: String) => Integer.parseInt(s))
 
       strings.append("4", "5", "6")
       numbers.get should be(Seq(1, 2, 3, 4, 5, 6))
@@ -696,7 +696,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "filter transformed property" in {
       val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
-      val ints = doubles.transformElements((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val ints = doubles.transformElements(_.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 
       doubles.listenersCount() should be(0)
