@@ -244,14 +244,14 @@ class PropertyUsageTest extends UdashCoreTest {
     "allow transformation of elements to ReadableProperty" in {
       """
         |val p: ReadableSeqProperty[Model.T, _ <: CastableReadableProperty[Model.T]] = SeqProperty.blank[Model.T]
-        |val t: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).get.i
+        |val t: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).get.i
         |""".stripMargin should compile
 
       """
         |val p: ReadableSeqProperty[Model.T, _ <: ReadableProperty[Model.T]] = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).asModel
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).asModel
         |""".stripMargin shouldNot compile
     }
 
@@ -307,14 +307,14 @@ class PropertyUsageTest extends UdashCoreTest {
     "allow transformation of elements to ReadableProperty" in {
       """
         |val p = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).get.i
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).get.i
         |""".stripMargin should compile
 
       """
         |val p = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).asModel
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).asModel
         |""".stripMargin shouldNot compile
     }
 
