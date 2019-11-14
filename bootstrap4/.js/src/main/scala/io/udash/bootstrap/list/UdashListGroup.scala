@@ -12,7 +12,6 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
   flush: ReadableProperty[Boolean],
   override val componentId: ComponentId
 )(itemFactory: (ElemType, Binding.NestedInterceptor) => Element) extends UdashBootstrapComponent {
-  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   override val render: Element =
@@ -22,7 +21,7 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
     )(
       nestedInterceptor(
         repeatWithNested(items) { (item, nested) =>
-          itemFactory(item, nested).styles(BootstrapStyles.ListGroup.item)
+          itemFactory(item, nested) +: BootstrapStyles.ListGroup.item
         }
       )
     ).render

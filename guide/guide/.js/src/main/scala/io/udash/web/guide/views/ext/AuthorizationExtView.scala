@@ -11,7 +11,7 @@ import scalatags.JsDom
 case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
 
 
-class AuthorizationExtView extends View with CssView {
+class AuthorizationExtView extends View {
   import Context._
 
   import JsDom.all._

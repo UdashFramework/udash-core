@@ -12,7 +12,7 @@ import scalatags.JsDom
 
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
-class BootstrappingFrontendView extends View with CssView {
+class BootstrappingFrontendView extends View {
   import Context._
   import JsDom.all._
 

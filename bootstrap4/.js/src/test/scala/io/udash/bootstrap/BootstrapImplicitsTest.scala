@@ -6,7 +6,6 @@ import io.udash.testing.UdashCoreFrontendTest
 import org.scalajs.dom.Element
 
 class BootstrapImplicitsTest extends UdashCoreFrontendTest {
-  import io.udash.css.CssView._
 
   "StyleOps" should {
     "apply style conditionally" in {

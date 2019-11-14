@@ -13,7 +13,6 @@ object SimpleModalDemo extends AutoDemo {
     import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
     import io.udash.bootstrap.modal.UdashModal
     import io.udash.bootstrap.modal.UdashModal._
-    import io.udash.css.CssView._
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
@@ -72,7 +71,6 @@ object SimpleModalDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

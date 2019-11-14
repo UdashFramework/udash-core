@@ -14,7 +14,7 @@ import scala.scalajs.js
 
 object RootViewFactory extends StaticViewFactory[RootState.type](() => new RootView)
 
-class RootView extends ContainerView with CssView {
+class RootView extends ContainerView {
   import scalatags.JsDom.all._
 
   private val content = div(

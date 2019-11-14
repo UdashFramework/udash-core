@@ -13,7 +13,6 @@ object PaginationDemo extends AutoDemo {
     import io.udash.bootstrap.button.{UdashButton, UdashButtonGroup}
     import io.udash.bootstrap.pagination.UdashPagination
     import io.udash.bootstrap.pagination.UdashPagination._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val showArrows = Property(true)
@@ -54,7 +53,6 @@ object PaginationDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
   }
 }

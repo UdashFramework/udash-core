@@ -10,7 +10,6 @@ object CheckButtonsDemo extends AutoDemo {
     import io.udash._
     import io.udash.bootstrap.form.UdashInputGroup
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import org.scalajs.dom.html.Input
     import scalatags.JsDom.all._
 
@@ -48,7 +47,6 @@ object CheckButtonsDemo extends AutoDemo {
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     (div(id := "check-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(containerFluid)(
         div(Grid.row)(div(firstCheckButtons)),

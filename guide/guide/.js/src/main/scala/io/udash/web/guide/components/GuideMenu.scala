@@ -23,7 +23,6 @@ case class MenuLink(override val name: String, state: RoutingState, fragment: Op
 
 class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
-  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   private val ClickEvent = "click"

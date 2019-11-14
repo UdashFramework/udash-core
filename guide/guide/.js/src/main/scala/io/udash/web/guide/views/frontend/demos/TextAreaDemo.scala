@@ -9,7 +9,6 @@ object TextAreaDemo extends AutoDemo {
   private val (rendered, source) = {
     import io.udash._
     import io.udash.bootstrap.utils.BootstrapStyles._
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     val text = Property("")
@@ -30,7 +29,6 @@ object TextAreaDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.linesIterator)
   }
 }

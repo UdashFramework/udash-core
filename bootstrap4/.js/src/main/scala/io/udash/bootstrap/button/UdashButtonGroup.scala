@@ -16,8 +16,6 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
   override val componentId: ComponentId
 )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   private def buttonFullWidth: Binding =
     BootstrapStyles.Sizing.width100.styleIf(justified)
 

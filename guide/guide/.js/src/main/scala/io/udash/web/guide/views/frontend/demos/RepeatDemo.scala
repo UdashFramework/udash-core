@@ -9,10 +9,8 @@ object RepeatDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._
-    import io.udash.css.CssView._
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
-
     import scala.util.Random
 
     val integers = SeqProperty(1, 2, 3, 4)
@@ -38,7 +36,6 @@ object RepeatDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.linesIterator)
   }
 }

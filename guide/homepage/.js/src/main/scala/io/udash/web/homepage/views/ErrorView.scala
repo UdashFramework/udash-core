@@ -14,7 +14,7 @@ import scalatags.JsDom.tags2._
 
 object ErrorViewFactory extends StaticViewFactory[IndexState](() => new ErrorView)
 
-class ErrorView extends View with CssView {
+class ErrorView extends View {
   import scalatags.JsDom.all._
 
   private val content = section(HomepageStyles.sectionError)(

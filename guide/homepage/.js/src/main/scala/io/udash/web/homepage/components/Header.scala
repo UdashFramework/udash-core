@@ -13,7 +13,6 @@ import org.scalajs.dom.raw.Element
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
-  import io.udash.css.CssView._
 
   override val buttonStyles: HeaderButtonsStyles = HeaderStyles
   override val navStyles: HeaderNavStyles = HeaderStyles

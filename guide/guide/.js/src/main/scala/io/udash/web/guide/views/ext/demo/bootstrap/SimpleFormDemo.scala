@@ -7,7 +7,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object SimpleFormDemo extends AutoDemo with CssView {
+object SimpleFormDemo extends AutoDemo {
 
   sealed trait ShirtSize
 

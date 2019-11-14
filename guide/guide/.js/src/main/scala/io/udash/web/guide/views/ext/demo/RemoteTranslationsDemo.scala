@@ -6,7 +6,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object RemoteTranslationsDemo extends AutoDemo with CssView {
+object RemoteTranslationsDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash.i18n._

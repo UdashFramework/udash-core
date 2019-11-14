@@ -4,7 +4,7 @@ import io.udash.web.commons.styles.components.HeaderNavStyles
 import org.scalajs.dom.Element
 
 trait HeaderNav {
-  import io.udash.css.CssView._
+
   import scalatags.JsDom.all._
   import scalatags.JsDom.tags2.nav
 

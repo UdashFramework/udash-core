@@ -9,10 +9,8 @@ object ProduceDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._
-    import io.udash.css.CssView._
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
-
     import scala.util.Random
 
     @silent("deprecated")
@@ -41,7 +39,6 @@ object ProduceDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (
       div(
         id := "produce-demo",

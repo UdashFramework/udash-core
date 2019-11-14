@@ -10,7 +10,6 @@ object IconsDemo extends AutoDemo {
     import io.udash.bootstrap._
     import io.udash.bootstrap.button._
     import io.udash.bootstrap.utils.UdashIcons
-    import io.udash.css.CssView._
     import scalatags.JsDom.all._
 
     UdashButtonToolbar()(
@@ -34,7 +33,6 @@ object IconsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    import io.udash.css.CssView._
     (div(GuideStyles.frame)(rendered), source.linesIterator)
   }
 }

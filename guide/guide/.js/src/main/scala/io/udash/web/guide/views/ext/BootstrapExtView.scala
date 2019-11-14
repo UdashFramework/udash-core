@@ -61,7 +61,7 @@ class BootstrapExtView extends View {
     h2("Statics"),
     p(
       "All Bootstrap tags and styles are available as UdashCSS styles. If you want to use ",
-      i("BootstrapStyles"), " import ", i("io.udash.css.CssView._"), ". It enables implicit conversion ",
+      i("BootstrapStyles"), " import ", i("io.udash.css.CssView._"), ". It enables implicit conversion ", //todo
       "from these styles into Scalatags modifiers."
     ),
     staticsSnippet,

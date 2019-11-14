@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object RpcServerClientViewFactory extends StaticViewFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
-class RpcServerClientView extends View with CssView {
+class RpcServerClientView extends View {
   import JsDom.all._
   import io.udash.web.guide.Context._
 

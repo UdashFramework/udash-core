@@ -5,7 +5,6 @@ import io.udash.testing.UdashFrontendTest
 
 class CssViewTest extends UdashFrontendTest {
 
-  import CssView._
   import StylesheetExample._
   import scalatags.JsDom.all._
 

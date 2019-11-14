@@ -11,8 +11,6 @@ final class UdashInputGroup private(
   override val componentId: ComponentId
 )(content: Modifier*) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   override val render: Element =
     div(
       BootstrapStyles.InputGroup.inputGroup,
@@ -21,7 +19,7 @@ final class UdashInputGroup private(
 }
 
 object UdashInputGroup {
-  import io.udash.css.CssView._
+
 
   /**
     * Creates an inputs group.
@@ -42,15 +40,15 @@ object UdashInputGroup {
 
   /** Adds `form-control` style to provided element. It's required to properly display input as part of group. */
   def input(el: Element): Element =
-    el.styles(BootstrapStyles.Form.control)
+    el +: BootstrapStyles.Form.control
 
   /** Adds `custom-select` style to provided element. It's required to properly display select as part of group. */
   def select(el: Element): Element =
-    el.styles(BootstrapStyles.Form.control, BootstrapStyles.InputGroup.customSelect)
+    (el +: BootstrapStyles.Form.control) +: BootstrapStyles.InputGroup.customSelect
 
   /** Adds `custom-file` style to provided element. It's required to properly display file input as part of group. */
   def file(el: Element): Element =
-    el.styles(BootstrapStyles.Form.control, BootstrapStyles.InputGroup.customFile)
+    (el +: BootstrapStyles.Form.control) +: BootstrapStyles.InputGroup.customFile
 
   /** Creates an element to be prepended to the input of this input group. */
   def prepend(content: Modifier*): Modifier =

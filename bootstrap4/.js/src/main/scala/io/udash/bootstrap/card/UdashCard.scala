@@ -6,7 +6,6 @@ import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.nav.UdashNav
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.css.CssView._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
@@ -98,19 +97,19 @@ final class UdashCard private(
     /** Puts the provided list group into the card with additional `list-group-flush` style.
       * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#list-groups">Bootstrap Docs</a>. */
     def listGroup(list: Binding.NestedInterceptor => UdashListGroup[_, _]): Modifier = {
-      list(externalBinding).render.styles(BootstrapStyles.ListGroup.flush)
+      list(externalBinding).render +: BootstrapStyles.ListGroup.flush
     }
 
     /** Puts the provided navigation tabs into the card with additional `card-header-tabs` style.
       * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
     def navigationTabs(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier = {
-      navigation(externalBinding).render.styles(BootstrapStyles.Card.navTabs)
+      navigation(externalBinding).render +: BootstrapStyles.Card.navTabs
     }
 
     /** Puts the provided navigation tabs into the card with additional `card-header-pills` style.
       * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
     def navigationPills(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier = {
-      navigation(externalBinding).render.styles(BootstrapStyles.Card.navPills)
+      navigation(externalBinding).render +: BootstrapStyles.Card.navPills
     }
   }
 

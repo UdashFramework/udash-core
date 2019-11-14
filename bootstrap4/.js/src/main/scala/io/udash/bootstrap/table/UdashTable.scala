@@ -24,8 +24,6 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
   rowFactory: (ElemType, Binding.NestedInterceptor) => Element
 ) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   override val render: Element = {
     div(
       nestedInterceptor((BootstrapStyles.Table.responsive _).reactiveOptionApply(responsive)),

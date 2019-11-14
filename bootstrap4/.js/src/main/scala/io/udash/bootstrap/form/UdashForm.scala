@@ -29,8 +29,6 @@ final class UdashForm private(
 )(content: FormElementsFactory => Modifier)
   extends UdashBootstrapComponent with Listenable[UdashForm, UdashForm.FormEvent] with CrossLogging {
 
-  import io.udash.css.CssView._
-
   private[form] val validationProperties: MSet[Property[Option[ValidationResult]]] = MSet.empty
 
   def clearValidationResults(): Unit = {
@@ -134,7 +132,7 @@ final class FormElementsFactory(
   form: OptArg[UdashForm] = OptArg.Empty
 ) extends CrossLogging {
 
-  import io.udash.css.CssView._
+
 
   /** Use this method to bond the external binding's lifecycle with the lifecycle of the elements created via this factory. */
   def externalBinding[T <: Binding](binding: T): T = {
@@ -582,7 +580,7 @@ final class FormElementsFactory(
 
         override val render: Element = div(
           id := groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
-          input.render.styles(BootstrapStyles.Form.customControlInput),
+          input.render +: BootstrapStyles.Form.customControlInput,
           nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
           label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
             labelContent.map(_.apply(nestedInterceptor)).getOrElse(span("\u00a0"))

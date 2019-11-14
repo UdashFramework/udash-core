@@ -15,7 +15,6 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
 object CodeBlock {
-  import io.udash.css.CssView._
 
   @js.native
   @JSGlobal("Prism")

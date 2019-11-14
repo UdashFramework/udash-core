@@ -5,7 +5,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object JQueryCallbacksDemo extends AutoDemo with CssView {
+object JQueryCallbacksDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash.bootstrap.button.UdashButton

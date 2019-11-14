@@ -16,7 +16,6 @@ object IntroFormDemo extends AutoDemo {
     import io.udash.bootstrap._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.form._
-    import io.udash.css.CssView._
     import io.udash.web.guide.components.BootstrapUtils
 
     import scala.collection.mutable

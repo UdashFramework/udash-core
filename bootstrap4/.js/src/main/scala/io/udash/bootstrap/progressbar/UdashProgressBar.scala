@@ -19,7 +19,6 @@ final class UdashProgressBar private[progressbar](
   override val componentId: ComponentId
 )(labelFactory: (ReadableProperty[Int], ReadableProperty[Int], ReadableProperty[Int], Binding.NestedInterceptor) => Modifier) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
 
   protected def barModifiers: Seq[Modifier] = Seq[Modifier](
     role := "progressbar", BootstrapStyles.ProgressBar.progressBar,

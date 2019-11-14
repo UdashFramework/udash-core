@@ -4,7 +4,6 @@ package alert
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.css.CssView._
 import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom.html.Div
 import scalatags.JsDom.TypedTag

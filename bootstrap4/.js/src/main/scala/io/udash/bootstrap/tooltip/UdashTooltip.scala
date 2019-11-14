@@ -48,7 +48,6 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
 
   override protected val defaultPlacement = Placement.Top
   override protected val defaultTemplate: String = {
-    import io.udash.css.CssView._
     import scalatags.Text.all._
     div(BootstrapStyles.Tooltip.tooltip, role := "tooltip")(
       div(BootstrapStyles.Tooltip.arrow),

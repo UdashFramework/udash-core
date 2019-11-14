@@ -10,7 +10,7 @@ import io.udash.web.guide.styles.partials.HeaderStyles
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
-  import io.udash.css.CssView._
+
   private lazy val template = header(HeaderStyles.header)(
     div(GlobalStyles.body, GlobalStyles.clearfix)(
       div(HeaderStyles.headerLeft)(

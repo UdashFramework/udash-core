@@ -24,8 +24,6 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
   additionalListModifiers: Binding.NestedInterceptor => Modifier
 ) extends UdashBootstrapComponent {
 
-  import io.udash.css.CssView._
-
   // keep track of pages sequence changes and update selected page
   propertyListeners += pages.listenStructure { patch =>
     if (patch.idx <= selectedPageIdx.get && patch.idx + patch.removed.size > selectedPageIdx.get) {

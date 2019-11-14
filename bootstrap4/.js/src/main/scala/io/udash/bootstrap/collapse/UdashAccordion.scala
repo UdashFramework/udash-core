@@ -21,7 +21,6 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
   with Listenable[UdashAccordion[ItemType, ElemType], UdashAccordion.AccordionEvent[ItemType, ElemType]] {
 
   import io.udash.bootstrap.utils.BootstrapTags._
-  import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]

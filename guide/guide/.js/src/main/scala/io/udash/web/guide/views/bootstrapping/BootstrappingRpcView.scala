@@ -9,7 +9,7 @@ import scalatags.JsDom
 
 case object BootstrappingRpcViewFactory extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
-class BootstrappingRpcView extends View with CssView {
+class BootstrappingRpcView extends View {
   import Context._
   import JsDom.all._
 

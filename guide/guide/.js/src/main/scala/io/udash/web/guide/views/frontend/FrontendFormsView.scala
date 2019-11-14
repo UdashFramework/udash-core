@@ -10,7 +10,7 @@ import scalatags.JsDom
 
 case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
-class FrontendFormsView extends View with CssView {
+class FrontendFormsView extends View {
   import JsDom.all._
   import io.udash.web.guide.Context._
 

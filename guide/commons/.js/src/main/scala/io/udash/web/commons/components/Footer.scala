@@ -11,7 +11,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 object Footer {
-  import io.udash.css.CssView._
+
   private val styles = FooterStyles
 
   private def template(wrapperStyle: Opt[CssStyle]): JsDom.TypedTag[Element] = footer(styles.footer)(

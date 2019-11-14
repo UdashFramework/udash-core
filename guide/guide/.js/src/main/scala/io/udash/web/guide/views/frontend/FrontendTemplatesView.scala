@@ -13,7 +13,7 @@ import scalatags.JsDom
 
 case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
-class FrontendTemplatesView extends View with CssView {
+class FrontendTemplatesView extends View {
   import JsDom.all._
   import io.udash.web.guide.Context._
 
