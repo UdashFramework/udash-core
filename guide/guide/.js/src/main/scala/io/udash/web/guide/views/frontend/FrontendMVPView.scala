@@ -11,7 +11,7 @@ import scalatags.JsDom
 
 case object FrontendMVPViewFactory extends StaticViewFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
-class FrontendMVPView extends View with CssView {
+class FrontendMVPView extends View {
   import Context._
   import JsDom.all._
 

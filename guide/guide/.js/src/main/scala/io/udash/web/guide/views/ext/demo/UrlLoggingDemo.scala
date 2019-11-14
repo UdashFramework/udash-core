@@ -6,7 +6,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object UrlLoggingDemo extends AutoDemo with CssView {
+object UrlLoggingDemo extends AutoDemo {
 
   private val ((enabled, history, add), source) = {
     import io.udash._

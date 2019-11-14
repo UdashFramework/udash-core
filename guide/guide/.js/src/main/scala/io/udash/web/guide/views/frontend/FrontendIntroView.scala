@@ -12,7 +12,7 @@ import scalatags.JsDom
 case object FrontendIntroViewFactory extends StaticViewFactory[FrontendIntroState.type](() => new FrontendIntroView)
 
 
-class FrontendIntroView extends View with CssView {
+class FrontendIntroView extends View {
   import Context._
   import JsDom.all._
 

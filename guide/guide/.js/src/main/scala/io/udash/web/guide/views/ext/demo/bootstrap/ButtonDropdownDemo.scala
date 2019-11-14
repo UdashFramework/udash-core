@@ -5,7 +5,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object ButtonDropdownDemo extends AutoDemo with CssView {
+object ButtonDropdownDemo extends AutoDemo {
 
   import io.udash.web.guide.Context._
   import io.udash.web.guide.{BootstrapExtState, IntroState}

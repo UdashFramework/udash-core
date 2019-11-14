@@ -6,7 +6,7 @@ import org.scalajs.dom._
 
 import scalatags.generic.Modifier
 
-trait Component extends Modifier[dom.Element] with CssView {
+trait Component extends Modifier[dom.Element] {
   def getTemplate: Modifier[dom.Element]
 
   def apply(): Modifier[dom.Element] = getTemplate

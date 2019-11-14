@@ -5,7 +5,7 @@ import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
 import scalatags.JsDom.all._
 
-object CssStylesApply extends CssView {
+object CssStylesApply {
 
   val styles = Benchmark("three styles") {
     div(

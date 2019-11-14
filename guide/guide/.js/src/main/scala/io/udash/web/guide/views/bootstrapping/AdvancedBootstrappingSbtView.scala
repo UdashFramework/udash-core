@@ -14,7 +14,7 @@ import scala.concurrent.Future
 
 case object AdvancedBootstrappingSbtViewFactory extends StaticViewFactory[AdvancedBootstrappingSbtState.type](() => new AdvancedBootstrappingSbtView)
 
-final class AdvancedBootstrappingSbtView extends View with CssView {
+final class AdvancedBootstrappingSbtView extends View {
 
   import Context._
   import JsDom.all._

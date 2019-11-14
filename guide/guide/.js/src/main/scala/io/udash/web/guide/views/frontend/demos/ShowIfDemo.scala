@@ -5,7 +5,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object ShowIfDemo extends AutoDemo with CssView {
+object ShowIfDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash._

@@ -5,7 +5,7 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-object PopoversDemo extends AutoDemo with CssView {
+object PopoversDemo extends AutoDemo {
 
   private val (rendered, source) = {
     import io.udash.bootstrap._
