@@ -103,7 +103,7 @@ object UdashCollapse {
   def apply(
     parentSelector: Option[String] = None,
     toggleOnInit: Boolean = true,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashCollapse = {
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
   }

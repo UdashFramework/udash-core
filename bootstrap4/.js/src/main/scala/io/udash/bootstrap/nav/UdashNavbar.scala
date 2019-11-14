@@ -25,7 +25,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
 
-  private val collapseId = ComponentId.newId()
+  private val collapseId = ComponentId.generate()
 
   override val render: Element =
     tags2.nav(
@@ -82,7 +82,7 @@ object UdashNavbar {
     darkStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     backgroundStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Light.toProperty,
     position: ReadableProperty[UdashNavbar.Position] = Position.Auto.toProperty,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     navigationFactory: Binding.NestedInterceptor => UdashNav[ItemType, ElemType],
     brand: Modifier = ()
@@ -117,7 +117,7 @@ object UdashNavbar {
     darkStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
     backgroundStyle: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Light.toProperty,
     position: ReadableProperty[UdashNavbar.Position] = Position.Auto.toProperty,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     navigationFactory: Binding.NestedInterceptor => Modifier,
     brand: Modifier = ()

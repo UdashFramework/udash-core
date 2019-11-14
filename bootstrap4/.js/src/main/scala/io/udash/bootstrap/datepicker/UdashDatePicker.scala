@@ -225,7 +225,7 @@ object UdashDatePicker {
   def apply(
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(): UdashDatePicker = {
     new UdashDatePicker(date, options, componentId)
   }
@@ -243,7 +243,7 @@ object UdashDatePicker {
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
     translatedTooltips: DatePickerTooltips[TranslationKey0],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )()(implicit lang: LangProperty, provider: TranslationProvider): UdashDatePicker = {
     val optionsWithTranslation = Property(options.get)
 

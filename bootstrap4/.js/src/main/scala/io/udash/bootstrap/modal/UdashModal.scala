@@ -136,7 +136,7 @@ object UdashModal {
     labelId: ReadableProperty[Option[String]] = UdashBootstrap.None,
     backdrop: ReadableProperty[UdashModal.BackdropType] = BackdropType.Active.toProperty,
     keyboard: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     headerFactory: Option[Binding.NestedInterceptor => Element],
     bodyFactory: Option[Binding.NestedInterceptor => Element],

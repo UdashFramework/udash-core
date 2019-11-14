@@ -45,7 +45,7 @@ object UdashListGroup {
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
     flush: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(itemFactory: (ElemType, Binding.NestedInterceptor) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, flush, componentId)(itemFactory)
 }

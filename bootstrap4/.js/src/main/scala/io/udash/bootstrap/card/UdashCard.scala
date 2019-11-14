@@ -142,7 +142,7 @@ object UdashCard {
     borderColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
     textAlignment: ReadableProperty[Option[BootstrapStyles.Align]] = UdashBootstrap.None,
     textColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: UdashCard#CardElementsFactory => Modifier): UdashCard = {
     new UdashCard(backgroundColor, borderColor, textAlignment, textColor, componentId)(content)
   }

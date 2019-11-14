@@ -42,7 +42,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
     div(BootstrapStyles.Collapse.accordion, id := componentId)(
       nestedInterceptor(
         repeatWithIndex(elements) { case (item, idx, nested) =>
-          val headingId = ComponentId.newId()
+          val headingId = ComponentId.generate()
           val card = UdashCard() { factory =>
             val collapse = UdashCollapse()(_ => Seq(
               aria.labelledby := headingId, dataParent := s"#$componentId",
@@ -106,7 +106,7 @@ object UdashAccordion {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     elements: seq.ReadableSeqProperty[ItemType, ElemType],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
     body: (ElemType, Binding.NestedInterceptor) => Seq[Element]

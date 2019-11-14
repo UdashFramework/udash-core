@@ -111,7 +111,7 @@ object UdashNav {
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     tabs: ReadableProperty[Boolean] = UdashBootstrap.False,
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     elemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
@@ -151,7 +151,7 @@ object UdashNav {
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     tabs: ReadableProperty[Boolean] = UdashBootstrap.False,
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     elemFactory: (ElemType, Binding.NestedInterceptor) => Element = defaultItemFactory,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,

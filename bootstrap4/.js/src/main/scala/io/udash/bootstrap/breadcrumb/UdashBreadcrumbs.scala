@@ -65,7 +65,7 @@ object UdashBreadcrumbs {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ElemType, Binding.NestedInterceptor) => Modifier,
     isActive: ItemType => Boolean = (_: ItemType) => false
@@ -85,7 +85,7 @@ object UdashBreadcrumbs {
     */
   def default(
     items: ReadableSeqProperty[Breadcrumb],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ReadableProperty[Breadcrumb], Binding.NestedInterceptor) => Modifier = defaultPageFactory,
     isActive: Breadcrumb => Boolean = (_: Breadcrumb) => false
@@ -105,7 +105,7 @@ object UdashBreadcrumbs {
     */
   def text(
     items: ReadableSeqProperty[String],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ReadableProperty[String], Binding.NestedInterceptor) => Modifier = (p, nested) => nested(bind(p)),
     isActive: String => Boolean = (_: String) => false

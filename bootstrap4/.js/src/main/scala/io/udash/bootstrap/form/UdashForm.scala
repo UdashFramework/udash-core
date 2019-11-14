@@ -118,7 +118,7 @@ object UdashForm {
     inline: Boolean = false,
     inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
     selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: FormElementsFactory => Modifier): UdashForm = {
     new UdashForm(
       Some(BootstrapStyles.Form.inline).filter(_ => inline),
@@ -181,7 +181,7 @@ final class FormElementsFactory(
      */
     def formGroup(
       horizontal: Option[HorizontalLayoutSettings] = None,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       input: Binding.NestedInterceptor => Element,
       labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -241,7 +241,7 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
@@ -276,7 +276,7 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
@@ -311,7 +311,7 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[Double] = Validator.Default
@@ -349,7 +349,7 @@ final class FormElementsFactory(
       maxValue: ReadableProperty[Double] = 100d.toProperty,
       valueStep: ReadableProperty[Double] = 1d.toProperty,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[Double] = Validator.Default
@@ -384,7 +384,7 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
@@ -429,7 +429,7 @@ final class FormElementsFactory(
       acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputName: String,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -479,7 +479,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -517,7 +517,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -561,8 +561,8 @@ final class FormElementsFactory(
       property: Property[Boolean],
       validationTrigger: ValidationTrigger = selectValidationTrigger,
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
-      inputId: ComponentId = ComponentId.newId(),
-      groupId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate(),
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -624,7 +624,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -669,7 +669,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,

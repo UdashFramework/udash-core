@@ -102,7 +102,7 @@ object UdashButton {
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     active: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton =
     new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
@@ -128,7 +128,7 @@ object UdashButton {
     outline: ReadableProperty[Boolean] = UdashBootstrap.False,
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton = {
     val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)

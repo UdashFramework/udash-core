@@ -179,7 +179,7 @@ object UdashPagination {
     paginationSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     showArrows: ReadableProperty[Boolean] = UdashBootstrap.True,
     highlightActive: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ElemType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory,
     arrowFactory: (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier = defaultArrowFactory(),

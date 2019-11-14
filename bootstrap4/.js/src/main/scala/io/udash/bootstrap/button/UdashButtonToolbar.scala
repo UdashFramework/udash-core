@@ -30,7 +30,7 @@ object UdashButtonToolbar {
    * @param groups      Rendered button groups belonging to the toolbar.
    * @return A `UdashButtonToolbar` component, call `render` to create a DOM element representing this toolbar.
    */
-  def apply(componentId: ComponentId = ComponentId.newId())(groups: Element*): UdashButtonToolbar[Element, Property[Element]] = {
+  def apply(componentId: ComponentId = ComponentId.generate())(groups: Element*): UdashButtonToolbar[Element, Property[Element]] = {
     reactive[Element, Property[Element]](SeqProperty[Element](groups), componentId)((item, _) => item.get)
   }
 
@@ -48,7 +48,7 @@ object UdashButtonToolbar {
    * @return A `UdashButtonToolbar` component, call `render` to create a DOM element representing this toolbar.
    */
   def reactive[ItemType, ElemType <: ReadableProperty[ItemType]](
-    items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.newId()
+    items: seq.ReadableSeqProperty[ItemType, ElemType], componentId: ComponentId = ComponentId.generate()
   )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]): UdashButtonToolbar[ItemType, ElemType] = {
     new UdashButtonToolbar[ItemType, ElemType](items, componentId)(itemFactory)
   }

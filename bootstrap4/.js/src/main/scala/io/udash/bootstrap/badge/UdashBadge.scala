@@ -54,7 +54,7 @@ object UdashBadge {
   def apply(
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadge(badgeStyle, pillStyle, componentId)(content)
   }
@@ -74,7 +74,7 @@ object UdashBadge {
     link: ReadableProperty[String],
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadgeLink(link, badgeStyle, pillStyle, componentId)(content)
   }

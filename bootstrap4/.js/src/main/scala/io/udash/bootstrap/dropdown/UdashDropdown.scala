@@ -33,9 +33,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   import io.udash.css.CssView._
 
   /** Dropdown menu list ID. */
-  val menuId: ComponentId = componentId.subcomponent("menu")
+  val menuId: ComponentId = componentId.withSuffix("menu")
   /** Dropdown button ID. */
-  val buttonId: ComponentId = componentId.subcomponent("button")
+  val buttonId: ComponentId = componentId.withSuffix("button")
 
   /** Toggles menu visibility. */
   def toggle(): Unit =
@@ -193,7 +193,7 @@ object UdashDropdown {
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
     rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     buttonContent: Binding.NestedInterceptor => Modifier,
@@ -222,7 +222,7 @@ object UdashDropdown {
     dropDirection: ReadableProperty[Direction] = Direction.Down.toProperty,
     rightAlignMenu: ReadableProperty[Boolean] = UdashBootstrap.False,
     buttonToggle: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     buttonContent: Binding.NestedInterceptor => Modifier
   ): UdashDropdown[DefaultDropdownItem, ElemType] = {

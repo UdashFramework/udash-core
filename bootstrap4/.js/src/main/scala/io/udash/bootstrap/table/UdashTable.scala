@@ -89,7 +89,7 @@ object UdashTable {
     borderless: ReadableProperty[Boolean] = UdashBootstrap.False,
     hover: ReadableProperty[Boolean] = UdashBootstrap.False,
     small: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     rowFactory: (ElemType, Binding.NestedInterceptor) => Element,
     headerFactory: Option[Binding.NestedInterceptor => Modifier] = None,

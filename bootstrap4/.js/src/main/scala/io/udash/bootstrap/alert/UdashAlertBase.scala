@@ -49,7 +49,7 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
     */
   def apply(
     alertStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): T = {
     create(alertStyle, componentId)(content)
   }
