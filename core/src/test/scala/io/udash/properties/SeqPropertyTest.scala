@@ -406,7 +406,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val init: Seq[BadEquals] = (1 to 3).map(new BadEquals(_))
       val p = SeqProperty[BadEquals](init)
 
-      val t = p.transform[T](
+      val t = p.transformElements[T](
         (i: BadEquals) => TC1(i.v),
         (t: T) => t match {
           case TC1(i) => new BadEquals(i)
@@ -684,7 +684,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "be able to modify after transformation" in {
       val numbers = SeqProperty[Int](1, 2, 3)
-      val strings = numbers.transform((i: Int) => i.toString, (s: String) => Integer.parseInt(s))
+      val strings = numbers.transformElements(_.toString, (s: String) => Integer.parseInt(s))
 
       strings.append("4", "5", "6")
       numbers.get should be(Seq(1, 2, 3, 4, 5, 6))
@@ -696,7 +696,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "filter transformed property" in {
       val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
-      val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val ints = doubles.transformElements(_.toInt, (i: Int) => i.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 
       doubles.listenersCount() should be(0)
@@ -938,7 +938,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "provide reversed version of transformed and filtered SeqProperty" in {
       val p = SeqProperty(-3, -2, -1, 0, 1, 2)
-      val f = p.filter(_ >= 0).transform((i: Int) => i + 1)
+      val f = p.filter(_ >= 0).transformElements(_ + 1)
       val r: ReadableSeqProperty[Int, ReadableProperty[Int]] = f.reversed()
       val r2: ReadableSeqProperty[Int, ReadableProperty[Int]] = r.reversed()
 

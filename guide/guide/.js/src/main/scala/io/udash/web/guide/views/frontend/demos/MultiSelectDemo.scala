@@ -19,8 +19,8 @@ object MultiSelectDemo extends AutoDemo {
     case object Banana extends Fruit
 
     val favoriteFruits = SeqProperty(Apple, Banana)
-    val favoriteFruitsStrings = favoriteFruits.transform(
-      (f: Fruit) => f.toString,
+    val favoriteFruitsStrings = favoriteFruits.transformElements(
+      _.toString,
       (s: String) => s match {
         case "Apple" => Apple
         case "Orange" => Orange

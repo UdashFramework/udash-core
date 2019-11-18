@@ -12,7 +12,7 @@ object ModelPropertyListeners extends BenchmarkUtils {
     }),
     ("one-way transformed property", () => {
       val p = ModelProperty(ModelItem.random)
-      val t = p.transform((v: ModelItem) => v.copy(i = v.i + 1))
+      val t = p.transform(v => v.copy(i = v.i + 1))
       (p, t)
     }),
     ("both-ways transformed property", () => {
@@ -22,7 +22,7 @@ object ModelPropertyListeners extends BenchmarkUtils {
     }),
     ("one-way transformed property with slow transformer", () => {
       val p = ModelProperty(ModelItem.random)
-      val t = p.transform((v: ModelItem) => v.copy(i = slowInc(v.i)))
+      val t = p.transform(v => v.copy(i = slowInc(v.i)))
       (p, t)
     }),
     ("both-ways transformed property with slow transformer", () => {

@@ -62,7 +62,7 @@ class ImmutablePropertyTest extends UdashCoreTest {
 
       p.get should be(Seq(1,2,3))
       p.elemProperties.map(_.get) should be(Seq(1,2,3))
-      p.transform((v: Int) => v + 1).get should be(Seq(2,3,4))
+      p.transformElements(_ + 1).get should be(Seq(2, 3, 4))
 
       var counter = 0
       p.listen(_ => counter += 1)

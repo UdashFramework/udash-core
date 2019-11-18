@@ -27,9 +27,7 @@ object CheckboxButtonsDemo extends AutoDemo {
       h4("Is active: "),
       div(Card.card, Card.body, Background.color(Color.Light))(
         repeatWithNested(options) { (option, nested) =>
-          val checked = selected.transform(
-            (_: BSeq[String]).contains(option.get)
-          )
+          val checked = selected.transform(_.contains(option.get))
           div(
             nested(bind(option)), ": ",
             nested(bind(checked))

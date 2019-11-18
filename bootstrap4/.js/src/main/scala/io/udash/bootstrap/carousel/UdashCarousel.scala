@@ -57,7 +57,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         nestedInterceptor(BootstrapStyles.active.styleIf(activeSlide.transform(_ == index)))
       )
 
-      val indices = slides.transform((slides: BSeq[_]) => slides.length)
+      val indices = slides.transform(_.length)
       produce(indices) { length =>
         ol(Carousel.indicators)(
           (0 until length).map(indicator).render
