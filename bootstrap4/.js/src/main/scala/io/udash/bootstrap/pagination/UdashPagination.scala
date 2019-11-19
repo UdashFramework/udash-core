@@ -56,7 +56,7 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
 
     tags2.nav(
       ul(
-        id := componentId, BootstrapStyles.Pagination.pagination,
+        componentId, BootstrapStyles.Pagination.pagination,
         nestedInterceptor((BootstrapStyles.Pagination.size _).reactiveOptionApply(paginationSize)),
         additionalListModifiers(nestedInterceptor)
       )(

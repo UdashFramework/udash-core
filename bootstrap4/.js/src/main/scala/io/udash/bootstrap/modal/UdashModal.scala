@@ -49,7 +49,7 @@ final class UdashModal private(
 
     val el = div(
       BootstrapStyles.Modal.modal,
-      tabindex := "-1", role := "dialog", id := componentId,
+      tabindex := "-1", role := "dialog", componentId,
       nestedInterceptor(aria.labelledby.bindIf(labelId.transform(_.getOrElse("")), labelId.transform(_.isDefined))),
       nestedInterceptor(BootstrapTags.dataBackdrop.bind(backdrop.transform(_.jsValue))),
       nestedInterceptor(BootstrapTags.dataKeyboard.bind(keyboard.transform(_.toString))),

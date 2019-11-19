@@ -1,4 +1,5 @@
-package io.udash.bootstrap
+package io.udash
+package bootstrap
 package collapse
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
@@ -46,7 +47,7 @@ final class UdashCollapse private(
   override val render: Element = {
     val el = div(
       parentSelector.map(dataParent := _), dataToggle := toggleOnInit,
-      BootstrapStyles.Collapse.collapse, id := componentId
+      BootstrapStyles.Collapse.collapse, componentId
     )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)

@@ -29,7 +29,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
 
   override val render: Element =
     tags2.nav(
-      id := componentId, BootstrapStyles.NavigationBar.navbar,
+      componentId, BootstrapStyles.NavigationBar.navbar,
       nestedInterceptor(BootstrapStyles.Position.fixedTop.styleIf(position.transform(_ == Position.FixedTop))),
       nestedInterceptor(BootstrapStyles.Position.fixedBottom.styleIf(position.transform(_ == Position.FixedBottom))),
       nestedInterceptor(BootstrapStyles.Position.stickyTop.styleIf(position.transform(_ == Position.StickyTop))),
@@ -47,7 +47,7 @@ final class UdashNavbar[ItemType, ElemType <: ReadableProperty[ItemType]] privat
         BootstrapStyles.NavigationBar.toggler
       )(span(BootstrapStyles.NavigationBar.togglerIcon)),
       div(
-        id := collapseId, BootstrapStyles.Collapse.collapse,
+        collapseId, BootstrapStyles.Collapse.collapse,
         BootstrapStyles.NavigationBar.collapse
       )(
         navigationFactory(nestedInterceptor)

@@ -39,7 +39,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
     collapses.get(panel)
 
   override val render: Element =
-    div(BootstrapStyles.Collapse.accordion, id := componentId)(
+    div(BootstrapStyles.Collapse.accordion, componentId)(
       nestedInterceptor(
         repeatWithIndex(elements) { case (item, idx, nested) =>
           val headingId = ComponentId.generate()
@@ -52,7 +52,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
             collapses(item) = collapse
 
             val header = factory.header { nested => Seq(
-              id := headingId,
+              headingId,
               h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
                 button(
                   BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),

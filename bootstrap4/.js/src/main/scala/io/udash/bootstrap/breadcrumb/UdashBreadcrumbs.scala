@@ -22,7 +22,7 @@ final class UdashBreadcrumbs[ItemType, ElemType <: ReadableProperty[ItemType]] p
     import scalatags.JsDom.all._
     import scalatags.JsDom.tags2.nav
 
-    nav(id := componentId, aria.label := "breadcrumb")(
+    nav(componentId, aria.label := "breadcrumb")(
       ol(BootstrapStyles.Navigation.breadcrumb)(
         nestedInterceptor(
           repeatWithNested(pages) { case (page, nested) =>

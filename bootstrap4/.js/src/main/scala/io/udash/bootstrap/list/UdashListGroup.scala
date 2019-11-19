@@ -17,7 +17,7 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
   override val render: Element =
     div(
-      id := componentId, BootstrapStyles.ListGroup.listGroup,
+      componentId, BootstrapStyles.ListGroup.listGroup,
       nestedInterceptor(BootstrapStyles.ListGroup.flush.styleIf(flush))
     )(
       nestedInterceptor(

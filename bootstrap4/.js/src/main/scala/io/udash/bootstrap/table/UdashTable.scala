@@ -30,7 +30,7 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
     div(
       nestedInterceptor((BootstrapStyles.Table.responsive _).reactiveOptionApply(responsive)),
       table(
-        id := componentId,
+        componentId,
         BootstrapStyles.Table.table,
         nestedInterceptor(BootstrapStyles.Table.dark.styleIf(dark)),
         nestedInterceptor(BootstrapStyles.Table.striped.styleIf(striped)),

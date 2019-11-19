@@ -16,7 +16,7 @@ final class UdashButtonToolbar[ItemType, ElemType <: ReadableProperty[ItemType]]
   import io.udash.css.CssView._
 
   override val render: Element =
-    div(role := "toolbar", BootstrapStyles.Button.toolbar, id := componentId)(
+    div(role := "toolbar", BootstrapStyles.Button.toolbar, componentId)(
       repeatWithNested(items)(itemFactory)
     ).render
 }

@@ -45,7 +45,7 @@ final class UdashButton private(
   }
 
   override val render: dom.html.Element = {
-    tag.value(id := componentId, tpe := "button")(classes: _*)(
+    tag.value(componentId, tpe := "button")(classes: _*)(
       //condition to support non-button tags
       onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
     )(content(nestedInterceptor)).render

@@ -88,7 +88,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       (idx, direction.getOrElse(CarouselEvent.Direction.Unknown))
     }
 
-    val res: Element = div(id := componentId, Carousel.carousel, Carousel.slide)(
+    val res: Element = div(componentId, Carousel.carousel, Carousel.slide)(
       nestedInterceptor(produceWithNested(showIndicators) {
         case (true, nested) => span(nested(indicators())).render
         case (false, _) => span().render

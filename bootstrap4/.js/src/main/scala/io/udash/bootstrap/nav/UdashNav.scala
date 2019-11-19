@@ -31,7 +31,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
 
   override val render: Element = {
     ul(
-      id := componentId,
+      componentId,
       BootstrapStyles.Navigation.nav,
       nestedInterceptor(BootstrapStyles.Navigation.justifyCenter.styleIf(align.transform(_ == BootstrapStyles.Align.Center))),
       nestedInterceptor(BootstrapStyles.Navigation.justifyRight.styleIf(align.transform(_ == BootstrapStyles.Align.Right))),

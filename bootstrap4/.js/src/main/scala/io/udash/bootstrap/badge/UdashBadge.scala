@@ -21,7 +21,7 @@ class UdashBadge private[badge](
 
   override val render: Element = {
     baseTag(
-      id := componentId, BootstrapStyles.Badge.badge,
+      componentId, BootstrapStyles.Badge.badge,
       nestedInterceptor((BootstrapStyles.Badge.color _).reactiveApply(badgeStyle)),
       nestedInterceptor(BootstrapStyles.Badge.pill.styleIf(pillStyle))
     )(content(nestedInterceptor)).render

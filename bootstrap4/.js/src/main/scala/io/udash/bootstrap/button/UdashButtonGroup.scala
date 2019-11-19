@@ -29,7 +29,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
   }
 
   override val render: Element =
-    div(id := componentId, role := "group", classes)(
+    div(componentId, role := "group", classes)(
       nestedInterceptor(
         repeatWithNested(items) { case (item, nested) =>
           val elements = itemFactory(item, nested)

@@ -115,7 +115,7 @@ final class UdashCard private(
   }
 
   override val render: Element = div(
-    BootstrapStyles.Card.card, id := componentId,
+    BootstrapStyles.Card.card, componentId,
     nestedInterceptor((BootstrapStyles.Text.align(_: BootstrapStyles.Align, BootstrapStyles.ResponsiveBreakpoint.All)).reactiveOptionApply(textAlignment)),
     nestedInterceptor((BootstrapStyles.Text.color _).reactiveOptionApply(textColor)),
     nestedInterceptor((BootstrapStyles.Background.color _).reactiveOptionApply(backgroundColor)),

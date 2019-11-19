@@ -7,6 +7,7 @@ import scalatags.JsDom.all._
 object TooltipsDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash._
     import io.udash.bootstrap._
     import BootstrapStyles._
     import io.udash.bootstrap.badge.UdashBadge

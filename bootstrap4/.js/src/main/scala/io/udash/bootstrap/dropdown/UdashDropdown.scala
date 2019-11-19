@@ -50,7 +50,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   override lazy val render: Element = {
     import io.udash.bootstrap.utils.BootstrapTags._
     val el = div(
-      id := componentId,
+      componentId,
       nestedInterceptor(
         ((direction: Direction) => direction match {
           case Direction.Up => BootstrapStyles.Dropdown.dropup
@@ -62,7 +62,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     )(
       nestedInterceptor(buttonFactory { nested =>
         Seq[Modifier](
-          nested(BootstrapStyles.Dropdown.toggle.styleIf(buttonToggle)), id := buttonId, dataToggle := "dropdown",
+          nested(BootstrapStyles.Dropdown.toggle.styleIf(buttonToggle)), buttonId, dataToggle := "dropdown",
           aria.haspopup := true, aria.expanded := false,
           buttonContent(nested), span(BootstrapStyles.Dropdown.caret)
         )
@@ -70,7 +70,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       div(
         BootstrapStyles.Dropdown.menu,
         nestedInterceptor(BootstrapStyles.Dropdown.menuRight.styleIf(rightAlignMenu)),
-        aria.labelledby := buttonId, id := menuId
+        aria.labelledby := buttonId, menuId
       )(nestedInterceptor(itemBindingFactory(this)))
     ).render
 
@@ -88,7 +88,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   }
 
   private def jQSelector(): UdashDropdownJQuery =
-    jQ(s"#${buttonId.id}").asInstanceOf[UdashDropdownJQuery]
+    jQ(s"#${buttonId.value}").asInstanceOf[UdashDropdownJQuery]
 }
 
 object UdashDropdown {

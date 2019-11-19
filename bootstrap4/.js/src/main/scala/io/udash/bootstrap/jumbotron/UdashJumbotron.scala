@@ -16,7 +16,7 @@ final class UdashJumbotron private(
 
   override val render: Element = {
     div(
-      id := componentId,
+      componentId,
       BootstrapStyles.Jumbotron.jumbotron,
       nestedInterceptor(BootstrapStyles.Jumbotron.fluid.styleIf(fluid))
     )(content(nestedInterceptor)).render

@@ -18,7 +18,7 @@ private[alert] abstract class UdashAlertBase(
 
   protected final def template: TypedTag[Div] = {
     div(
-      id := componentId, role := "alert",
+      componentId, role := "alert",
       BootstrapStyles.Alert.alert,
       nestedInterceptor((BootstrapStyles.Alert.color _).reactiveApply(alertStyle))
     )

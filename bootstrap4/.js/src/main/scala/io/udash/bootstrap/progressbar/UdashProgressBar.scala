@@ -41,7 +41,7 @@ final class UdashProgressBar private[progressbar](
 
   override val render: Element = {
     div(BootstrapStyles.ProgressBar.progress)(
-      div(id := componentId, barModifiers)(
+      div(componentId, barModifiers)(
         nestedInterceptor(
           produceWithNested(showPercentage) { (shouldShow, nested) =>
             if (shouldShow) div(labelFactory(progress, minValue, maxValue, nested)).render

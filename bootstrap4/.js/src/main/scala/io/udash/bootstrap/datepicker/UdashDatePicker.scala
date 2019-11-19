@@ -31,7 +31,7 @@ final class UdashDatePicker private[datepicker](
   import scalatags.JsDom.all._
 
   private val inp = input(
-    id := componentId.id, tpe := "text",
+    componentId, tpe := "text",
     BootstrapStyles.Form.control, CssStyleName("datetimepicker-input"),
     BootstrapTags.dataToggle := "datetimepicker", BootstrapTags.dataTarget := s"#$componentId"
   ).render
