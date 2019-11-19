@@ -17,7 +17,7 @@ object FileInput {
     * @return
     */
   def single(selectedFile: Property[File])(inputName: String, inputModifiers: Modifier*): InputBinding[JSInput] = {
-    apply(selectedFile.transformToSeq(Seq(_), _.head), false.toProperty)(inputName, inputModifiers)
+    apply(selectedFile.bitransformToSeq(Seq(_))(_.head), false.toProperty)(inputName, inputModifiers)
   }
 
   /**

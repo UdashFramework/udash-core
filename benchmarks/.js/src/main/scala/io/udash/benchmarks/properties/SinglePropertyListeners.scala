@@ -17,7 +17,7 @@ object SinglePropertyListeners extends BenchmarkUtils {
     }),
     ("both-ways transformed property", () => {
       val p = Property(0)
-      val t = p.transform(_ + 1, (v: Int) => v - 1)
+      val t = p.bitransform(_ + 1)(_ - 1)
       (p, t)
     }),
     ("one-way transformed property with slow transformer", () => {
@@ -27,7 +27,7 @@ object SinglePropertyListeners extends BenchmarkUtils {
     }),
     ("both-ways transformed property with slow transformer", () => {
       val p = Property(0)
-      val t = p.transform(slowInc, (v: Int) => slowDec(v))
+      val t = p.bitransform(slowInc)(slowDec)
       (p, t)
     })
   )

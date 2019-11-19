@@ -178,13 +178,10 @@ class PropertyTest extends UdashCoreTest {
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](new C(1, "asd"))
-      val tp = cp.transform[(T, T)](
-        (c: C) => Tuple2(TC1(c.i), TC2(c.s)),
-        (t: (T, T)) => t match {
+      val tp = cp.bitransform(c => (TC1(c.i), TC2(c.s))) {
           case (TC1(i), TC2(s)) => new C(i, s)
           case _ => new C(0, "")
         }
-      )
 
       tp.listen(listener)
       cp.listen(listener)
@@ -193,55 +190,55 @@ class PropertyTest extends UdashCoreTest {
       cp.listenOnce(oneTimeListener)
 
       cp.get should be(new C(1, "asd"))
-      tp.get should be(Tuple2(TC1(1), TC2("asd")))
+      tp.get should be(TC1(1) -> TC2("asd"))
 
       cp.set(new C(12, "asd2"))
       cp.get should be(new C(12, "asd2"))
-      tp.get should be(Tuple2(TC1(12), TC2("asd2")))
+      tp.get should be(TC1(12) -> TC2("asd2"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.touch()
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")), force = true)
+      tp.set(TC1(-5) -> TC2("tp"), force = true)
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.clearListeners()
-      tp.set(Tuple2(TC1(-12), TC2("tp")))
+      tp.set(TC1(-12) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-13), TC2("tp")))
+      tp.set(TC1(-13) -> TC2("tp"))
 
       cp.clearListeners()
-      tp.set(Tuple2(TC1(-14), TC2("tp")))
+      tp.set(TC1(-14) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-15), TC2("tp")))
+      tp.set(TC1(-15) -> TC2("tp"))
 
       values.size should be(12)
       values should contain(new C(12, "asd2"))
-      values should contain(Tuple2(TC1(12), TC2("asd2")))
-      values should contain(Tuple2(TC1(-5), TC2("tp")))
+      values should contain(TC1(12) -> TC2("asd2"))
+      values should contain(TC1(-5) -> TC2("tp"))
       values should contain(new C(-5, "tp"))
-      values should contain(Tuple2(TC1(-13), TC2("tp")))
+      values should contain(TC1(-13) -> TC2("tp"))
       values should contain(new C(-13, "tp"))
-      values should contain(Tuple2(TC1(-15), TC2("tp")))
+      values should contain(TC1(-15) -> TC2("tp"))
       values should contain(new C(-15, "tp"))
 
       oneTimeValues.size should be(2)
       oneTimeValues should contain(new C(12, "asd2"))
-      oneTimeValues should contain(Tuple2(TC1(12), TC2("asd2")))
+      oneTimeValues should contain(TC1(12) -> TC2("asd2"))
     }
 
     "fire transform method when needed" in {
@@ -693,10 +690,8 @@ class PropertyTest extends UdashCoreTest {
         }
 
       val p = Property("1,2,3,4,5")
-      val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
-        (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
-        (s: BSeq[Int]) => s.mkString(",")
-      )
+      val s: SeqProperty[Int, Property[Int]] =
+        p.bitransformToSeq(v => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))(_.mkString(","))
 
       p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
@@ -869,9 +864,7 @@ class PropertyTest extends UdashCoreTest {
       val p = SeqProperty(new ClazzModel(42))
       var fromListen = BSeq.empty[Int]
 
-      val s = p.transformToSeq(
-        (v: BSeq[ClazzModel]) => v.map(_.p), (v: BSeq[Int]) => v.map(new ClazzModel(_))
-      )
+      val s = p.bitransformToSeq(_.map(_.p))(_.map(new ClazzModel(_)))
       p.get.map(_.p) shouldBe Seq(42)
       s.get shouldBe Seq(42)
 
@@ -889,7 +882,7 @@ class PropertyTest extends UdashCoreTest {
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
-      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: BSeq[Int]) => v.map(_.toString).mkString(","))
+      val i = s.bitransformToSeq(_.split(",").map(_.toInt))(_.map(_.toString).mkString(","))
 
       i.get should be(Seq(1, 2, 3, 4, 5, 6))
 

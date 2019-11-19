@@ -49,7 +49,7 @@ private[properties] class TransformedSeqProperty[A, B](
     with AbstractSeqProperty[B, Property[B]] {
 
   override protected def transformElement(el: Property[A]): Property[B] =
-    el.transform(transformer, revert)
+    el.bitransform(transformer)(revert)
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit =
     origin.replaceSeq(idx, amount, values.map(revert))
