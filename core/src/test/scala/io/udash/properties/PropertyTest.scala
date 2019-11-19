@@ -690,10 +690,8 @@ class PropertyTest extends UdashCoreTest {
         }
 
       val p = Property("1,2,3,4,5")
-      val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
-        (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
-        (s: BSeq[Int]) => s.mkString(",")
-      )
+      val s: SeqProperty[Int, Property[Int]] =
+        p.bitransformToSeq(v => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))(_.mkString(","))
 
       p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
@@ -866,9 +864,7 @@ class PropertyTest extends UdashCoreTest {
       val p = SeqProperty(new ClazzModel(42))
       var fromListen = BSeq.empty[Int]
 
-      val s = p.transformToSeq(
-        (v: BSeq[ClazzModel]) => v.map(_.p), (v: BSeq[Int]) => v.map(new ClazzModel(_))
-      )
+      val s = p.bitransformToSeq(_.map(_.p))(_.map(new ClazzModel(_)))
       p.get.map(_.p) shouldBe Seq(42)
       s.get shouldBe Seq(42)
 
@@ -886,7 +882,7 @@ class PropertyTest extends UdashCoreTest {
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
-      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: BSeq[Int]) => v.map(_.toString).mkString(","))
+      val i = s.bitransformToSeq(_.split(",").map(_.toInt))(_.map(_.toString).mkString(","))
 
       i.get should be(Seq(1, 2, 3, 4, 5, 6))
 
