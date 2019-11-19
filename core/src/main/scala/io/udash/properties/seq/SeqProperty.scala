@@ -44,7 +44,7 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   /** Removes all elements from this SeqProperty. */
   def clear(): Unit
 
-  /** Creates Property[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
+  /** Creates SeqProperty[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
    * Prefer this to `bitransform` whenever you don't need the whole sequence to perform the transformation.
    *
    * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
