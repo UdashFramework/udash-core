@@ -170,10 +170,7 @@ class ModelPropertyTest extends UdashCoreTest {
       val listener = (v: Any) => values += v
 
       val p = ModelProperty(null: TT)
-      val t = p.transform[Int](
-        (p: TT) => p.i + p.t.c.i,
-        (x: Int) => newTT(x / 2, None, new C(x / 2, ""), Seq.empty)
-      )
+      val t = p.bitransform(p => p.i + p.t.c.i)(x => newTT(x / 2, None, new C(x / 2, ""), Seq.empty))
 
       val r1 = p.listen(listener)
       val r2 = t.listen(listener)

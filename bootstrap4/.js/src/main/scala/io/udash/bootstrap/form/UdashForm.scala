@@ -317,7 +317,7 @@ final class FormElementsFactory(
       validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
-        NumberInput(property.transform(_.toString, _.toDouble), debounce)(
+        NumberInput(property.bitransform(_.toString)(_.toDouble), debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),

@@ -178,13 +178,10 @@ class PropertyTest extends UdashCoreTest {
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](new C(1, "asd"))
-      val tp = cp.transform[(T, T)](
-        (c: C) => Tuple2(TC1(c.i), TC2(c.s)),
-        (t: (T, T)) => t match {
+      val tp = cp.bitransform(c => Tuple2(TC1(c.i), TC2(c.s))) {
           case (TC1(i), TC2(s)) => new C(i, s)
           case _ => new C(0, "")
         }
-      )
 
       tp.listen(listener)
       cp.listen(listener)

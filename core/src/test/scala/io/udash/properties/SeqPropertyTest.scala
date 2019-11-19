@@ -376,10 +376,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "transform into Property" in {
       val p = SeqProperty[Int](1, 2, 3)
-      val t = p.transform[Int](
-        (s: BSeq[Int]) => s.sum,
-        (i: Int) => (1 to i)
-      )
+      val t = p.bitransform(_.sum)(1 to _)
 
       p.get should be(Seq(1, 2, 3))
       t.get should be(6)

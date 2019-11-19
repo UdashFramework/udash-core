@@ -19,14 +19,11 @@ object SelectDemo extends AutoDemo {
     case object Banana extends Fruit
 
     val favoriteFruit = Property[Fruit](Apple)
-    val favoriteFruitString = favoriteFruit.transform(
-      (f: Fruit) => f.toString,
-      (s: String) => s match {
+    val favoriteFruitString = favoriteFruit.bitransform(_.toString) {
         case "Apple" => Apple
         case "Orange" => Orange
         case "Banana" => Banana
       }
-    )
 
     def select: UdashInputGroup = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),

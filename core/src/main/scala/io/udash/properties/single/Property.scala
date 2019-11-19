@@ -39,7 +39,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of new Property.
     * @return New Property[B], which will be synchronised with original Property[A].
     */
-  def transform[B](transformer: A => B, revert: B => A): Property[B]
+  def bitransform[B](transformer: A => B)(revert: B => A): Property[B]
 
   /**
     * Creates SeqProperty[B] linked to `this`. Changes will be synchronized with `this` in both directions.
@@ -73,7 +73,7 @@ private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A
     oneTimeListeners.clear()
   }
 
-  override def transform[B](transformer: A => B, revert: B => A): Property[B] =
+  override def bitransform[B](transformer: A => B)(revert: B => A): Property[B] =
     new TransformedProperty[A, B](this, transformer, revert)
 
   override def transformToSeq[B : PropertyCreator](transformer: A => BSeq[B], revert: BSeq[B] => A): SeqProperty[B, Property[B]] =

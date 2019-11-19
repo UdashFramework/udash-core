@@ -39,7 +39,7 @@ object TextInputDemo extends AutoDemo {
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           UdashInputGroup.input(
-            NumberInput(age.transform(_.toString, _.toInt))(maxlength := "6").render
+            NumberInput(age.bitransform(_.toString)(_.toInt))(maxlength := "6").render
           ),
           UdashInputGroup.appendText(span(bind(age)))
         ).render

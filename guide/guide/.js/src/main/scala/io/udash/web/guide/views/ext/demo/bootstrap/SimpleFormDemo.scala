@@ -82,7 +82,7 @@ object SimpleFormDemo extends AutoDemo with CssView {
         ),
         factory.input.formGroup()(
           input = _ => factory.input.numberInput(
-            user.subProp(_.age).transform(_.toDouble, _.toInt),
+            user.subProp(_.age).bitransform(_.toDouble)(_.toInt),
           )(validator = age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid).render,
           labelContent = Some(_ => "Age": Modifier),
           invalidFeedback = Some(_ => "Age should be a non-negative integer!")

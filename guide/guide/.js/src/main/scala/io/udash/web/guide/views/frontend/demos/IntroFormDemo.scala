@@ -69,9 +69,9 @@ object IntroFormDemo extends AutoDemo {
 
       // String representations of the model subproperties
       // These values are synchronised with the original value
-      private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
-      private val between = model.subProp(_.between).transform(i2s, s2i)
-      private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
+      private val minimum = model.subProp(_.minimum).bitransform(i2s)(s2i)
+      private val between = model.subProp(_.between).bitransform(i2s)(s2i)
+      private val maximum = model.subProp(_.maximum).bitransform(i2s)(s2i)
 
       private val validation = model.transform { element: IntroFormDemoModel =>
         val errors = mutable.ArrayBuffer[String]()
