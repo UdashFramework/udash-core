@@ -178,7 +178,7 @@ class PropertyTest extends UdashCoreTest {
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](new C(1, "asd"))
-      val tp = cp.bitransform(c => Tuple2(TC1(c.i), TC2(c.s))) {
+      val tp = cp.bitransform(c => (TC1(c.i), TC2(c.s))) {
           case (TC1(i), TC2(s)) => new C(i, s)
           case _ => new C(0, "")
         }
@@ -190,55 +190,55 @@ class PropertyTest extends UdashCoreTest {
       cp.listenOnce(oneTimeListener)
 
       cp.get should be(new C(1, "asd"))
-      tp.get should be(Tuple2(TC1(1), TC2("asd")))
+      tp.get should be(TC1(1) -> TC2("asd"))
 
       cp.set(new C(12, "asd2"))
       cp.get should be(new C(12, "asd2"))
-      tp.get should be(Tuple2(TC1(12), TC2("asd2")))
+      tp.get should be(TC1(12) -> TC2("asd2"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.touch()
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")), force = true)
+      tp.set(TC1(-5) -> TC2("tp"), force = true)
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.clearListeners()
-      tp.set(Tuple2(TC1(-12), TC2("tp")))
+      tp.set(TC1(-12) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-13), TC2("tp")))
+      tp.set(TC1(-13) -> TC2("tp"))
 
       cp.clearListeners()
-      tp.set(Tuple2(TC1(-14), TC2("tp")))
+      tp.set(TC1(-14) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-15), TC2("tp")))
+      tp.set(TC1(-15) -> TC2("tp"))
 
       values.size should be(12)
       values should contain(new C(12, "asd2"))
-      values should contain(Tuple2(TC1(12), TC2("asd2")))
-      values should contain(Tuple2(TC1(-5), TC2("tp")))
+      values should contain(TC1(12) -> TC2("asd2"))
+      values should contain(TC1(-5) -> TC2("tp"))
       values should contain(new C(-5, "tp"))
-      values should contain(Tuple2(TC1(-13), TC2("tp")))
+      values should contain(TC1(-13) -> TC2("tp"))
       values should contain(new C(-13, "tp"))
-      values should contain(Tuple2(TC1(-15), TC2("tp")))
+      values should contain(TC1(-15) -> TC2("tp"))
       values should contain(new C(-15, "tp"))
 
       oneTimeValues.size should be(2)
       oneTimeValues should contain(new C(12, "asd2"))
-      oneTimeValues should contain(Tuple2(TC1(12), TC2("asd2")))
+      oneTimeValues should contain(TC1(12) -> TC2("asd2"))
     }
 
     "fire transform method when needed" in {
