@@ -4,8 +4,7 @@ import com.avsystem.commons._
 import io.udash.utils.Registration
 
 private[properties] class CombinedProperty[A, B, R](
-  override val origin: ReadableProperty[A], originTwo: ReadableProperty[B],
-  override val parent: ReadableProperty[_], combiner: (A, B) => R
+  override val origin: ReadableProperty[A], originTwo: ReadableProperty[B], combiner: (A, B) => R
 ) extends ForwarderReadableProperty[R] {
   private var lastValueOne: Opt[A] = Opt.empty
   private var lastValueTwo: Opt[B] = Opt.empty

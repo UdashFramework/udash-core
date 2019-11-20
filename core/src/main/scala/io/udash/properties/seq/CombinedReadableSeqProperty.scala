@@ -8,7 +8,7 @@ import io.udash.utils.{CrossCollections, Registration}
 private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
-) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, null, (x, y) => x.map(v => combiner(v, y)))
+) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, (x, y) => x.map(v => combiner(v, y)))
   with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
   private var combinedChildren: MBuffer[ReadableProperty[R]] = _

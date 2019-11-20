@@ -84,7 +84,7 @@ private[properties] class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
     s.elemProperties.drop(fromIdx)
       .zip(p.elemProperties.drop(fromIdx))
-      .map { case (x, y) => x.combine(y, this)(combiner) }
+      .map { case (x, y) => x.combine(y)(combiner) }
     }.toSeq
 
   override protected def initOriginListeners(): Unit = {
@@ -113,9 +113,9 @@ private[properties] class ZippedAllReadableSeqProperty[A, B, O: PropertyCreator]
 ) extends ZippedReadableSeqProperty(s, p, combiner) {
 
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
-    s.elemProperties.drop(fromIdx)
-      .zipAll(p.elemProperties.drop(fromIdx), defaultA, defaultB)
-      .map { case (x, y) => x.combine(y, this)(combiner) }
+    s.elemProperties.iterator.drop(fromIdx)
+      .zipAll(p.elemProperties.iterator.drop(fromIdx), defaultA, defaultB)
+      .map { case (x, y) => x.combine(y)(combiner) }
     }.toSeq
 }
 
@@ -125,7 +125,7 @@ private[properties] class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqPr
   private var registration: Registration = _
 
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[(A, Int)]] = {
-    s.elemProperties.zipWithIndex.drop(fromIdx)
+    s.elemProperties.iterator.zipWithIndex.drop(fromIdx)
       .map { case (x, y) => x.transform(v => (v, y)) }
     }.toSeq
 
