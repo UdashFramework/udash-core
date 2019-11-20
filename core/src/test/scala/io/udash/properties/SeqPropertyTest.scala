@@ -1172,7 +1172,7 @@ class SeqPropertyTest extends UdashCoreTest {
       pairs.get should be(Seq((3, 8), (7, 10), (13, 14), (21, 20)))
     }
 
-    "zip all with another ReadableProperty" in {
+    "zip all with another ReadableSeqProperty" in {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
       val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
@@ -1189,8 +1189,8 @@ class SeqPropertyTest extends UdashCoreTest {
       var fromListener = Seq.empty[(Int, Int)]
       val registration = pairs.listen(fromListener = _, initUpdate = true)
 
-      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
-      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2))
 
       numbers.append(20, 21)
       fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
