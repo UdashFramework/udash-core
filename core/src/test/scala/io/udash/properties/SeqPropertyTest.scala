@@ -1365,19 +1365,30 @@ class SeqPropertyTest extends UdashCoreTest {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val indexed = numbers.zipWithIndex
 
+      ensureNoListeners(numbers)
+      ensureNoListeners(indexed)
+
+      var fromListener = BSeq.empty[(Int, Int)]
+      val registration = indexed.listen(fromListener = _, initUpdate = true)
+
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
 
       numbers.append(-1)
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
 
       numbers.remove(-1)
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
+
+      registration.cancel()
 
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(0)
 
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = indexed.listenStructure(p => patches.append(p))
+      val structureRegistration = indexed.listenStructure(p => patches.append(p))
 
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(1)
@@ -1438,7 +1449,7 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
 
