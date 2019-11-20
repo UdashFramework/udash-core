@@ -12,12 +12,10 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
   protected var children: MBuffer[ReadableProperty[O]] = _
   private val originStructureListener: Patch[ReadableProperty[_]] => Unit =
     (patch: Patch[ReadableProperty[_]]) => {
-      val idx = patch.idx
-      val els = children
-      val removed = CrossCollections.slice(els, patch.idx, els.length)
-      val added = updatedPart(idx)
+      val removed = CrossCollections.slice(children, patch.idx, children.length)
+      val added = updatedPart(patch.idx)
       if (added.nonEmpty || removed.nonEmpty) {
-        CrossCollections.replaceSeq(els, idx, removed.size, added)
+        CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
         val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
         CallbackSequencer().queue(
           s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",

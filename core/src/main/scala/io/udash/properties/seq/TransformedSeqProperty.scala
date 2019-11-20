@@ -41,7 +41,7 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
     el.transform(transformer).asInstanceOf[ElemType]
 }
 
-private[properties] class TransformedSeqProperty[A, B](
+private[properties] final class TransformedSeqProperty[A, B](
   override protected val origin: SeqProperty[A, Property[A]],
   transformer: A => B, revert: B => A
 ) extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer)

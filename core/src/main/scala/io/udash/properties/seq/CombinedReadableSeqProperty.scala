@@ -14,7 +14,7 @@ private[properties] final class CombinedReadableSeqProperty[A, B, R: PropertyCre
   private var combinedChildren: MBuffer[ReadableProperty[R]] = _
   private var originListenerRegistration: Registration = _
 
-  protected def originStructureListener(originPatch: Patch[ReadableProperty[A]]): Unit = {
+  private val originStructureListener: Patch[ReadableProperty[A]] => Unit = { originPatch =>
     val combinedNewChildren = originPatch.added.map(sub => sub.combine(p)(combiner))
     val mappedPatch: Patch[ReadableProperty[R]] = originPatch.copy(
       removed = originPatch.removed.indices.map(idx => combinedChildren(idx + originPatch.idx)),
