@@ -1017,15 +1017,21 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       var fromListener = Seq.empty[(Int, Int)]
-      val registration = pairs.listen(fromListener = _)
+      val registration = pairs.listen(fromListener = _, initUpdate = true)
+
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
 
       numbers.append(20, 21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
 
       numbers.append(10)
@@ -1181,15 +1187,21 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(evens)
 
       var fromListener = Seq.empty[(Int, Int)]
-      val registration = pairs.listen(fromListener = _)
+      val registration = pairs.listen(fromListener = _, initUpdate = true)
+
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
 
       numbers.append(20, 21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
 
       numbers.remove(21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
 
       registration.cancel()
