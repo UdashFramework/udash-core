@@ -773,17 +773,19 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = Property(2)
 
       val c = s.combine(p)(_ * _)
+
       ensureNoListeners(s)
+      ensureNoListeners(c)
       p.listenersCount() should be(0)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      val r2 = c.listenStructure(patch => lastPatch = patch)
+      val structureRegistration = c.listenStructure(patch => lastPatch = patch)
       s.listenersCount() should be(0)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
       val listenCalls = MListBuffer[BSeq[Int]]()
-      val r1 = c.listen(v => listenCalls += v)
+      val registration = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(1)
@@ -796,15 +798,13 @@ class SeqPropertyTest extends UdashCoreTest {
       }
       c.get should be(Seq(1, 2, 3, 4))
       lastPatch should be(null)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(1, 2, 3, 4))
+      listenCalls shouldBe Seq(Seq(1, 2, 3, 4))
 
       listenCalls.clear()
       CallbackSequencer().sequence {
         p.set(2)
       }
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 4, 6, 8))
+      listenCalls shouldBe Seq(Seq(2, 4, 6, 8))
 
       listenCalls.clear()
       lastPatch = null
@@ -814,8 +814,7 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.head.get should be(2)
       lastPatch.removed.size should be(0)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 4, 6, 8, 2))
+      listenCalls shouldBe Seq(Seq(2, 4, 6, 8, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -826,8 +825,7 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.removed.head.get should be(4)
       lastPatch.removed.last.get should be(8)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 2))
+      listenCalls shouldBe Seq(Seq(2, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -838,8 +836,14 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.last.get should be(16)
       lastPatch.removed.size should be(0)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 12, 14, 16, 2))
+      listenCalls shouldBe Seq(Seq(2, 12, 14, 16, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.elemProperties.head.set(0)
+      c.get should be(Seq(0, 12, 14, 16, 2))
+      lastPatch shouldBe null
+      listenCalls shouldBe Seq(Seq(0, 12, 14, 16, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -847,18 +851,18 @@ class SeqPropertyTest extends UdashCoreTest {
       c.get should be(Seq())
       lastPatch.idx should be(0)
       lastPatch.added.size should be(0)
-      lastPatch.removed.head.get should be(2)
+      lastPatch.removed.head.get should be(0)
       lastPatch.removed.last.get should be(2)
       lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
 
-      r1.cancel()
+      registration.cancel()
       s.listenersCount() should be(0)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
-      r2.cancel()
+      structureRegistration.cancel()
       ensureNoListeners(s)
       p.listenersCount() should be(0)
     }
