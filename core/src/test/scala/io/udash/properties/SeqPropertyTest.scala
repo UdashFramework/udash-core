@@ -1016,6 +1016,9 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(odds)
       ensureNoListeners(evens)
 
+      var fromListener = Seq.empty[(Int, Int)]
+      val registration = pairs.listen(fromListener = _)
+
       numbers.append(20, 21)
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
@@ -1027,8 +1030,9 @@ class SeqPropertyTest extends UdashCoreTest {
 
       numbers.append(10)
 
+      registration.cancel()
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = pairs.listenStructure(p => patches.append(p))
+      val structureRegistration = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
@@ -1146,7 +1150,7 @@ class SeqPropertyTest extends UdashCoreTest {
       odds.structureListenersCount() should be(1)
       evens.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
       ensureNoListeners(odds)
@@ -1176,6 +1180,9 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(odds)
       ensureNoListeners(evens)
 
+      var fromListener = Seq.empty[(Int, Int)]
+      val registration = pairs.listen(fromListener = _)
+
       numbers.append(20, 21)
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
 
@@ -1185,8 +1192,9 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.remove(20)
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
 
+      registration.cancel()
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = pairs.listenStructure(p => patches.append(p))
+      val structureRegistration = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
@@ -1325,7 +1333,7 @@ class SeqPropertyTest extends UdashCoreTest {
       odds.structureListenersCount() should be(1)
       evens.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
       ensureNoListeners(odds)
