@@ -5,32 +5,53 @@ import io.udash.properties._
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
-private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
-  override val id: PropertyId = PropertyCreator.newID()
-  override protected[properties] val parent: ReadableProperty[_] = null
+private[properties] abstract class ZippedSeqPropertyUtils[O](
+  sources: ISeq[ReadableSeqProperty[_, _ <: ReadableProperty[_]]]
+) extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
 
-  protected final val children = CrossCollections.createArray[ReadableProperty[O]]
-  protected final val childrenRegistrations = CrossCollections.createArray[Registration]
+  override final val id: PropertyId = PropertyCreator.newID()
+  override final protected[properties] def parent: ReadableProperty[_] = null
 
-  private val originStructureListener: Patch[ReadableProperty[_]] => Unit =
-    (patch: Patch[ReadableProperty[_]]) => {
-      val removed = CrossCollections.slice(children, patch.idx, children.length)
-      val added = updatedPart(patch.idx)
-      if (added.nonEmpty || removed.nonEmpty) {
-        CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
-        val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
-        CallbackSequencer().queue(
-          s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
-          () => structureListeners.foreach(_.apply(mappedPatch))
-        )
-        valueChanged()
-      }
+  private final val children = CrossCollections.createArray[ReadableProperty[O]]
+  private final val sourceRegistrations = CrossCollections.createArray[Registration]
+  private final val childrenRegistrations = CrossCollections.createArray[Registration]
+
+  private val originStructureListener: Patch[ReadableProperty[_]] => Unit = { patch =>
+    val removed = CrossCollections.slice(children, patch.idx, children.length)
+    val added = updatedPart(patch.idx)
+    if (added.nonEmpty || removed.nonEmpty) {
+      CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
+      val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
+      CallbackSequencer().queue(
+        s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+        () => structureListeners.foreach(_.apply(mappedPatch))
+      )
+      valueChanged()
     }
+  }
 
   protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]]
 
-  protected def initOriginListeners(structureListener: Patch[ReadableProperty[_]] => Unit = originStructureListener): Unit
-  protected def killOriginListeners(): Unit
+  private def initOriginListeners(): Unit = {
+    if (sourceRegistrations.isEmpty) {
+      val updated = updatedPart(0)
+      children.appendAll(updated)
+      childrenRegistrations.appendAll(updated.iterator.map(_.listen(_ => valueChanged())))
+      sourceRegistrations.appendAll(sources.iterator.map(_.listenStructure(originStructureListener)))
+    }
+  }
+
+  private def killOriginListeners(): Unit = {
+    if (sourceRegistrations.nonEmpty && listenersCount() == 0 && structureListenersCount() == 0) {
+      childrenRegistrations.foreach(_.cancel())
+      sourceRegistrations.foreach(_.cancel())
+
+      childrenRegistrations.clear()
+      sourceRegistrations.clear()
+
+      children.clear()
+    }
+  }
 
   override def get: BSeq[O] = {
     (if (children.nonEmpty) children else updatedPart(0)).map(_.get)
@@ -76,10 +97,7 @@ private[properties] final class ZippedReadableSeqProperty[A, B, O: PropertyCreat
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O, defaults: Opt[(ReadableProperty[A], ReadableProperty[B])]
-) extends ZippedSeqPropertyUtils[O] {
-
-  private var sRegistration: Registration = _
-  private var pRegistration: Registration = _
+) extends ZippedSeqPropertyUtils[O](ISeq(s, p)) {
 
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
     val zip: (Iterator[ReadableProperty[A]], Iterator[ReadableProperty[B]]) => Iterator[(ReadableProperty[A], ReadableProperty[B])] = {
@@ -92,54 +110,11 @@ private[properties] final class ZippedReadableSeqProperty[A, B, O: PropertyCreat
       .map { case (x, y) => x.combine(y)(combiner) }
       .toSeq
   }
-
-  override protected def initOriginListeners(structureListener: Patch[ReadableProperty[_]] => Unit): Unit = {
-    if (sRegistration == null || pRegistration == null) {
-      val updated = updatedPart(0)
-      children.appendAll(updated)
-      childrenRegistrations.appendAll(updated.iterator.map(_.listen(_ => valueChanged())))
-      sRegistration = s.listenStructure(structureListener)
-      pRegistration = p.listenStructure(structureListener)
-    }
-  }
-
-  override protected def killOriginListeners(): Unit = {
-    if (sRegistration != null && pRegistration != null && listenersCount() == 0 && structureListenersCount() == 0) {
-      sRegistration.cancel()
-      pRegistration.cancel()
-      childrenRegistrations.foreach(_.cancel())
-      childrenRegistrations.clear()
-      children.clear()
-      sRegistration = null
-      pRegistration = null
-    }
-  }
 }
 
 private[properties] final class ZippedWithIndexReadableSeqProperty[A](s: ReadableSeqProperty[A, ReadableProperty[A]])
-  extends ZippedSeqPropertyUtils[(A, Int)] {
-
-  private var registration: Registration = _
+  extends ZippedSeqPropertyUtils[(A, Int)](ISeq(s)) {
 
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[(A, Int)]] =
     s.elemProperties.iterator.zipWithIndex.drop(fromIdx).map { case (x, y) => x.transform(v => (v, y)) }.toSeq
-
-  override protected def initOriginListeners(structureListener: Patch[ReadableProperty[_]] => Unit): Unit = {
-    if (registration == null || !registration.isActive) {
-      val updated = updatedPart(0)
-      childrenRegistrations.appendAll(updated.iterator.map(_.listen(_ => valueChanged())))
-      children.appendAll(updated)
-      registration = s.listenStructure(structureListener)
-    }
-  }
-
-  override protected def killOriginListeners(): Unit = {
-    if (registration != null && listenersCount() == 0 && structureListenersCount() == 0) {
-      childrenRegistrations.foreach(_.cancel())
-      childrenRegistrations.clear()
-      children.clear()
-      registration.cancel()
-      registration = null
-    }
-  }
 }
