@@ -16,8 +16,8 @@ private[properties] abstract class ZippedSeqPropertyUtils[O] extends AbstractRea
       val els = children
       val removed = CrossCollections.slice(els, patch.idx, els.length)
       val added = updatedPart(idx)
-      CrossCollections.replaceSeq(els, idx, removed.size, added)
       if (added.nonEmpty || removed.nonEmpty) {
+        CrossCollections.replaceSeq(els, idx, removed.size, added)
         val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
         CallbackSequencer().queue(
           s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",

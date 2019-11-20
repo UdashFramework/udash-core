@@ -15,6 +15,6 @@ object CrossCollections {
     replaceSeq(a, idx, count, items)
   def replaceSeq[T](a: MBuffer[T], idx: Int, count: Int, items: BSeq[T]): Unit = {
     a.remove(idx, count)
-    if (items.nonEmpty) a.insertAll(idx, items)
+    a.insertAll(idx, items)
   }
 }
