@@ -76,7 +76,11 @@ object Dependencies {
   ))
 
   val catsCrossDeps = Def.setting(Seq(
-    "org.typelevel" %%% "cats-core" % "2.0.0-M1"
+    "org.typelevel" %%% "cats-core" % "2.0.0",
+    "org.typelevel" %%% "cats-laws" % "2.0.0" % Test,
+    "org.scalacheck" %%% "scalacheck" % "1.14.0" % Test,
+    "org.scalatest" %%% "scalatest" % "3.0.8" % Test,
+    "org.typelevel" %%% "discipline-scalatest" % "1.0.0-RC1" % Test,
   ))
 
   private val rpcCrossDeps = Def.setting(Seq(
