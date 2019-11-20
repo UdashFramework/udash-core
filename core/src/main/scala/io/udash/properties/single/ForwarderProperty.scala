@@ -7,9 +7,6 @@ private[properties] trait ForwarderReadableProperty[A] extends AbstractReadableP
 
   override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] def parent: ReadableProperty[_] = null
-
-  override protected[properties] def valueChanged(): Unit =
-    origin.valueChanged()
 }
 
 private[properties] trait ForwarderProperty[A] extends ForwarderReadableProperty[A] with AbstractProperty[A] {

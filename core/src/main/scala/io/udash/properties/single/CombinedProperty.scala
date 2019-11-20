@@ -12,12 +12,12 @@ private[properties] class CombinedProperty[A, B, R](
 
   protected def originListenerOne(originValue: A) : Unit = {
     lastValueOne = Opt(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   protected def originListenerTwo(originValue: B) : Unit = {
     lastValueTwo = Opt(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   private def initOriginListener(): Unit = {
