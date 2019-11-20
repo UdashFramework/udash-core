@@ -1038,6 +1038,14 @@ class SeqPropertyTest extends UdashCoreTest {
       fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
 
+      numbers.elemProperties.head.set(11)
+      fromListener shouldBe Seq((11, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((11, 2), (3, 4), (5, 6), (7, 8))
+
+      numbers.elemProperties.head.set(1)
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+
       numbers.append(10)
 
       registration.cancel()
@@ -1385,6 +1393,14 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.remove(-1)
       fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.elemProperties.head.set(0)
+      indexed.get should be(numbers.get.zipWithIndex)
+      fromListener should be(numbers.get.zipWithIndex)
+
+      numbers.elemProperties.head.set(1)
+      indexed.get should be(numbers.get.zipWithIndex)
+      fromListener should be(numbers.get.zipWithIndex)
 
       registration.cancel()
 
