@@ -66,16 +66,13 @@ trait ReadableProperty[+A] {
     * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
     *
     * @param property `Property[B]` to combine with `this`.
-    * @param combinedParent Parent of combined property, `null` by default.
     * @param combiner Method combining values A and B into O.
     * @tparam B Type of elements in provided property.
     * @tparam O Output property elements type.
     * @return Property[O] updated on any change in `this` or `property`.
     */
-  def combine[B, O: PropertyCreator](
-    property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
-  )(combiner: (A, B) => O): ReadableProperty[O] =
-    new CombinedProperty[A, B, O](this, property, combinedParent, combiner)
+  def combine[B, O: PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
+    new CombinedProperty[A, B, O](this, property, combiner)
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {

@@ -53,7 +53,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
   def zip[B, O: PropertyCreator](
     property: ReadableSeqProperty[B, ReadableProperty[B]]
   )(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
-    new ZippedReadableSeqProperty(this, property, combiner)
+    new ZippedReadableSeqProperty(this, property, combiner, defaults = Opt.Empty)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
    * Uses `defaultA` and `defaultB` to fill smaller sequence. */
@@ -62,7 +62,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
     defaultA: ReadableProperty[A1],
     defaultB: ReadableProperty[B]
   ): ReadableSeqProperty[O, ReadableProperty[O]] =
-    new ZippedAllReadableSeqProperty(this, property, combiner, defaultA, defaultB)
+    new ZippedReadableSeqProperty(this, property, combiner, (defaultA, defaultB).opt)
 
   /** Zips elements from `this` SeqProperty with their indexes. */
   def zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]]
