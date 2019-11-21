@@ -11,7 +11,6 @@ private[properties] class ReadableWrapper[T](private val p: ReadableProperty[T])
   override def listen(valueListener: T => Any, initUpdate: Boolean): Registration = p.listen(valueListener, initUpdate)
   override def listenOnce(valueListener: T => Any): Registration = p.listenOnce(valueListener)
   override def listenersCount(): Int = p.listenersCount()
-  override protected[properties] def parent: ReadableProperty[_] = p.parent
   override protected[properties] def valueChanged(): Unit = p.valueChanged()
   override protected[properties] def listenersUpdate(): Unit = p.listenersUpdate()
   override def transform[B](transformer: T => B): ReadableProperty[B] = p.transform(transformer)

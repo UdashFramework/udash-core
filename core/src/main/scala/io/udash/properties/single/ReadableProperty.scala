@@ -29,9 +29,6 @@ trait ReadableProperty[+A] {
   /** Ensures read-only access to this property. */
   def readable: ReadableProperty[A]
 
-  /** Parent property. `null` if this property has no parent. */
-  protected[properties] def parent: ReadableProperty[_]
-
   /** This method should be called when the value has changed. */
   protected[properties] def valueChanged(): Unit
 
@@ -79,6 +76,9 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
 
   protected def wrapListenerRegistration(reg: Registration): Registration = reg
   protected def wrapOneTimeListenerRegistration(reg: Registration): Registration = wrapListenerRegistration(reg)
+
+  /** Parent property. `null` if this property has no parent. */
+  protected def parent: ReadableProperty[_]
 
   override def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
