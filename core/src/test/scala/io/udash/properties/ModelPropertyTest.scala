@@ -477,7 +477,7 @@ class ModelPropertyTest extends UdashCoreTest {
       mp.roSubProp(_.s2).get should ===(Vector("def"))
 
       mp.subSeq[Int, Seq](_.s3).get should ===(Seq(1))
-      mp.roSubSeq[Int](_.s3).get should ===(Seq(1))
+      mp.roSubSeq[Int, Seq](_.s3).get should ===(Seq(1))
       mp.subProp(_.s3).get shouldBe a[Seq[_]]
       mp.roSubProp(_.s3).get shouldBe a[Seq[_]]
       mp.subProp(_.s3).get should ===(Vector(1))
