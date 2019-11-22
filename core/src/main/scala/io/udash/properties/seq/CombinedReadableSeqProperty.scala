@@ -1,11 +1,10 @@
 package io.udash.properties.seq
 
 import com.avsystem.commons._
-import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
-private[properties] final class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
+private[properties] final class CombinedReadableSeqProperty[A, B, R](
   s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
   combiner: (A, B) => R
 ) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, (x, y) => x.map(v => combiner(v, y)))

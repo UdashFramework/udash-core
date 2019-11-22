@@ -66,7 +66,7 @@ trait ReadableProperty[+A] {
    * @tparam O Output property elements type.
    * @return Property[O] updated on any change in `this` or `property`.
    */
-  def combine[B, O: PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
+  def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
 }
 
