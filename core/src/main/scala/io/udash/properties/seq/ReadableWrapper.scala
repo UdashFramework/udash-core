@@ -1,7 +1,6 @@
 package io.udash.properties.seq
 
 import com.avsystem.commons._
-import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{ReadableProperty, ReadableWrapper => SingleReadableWrapper}
 import io.udash.utils.Registration
 
@@ -21,9 +20,8 @@ private[properties] class ReadableWrapper[T](private val p: ReadableSeqProperty[
       ))
     }
 
-
   override def structureListenersCount(): Int = p.structureListenersCount()
-  override def transformElements[B: PropertyCreator](transformer: T => B): ReadableSeqProperty[B, ReadableProperty[B]] = p.transformElements(transformer)
+  override def transformElements[B](transformer: T => B): ReadableSeqProperty[B, ReadableProperty[B]] = p.transformElements(transformer)
   override def reversed(): ReadableSeqProperty[T, ReadableProperty[T]] = p.reversed()
   override def filter(matcher: T => Boolean): ReadableSeqProperty[T, _ <: ReadableProperty[T]] = p.filter(matcher)
   override def zipWithIndex: ReadableSeqProperty[(T, Int), ReadableProperty[(T, Int)]] = p.zipWithIndex
