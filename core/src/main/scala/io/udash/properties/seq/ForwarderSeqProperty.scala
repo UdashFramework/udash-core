@@ -96,21 +96,21 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
     val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin())
     if (!(transformedElements.iterator.map(_.id) sameElements fromOrigin.iterator.map(_.id))) {
       fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements.toSeq, fromOrigin.toSeq, fromOrigin.isEmpty), structureListeners)
-      fireValueListeners()
+      valueChanged()
     } else if (transformedElements.map(_.get) != fromOrigin.map(_.get)) {
-      fireValueListeners()
+      valueChanged()
     }
     transformedElements = fromOrigin
   }
 
   override protected def originListener(originValue: BSeq[A]) : Unit = {
-    fireValueListeners()
+    valueChanged()
   }
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
     structureListeners.foreach(_.apply(transPatch))
-    fireValueListeners()
+    valueChanged()
   }
 }
 
