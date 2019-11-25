@@ -5,6 +5,11 @@ import io.udash.properties._
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
+/**
+ *
+ * @param sources SeqProperties required for updating this property.
+ *                When empty, the origin listeners will be reinitialized on all new registrations
+ */
 private[properties] abstract class ZippedSeqPropertyUtils[O](
   sources: ISeq[ReadableSeqProperty[_, _ <: ReadableProperty[_]]]
 ) extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
