@@ -772,7 +772,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val s = SeqProperty(1, 2, 3, 4)
       val p = Property(2)
 
-      val c = s.combine(p)(_ * _)
+      val c = s.combineElements(p)(_ * _)
 
       ensureNoListeners(s)
       ensureNoListeners(c)

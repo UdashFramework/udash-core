@@ -443,66 +443,91 @@ class PropertyTest extends UdashCoreTest {
       val sum = p1.combine(p2)(_ + _)
       val s = SeqProperty(1, 2, 3, 4)
 
-      val sc = sum.combine(s)((m, items) => items.map(_ * m))
-      val sqc = s.combine(sum)(_ * _)
+      val sumCombine = sum.combine(s)((m, items) => items.map(_ * m))
+      val sCombine = s.combine(sum)((items, m) => items.map(_ * m))
+      val sCombineElements = s.combineElements(sum)(_ * _)
 
-      p1.listenersCount() should be(0)
-      p2.listenersCount() should be(0)
-      sum.listenersCount() should be(0)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      sum.listenersCount() shouldBe 0
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      ensureNoListeners(s)
+      ensureNoListeners(sCombineElements)
 
-      // sum.get == 10
-      sc.get should be(Seq(10, 20, 30, 40))
-      sqc.get should be(Seq(10, 20, 30, 40))
+      sum.get shouldBe 10
+      sumCombine.get shouldBe Seq(10, 20, 30, 40)
+      sCombine.get shouldBe Seq(10, 20, 30, 40)
+      sCombineElements.get shouldBe Seq(10, 20, 30, 40)
 
-      var sqcHeadChanges = 0
-      val r1 = sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+      var combinedElementsHeadChanges = 0
+      val r1 = sCombineElements.elemProperties.head.listen(_ => combinedElementsHeadChanges += 1)
 
-      p1.listenersCount() should be(1)
-      p2.listenersCount() should be(1)
-      sum.listenersCount() should be(1)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+      sum.listenersCount() shouldBe 1
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 0
+      ensureNoListeners(sCombineElements)
 
-      var sqcChanges = 0
-      val r2 = sqc.listen(_ => sqcChanges += 1)
+      var combineElementsValueChanges = 0
+      var combinedElementsListenerValue = BSeq.empty[Int]
+      val r2 = sCombineElements.listen { v =>
+        combinedElementsListenerValue = v
+        combineElementsValueChanges += 1
+      }
 
-      p1.listenersCount() should be(1)
-      p2.listenersCount() should be(1)
-      sum.listenersCount() should be(2)
-      s.listenersCount() should be(1)
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+      sum.listenersCount() shouldBe 2
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 1
+      sCombineElements.listenersCount() shouldBe 1
 
       s.replace(1, 2, 7, 8, 9)
 
-      // sum.get == 10
-      sc.get should be(Seq(10, 70, 80, 90, 40))
-      sqc.get should be(Seq(10, 70, 80, 90, 40))
+      sum.get shouldBe 10
+      sumCombine.get shouldBe Seq(10, 70, 80, 90, 40)
+      sCombine.get shouldBe Seq(10, 70, 80, 90, 40)
+      sCombineElements.get shouldBe Seq(10, 70, 80, 90, 40)
+      combinedElementsListenerValue shouldBe Seq(10, 70, 80, 90, 40)
 
-      sqcHeadChanges should be(0)
-      sqcChanges should be(1)
+      combinedElementsHeadChanges shouldBe 0
+      combineElementsValueChanges shouldBe 1
 
       p1.set(0)
       p2.set(0)
 
-      sqcHeadChanges should be(2)
-      sqcChanges should be(3)
+      combinedElementsHeadChanges shouldBe 2
+      combineElementsValueChanges shouldBe 3
 
-      // sum.get == 0
-      sc.get should be(Seq(0, 0, 0, 0, 0))
-      sqc.get should be(Seq(0, 0, 0, 0, 0))
+      sum.get shouldBe 0
+      sumCombine.get shouldBe Seq(0, 0, 0, 0, 0)
+      sCombine.get shouldBe Seq(0, 0, 0, 0, 0)
+      sCombineElements.get shouldBe Seq(0, 0, 0, 0, 0)
+      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0)
 
       r1.cancel()
       r2.cancel()
 
-      p1.listenersCount() should be(0)
-      p2.listenersCount() should be(0)
-      sum.listenersCount() should be(0)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      sum.listenersCount() shouldBe 0
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 0
+      ensureNoListeners(sCombineElements)
 
       p1.set(2)
       p2.set(3)
+      sum.get shouldBe 5
       s.set(Seq(2, 1))
-      sc.get should be(Seq(10, 5))
-      sqc.get should be(Seq(10, 5))
+      sumCombine.get shouldBe Seq(10, 5)
+      sCombine.get shouldBe Seq(10, 5)
+      sCombineElements.get shouldBe Seq(10, 5)
+      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0) //r2 cancelled
     }
 
     "transform to ReadableSeqProperty" in {

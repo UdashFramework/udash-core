@@ -1,7 +1,8 @@
 package io.udash.utils
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.properties.{Blank, HasModelPropertyCreator}
+import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
 import org.scalajs.dom._
 import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
@@ -68,7 +69,7 @@ class FileUploader(url: Url) {
 }
 
 object FileUploader {
-  sealed trait FileUploadState
+  sealed trait FileUploadState extends AbstractCase
   object FileUploadState {
     case object NotStarted extends FileUploadState
     case object InProgress extends FileUploadState
@@ -81,7 +82,7 @@ object FileUploader {
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
   }
 
-  class HttpResponse(private val xhr: XMLHttpRequest) {
+  final class HttpResponse(private val xhr: XMLHttpRequest) {
     def text: Option[String] = Option(xhr.responseText)
     def responseHeader(header: String): Option[String] = Option(xhr.getResponseHeader(header))
     def responseType: Option[String] = if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None
@@ -89,8 +90,11 @@ object FileUploader {
     def xml: Option[Document] = Option(xhr.responseXML)
     def statusCode: Int = xhr.status
   }
+  object HttpResponse {
+    implicit val pc: PropertyCreator[HttpResponse] = PropertyCreator.materializeSingle
+  }
 
-  class FileUploadModel(
+  final class FileUploadModel(
     val files: Seq[File],
     val state: FileUploadState,
     val bytesSent: Double,

@@ -98,7 +98,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
     })
 }
 
-private[properties] final class ZippedReadableSeqProperty[A, B, O: PropertyCreator](
+private[properties] final class ZippedReadableSeqProperty[A, B, O](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
   combiner: (A, B) => O, defaults: Opt[(ReadableProperty[A], ReadableProperty[B])]
