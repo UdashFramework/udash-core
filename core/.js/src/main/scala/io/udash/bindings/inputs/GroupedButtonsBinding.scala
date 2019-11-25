@@ -1,14 +1,13 @@
 package io.udash.bindings.inputs
 
 import io.udash._
-import io.udash.properties.PropertyCreator
 import org.scalajs.dom.html.{Div, Input => JSInput}
 import org.scalajs.dom.{Event, Node}
 import scalatags.JsDom.all._
 
 import scala.util.Random
 
-private[inputs] class GroupedButtonsBinding[T : PropertyCreator](
+private[inputs] class GroupedButtonsBinding[T](
   options: ReadableSeqProperty[T], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
 )(
   inputTpe: String,

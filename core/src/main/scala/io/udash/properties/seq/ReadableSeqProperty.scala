@@ -35,7 +35,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
    * Prefer this to `transform` whenever you don't need the whole sequence to perform the transformation.
    *
    * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableSeqProperty[A]. */
-  def transformElements[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]]
+  def transformElements[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Creates `ReadableSeqProperty[A]` providing reversed order of elements from `this`. */
   def reversed(): ReadableSeqProperty[A, ReadableProperty[A]]
@@ -50,14 +50,14 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
     new CombinedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
-  def zip[B, O: PropertyCreator](
+  def zip[B, O](
     property: ReadableSeqProperty[B, ReadableProperty[B]]
   )(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
     new ZippedReadableSeqProperty(this, property, combiner, defaults = Opt.Empty)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
    * Uses `defaultA` and `defaultB` to fill smaller sequence. */
-  def zipAll[B, A1 >: A, O: PropertyCreator](property: ReadableSeqProperty[B, ReadableProperty[B]])(
+  def zipAll[B, A1 >: A, O](property: ReadableSeqProperty[B, ReadableProperty[B]])(
     combiner: (A1, B) => O,
     defaultA: ReadableProperty[A1],
     defaultB: ReadableProperty[B]
@@ -87,7 +87,7 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     )
   }
 
-  override def transformElements[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformElements[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer)
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =

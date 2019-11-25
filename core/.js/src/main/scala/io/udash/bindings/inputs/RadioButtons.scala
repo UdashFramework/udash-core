@@ -1,7 +1,6 @@
 package io.udash.bindings.inputs
 
 import io.udash._
-import io.udash.properties.PropertyCreator
 import org.scalajs.dom.html.{Div, Input => JSInput}
 import org.scalajs.dom.{Event, Node}
 import scalatags.JsDom.all._
@@ -25,7 +24,7 @@ object RadioButtons {
     * @param inputModifiers Modifiers to apply on each generated checkbox.
     * @return HTML element created by decorator.
     */
-  def apply[T : PropertyCreator](
+  def apply[T](
     selectedItem: Property[T], options: ReadableSeqProperty[T]
   )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
     new GroupedButtonsBinding(options, decorator, inputModifiers)(

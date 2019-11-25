@@ -12,7 +12,7 @@ import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
-import io.udash.properties.{PropertyCreator, seq}
+import io.udash.properties.seq
 import org.scalajs.dom._
 import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
@@ -474,7 +474,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided item property
      */
-    def select[T: PropertyCreator](
+    def select[T](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -512,7 +512,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided items property
      */
-    def multiSelect[T: PropertyCreator, ElemType <: Property[T]](
+    def multiSelect[T, ElemType <: Property[T]](
       selectedItems: seq.SeqProperty[T, ElemType],
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -619,7 +619,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided checkbox states property
      */
-    def checkButtons[T: PropertyCreator](
+    def checkButtons[T](
       selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
@@ -664,7 +664,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided item selection property
      */
-    def radioButtons[T: PropertyCreator](
+    def radioButtons[T](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
@@ -689,7 +689,7 @@ final class FormElementsFactory(
       override val render: Element = input.render
     }
 
-    private class ButtonsComponent[T: PropertyCreator, SelectedType](
+    private class ButtonsComponent[T, SelectedType](
       selected: Property[SelectedType],
       input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
       inputDecorationClass: CssStyle,
