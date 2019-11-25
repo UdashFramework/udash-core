@@ -2,7 +2,7 @@ package io.udash.properties.seq
 
 import com.avsystem.commons._
 import io.udash.properties.Properties.ReadableProperty
-import io.udash.properties.{PropertyCreator, PropertyId}
+import io.udash.properties.{ImmutableProperty, PropertyCreator, PropertyId}
 import io.udash.utils.Registration
 
 private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
@@ -24,7 +24,7 @@ private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[
   private def initOriginListeners(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
-      val registrations = value.map(_.listen(_ => fireValueListeners()))
+      val registrations = value.map(_.listen(_ => valueChanged()))
       originListenerRegistration = new Registration {
         override def restart(): Unit = {
           registrations.foreach(_.restart())
@@ -72,11 +72,6 @@ private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[
   override def elemProperties: ISeq[ReadableProperty[A]] =
     children
 
-  override def listenStructure(structureListener: Patch[ReadableProperty[A]] => Any): Registration = {
-    new Registration {
-      override def cancel(): Unit = {}
-      override def restart(): Unit = {}
-      override def isActive: Boolean = true
-    }
-  }
+  override def listenStructure(structureListener: Patch[ReadableProperty[A]] => Any): Registration =
+    ImmutableProperty.NoOpRegistration
 }

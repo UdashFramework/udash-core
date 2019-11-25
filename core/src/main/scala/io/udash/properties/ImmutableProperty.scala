@@ -26,8 +26,6 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
   override def listenOnce(valueListener: A => Any): Registration = ImmutableProperty.NoOpRegistration
 
-  override protected[properties] def parent: ReadableProperty[_] = null
-  override protected[properties] def fireValueListeners(): Unit = {}
   override protected[properties] def valueChanged(): Unit = {}
   override protected[properties] def listenersUpdate(): Unit = {}
   override def listenersCount(): Int = 0
