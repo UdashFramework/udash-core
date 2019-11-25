@@ -1,10 +1,10 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import io.udash.properties.model.{ModelPropertyMacroApi, ReadableModelProperty}
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
-import com.avsystem.commons._
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
@@ -56,7 +56,7 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
+private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
   extends ImmutableProperty[BSeq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: BSeq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
@@ -69,7 +69,7 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
     ImmutableProperty.NoOpRegistration
 
-  override def transformElements[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformElements[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty(value.map(transformer))
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =

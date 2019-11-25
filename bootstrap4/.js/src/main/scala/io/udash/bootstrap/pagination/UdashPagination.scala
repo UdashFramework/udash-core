@@ -6,12 +6,11 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
-import io.udash.properties.{PropertyCreator, seq}
-import org.scalajs.dom.Element
-import org.scalajs.dom.Event
+import io.udash.properties.seq
+import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
 
-final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]] private(
+final class UdashPagination[PageType, ElemType <: ReadableProperty[PageType]] private(
   pages: seq.ReadableSeqProperty[PageType, ElemType],
   selectedPageIdx: Property[Int],
   paginationSize: ReadableProperty[Option[BootstrapStyles.Size]],
@@ -173,7 +172,7 @@ object UdashPagination {
     * @tparam ElemType A type of a property containing an element in the `items` sequence.
     * @return A `UdashPagination` component, call `render` to create a DOM element.
     */
-  def apply[PageType: PropertyCreator, ElemType <: ReadableProperty[PageType]](
+  def apply[PageType, ElemType <: ReadableProperty[PageType]](
     pages: seq.ReadableSeqProperty[PageType, ElemType],
     selectedPageIdx: Property[Int],
     paginationSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
