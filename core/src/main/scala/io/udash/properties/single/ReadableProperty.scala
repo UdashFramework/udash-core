@@ -26,7 +26,7 @@ trait ReadableProperty[+A] {
   /** Returns listeners count. */
   def listenersCount(): Int
 
-  /** Ensures read-only access to this property. */
+  /** Read-only interface of this property. */
   def readable: ReadableProperty[A]
 
   /** This method should be called when the value has changed. */
@@ -106,8 +106,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     if (parent != null) parent.listenersUpdate()
   }
 
-  override lazy val readable: ReadableProperty[A] =
-    new ReadableWrapper[A](this)
+  override def readable: ReadableProperty[A] = this
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
