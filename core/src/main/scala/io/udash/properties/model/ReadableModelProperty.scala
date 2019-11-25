@@ -32,6 +32,5 @@ private[properties] trait AbstractReadableModelProperty[A]
   extends AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
   protected val properties = CrossCollections.createDictionary[Property[_]]
 
-  override lazy val readable: ReadableModelProperty[A] =
-    new ReadableWrapper[A](this)
+  override def readable: ReadableModelProperty[A] = this
 }

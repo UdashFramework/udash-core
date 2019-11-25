@@ -109,6 +109,5 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     )
   }
 
-  override lazy val readable: ReadableSeqProperty[A, ReadableProperty[A]] =
-    new ReadableWrapper[A](this)
+  override def readable: ReadableSeqProperty[A, ReadableProperty[A]] = this
 }
