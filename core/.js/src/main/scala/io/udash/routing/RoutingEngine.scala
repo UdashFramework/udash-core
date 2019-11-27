@@ -48,7 +48,10 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      toRemoveStates.values.foreach { case (_, presenter) => presenter.onClose() }
+      toRemoveStates.values.foreach { case (view, presenter) =>
+        view.onClose()
+        presenter.onClose()
+      }
 
       val oldViewFactories =
         newStatePath
@@ -122,7 +125,10 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
   }
 
   private def clearAllPresenters(): Unit = {
-    statesMap.values.foreach { case (_, presenter) => presenter.onClose() }
+    statesMap.values.foreach { case (view, presenter) =>
+      view.onClose()
+      presenter.onClose()
+    }
     statesMap.clear()
   }
 
