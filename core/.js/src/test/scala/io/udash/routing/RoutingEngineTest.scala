@@ -11,9 +11,13 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       object RootViewFactory extends ViewFactory[RootState] {
         var calls = 0
+        var closed = false
         override def create() = {
           calls += 1
-          (rootView, EmptyPresenter)
+          (rootView, new Presenter[RootState] {
+            override def handleState(state: RootState): Unit = ()
+            override def onClose(): Unit = closed = true
+          })
         }
       }
 
@@ -35,6 +39,8 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       initTestRoutingEngine(state2vp = state2VP)
 
+      RootViewFactory.closed shouldBe false
+
       routingEngine.handleUrl(Url("/"))
 
       renderer.views.size should be(2)
@@ -42,6 +48,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(objectView)
       renderer.lastSubPathToLeave should be(Nil)
       renderer.lastPathToAdd.size should be(2)
+      RootViewFactory.closed shouldBe false
 
       routingEngine.handleUrl(Url("/next"))
 
@@ -51,6 +58,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectView)
       renderer.lastSubPathToLeave.size should be(2)
       renderer.lastPathToAdd should be(nextObjectView :: Nil)
+      RootViewFactory.closed shouldBe false
 
       routingEngine.handleUrl(Url("/"))
 
@@ -59,6 +67,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(objectView)
       renderer.lastSubPathToLeave.size should be(2)
       renderer.lastPathToAdd.size should be(0)
+      RootViewFactory.closed shouldBe false
 
       routingEngine.handleUrl(Url("/abc/1"))
 
@@ -67,6 +76,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(classView)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
+      RootViewFactory.closed shouldBe false
 
       routingEngine.handleUrl(Url("/abcd/234"))
 
@@ -75,6 +85,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(class2View)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
+      RootViewFactory.closed shouldBe false
 
       routingEngine.handleUrl(Url("/next"))
 
@@ -84,7 +95,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectView)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd should be(objectView :: nextObjectView :: Nil)
-
+      RootViewFactory.closed shouldBe false
       RootViewFactory.calls should be(1)
 
       routingEngine.handleUrl(Url("/next"), fullReload = true)
@@ -95,12 +106,18 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectView)
       renderer.lastSubPathToLeave.size should be(0)
       renderer.lastPathToAdd should be(rootView :: objectView :: nextObjectView :: Nil)
-
+      RootViewFactory.closed shouldBe true //full reload
       RootViewFactory.calls should be(2)
+      RootViewFactory.closed = false
 
       routingEngine.handleUrl(Url("/root/1"))
+
+      RootViewFactory.closed shouldBe false
       RootViewFactory.calls should be(2)
+
       routingEngine.handleUrl(Url("/root/2"))
+
+      RootViewFactory.closed shouldBe false
       RootViewFactory.calls should be(2)
     }
 
