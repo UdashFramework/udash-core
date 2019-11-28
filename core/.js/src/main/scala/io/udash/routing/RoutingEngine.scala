@@ -3,6 +3,7 @@ package io.udash.routing
 import com.avsystem.commons.misc.AbstractCase
 import com.github.ghik.silencer.silent
 import io.udash._
+import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
@@ -21,7 +22,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   viewRenderer: ViewRenderer
-) {
+) extends CrossLogging {
 
   private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
@@ -51,7 +52,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      Try(cleanup(toRemoveStates.values))
+      cleanup(toRemoveStates.values)
 
       val oldViewFactories =
         newStatePath
@@ -126,8 +127,8 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
 
   private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
     state.foreach { case (view, presenter) =>
-      view.onClose()
-      presenter.onClose()
+      Try(view.onClose()).failed.foreach(logger.warn("Error closing view.", _))
+      Try(presenter.onClose()).failed.foreach(logger.warn("Error closing presenter.", _))
     }
   }
 
