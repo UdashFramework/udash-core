@@ -2,123 +2,139 @@ package io.udash.routing
 
 import io.udash._
 import io.udash.testing._
+import org.scalactic.source.Position
 
 class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
   "RoutingEngine" should {
     "render valid views on url change" in {
-      val rootView = new TestView
+      val rootViewFactory = new TestViewFactory[RootState]
+      val objectViewFactory = new TestViewFactory[ObjectState.type]
+      val nextObjectViewFactory = new TestViewFactory[NextObjectState.type]
+      val classViewFactory = new TestViewFactory[ClassState]
+      val class2ViewFactory = new TestViewFactory[ClassState]
+      val errorViewFactory = new TestViewFactory[ErrorState.type]
+      val state2VP: Map[TestState, TestViewFactory[_ <: TestState]] = Map[TestState, TestViewFactory[_ <: TestState]](
+        RootState(None) -> rootViewFactory,
+        RootState(Some(1)) -> rootViewFactory,
+        RootState(Some(2)) -> rootViewFactory,
+        ObjectState -> objectViewFactory,
+        NextObjectState -> nextObjectViewFactory,
+        ClassState("abc", 1) -> classViewFactory,
+        ClassState("abcd", 234) -> class2ViewFactory,
+        ErrorState -> errorViewFactory
+      )
 
-      object RootViewFactory extends ViewFactory[RootState] {
-        var calls = 0
-        var closed = false
-        override def create() = {
-          calls += 1
-          (rootView, new Presenter[RootState] {
-            override def handleState(state: RootState): Unit = ()
-            override def onClose(): Unit = closed = true
-          })
+      def testClosed(pattern: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
+        state2VP.mapValues(pattern).toVector.distinct.foreach { case (state, status) =>
+          state -> status shouldBe state -> state2VP(state).view.closed
+          state -> status shouldBe state -> state2VP(state).presenter.closed
+        }
+        state2VP.valuesIterator.foreach { vf =>
+          vf.view.closed = false
+          vf.presenter.closed = false
         }
       }
 
-      val objectView = new TestView
-      val nextObjectView = new TestView
-      val classView = new TestView
-      val class2View = new TestView
-      val errorView = new TestView
-      val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map[TestState, ViewFactory[_ <: TestState]](
-        RootState(None) -> RootViewFactory,
-        RootState(Some(1)) -> RootViewFactory,
-        RootState(Some(2)) -> RootViewFactory,
-        ObjectState -> new StaticViewFactory[ObjectState.type](() => objectView) {},
-        NextObjectState -> new StaticViewFactory[NextObjectState.type](() => nextObjectView) {},
-        ClassState("abc", 1) -> new StaticViewFactory[ClassState](() => classView) {},
-        ClassState("abcd", 234) -> new StaticViewFactory[ClassState](() => class2View) {},
-        ErrorState -> new StaticViewFactory[ErrorState.type](() => errorView) {}
-      )
-
       initTestRoutingEngine(state2vp = state2VP)
 
-      RootViewFactory.closed shouldBe false
+      testClosed(_ => false)
 
       routingEngine.handleUrl(Url("/"))
 
       renderer.views.size should be(2)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(objectView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(objectViewFactory.view)
       renderer.lastSubPathToLeave should be(Nil)
       renderer.lastPathToAdd.size should be(2)
-      RootViewFactory.closed shouldBe false
+      testClosed(_ => false)
 
       routingEngine.handleUrl(Url("/next"))
 
       renderer.views.size should be(3)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(objectView)
-      renderer.views(2) should be(nextObjectView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(objectViewFactory.view)
+      renderer.views(2) should be(nextObjectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(2)
-      renderer.lastPathToAdd should be(nextObjectView :: Nil)
-      RootViewFactory.closed shouldBe false
+      renderer.lastPathToAdd should be(nextObjectViewFactory.view :: Nil)
+      testClosed(_ => false)
 
       routingEngine.handleUrl(Url("/"))
 
       renderer.views.size should be(2)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(objectView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(objectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(2)
       renderer.lastPathToAdd.size should be(0)
-      RootViewFactory.closed shouldBe false
+      testClosed {
+        case `nextObjectViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/abc/1"))
 
       renderer.views.size should be(2)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(classView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(classViewFactory.view)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
-      RootViewFactory.closed shouldBe false
+      testClosed {
+        case `objectViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/abcd/234"))
 
       renderer.views.size should be(2)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(class2View)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(class2ViewFactory.view)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
-      RootViewFactory.closed shouldBe false
+      testClosed {
+        case `classViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/next"))
 
       renderer.views.size should be(3)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(objectView)
-      renderer.views(2) should be(nextObjectView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(objectViewFactory.view)
+      renderer.views(2) should be(nextObjectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(1)
-      renderer.lastPathToAdd should be(objectView :: nextObjectView :: Nil)
-      RootViewFactory.closed shouldBe false
-      RootViewFactory.calls should be(1)
+      renderer.lastPathToAdd should be(objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
+      rootViewFactory.count shouldBe 1
+      testClosed {
+        case `class2ViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/next"), fullReload = true)
 
       renderer.views.size should be(3)
-      renderer.views(0) should be(rootView)
-      renderer.views(1) should be(objectView)
-      renderer.views(2) should be(nextObjectView)
+      renderer.views(0) should be(rootViewFactory.view)
+      renderer.views(1) should be(objectViewFactory.view)
+      renderer.views(2) should be(nextObjectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(0)
-      renderer.lastPathToAdd should be(rootView :: objectView :: nextObjectView :: Nil)
-      RootViewFactory.closed shouldBe true //full reload
-      RootViewFactory.calls should be(2)
-      RootViewFactory.closed = false
+      renderer.lastPathToAdd should be(rootViewFactory.view :: objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
+      rootViewFactory.count shouldBe 2
+      testClosed {
+        case `rootViewFactory` | `objectViewFactory` | `nextObjectViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/root/1"))
 
-      RootViewFactory.closed shouldBe false
-      RootViewFactory.calls should be(2)
+      rootViewFactory.count shouldBe 2
+      testClosed {
+        case `objectViewFactory` | `nextObjectViewFactory` => true
+        case _ => false
+      }
 
       routingEngine.handleUrl(Url("/root/2"))
 
-      RootViewFactory.closed shouldBe false
-      RootViewFactory.calls should be(2)
+      rootViewFactory.count shouldBe 2
+      testClosed(_ => false)
     }
 
     "fire state change callbacks" in {
