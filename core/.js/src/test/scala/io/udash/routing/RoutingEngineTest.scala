@@ -317,6 +317,13 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.handleUrl(Url("/root"))
       renderer.views shouldBe Seq(rootView)
 
+      routingEngine.handleUrl(Url("/abcd/234"))
+      renderer.views shouldBe Seq(rootView, class2View)
+
+      //onClose exception doesn't prevent routing to valid state
+      routingEngine.handleUrl(Url("/root"), fullReload = true)
+      renderer.views shouldBe Seq(rootView)
+
       routingEngine.handleUrl(Url("/next"))
       renderer.views shouldBe Seq(rootView)
     }
