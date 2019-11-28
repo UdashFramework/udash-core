@@ -33,7 +33,10 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
    * @param url URL to be resolved
    */
   def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
-    if (fullReload) clearAllPresenters()
+    if (fullReload) {
+      cleanup(statesMap.values)
+      statesMap.clear()
+    }
 
     val newState = routingRegistry.matchUrl(url)
     val oldState = currentStateProp.get
@@ -48,10 +51,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      toRemoveStates.values.foreach { case (view, presenter) =>
-        view.onClose()
-        presenter.onClose()
-      }
+      Try(cleanup(toRemoveStates.values))
 
       val oldViewFactories =
         newStatePath
@@ -124,12 +124,11 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     }
   }
 
-  private def clearAllPresenters(): Unit = {
-    statesMap.values.foreach { case (view, presenter) =>
+  private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
+    state.foreach { case (view, presenter) =>
       view.onClose()
       presenter.onClose()
     }
-    statesMap.clear()
   }
 
   private def resolvePath(path: List[HierarchyRoot]): List[View] = {
