@@ -25,8 +25,9 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         ErrorState -> errorViewFactory
       )
 
-      def testClosed(pattern: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
-        state2VP.mapValues(pattern).toVector.distinct.foreach { case (state, status) =>
+      def testClosedAndReset(expectedClosed: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
+        import scala.collection.compat._
+        state2VP.view.mapValues(expectedClosed).toVector.distinct.foreach { case (state, status) =>
           state -> status shouldBe state -> state2VP(state).view.closed
           state -> status shouldBe state -> state2VP(state).presenter.closed
         }
@@ -38,7 +39,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       initTestRoutingEngine(state2vp = state2VP)
 
-      testClosed(_ => false)
+      testClosedAndReset(_ => false)
 
       routingEngine.handleUrl(Url("/"))
 
@@ -47,7 +48,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(objectViewFactory.view)
       renderer.lastSubPathToLeave should be(Nil)
       renderer.lastPathToAdd.size should be(2)
-      testClosed(_ => false)
+      testClosedAndReset(_ => false)
 
       routingEngine.handleUrl(Url("/next"))
 
@@ -57,7 +58,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(2) should be(nextObjectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(2)
       renderer.lastPathToAdd should be(nextObjectViewFactory.view :: Nil)
-      testClosed(_ => false)
+      testClosedAndReset(_ => false)
 
       routingEngine.handleUrl(Url("/"))
 
@@ -66,7 +67,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(objectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(2)
       renderer.lastPathToAdd.size should be(0)
-      testClosed {
+      testClosedAndReset {
         case `nextObjectViewFactory` => true
         case _ => false
       }
@@ -78,7 +79,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(classViewFactory.view)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
-      testClosed {
+      testClosedAndReset {
         case `objectViewFactory` => true
         case _ => false
       }
@@ -90,7 +91,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(class2ViewFactory.view)
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd.size should be(1)
-      testClosed {
+      testClosedAndReset {
         case `classViewFactory` => true
         case _ => false
       }
@@ -104,7 +105,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.lastSubPathToLeave.size should be(1)
       renderer.lastPathToAdd should be(objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
       rootViewFactory.count shouldBe 1
-      testClosed {
+      testClosedAndReset {
         case `class2ViewFactory` => true
         case _ => false
       }
@@ -118,7 +119,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.lastSubPathToLeave.size should be(0)
       renderer.lastPathToAdd should be(rootViewFactory.view :: objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
       rootViewFactory.count shouldBe 2
-      testClosed {
+      testClosedAndReset {
         case `rootViewFactory` | `objectViewFactory` | `nextObjectViewFactory` => true
         case _ => false
       }
@@ -126,7 +127,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.handleUrl(Url("/root/1"))
 
       rootViewFactory.count shouldBe 2
-      testClosed {
+      testClosedAndReset {
         case `objectViewFactory` | `nextObjectViewFactory` => true
         case _ => false
       }
@@ -134,7 +135,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.handleUrl(Url("/root/2"))
 
       rootViewFactory.count shouldBe 2
-      testClosed(_ => false)
+      testClosedAndReset(_ => false)
     }
 
     "fire state change callbacks" in {
