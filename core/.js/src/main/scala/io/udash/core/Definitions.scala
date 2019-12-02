@@ -27,8 +27,8 @@ trait Presenter[-S <: State] {
   def handleState(state: S): Unit
 
   /**
-    * This method will be called by [[io.udash.routing.RoutingEngine]] when this presenter will be replaced
-    * by other presenter. In this callback you should do cleanup if needed.
+    * This method will be called by [[io.udash.routing.RoutingEngine]] when this presenter is replaced
+    * by another one. This is where you can do cleanup if needed.
     */
   def onClose(): Unit = ()
 }
@@ -58,6 +58,12 @@ trait View {
     * @return DOM representation of view
     */
   def getTemplate: Modifier[Element]
+
+  /**
+   * This method will be called by [[io.udash.routing.RoutingEngine]] when this view is replaced
+   * by another one. This is where you can do cleanup.
+   */
+  def onClose(): Unit = ()
 }
 
 /** A [[io.udash.core.View]] which can render child view. */
