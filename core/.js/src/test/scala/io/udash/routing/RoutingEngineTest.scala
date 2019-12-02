@@ -257,17 +257,24 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.currentState should be(ClassState("abcd", 234))
     }
 
-    "not render views if presenter throws exception on state handling" in {
+    "not render views with presenters throwing exceptions on state handling" in {
       class ExceptionPresenter[S <: State] extends Presenter[S] {
-        override def handleState(state: S): Unit = {
-          throw new RuntimeException
-        }
+        override def handleState(state: S): Unit = throw new RuntimeException("handleState")
       }
 
       class ExceptionViewFactory[S <: State](view: View) extends ViewFactory[S] {
         override def create(): (View, Presenter[S]) = {
           (view, new ExceptionPresenter[S])
         }
+      }
+
+      class OnCloseExceptionPresenter[S <: State] extends Presenter[S] {
+        override def handleState(state: S): Unit = ()
+        override def onClose(): Unit = throw new RuntimeException("onClose")
+      }
+
+      class OnCloseExceptionViewFactory[S <: State](view: View) extends ViewFactory[S] {
+        override def create(): (View, Presenter[S]) = (view, new OnCloseExceptionPresenter[S])
       }
 
       val rootView = new TestView
@@ -281,7 +288,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         ObjectState -> new ExceptionViewFactory[ObjectState.type](objectView),
         NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
         ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),
-        ClassState("abcd", 234) -> new ExceptionViewFactory[ClassState](class2View),
+        ClassState("abcd", 234) -> new OnCloseExceptionViewFactory[ClassState](class2View),
         ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
       )
 
@@ -299,11 +306,26 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.handleUrl(Url("/abc/1"))
       renderer.views.size should be(0)
 
+      //handleState exception doesn't prevent routing to valid state
+      routingEngine.handleUrl(Url("/root"))
+      renderer.views shouldBe Seq(rootView)
+
       routingEngine.handleUrl(Url("/abcd/234"))
-      renderer.views.size should be(0)
+      renderer.views shouldBe Seq(rootView, class2View)
+
+      //onClose exception doesn't prevent routing to valid state
+      routingEngine.handleUrl(Url("/root"))
+      renderer.views shouldBe Seq(rootView)
+
+      routingEngine.handleUrl(Url("/abcd/234"))
+      renderer.views shouldBe Seq(rootView, class2View)
+
+      //onClose exception doesn't prevent routing to valid state
+      routingEngine.handleUrl(Url("/root"), fullReload = true)
+      renderer.views shouldBe Seq(rootView)
 
       routingEngine.handleUrl(Url("/next"))
-      renderer.views.size should be(0)
+      renderer.views shouldBe Seq(rootView)
     }
   }
 }

@@ -3,6 +3,7 @@ package io.udash.routing
 import com.avsystem.commons.misc.AbstractCase
 import com.github.ghik.silencer.silent
 import io.udash._
+import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
@@ -21,7 +22,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   viewRenderer: ViewRenderer
-) {
+) extends CrossLogging {
 
   private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
@@ -33,7 +34,10 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
    * @param url URL to be resolved
    */
   def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
-    if (fullReload) clearAllPresenters()
+    if (fullReload) {
+      cleanup(statesMap.values)
+      statesMap.clear()
+    }
 
     val newState = routingRegistry.matchUrl(url)
     val oldState = currentStateProp.get
@@ -48,10 +52,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      toRemoveStates.values.foreach { case (view, presenter) =>
-        view.onClose()
-        presenter.onClose()
-      }
+      cleanup(toRemoveStates.values)
 
       val oldViewFactories =
         newStatePath
@@ -124,12 +125,11 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     }
   }
 
-  private def clearAllPresenters(): Unit = {
-    statesMap.values.foreach { case (view, presenter) =>
-      view.onClose()
-      presenter.onClose()
+  private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
+    state.foreach { case (view, presenter) =>
+      Try(view.onClose()).failed.foreach(logger.warn("Error closing view.", _))
+      Try(presenter.onClose()).failed.foreach(logger.warn("Error closing presenter.", _))
     }
-    statesMap.clear()
   }
 
   private def resolvePath(path: List[HierarchyRoot]): List[View] = {
