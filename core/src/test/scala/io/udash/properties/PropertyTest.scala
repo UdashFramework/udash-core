@@ -316,6 +316,29 @@ class PropertyTest extends UdashCoreTest {
       counter2 should be(1)
     }
 
+    "fire on transformed value changed or when forced" in {
+      val origin: Property[Option[Int]] = Property(Some(0))
+      val transformed: ReadableProperty[Boolean] = origin.transform((q: Option[Int]) => q.isDefined)
+      var counter = 0
+
+      transformed.listen(_ => counter += 1)
+
+      origin.set(Some(0))
+      counter shouldBe 0 //suppressed at origin
+
+      origin.set(Some(1))
+      counter shouldBe 0 //suppressed at transformed
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None, force = true)
+      counter shouldBe 2
+    }
+
     "combine with other properties (single properties)" in {
       val p1 = Property(1)
       val p2 = Property(2)
