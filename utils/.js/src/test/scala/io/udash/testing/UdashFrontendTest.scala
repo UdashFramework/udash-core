@@ -1,5 +1,6 @@
 package io.udash.testing
 
+import com.avsystem.commons._
 import org.scalajs.dom
 import org.scalajs.dom.Element
 import org.scalajs.dom.raw.DOMTokenList
@@ -14,12 +15,12 @@ trait FrontendTestUtils {
       case _ => false
     }
 
-    override def containsOneOf(container: DOMTokenList, elements: Seq[Any]): Boolean = elements.exists {
+    override def containsOneOf(container: DOMTokenList, elements: BSeq[Any]): Boolean = elements.exists {
       case s: String => container.contains(s)
       case _ => false
     }
 
-    override def containsNoneOf(container: DOMTokenList, elements: Seq[Any]): Boolean = elements.forall {
+    override def containsNoneOf(container: DOMTokenList, elements: BSeq[Any]): Boolean = elements.forall {
       case s: String => container.contains(s)
       case _ => false
     }

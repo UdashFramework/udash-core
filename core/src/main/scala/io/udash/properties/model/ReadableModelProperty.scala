@@ -1,5 +1,6 @@
 package io.udash.properties.model
 
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.{AbstractReadableProperty, CastableReadableProperty, Property, ReadableProperty}
@@ -16,7 +17,7 @@ trait ReadableModelProperty[+A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def roSubSeq[B](f: A => Seq[B])(implicit ev: SeqPropertyCreator[B, Seq]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
+  def roSubSeq[B, SeqTpe[T] <: BSeq[T]](f: A => SeqTpe[B])(implicit ev: SeqPropertyCreator[B, SeqTpe]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
 
   /** Ensures read-only access to this property. */
@@ -32,6 +33,5 @@ private[properties] trait AbstractReadableModelProperty[A]
   extends AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
   protected val properties = CrossCollections.createDictionary[Property[_]]
 
-  override lazy val readable: ReadableModelProperty[A] =
-    new ReadableWrapper[A](this)
+  override def readable: ReadableModelProperty[A] = this
 }

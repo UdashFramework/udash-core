@@ -68,7 +68,7 @@ object ProgressBarDemo extends AutoDemo {
         )(),
       ),
       div(bottomMargin)(
-        NumberInput(value.transform(_.toString, _.toInt))(
+        NumberInput(value.bitransform(_.toString)(_.toInt))(
           Form.control, placeholder := "Percentage"
         )
       )

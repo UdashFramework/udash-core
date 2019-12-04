@@ -23,7 +23,7 @@ class IndexPresenter(stateProperty: Property[IndexState]) extends Presenter[Inde
   }
 }
 
-class IndexView(state: Property[IndexState]) extends FinalView {
+class IndexView(state: Property[IndexState]) extends View {
   import scalatags.JsDom.all._
 
   private lazy val content = div(

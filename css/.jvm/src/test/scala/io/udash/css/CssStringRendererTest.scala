@@ -65,20 +65,14 @@ class CssStringRendererTest extends UdashSharedTest {
           |
           |.io-udash-css-StylesheetExample-test1:hover {
           |  cursor: -moz-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: -o-zoom-in;
+          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |
-          |@media not handheld and (orientation:landscape) and (max-width:840px) {
+          |@media not handheld and (orientation:landscape) and (max-width:540px) {
           |  .io-udash-css-StylesheetExample-test1 {
-          |    width: 600px;
-          |  }
-          |}
-          |
-          |@media not handheld and (orientation:landscape) and (max-width:740px) {
-          |  .io-udash-css-StylesheetExample-test1 {
-          |    width: 500px;
+          |    width: 300px;
           |  }
           |}
           |
@@ -88,9 +82,15 @@ class CssStringRendererTest extends UdashSharedTest {
           |  }
           |}
           |
-          |@media not handheld and (orientation:landscape) and (max-width:540px) {
+          |@media not handheld and (orientation:landscape) and (max-width:740px) {
           |  .io-udash-css-StylesheetExample-test1 {
-          |    width: 300px;
+          |    width: 500px;
+          |  }
+          |}
+          |
+          |@media not handheld and (orientation:landscape) and (max-width:840px) {
+          |  .io-udash-css-StylesheetExample-test1 {
+          |    width: 600px;
           |  }
           |}
           |
@@ -102,8 +102,8 @@ class CssStringRendererTest extends UdashSharedTest {
           |
           |.io-udash-css-StylesheetExample-test2:hover {
           |  cursor: -moz-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: -o-zoom-in;
+          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |
@@ -140,8 +140,8 @@ class CssStringRendererTest extends UdashSharedTest {
           |
           |.io-udash-css-SecondStylesheetExample-test:hover {
           |  cursor: -moz-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: -o-zoom-in;
+          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |

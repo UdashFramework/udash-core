@@ -3,6 +3,7 @@ package io.udash.web.guide.views.ext.demo.bootstrap
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
+import com.avsystem.commons._
 
 object CheckboxButtonsDemo extends AutoDemo {
 
@@ -26,9 +27,7 @@ object CheckboxButtonsDemo extends AutoDemo {
       h4("Is active: "),
       div(Card.card, Card.body, Background.color(Color.Light))(
         repeatWithNested(options) { (option, nested) =>
-          val checked = selected.transform(
-            (_: Seq[String]).contains(option.get)
-          )
+          val checked = selected.transform(_.contains(option.get))
           div(
             nested(bind(option)), ": ",
             nested(bind(checked))

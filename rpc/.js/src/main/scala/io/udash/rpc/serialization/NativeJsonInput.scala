@@ -1,6 +1,6 @@
 package io.udash.rpc.serialization
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
 

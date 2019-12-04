@@ -15,17 +15,17 @@ import scala.concurrent.Future
 
 trait CirceRestImplicits extends FloatingPointRestImplicits {
   implicit def encoderBasedAsJson[T: Encoder]: AsRaw[JsonValue, T] =
-    AsRaw.create(v => JsonValue(v.asJson.noSpaces))
+    v => JsonValue(v.asJson.noSpaces)
 
   implicit def decoderBasedFromJson[T: Decoder]: AsReal[JsonValue, T] =
-    AsReal.create(json => parse(json.value).fold(throw _, _.as[T].fold(throw _, identity)))
+    json => parse(json.value).fold(throw _, _.as[T].fold(throw _, identity))
 
   implicit def keyEncoderBasedAsPlain[T: KeyEncoder]: AsRaw[PlainValue, T] =
-    AsRaw.create(v => PlainValue(KeyEncoder[T].apply(v)))
+    v => PlainValue(KeyEncoder[T].apply(v))
 
   implicit def keyDecoderBasedFromPlain[T: KeyDecoder]: AsReal[PlainValue, T] =
-    AsReal.create(pv => KeyDecoder[T].apply(pv.value)
-      .getOrElse(throw new IllegalArgumentException(s"Invalid key: ${pv.value}")))
+    pv => KeyDecoder[T].apply(pv.value)
+      .getOrElse(throw new IllegalArgumentException(s"Invalid key: ${pv.value}"))
 
   @implicitNotFound("#{forEncoder}")
   implicit def asJsonNotFound[T](

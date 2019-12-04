@@ -6,33 +6,34 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.10"
-  val silencerVersion = "1.4.2"
+  val silencerVersion = "1.4.4"
+  val collectionCompatVersion = "2.1.2"
 
-  val jqueryWrapperVersion = "3.0.1"
+  val jqueryWrapperVersion = "3.0.2"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.7"
   val scalaTagsVersion = "0.7.0"
-  val scalaCssVersion = "0.5.6"
+  val scalaCssVersion = "0.6.0-RC1"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "1.42.0"
+  val avsCommonsVersion = "2.0.0-M4"
 
   val atmosphereJSVersion = "2.3.8"
-  val atmosphereVersion = "2.5.9"
+  val atmosphereVersion = "2.5.11"
 
   val upickleVersion = "0.8.0" // Tests only
-  val circeVersion = "0.12.2" // Tests only
+  val circeVersion = "0.12.3" // Tests only
   val circeDerivationVersion = "0.12.0-M7" // Tests only
-  val monixVersion = "3.0.0" // Tests only
+  val monixVersion = "3.1.0" // Tests only
 
   val sttpVersion = "1.7.2"
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "9.4.21.v20190926"
+  val jettyVersion = "9.4.24.v20191120"
   val typesafeConfigVersion = "1.4.0"
-  val flexmarkVersion = "0.50.42"
+  val flexmarkVersion = "0.50.44"
   val logbackVersion = "1.2.3"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
@@ -43,18 +44,17 @@ object Dependencies {
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
   val momentJsVersion = "2.22.2"
-  val highchartsVersion = "5.0.14"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.2.5"
+  val scalaJsBenchmarkVersion = "0.3.0-RC1"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-plugin" % silencerVersion,
+    "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
 
   val commonDeps = Def.setting(Seq(
-    "com.github.ghik" %% "silencer-lib" % silencerVersion % Provided,
+    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
   ))
 
   val commonTestDeps = Def.setting(Seq(
@@ -67,7 +67,8 @@ object Dependencies {
   ))
 
   val utilsCrossDeps = Def.setting(Seq(
-    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion
+    "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
+    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
@@ -122,7 +123,7 @@ object Dependencies {
   ))
 
   val restSjsDeps = restCrossDeps
-  
+
   val restJettyDeps = Def.setting(Seq(
     "org.eclipse.jetty" % "jetty-client" % jettyVersion
   ))
@@ -171,10 +172,6 @@ object Dependencies {
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
   ))
 
-  val chartsSjsDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion
-  ))
-
   val benchmarksSjsDeps = Def.setting(Seq(
     "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,
     "io.circe" %%% "circe-core" % circeVersion,
@@ -202,19 +199,6 @@ object Dependencies {
   val guideJsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
     ProvidedJS / "prism.js",
-
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts.src.js"
-      minified s"$highchartsVersion/highcharts.js" dependsOn "jquery.js",
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-3d.src.js"
-      minified s"$highchartsVersion/highcharts-3d.js" dependsOn s"$highchartsVersion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/highcharts-more.src.js"
-      minified s"$highchartsVersion/highcharts-more.js" dependsOn s"$highchartsVersion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/exporting.src.js"
-      minified s"$highchartsVersion/modules/exporting.js" dependsOn s"$highchartsVersion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/drilldown.src.js"
-      minified s"$highchartsVersion/modules/drilldown.js" dependsOn s"$highchartsVersion/highcharts.src.js",
-    "org.webjars" % "highcharts" % highchartsVersion / s"$highchartsVersion/modules/heatmap.src.js"
-      minified s"$highchartsVersion/modules/heatmap.js" dependsOn s"$highchartsVersion/highcharts.src.js"
   ))
 
   val guideFrontendDeps = Def.setting(Seq(

@@ -24,7 +24,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   private final lazy val ModelPropertyImplCls = tq"$Package.model.ModelPropertyImpl"
   private final lazy val CastablePropertyCls = tq"$Package.single.CastableProperty"
   private final lazy val ModelPropertyMacroApiCls = tq"$Package.model.ModelPropertyMacroApi"
-  private final lazy val SeqTpe = typeOf[Seq[_]]
+  private final lazy val SeqTpe = typeOf[scala.collection.Seq[_]]
   private final lazy val TopLevelSymbols = Set(typeOf[Any], typeOf[AnyRef], typeOf[AnyVal], typeOf[Product], typeOf[Equals]).map(_.typeSymbol)
 
   private def fixOverride(s: Symbol) =

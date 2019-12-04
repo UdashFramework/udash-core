@@ -10,7 +10,6 @@ import org.atmosphere.cpr._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Span}
 
-import scala.collection.mutable
 import scala.util.Try
 
 trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
@@ -18,8 +17,8 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
   override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   class BroadcasterMock extends DefaultBroadcaster {
-    val broadcasts = mutable.ListBuffer[String]()
-    val addedResources = mutable.ListBuffer[AtmosphereResource]()
+    val broadcasts = MListBuffer[String]()
+    val addedResources = MListBuffer[AtmosphereResource]()
 
     override def broadcast(msg: Any): Future[AnyRef] = {
       broadcasts += msg.toString
@@ -33,7 +32,7 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
   }
 
   class BroadcasterFactoryMock(broadcaster: Broadcaster) extends DefaultBroadcasterFactory {
-    val lookups = mutable.ListBuffer[String]()
+    val lookups = MListBuffer[String]()
 
     private def _lookup[T <: Broadcaster](msg: String): T = {
       lookups += msg
@@ -47,7 +46,7 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
   }
 
   class MetaBroadcasterMock extends DefaultMetaBroadcaster {
-    val broadcasts = mutable.ListBuffer[(String, String)]()
+    val broadcasts = MListBuffer[(String, String)]()
 
     override def broadcastTo(broadcasterID: String, message: Any): Future[JList[Broadcaster]] = {
       broadcasts.+=((broadcasterID, message.toString))

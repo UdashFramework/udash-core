@@ -1,6 +1,6 @@
 package io.udash.bindings
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, HasCssName, PropertyOps}
 import io.udash.bindings.modifiers._
 import io.udash.properties.seq.ReadableSeqProperty
@@ -24,8 +24,8 @@ trait Bindings {
   final val TextInput = inputs.TextInput
   final val RangeInput = inputs.RangeInput
 
-  implicit def seqFromNode(el: Node): Seq[Node] = js.Array(el)
-  implicit def seqFromElement(el: Element): Seq[Element] = js.Array(el)
+  implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
+  implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
   implicit def seqNodeFromOpt[T](el: Opt[T])(implicit ev: T => Modifier[Element]): Modifier[Element] =
     new JsDom.all.SeqNode(el.toSeq)
 

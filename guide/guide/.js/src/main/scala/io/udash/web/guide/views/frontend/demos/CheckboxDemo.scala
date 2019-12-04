@@ -19,10 +19,7 @@ object CheckboxDemo extends AutoDemo {
     val propA = Property(true)
     val propB = Property(false)
     val propC = Property("Yes")
-    val propCAsBoolean = propC.transform(
-      (s: String) => s.equalsIgnoreCase("yes"),
-      (b: Boolean) => if (b) "Yes" else "No"
-    )
+    val propCAsBoolean = propC.bitransform(_.equalsIgnoreCase("yes"))(if (_) "Yes" else "No")
 
     def checkboxes: JsDom.TypedTag[Div] = div(Grid.row)(
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -51,7 +48,7 @@ object CheckboxDemo extends AutoDemo {
     checkboxes.render
 
     (checkboxes, checkboxes)
-  }.withSourceCode
+    }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, Iterator[String]) = {
     import io.udash.bootstrap.utils.BootstrapStyles._

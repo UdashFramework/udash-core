@@ -1,7 +1,6 @@
 package io.udash.bindings.inputs
 
 import io.udash._
-import io.udash.properties.PropertyCreator
 import io.udash.properties.seq.SeqProperty
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Select
@@ -23,7 +22,7 @@ object Select {
     * @param selectModifiers Additional Modifiers for the select tag, don't use modifiers on value, onchange and selected attributes.
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
-  def apply[T : PropertyCreator](
+  def apply[T](
     selectedItem: Property[T], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new SelectBinding(options, label, selectModifiers)(
@@ -42,7 +41,7 @@ object Select {
     * @param selectModifiers Additional Modifiers, don't use modifiers on value, onchange and selected attributes.
     * @return Binding with `select` element, which can be used as Scalatags modifier.
     */
-  def apply[T : PropertyCreator, ElemType <: Property[T]](
+  def apply[T, ElemType <: Property[T]](
     selectedItems: SeqProperty[T, ElemType], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new SelectBinding(options, label, selectModifiers :+ (multiple := true))(

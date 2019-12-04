@@ -1,5 +1,6 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.single.{AbstractProperty, CastableProperty, Property}
 
@@ -17,12 +18,14 @@ object SeqProperty {
     Property[Seq[T]](init)(pc).asSeq[T]
 }
 
-trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[Seq[A]] {
+trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[BSeq[A]] {
   /** Replaces `amount` elements from index `idx` with provided `values`. */
-  def replace(idx: Int, amount: Int, values: A*): Unit
+  def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit
+  final def replace(idx: Int, amount: Int, values: A*): Unit = replaceSeq(idx, amount, values)
 
   /** Inserts `values` on index `idx`. */
-  def insert(idx: Int, values: A*): Unit
+  def insertSeq(idx: Int, values: BSeq[A]): Unit
+  final def insert(idx: Int, values: A*): Unit = insertSeq(idx, values)
 
   /** Removes `amount` elements starting from index `idx`. */
   def remove(idx: Int, amount: Int): Unit
@@ -31,27 +34,30 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   def remove(value: A): Unit
 
   /** Adds `values` at the begging of the sequence. */
-  def prepend(values: A*): Unit
+  def prependSeq(values: BSeq[A]): Unit
+  final def prepend(values: A*): Unit = prependSeq(values)
 
   /** Adds `values` at the end of the sequence. */
-  def append(values: A*): Unit
+  def appendSeq(values: BSeq[A]): Unit
+  final def append(values: A*): Unit = appendSeq(values)
 
   /** Removes all elements from this SeqProperty. */
   def clear(): Unit
 
-  /** Transforms SeqProperty[A] into SeqProperty[B].
-    *
-    * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
-  def transform[B](transformer: A => B, revert: B => A): SeqProperty[B, Property[B]]
+  /** Creates SeqProperty[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
+   * Prefer this to `bitransform` whenever you don't need the whole sequence to perform the transformation.
+   *
+   * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
+  def bitransformElements[B](transformer: A => B)(revert: B => A): SeqProperty[B, Property[B]]
 
   /** Creates `SeqProperty[A]` providing reversed order of elements from `this`. */
   override def reversed(): SeqProperty[A, Property[A]]
 }
 
 private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
-  extends AbstractReadableSeqProperty[A, ElemType] with AbstractProperty[Seq[A]] with SeqProperty[A, ElemType] {
+  extends AbstractReadableSeqProperty[A, ElemType] with AbstractProperty[BSeq[A]] with SeqProperty[A, ElemType] {
 
-  def insert(idx: Int, values: A*): Unit = replace(idx, 0, values: _*)
+  def insertSeq(idx: Int, values: BSeq[A]): Unit = replaceSeq(idx, 0, values)
 
   def remove(idx: Int, amount: Int): Unit = replace(idx, amount)
 
@@ -60,9 +66,9 @@ private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
     if (idx >= 0) replace(idx, 1)
   }
 
-  def prepend(values: A*): Unit = insert(0, values: _*)
+  def prependSeq(values: BSeq[A]): Unit = insertSeq(0, values)
 
-  def append(values: A*): Unit = insert(get.size, values: _*)
+  def appendSeq(values: BSeq[A]): Unit = insertSeq(get.size, values)
 
   def clear(): Unit = remove(0, size)
 
@@ -71,7 +77,7 @@ private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
     structureListeners.clear()
   }
 
-  def transform[B](transformer: A => B, revert: B => A): SeqProperty[B, Property[B]] =
+  override def bitransformElements[B](transformer: A => B)(revert: B => A): SeqProperty[B, Property[B]] =
     new TransformedSeqProperty[A, B](this, transformer, revert)
 
   override def reversed(): SeqProperty[A, Property[A]] =

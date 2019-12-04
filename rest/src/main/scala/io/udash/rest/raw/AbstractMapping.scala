@@ -2,18 +2,18 @@ package io.udash
 package rest.raw
 
 import com.avsystem.commons._
+import com.avsystem.commons.collection.CrossFactory
 import io.udash.rest.raw.AbstractMapping.ConcatSeq
 
-import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
+import scala.collection.compat._
 
 /**
-  * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
-  * initialized map which allows fast lookup by key. When looking up values by key, duplicate entries are dropped and
-  * only the last value for given key is returned.
-  *
-  * Mappings have O(1) prepend, append and concatenation operations.
-  */
+ * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
+ * initialized map which allows fast lookup by key. When looking up values by key, duplicate entries are dropped and
+ * only the last value for given key is returned.
+ *
+ * Mappings have O(1) prepend, append and concatenation operations.
+ */
 final case class Mapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = Mapping[V]
   def caseSensitive: Boolean = true
@@ -23,9 +23,9 @@ final case class Mapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[
 object Mapping extends AbstractMappingCompanion[Mapping]
 
 /**
-  * A version of [[Mapping]] which is case-insensitive when looking up values by key.
-  * Used primarily to represent [[io.udash.rest.Header Header]] parameter values.
-  */
+ * A version of [[Mapping]] which is case-insensitive when looking up values by key.
+ * Used primarily to represent [[io.udash.rest.Header Header]] parameter values.
+ */
 final case class IMapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = IMapping[V]
   def caseSensitive: Boolean = false
@@ -101,20 +101,25 @@ object AbstractMapping {
   }
 }
 
-abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] {
+abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] { companion =>
   def apply[V](entries: ISeq[(String, V)]): M[V]
+  def create[V](entries: (String, V)*): M[V] = apply(entries.to(ISeq))
 
-  def empty[V]: M[V] = apply()
-  def apply[V](entries: (String, V)*): M[V] = apply(entries.toList)
+  def empty[V]: M[V] = create()
 
-  def newBuilder[V]: mutable.Builder[(String, V), M[V]] =
-    new MListBuffer[(String, V)].mapResult(apply(_))
+  def newBuilder[V]: MBuilder[(String, V), M[V]] =
+    new MListBuffer[(String, V)].mapResult(create)
 
-  private val reusableCBF = new CanBuildFrom[Nothing, (String, Any), M[Any]] {
-    def apply(from: Nothing): mutable.Builder[(String, Any), M[Any]] = newBuilder
-    def apply(): mutable.Builder[(String, Any), M[Any]] = newBuilder
+  private val reusableFactory = new CrossFactory[(String, Any), M[Any]] {
+    def fromSpecific(it: IterableOnce[(String, Any)]): M[Any] = {
+      val b = newBuilder
+      b ++= it
+      b.result()
+    }
+
+    def newBuilder: MBuilder[(String, Any), M[Any]] = companion.newBuilder
   }
 
-  implicit def canBuildFrom[V]: CanBuildFrom[Nothing, (String, V), M[V]] =
-    reusableCBF.asInstanceOf[CanBuildFrom[Nothing, (String, V), M[V]]]
+  implicit def canBuildFrom[V]: Factory[(String, V), M[V]] =
+    reusableFactory.asInstanceOf[Factory[(String, V), M[V]]]
 }

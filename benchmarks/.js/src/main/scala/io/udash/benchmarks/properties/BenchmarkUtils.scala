@@ -1,5 +1,6 @@
 package io.udash.benchmarks.properties
 
+import com.avsystem.commons._
 import io.udash._
 import japgolly.scalajs.benchmark.Benchmark
 
@@ -16,27 +17,20 @@ trait BenchmarkUtils {
   sealed trait ModelWithSeqItem {
     def i: Int
     def s: String
-    def seq: Seq[Int]
+    def seq: BSeq[Int]
   }
 
-  case class ModelWithBSeqItem(i: Int, s: String, seq: Seq[Int]) extends ModelWithSeqItem
+  case class ModelWithBSeqItem(i: Int, s: String, seq: BSeq[Int]) extends ModelWithSeqItem
   object ModelWithBSeqItem extends HasModelPropertyCreator[ModelWithBSeqItem] {
     def random: ModelWithBSeqItem = ModelWithBSeqItem(
       Random.nextInt(100), Random.nextString(5), 1 to Random.nextInt(100) + 100
     )
   }
 
-  case class ModelWithISeqItem(i: Int, s: String, seq: scala.collection.immutable.Seq[Int]) extends ModelWithSeqItem
+  case class ModelWithISeqItem(i: Int, s: String, seq: ISeq[Int]) extends ModelWithSeqItem
   object ModelWithISeqItem extends HasModelPropertyCreator[ModelWithISeqItem] {
     def random: ModelWithISeqItem = ModelWithISeqItem(
       Random.nextInt(100), Random.nextString(5), 1 to Random.nextInt(100) + 100
-    )
-  }
-
-  case class ModelWithMSeqItem(i: Int, s: String, seq: scala.collection.mutable.Seq[Int]) extends ModelWithSeqItem
-  object ModelWithMSeqItem extends HasModelPropertyCreator[ModelWithMSeqItem] {
-    def random: ModelWithMSeqItem = ModelWithMSeqItem(
-      Random.nextInt(100), Random.nextString(5), (1 to Random.nextInt(100) + 100).toBuffer
     )
   }
 

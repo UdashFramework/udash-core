@@ -20,23 +20,20 @@ object CheckButtonsDemo extends AutoDemo {
     case object Banana extends Fruit
 
     val favoriteFruits = SeqProperty(Apple, Banana)
-    val favoriteFruitsStrings = favoriteFruits.transform(
-      (f: Fruit) => f.toString,
-      (s: String) => s match {
+    val favoriteFruitsStrings = favoriteFruits.bitransformElements(_.toString) {
         case "Apple" => Apple
         case "Orange" => Orange
         case "Banana" => Banana
       }
-    )
 
     def checkButtons: UdashInputGroup = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.appendCheckbox(
         CheckButtons(
           favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )((els: Seq[(Input, String)]) => span(els.map {
+        )(els => span(els.map {
           case (i: Input, l: String) => label(Form.checkInline, attr("data-label") := l)(i, l)
-        }).render).render
+        }).render)
       ),
       UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
     )

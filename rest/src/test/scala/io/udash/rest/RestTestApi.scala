@@ -34,7 +34,7 @@ case object SingletonEntity extends FlatBaseEntity
 case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
-    cr => RestResponse(200, IMapping("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
+    cr => RestResponse(200, IMapping.create("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
     resp => CustomResp(resp.headers("X-Value").value)
   )
   implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {
@@ -135,7 +135,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
-    def neverGet: Future[Unit] = Future.never
+    def neverGet: Future[Unit] = Promise[Unit].future // https://github.com/scala-js/scala-js/issues/3818
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))

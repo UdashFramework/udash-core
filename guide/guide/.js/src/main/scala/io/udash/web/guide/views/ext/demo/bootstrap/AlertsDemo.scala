@@ -56,9 +56,7 @@ object AlertsDemo extends AutoDemo {
       ))(
         h4("Dismissed: "),
         div(Card.card, Card.body, Background.color(Color.Light))(
-          produce(dismissed)(seq =>
-            ul(seq.map(li(_))).render
-          )
+          produce(dismissed)(seq => ul(seq.map(li(_))).render)
         )
       )
     ).render

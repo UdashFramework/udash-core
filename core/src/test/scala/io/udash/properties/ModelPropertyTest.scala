@@ -6,8 +6,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.properties.single.Property
 import io.udash.testing.UdashCoreTest
 
-import scala.collection.mutable
-
 class ModelPropertyTest extends UdashCoreTest {
   class C(val i: Int, val s: String) {
     var variable: Int = 7
@@ -94,9 +92,9 @@ class ModelPropertyTest extends UdashCoreTest {
     }
 
     "fire listeners on value change" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
-      val oneTimeValues = mutable.ArrayBuffer[Any]()
+      val oneTimeValues = MArrayBuffer[Any]()
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val p = ModelProperty(null: TT)
@@ -168,14 +166,11 @@ class ModelPropertyTest extends UdashCoreTest {
     }
 
     "transform and synchronize value" in {
-      val values = mutable.ArrayBuffer[Any]()
+      val values = MArrayBuffer[Any]()
       val listener = (v: Any) => values += v
 
       val p = ModelProperty(null: TT)
-      val t = p.transform[Int](
-        (p: TT) => p.i + p.t.c.i,
-        (x: Int) => newTT(x / 2, None, new C(x / 2, ""), Seq.empty)
-      )
+      val t = p.bitransform(p => p.i + p.t.c.i)(x => newTT(x / 2, None, new C(x / 2, ""), Seq.empty))
 
       val r1 = p.listen(listener)
       val r2 = t.listen(listener)
@@ -440,7 +435,7 @@ class ModelPropertyTest extends UdashCoreTest {
 
       an[IllegalStateException] shouldBe thrownBy(p.asModel(ModelPropertyCreator.materialize))
 
-      val p2 = Property(Seq(1, 2, 3))(new SinglePropertyCreator[BSeq[Int]])
+      val p2 = Property(Seq(1, 2, 3))(new SinglePropertyCreator[Seq[Int]])
       an[IllegalStateException] shouldBe thrownBy(p2.asSeq)
     }
 
@@ -468,33 +463,49 @@ class ModelPropertyTest extends UdashCoreTest {
       val mp = ModelProperty(AliasedSeqModel(Vector("abc"), Vector("def"), Vector(1), Vector("123")))
 
       mp.subSeq(_.s1).get should ===(Seq("abc"))
+      mp.roSubSeq(_.s1).get should ===(Seq("abc"))
       mp.subProp(_.s1).get shouldBe a[Seq[_]]
+      mp.roSubProp(_.s1).get shouldBe a[Seq[_]]
       mp.subProp(_.s1).get should ===(Vector("abc"))
+      mp.roSubProp(_.s1).get should ===(Vector("abc"))
 
       mp.subSeq(_.s2).get should ===(Seq("def"))
+      mp.roSubSeq(_.s2).get should ===(Seq("def"))
       mp.subProp(_.s2).get shouldBe a[Vector[_]]
+      mp.roSubProp(_.s2).get shouldBe a[Vector[_]]
       mp.subProp(_.s2).get should ===(Vector("def"))
+      mp.roSubProp(_.s2).get should ===(Vector("def"))
 
       mp.subSeq[Int, Seq](_.s3).get should ===(Seq(1))
+      mp.roSubSeq[Int, Seq](_.s3).get should ===(Seq(1))
       mp.subProp(_.s3).get shouldBe a[Seq[_]]
+      mp.roSubProp(_.s3).get shouldBe a[Seq[_]]
       mp.subProp(_.s3).get should ===(Vector(1))
+      mp.roSubProp(_.s3).get should ===(Vector(1))
 
       mp.subSeq(_.s4).get should ===(Seq("123"))
+      mp.roSubSeq(_.s4).get should ===(Seq("123"))
       mp.subProp(_.s4).get shouldBe a[Seq[_]]
+      mp.roSubProp(_.s4).get shouldBe a[Seq[_]]
       mp.subProp(_.s4).get should ===(Vector("123"))
+      mp.roSubProp(_.s4).get should ===(Vector("123"))
 
       val zipped = mp.subSeq(_.s1).zip(mp.subSeq(_.s2))(_ + _)
       zipped.get should ===(Seq("abcdef"))
 
       mp.subSeq(_.s2).prepend("abc")
       mp.subSeq(_.s2).get should ===(Seq("abc", "def"))
+      mp.roSubSeq(_.s2).get should ===(Seq("abc", "def"))
       mp.subProp(_.s2).get should ===(Vector("abc", "def"))
+      mp.roSubProp(_.s2).get should ===(Vector("abc", "def"))
       zipped.get should ===(Seq("abcabc"))
 
       mp.subProp(_.s2).set(Vector("xyz"))
 
       mp.subSeq(_.s2).get should ===(Seq("xyz"))
+      mp.roSubSeq(_.s2).get should ===(Seq("xyz"))
       mp.subProp(_.s2).get should ===(Vector("xyz"))
+      mp.roSubProp(_.s2).get should ===(Vector("xyz"))
       zipped.get should ===(Seq("abcxyz"))
     }
   }

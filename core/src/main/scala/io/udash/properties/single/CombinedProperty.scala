@@ -1,11 +1,10 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.utils.Registration
 
 private[properties] class CombinedProperty[A, B, R](
-  override val origin: ReadableProperty[A], originTwo: ReadableProperty[B],
-  override val parent: ReadableProperty[_], combiner: (A, B) => R
+  override val origin: ReadableProperty[A], originTwo: ReadableProperty[B], combiner: (A, B) => R
 ) extends ForwarderReadableProperty[R] {
   private var lastValueOne: Opt[A] = Opt.empty
   private var lastValueTwo: Opt[B] = Opt.empty
@@ -13,12 +12,12 @@ private[properties] class CombinedProperty[A, B, R](
 
   protected def originListenerOne(originValue: A) : Unit = {
     lastValueOne = Opt(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   protected def originListenerTwo(originValue: B) : Unit = {
     lastValueTwo = Opt(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   private def initOriginListener(): Unit = {

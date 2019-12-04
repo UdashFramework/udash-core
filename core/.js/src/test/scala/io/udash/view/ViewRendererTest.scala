@@ -157,7 +157,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewC.renderingCounter should be(1)
     }
 
-    "not try to call renderChild on FinalView" in {
+    "not try to call renderChild on non-container view" in {
       val renderer = new ViewRenderer(emptyComponent())
 
       val rootView = new TestView

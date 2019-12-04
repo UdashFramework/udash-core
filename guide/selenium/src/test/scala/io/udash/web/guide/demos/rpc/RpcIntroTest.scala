@@ -7,20 +7,13 @@ class RpcIntroTest extends SeleniumTest {
   override protected final val url = "/rpc"
 
   "RpcIntro view" should {
-    "contain two example buttons" in {
-      eventually {
-        driver.findElementById("ping-pong-call-demo")
-        driver.findElementById("ping-pong-push-demo")
-      }
-    }
-
     "receive response in call demo" in {
-      val callDemo = driver.findElementById("ping-pong-call-demo")
+      val callDemo = findElementById("ping-pong-call-demo")
       buttonTest(callDemo)
     }
 
     "receive response in push demo" in {
-      val pushDemo = driver.findElementById("ping-pong-push-demo")
+      val pushDemo = findElementById("ping-pong-push-demo")
       buttonTest(pushDemo)
     }
   }

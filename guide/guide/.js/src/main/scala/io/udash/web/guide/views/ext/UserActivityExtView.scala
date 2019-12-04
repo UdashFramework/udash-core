@@ -38,7 +38,7 @@ case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.
   }
 }
 
-class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends FinalView {
+class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends View {
   import Context._
   import JsDom.all._
 

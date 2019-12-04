@@ -22,23 +22,20 @@ object RadioButtonsDemo extends AutoDemo {
     case object Banana extends Fruit
 
     val favoriteFruit = Property[Fruit](Apple)
-    val favoriteFruitString = favoriteFruit.transform(
-      (f: Fruit) => f.toString,
-      (s: String) => s match {
+    val favoriteFruitString = favoriteFruit.bitransform(_.toString) {
         case "Apple" => Apple
         case "Orange" => Orange
         case "Banana" => Banana
       }
-    )
 
     def radioButtons: UdashInputGroup = UdashInputGroup()(
       prependText("Fruits:"),
       appendRadio(
         RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
-          (els: Seq[(Input, String)]) => span(els.map {
+          els => span(els.map {
             case (i: Input, l: String) => label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
           }).render
-        ).render
+        )
       ),
       appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
     )

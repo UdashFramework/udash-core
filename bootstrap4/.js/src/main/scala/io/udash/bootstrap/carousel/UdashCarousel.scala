@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package carousel
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
@@ -56,7 +57,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         nestedInterceptor(BootstrapStyles.active.styleIf(activeSlide.transform(_ == index)))
       )
 
-      val indices = slides.transform((slides: Seq[_]) => slides.length)
+      val indices = slides.transform(_.length)
       produce(indices) { length =>
         ol(Carousel.indicators)(
           (0 until length).map(indicator).render

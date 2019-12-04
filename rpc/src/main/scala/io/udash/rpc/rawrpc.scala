@@ -20,10 +20,10 @@ object JsonStr {
   )
 
   implicit def futureAsReal[T](implicit asReal: AsReal[JsonStr, T]): AsReal[Future[JsonStr], Future[T]] =
-    AsReal.create(_.mapNow(asReal.asReal))
+    _.mapNow(asReal.asReal)
 
   implicit def futureAsRaw[T](implicit asRaw: AsRaw[JsonStr, T]): AsRaw[Future[JsonStr], Future[T]] =
-    AsRaw.create(_.mapNow(asRaw.asRaw))
+    _.mapNow(asRaw.asRaw)
 
   @implicitNotFound("#{forT}")
   implicit def futureAsRealNotFound[T](

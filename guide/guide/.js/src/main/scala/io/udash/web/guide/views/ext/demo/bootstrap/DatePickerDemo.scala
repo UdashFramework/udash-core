@@ -78,9 +78,7 @@ object DatePickerDemo extends AutoDemo with CssView {
           ),
           factory.input.formGroup()(
             input = _ => factory.input.select(
-              pickerOptions.subProp(_.locale).transform[String](
-                (_: Option[String]).get, Some(_: String)
-              ),
+              pickerOptions.subProp(_.locale).bitransform(_.get)(Option.apply),
               Seq("en_GB", "pl", "ru", "af").toSeqProperty
             )(span(_)).render,
             labelContent = Some(_ => "Locale")

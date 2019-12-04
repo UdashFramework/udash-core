@@ -5,14 +5,14 @@ import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty,
 import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
-  extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {
+  extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[BSeq[B]] {
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
   protected var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
 
-  protected def originListener(originValue: Seq[A]): Unit = {}
+  protected def originListener(originValue: BSeq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
@@ -46,12 +46,12 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     super.listenStructure(structureListener)
   }
 
-  override def listen(valueListener: Seq[B] => Any, initUpdate: Boolean = false): Registration = {
+  override def listen(valueListener: BSeq[B] => Any, initUpdate: Boolean = false): Registration = {
     initOriginListeners()
     super.listen(valueListener, initUpdate)
   }
 
-  override def listenOnce(valueListener: Seq[B] => Any): Registration = {
+  override def listenOnce(valueListener: BSeq[B] => Any): Registration = {
     initOriginListeners()
     super.listenOnce(valueListener)
   }
@@ -78,16 +78,16 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
 
   protected final var transformedElements: MBuffer[ElemType] = CrossCollections.createArray[ElemType]
 
-  protected def loadFromOrigin(): Seq[B]
-  protected def elementsFromOrigin(): Seq[ElemType]
+  protected def loadFromOrigin(): BSeq[B]
+  protected def elementsFromOrigin(): BSeq[ElemType]
   protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType]
 
-  override def get: Seq[B] = {
+  override def get: BSeq[B] = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) loadFromOrigin()
     else transformedElements.map(_.get)
   }
 
-  override def elemProperties: Seq[ElemType] = {
+  override def elemProperties: BSeq[ElemType] = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) elementsFromOrigin()
     else transformedElements
   }
@@ -95,28 +95,28 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
   override protected def onListenerInit(): Unit = {
     val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin())
     if (!(transformedElements.iterator.map(_.id) sameElements fromOrigin.iterator.map(_.id))) {
-      fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements, fromOrigin, fromOrigin.isEmpty), structureListeners)
-      fireValueListeners()
+      fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements.toSeq, fromOrigin.toSeq, fromOrigin.isEmpty), structureListeners)
+      valueChanged()
     } else if (transformedElements.map(_.get) != fromOrigin.map(_.get)) {
-      fireValueListeners()
+      valueChanged()
     }
     transformedElements = fromOrigin
   }
 
-  override protected def originListener(originValue: Seq[A]) : Unit = {
-    fireValueListeners()
+  override protected def originListener(originValue: BSeq[A]) : Unit = {
+    valueChanged()
   }
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
     structureListeners.foreach(_.apply(transPatch))
-    fireValueListeners()
+    valueChanged()
   }
 }
 
 
 private[properties] trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType]
-    with ForwarderProperty[Seq[B]] with AbstractSeqProperty[B, ElemType] {
+    with ForwarderProperty[BSeq[B]] with AbstractSeqProperty[B, ElemType] {
   protected def origin: SeqProperty[A, OrigType]
 }

@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 /**
  * <b>Note: It can be used only in one-thread environment!</b>
-  *
+ *
  * This sequencer is used in order to fire callback listeners ONCE during making many updates to [[io.udash.properties.single.Property]].
  * Property implementation uses this CallbackSequencer in order to queue callbacks and invoke them after
  * running commit().
@@ -41,7 +41,7 @@ class CallbackSequencer {
 
   def queue(id: Id, fireListeners: () => Any): Unit = {
     if (starts == 0) fireListeners()
-    else queue += Tuple2(id, fireListeners)
+    else queue += id -> fireListeners
   }
 
   def sequence(code: => Any): Unit = {

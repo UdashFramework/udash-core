@@ -9,19 +9,11 @@ class I18nDemosTest extends SeleniumTest {
   override protected final val url = "/ext/i18n"
 
   "I18n view" should {
-    "contain demo elements" in {
-      eventually {
-        driver.findElementById("frontend-translations-demo")
-        driver.findElementById("rpc-translations-demo")
-        driver.findElementById("dynamic-rpc-translations-demo")
-      }
-    }
-
     "contain working frontend translations demo" in {
       driver.navigate().refresh()
 
       //runDemo("frontend-translations-demo")()
-      def demo = driver.findElementById("frontend-translations-demo")
+      def demo = findElementById("frontend-translations-demo")
 
       eventually {
         val elements = demo.findElements(new ByCssSelector("li"))
@@ -39,7 +31,7 @@ class I18nDemosTest extends SeleniumTest {
 
       //val translations = runDemo("rpc-translations-demo")()
       //verifyPlTranslations(translations)
-      def demo = driver.findElementById("rpc-translations-demo")
+      def demo = findElementById("rpc-translations-demo")
 
       eventually {
         val elements = demo.findElements(new ByCssSelector("li"))
@@ -55,10 +47,11 @@ class I18nDemosTest extends SeleniumTest {
     "contain working dynamic remote translations demo" in {
       driver.navigate().refresh()
 
-      def demo = driver.findElementById("dynamic-rpc-translations-demo")
+      def demo = findElementById("dynamic-rpc-translations-demo")
 
-      val enButton = demo.findElement(new ById("enButton"))
-      val plButton = demo.findElement(new ById("plButton"))
+      val (enButton, plButton) = eventually {
+        (demo.findElement(new ById("enButton")), demo.findElement(new ById("plButton")))
+      }
 
       def elements = demo.findElements(new ByCssSelector("li"))
 

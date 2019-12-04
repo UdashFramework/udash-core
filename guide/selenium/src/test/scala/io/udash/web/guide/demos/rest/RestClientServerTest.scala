@@ -11,14 +11,8 @@ class RestClientServerTest extends SeleniumTest with BeforeAndAfterEach {
   val url = "/rest"
 
   "RestClientServer view" should {
-    "contain REST simple demo" in {
-      eventually {
-        driver.findElementById("echo-rest-demo")
-      }
-    }
-
     "receive response in demo" in {
-      val callDemo = driver.findElementById("echo-rest-demo")
+      val callDemo = findElementById("echo-rest-demo")
       val inputDemo = callDemo.findElement(new ById("echo-rest-demo-input"))
       val responseDemo = callDemo.findElement(new ById("echo-rest-demo-response"))
       val queryButton = callDemo.findElement(new ById("echo-rest-demo-query-btn"))

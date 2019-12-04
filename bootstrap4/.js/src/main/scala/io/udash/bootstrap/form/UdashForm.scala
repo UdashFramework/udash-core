@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package form
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
@@ -11,13 +12,12 @@ import io.udash.bootstrap.utils.BootstrapStyles.ResponsiveBreakpoint
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.css.CssStyle
 import io.udash.logging.CrossLogging
-import io.udash.properties.{PropertyCreator, seq}
+import io.udash.properties.seq
 import org.scalajs.dom._
 import org.scalajs.dom.html.{Form, Input => JSInput}
 import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
-import scala.collection.mutable
 import scala.concurrent.duration.{Duration, DurationLong}
 import scala.util.{Failure, Success}
 
@@ -31,7 +31,7 @@ final class UdashForm private(
 
   import io.udash.css.CssView._
 
-  private[form] val validationProperties: mutable.Set[Property[Option[ValidationResult]]] = mutable.Set.empty
+  private[form] val validationProperties: MSet[Property[Option[ValidationResult]]] = MSet.empty
 
   def clearValidationResults(): Unit = {
     validationProperties.foreach(_.set(None))
@@ -317,7 +317,7 @@ final class FormElementsFactory(
       validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
-        NumberInput(property.transform(_.toString, _.toDouble), debounce)(
+        NumberInput(property.bitransform(_.toString)(_.toDouble), debounce)(
           id := inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
@@ -436,7 +436,7 @@ final class FormElementsFactory(
       labelContent: Binding.NestedInterceptor => Modifier = _ => "",
       validFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
       invalidFeedback: Option[Binding.NestedInterceptor => Modifier] = None,
-      validator: Validator[Seq[File]] = Validator.Default
+      validator: Validator[BSeq[File]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new UdashBootstrapComponent {
         private val input = FileInput(selectedFiles, acceptMultipleFiles)(
@@ -474,7 +474,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided item property
      */
-    def select[T: PropertyCreator](
+    def select[T](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -512,7 +512,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided items property
      */
-    def multiSelect[T: PropertyCreator, ElemType <: Property[T]](
+    def multiSelect[T, ElemType <: Property[T]](
       selectedItems: seq.SeqProperty[T, ElemType],
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
@@ -521,7 +521,7 @@ final class FormElementsFactory(
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
-      validator: Validator[Seq[T]] = Validator.Default
+      validator: Validator[BSeq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         Select(selectedItems, options)(
@@ -619,7 +619,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided checkbox states property
      */
-    def checkButtons[T: PropertyCreator](
+    def checkButtons[T](
       selectedItems: seq.SeqProperty[T, _ <: ReadableProperty[T]],
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
@@ -630,7 +630,7 @@ final class FormElementsFactory(
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       validFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       invalidFeedback: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
-      validator: Validator[Seq[T]] = Validator.Default
+      validator: Validator[BSeq[T]] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new ButtonsComponent(
         selectedItems, CheckButtons(selectedItems, options)(_: Seq[(JSInput, T)] => Seq[Node]),
@@ -664,7 +664,7 @@ final class FormElementsFactory(
      *                          Use the provided interceptor to properly clean up bindings inside the content.
      * @param validator         Validator for provided item selection property
      */
-    def radioButtons[T: PropertyCreator](
+    def radioButtons[T](
       selectedItem: Property[T],
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
@@ -689,7 +689,7 @@ final class FormElementsFactory(
       override val render: Element = input.render
     }
 
-    private class ButtonsComponent[T: PropertyCreator, SelectedType](
+    private class ButtonsComponent[T, SelectedType](
       selected: Property[SelectedType],
       input: (Seq[(JSInput, T)] => Seq[Node]) => InputBinding[_ <: Element],
       inputDecorationClass: CssStyle,

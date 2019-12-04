@@ -10,7 +10,6 @@ import io.udash.rest.{Header => HeaderAnnot, _}
 import io.udash.utils.URLEncoder
 
 import scala.annotation.implicitNotFound
-import scala.collection.mutable
 
 @implicitNotFound("OpenApiMetadata for ${T} not found, " +
   "is it a valid REST API trait with properly defined companion object?")
@@ -56,13 +55,13 @@ final case class OpenApiMetadata[T](
       httpMethods.iterator.map(_.pathOperation(resolver))
 
   def paths(resolver: SchemaResolver): Paths = {
-    val operationIds = new mutable.HashSet[String]
-    val pathsMap = new MLinkedHashMap[String, mutable.OpenHashMap[HttpMethod, Operation]]
+    val operationIds = new MHashSet[String]
+    val pathsMap = new MLinkedHashMap[String, MHashMap[HttpMethod, Operation]]
     // linked set to remove possible duplicates from prefix methods but to retain order
-    val pathAdjustersMap = new mutable.OpenHashMap[String, MLinkedHashSet[PathItemAdjuster]]
+    val pathAdjustersMap = new MHashMap[String, MLinkedHashSet[PathItemAdjuster]]
     operations(resolver).foreach {
       case PathOperation(path, httpMethod, operation, pathAdjusters) =>
-        val opsMap = pathsMap.getOrElseUpdate(path, new mutable.OpenHashMap)
+        val opsMap = pathsMap.getOrElseUpdate(path, new MHashMap)
         pathAdjustersMap.getOrElseUpdate(path, new MLinkedHashSet) ++= pathAdjusters
         opsMap(httpMethod) = operation
         operation.operationId.foreach { opid =>

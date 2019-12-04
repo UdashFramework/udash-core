@@ -1,7 +1,7 @@
 package io.udash.properties
 package single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.utils.Registration
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
@@ -16,7 +16,7 @@ private[properties] class TransformedReadableProperty[A, B](
   protected def originListener(originValue: A) : Unit = {
     lastValue = Opt(originValue)
     transformedValue = transformer(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   private def initOriginListener(): Unit = {

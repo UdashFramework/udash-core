@@ -1,23 +1,24 @@
 package io.udash.css
 
-import scala.collection.immutable.ListMap
-import scala.collection.mutable
 import scalacss.internal.Css.styleA
 import scalacss.internal.DslBase.ToStyle
 import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
 
+import scala.collection.immutable.ListMap
+import scala.collection.mutable
+
 /**
-  * Base trait for all stylesheets.
-  *
-  * Example:
-  * <pre>
-  * object ExampleStylesheet extends CssBase {
-  *   import dsl._
-  *
-  *   val s = style(...)
-  * }
-  * </pre>
-  */
+ * Base trait for all stylesheets.
+ *
+ * Example:
+ * <pre>
+ * object ExampleStylesheet extends CssBase {
+ * import dsl._
+ *
+ * val s = style(...)
+ * }
+ * </pre>
+ */
 trait CssBase {
   class Dsl(val elementsBuffer: mutable.ArrayBuffer[CssStyle]) extends DslBase {
     implicit def compose: Compose = Compose.trust
@@ -26,89 +27,89 @@ trait CssBase {
       Cond.empty
 
     /**
-      * Creates CSS style which will not be rendered. <br/><br/>
-      *
-      * Example:
-      * <pre>
-      *   def utils(x: Int): CssStyle = mixin(
-      *     margin(x px, auto),
-      *     textAlign.left,
-      *     cursor.pointer
-      *   )
-      * </pre>
-      */
+     * Creates CSS style which will not be rendered. <br/><br/>
+     *
+     * Example:
+     * <pre>
+     * def utils(x: Int): CssStyle = mixin(
+     * margin(x px, auto),
+     *     textAlign.left,
+     *     cursor.pointer
+     * )
+     * </pre>
+     */
     def mixin(impl: ToStyle*): CssStyle =
-      macro io.udash.css.macros.StyleMacros.mixin
+    macro io.udash.css.macros.StyleMacros.mixin
 
     /** Creates CSS style with auto-generated name. */
 
     /**
-      * Creates CSS style with auto-generated name. <br/><br/>
-      *
-      * Example:
-      * <pre>
-      *   val example: CssStyle = style(
-      *     utils(12), // mixin usage
-      *
-      *     &.hover(
-      *       cursor.zoomIn
-      *     ),
-      *
-      *     media.not.handheld.landscape.maxWidth(640 px)(
-      *       width(400 px)
-      *     )
-      *   )
-      * </pre>
-      */
+     * Creates CSS style with auto-generated name. <br/><br/>
+     *
+     * Example:
+     * <pre>
+     * val example: CssStyle = style(
+     * utils(12), // mixin usage
+     *
+     * &.hover(
+     *       cursor.zoomIn
+     * ),
+     *
+     *     media.not.handheld.landscape.maxWidth(640 px)(
+     * width(400 px)
+     * )
+     * )
+     * </pre>
+     */
     def style(impl: ToStyle*): CssStyle =
-      macro io.udash.css.macros.StyleMacros.style
+    macro io.udash.css.macros.StyleMacros.style
 
     /** Creates CSS style with provided name. */
     def namedStyle(className: String, impl: ToStyle*): CssStyle =
-      macro io.udash.css.macros.StyleMacros.namedStyle
+    macro io.udash.css.macros.StyleMacros.namedStyle
 
     /** Creates CSS keyframe. */
     def keyframe(impl: ToStyle*): Seq[ToStyle] =
       impl
 
     /**
-      * Creates CSS keyframes animation with auto-generated name. <br/><br/>
-      *
-      * Example:
-      * <pre>
-      *   val animation = keyframes(
-      *     0d -> keyframe(height(10 px)),
-      *     20d -> keyframe(height(50 px)),
-      *     100d -> keyframe(height(200 px))
-      *   )
-      * </pre>
-      */
+     * Creates CSS keyframes animation with auto-generated name. <br/><br/>
+     *
+     * Example:
+     * <pre>
+     * val animation = keyframes(
+     * 0d -> keyframe(height(10 px)),
+     * 20d -> keyframe(height(50 px)),
+     * 100d -> keyframe(height(200 px))
+     * )
+     * </pre>
+     */
     def keyframes(impl: (Double, Seq[ToStyle])*): CssStyle =
-      macro io.udash.css.macros.StyleMacros.keyframes
+    macro io.udash.css.macros.StyleMacros.keyframes
 
     /** Creates CSS keyframes animation with provided name. */
     def namedKeyframes(className: String, impl: (Double, Seq[ToStyle])*): CssStyle =
-      macro io.udash.css.macros.StyleMacros.namedKeyframes
+    macro io.udash.css.macros.StyleMacros.namedKeyframes
 
     /**
-      * Creates CSS fontface with auto-generated name. <br/><br/>
-      *
-      * Example:
-      * <pre>
-      *   val ff = fontFace(
-      *     _.src("url(font.woff)")
-      *       .fontStretch.expanded
-      *       .fontStyle.italic
-      *       .unicodeRange(0, 5)
-      *   )
-      * </pre>
-      */
+     * Creates CSS fontface with auto-generated name. <br/><br/>
+     *
+     * Example:
+     * <pre>
+     * val ff = fontFace(
+     * _.src("url(font.woff)")
+     * .fontStretch.expanded
+     * .fontStyle.italic
+     * .unicodeRange(0, 5)
+     * )
+     * </pre>
+     */
     def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
-      macro io.udash.css.macros.StyleMacros.fontFace
+    macro io.udash.css.macros.StyleMacros.fontFace
 
     /** Creates CSS fontface with provided name. */
     def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
-      macro io.udash.css.macros.StyleMacros.nameFontFace
+    macro io.udash.css.macros.StyleMacros.nameFontFace
 
     override def unsafeChild(n: String)(t: ToStyle*)(implicit c: Compose): Style.UnsafeExt =
       unsafeExt(root => n.split(",").map(el => s"$root $el").mkString(","))(t: _*)(c)
@@ -165,9 +166,10 @@ trait CssBase {
         renderer.apply(Vector(
           CssEntry.Keyframes(
             kfs.name,
-            kfs.frames.map { case (selector, style) =>
-              (selector, styleA(style)(Env.empty)): (KeyframeSelector, StyleStream)
-            }(collection.breakOut): ListMap[KeyframeSelector, StyleStream]
+            ListMap[KeyframeSelector, StyleStream]() ++
+              kfs.frames.iterator.map { case (selector, style) =>
+                (selector, styleA(style)(Env.empty)): (KeyframeSelector, StyleStream)
+              }
           )
         ))
       case CssFontFace(className, font) =>

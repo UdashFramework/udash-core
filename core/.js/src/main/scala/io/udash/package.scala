@@ -16,17 +16,12 @@ package object udash
   type Presenter[S <: State] = io.udash.core.Presenter[S]
 
   type ViewFactory[S <: State] = io.udash.core.ViewFactory[S]
-  type ContainerViewFactory[S <: ContainerState] = io.udash.core.ContainerViewFactory[S]
-  type FinalViewFactory[S <: FinalState] = io.udash.core.FinalViewFactory[S]
 
   type View = io.udash.core.View
   type ContainerView = io.udash.core.ContainerView
-  type FinalView = io.udash.core.FinalView
 
   type State = io.udash.core.State
   type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
-  type ContainerState = io.udash.core.ContainerState
-  type FinalState = io.udash.core.FinalState
 
   type RoutingRegistry[HierarchyRoot <: State] = io.udash.routing.RoutingRegistry[HierarchyRoot]
 

@@ -185,9 +185,9 @@ object HttpBody extends HttpBodyLowPrio {
 }
 trait HttpBodyLowPrio { this: HttpBody.type =>
   implicit def httpBodyJsonAsRaw[T](implicit jsonAsRaw: AsRaw[JsonValue, T]): AsRaw[HttpBody, T] =
-    AsRaw.create(v => HttpBody.json(jsonAsRaw.asRaw(v)))
+    v => HttpBody.json(jsonAsRaw.asRaw(v))
   implicit def httpBodyJsonAsReal[T](implicit jsonAsReal: AsReal[JsonValue, T]): AsReal[HttpBody, T] =
-    AsReal.create(v => jsonAsReal.asReal(v.readJson()))
+    v => jsonAsReal.asReal(v.readJson())
 
   @implicitNotFound("Cannot deserialize ${T} from HttpBody, because:\n#{forJson}")
   implicit def asRealNotFound[T](

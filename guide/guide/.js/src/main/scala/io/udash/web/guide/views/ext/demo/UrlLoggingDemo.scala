@@ -11,11 +11,9 @@ object UrlLoggingDemo extends AutoDemo with CssView {
   private val ((enabled, history, add), source) = {
     import io.udash._
 
-    import scala.collection.mutable.ListBuffer
-
     val enabled = Property(false)
-    val history = SeqProperty[(String, Option[String])](ListBuffer.empty)
-    enabled.listen(b => if (!b) history.set(ListBuffer.empty))
+    val history = SeqProperty.blank[(String, Option[String])]
+    enabled.listen(b => if (!b) history.set(Seq.empty))
 
     def log(url: String, referrer: Option[String]): Unit = {
       if (enabled.get) history.append((url, referrer))
@@ -52,7 +50,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
             )
           ),
           produce(history)(seq =>
-            div()(seq.map { case (url, refOpt) =>
+            div(seq.map { case (url, refOpt) =>
               div(Grid.row)(
                 div(Grid.col(4, ResponsiveBreakpoint.Medium))(
                   url
@@ -61,7 +59,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
                   refOpt
                 )
               )
-            }: _*).render
+            }).render
           )
         )
       ).render

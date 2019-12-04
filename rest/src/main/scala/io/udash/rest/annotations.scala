@@ -6,6 +6,8 @@ import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
 import io.udash.rest.raw._
 
+import scala.annotation.StaticAnnotation
+
 /**
   * Base trait for tag annotations that determine how a REST method is translated into actual HTTP request.
   * A REST method may be annotated with one of HTTP method tags ([[io.udash.rest.GET GET]], [[io.udash.rest.PUT PUT]],
@@ -89,7 +91,8 @@ sealed abstract class BodyMethodTag(method: HttpMethod) extends HttpMethodTag(me
   * @param path see [[RestMethodTag.path]]
   */
 class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(HttpMethod.GET) {
-  @rpcNamePrefix("get_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("get_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 /**
@@ -98,19 +101,23 @@ class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(Htt
   * (i.e. their result type is not another REST trait).
   */
 class POST(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.POST) {
-  @rpcNamePrefix("post_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("post_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class PATCH(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PATCH) {
-  @rpcNamePrefix("patch_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("patch_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class PUT(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PUT) {
-  @rpcNamePrefix("put_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("put_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class DELETE(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.DELETE) {
-  @rpcNamePrefix("delete_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("delete_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 /**

@@ -2,8 +2,8 @@ package io.udash
 package benchmarks.properties
 
 import io.udash.properties.ModelPropertyCreator
-import japgolly.scalajs.benchmark.{Benchmark, Suite}
 import japgolly.scalajs.benchmark.gui.GuiSuite
+import japgolly.scalajs.benchmark.{Benchmark, Suite}
 
 object ModelPropertyWithSeqListeners extends BenchmarkUtils {
   private def properties[T <: ModelWithSeqItem : ModelPropertyCreator](model: T): Seq[(String, () => (ModelProperty[T], ReadableProperty[T]))] = Seq(
@@ -28,8 +28,7 @@ object ModelPropertyWithSeqListeners extends BenchmarkUtils {
   val suite = GuiSuite(
     Suite("Seq ModelProperty - set, get & listen")(
       benchmarks(ModelWithBSeqItem.random, "BSeq") ++
-        benchmarks(ModelWithISeqItem.random, "ISeq") ++
-        benchmarks(ModelWithMSeqItem.random, "MSeq"): _*
+        benchmarks(ModelWithISeqItem.random, "ISeq"): _*
     )
   )
 }

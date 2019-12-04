@@ -60,7 +60,7 @@ object IntroFormDemo extends AutoDemo {
         ))
     }
 
-    class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) extends FinalView {
+    class IntroFormDemoView(model: ModelProperty[IntroFormDemoModel], presenter: IntroFormDemoPresenter) extends View {
 
       import scalatags.JsDom.all._
 
@@ -69,9 +69,9 @@ object IntroFormDemo extends AutoDemo {
 
       // String representations of the model subproperties
       // These values are synchronised with the original value
-      private val minimum = model.subProp(_.minimum).transform(i2s, s2i)
-      private val between = model.subProp(_.between).transform(i2s, s2i)
-      private val maximum = model.subProp(_.maximum).transform(i2s, s2i)
+      private val minimum = model.subProp(_.minimum).bitransform(i2s)(s2i)
+      private val between = model.subProp(_.between).bitransform(i2s)(s2i)
+      private val maximum = model.subProp(_.maximum).bitransform(i2s)(s2i)
 
       private val validation = model.transform { element: IntroFormDemoModel =>
         val errors = mutable.ArrayBuffer[String]()
@@ -82,7 +82,7 @@ object IntroFormDemo extends AutoDemo {
         if (element.between > element.maximum)
           errors += "Maximum is smaller than your value!"
         if (errors.isEmpty) Valid
-        else Invalid(errors.map(DefaultValidationError))
+        else Invalid(errors.map(DefaultValidationError).toSeq)
       }
 
       // Button from Udash Bootstrap wrapper
