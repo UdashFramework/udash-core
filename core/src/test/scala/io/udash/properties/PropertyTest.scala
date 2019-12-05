@@ -337,6 +337,9 @@ class PropertyTest extends UdashCoreTest {
 
       origin.set(None, force = true)
       counter shouldBe 2
+
+      origin.touch()
+      counter shouldBe 3
     }
 
     "fire on streamed value changed or when forced" in {
@@ -359,6 +362,10 @@ class PropertyTest extends UdashCoreTest {
 
       origin.set(None)
       counter shouldBe 1
+
+      //todo detect forced / touched?
+      //origin.set(None, force = true)
+      //counter shouldBe 2
     }
 
     "combine with other properties (single properties)" in {
