@@ -7,11 +7,11 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{GenCodec, name, transparent}
 import io.udash.rest.openapi.adjusters.description
 import io.udash.rest.{PolyRestDataCompanion, RestDataCompanion}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 class Fuu[T](thing: T)
 
-class RestSchemaTest extends FunSuite {
+class RestSchemaTest extends AnyFunSuite {
   private def schemaStr[T](implicit schema: RestSchema[T]): String =
     JsonStringOutput.writePretty(new InliningResolver().resolve(schema))
 

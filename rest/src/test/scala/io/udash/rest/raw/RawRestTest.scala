@@ -7,8 +7,8 @@ import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 import io.udash.rest.util.WithHeaders
 import org.scalactic.source.Position
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funsuite.AnyFunSuite
 
 case class UserId(id: String) extends AnyVal {
   override def toString: String = id
@@ -66,7 +66,7 @@ trait RootApi {
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
-class RawRestTest extends FunSuite with ScalaFutures {
+class RawRestTest extends AnyFunSuite with ScalaFutures {
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
     case tb@HttpBody.Textual(content, _, _) =>
