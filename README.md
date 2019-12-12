@@ -47,13 +47,3 @@ The whole framework code is available on GitHub under Apache v2 license.
 
 ### IDE support
 With any IDE supporting the Scala language. No extra plugin needed.
-
-# Try it on ScalaFiddle
-
-* [Hello World](https://scalafiddle.io/sf/z8zY6cP/0)
-* [Properties](https://scalafiddle.io/sf/OZe6XBJ/2)
-* [Validation](https://scalafiddle.io/sf/Yiz0JO2/0)
-* [i18n](https://scalafiddle.io/sf/ll4AVYz/0)
-* [UI Components](https://scalafiddle.io/sf/13Wn0gZ/0)
-
-Find more examples in the [Udash Demos](https://github.com/UdashFramework/udash-demos) repository.
