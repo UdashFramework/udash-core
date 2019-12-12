@@ -14,6 +14,8 @@ final case class ComponentId private(value: String) extends Modifier with CaseMe
 
   /** Generate new [[ComponentId]] based on a current id value with added suffix. */
   def withSuffix(s: String): ComponentId = ComponentId(s"$value-$s")
+
+  override def toString(): String = value
 }
 
 object ComponentId {
