@@ -13,12 +13,15 @@ final case class ComponentId private(value: String) extends Modifier with CaseMe
   }
 
   /** Generate new [[ComponentId]] based on a current id value with added suffix. */
-  def withSuffix(s: String): ComponentId = ComponentId(s"$value-$s")
+  def withSuffix(s: String): ComponentId = ComponentId.forName(ComponentId.join(value, s))
 
   override def toString(): String = value
 }
 
 object ComponentId {
+  final val Separator = "-"
+  final def join(s: String*): String = s.mkString(Separator)
+
   private var count: Int = -1
 
   private def next(): Int = {
@@ -29,8 +32,7 @@ object ComponentId {
   /** Generates unique element ID based on the enclosing (calling) class */
   def generate(): ComponentId = macro ComponentIdMacro.impl
 
-  def forName(name: String): ComponentId =
-    ComponentId(name + "-" + ComponentId.next())
+  def forName(name: String): ComponentId = ComponentId(join(name, next().toString))
 
-  implicit val idAttrValue: GenericAttr[ComponentId] = new GenericAttr[ComponentId]
+  implicit val IdAttrValue: GenericAttr[ComponentId] = new GenericAttr[ComponentId]
 }
