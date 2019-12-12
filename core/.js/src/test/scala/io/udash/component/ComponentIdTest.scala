@@ -34,6 +34,15 @@ class ComponentIdTest extends UdashFrontendTest {
       ComponentId.generate().value should startWith("io-udash-component-ComponentIdTest-")
     }
 
+    "support unique suffixes" in {
+      val parent = ComponentId.forName("parent")
+      val number = parent.value.stripPrefix("parent-").toInt
+
+      parent.withSuffix("child").value shouldBe s"parent-child-${number + 1}"
+      parent.withSuffix("child").value shouldBe s"parent-child-${number + 2}"
+      parent.withSuffix("child2").value shouldBe s"parent-child2-${number + 3}"
+    }
+
     "carry info on definition place through containing generated id prefix for generated ids" in {
       val definedInOuterScope: () => ComponentId = () => ComponentId.generate()
 
