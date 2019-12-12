@@ -8,7 +8,7 @@ class ComponentIdMacro(val c: blackbox.Context) {
   import c.universe._
 
   def impl(): c.Tree = {
-    val trimmedName = Iterator.iterate(c.internal.enclosingOwner)(_.owner).find(_.isClass).get.fullName
+    val trimmedName = Iterator.iterate(c.internal.enclosingOwner)(_.owner).find(_.isClass).get.fullName.split('.').mkString("-")
     q"ComponentId.forName($trimmedName)"
   }
 }
