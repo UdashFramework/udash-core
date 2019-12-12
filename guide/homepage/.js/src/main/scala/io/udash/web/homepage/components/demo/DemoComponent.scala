@@ -8,7 +8,6 @@ import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.DemoStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
-
 import scalatags.JsDom.all._
 import scalatags.generic.Attr
 
@@ -69,10 +68,10 @@ object DemoComponent {
     ).render
 
   def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")), fiddle("13Wn0gZ/1")),
-    DemoEntry("Properties", IndexState(Option("properties")), fiddle("OZe6XBJ/3")),
-    DemoEntry("Validation", IndexState(Option("validation")), fiddle("Yiz0JO2/1")),
-    DemoEntry("i18n", IndexState(Option("i18n")), fiddle("ll4AVYz/1")),
+    DemoEntry("Hello World", IndexState(Option("hello")), fiddle("yJVjCFf/0")),
+    DemoEntry("Properties", IndexState(Option("properties")), fiddle("a10A6UA/0")),
+    DemoEntry("Validation", IndexState(Option("validation")), fiddle("ButwLWQ/0")),
+    DemoEntry("i18n", IndexState(Option("i18n")), fiddle("aczBObA/0")),
   )
 }
 
