@@ -84,8 +84,6 @@ case object BootstrapExtState extends RoutingState(Some(ContentState))
 
 case object AuthorizationExtState extends RoutingState(Some(ContentState))
 
-case object ChartsExtState extends RoutingState(Some(ContentState))
-
 case object JQueryExtState extends RoutingState(Some(ContentState))
 
 case object I18NExtState extends RoutingState(Some(ContentState))

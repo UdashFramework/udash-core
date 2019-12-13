@@ -41,7 +41,7 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
     el.transform(transformer).asInstanceOf[ElemType]
 }
 
-private[properties] class TransformedSeqProperty[A, B](
+private[properties] final class TransformedSeqProperty[A, B](
   override protected val origin: SeqProperty[A, Property[A]],
   transformer: A => B, revert: B => A
 ) extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer)
@@ -49,7 +49,7 @@ private[properties] class TransformedSeqProperty[A, B](
     with AbstractSeqProperty[B, Property[B]] {
 
   override protected def transformElement(el: Property[A]): Property[B] =
-    el.transform(transformer, revert)
+    el.bitransform(transformer)(revert)
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit =
     origin.replaceSeq(idx, amount, values.map(revert))

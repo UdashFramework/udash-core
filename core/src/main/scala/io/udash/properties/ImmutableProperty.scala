@@ -1,10 +1,10 @@
 package io.udash.properties
 
+import com.avsystem.commons._
 import io.udash.properties.model.{ModelPropertyMacroApi, ReadableModelProperty}
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
-import com.avsystem.commons._
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
   /** Unique property ID. */
@@ -20,14 +20,12 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     */
   override def listen(valueListener: A => Any, initUpdate: Boolean): Registration = {
     if (initUpdate) valueListener(value)
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
   }
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
-  override def listenOnce(valueListener: A => Any): Registration = ImmutableProperty.noopRegistration
+  override def listenOnce(valueListener: A => Any): Registration = ImmutableProperty.NoOpRegistration
 
-  override protected[properties] def parent: ReadableProperty[_] = null
-  override protected[properties] def fireValueListeners(): Unit = {}
   override protected[properties] def valueChanged(): Unit = {}
   override protected[properties] def listenersUpdate(): Unit = {}
   override def listenersCount(): Int = 0
@@ -40,7 +38,7 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {
     if (initUpdate) target.set(transformer(value))
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
   }
 
   override def readable: ReadableProperty[A] = this
@@ -58,7 +56,7 @@ private[properties] class ImmutableModelProperty[A](value: A)
   override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
+private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
   extends ImmutableProperty[BSeq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: BSeq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
@@ -69,9 +67,9 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
   override def structureListenersCount(): Int = 0
 
   override def listenStructure(structureListener: Patch[ImmutableProperty[A]] => Any): Registration =
-    ImmutableProperty.noopRegistration
+    ImmutableProperty.NoOpRegistration
 
-  override def transform[B: PropertyCreator](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformElements[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty(value.map(transformer))
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
@@ -87,7 +85,7 @@ private[properties] class ImmutableSeqProperty[A: PropertyCreator, SeqTpe[T] <: 
 }
 
 private[properties] object ImmutableProperty {
-  val noopRegistration = new Registration {
+  final val NoOpRegistration: Registration = new Registration {
     override def cancel(): Unit = {}
     override def restart(): Unit = {}
     override def isActive: Boolean = true

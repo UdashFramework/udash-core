@@ -178,13 +178,10 @@ class PropertyTest extends UdashCoreTest {
       val oneTimeListener = (v: Any) => oneTimeValues += v
 
       val cp = Property[C](new C(1, "asd"))
-      val tp = cp.transform[(T, T)](
-        (c: C) => Tuple2(TC1(c.i), TC2(c.s)),
-        (t: (T, T)) => t match {
+      val tp = cp.bitransform(c => (TC1(c.i), TC2(c.s))) {
           case (TC1(i), TC2(s)) => new C(i, s)
           case _ => new C(0, "")
         }
-      )
 
       tp.listen(listener)
       cp.listen(listener)
@@ -193,55 +190,55 @@ class PropertyTest extends UdashCoreTest {
       cp.listenOnce(oneTimeListener)
 
       cp.get should be(new C(1, "asd"))
-      tp.get should be(Tuple2(TC1(1), TC2("asd")))
+      tp.get should be(TC1(1) -> TC2("asd"))
 
       cp.set(new C(12, "asd2"))
       cp.get should be(new C(12, "asd2"))
-      tp.get should be(Tuple2(TC1(12), TC2("asd2")))
+      tp.get should be(TC1(12) -> TC2("asd2"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")))
+      tp.set(TC1(-5) -> TC2("tp"))
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.touch()
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
-      tp.set(Tuple2(TC1(-5), TC2("tp")), force = true)
+      tp.set(TC1(-5) -> TC2("tp"), force = true)
       cp.get should be(new C(-5, "tp"))
-      tp.get should be(Tuple2(TC1(-5), TC2("tp")))
+      tp.get should be(TC1(-5) -> TC2("tp"))
 
       tp.clearListeners()
-      tp.set(Tuple2(TC1(-12), TC2("tp")))
+      tp.set(TC1(-12) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-13), TC2("tp")))
+      tp.set(TC1(-13) -> TC2("tp"))
 
       cp.clearListeners()
-      tp.set(Tuple2(TC1(-14), TC2("tp")))
+      tp.set(TC1(-14) -> TC2("tp"))
 
       tp.listen(listener)
       cp.listen(listener)
-      tp.set(Tuple2(TC1(-15), TC2("tp")))
+      tp.set(TC1(-15) -> TC2("tp"))
 
       values.size should be(12)
       values should contain(new C(12, "asd2"))
-      values should contain(Tuple2(TC1(12), TC2("asd2")))
-      values should contain(Tuple2(TC1(-5), TC2("tp")))
+      values should contain(TC1(12) -> TC2("asd2"))
+      values should contain(TC1(-5) -> TC2("tp"))
       values should contain(new C(-5, "tp"))
-      values should contain(Tuple2(TC1(-13), TC2("tp")))
+      values should contain(TC1(-13) -> TC2("tp"))
       values should contain(new C(-13, "tp"))
-      values should contain(Tuple2(TC1(-15), TC2("tp")))
+      values should contain(TC1(-15) -> TC2("tp"))
       values should contain(new C(-15, "tp"))
 
       oneTimeValues.size should be(2)
       oneTimeValues should contain(new C(12, "asd2"))
-      oneTimeValues should contain(Tuple2(TC1(12), TC2("asd2")))
+      oneTimeValues should contain(TC1(12) -> TC2("asd2"))
     }
 
     "fire transform method when needed" in {
@@ -274,10 +271,10 @@ class PropertyTest extends UdashCoreTest {
       val pageProperty = Property(1)
       val seenAllProperty = Property(false)
 
-      val totalPagesProperty = seenAllProperty.transform(all => {
+      val totalPagesProperty = seenAllProperty.transform { all =>
         counter += 1
         if (all) Some(pageProperty.get) else None
-      })
+      }
 
       val lastPageProperty = totalPagesProperty.combine(pageProperty) { (total, page) =>
         counter2 += 1
@@ -446,66 +443,91 @@ class PropertyTest extends UdashCoreTest {
       val sum = p1.combine(p2)(_ + _)
       val s = SeqProperty(1, 2, 3, 4)
 
-      val sc = sum.combine(s)((m, items) => items.map(_ * m))
-      val sqc = s.combine(sum)(_ * _)
+      val sumCombine = sum.combine(s)((m, items) => items.map(_ * m))
+      val sCombine = s.combine(sum)((items, m) => items.map(_ * m))
+      val sCombineElements = s.combineElements(sum)(_ * _)
 
-      p1.listenersCount() should be(0)
-      p2.listenersCount() should be(0)
-      sum.listenersCount() should be(0)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      sum.listenersCount() shouldBe 0
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      ensureNoListeners(s)
+      ensureNoListeners(sCombineElements)
 
-      // sum.get == 10
-      sc.get should be(Seq(10, 20, 30, 40))
-      sqc.get should be(Seq(10, 20, 30, 40))
+      sum.get shouldBe 10
+      sumCombine.get shouldBe Seq(10, 20, 30, 40)
+      sCombine.get shouldBe Seq(10, 20, 30, 40)
+      sCombineElements.get shouldBe Seq(10, 20, 30, 40)
 
-      var sqcHeadChanges = 0
-      val r1 = sqc.elemProperties.head.listen(_ => sqcHeadChanges += 1)
+      var combinedElementsHeadChanges = 0
+      val r1 = sCombineElements.elemProperties.head.listen(_ => combinedElementsHeadChanges += 1)
 
-      p1.listenersCount() should be(1)
-      p2.listenersCount() should be(1)
-      sum.listenersCount() should be(1)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+      sum.listenersCount() shouldBe 1
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 0
+      ensureNoListeners(sCombineElements)
 
-      var sqcChanges = 0
-      val r2 = sqc.listen(_ => sqcChanges += 1)
+      var combineElementsValueChanges = 0
+      var combinedElementsListenerValue = BSeq.empty[Int]
+      val r2 = sCombineElements.listen { v =>
+        combinedElementsListenerValue = v
+        combineElementsValueChanges += 1
+      }
 
-      p1.listenersCount() should be(1)
-      p2.listenersCount() should be(1)
-      sum.listenersCount() should be(2)
-      s.listenersCount() should be(1)
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+      sum.listenersCount() shouldBe 2
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 1
+      sCombineElements.listenersCount() shouldBe 1
 
       s.replace(1, 2, 7, 8, 9)
 
-      // sum.get == 10
-      sc.get should be(Seq(10, 70, 80, 90, 40))
-      sqc.get should be(Seq(10, 70, 80, 90, 40))
+      sum.get shouldBe 10
+      sumCombine.get shouldBe Seq(10, 70, 80, 90, 40)
+      sCombine.get shouldBe Seq(10, 70, 80, 90, 40)
+      sCombineElements.get shouldBe Seq(10, 70, 80, 90, 40)
+      combinedElementsListenerValue shouldBe Seq(10, 70, 80, 90, 40)
 
-      sqcHeadChanges should be(0)
-      sqcChanges should be(1)
+      combinedElementsHeadChanges shouldBe 0
+      combineElementsValueChanges shouldBe 1
 
       p1.set(0)
       p2.set(0)
 
-      sqcHeadChanges should be(2)
-      sqcChanges should be(3)
+      combinedElementsHeadChanges shouldBe 2
+      combineElementsValueChanges shouldBe 3
 
-      // sum.get == 0
-      sc.get should be(Seq(0, 0, 0, 0, 0))
-      sqc.get should be(Seq(0, 0, 0, 0, 0))
+      sum.get shouldBe 0
+      sumCombine.get shouldBe Seq(0, 0, 0, 0, 0)
+      sCombine.get shouldBe Seq(0, 0, 0, 0, 0)
+      sCombineElements.get shouldBe Seq(0, 0, 0, 0, 0)
+      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0)
 
       r1.cancel()
       r2.cancel()
 
-      p1.listenersCount() should be(0)
-      p2.listenersCount() should be(0)
-      sum.listenersCount() should be(0)
-      s.listenersCount() should be(0)
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      sum.listenersCount() shouldBe 0
+      sumCombine.listenersCount() shouldBe 0
+      sCombine.listenersCount() shouldBe 0
+      s.listenersCount() shouldBe 0
+      ensureNoListeners(sCombineElements)
 
       p1.set(2)
       p2.set(3)
+      sum.get shouldBe 5
       s.set(Seq(2, 1))
-      sc.get should be(Seq(10, 5))
-      sqc.get should be(Seq(10, 5))
+      sumCombine.get shouldBe Seq(10, 5)
+      sCombine.get shouldBe Seq(10, 5)
+      sCombineElements.get shouldBe Seq(10, 5)
+      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0) //r2 cancelled
     }
 
     "transform to ReadableSeqProperty" in {
@@ -693,10 +715,8 @@ class PropertyTest extends UdashCoreTest {
         }
 
       val p = Property("1,2,3,4,5")
-      val s: SeqProperty[Int, Property[Int]] = p.transformToSeq(
-        (v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()),
-        (s: BSeq[Int]) => s.mkString(",")
-      )
+      val s: SeqProperty[Int, Property[Int]] =
+        p.bitransformToSeq(v => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))(_.mkString(","))
 
       p.listenersCount() should be(0)
       registerElementListener(s.elemProperties)
@@ -869,9 +889,7 @@ class PropertyTest extends UdashCoreTest {
       val p = SeqProperty(new ClazzModel(42))
       var fromListen = BSeq.empty[Int]
 
-      val s = p.transformToSeq(
-        (v: BSeq[ClazzModel]) => v.map(_.p), (v: BSeq[Int]) => v.map(new ClazzModel(_))
-      )
+      val s = p.bitransformToSeq(_.map(_.p))(_.map(new ClazzModel(_)))
       p.get.map(_.p) shouldBe Seq(42)
       s.get shouldBe Seq(42)
 
@@ -889,7 +907,7 @@ class PropertyTest extends UdashCoreTest {
 
     "handle child modification in transformToSeq result" in {
       val s = Property("1,2,3,4,5,6")
-      val i = s.transformToSeq(_.split(",").map(_.toInt), (v: BSeq[Int]) => v.map(_.toString).mkString(","))
+      val i = s.bitransformToSeq(_.split(",").map(_.toInt))(_.map(_.toString).mkString(","))
 
       i.get should be(Seq(1, 2, 3, 4, 5, 6))
 
@@ -935,9 +953,9 @@ class PropertyTest extends UdashCoreTest {
 
     "stream value to another property" in {
       val source = SeqProperty(1, 2, 3)
-      val transformed = source.transform((i: Int) => i * 2)
+      val transformed = source.transformElements(_ * 2)
       val filtered = transformed.filter(_ < 10)
-      val sum = filtered.transform((s: BSeq[Int]) => s.sum)
+      val sum = filtered.transform(_.sum)
 
       val target = Property(42)
       val targetWithoutInit = Property(42)
@@ -1177,7 +1195,7 @@ class PropertyTest extends UdashCoreTest {
       val sp = p.asSeq[Int]
       sp.prepend(0)
 
-      sp.transform((_: Int) + 1).reversed().get shouldBe (5 to(1, -1))
+      sp.transformElements(_ + 1).reversed().get shouldBe (5 to(1, -1))
       sp.get shouldBe (0 to 4)
       p.get shouldBe (0 to 4)
     }

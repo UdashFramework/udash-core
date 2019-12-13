@@ -1,39 +1,43 @@
 package io.udash.routing
 
+import com.avsystem.commons.misc.AbstractCase
 import com.github.ghik.silencer.silent
 import io.udash._
+import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.reflect.ClassTag
 import scala.util.Try
 
-case class StateChangeEvent[S <: State : ClassTag](currentState: S, oldState: S)
+final case class StateChangeEvent[S <: State](currentState: S, oldState: S) extends AbstractCase
 
 /**
-  * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
-  * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
-  */
-class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
+ * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
+ * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
+ */
+class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   viewRenderer: ViewRenderer
-) {
+) extends CrossLogging {
 
   private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
   private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
   /**
-    * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewFactories.
-    *
-    * @param url URL to be resolved
-    */
+   * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewFactories.
+   *
+   * @param url URL to be resolved
+   */
   def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
-    if (fullReload) clearAllPresenters()
+    if (fullReload) {
+      cleanup(statesMap.values)
+      statesMap.clear()
+    }
 
     val newState = routingRegistry.matchUrl(url)
     val oldState = currentStateProp.get
@@ -48,7 +52,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      toRemoveStates.values.foreach { case (_, presenter) => presenter.onClose() }
+      cleanup(toRemoveStates.values)
 
       val oldViewFactories =
         newStatePath
@@ -79,21 +83,23 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
   }.recover { case ex: Throwable => statesMap.clear(); throw ex }
 
   /**
-    * Register a callback for the routing state change.
-    *
-    * @param callback Callback getting StateChangeEvent as arguments
-    */
+   * Register a callback for the routing state change.
+   *
+   * @param callback Callback getting StateChangeEvent as arguments
+   */
   def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Any): Registration =
-    onStateChange({ case x => callback(x) }: callbacks.CallbackType)
+    onStateChange({
+      case x => callback(x)
+    }: callbacks.CallbackType)
 
   /**
-    * Register a callback for the routing state change.
-    *
-    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
-    * Each callback is executed once, exceptions thrown in callbacks are swallowed.
-    *
-    * @param callback Callback (PartialFunction) getting StateChangeEvent as arguments
-    */
+   * Register a callback for the routing state change.
+   *
+   * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
+   * Each callback is executed once, exceptions thrown in callbacks are swallowed.
+   *
+   * @param callback Callback (PartialFunction) getting StateChangeEvent as arguments
+   */
   def onStateChange(callback: callbacks.CallbackType): Registration =
     callbacks.register(callback)
 
@@ -114,14 +120,16 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : 
     (path, oldPath) match {
       case (head1 :: tail1, head2 :: tail2)
         if viewFactoryRegistry.matchStateToResolver(head1) == viewFactoryRegistry.matchStateToResolver(head2) =>
-          getUpdatablePathSize(tail1, tail2, acc + 1)
+        getUpdatablePathSize(tail1, tail2, acc + 1)
       case _ => acc
     }
   }
 
-  private def clearAllPresenters(): Unit = {
-    statesMap.values.foreach { case (_, presenter) => presenter.onClose() }
-    statesMap.clear()
+  private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
+    state.foreach { case (view, presenter) =>
+      Try(view.onClose()).failed.foreach(logger.warn("Error closing view.", _))
+      Try(presenter.onClose()).failed.foreach(logger.warn("Error closing presenter.", _))
+    }
   }
 
   private def resolvePath(path: List[HierarchyRoot]): List[View] = {

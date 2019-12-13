@@ -16,7 +16,7 @@ private[properties] class TransformedReadableProperty[A, B](
   protected def originListener(originValue: A) : Unit = {
     lastValue = Opt(originValue)
     transformedValue = transformer(originValue)
-    fireValueListeners()
+    valueChanged()
   }
 
   private def initOriginListener(): Unit = {

@@ -13,22 +13,22 @@ object TransformedSeqPropertyListeners extends BenchmarkUtils {
     }),
     ("one-way transformed elements", () => {
       val p = SeqProperty(Seq.tabulate(seqSize)(identity))
-      val t = p.transform((v: Int) => v + 1)
+      val t = p.transformElements(_ + 1)
       (p, t)
     }),
     ("both-ways transformed elements", () => {
       val p = SeqProperty(Seq.tabulate(seqSize)(identity))
-      val t = p.transform((v: Int) => v + 1, (v: Int) => v - 1)
+      val t = p.bitransformElements(_ + 1)(_ - 1)
       (p, t)
     }),
     ("one-way transformed elements with slow transformer", () => {
       val p = SeqProperty(Seq.tabulate(seqSize)(identity))
-      val t = p.transform((v: Int) => slowInc(v))
+      val t = p.transformElements(slowInc)
       (p, t)
     }),
     ("both-ways transformed elements with slow transformer", () => {
       val p = SeqProperty(Seq.tabulate(seqSize)(identity))
-      val t = p.transform((v: Int) => slowInc(v), (v: Int) => slowDec(v))
+      val t = p.bitransformElements(slowInc)(slowDec)
       (p, t)
     })
   )

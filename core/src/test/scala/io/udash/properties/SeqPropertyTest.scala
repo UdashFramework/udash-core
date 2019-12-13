@@ -376,10 +376,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "transform into Property" in {
       val p = SeqProperty[Int](1, 2, 3)
-      val t = p.transform[Int](
-        (s: BSeq[Int]) => s.sum,
-        (i: Int) => (1 to i)
-      )
+      val t = p.bitransform(_.sum)(1 to _)
 
       p.get should be(Seq(1, 2, 3))
       t.get should be(6)
@@ -406,13 +403,10 @@ class SeqPropertyTest extends UdashCoreTest {
       val init: Seq[BadEquals] = (1 to 3).map(new BadEquals(_))
       val p = SeqProperty[BadEquals](init)
 
-      val t = p.transform[T](
-        (i: BadEquals) => TC1(i.v),
-        (t: T) => t match {
+      val t = p.bitransformElements[T](i => TC1(i.v)) {
           case TC1(i) => new BadEquals(i)
           case _: T => new BadEquals(0)
         }
-      )
 
       p.get.map(_.v) should be(Seq(1, 2, 3))
       t.get should be(Seq(TC1(1), TC1(2), TC1(3)))
@@ -684,7 +678,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "be able to modify after transformation" in {
       val numbers = SeqProperty[Int](1, 2, 3)
-      val strings = numbers.transform((i: Int) => i.toString, (s: String) => Integer.parseInt(s))
+      val strings = numbers.bitransformElements(_.toString)(Integer.parseInt)
 
       strings.append("4", "5", "6")
       numbers.get should be(Seq(1, 2, 3, 4, 5, 6))
@@ -696,7 +690,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "filter transformed property" in {
       val doubles = SeqProperty[Double](1.5, 2.3, 3.7)
-      val ints = doubles.transform((d: Double) => d.toInt, (i: Int) => i.toDouble)
+      val ints = doubles.bitransformElements(_.toInt)(_.toDouble)
       val evens = ints.filter(_ % 2 == 0)
 
       doubles.listenersCount() should be(0)
@@ -778,18 +772,20 @@ class SeqPropertyTest extends UdashCoreTest {
       val s = SeqProperty(1, 2, 3, 4)
       val p = Property(2)
 
-      val c = s.combine(p)(_ * _)
+      val c = s.combineElements(p)(_ * _)
+
       ensureNoListeners(s)
+      ensureNoListeners(c)
       p.listenersCount() should be(0)
 
       var lastPatch: Patch[ReadableProperty[Int]] = null
-      val r2 = c.listenStructure(patch => lastPatch = patch)
+      val structureRegistration = c.listenStructure(patch => lastPatch = patch)
       s.listenersCount() should be(0)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
       val listenCalls = MListBuffer[BSeq[Int]]()
-      val r1 = c.listen(v => listenCalls += v)
+      val registration = c.listen(v => listenCalls += v)
       s.listenersCount() should be(1)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(1)
@@ -802,15 +798,13 @@ class SeqPropertyTest extends UdashCoreTest {
       }
       c.get should be(Seq(1, 2, 3, 4))
       lastPatch should be(null)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(1, 2, 3, 4))
+      listenCalls shouldBe Seq(Seq(1, 2, 3, 4))
 
       listenCalls.clear()
       CallbackSequencer().sequence {
         p.set(2)
       }
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 4, 6, 8))
+      listenCalls shouldBe Seq(Seq(2, 4, 6, 8))
 
       listenCalls.clear()
       lastPatch = null
@@ -820,8 +814,7 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.head.get should be(2)
       lastPatch.removed.size should be(0)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 4, 6, 8, 2))
+      listenCalls shouldBe Seq(Seq(2, 4, 6, 8, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -832,8 +825,7 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.removed.head.get should be(4)
       lastPatch.removed.last.get should be(8)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 2))
+      listenCalls shouldBe Seq(Seq(2, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -844,8 +836,14 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.last.get should be(16)
       lastPatch.removed.size should be(0)
       lastPatch.clearsProperty should be(false)
-      listenCalls.size should be(1)
-      listenCalls should contain(Seq(2, 12, 14, 16, 2))
+      listenCalls shouldBe Seq(Seq(2, 12, 14, 16, 2))
+
+      listenCalls.clear()
+      lastPatch = null
+      s.elemProperties.head.set(0)
+      c.get should be(Seq(0, 12, 14, 16, 2))
+      lastPatch shouldBe null
+      listenCalls shouldBe Seq(Seq(0, 12, 14, 16, 2))
 
       listenCalls.clear()
       lastPatch = null
@@ -853,18 +851,18 @@ class SeqPropertyTest extends UdashCoreTest {
       c.get should be(Seq())
       lastPatch.idx should be(0)
       lastPatch.added.size should be(0)
-      lastPatch.removed.head.get should be(2)
+      lastPatch.removed.head.get should be(0)
       lastPatch.removed.last.get should be(2)
       lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
 
-      r1.cancel()
+      registration.cancel()
       s.listenersCount() should be(0)
       s.structureListenersCount() should be(1)
       p.listenersCount() should be(0)
 
-      r2.cancel()
+      structureRegistration.cancel()
       ensureNoListeners(s)
       p.listenersCount() should be(0)
     }
@@ -938,7 +936,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
     "provide reversed version of transformed and filtered SeqProperty" in {
       val p = SeqProperty(-3, -2, -1, 0, 1, 2)
-      val f = p.filter(_ >= 0).transform((i: Int) => i + 1)
+      val f = p.filter(_ >= 0).transformElements(_ + 1)
       val r: ReadableSeqProperty[Int, ReadableProperty[Int]] = f.reversed()
       val r2: ReadableSeqProperty[Int, ReadableProperty[Int]] = r.reversed()
 
@@ -1022,19 +1020,37 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(odds)
       ensureNoListeners(evens)
 
+      var fromListener = BSeq.empty[(Int, Int)]
+      val registration = pairs.listen(fromListener = _, initUpdate = true)
+
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+
       numbers.append(20, 21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8)))
+
+      numbers.elemProperties.head.set(11)
+      fromListener shouldBe Seq((11, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((11, 2), (3, 4), (5, 6), (7, 8))
+
+      numbers.elemProperties.head.set(1)
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8))
 
       numbers.append(10)
 
+      registration.cancel()
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = pairs.listenStructure(p => patches.append(p))
+      val structureRegistration = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
@@ -1152,7 +1168,7 @@ class SeqPropertyTest extends UdashCoreTest {
       odds.structureListenersCount() should be(1)
       evens.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
       ensureNoListeners(odds)
@@ -1168,7 +1184,7 @@ class SeqPropertyTest extends UdashCoreTest {
       pairs.get should be(Seq((3, 8), (7, 10), (13, 14), (21, 20)))
     }
 
-    "zip all with another ReadableProperty" in {
+    "zip all with another ReadableSeqProperty" in {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val odds: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 1)
       val evens: ReadableSeqProperty[Int, ReadableProperty[Int]] = numbers.filter(_ % 2 == 0)
@@ -1182,17 +1198,27 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(odds)
       ensureNoListeners(evens)
 
+      var fromListener = BSeq.empty[(Int, Int)]
+      val registration = pairs.listen(fromListener = _, initUpdate = true)
+
+      fromListener shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2))
+      pairs.get shouldBe Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2))
+
       numbers.append(20, 21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20), (21, -2)))
 
       numbers.remove(21)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, 20)))
 
       numbers.remove(20)
+      fromListener should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
       pairs.get should be(Seq((1, 2), (3, 4), (5, 6), (7, 8), (9, -2)))
 
+      registration.cancel()
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = pairs.listenStructure(p => patches.append(p))
+      val structureRegistration = pairs.listenStructure(p => patches.append(p))
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
@@ -1331,7 +1357,7 @@ class SeqPropertyTest extends UdashCoreTest {
       odds.structureListenersCount() should be(1)
       evens.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
       ensureNoListeners(odds)
@@ -1351,19 +1377,38 @@ class SeqPropertyTest extends UdashCoreTest {
       val numbers = SeqProperty(1, 2, 3, 4, 5, 6, 7, 8, 9)
       val indexed = numbers.zipWithIndex
 
+      ensureNoListeners(numbers)
+      ensureNoListeners(indexed)
+
+      var fromListener = BSeq.empty[(Int, Int)]
+      val registration = indexed.listen(fromListener = _, initUpdate = true)
+
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
 
       numbers.append(-1)
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
 
       numbers.remove(-1)
+      fromListener should be(numbers.get.zipWithIndex)
       indexed.get should be(numbers.get.zipWithIndex)
+
+      numbers.elemProperties.head.set(0)
+      indexed.get should be(numbers.get.zipWithIndex)
+      fromListener should be(numbers.get.zipWithIndex)
+
+      numbers.elemProperties.head.set(1)
+      indexed.get should be(numbers.get.zipWithIndex)
+      fromListener should be(numbers.get.zipWithIndex)
+
+      registration.cancel()
 
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(0)
 
       val patches = MArrayBuffer.empty[Patch[ReadableProperty[(Int, Int)]]]
-      val r1 = indexed.listenStructure(p => patches.append(p))
+      val structureRegistration = indexed.listenStructure(p => patches.append(p))
 
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(1)
@@ -1424,7 +1469,7 @@ class SeqPropertyTest extends UdashCoreTest {
       numbers.listenersCount() should be(0)
       numbers.structureListenersCount() should be(1)
 
-      r1.cancel()
+      structureRegistration.cancel()
 
       ensureNoListeners(numbers)
 

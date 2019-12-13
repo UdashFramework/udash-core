@@ -6,8 +6,6 @@ import io.udash.routing.StateChangeEvent
 import io.udash.utils.CallbacksHandler
 import org.scalajs.dom.Element
 
-import scala.reflect.ClassTag
-
 /**
  * Root application which is used to start single instance of app.
  *
@@ -15,7 +13,7 @@ import scala.reflect.ClassTag
  * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
  * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
  */
-class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : ClassTag : PropertyCreator](
+class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   urlChangeProvider: UrlChangeProvider = new WindowUrlFragmentChangeProvider
