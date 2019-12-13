@@ -10,7 +10,7 @@ class ComponentIdMacro(val c: blackbox.Context) {
   final def IdObj: Tree = q"io.udash.component.ComponentId"
 
   def impl(): c.Tree = {
-    val fqnParts = Iterator.iterate(c.internal.enclosingOwner)(_.owner).find(_.isClass).get.fullName.split('.')
-    q"$IdObj.forName($IdObj.join(..$fqnParts))"
+    val fqn = Iterator.iterate(c.internal.enclosingOwner)(_.owner).find(_.isClass).get.fullName.replace('.', '-')
+    q"$IdObj.forName($fqn)"
   }
 }
