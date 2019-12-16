@@ -2,7 +2,7 @@ package io.udash.properties
 
 import io.udash.testing.UdashCoreTest
 
-import scala.xml.Document
+import scala.collection.AbstractSeq
 
 class PropertyUsageTest extends UdashCoreTest {
   // DO NOT REMOVE THESE IMPORTS!
@@ -123,6 +123,13 @@ class PropertyUsageTest extends UdashCoreTest {
         |val s: SeqProperty[String, _ <: ReadableProperty[String]] = p.subSeq(_.s)
         |""".stripMargin should compile
     }
+  }
+
+  //rough approximation of scala.xml.Document, which used to be the test case for fixed-param Seq type here
+  class Document extends AbstractSeq[Int] with scala.collection.immutable.Seq[Int] {
+    override def length: Int = ???
+    override def apply(idx: Int): Int = ???
+    override def iterator: Iterator[Int] = ???
   }
 
   object ClassModel {

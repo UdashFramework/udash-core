@@ -1,9 +1,9 @@
 package io.udash
 package rest.raw
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class MappingTest extends FunSuite {
+class MappingTest extends AnyFunSuite {
   test("simple") {
     assert(Mapping.create("a" -> 1).toMap == Map("a" -> 1))
   }

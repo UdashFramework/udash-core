@@ -7,7 +7,9 @@ import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.{Dimension, WebElement}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 private trait ServerConfig {
   def init(): Unit
@@ -42,7 +44,7 @@ private final class InternalServerConfig extends ServerConfig {
   }
 }
 
-abstract class SeleniumTest extends WordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
+abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
   protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
