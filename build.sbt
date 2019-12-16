@@ -470,6 +470,7 @@ lazy val `guide-packager` =
       },
 
       dockerExposedPorts += 8080,
+      dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
     )
 
 lazy val `guide-selenium` =
