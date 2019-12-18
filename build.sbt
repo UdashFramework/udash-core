@@ -469,7 +469,7 @@ lazy val `guide-packager` =
         (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
       },
 
-      dockerExposedPorts += 8080,
+      dockerExposedPorts += 8080, //should match ui.server.port
       dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
     )
 

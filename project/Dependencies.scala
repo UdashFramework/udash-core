@@ -184,7 +184,7 @@ object Dependencies {
   val backendDeps = Def.setting(Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
-    "org.codehaus.janino" % "janino" % janinoVersion,
+    "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
