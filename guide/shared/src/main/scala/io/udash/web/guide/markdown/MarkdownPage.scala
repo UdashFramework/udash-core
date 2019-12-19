@@ -6,6 +6,5 @@ final class MarkdownPage(val file: String)(implicit val ctx: EnumCtx) extends Ab
 object MarkdownPage extends AbstractValueEnumCompanion[MarkdownPage] {
   final val Intro: Value = new MarkdownPage("assets/pages/intro.md")
   final val Rest: Value = new MarkdownPage("assets/pages/rest.md")
-  final val I18n: Value = new MarkdownPage("assets/pages/ext/i18n.md")
   final val License: Value = new MarkdownPage("assets/pages/license.md")
 }
