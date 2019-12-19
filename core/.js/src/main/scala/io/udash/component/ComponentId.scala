@@ -12,8 +12,11 @@ final case class ComponentId private(value: String) extends AbstractCase with Mo
     t.id = value
   }
 
-  /** Generate new [[ComponentId]] based on a current id value with added suffix. */
-  def withSuffix(s: String): ComponentId = ComponentId.forName(ComponentId.join(value, s))
+  /** Generate a [[ComponentId]] based on a current id value with added suffix. */
+  def withSuffix(s: String): ComponentId = ComponentId(ComponentId.join(value, s))
+
+  /** Generate a unique [[ComponentId]] based on a current id value with added suffix. */
+  def withUniqueSuffix(s: String): ComponentId = ComponentId.forName(ComponentId.join(value, s))
 
   override def toString(): String = value
 }
