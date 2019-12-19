@@ -1,13 +1,13 @@
 package io.udash.component
 
-import com.avsystem.commons.misc.CaseMethods
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.macros.ComponentIdMacro
 import org.scalajs.dom.Element
 import scalatags.JsDom.GenericAttr
 import scalatags.JsDom.all._
 
 
-final case class ComponentId private(value: String) extends Modifier with CaseMethods {
+final case class ComponentId private(value: String) extends AbstractCase with Modifier {
   override def applyTo(t: Element): Unit = {
     t.id = value
   }
@@ -19,8 +19,8 @@ final case class ComponentId private(value: String) extends Modifier with CaseMe
 }
 
 object ComponentId {
-  final val Separator = "-"
-  final def join(s: String*): String = s.mkString(Separator)
+  private val Separator = "-"
+  private def join(s: String*): String = s.mkString(Separator)
 
   private var count: Int = -1
 

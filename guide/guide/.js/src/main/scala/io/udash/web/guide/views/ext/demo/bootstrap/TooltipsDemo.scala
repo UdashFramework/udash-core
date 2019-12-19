@@ -56,7 +56,7 @@ object TooltipsDemo extends AutoDemo {
     val button = UdashButton()("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(id := tooltipContainerId)(
+    div(tooltipContainerId)(
       label1, label2, label3, button
     ).render
   }.withSourceCode

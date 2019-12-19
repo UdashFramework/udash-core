@@ -13,7 +13,7 @@ class ComponentIdTest extends UdashFrontendTest {
   }
 
   class Origin(fromOuterScope: () => ComponentId) {
-    def doGenerateFromOuterScope() = fromOuterScope()
+    def doGenerateFromOuterScope(): ComponentId = fromOuterScope()
     def generateFromInnerScope: ComponentId = ComponentId.generate()
   }
 
@@ -49,7 +49,7 @@ class ComponentIdTest extends UdashFrontendTest {
       val origin: Origin = new Origin(definedInOuterScope)
 
       val thisClassName: String = this.getClass.getSimpleName
-      val originClassName: String = classOf[Origin].getSimpleName
+      val originClassName: String = origin.getClass.getSimpleName
 
       val fromInnerScope: ComponentId = origin.generateFromInnerScope
       fromInnerScope.value should include(thisClassName)

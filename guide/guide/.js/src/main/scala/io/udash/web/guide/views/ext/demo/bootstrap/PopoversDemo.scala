@@ -63,7 +63,7 @@ object PopoversDemo extends AutoDemo with CssView {
     val button = UdashButton()("Toggle popover")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(id := popoverContainerId)(
+    div(popoverContainerId)(
       label1, label2, label3, button
     ).render
   }.withSourceCode
