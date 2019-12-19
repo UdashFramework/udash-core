@@ -468,6 +468,9 @@ lazy val `guide-packager` =
         val frontendStatics = (`guide-guide` / Compile / compileAndOptimizeStatics).value
         (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
       },
+
+      dockerExposedPorts += 8080, //should match ui.server.port
+      dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
     )
 
 lazy val `guide-selenium` =

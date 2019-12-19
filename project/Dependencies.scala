@@ -35,10 +35,11 @@ object Dependencies {
   val typesafeConfigVersion = "1.4.0"
   val flexmarkVersion = "0.50.44"
   val logbackVersion = "1.2.3"
-  val fontAwesomeVersion = "5.12.0"
+  val janinoVersion = "3.1.0"
+  val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.0.8"
+  val scalatestVersion = "3.1.0"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
@@ -183,6 +184,7 @@ object Dependencies {
   val backendDeps = Def.setting(Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
+    "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
