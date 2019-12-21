@@ -27,7 +27,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
       CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
       val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
       CallbackSequencer().queue(
-        s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+        s"$hashCode:fireElementsListeners:${patch.hashCode()}",
         () => structureListeners.foreach(_.apply(mappedPatch))
       )
       valueChanged()

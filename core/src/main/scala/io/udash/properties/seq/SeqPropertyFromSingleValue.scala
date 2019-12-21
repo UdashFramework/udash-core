@@ -39,7 +39,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
   private def structureChanged(patch: Patch[ElemType]): Unit =
     CallbackSequencer().queue(
-      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+      s"$hashCode:fireElementsListeners:${patch.hashCode()}",
       () => structureListeners.foreach(_.apply(patch))
     )
 
@@ -156,7 +156,7 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   protected def toElemProp(p: Property[B]): Property[B] = p
 
   override protected[properties] def valueChanged(): Unit = {
-    CallbackSequencer().queue(s"revertSet:$id", () => {
+    CallbackSequencer().queue(s"revertSet:$hashCode", () => {
       origin.set(revert(get))
     })
     super.valueChanged()

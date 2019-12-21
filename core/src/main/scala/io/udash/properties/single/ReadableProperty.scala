@@ -130,7 +130,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
 
   protected[properties] override def valueChanged(): Unit = {
     val originalListeners = listeners.toSet
-    CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
+    CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
       listeners.foreach { listener => if (originalListeners.contains(listener)) listener(value) }
       oneTimeListeners.foreach(_.cancel())
