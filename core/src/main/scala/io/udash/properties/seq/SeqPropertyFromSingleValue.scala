@@ -12,7 +12,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]
-  private final val childrenRegistrations = MHashMap.empty[PropertyId, Registration]
+  private final val childrenRegistrations = MHashMap.empty[Property[B], Registration]
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
@@ -61,12 +61,12 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
         PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
-      if (listenChildren) childrenRegistrations ++= added.map(p => p.id -> p.listen(_ => valueChanged()))
+      if (listenChildren) childrenRegistrations ++= added.map(p => p -> p.listen(_ => valueChanged()))
       CrossCollections.replaceSeq(children, commonBegin, 0, added)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
-      if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p.id).get.cancel())
+      if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p).get.cancel())
       CrossCollections.replace(children, commonBegin, current.size - transformed.size)
       Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq(), transformed.isEmpty))
     } else None
@@ -116,7 +116,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       override def restart(): Unit = {
         initOriginListeners()
         if (listenChildren && childrenRegistrations.isEmpty) {
-          childrenRegistrations ++= children.map(p => p.id -> p.listen(_ => valueChanged()))
+          childrenRegistrations ++= children.map(p => p -> p.listen(_ => valueChanged()))
         }
         reg.restart()
       }
