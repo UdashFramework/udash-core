@@ -35,7 +35,7 @@ object UdashInputGroup {
     */
   def apply(
     groupSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Modifier*): UdashInputGroup = {
     new UdashInputGroup(groupSize, componentId)(content)
   }

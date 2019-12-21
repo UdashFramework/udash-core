@@ -8,6 +8,7 @@ import scalatags.JsDom.all._
 object PopoversDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
+    import io.udash._
     import io.udash.bootstrap._
     import BootstrapStyles._
     import io.udash.bootstrap.badge.UdashBadge
@@ -62,7 +63,7 @@ object PopoversDemo extends AutoDemo with CssView {
     val button = UdashButton()("Toggle popover")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(id := popoverContainerId)(
+    div(popoverContainerId)(
       label1, label2, label3, button
     ).render
   }.withSourceCode

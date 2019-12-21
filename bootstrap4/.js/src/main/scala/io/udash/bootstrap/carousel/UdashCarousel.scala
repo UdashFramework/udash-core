@@ -88,7 +88,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       (idx, direction.getOrElse(CarouselEvent.Direction.Unknown))
     }
 
-    val res: Element = div(id := componentId, Carousel.carousel, Carousel.slide)(
+    val res: Element = div(componentId, Carousel.carousel, Carousel.slide)(
       nestedInterceptor(produceWithNested(showIndicators) {
         case (true, nested) => span(nested(indicators())).render
         case (false, _) => span().render
@@ -186,7 +186,7 @@ object UdashCarousel {
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
     srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
     activeSlide: Property[Int] = Property(0),
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
   ): UdashCarousel[ItemType, ElemType] = {
@@ -213,7 +213,7 @@ object UdashCarousel {
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
     srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
     activeSlide: Property[Int] = Property(0),
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     slideContentFactory: (ReadableProperty[UdashCarouselSlide], Binding.NestedInterceptor) => Modifier =
       (slide, nested) => nested(produce(slide)(_.render))

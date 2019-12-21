@@ -102,7 +102,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         ).render
       )
       noException shouldBe thrownBy {
-        jQ(() => jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt].datetimepicker("date", null))
+        jQ(() => jQ("#" + picker.componentId.value).asInstanceOf[JQueryDatePickerExt].datetimepicker("date", null))
       }
     }
 
@@ -121,7 +121,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       ).render
       jQ("body").append(r)
 
-      val pickerJQ = jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt]
+      val pickerJQ = jQ("#" + picker.componentId.value).asInstanceOf[JQueryDatePickerExt]
 
       for {
         _ <- {
@@ -226,7 +226,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       val picker: UdashDatePicker = UdashDatePicker.i18n(date, pickerOptions, tooltips)()(lang, tp)
       jQ("body").append(picker.render)
 
-      val pickerJQ = jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt]
+      val pickerJQ = jQ("#" + picker.componentId.value).asInstanceOf[JQueryDatePickerExt]
 
       for {
         _ <- retrying {

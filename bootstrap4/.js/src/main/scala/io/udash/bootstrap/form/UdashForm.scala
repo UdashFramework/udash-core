@@ -118,7 +118,7 @@ object UdashForm {
     inline: Boolean = false,
     inputValidationTrigger: ValidationTrigger = ValidationTrigger.OnBlur,
     selectValidationTrigger: ValidationTrigger = ValidationTrigger.OnChange,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: FormElementsFactory => Modifier): UdashForm = {
     new UdashForm(
       Some(BootstrapStyles.Form.inline).filter(_ => inline),
@@ -181,7 +181,7 @@ final class FormElementsFactory(
      */
     def formGroup(
       horizontal: Option[HorizontalLayoutSettings] = None,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       input: Binding.NestedInterceptor => Element,
       labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -193,7 +193,7 @@ final class FormElementsFactory(
         override val render: Element = horizontal match {
           case None =>
             val inputEl = input(nestedInterceptor)
-            div(BootstrapStyles.Form.group, id := groupId)(
+            div(BootstrapStyles.Form.group, groupId)(
               labelContent.map(content => label(`for` := inputEl.id)(content(nestedInterceptor))),
               inputEl,
               validFeedback.map(content => div(BootstrapStyles.Form.validFeedback)(content(nestedInterceptor))),
@@ -202,7 +202,7 @@ final class FormElementsFactory(
             ).render
           case Some(HorizontalLayoutSettings(labelWidth, inputWidth, breakpoint, labelSize)) =>
             val inputEl = input(nestedInterceptor)
-            div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, id := groupId)(
+            div(BootstrapStyles.Form.group, BootstrapStyles.Grid.row, groupId)(
               div(BootstrapStyles.Grid.col(labelWidth, breakpoint))(
                 labelContent.map { content =>
                   label(`for` := inputEl.id, (BootstrapStyles.Form.colFormLabelSize _).reactiveOptionApply(labelSize))(
@@ -241,14 +241,14 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         TextInput(property, debounce)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(property, validationTrigger, nestedInterceptor)(validator),
@@ -276,14 +276,14 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         PasswordInput(property, debounce)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(property, validationTrigger, nestedInterceptor)(validator),
@@ -311,14 +311,14 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         NumberInput(property.bitransform(_.toString)(_.toDouble), debounce)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(property, validationTrigger, nestedInterceptor)(validator),
@@ -349,14 +349,14 @@ final class FormElementsFactory(
       maxValue: ReadableProperty[Double] = 100d.toProperty,
       valueStep: ReadableProperty[Double] = 1d.toProperty,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[Double] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         RangeInput(value, minValue, maxValue, valueStep)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.controlRange,
           BootstrapStyles.Form.customRange,
           inputModifier.map(_.apply(nestedInterceptor)),
@@ -384,14 +384,14 @@ final class FormElementsFactory(
       debounce: Duration = 20 millis,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       validator: Validator[String] = Validator.Default
     ): UdashBootstrapComponent = {
       externalBinding(new InputComponent(
         TextArea(property, debounce)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(property, validationTrigger, nestedInterceptor)(validator),
@@ -429,7 +429,7 @@ final class FormElementsFactory(
       acceptMultipleFiles: ReadableProperty[Boolean] = UdashBootstrap.False,
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = inputValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       inputName: String,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -441,7 +441,7 @@ final class FormElementsFactory(
       externalBinding(new UdashBootstrapComponent {
         private val input = FileInput(selectedFiles, acceptMultipleFiles)(
           inputName,
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.customFileInput,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(selectedFiles, validationTrigger, nestedInterceptor)(validator),
@@ -479,7 +479,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -488,7 +488,7 @@ final class FormElementsFactory(
       externalBinding(new InputComponent(
         Select(selectedItem, options)(
           itemLabel,
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.customSelect,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(selectedItem, validationTrigger, nestedInterceptor)(validator),
@@ -517,7 +517,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      inputId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate()
     )(
       itemLabel: T => Modifier,
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -526,7 +526,7 @@ final class FormElementsFactory(
       externalBinding(new InputComponent(
         Select(selectedItems, options)(
           itemLabel,
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.customSelect,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(selectedItems, validationTrigger, nestedInterceptor)(validator),
@@ -561,8 +561,8 @@ final class FormElementsFactory(
       property: Property[Boolean],
       validationTrigger: ValidationTrigger = selectValidationTrigger,
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
-      inputId: ComponentId = ComponentId.newId(),
-      groupId: ComponentId = ComponentId.newId()
+      inputId: ComponentId = ComponentId.generate(),
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: Option[Binding.NestedInterceptor => Modifier] = None,
       labelContent: Option[Binding.NestedInterceptor => Modifier] = None,
@@ -572,7 +572,7 @@ final class FormElementsFactory(
     ): UdashBootstrapComponent = {
       externalBinding(new UdashBootstrapComponent {
         private val input = nestedInterceptor(Checkbox(property)(
-          id := inputId,
+          inputId,
           BootstrapStyles.Form.control,
           inputModifier.map(_.apply(nestedInterceptor)),
           validationModifier(property, validationTrigger, nestedInterceptor)(validator)
@@ -581,7 +581,7 @@ final class FormElementsFactory(
         override val componentId: ComponentId = groupId
 
         override val render: Element = div(
-          id := groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
+          groupId, BootstrapStyles.Form.customControl, BootstrapStyles.Form.customCheckbox,
           input.render.styles(BootstrapStyles.Form.customControlInput),
           nestedInterceptor(BootstrapStyles.Form.customControlInline.styleIf(inline)),
           label(`for` := inputId, BootstrapStyles.Form.customControlLabel)(
@@ -624,7 +624,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -669,7 +669,7 @@ final class FormElementsFactory(
       options: ReadableSeqProperty[T],
       inline: ReadableProperty[Boolean] = UdashBootstrap.False,
       validationTrigger: ValidationTrigger = selectValidationTrigger,
-      groupId: ComponentId = ComponentId.newId()
+      groupId: ComponentId = ComponentId.generate()
     )(
       inputModifier: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
       labelContent: (T, Int, Binding.NestedInterceptor) => Option[Modifier] = (_: T, _: Int, _: Binding.NestedInterceptor) => None,
@@ -724,7 +724,7 @@ final class FormElementsFactory(
 
       override val componentId: ComponentId = groupId
 
-      override val render: Element = div(id := groupId, inputs.render).render
+      override val render: Element = div(groupId, inputs.render).render
     }
 
     private def validationModifier[ArgumentType](

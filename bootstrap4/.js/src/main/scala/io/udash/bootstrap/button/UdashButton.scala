@@ -45,7 +45,7 @@ final class UdashButton private(
   }
 
   override val render: dom.html.Element = {
-    tag.value(id := componentId, tpe := "button")(classes: _*)(
+    tag.value(componentId, tpe := "button")(classes: _*)(
       //condition to support non-button tags
       onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
     )(content(nestedInterceptor)).render
@@ -102,7 +102,7 @@ object UdashButton {
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     active: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton =
     new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
@@ -128,7 +128,7 @@ object UdashButton {
     outline: ReadableProperty[Boolean] = UdashBootstrap.False,
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton = {
     val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
