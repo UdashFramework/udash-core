@@ -7,8 +7,6 @@ import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
 
 private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
-  /** Unique property ID. */
-  override val id: PropertyId = PropertyCreator.newID()
 
   /** @return Current property value. */
   @inline override def get: A = value

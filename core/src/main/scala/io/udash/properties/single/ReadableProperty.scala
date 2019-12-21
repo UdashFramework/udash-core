@@ -8,7 +8,7 @@ import io.udash.utils.Registration
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[+A] {
   /** Unique property ID. */
-  val id: PropertyId
+  final def id: PropertyId = PropertyId(hashCode())
 
   /** @return Current property value. */
   def get: A

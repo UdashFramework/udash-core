@@ -14,7 +14,6 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
   sources: ISeq[ReadableSeqProperty[_, _ <: ReadableProperty[_]]]
 ) extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
 
-  override final val id: PropertyId = PropertyCreator.newID()
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[ReadableProperty[O]]

@@ -9,7 +9,6 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
-  override final val id: PropertyId = PropertyCreator.newID()
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]

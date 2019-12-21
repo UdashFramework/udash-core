@@ -1,14 +1,13 @@
 package io.udash.properties.seq
 
 import com.avsystem.commons._
+import io.udash.properties.ImmutableProperty
 import io.udash.properties.Properties.ReadableProperty
-import io.udash.properties.{ImmutableProperty, PropertyCreator, PropertyId}
 import io.udash.utils.Registration
 
 private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[ReadableProperty[A]])
   extends AbstractReadableSeqProperty[A, ReadableProperty[A]] {
 
-  override val id: PropertyId = PropertyCreator.newID()
   override protected[properties] val parent: ReadableProperty[_] = null
 
   private val children = value.map(_.readable)
