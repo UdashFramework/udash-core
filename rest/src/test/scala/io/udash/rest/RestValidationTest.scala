@@ -3,9 +3,9 @@ package rest
 
 import com.avsystem.commons._
 import io.udash.rest.raw.RestMetadata
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class RestValidationTest extends FunSuite with DefaultRestImplicits {
+class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
 
   trait Api2 {
     def self: Api2

@@ -2,11 +2,11 @@ package io.udash
 package rest
 
 import io.udash.testing.CompilationErrorAssertions
-import org.scalatest.FunSuite
 
 import scala.concurrent.Future
+import org.scalatest.funsuite.AnyFunSuite
 
-class CompilationErrorsTest extends FunSuite with CompilationErrorAssertions {
+class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions {
   private def norm(error: String): String =
     error.replaceFirst("^Macro at <macro>:\\d+:\\d+ failed: ", "")
 

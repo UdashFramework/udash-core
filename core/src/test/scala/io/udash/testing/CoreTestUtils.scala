@@ -2,7 +2,8 @@ package io.udash.testing
 
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
-import org.scalatest.{Assertion, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers
 
 trait CoreTestUtils extends Matchers {
   def ensureNoListeners(seqProperty: ReadableSeqProperty[_, _ <: ReadableProperty[_]]): Assertion = {

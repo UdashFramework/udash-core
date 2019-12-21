@@ -1,6 +1,8 @@
 package io.udash.testing
 
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-trait UdashSharedTest extends WordSpec with Matchers with BeforeAndAfterAll {
+trait UdashSharedTest extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 }
