@@ -26,11 +26,13 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   buttonContent: Binding.NestedInterceptor => Modifier,
   buttonFactory: (NestedInterceptor => Modifier) => UdashButton
 ) extends UdashBootstrapComponent
-  with Listenable[UdashDropdown[ItemType, ElemType], UdashDropdown.DropdownEvent[ItemType, ElemType]] {
+  with Listenable {
 
   import UdashDropdown._
   import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
   import io.udash.css.CssView._
+
+  override type EventType = UdashDropdown.DropdownEvent[ItemType, ElemType]
 
   /** Dropdown menu list ID. */
   val menuId: ComponentId = componentId.withSuffix("menu")
@@ -96,7 +98,7 @@ object UdashDropdown {
   sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
     override val source: UdashDropdown[ItemType, ElemType],
     val tpe: DropdownEvent.EventType
-  ) extends ListenableEvent[UdashDropdown[ItemType, ElemType]]
+  ) extends ListenableEvent
 
   object DropdownEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum

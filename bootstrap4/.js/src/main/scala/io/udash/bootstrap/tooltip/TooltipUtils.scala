@@ -13,7 +13,10 @@ import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 import scala.scalajs.js.|
 
-trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventType, ThisType]] extends Listenable[ThisType, EventType] {
+trait Tooltip extends Listenable {
+
+  override type EventType = TooltipEvent
+
   /** Shows the tooltip. */
   def show(): Unit
 
@@ -43,7 +46,7 @@ trait Tooltip[EventType <: ListenableEvent[ThisType], ThisType <: Tooltip[EventT
   private[tooltip] def reloadContent(): Unit
 }
 
-abstract class TooltipUtils[TooltipType <: Tooltip[_, TooltipType]] {
+abstract class TooltipUtils[TooltipType <: Tooltip] {
   trait Delay extends js.Object {
     val show: Long
     val hide: Long

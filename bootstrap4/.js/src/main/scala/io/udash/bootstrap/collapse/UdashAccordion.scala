@@ -17,12 +17,13 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 )(
   heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
   body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
-) extends UdashBootstrapComponent
-  with Listenable[UdashAccordion[ItemType, ElemType], UdashAccordion.AccordionEvent[ItemType, ElemType]] {
+) extends UdashBootstrapComponent with Listenable {
 
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
+
+  override type EventType = UdashAccordion.AccordionEvent[ItemType, ElemType]
 
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
   propertyListeners += elements.listenStructure { patch =>
@@ -88,7 +89,7 @@ object UdashAccordion {
     item: ItemType,
     idx: Int,
     collapseEvent: UdashCollapse.CollapseEvent
-  ) extends AbstractCase with ListenableEvent[UdashAccordion[ItemType, ElemType]]
+  ) extends AbstractCase with ListenableEvent
 
   /**
     * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.

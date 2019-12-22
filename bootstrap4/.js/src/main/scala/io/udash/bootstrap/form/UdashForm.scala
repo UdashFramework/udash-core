@@ -27,9 +27,11 @@ final class UdashForm private(
   selectValidationTrigger: ValidationTrigger,
   override val componentId: ComponentId
 )(content: FormElementsFactory => Modifier)
-  extends UdashBootstrapComponent with Listenable[UdashForm, UdashForm.FormEvent] with CrossLogging {
+  extends UdashBootstrapComponent with Listenable with CrossLogging {
 
   import io.udash.css.CssView._
+
+  override type EventType = UdashForm.FormEvent
 
   private[form] val validationProperties: MSet[Property[Option[ValidationResult]]] = MSet.empty
 
@@ -46,7 +48,7 @@ final class UdashForm private(
 
 object UdashForm {
   final case class FormEvent(override val source: UdashForm, tpe: FormEvent.EventType)
-    extends AbstractCase with ListenableEvent[UdashForm]
+    extends AbstractCase with ListenableEvent
   object FormEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {

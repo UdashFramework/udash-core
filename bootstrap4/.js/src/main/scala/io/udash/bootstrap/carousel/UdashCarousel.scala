@@ -1,13 +1,12 @@
 package io.udash.bootstrap
 package carousel
 
-import com.avsystem.commons._
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
-import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.seq
@@ -28,13 +27,15 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   override val componentId: ComponentId
 )(
   slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
-) extends UdashBootstrapComponent with Listenable[UdashCarousel[ItemType, ElemType], CarouselEvent[ItemType, ElemType]] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashCarousel._
   import io.udash.bootstrap.utils.BootstrapStyles.Carousel
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
+
+  override type EventType = CarouselEvent[ItemType, ElemType]
 
   if (activeSlide.get >= slides.size) activeSlide.set(slides.size - 1)
   if (activeSlide.get < 0) activeSlide.set(0)
@@ -222,15 +223,15 @@ object UdashCarousel {
   }
 
   /**
-    * Event emitted by [[UdashCarousel]] on slide change transition start
-    *
-    * @param source      The [[UdashCarousel]] emitting the event.
-    * @param targetIndex The index of the slide source transitioned to.
-    * @param direction   The animation direction. Either `CarouselEvent.Direction.Left` or `CarouselEvent.Direction.Right`.
-    */
+   * Event emitted by [[UdashCarousel]] on slide change transition start
+   *
+   * @param source      The [[UdashCarousel]] emitting the event.
+   * @param targetIndex The index of the slide source transitioned to.
+   * @param direction   The animation direction. Either `CarouselEvent.Direction.Left` or `CarouselEvent.Direction.Right`.
+   */
   final case class CarouselEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
     source: UdashCarousel[ItemType, ElemType], targetIndex: Int, direction: Direction, changed: Boolean
-  ) extends AbstractCase with ListenableEvent[UdashCarousel[ItemType, ElemType]]
+  ) extends AbstractCase with ListenableEvent
 
   object CarouselEvent {
     /** Carousel animation direction. */

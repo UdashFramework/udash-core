@@ -21,12 +21,14 @@ final class UdashModal private(
   headerFactory: Option[Binding.NestedInterceptor => Element],
   bodyFactory: Option[Binding.NestedInterceptor => Element],
   footerFactory: Option[Binding.NestedInterceptor => Element]
-) extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashModal._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
   import scalatags.JsDom.all._
+
+  override type EventType = UdashModal.ModalEvent
 
   /** Toggles modal visibility. */
   def toggle(): Unit = jQSelector().modal("toggle")
@@ -35,7 +37,7 @@ final class UdashModal private(
   /** Hides modal window. */
   def hide(): Unit = jQSelector().modal("hide")
   /** Readjusts the modal's positioning to counter a scrollbar in case one should
-    * appear, which would make the modal jump to the left. */
+   * appear, which would make the modal jump to the left. */
   def handleUpdate(): Unit = jQSelector().modal("handleUpdate")
 
   override val render: Element = {
@@ -94,7 +96,7 @@ object UdashModal {
   final case class ModalEvent(
     override val source: UdashModal,
     tpe: ModalEvent.EventType
-  ) extends AbstractCase with ListenableEvent[UdashModal]
+  ) extends AbstractCase with ListenableEvent
 
   object ModalEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum

@@ -1,8 +1,8 @@
 package io.udash.component
 
 trait Components {
-  type Listenable[ComponentType <: Listenable[ComponentType, _], EventType <: ListenableEvent[ComponentType]] = io.udash.component.Listenable[ComponentType, EventType]
-  type ListenableEvent[ComponentType <: Listenable[ComponentType, _]] = io.udash.component.ListenableEvent[ComponentType]
+  type Listenable = io.udash.component.Listenable
+  type ListenableEvent = io.udash.component.ListenableEvent
 }
 
 object Components extends Components
