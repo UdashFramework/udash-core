@@ -59,6 +59,8 @@ case object FrontendPropertiesState extends RoutingState(Some(FrontendState))
 
 case object FrontendBindingsState extends RoutingState(Some(FrontendState))
 
+case object FrontendBindingsTestState extends RoutingState(Some(FrontendState))
+
 case object FrontendFormsState extends RoutingState(Some(FrontendState))
 
 case object FrontendFilesState extends RoutingState(Some(FrontendState))

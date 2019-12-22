@@ -2,7 +2,7 @@ package io.udash.core
 
 import io.udash.properties.HasModelPropertyCreator
 import org.scalajs.dom._
-import scalatags.generic.Modifier
+import scalatags.JsDom.Modifier
 
 /**
   * Url wrapper - just for avoiding strings.
@@ -53,11 +53,11 @@ trait ViewFactory[S <: State] {
   */
 trait View {
   /**
-    * Implementation of this method should return DOM representation of view.
-    *
-    * @return DOM representation of view
-    */
-  def getTemplate: Modifier[Element]
+   * Implementation of this method should return DOM representation of view.
+   *
+   * @return DOM representation of view
+   */
+  def getTemplate: Modifier
 
   /**
    * This method will be called by [[io.udash.routing.RoutingEngine]] when this view is replaced

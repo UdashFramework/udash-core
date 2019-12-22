@@ -31,6 +31,7 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
       case FrontendTemplatesState => FrontendTemplatesViewFactory
       case FrontendPropertiesState => FrontendPropertiesViewFactory
       case FrontendBindingsState => FrontendBindingsViewFactory
+      case FrontendBindingsTestState => FrontendBindingsTestViewFactory
       case FrontendFormsState => FrontendFormsViewFactory
       case FrontendFilesState => FrontendFilesViewFactory
 

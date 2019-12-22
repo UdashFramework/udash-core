@@ -56,6 +56,7 @@ object Context {
       MenuLink("Scalatags & UdashCSS", FrontendTemplatesState),
       MenuLink("Properties", FrontendPropertiesState),
       MenuLink("Template Data Binding", FrontendBindingsState),
+      MenuLink("Bindings test", FrontendBindingsTestState),
       MenuLink("Two-way Forms Binding", FrontendFormsState),
       MenuLink("Files upload", FrontendFilesState)
     )),
