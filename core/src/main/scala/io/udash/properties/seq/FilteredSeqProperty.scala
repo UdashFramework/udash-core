@@ -50,7 +50,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
 
     val patch = (oldIdx, matches) match {
       case (old, false) if old != -1 =>
-        CrossCollections.replace(lastValue, old, 1)
+        lastValue.remove(old, 1)
         Patch[ElemType](old, Seq(p), Seq.empty, filteredProps.isEmpty)
       case (-1, true) =>
         val originProps = origin.elemProperties

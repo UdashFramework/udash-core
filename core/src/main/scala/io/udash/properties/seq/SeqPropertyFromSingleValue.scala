@@ -61,18 +61,18 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
         PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
-      if (listenChildren) childrenRegistrations ++= added.map(p => p -> p.listen(_ => valueChanged()))
+      if (listenChildren) childrenRegistrations ++= added.iterator.map(p => p -> p.listen(_ => valueChanged()))
       CrossCollections.replaceSeq(children, commonBegin, 0, added)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
       if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p).get.cancel())
-      CrossCollections.replace(children, commonBegin, current.size - transformed.size)
+      children.remove(commonBegin, current.size - transformed.size)
       Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq(), transformed.isEmpty))
     } else None
 
     CallbackSequencer().sequence {
-      transformed.zip(children)
+      transformed.iterator.zip(children.iterator)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }
       patch.foreach(structureChanged)
@@ -116,7 +116,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       override def restart(): Unit = {
         initOriginListeners()
         if (listenChildren && childrenRegistrations.isEmpty) {
-          childrenRegistrations ++= children.map(p => p -> p.listen(_ => valueChanged()))
+          childrenRegistrations ++= children.iterator.map(p => p -> p.listen(_ => valueChanged()))
         }
         reg.restart()
       }
