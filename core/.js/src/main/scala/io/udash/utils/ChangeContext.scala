@@ -1,6 +1,8 @@
 package io.udash
 package utils
 
+import com.avsystem.commons._
+import io.udash.bindings.modifiers.Binding
 import org.scalajs.dom.raw._
 import org.scalajs.dom.{MutationObserver, MutationObserverInit}
 
@@ -11,23 +13,31 @@ object ChangeContext {
   final val NodeAdded = "NodeAdded"
   final val NodeRemoved = "NodeRemoved"
 
-  def init(): Unit = {
+  private val bindings: MHashMap[Node, MBuffer[Binding]] = MHashMap.empty
+
+  def bind(node: Node, binding: Binding): Unit = bindings.getOrElseUpdate(node, CrossCollections.createArray) += binding
+
+  def init(): MutationObserver = {
     val mutationObserver: MutationObserver = new MutationObserver((records, _) => {
       records.foreach { v =>
         for (i <- 0 until v.removedNodes.length) {
           val node = v.removedNodes.item(i)
-          if (!node.isInstanceOf[Text])
-            dispatchOnAllNodes(NodeRemoved, node)
+          println("R " + bindings.get(node).toList.flatten -> node.nodeName)
+          //if (!node.isInstanceOf[Text])
+          //  dispatchOnAllNodes(NodeRemoved, node)
         }
         for (i <- 0 until v.addedNodes.length) {
           val node = v.addedNodes.item(i)
-          if (!node.isInstanceOf[Text])
-            dispatchOnAllNodes(NodeAdded, node)
+          println("A " + bindings.get(node).toList.flatten -> node.nodeName)
+          //if (!node.isInstanceOf[Text])
+          //  dispatchOnAllNodes(NodeAdded, node)
         }
       }
     })
 
     mutationObserver.observe(org.scalajs.dom.document.body, MutationObserverInit(childList = true, subtree = true))
+
+    mutationObserver
   }
 
   private def dispatchOnAllNodes(eventType: String, node: Node): Unit = {
