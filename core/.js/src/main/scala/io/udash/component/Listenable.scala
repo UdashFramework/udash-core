@@ -7,7 +7,7 @@ import io.udash.Registration
  * A class (typically a component) exposing callbacks events.
  *
  * Callbacks emitted by this utility interface are executed in the order of registration.
- * Fired events can be defined via implementing [[ListenableEvent]] and setting the `EventType` appropriately.
+ * Events can be defined via implementing [[ListenableEvent]] and setting the `EventType` appropriately.
  *
  */
 trait Listenable {
@@ -52,5 +52,5 @@ trait Listenable {
  * An event emitted by a [[Listenable]].
  */
 trait ListenableEvent { self =>
-  def source: Listenable {type EventType >: self.type <: ListenableEvent}
+  val source: Listenable {type EventType >: self.type <: ListenableEvent}
 }
