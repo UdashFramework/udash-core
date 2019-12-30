@@ -15,7 +15,7 @@ import scala.scalajs.js.|
 
 trait Tooltip extends Listenable {
 
-  override type EventType = TooltipEvent
+  override final type EventType = TooltipEvent
 
   /** Shows the tooltip. */
   def show(): Unit
