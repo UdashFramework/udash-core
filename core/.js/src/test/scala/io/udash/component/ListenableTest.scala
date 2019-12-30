@@ -72,15 +72,20 @@ class ListenableTest extends UdashFrontendTest {
 
       callbacks shouldBe empty
 
+      listenable.fireEvent()
+
+      callbacks should contain theSameElementsInOrderAs Seq(1, 2)
+      callbacks.clear()
+
       assert(registration.isActive)
 
-      registration.restart() //noop
+      registration.restart() //moves first callback to the end
 
       assert(registration.isActive)
 
       listenable.fireEvent()
 
-      callbacks should contain theSameElementsInOrderAs Seq(1, 2)
+      callbacks should contain theSameElementsInOrderAs Seq(2, 1)
       callbacks.clear()
 
       registration.cancel()
