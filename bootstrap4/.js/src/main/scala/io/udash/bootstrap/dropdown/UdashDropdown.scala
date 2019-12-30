@@ -25,8 +25,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   itemBindingFactory: UdashDropdown[ItemType, ElemType] => Binding,
   buttonContent: Binding.NestedInterceptor => Modifier,
   buttonFactory: (NestedInterceptor => Modifier) => UdashButton
-) extends UdashBootstrapComponent
-  with Listenable {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashDropdown._
   import io.udash.bootstrap.dropdown.UdashDropdown.DropdownEvent._
@@ -95,10 +94,9 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
 object UdashDropdown {
   /** More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/#events">Bootstrap Docs</a> */
-  sealed abstract class DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
-    override val source: UdashDropdown[ItemType, ElemType],
-    val tpe: DropdownEvent.EventType
-  ) extends ListenableEvent
+  sealed trait DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]] extends ListenableEvent {
+    def tpe: DropdownEvent.EventType
+  }
 
   object DropdownEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -115,14 +113,16 @@ object UdashDropdown {
       final val Selection: Value = new EventType
     }
 
-    case class VisibilityChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    final case class VisibilityChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
       override val source: UdashDropdown[ItemType, ElemType],
       override val tpe: DropdownEvent.EventType
-    ) extends DropdownEvent(source, tpe) with CaseMethods
+    ) extends DropdownEvent[ItemType, ElemType] with CaseMethods
 
-    case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
+    final case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
       override val source: UdashDropdown[ItemType, ElemType], item: ItemType
-    ) extends DropdownEvent(source, EventType.Selection) with CaseMethods
+    ) extends DropdownEvent[ItemType, ElemType] with CaseMethods {
+      override def tpe: EventType = EventType.Selection
+    }
   }
 
   final class Direction(implicit enumCtx: EnumCtx) extends AbstractValueEnum
