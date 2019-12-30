@@ -106,12 +106,12 @@ class ListenableTest extends UdashFrontendTest {
   }
 
   "Registration" should {
-    "unregister on cancel called" in { listenable: TestListenable =>
+    "unregister on cancel called" in new Fixture {
       val registration = getEmptyRegistration(listenable)
       registration.cancel()
       registration.isActive should ===(false)
     }
-    "reregister on restart called" in { listenable: TestListenable =>
+    "reregister on restart called" in new Fixture {
       val registration = getEmptyRegistration(listenable)
       registration.cancel()
       registration.isActive should ===(false)
