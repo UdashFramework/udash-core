@@ -14,7 +14,6 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
   sources: ISeq[ReadableSeqProperty[_, _ <: ReadableProperty[_]]]
 ) extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
 
-  override final val id: PropertyId = PropertyCreator.newID()
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[ReadableProperty[O]]
@@ -28,7 +27,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
       CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
       val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
       CallbackSequencer().queue(
-        s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+        s"$hashCode:fireElementsListeners:${patch.hashCode()}",
         () => structureListeners.foreach(_.apply(mappedPatch))
       )
       valueChanged()

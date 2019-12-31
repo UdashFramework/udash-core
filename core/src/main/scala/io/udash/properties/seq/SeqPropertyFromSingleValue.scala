@@ -9,11 +9,10 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
-  override final val id: PropertyId = PropertyCreator.newID()
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]
-  private final val childrenRegistrations = MHashMap.empty[PropertyId, Registration]
+  private final val childrenRegistrations = MHashMap.empty[Property[B], Registration]
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
@@ -40,7 +39,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 
   private def structureChanged(patch: Patch[ElemType]): Unit =
     CallbackSequencer().queue(
-      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+      s"$hashCode:fireElementsListeners:${patch.hashCode()}",
       () => structureListeners.foreach(_.apply(patch))
     )
 
@@ -62,18 +61,18 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       val added: Seq[CastableProperty[B]] = Seq.tabulate(transformed.size - current.size) { idx =>
         PropertyCreator[B].newProperty(transformed(current.size + idx), this)
       }
-      if (listenChildren) childrenRegistrations ++= added.map(p => p.id -> p.listen(_ => valueChanged()))
+      if (listenChildren) childrenRegistrations ++= added.iterator.map(p => p -> p.listen(_ => valueChanged()))
       CrossCollections.replaceSeq(children, commonBegin, 0, added)
       Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
-      if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p.id).get.cancel())
-      CrossCollections.replace(children, commonBegin, current.size - transformed.size)
+      if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p).get.cancel())
+      children.remove(commonBegin, current.size - transformed.size)
       Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq(), transformed.isEmpty))
     } else None
 
     CallbackSequencer().sequence {
-      transformed.zip(children)
+      transformed.iterator.zip(children.iterator)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }
       patch.foreach(structureChanged)
@@ -117,7 +116,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       override def restart(): Unit = {
         initOriginListeners()
         if (listenChildren && childrenRegistrations.isEmpty) {
-          childrenRegistrations ++= children.map(p => p.id -> p.listen(_ => valueChanged()))
+          childrenRegistrations ++= children.iterator.map(p => p -> p.listen(_ => valueChanged()))
         }
         reg.restart()
       }
@@ -157,7 +156,7 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   protected def toElemProp(p: Property[B]): Property[B] = p
 
   override protected[properties] def valueChanged(): Unit = {
-    CallbackSequencer().queue(s"revertSet:$id", () => {
+    CallbackSequencer().queue(s"revertSet:$hashCode", () => {
       origin.set(revert(get))
     })
     super.valueChanged()

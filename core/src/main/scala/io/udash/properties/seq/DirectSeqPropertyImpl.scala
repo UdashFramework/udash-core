@@ -1,14 +1,14 @@
 package io.udash.properties.seq
 
 import com.avsystem.commons._
+import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
-import io.udash.properties.{PropertyCreator, PropertyId}
 import io.udash.utils.CrossCollections
 
 import scala.collection.compat._
 
 private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
-  val parent: ReadableProperty[_], override val id: PropertyId)(implicit fac: Factory[A, SeqTpe[A]])
+  val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[BSeq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]

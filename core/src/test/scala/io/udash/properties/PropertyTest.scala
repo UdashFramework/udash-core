@@ -531,11 +531,11 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "transform to ReadableSeqProperty" in {
-      val elemListeners = MMap.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[ReadableProperty[_], Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]) =
         props.foreach { p =>
-          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+          elemListeners(p) = p.listen(_ => elementsUpdated += 1)
         }
 
       val p = Property("1,2,3,4,5")
@@ -553,7 +553,7 @@ class PropertyTest extends UdashCoreTest {
       val r2 = s.listenStructure { p =>
         registerElementListener(p.added)
         p.removed.foreach { p =>
-          elemListeners(p.id).cancel()
+          elemListeners(p).cancel()
         }
         lastPatch = p
       }
@@ -707,11 +707,11 @@ class PropertyTest extends UdashCoreTest {
     }
 
     "transform to SeqProperty" in {
-      val elemListeners = MMap.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[ReadableProperty[_], Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]): Unit =
         props.foreach { p =>
-          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+          elemListeners(p) = p.listen(_ => elementsUpdated += 1)
         }
 
       val p = Property("1,2,3,4,5")
@@ -728,7 +728,7 @@ class PropertyTest extends UdashCoreTest {
       val r2 = s.listenStructure(p => {
         registerElementListener(p.added)
         p.removed.foreach { p =>
-          elemListeners(p.id).cancel()
+          elemListeners(p).cancel()
         }
         lastPatch = p
       })

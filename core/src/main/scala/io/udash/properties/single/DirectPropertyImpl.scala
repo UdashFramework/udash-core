@@ -1,8 +1,6 @@
 package io.udash.properties.single
 
-import io.udash.properties.PropertyId
-
-private[properties] class DirectPropertyImpl[A](val parent: ReadableProperty[_], override val id: PropertyId)
+private[properties] class DirectPropertyImpl[A](val parent: ReadableProperty[_])
   extends AbstractProperty[A] with CastableProperty[A] {
 
   private var value: A = _

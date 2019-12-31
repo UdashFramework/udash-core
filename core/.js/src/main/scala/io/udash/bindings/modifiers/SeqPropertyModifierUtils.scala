@@ -16,25 +16,19 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
   private val producedElementsCount = MArrayBuffer[Int]()
-  protected val nestedBindingsByProperty: js.Dictionary[js.Array[Binding]] = js.Dictionary.empty
+  private val nestedBindingsByProperty: MHashMap[E, js.Array[Binding]] = MHashMap.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
     super.nestedInterceptor(binding)
     binding.setup { b =>
-      val id: String = p.id.toString
-      if (!nestedBindingsByProperty.contains(id)) {
-        nestedBindingsByProperty(id) = js.Array()
-      }
-      nestedBindingsByProperty(id).push(b)
+      nestedBindingsByProperty.getOrElseUpdate(p, js.Array()).push(b)
     }
   }
 
   def clearPropertyAwareNestedInterceptor(p: E): Unit = {
-    val id = p.id.toString
-    if (nestedBindingsByProperty.contains(id)) {
-      nestedBindingsByProperty(id).foreach(_.kill())
-      nestedBindingsByProperty(id).length = 0
-      nestedBindingsByProperty.remove(id)
+    nestedBindingsByProperty.remove(p).foreach { bindings =>
+      bindings.foreach(_.kill())
+      bindings.length = 0
     }
   }
 
