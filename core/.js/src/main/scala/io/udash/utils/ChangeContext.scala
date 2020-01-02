@@ -22,15 +22,14 @@ object ChangeContext {
       records.foreach { v =>
         for (i <- 0 until v.removedNodes.length) {
           val node = v.removedNodes.item(i)
-          println("R " + bindings.get(node).toList.flatten -> node.nodeName)
-          //if (!node.isInstanceOf[Text])
-          //  dispatchOnAllNodes(NodeRemoved, node)
+          val nodeBindings = bindings.remove(node).toList.flatten
+          println("R " + nodeBindings -> node.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
+          nodeBindings.foreach(_.kill())
         }
         for (i <- 0 until v.addedNodes.length) {
           val node = v.addedNodes.item(i)
-          println("A " + bindings.get(node).toList.flatten -> node.nodeName)
-          //if (!node.isInstanceOf[Text])
-          //  dispatchOnAllNodes(NodeAdded, node)
+          val nodeBindings = bindings.get(node).toList.flatten
+          println("A " + nodeBindings -> node.nodeName)
         }
       }
     })
