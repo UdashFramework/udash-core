@@ -3,7 +3,7 @@ package io.udash.bindings.modifiers
 import com.avsystem.commons._
 import io.udash.bindings._
 import io.udash.properties.single.ReadableProperty
-import io.udash.utils.Registration
+import io.udash.utils.{ChangeContext, Registration}
 import org.scalajs.dom._
 
 import scala.scalajs.js
@@ -20,6 +20,7 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
 
   override def applyTo(t: Element): Unit = {
     var elements: Seq[Node] = Seq.empty
+    ChangeContext.bind(t, this)
 
     def rebuild(propertyValue: T): Unit = {
       killNestedBindings()

@@ -19,13 +19,3 @@ private[bindings] class PropertyModifier[T](
     property.listen(callback)
 
 }
-
-
-
-
-
-
-
-
-
-

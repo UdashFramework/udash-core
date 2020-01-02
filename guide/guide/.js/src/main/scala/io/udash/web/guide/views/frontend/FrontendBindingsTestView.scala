@@ -2,7 +2,6 @@ package io.udash
 package web.guide.views.frontend
 
 import io.udash.css.CssView
-import io.udash.utils.ChangeContext
 import io.udash.web.guide.FrontendBindingsTestState
 import org.scalajs.dom.ext.Color
 
@@ -10,16 +9,7 @@ case object FrontendBindingsTestViewFactory extends StaticViewFactory[FrontendBi
 
 final class FrontendBindingsTestView extends View with CssView {
 
-  println("view init")
-
-  ChangeContext.init()
-
   import scalatags.JsDom.all._
-
-  //  def inContext[El <: Element](binding: Binding): scalatags.generic.Modifier[El] = { t: El =>
-  //    ChangeContext.bind(t, binding)
-  //    binding.applyTo(t)
-  //  }
 
   private val prop = Property(1)
 
@@ -41,12 +31,10 @@ final class FrontendBindingsTestView extends View with CssView {
   }
 
   override def getTemplate: Modifier = {
-    println("view get template")
     r
   }
 
   override def onClose(): Unit = {
-    ChangeContext.stop()
     println("view closed")
   }
 }

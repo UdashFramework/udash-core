@@ -3,7 +3,7 @@ package io.udash
 import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.routing.StateChangeEvent
-import io.udash.utils.CallbacksHandler
+import io.udash.utils.{CallbacksHandler, ChangeContext}
 import org.scalajs.dom.Element
 
 /**
@@ -30,6 +30,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
    * @param attachElement Root element of application.
    */
   final def run(attachElement: Element): Unit = {
+    ChangeContext.init(attachElement)
     rootElement = attachElement
 
     urlChangeProvider.initialize()
