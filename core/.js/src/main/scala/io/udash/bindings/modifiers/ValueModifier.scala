@@ -8,8 +8,7 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
-private[bindings]
-trait ValueModifier[T] extends Binding with DOMManipulator {
+private[bindings] trait ValueModifier[T] extends Binding with DOMManipulator {
 
   import Bindings._
 

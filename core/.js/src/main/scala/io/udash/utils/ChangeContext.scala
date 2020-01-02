@@ -10,22 +10,21 @@ object ChangeContext {
 
   private val bindings: MHashMap[Node, MBuffer[Binding]] = MHashMap.empty
 
-  private def cleanup(removedNode: Node): Unit = {
-    val nodeBindings = bindings.remove(removedNode).toList.flatten
-    if (nodeBindings.nonEmpty) {
-      println("R " + nodeBindings -> removedNode.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
-      nodeBindings.foreach(_.kill())
+  //todo tail
+  private def cleanup(removedNodes: NodeList): Unit = {
+    for (i <- 0 until removedNodes.length) {
+      val node = removedNodes.item(i)
+      val nodeBindings = bindings.remove(node).toList.flatten
+      if (nodeBindings.nonEmpty) {
+        println("R " + nodeBindings -> node.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
+        nodeBindings.foreach(_.kill())
+      }
+
+      cleanup(node.childNodes)
     }
   }
 
-  private val observer = new MutationObserver((records, _) => {
-    records.foreach { v =>
-      for (i <- 0 until v.removedNodes.length) {
-        val node = v.removedNodes.item(i)
-        cleanup(node)
-      }
-    }
-  })
+  private val observer = new MutationObserver((records, _) => records.foreach(v => cleanup(v.removedNodes)))
   private var active = false
 
   def bind(node: Node, binding: Binding): Unit = {
