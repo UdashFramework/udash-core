@@ -18,7 +18,7 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
   protected def checkNull: Boolean
   protected def listen(callback: T => Unit): Registration
 
-  override def applyTo(t: Element): Unit = {
+  override final def applyTo(t: Element): Unit = {
     var elements: Seq[Node] = Seq.empty
     ChangeContext.bind(t, this)
 

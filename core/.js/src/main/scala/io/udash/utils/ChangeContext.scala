@@ -9,13 +9,20 @@ import org.scalajs.dom.{MutationObserver, MutationObserverInit}
 object ChangeContext {
 
   private val bindings: MHashMap[Node, MBuffer[Binding]] = MHashMap.empty
+
+  private def cleanup(removedNode: Node): Unit = {
+    val nodeBindings = bindings.remove(removedNode).toList.flatten
+    if (nodeBindings.nonEmpty) {
+      println("R " + nodeBindings -> removedNode.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
+      nodeBindings.foreach(_.kill())
+    }
+  }
+
   private val observer = new MutationObserver((records, _) => {
     records.foreach { v =>
       for (i <- 0 until v.removedNodes.length) {
         val node = v.removedNodes.item(i)
-        val nodeBindings = bindings.remove(node).toList.flatten
-        println("R " + nodeBindings -> node.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
-        nodeBindings.foreach(_.kill())
+        cleanup(node)
       }
     }
   })
