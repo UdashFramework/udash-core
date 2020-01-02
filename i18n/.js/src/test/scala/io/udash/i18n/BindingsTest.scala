@@ -10,21 +10,24 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
   implicit val provider: TranslationProvider = new LocalTranslationProvider(Map(
     Lang("en") -> Bundle(BundleHash("hash1"), Map(
+      "tr0" -> null,
       "tr1" -> "Translation {0}",
       "tr2" -> "Translation2 {1} {0}",
       "tr3" -> "Translation3 {}",
-      "tr4" -> "Translation4 {1} {} {}",
-      "tr5" -> "Translation5 {4}"
+      "tr4" -> "Translation4 <b>{1}</b> {} {}",
+      "tr5" -> "Translation5 <b>{4}</b>"
     )),
     Lang("pl") -> Bundle(BundleHash("hash1"), Map(
+      "tr0" -> null,
       "tr1" -> "Translation {0} pl",
       "tr2" -> "Translation2 {1} {0} pl",
       "tr3" -> "Translation3 {} pl",
-      "tr4" -> "Translation4 {1} {} {} pl",
-      "tr5" -> "Translation5 {4} pl"
+      "tr4" -> "Translation4 <b>{1}</b> {} {} pl",
+      "tr5" -> "Translation5 <b>{4}</b> pl"
     ))
   ), missingTranslationError = "ERROR")
 
+  val key0 = TranslationKey.keyX("tr0")
   val key1 = TranslationKey.key1[String]("tr1")
   val key2 = TranslationKey.key2[Int, Double]("tr2")
   val key3 = TranslationKey.key1[Double]("tr3")
@@ -37,31 +40,37 @@ class BindingsTest extends AsyncUdashFrontendTest {
         implicit val lang = Lang("en")
         div(
           "Translation: ",
+          translated(key0()),
+          translated(key0(), rawHtml = true),
           translated(key1("test")),
           translated(key2(3, 3.14)),
           translated(key3(0.99)),
           translated(key4("test", 1, true, 3.1415)),
-          translated(keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]))
+          translated(keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]), rawHtml = true)
         ).render
       }
       val template2 = {
         implicit val lang = Lang("pl")
         div(
           "Translation: ",
+          translated(key0()),
+          translated(key0(), rawHtml = true),
           translated(key1("test")),
           translated(key2(3, 3.14)),
           translated(key3(0.99)),
           translated(key4("test", 1, true, 3.1415)),
-          translated(keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"))
+          translated(keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"), rawHtml = true)
         ).render
       }
 
       for {
         _ <- retrying {
-          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+          template.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
         }
         r <- retrying {
-          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+          template2.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
         }
       } yield r
     }
@@ -143,37 +152,45 @@ class BindingsTest extends AsyncUdashFrontendTest {
         implicit val langProperty = en
         div(
           "Translation: ",
+          translatedDynamic(key0)(_()),
+          translatedDynamic(key0, rawHtml = true)(_()),
           translatedDynamic(key1)(key => key("test")),
           translatedDynamic(key2)(key => key(3, 3.14)),
           translatedDynamic(key3)(key => key(0.99)),
           translatedDynamic(key4)(key => key("test", 1, true, 3.1415)),
-          translatedDynamic(keyX)(key => key("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]))
+          translatedDynamic(keyX, rawHtml = true)(key => key("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]))
         ).render
       }
       val template2 = {
         implicit val langProperty = pl
         div(
           "Translation: ",
+          translatedDynamic(key0)(_()),
+          translatedDynamic(key0, rawHtml = true)(_()),
           translatedDynamic(key1)(key => key("test")),
           translatedDynamic(key2)(key => key(3, 3.14)),
           translatedDynamic(key3)(key => key(0.99)),
           translatedDynamic(key4)(key => key("test", 1, true, 3.1415)),
-          translatedDynamic(keyX)(key => key("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"))
+          translatedDynamic(keyX, rawHtml = true)(key => key("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"))
         ).render
       }
 
       for {
         _ <- retrying {
-          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
-          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
+          template.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
+          template2.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
         }
         _ <- Future {
           en.set(Lang("pl"))
           pl.set(Lang("en"))
         }
         r <- retrying {
-          template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 1 true 3.1415 plTranslation5 Udash pl")
-          template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 1 true 3.1415Translation5 Udash")
+          template.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
+          template2.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
         }
       } yield r
     }
