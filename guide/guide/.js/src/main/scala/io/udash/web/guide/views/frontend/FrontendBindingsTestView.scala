@@ -6,6 +6,7 @@ import io.udash.css.CssView
 import io.udash.utils.ChangeContext
 import io.udash.web.guide.FrontendBindingsTestState
 import org.scalajs.dom.Element
+import org.scalajs.dom.ext.Color
 
 case object FrontendBindingsTestViewFactory extends StaticViewFactory[FrontendBindingsTestState.type](() => new FrontendBindingsTestView)
 
@@ -35,6 +36,9 @@ final class FrontendBindingsTestView extends View with CssView {
   private def addBind(): Unit = {
     val child = div(inContext(bind(prop))).render
     r.appendChild(child)
+    child.onclick = _ => r.removeChild(child)
+    child.onmouseenter = _ => child.style.backgroundColor = Color.Yellow
+    child.onmouseout = _ => child.style.backgroundColor = null
     child.onclick = _ => r.removeChild(child)
   }
 
