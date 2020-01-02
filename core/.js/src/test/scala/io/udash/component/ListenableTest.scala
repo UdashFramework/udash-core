@@ -11,27 +11,19 @@ private final class TestListenable extends Listenable {
   def fireEvent(): Unit = {
     fire(TestListenableEvent(this))
   }
+
+  def emptyRegistration(): Registration = listen { case _ => () }
 }
 private final case class TestListenableEvent(source: TestListenable) extends ListenableEvent
 
 class ListenableTest extends UdashFrontendTest {
-
-  def getEmptyRegistration(listenable: Listenable): Registration = {
-    listenable.listen {
-      case _ =>
-    }
-  }
-
   private trait Fixture {
     protected val listenable = new TestListenable
   }
 
   "Listenable" should {
-    "create an active Registration on listen called" in new Fixture {
-      getEmptyRegistration(listenable).isActive should ===(true)
-    }
     "deactivate active Registrations on remove listeners called" in new Fixture {
-      val registration = getEmptyRegistration(listenable)
+      val registration = listenable.emptyRegistration()
       listenable.removeListeners()
       registration.isActive should ===(false)
     }
@@ -106,13 +98,16 @@ class ListenableTest extends UdashFrontendTest {
   }
 
   "Registration" should {
+    "be active initially" in new Fixture {
+      listenable.emptyRegistration().isActive should ===(true)
+    }
     "unregister on cancel called" in new Fixture {
-      val registration = getEmptyRegistration(listenable)
+      val registration = listenable.emptyRegistration()
       registration.cancel()
       registration.isActive should ===(false)
     }
     "reregister on restart called" in new Fixture {
-      val registration = getEmptyRegistration(listenable)
+      val registration = listenable.emptyRegistration()
       registration.cancel()
       registration.isActive should ===(false)
       registration.restart()

@@ -94,7 +94,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
 object UdashDropdown {
   /** More: <a href="http://getbootstrap.com/docs/4.1/components/dropdowns/#events">Bootstrap Docs</a> */
-  sealed trait DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]] extends ListenableEvent {
+  sealed trait DropdownEvent[ItemType, ElemType <: ReadableProperty[ItemType]] extends AbstractCase with ListenableEvent {
     def tpe: DropdownEvent.EventType
   }
 
@@ -116,11 +116,11 @@ object UdashDropdown {
     final case class VisibilityChangeEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
       override val source: UdashDropdown[ItemType, ElemType],
       override val tpe: DropdownEvent.EventType
-    ) extends DropdownEvent[ItemType, ElemType] with CaseMethods
+    ) extends DropdownEvent[ItemType, ElemType]
 
     final case class SelectionEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
       override val source: UdashDropdown[ItemType, ElemType], item: ItemType
-    ) extends DropdownEvent[ItemType, ElemType] with CaseMethods {
+    ) extends DropdownEvent[ItemType, ElemType] {
       override def tpe: EventType = EventType.Selection
     }
   }
