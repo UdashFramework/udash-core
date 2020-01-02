@@ -3,10 +3,10 @@ package tooltip
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 
-final case class TooltipEvent[TooltipType <: Tooltip[_, TooltipType]](
-  override val source: TooltipType,
+final case class TooltipEvent(
+  override val source: Tooltip,
   tpe: TooltipEvent.EventType
-) extends AbstractCase with ListenableEvent[TooltipType]
+) extends AbstractCase with ListenableEvent
 
 object TooltipEvent {
   /** More: <a href="http://getbootstrap.com/docs/4.1/components/tooltips/#events">Bootstrap Docs</a> */

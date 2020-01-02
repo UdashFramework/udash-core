@@ -18,12 +18,14 @@ final class UdashCollapse private(
   override val componentId: ComponentId
 )(
   content: Binding.NestedInterceptor => Modifier
-) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
+
+  override type EventType = UdashCollapse.CollapseEvent
 
   /** Toggle state of this collapse. */
   def toggle(): Unit = jQSelector().collapse("toggle")
@@ -73,7 +75,7 @@ object UdashCollapse {
   final case class CollapseEvent(
     override val source: UdashCollapse,
     tpe: CollapseEvent.EventType
-  ) extends AbstractCase with ListenableEvent[UdashCollapse]
+  ) extends AbstractCase with ListenableEvent
 
   object CollapseEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum

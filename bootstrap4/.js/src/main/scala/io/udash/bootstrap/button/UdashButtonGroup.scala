@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package button
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}

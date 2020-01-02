@@ -24,8 +24,11 @@ final class UdashButton private(
   disabled: ReadableProperty[Boolean],
   override val componentId: ComponentId,
   tag: UdashButton.ButtonTag
-)(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+)(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable {
+
   import io.udash.css.CssView._
+
+  override type EventType = ButtonClickEvent
 
   private val classes: List[Modifier] = {
     (BootstrapStyles.Button.btn: Modifier) ::
@@ -61,8 +64,7 @@ final class UdashButton private(
 }
 
 object UdashButton {
-  final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent)
-    extends AbstractCase with ListenableEvent[UdashButton]
+  final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent) extends AbstractCase with ListenableEvent
 
   /**
    * Holds button enclosing tag options. Since buttons have their own click listeners implemented they can be enclosed

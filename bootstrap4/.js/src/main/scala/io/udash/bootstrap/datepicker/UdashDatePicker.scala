@@ -24,11 +24,13 @@ final class UdashDatePicker private[datepicker](
   val date: Property[Option[ju.Date]],
   options: ReadableProperty[UdashDatePicker.DatePickerOptions],
   override val componentId: ComponentId
-) extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with CrossLogging {
+) extends UdashBootstrapComponent with Listenable with CrossLogging {
 
   import UdashDatePicker._
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
+
+  override type EventType = UdashDatePicker.DatePickerEvent
 
   private val inp = input(
     componentId, tpe := "text",
@@ -327,7 +329,7 @@ object UdashDatePicker {
   def loadBootstrapDatePickerStyles(): Element =
     link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css").render
 
-  sealed trait DatePickerEvent extends AbstractCase with ListenableEvent[UdashDatePicker]
+  sealed trait DatePickerEvent extends AbstractCase with ListenableEvent
   object DatePickerEvent {
     final case class Show(source: UdashDatePicker) extends DatePickerEvent
     final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
@@ -535,6 +537,7 @@ object UdashDatePicker {
   }
 
   import org.scalajs.dom.raw.{MutationObserver, MutationObserverInit, MutationRecord}
+
   import scala.collection.mutable.{Map => MMap}
 
   private val datePickerSetupCallbacks = MMap.empty[ComponentId, () => Unit]

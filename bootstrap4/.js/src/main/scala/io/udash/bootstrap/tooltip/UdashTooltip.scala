@@ -8,8 +8,8 @@ import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
-final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
-  extends Tooltip[TooltipEvent[UdashTooltip], UdashTooltip] {
+final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery) extends Tooltip {
+
   /** Shows the tooltip. */
   def show(): Unit =
     selector.tooltip("show")
