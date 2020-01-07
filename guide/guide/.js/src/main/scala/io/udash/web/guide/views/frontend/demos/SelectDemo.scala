@@ -35,8 +35,6 @@ object SelectDemo extends AutoDemo {
       UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
     )
 
-    select.render
-
     (select, select)
   }.withSourceCode
 

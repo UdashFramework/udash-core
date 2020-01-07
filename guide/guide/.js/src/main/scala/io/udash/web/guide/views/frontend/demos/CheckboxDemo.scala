@@ -45,8 +45,6 @@ object CheckboxDemo extends AutoDemo {
       )
     )
 
-    checkboxes.render
-
     (checkboxes, checkboxes)
     }.withSourceCode
 

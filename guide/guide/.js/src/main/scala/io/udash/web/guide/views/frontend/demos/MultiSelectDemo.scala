@@ -35,8 +35,6 @@ object MultiSelectDemo extends AutoDemo {
       UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
     )
 
-    multiSelect.render
-
     (multiSelect, multiSelect)
   }.withSourceCode
 

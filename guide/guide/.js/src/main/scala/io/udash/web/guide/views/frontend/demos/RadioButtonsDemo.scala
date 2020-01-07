@@ -40,8 +40,6 @@ object RadioButtonsDemo extends AutoDemo {
       appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
     )
 
-    radioButtons.render
-
     (radioButtons, radioButtons)
   }.withSourceCode
 

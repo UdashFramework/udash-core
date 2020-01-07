@@ -38,8 +38,6 @@ object CheckButtonsDemo extends AutoDemo {
       UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
     )
 
-    checkButtons.render
-
     (checkButtons, checkButtons)
   }.withSourceCode
 

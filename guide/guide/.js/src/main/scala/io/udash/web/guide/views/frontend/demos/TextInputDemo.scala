@@ -46,8 +46,6 @@ object TextInputDemo extends AutoDemo {
       )
     )
 
-    inputs.render
-
     (inputs, inputs)
   }.withSourceCode
 
