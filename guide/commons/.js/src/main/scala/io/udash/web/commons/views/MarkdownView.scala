@@ -48,7 +48,7 @@ final class MarkdownView(model: ReadableModelProperty[MarkdownModel]) extends Vi
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
-  override val getTemplate: Modifier = ISeq(
+  override val getTemplate: Modifier = div(
     produce(model.roSubProp(_.error)) { error =>
       error.opt.filter(_.nonEmpty).map(e =>
         div(cls := "bootstrap")(

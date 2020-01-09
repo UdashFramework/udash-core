@@ -30,7 +30,7 @@ object ChangeContext {
   def bind(node: Node, binding: Binding): Unit = {
     if (active) {
       bindings.getOrElseUpdate(node, CrossCollections.createArray) += binding
-      println("A " + binding.getClass.getSimpleName + " " + node.asInstanceOf[Element].outerHTML + " " + bindings.valuesIterator.map(_.size).sum)
+      println("A " + binding.getClass.getSimpleName + " " + binding.hashCode() + " " + node.asInstanceOf[Element].outerHTML + " " + bindings.valuesIterator.map(_.size).sum)
     }
   }
 
