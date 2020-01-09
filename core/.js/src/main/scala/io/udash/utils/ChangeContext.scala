@@ -29,8 +29,12 @@ object ChangeContext {
   private def setup(addedNodes: NodeList): Unit = {
     for (i <- 0 until addedNodes.length) {
       val node = addedNodes.item(i)
-      //todo ensure node bindings are started
-      if (bindings(node).exists(!_.active)) println("detected inactive binding attached")
+      bindings(node).foreach { binding =>
+        if (!binding.isActive) {
+          binding.restart()
+          total += 1
+        }
+      }
       setup(node.childNodes)
     }
   }

@@ -11,7 +11,7 @@ import scala.scalajs.js
 trait Binding extends Modifier[Element] {
   protected final val propertyListeners: js.Array[Registration] = js.Array()
   protected final val nestedBindings: js.Array[Binding] = js.Array()
-  final var active = true
+  private var active = true
 
   /** Every interceptor is expected to return the value received as argument. */
   protected def nestedInterceptor[T <: Binding](binding: T): T =
@@ -23,9 +23,15 @@ trait Binding extends Modifier[Element] {
   def kill(): Unit = {
     killNestedBindings()
     propertyListeners.foreach(_.cancel())
-    propertyListeners.length = 0 // JS way to clear an array
     active = false
   }
+
+  def restart(): Unit = {
+    propertyListeners.foreach(_.restart())
+    active = true
+  }
+
+  def isActive: Boolean = active
 
   /** This method clears all nested bindings and listeners. */
   def killNestedBindings(): Unit = {
