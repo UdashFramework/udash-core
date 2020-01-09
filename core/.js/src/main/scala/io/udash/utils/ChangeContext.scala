@@ -1,36 +1,61 @@
 package io.udash
 package utils
 
-import com.avsystem.commons._
 import io.udash.bindings.modifiers.Binding
 import org.scalajs.dom.raw._
 import org.scalajs.dom.{MutationObserver, MutationObserverInit}
 
+import scala.scalajs.js
+
 object ChangeContext {
 
-  private val bindings: MHashMap[Node, MBuffer[Binding]] = MHashMap.empty
+  private var total = 0
 
   //todo tail
   private def cleanup(removedNodes: NodeList): Unit = {
     for (i <- 0 until removedNodes.length) {
       val node = removedNodes.item(i)
-      val nodeBindings = bindings.remove(node).toList.flatten
+      val nodeBindings = bindings(node)
       if (nodeBindings.nonEmpty) {
-        println("R " + nodeBindings -> node.nodeName + " " + bindings.valuesIterator.map(_.size).sum)
+        total -= nodeBindings.size
+        println("R " + nodeBindings -> node.nodeName + " " + total)
         nodeBindings.foreach(_.kill())
       }
-
+      js.special.delete(node, "bindings")
       cleanup(node.childNodes)
     }
   }
 
-  private val observer = new MutationObserver((records, _) => records.foreach(v => cleanup(v.removedNodes)))
+  private def setup(addedNodes: NodeList): Unit = {
+    for (i <- 0 until addedNodes.length) {
+      val node = addedNodes.item(i)
+      //todo ensure node bindings are started
+      setup(node.childNodes)
+    }
+  }
+
+  private val observer = new MutationObserver((records, _) => records.foreach { v =>
+    cleanup(v.removedNodes)
+    setup(v.addedNodes)
+  })
   private var active = false
+
+  //todo nice wrapper for this
+  private def bindings(node: Node): js.Array[Binding] = {
+    if (node.hasOwnProperty("bindings")) {
+      node.asInstanceOf[js.Dynamic].bindings.asInstanceOf[js.Array[Binding]]
+    } else {
+      val result = js.Array[Binding]()
+      node.asInstanceOf[js.Dynamic].bindings = result
+      result
+    }
+  }
 
   def bind(node: Node, binding: Binding): Unit = {
     if (active) {
-      bindings.getOrElseUpdate(node, CrossCollections.createArray) += binding
-      println("A " + binding.getClass.getSimpleName + " " + binding.hashCode() + " " + node.asInstanceOf[Element].outerHTML + " " + bindings.valuesIterator.map(_.size).sum)
+      bindings(node) += binding
+      total += 1
+      println("A " + binding.getClass.getSimpleName + " " + binding.hashCode() + " " + node.asInstanceOf[Element].outerHTML + " " + total)
     }
   }
 
@@ -42,7 +67,6 @@ object ChangeContext {
 
   def stop(): Unit = {
     active = false
-    bindings.clear()
     observer.disconnect()
   }
 }
