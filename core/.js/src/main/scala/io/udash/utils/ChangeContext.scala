@@ -10,6 +10,7 @@ import scala.scalajs.js
 object ChangeContext {
 
   private var total = 0
+  private var active = false
 
   //todo tail
   private def cleanup(removedNodes: NodeList): Unit = {
@@ -21,7 +22,6 @@ object ChangeContext {
         println("R " + nodeBindings -> node.nodeName + " " + total)
         nodeBindings.foreach(_.kill())
       }
-      js.special.delete(node, "bindings")
       cleanup(node.childNodes)
     }
   }
@@ -30,6 +30,7 @@ object ChangeContext {
     for (i <- 0 until addedNodes.length) {
       val node = addedNodes.item(i)
       //todo ensure node bindings are started
+      if (bindings(node).exists(!_.active)) println("detected inactive binding attached")
       setup(node.childNodes)
     }
   }
@@ -38,7 +39,6 @@ object ChangeContext {
     cleanup(v.removedNodes)
     setup(v.addedNodes)
   })
-  private var active = false
 
   //todo nice wrapper for this
   private def bindings(node: Node): js.Array[Binding] = {
