@@ -1127,67 +1127,92 @@ class PropertyTest extends UdashCoreTest {
 
     "synchronize values with another property" in {
       val source = Property(1)
-      val target = Property(5)
+      var sourceListener = 0
+      source.listen(sourceListener = _, initUpdate = true)
 
-      source.get should be(1)
-      target.get should be(5)
+      val target = Property(5)
+      var targetListener = 0
+      target.listen(targetListener = _, initUpdate = true)
+
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 5
+      targetListener shouldBe 5
 
       //Init update
       val registration = source.sync(target)((i: Int) => i * 2, (i: Int) => i / 2)
 
-      registration.isActive should be(true)
-      source.get should be(1)
-      target.get should be(2)
+      registration.isActive shouldBe true
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 2
+      targetListener shouldBe 2
 
       // Source update
       source.set(2)
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Source touch
       source.touch()
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Target update
       target.set(8)
 
-      source.get should be(4)
-      target.get should be(8)
+      source.get shouldBe 4
+      sourceListener shouldBe 4
+      target.get shouldBe 8
+      targetListener shouldBe 8
 
       // Source update
       source.set(2)
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Registration cancel and source update
       registration.cancel()
       source.set(1)
 
-      registration.isActive should be(false)
-      source.get should be(1)
-      target.get should be(4)
+      registration.isActive shouldBe false
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Target update
       target.set(1)
 
-      source.get should be(1)
-      target.get should be(1)
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 1
+      targetListener shouldBe 1
 
       // Restart streaming, source touch
       registration.restart()
 
-      source.get should be(1)
-      target.get should be(2)
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 2
+      targetListener shouldBe 2
 
       // Target update
       target.set(8)
 
-      source.get should be(4)
-      target.get should be(8)
+      source.get shouldBe 4
+      sourceListener shouldBe 4
+      target.get shouldBe 8
+      targetListener shouldBe 8
     }
 
     "synchronize values with SeqProperty" in {
