@@ -124,7 +124,7 @@ class CallbackSequencerTest extends UdashCoreTest {
       fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
     }
 
-    "fire listeners queued by sequenced listeners" in {
+    "fire listeners queued by sequenced listeners" ignore {
       val fires = mutable.ArrayBuffer[String]()
       val l1 = () => fires += "a"
       val l2 = () => CallbackSequencer().queue("2", () => fires += "b")
