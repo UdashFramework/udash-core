@@ -560,6 +560,28 @@ class PropertyTest extends UdashCoreTest {
       sqc.get should be(Seq(10, 5))
     }
 
+    "trigger once for multiply combined properties" in {
+      val calls = mutable.Buffer.empty[(Int, Int, Int)]
+
+      val p0 = Property.blank[Int]
+      val p1 = Property.blank[Int]
+      val p2 = Property.blank[Int]
+
+      p0.combine(p1)((_, _))
+        .combine(p2)((_, _))
+        .listen { case ((i1, i2), i3) =>
+          calls.append((i1, i2, i3))
+        }
+
+      CallbackSequencer().sequence {
+        p0.set(0)
+        p1.set(1)
+        p2.set(2)
+      }
+
+      calls should contain inOrderElementsOf Seq((0, 1, 2))
+    }
+
     "transform to ReadableSeqProperty" in {
       val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0
