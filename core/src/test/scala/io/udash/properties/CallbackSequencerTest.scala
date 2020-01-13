@@ -109,26 +109,31 @@ class CallbackSequencerTest extends UdashCoreTest {
     "fire listeners queued by listeners" in {
       val fires = mutable.ArrayBuffer[String]()
       val l1 = () => fires += "a"
-      val l2 = () => CallbackSequencer().queue("2", () => fires += "b")
+      val l2a = () => CallbackSequencer().queue("2a", () => fires += "b")
       val l3 = () => fires += "c"
+      val lz = () => CallbackSequencer().queue("z", () => fires += "z")
 
       fires shouldBe empty
 
       CallbackSequencer().queue("1", l1)
       fires should contain theSameElementsInOrderAs Seq("a")
 
-      CallbackSequencer().queue("2", l2)
+      CallbackSequencer().queue("2", l2a)
       fires should contain theSameElementsInOrderAs Seq("a", "b")
 
       CallbackSequencer().queue("3", l3)
       fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
+
+      CallbackSequencer().queue("z", lz) //same id won't be triggered again
+      fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
     }
 
-    "fire listeners queued by sequenced listeners" ignore {
+    "fire listeners queued by sequenced listeners" in {
       val fires = mutable.ArrayBuffer[String]()
       val l1 = () => fires += "a"
-      val l2 = () => CallbackSequencer().queue("2", () => fires += "b")
+      val l2a = () => CallbackSequencer().queue("2a", () => fires += "b")
       val l3 = () => fires += "c"
+      val lz = () => CallbackSequencer().queue("z", () => fires += "z")
 
       fires shouldBe empty
 
@@ -136,10 +141,13 @@ class CallbackSequencerTest extends UdashCoreTest {
         CallbackSequencer().queue("1", l1)
         fires shouldBe empty
 
-        CallbackSequencer().queue("2", l2)
+        CallbackSequencer().queue("2", l2a)
         fires shouldBe empty
 
         CallbackSequencer().queue("3", l3)
+        fires shouldBe empty
+
+        CallbackSequencer().queue("z", lz)
         fires shouldBe empty
       }
 

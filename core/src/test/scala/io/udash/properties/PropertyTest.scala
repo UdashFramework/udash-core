@@ -582,6 +582,19 @@ class PropertyTest extends UdashCoreTest {
       calls should contain inOrderElementsOf Seq((0, 1, 2))
     }
 
+    "short-circuit loops on self" in {
+      val p0 = Property.blank[Int]
+      p0.listen { v => if (v < 5) p0.set(v + 1) }
+
+      p0.set(1)
+
+      p0.get shouldBe 2
+
+      CallbackSequencer().sequence(p0.set(3))
+
+      p0.get shouldBe 4
+    }
+
     "transform to ReadableSeqProperty" in {
       val elemListeners = mutable.Map.empty[PropertyId, Registration]
       var elementsUpdated = 0

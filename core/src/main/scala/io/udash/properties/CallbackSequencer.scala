@@ -38,8 +38,7 @@ final class CallbackSequencer {
   }
 
   def queue(id: Id, fireListeners: () => Any): Unit = {
-    if (starts == 0) fireListeners()
-    else queue += Tuple2(id, fireListeners)
+    sequence(queue += Tuple2(id, fireListeners))
   }
 
   def sequence(code: => Any): Unit = {
