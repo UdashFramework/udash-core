@@ -27,18 +27,18 @@ object RangeInput {
 
       element.onchange = (_: Event) => property.set(element.valueAsNumber)
       propertyListeners += property.listen(element.valueAsNumber = _, initUpdate = true)
-      propertyListeners += minValue.listen { v =>
+      propertyListeners += minValue.listen({ v =>
         (min := v).applyTo(element)
         property.set(element.valueAsNumber)
-      }
-      propertyListeners += maxValue.listen { v =>
+      }, initUpdate = true)
+      propertyListeners += maxValue.listen({ v =>
         (max := v).applyTo(element)
         property.set(element.valueAsNumber)
-      }
-      propertyListeners += valueStep.listen { v =>
+      }, initUpdate = true)
+      propertyListeners += valueStep.listen({ v =>
         (step := v).applyTo(element)
         property.set(element.valueAsNumber)
-      }
+      }, true)
 
       override def render: JSInput = element
     }
