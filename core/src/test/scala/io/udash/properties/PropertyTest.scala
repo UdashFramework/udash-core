@@ -584,7 +584,7 @@ class PropertyTest extends UdashCoreTest {
 
     "short-circuit loops on self" in {
       val p0 = Property.blank[Int]
-      p0.listen { v => if (v < 5) p0.set(v + 1) }
+      p0.listen { v => if (v < 10) p0.set(v + 1) }
 
       p0.set(1)
 
