@@ -9,7 +9,7 @@ before_script:
   - mkdir geckodriver
   - tar -xzf geckodriver-v0.24.0-linux64.tar.gz -C geckodriver
   - export PATH=$PWD/geckodriver:$PATH
-  - npm install jsdom
+  - npm install jsdom@15.2.1
 
 script:
   - xvfb-run sbt -jvm-opts .jvmopts-travis "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE

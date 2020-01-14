@@ -313,6 +313,58 @@ class PropertyTest extends UdashCoreTest {
       counter2 should be(1)
     }
 
+    "fire on transformed value changed or when forced" in {
+      val origin: Property[Option[Int]] = Property(Some(0))
+      val transformed: ReadableProperty[Boolean] = origin.transform((q: Option[Int]) => q.isDefined)
+      var counter = 0
+
+      transformed.listen(_ => counter += 1)
+
+      origin.set(Some(0))
+      counter shouldBe 0 //suppressed at origin
+
+      origin.set(Some(1))
+      counter shouldBe 0 //suppressed at transformed
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None, force = true)
+      counter shouldBe 2
+
+      origin.touch()
+      counter shouldBe 3
+    }
+
+    "fire on streamed value changed or when forced" in {
+      val origin: Property[Option[Int]] = Property(Some(0))
+      val target = Property.blank[Boolean]
+
+      origin.streamTo(target)((q: Option[Int]) => q.isDefined)
+      var counter = 0
+
+      target.listen(_ => counter += 1)
+
+      origin.set(Some(0))
+      counter shouldBe 0 //suppressed at origin
+
+      origin.set(Some(1))
+      counter shouldBe 0 //suppressed at target
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None)
+      counter shouldBe 1
+
+      //todo detect forced / touched?
+      //origin.set(None, force = true)
+      //counter shouldBe 2
+    }
+
     "combine with other properties (single properties)" in {
       val p1 = Property(1)
       val p2 = Property(2)
@@ -540,7 +592,7 @@ class PropertyTest extends UdashCoreTest {
 
       val p = Property("1,2,3,4,5")
       val s: ReadableSeqProperty[Int, ReadableProperty[Int]] =
-        p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+        p.transformToSeq((v: String) => Try(v.split(",").map(_.trim.toInt).toSeq).getOrElse(Seq[Int]()))
 
       p.listenersCount() should be(0)
 
@@ -565,6 +617,14 @@ class PropertyTest extends UdashCoreTest {
       lastPatch = null
       elementsUpdated = 0
       p.set("5,4,3")
+      s.get should be(Seq(5, 4, 3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      //suppressed at s
+      p.set(" 5 ,4 ,3")
       s.get should be(Seq(5, 4, 3))
       lastValue should be(s.get)
       lastPatch.added.size should be(0)
