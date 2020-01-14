@@ -11,7 +11,7 @@ before_script:
   - export PATH=$PWD/geckodriver:$PATH
   - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d
   - gpg --import travis/travis.gpg
-  - npm install jsdom
+  - npm install jsdom@10.0.0 #version based on https://github.com/scala-js/scala-js-env-jsdom-nodejs/blob/master/.travis.yml
 
 script:
   - xvfb-run sbt -jvm-opts .jvmopts-travis "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++$TRAVIS_SCALA_VERSION $TEST_PACKAGE
