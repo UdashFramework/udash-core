@@ -20,7 +20,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
 
     CrossCollections.replace(properties, idx, amount, newProperties: _*)
 
-    fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty), structureListeners)
+    fireElementsListeners(Patch(idx, oldProperties, newProperties, properties.isEmpty))
     valueChanged()
   }
 

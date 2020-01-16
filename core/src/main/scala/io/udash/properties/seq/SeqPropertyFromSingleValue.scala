@@ -40,14 +40,6 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     super.listenStructure(structureListener)
   }
 
-  private def structureChanged(patch: Patch[ElemType]): Unit = {
-    val originalListeners = structureListeners.toSet
-    CallbackSequencer().queue(
-      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
-      () => originalListeners.foreach(_.apply(patch))
-    )
-  }
-
   private def update(v: A): Unit = {
     lastOriginValue = Opt(v)
 
@@ -80,7 +72,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       transformed.zip(children)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }
-      patch.foreach(structureChanged)
+      patch.foreach(fireElementsListeners)
       valueChanged()
     }
   }

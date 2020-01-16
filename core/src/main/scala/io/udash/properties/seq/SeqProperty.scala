@@ -48,7 +48,7 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   override def reversed(): SeqProperty[A, Property[A]]
 }
 
-private[properties] trait AbstractSeqProperty[A, +ElemType <: Property[A]]
+private[properties] trait AbstractSeqProperty[A, ElemType <: Property[A]]
   extends AbstractReadableSeqProperty[A, ElemType] with AbstractProperty[Seq[A]] with SeqProperty[A, ElemType] {
 
   def insert(idx: Int, values: A*): Unit = replace(idx, 0, values: _*)

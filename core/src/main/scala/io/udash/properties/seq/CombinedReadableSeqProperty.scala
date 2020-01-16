@@ -1,7 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.properties.PropertyCreator
+import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
@@ -22,7 +22,7 @@ private[properties] class CombinedReadableSeqProperty[A, B, R: PropertyCreator](
       added = combinedNewChildren
     )
     CrossCollections.replace(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren: _*)
-    fireElementsListeners(mappedPatch, structureListeners)
+    fireElementsListeners(mappedPatch)
   }
 
   private def initOriginListener(): Unit = {
