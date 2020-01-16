@@ -745,7 +745,7 @@ class PropertyTest extends UdashCoreTest {
       s.get should be(Seq(1, 2, 3, 4, 5))
     }
 
-    "not emit patches to listeners which observed updated value" in {
+    "not emit patches to listeners which observed updated value in transformToSeq" in {
       val patches = mutable.Buffer.empty[Patch[_]]
 
       def test()(implicit position: Position) = {
@@ -753,7 +753,7 @@ class PropertyTest extends UdashCoreTest {
         val sp = p.transformToSeq(Seq(_))
         val transformed = sp.transform((i: Int) => i + 1)
         sp.get shouldBe Seq(1)
-        transformed.get shouldBe Seq(2) //current value observed immediately
+        transformed.get should contain theSameElementsInOrderAs Seq(2) //current value observed immediately
 
         sp.listenStructure(patches += _)
       }
