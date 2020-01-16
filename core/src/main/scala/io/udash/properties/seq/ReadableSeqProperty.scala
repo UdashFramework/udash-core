@@ -77,7 +77,7 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
 
   protected[this] final val structureListeners: mutable.Buffer[Patch[ElemType] => Any] = mutable.ArrayBuffer.empty
 
-  override def structureListenersCount(): Int = structureListeners.size
+  override final def structureListenersCount(): Int = structureListeners.size
   protected def wrapStructureListenerRegistration(reg: Registration): Registration =
     wrapListenerRegistration(reg)
 
