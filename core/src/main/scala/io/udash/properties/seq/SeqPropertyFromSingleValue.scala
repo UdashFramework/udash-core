@@ -40,11 +40,13 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     super.listenStructure(structureListener)
   }
 
-  private def structureChanged(patch: Patch[ElemType]): Unit =
+  private def structureChanged(patch: Patch[ElemType]): Unit = {
+    val originalListeners = structureListeners.toSet
     CallbackSequencer().queue(
       s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
-      () => structureListeners.foreach(_.apply(patch))
+      () => originalListeners.foreach(_.apply(patch))
     )
+  }
 
   private def update(v: A): Unit = {
     lastOriginValue = Opt(v)
