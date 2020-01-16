@@ -40,7 +40,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
 
       val filteredPatch = Patch[ElemType](idx, removed, added, lastValue.isEmpty)
       fireValueListeners()
-      fireElementsListeners(filteredPatch, structureListeners)
+      fireElementsListeners(filteredPatch)
     }
   }
 
@@ -62,7 +62,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     }
 
     if (matches || oldIdx != -1) fireValueListeners()
-    if (patch != null) fireElementsListeners(patch, structureListeners)
+    if (patch != null) fireElementsListeners(patch)
   }
 
   override def elemProperties: Seq[ElemType] =

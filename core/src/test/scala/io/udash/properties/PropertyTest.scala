@@ -6,6 +6,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
+import org.scalactic.source.Position
 
 import scala.collection.mutable
 import scala.util.Try
@@ -742,6 +743,30 @@ class PropertyTest extends UdashCoreTest {
       }
 
       s.get should be(Seq(1, 2, 3, 4, 5))
+    }
+
+    "not emit patches to listeners which observed updated value in transformToSeq" in {
+      val patches = mutable.Buffer.empty[Patch[_]]
+
+      def test()(implicit position: Position) = {
+        val p = Property(1)
+        val sp = p.transformToSeq(Seq(_))
+        val transformed = sp.transform((i: Int) => i + 1)
+        sp.get shouldBe Seq(1)
+        transformed.get should contain theSameElementsInOrderAs Seq(2) //current value observed immediately
+
+        sp.listenStructure(patches += _)
+      }
+
+      test()
+      patches shouldBe empty
+
+      CallbackSequencer().sequence(test()) //should behave the same
+
+      // No patch should be emitted to newly created structure listeners (after value was set).
+      // Previously the patches would be emitted after exiting the sequencer,
+      // so e.g. repeat based on `transformed`, would add a duplicate row.
+      patches shouldBe empty
     }
 
     "transform to SeqProperty" in {
