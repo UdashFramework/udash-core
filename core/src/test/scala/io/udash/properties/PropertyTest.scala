@@ -563,9 +563,9 @@ class PropertyTest extends UdashCoreTest {
     "trigger once for multiply combined properties" in {
       val calls = mutable.Buffer.empty[(Int, Int, Int)]
 
-      val p0 = Property.blank[Int]
-      val p1 = Property.blank[Int]
-      val p2 = Property.blank[Int]
+      val p0 = Property(-1)
+      val p1 = Property(-1)
+      val p2 = Property(-1)
 
       p0.combine(p1)((_, _))
         .combine(p2)((_, _))
@@ -580,6 +580,16 @@ class PropertyTest extends UdashCoreTest {
       }
 
       calls should contain inOrderElementsOf Seq((0, 1, 2))
+
+      calls.clear()
+
+      CallbackSequencer().sequence {
+        p2.set(3)
+        p1.set(4)
+        p0.set(5)
+      }
+
+      calls should contain inOrderElementsOf Seq((5, 4, 3))
     }
 
     "short-circuit loops on self" in {

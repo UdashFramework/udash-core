@@ -38,7 +38,7 @@ object RangeInput {
       propertyListeners += valueStep.listen({ v =>
         (step := v).applyTo(element)
         property.set(element.valueAsNumber)
-      }, true)
+      }, initUpdate = true)
 
       override def render: JSInput = element
     }
