@@ -28,7 +28,6 @@ val deploymentConfiguration = Seq(
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
 
-  sonatypeBundleDirectory := (ThisBuild / baseDirectory).value / target.value.getName / "sonatype-staging" / s"udash-${version.value}",
   publishTo := sonatypePublishToBundle.value,
 
   credentials in Global += Credentials(
