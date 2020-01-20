@@ -1,5 +1,7 @@
 package io.udash.properties
 
+import com.github.ghik.silencer.silent
+
 import scala.collection.mutable
 
 /**
@@ -32,7 +34,7 @@ final class CallbackSequencer {
             callback()
           }
           false //removes
-        }
+        }: @silent("deprecated")
       }
     }
   }
