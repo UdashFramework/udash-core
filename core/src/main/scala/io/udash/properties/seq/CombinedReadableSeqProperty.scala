@@ -20,7 +20,7 @@ private[properties] final class CombinedReadableSeqProperty[A, B, R](
       added = combinedNewChildren
     )
     CrossCollections.replaceSeq(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren)
-    fireElementsListeners(mappedPatch, structureListeners)
+    fireElementsListeners(mappedPatch)
   }
 
   private def initOriginListener(): Unit = {
