@@ -118,7 +118,7 @@ val testInBrowser = Seq(
 
 val noPublishSettings = Seq(
   publish / skip := true,
-  Compile / doc := (doc / target).value,
+  Compile / packageDoc / mappings := Seq.empty,
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
