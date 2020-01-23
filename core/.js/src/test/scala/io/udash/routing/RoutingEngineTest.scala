@@ -284,7 +284,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val class2View = new TestView
       val errorView = new TestView
       val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map(
-        RootState(None) -> new StaticViewFactory[RootState](() => rootView),
+        RootState(None) -> new StaticViewFactory[RootState](() => rootView) {},
         ObjectState -> new ExceptionViewFactory[ObjectState.type](objectView),
         NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
         ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),
@@ -332,7 +332,6 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val staticView = new TestView
       var staticCreateCount = 0
       def staticViewFactory() = new StaticViewFactory[RootState](() => staticView) {
-        println("create new")
         override def create(): (View, EmptyPresenter.type) = {
           staticCreateCount += 1
           super.create()
