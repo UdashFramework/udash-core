@@ -21,9 +21,8 @@ final class CallbackSequencer {
   private def start(): Unit =
     starts += 1
 
-  private def end(): Unit = {
+  private def end(): Unit =
     starts -= 1
-  }
 
   private def commit(): Unit = {
     if (starts == 1) {

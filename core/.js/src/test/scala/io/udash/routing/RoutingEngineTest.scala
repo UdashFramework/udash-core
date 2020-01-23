@@ -37,7 +37,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         }
       }
 
-      initTestRoutingEngine(state2vp = state2VP)
+      initTestRoutingEngine(state2vp = state2VP.mapValues(() => _))
 
       testClosedAndReset(_ => false)
 
@@ -292,7 +292,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
       )
 
-      initTestRoutingEngine(state2vp = state2VP)
+      initTestRoutingEngine(state2vp = state2VP.mapValues(() => _))
 
       routingEngine.handleUrl(Url("/"))
       renderer.views.size should be(0)
@@ -326,6 +326,46 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       routingEngine.handleUrl(Url("/next"))
       renderer.views shouldBe Seq(rootView)
+    }
+
+    "not rerender static views" in {
+      val staticView = new TestView
+      var staticCreateCount = 0
+      def staticViewFactory() = new StaticViewFactory[RootState](() => staticView) {
+        println("create new")
+        override def create(): (View, EmptyPresenter.type) = {
+          staticCreateCount += 1
+          super.create()
+        }
+      }
+      val state2VP: Map[TestState, () => ViewFactory[_ <: TestState]] = Map[TestState, () => ViewFactory[_ <: TestState]](
+        RootState(None) -> staticViewFactory,
+        RootState(Some(1)) -> staticViewFactory,
+        RootState(Some(2)) -> staticViewFactory,
+      )
+
+      initTestRoutingEngine(state2vp = state2VP)
+
+      routingEngine.handleUrl(Url("/root"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe empty
+      renderer.lastPathToAdd.size shouldBe 1
+      staticCreateCount shouldBe 1
+
+      routingEngine.handleUrl(Url("/root/1"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe List(staticView)
+      renderer.lastPathToAdd.size shouldBe 0
+      staticCreateCount shouldBe 1
+
+      routingEngine.handleUrl(Url("/root/2"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe List(staticView)
+      renderer.lastPathToAdd.size shouldBe 0
+      staticCreateCount shouldBe 1
     }
   }
 }
