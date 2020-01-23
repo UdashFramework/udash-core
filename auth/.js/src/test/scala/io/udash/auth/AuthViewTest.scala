@@ -5,8 +5,8 @@ import io.udash.testing.UdashFrontendTest
 class AuthViewTest extends UdashFrontendTest with AuthTestUtils {
   "AuthView" should {
     "not render data if permission is missing" in {
-      import scalatags.JsDom.all._
       import AuthView._
+      import scalatags.JsDom.all._
 
       implicit val user = User(Set(P1, P2))
 
@@ -26,9 +26,9 @@ class AuthViewTest extends UdashFrontendTest with AuthTestUtils {
     }
 
     "not render data if user is not authenticated" in {
-      import scalatags.JsDom.all._
       import AuthView._
       import PermissionCombinator.AllowAll
+      import scalatags.JsDom.all._
 
       implicit val user = UnauthenticatedUser
 
@@ -45,6 +45,23 @@ class AuthViewTest extends UdashFrontendTest with AuthTestUtils {
       ).render
 
       el.textContent should be("248")
+    }
+
+    "render fallback view if user lacks permission " in {
+      import AuthView._
+      import PermissionCombinator.AllowAll
+      import scalatags.JsDom.all._
+
+
+      implicit val user = User(Set(P1, P2))
+
+      val el = div(
+        requireWithFallback(AllowAll, requireAuthenticated = true)("1")("-1"),
+        requireWithFallback(P1.and(P2), requireAuthenticated = true)("2")("-2"),
+        requireWithFallback(P1.and(P3), requireAuthenticated = true)("3")("-3"),
+        requireWithFallback(P2.and(P3), requireAuthenticated = true)("4")("-4"),
+      ).render
+      el.textContent should be("12-3-4")
     }
   }
 }

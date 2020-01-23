@@ -27,8 +27,8 @@ trait Presenter[-S <: State] {
   def handleState(state: S): Unit
 
   /**
-    * This method will be called by [[io.udash.routing.RoutingEngine]] when this presenter will be replaced
-    * by other presenter. In this callback you should do cleanup if needed.
+    * This method will be called by [[io.udash.routing.RoutingEngine]] when this presenter is replaced
+    * by another one. This is where you can do cleanup if needed.
     */
   def onClose(): Unit = ()
 }
@@ -47,16 +47,6 @@ trait ViewFactory[S <: State] {
   def create(): (View, Presenter[S])
 }
 
-/** [[ViewFactory]] creating [[ContainerView]]. */
-trait ContainerViewFactory[S <: ContainerState] extends ViewFactory[S] {
-  override def create(): (ContainerView, Presenter[S])
-}
-
-/** [[ViewFactory]] creating [[FinalView]]. */
-trait FinalViewFactory[S <: FinalState] extends ViewFactory[S] {
-  override def create(): (FinalView, Presenter[S])
-}
-
 /**
   * Abstract view which should be used in order to implement View for [[io.udash.core.ViewFactory]].
   * The View implementation usually gets the model and the [[io.udash.core.Presenter]] as constructor arguments.
@@ -68,6 +58,12 @@ trait View {
     * @return DOM representation of view
     */
   def getTemplate: Modifier[Element]
+
+  /**
+   * This method will be called by [[io.udash.routing.RoutingEngine]] when this view is replaced
+   * by another one. This is where you can do cleanup.
+   */
+  def onClose(): Unit = ()
 }
 
 /** A [[io.udash.core.View]] which can render child view. */
@@ -96,18 +92,11 @@ trait ContainerView extends View {
   }
 }
 
-/** A [[io.udash.core.View]] which does not have any child view. */
-trait FinalView extends View
-
 /** The class which should be used to present the state for [[io.udash.routing.RoutingEngine]]. */
 trait State {
   type HierarchyRoot <: State {type HierarchyRoot = State.this.HierarchyRoot}
-  def parentState: Option[ContainerState with HierarchyRoot]
+  def parentState: Option[HierarchyRoot]
 }
-/** State related to [[ContainerView]]. */
-trait ContainerState extends State
-/** State related to [[FinalView]]. */
-trait FinalState extends State
 
 /**
   * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].

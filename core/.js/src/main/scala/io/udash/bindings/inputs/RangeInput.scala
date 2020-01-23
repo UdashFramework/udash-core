@@ -23,18 +23,22 @@ object RangeInput {
     valueStep: ReadableProperty[Double] = 1d.toProperty
   )(inputModifiers: Modifier*): InputBinding[JSInput] =
     new InputBinding[JSInput] {
-      private val element = input(
-        inputModifiers, tpe := "range",
-        nestedInterceptor(min.bind(minValue.transform(_.toString))),
-        nestedInterceptor(max.bind(maxValue.transform(_.toString))),
-        nestedInterceptor(step.bind(valueStep.transform(_.toString)))
-      ).render
+      private val element = input(inputModifiers, tpe := "range").render
 
       element.onchange = (_: Event) => property.set(element.valueAsNumber)
       propertyListeners += property.listen(element.valueAsNumber = _, initUpdate = true)
-      propertyListeners += minValue.listen(_ => property.set(element.valueAsNumber))
-      propertyListeners += maxValue.listen(_ => property.set(element.valueAsNumber))
-      propertyListeners += valueStep.listen(_ => property.set(element.valueAsNumber))
+      propertyListeners += minValue.listen({ v =>
+        (min := v).applyTo(element)
+        property.set(element.valueAsNumber)
+      }, initUpdate = true)
+      propertyListeners += maxValue.listen({ v =>
+        (max := v).applyTo(element)
+        property.set(element.valueAsNumber)
+      }, initUpdate = true)
+      propertyListeners += valueStep.listen({ v =>
+        (step := v).applyTo(element)
+        property.set(element.valueAsNumber)
+      }, initUpdate = true)
 
       override def render: JSInput = element
     }

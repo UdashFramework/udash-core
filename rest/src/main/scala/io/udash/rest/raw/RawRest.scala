@@ -9,7 +9,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
 
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, tailrec}
 
 sealed abstract class RestMethodCall {
   val pathParams: List[PlainValue]
@@ -110,6 +110,7 @@ trait RawRest {
       case NonFatal(cause) => throw new InvalidRpcCall(s"Invalid HTTP body: ${cause.getMessage}", cause)
     }
 
+    @tailrec
     def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
       case PrefixCall(pathParams, pm) :: tail =>
         rawRest.prefix(pm.name, parameters.copy(path = pathParams)) match {
@@ -283,7 +284,8 @@ object RawRest extends RawRpcCompanion[RawRest] {
               case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
               case m => List(m)
             } ++ Iterator(HttpMethod.OPTIONS)
-            val response = RestResponse(200, IMapping("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
+            val response = RestResponse(200,
+              IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
             RawRest.successfulAsync(response)
           case wireMethod =>
             val head = wireMethod == HttpMethod.HEAD

@@ -2,7 +2,7 @@ package io.udash.properties
 
 import io.udash.testing.UdashCoreTest
 
-import scala.xml.Document
+import scala.collection.AbstractSeq
 
 class PropertyUsageTest extends UdashCoreTest {
   // DO NOT REMOVE THESE IMPORTS!
@@ -125,6 +125,13 @@ class PropertyUsageTest extends UdashCoreTest {
     }
   }
 
+  //rough approximation of scala.xml.Document, which used to be the test case for fixed-param Seq type here
+  class Document extends AbstractSeq[Int] with scala.collection.immutable.Seq[Int] {
+    override def length: Int = ???
+    override def apply(idx: Int): Int = ???
+    override def iterator: Iterator[Int] = ???
+  }
+
   object ClassModel {
     case class T(i: Int, t: T, s: Seq[String], fixedSeq: Document)
     object T extends HasModelPropertyCreator[T]
@@ -244,14 +251,14 @@ class PropertyUsageTest extends UdashCoreTest {
     "allow transformation of elements to ReadableProperty" in {
       """
         |val p: ReadableSeqProperty[Model.T, _ <: CastableReadableProperty[Model.T]] = SeqProperty.blank[Model.T]
-        |val t: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).get.i
+        |val t: ReadableSeqProperty[Int, ReadableProperty[Int]] = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).get.i
         |""".stripMargin should compile
 
       """
         |val p: ReadableSeqProperty[Model.T, _ <: ReadableProperty[Model.T]] = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).asModel
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).asModel
         |""".stripMargin shouldNot compile
     }
 
@@ -307,14 +314,14 @@ class PropertyUsageTest extends UdashCoreTest {
     "allow transformation of elements to ReadableProperty" in {
       """
         |val p = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).get.i
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).get.i
         |""".stripMargin should compile
 
       """
         |val p = SeqProperty.blank[Model.T]
-        |val t = p.transform((el: Model.T) => el.i)
-        |p.transform((el: Model.T) => el.t).elemProperties(0).asModel
+        |val t = p.transformElements(_.i)
+        |p.transformElements(_.t).elemProperties(0).asModel
         |""".stripMargin shouldNot compile
     }
 

@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 class TooltipTestUtils extends AsyncUdashCoreFrontendTest {
-  def tooltipTest(companion: TooltipUtils[_ <: Tooltip[_, _]], expectContent: Boolean): Unit = {
+  def tooltipTest(companion: TooltipUtils[_ <: Tooltip], expectContent: Boolean): Unit = {
     "display translated content" in {
       import io.udash.wrappers.jquery._
       import scalatags.JsDom.all._

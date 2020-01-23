@@ -1,10 +1,10 @@
-package io.udash.bootstrap
+package io.udash
+package bootstrap
 package collapse
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.utils._
-import io.udash.component.{ComponentId, Listenable, ListenableEvent}
+import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
@@ -18,12 +18,14 @@ final class UdashCollapse private(
   override val componentId: ComponentId
 )(
   content: Binding.NestedInterceptor => Modifier
-) extends UdashBootstrapComponent with Listenable[UdashCollapse, UdashCollapse.CollapseEvent] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
+
+  override type EventType = UdashCollapse.CollapseEvent
 
   /** Toggle state of this collapse. */
   def toggle(): Unit = jQSelector().collapse("toggle")
@@ -47,7 +49,7 @@ final class UdashCollapse private(
   override val render: Element = {
     val el = div(
       parentSelector.map(dataParent := _), dataToggle := toggleOnInit,
-      BootstrapStyles.Collapse.collapse, id := componentId
+      BootstrapStyles.Collapse.collapse, componentId
     )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)
@@ -73,7 +75,7 @@ object UdashCollapse {
   final case class CollapseEvent(
     override val source: UdashCollapse,
     tpe: CollapseEvent.EventType
-  ) extends AbstractCase with ListenableEvent[UdashCollapse]
+  ) extends AbstractCase with ListenableEvent
 
   object CollapseEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -104,7 +106,7 @@ object UdashCollapse {
   def apply(
     parentSelector: Option[String] = None,
     toggleOnInit: Boolean = true,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashCollapse = {
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
   }

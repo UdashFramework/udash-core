@@ -1,6 +1,6 @@
 package io.udash.properties
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties.model.ModelProperty
 import io.udash.properties.single.Property
 import io.udash.testing.UdashCoreTest

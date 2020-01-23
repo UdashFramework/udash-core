@@ -1,14 +1,14 @@
-package io.udash.bootstrap.card
+package io.udash.bootstrap
+package card
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.list.UdashListGroup
 import io.udash.bootstrap.nav.UdashNav
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
+import io.udash.css.CssView._
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import io.udash.css.CssView._
 
 final class UdashCard private(
   backgroundColor: ReadableProperty[Option[BootstrapStyles.Color]],
@@ -115,7 +115,7 @@ final class UdashCard private(
   }
 
   override val render: Element = div(
-    BootstrapStyles.Card.card, id := componentId,
+    BootstrapStyles.Card.card, componentId,
     nestedInterceptor((BootstrapStyles.Text.align(_: BootstrapStyles.Align, BootstrapStyles.ResponsiveBreakpoint.All)).reactiveOptionApply(textAlignment)),
     nestedInterceptor((BootstrapStyles.Text.color _).reactiveOptionApply(textColor)),
     nestedInterceptor((BootstrapStyles.Background.color _).reactiveOptionApply(backgroundColor)),
@@ -142,7 +142,7 @@ object UdashCard {
     borderColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
     textAlignment: ReadableProperty[Option[BootstrapStyles.Align]] = UdashBootstrap.None,
     textColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: UdashCard#CardElementsFactory => Modifier): UdashCard = {
     new UdashCard(backgroundColor, borderColor, textAlignment, textColor, componentId)(content)
   }

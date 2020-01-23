@@ -5,10 +5,10 @@ import com.avsystem.commons._
 import io.udash.rest.raw.RawRest
 import io.udash.rest.raw.RawRest.HandleRequest
 import org.scalactic.source.Position
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class RestApiTest extends FunSuite with ScalaFutures {
+abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](RestTestApi.Impl)
 
@@ -24,7 +24,7 @@ abstract class RestApiTest extends FunSuite with ScalaFutures {
     )
 
   def mkDeep(value: Any): Any = value match {
-    case arr: Array[_] => arr.deep
+    case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
     case _ => value
   }
 }
@@ -72,6 +72,10 @@ trait RestApiTestScenarios extends RestApiTest {
 
   test("large binary request and response") {
     testCall(_.binaryEcho(Array.fill[Byte](1024 * 1024)(5)))
+  }
+
+  test("body using third party type") {
+    testCall(_.thirdPartyBody(HasThirdParty(ThirdParty(5))))
   }
 }
 

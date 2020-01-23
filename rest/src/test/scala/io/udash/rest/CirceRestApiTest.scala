@@ -15,17 +15,17 @@ import scala.concurrent.Future
 
 trait CirceRestImplicits extends FloatingPointRestImplicits {
   implicit def encoderBasedAsJson[T: Encoder]: AsRaw[JsonValue, T] =
-    AsRaw.create(v => JsonValue(v.asJson.noSpaces))
+    v => JsonValue(v.asJson.noSpaces)
 
   implicit def decoderBasedFromJson[T: Decoder]: AsReal[JsonValue, T] =
-    AsReal.create(json => parse(json.value).fold(throw _, _.as[T].fold(throw _, identity)))
+    json => parse(json.value).fold(throw _, _.as[T].fold(throw _, identity))
 
   implicit def keyEncoderBasedAsPlain[T: KeyEncoder]: AsRaw[PlainValue, T] =
-    AsRaw.create(v => PlainValue(KeyEncoder[T].apply(v)))
+    v => PlainValue(KeyEncoder[T].apply(v))
 
   implicit def keyDecoderBasedFromPlain[T: KeyDecoder]: AsReal[PlainValue, T] =
-    AsReal.create(pv => KeyDecoder[T].apply(pv.value)
-      .getOrElse(throw new IllegalArgumentException(s"Invalid key: ${pv.value}")))
+    pv => KeyDecoder[T].apply(pv.value)
+      .getOrElse(throw new IllegalArgumentException(s"Invalid key: ${pv.value}"))
 
   @implicitNotFound("#{forEncoder}")
   implicit def asJsonNotFound[T](
@@ -51,7 +51,7 @@ object CirceRestImplicits extends CirceRestImplicits
 
 trait CirceInstances[T] {
   @materializeWith(io.circe.derivation.`package`, "deriveEncoder")
-  def encoder: ObjectEncoder[T]
+  def encoder: Encoder.AsObject[T]
   @materializeWith(io.circe.derivation.`package`, "deriveDecoder")
   def decoder: Decoder[T]
 }
@@ -59,22 +59,24 @@ trait CirceInstances[T] {
 abstract class HasCirceCodec[T](
   implicit instances: MacroInstances[Unit, CirceInstances[T]]
 ) {
-  implicit final lazy val objectEncoder: ObjectEncoder[T] = instances((), this).encoder
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder
   implicit final lazy val decoder: Decoder[T] = instances((), this).decoder
 }
 
 trait CirceCustomizedInstances[T] {
   @materializeWith(io.circe.derivation.`package`, "deriveEncoder")
-  def encoder(nameTransform: String => String): ObjectEncoder[T]
+  def encoder(nameTransform: String => String, discriminator: Option[String]): Encoder.AsObject[T]
   @materializeWith(io.circe.derivation.`package`, "deriveDecoder")
-  def decoder(nameTransform: String => String): Decoder[T]
+  def decoder(nameTransform: String => String, useDefaults: Boolean, discriminator: Option[String]): Decoder[T]
 }
 
-abstract class HasCirceCustomizedCodec[T](nameTransform: String => String)(
-  implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]
-) {
-  implicit final lazy val objectEncoder: ObjectEncoder[T] = instances((), this).encoder(nameTransform)
-  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform)
+abstract class HasCirceCustomizedCodec[T](
+  nameTransform: String => String,
+  useDefaults: Boolean = true,
+  discriminator: Option[String] = None
+)(implicit instances: MacroInstances[Unit, CirceCustomizedInstances[T]]) {
+  implicit final lazy val objectEncoder: Encoder.AsObject[T] = instances((), this).encoder(nameTransform, discriminator)
+  implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform, useDefaults, discriminator)
 }
 
 case class CirceAddress(city: String, zip: String)

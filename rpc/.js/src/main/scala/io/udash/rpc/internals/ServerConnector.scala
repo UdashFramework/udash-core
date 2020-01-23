@@ -94,7 +94,7 @@ abstract class AtmosphereServerConnector(
     this.isReady = isReady
     if (isReady == ConnectionStatus.Open) {
       val queue = new mutable.ArrayBuffer[RpcRequest]()
-      waitingRequests.copyToBuffer(queue)
+      queue ++= waitingRequests
       waitingRequests.clear()
 
       queue foreach { req => sendRpcRequest(req) }
@@ -128,7 +128,7 @@ abstract class AtmosphereServerConnector(
       onClose = onClose,
       onClientTimeout = onClientTimeout,
       onMessage = (res: AtmosphereResponse) => handleMessage(res.responseBody),
-      onMessagePublished = (req: AtmosphereRequest, res: AtmosphereResponse) => handleMessage(req.responseBody)
+      onMessagePublished = (req: AtmosphereRequest, _: AtmosphereResponse) => handleMessage(req.responseBody)
     )
   }
 }

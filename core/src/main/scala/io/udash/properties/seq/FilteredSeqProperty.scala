@@ -1,16 +1,15 @@
 package io.udash.properties.seq
 
+import com.avsystem.commons._
 import io.udash.properties.single.ReadableProperty
 import io.udash.utils.{CrossCollections, Registration}
-
-import scala.collection.mutable
 
 private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  private var lastValue: mutable.Buffer[ElemType] = _
-  private val originListeners: mutable.Buffer[Registration] = CrossCollections.createArray
+  private var lastValue: MBuffer[ElemType] = _
+  private val originListeners: MBuffer[Registration] = CrossCollections.createArray
 
   override protected def onListenerInit(): Unit = {
     super.onListenerInit()
@@ -29,18 +28,18 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     // update origin elements listeners
     patch.removed.indices.foreach { i => originListeners(i + patch.idx).cancel() }
     val newListeners = patch.added.map { el => el.listen(v => elementChanged(el, v)) }
-    CrossCollections.replace(originListeners, patch.idx, patch.removed.size, newListeners: _*)
+    CrossCollections.replaceSeq(originListeners, patch.idx, patch.removed.size, newListeners)
 
     // update last value
     val added = patch.added.filter(p => matcher(p.get))
     val removed = patch.removed.filter(p => matcher(p.get))
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
-      CrossCollections.replace(lastValue, idx, removed.size, added: _*)
+      CrossCollections.replaceSeq(lastValue, idx, removed.size, added)
 
       val filteredPatch = Patch[ElemType](idx, removed, added, lastValue.isEmpty)
-      fireValueListeners()
-      fireElementsListeners(filteredPatch, structureListeners)
+      valueChanged()
+      fireElementsListeners(filteredPatch)
     }
   }
 
@@ -51,7 +50,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
 
     val patch = (oldIdx, matches) match {
       case (old, false) if old != -1 =>
-        CrossCollections.replace(lastValue, old, 1)
+        lastValue.remove(old, 1)
         Patch[ElemType](old, Seq(p), Seq.empty, filteredProps.isEmpty)
       case (-1, true) =>
         val originProps = origin.elemProperties
@@ -61,14 +60,14 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
       case _ => null
     }
 
-    if (matches || oldIdx != -1) fireValueListeners()
-    if (patch != null) fireElementsListeners(patch, structureListeners)
+    if (matches || oldIdx != -1) valueChanged()
+    if (patch != null) fireElementsListeners(patch)
   }
 
-  override def elemProperties: Seq[ElemType] =
+  override def elemProperties: BSeq[ElemType] =
     if (lastValue != null) lastValue.toVector
     else origin.elemProperties.filter(el => matcher(el.get))
 
-  override def get: Seq[A] =
+  override def get: BSeq[A] =
     elemProperties.map(_.get)
 }

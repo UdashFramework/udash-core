@@ -1,8 +1,8 @@
-package io.udash.bootstrap.list
+package io.udash.bootstrap
+package list
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.properties.seq
 import org.scalajs.dom.Element
@@ -17,7 +17,7 @@ final class UdashListGroup[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
   override val render: Element =
     div(
-      id := componentId, BootstrapStyles.ListGroup.listGroup,
+      componentId, BootstrapStyles.ListGroup.listGroup,
       nestedInterceptor(BootstrapStyles.ListGroup.flush.styleIf(flush))
     )(
       nestedInterceptor(
@@ -45,7 +45,7 @@ object UdashListGroup {
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     items: seq.ReadableSeqProperty[ItemType, ElemType],
     flush: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(itemFactory: (ElemType, Binding.NestedInterceptor) => Element): UdashListGroup[ItemType, ElemType] =
     new UdashListGroup(items, flush, componentId)(itemFactory)
 }

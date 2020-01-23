@@ -6,6 +6,8 @@ import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
 import io.udash.rest.raw._
 
+import scala.annotation.StaticAnnotation
+
 /**
   * Base trait for tag annotations that determine how a REST method is translated into actual HTTP request.
   * A REST method may be annotated with one of HTTP method tags ([[io.udash.rest.GET GET]], [[io.udash.rest.PUT PUT]],
@@ -89,7 +91,8 @@ sealed abstract class BodyMethodTag(method: HttpMethod) extends HttpMethodTag(me
   * @param path see [[RestMethodTag.path]]
   */
 class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(HttpMethod.GET) {
-  @rpcNamePrefix("get_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("get_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 /**
@@ -98,19 +101,23 @@ class GET(val path: String = RestMethodTag.methodName) extends HttpMethodTag(Htt
   * (i.e. their result type is not another REST trait).
   */
 class POST(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.POST) {
-  @rpcNamePrefix("post_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("post_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class PATCH(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PATCH) {
-  @rpcNamePrefix("patch_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("patch_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class PUT(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.PUT) {
-  @rpcNamePrefix("put_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("put_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 /** See [[io.udash.rest.BodyMethodTag BodyMethodTag]] */
 class DELETE(val path: String = RestMethodTag.methodName) extends BodyMethodTag(HttpMethod.DELETE) {
-  @rpcNamePrefix("delete_", overloadedOnly = true) type Implied
+  @rpcNamePrefix("delete_", overloadedOnly = true)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 /**
@@ -158,7 +165,8 @@ class CustomBody extends SomeBodyTag
   *
   * By default, parameters of a prefix method are interpreted as URL path fragments. Their values are encoded as
   * [[io.udash.rest.raw.PlainValue PlainValue]] and appended to URL path. Alternatively, each parameter may also be
-  * explicitly annotated with [[io.udash.rest.Header Header]] or [[io.udash.rest.Query Query]].
+  * explicitly annotated with [[io.udash.rest.Header Header]], [[io.udash.rest.Query Query]] or
+  * [[io.udash.rest.Cookie Cookie]].
   *
   * NOTE: REST method is interpreted as prefix method by default which means that there is no need to apply
   * [[io.udash.rest.Prefix Prefix]] annotation explicitly unless you want to specify a custom path.
@@ -217,7 +225,7 @@ class Query(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with NonBodyTag
 
 /**
-  * REST method parameterrs annotated with [[io.udash.rest.Query Query]] will be encoded as
+  * REST method parameterrs annotated with [[io.udash.rest.Cookie Cookie]] will be encoded as
   * [[io.udash.rest.raw.PlainValue PlainValue]] and sent as cookie values (using `Cookie` HTTP header).
   * Cookie parameter values must not contain ';' character (semicolon).
   */

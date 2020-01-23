@@ -1,8 +1,8 @@
-package io.udash.bootstrap.badge
+package io.udash.bootstrap
+package badge
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom.Element
 import scalatags.JsDom.TypedTag
@@ -21,7 +21,7 @@ class UdashBadge private[badge](
 
   override val render: Element = {
     baseTag(
-      id := componentId, BootstrapStyles.Badge.badge,
+      componentId, BootstrapStyles.Badge.badge,
       nestedInterceptor((BootstrapStyles.Badge.color _).reactiveApply(badgeStyle)),
       nestedInterceptor(BootstrapStyles.Badge.pill.styleIf(pillStyle))
     )(content(nestedInterceptor)).render
@@ -54,7 +54,7 @@ object UdashBadge {
   def apply(
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadge(badgeStyle, pillStyle, componentId)(content)
   }
@@ -74,7 +74,7 @@ object UdashBadge {
     link: ReadableProperty[String],
     badgeStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
     pillStyle: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashBadge = {
     new UdashBadgeLink(link, badgeStyle, pillStyle, componentId)(content)
   }

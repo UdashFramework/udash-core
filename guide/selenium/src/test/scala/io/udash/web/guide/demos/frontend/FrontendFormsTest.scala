@@ -2,30 +2,18 @@ package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByClassName, ByCssSelector, ByTagName}
+import org.openqa.selenium.{By, Keys}
 
-import scala.collection.JavaConverters._
+import com.avsystem.commons._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {
-  val url = "/frontend/forms"
+  override protected final val url = "/frontend/forms"
 
   "FrontendForms view" should {
-    driver.get(server.createUrl(url))
-
-    "contain demo elements" in {
-      eventually {
-        driver.findElementById("checkbox-demo")
-        driver.findElementById("check-buttons-demo")
-        driver.findElementById("multi-select-demo")
-        driver.findElementById("radio-buttons-demo")
-        driver.findElementById("select-demo")
-        driver.findElementById("text-area-demo")
-        driver.findElementById("inputs-demo")
-      }
-    }
 
     "contain working checkbox demo" in {
-      val checkboxes = driver.findElementById("checkbox-demo")
+      val checkboxes = findElementById("checkbox-demo")
 
       def clickAndCheck(propertyName: String, expect: String) = {
         val checkbox = checkboxes.findElement(new ByClassName(s"checkbox-demo-$propertyName"))
@@ -51,7 +39,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working check buttons demo" in {
-      val checkButtons = driver.findElementById("check-buttons-demo")
+      val checkButtons = findElementById("check-buttons-demo")
 
       def clickAndCheck(propertyName: String) = {
         val checkbox = checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
@@ -73,7 +61,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working multi select demo" in {
-      val multiSelect = driver.findElementById("multi-select-demo")
+      val multiSelect = findElementById("multi-select-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = multiSelect.findElement(new ByTagName("select"))
@@ -98,7 +86,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working radio buttons demo" in {
-      val radioButtons = driver.findElementById("radio-buttons-demo")
+      val radioButtons = findElementById("radio-buttons-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
@@ -122,7 +110,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working select demo" in {
-      val selectDemo = driver.findElementById("select-demo")
+      val selectDemo = findElementById("select-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
         val select = selectDemo.findElement(new ByTagName("select"))
@@ -146,7 +134,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working text area demo" in {
-      val textAreaDemo = driver.findElementById("text-area-demo")
+      val textAreaDemo = findElementById("text-area-demo")
 
       def typeAndCheck(text: String) = {
         val textArea = textAreaDemo.findElement(new ByTagName("textarea"))
@@ -165,7 +153,7 @@ class FrontendFormsTest extends SeleniumTest {
     }
 
     "contain working text input demo" in {
-      val inputsDemo = driver.findElementById("inputs-demo")
+      val inputsDemo = findElementById("inputs-demo")
 
       def typeAndCheck(text: String, tpe: String) = {
         val input = inputsDemo.findElement(new ByCssSelector(s"input[type=$tpe]"))
@@ -182,6 +170,107 @@ class FrontendFormsTest extends SeleniumTest {
         typeAndCheck(Random.shuffle(Seq("Apple", "Orange", "Banana")).head, "text")
         typeAndCheck(Random.shuffle(Seq("Apple", "Orange", "Banana")).head, "password")
         typeAndCheck(Random.shuffle(Seq("123354", "-123", "32")).head, "number")
+      }
+    }
+
+    //todo migrate content from udash selenium or remove
+    "contain working range input demo" ignore {
+      val demo = findElementById("range-input-demo")
+
+      val minInput = demo.findElement(By.id("range-min"))
+      val maxInput = demo.findElement(By.id("range-max"))
+      val stepInput = demo.findElement(By.id("range-step"))
+      val selector1 = demo.findElement(By.id("range-selector1"))
+      val selector2 = demo.findElement(By.id("range-selector2"))
+      val label1 = demo.findElement(By.id("range-label1"))
+      val label2 = demo.findElement(By.id("range-label2"))
+
+      minInput.clear()
+      minInput.sendKeys("0")
+      maxInput.clear()
+      maxInput.sendKeys("100")
+      stepInput.clear()
+      stepInput.sendKeys("1")
+
+      for (_ <- 0 to 200) selector1.sendKeys(Keys.LEFT)
+      eventually {
+        label1.getText should be("Range selector: 0")
+        label2.getText should be("Second selector: 0")
+      }
+
+      for (i <- 1 to 10) {
+        selector2.sendKeys(Keys.RIGHT)
+        eventually {
+          label1.getText should be(s"Range selector: $i")
+          label2.getText should be(s"Second selector: $i")
+        }
+      }
+
+      stepInput.clear()
+      stepInput.sendKeys("2")
+
+      for (i <- 1 to 10) {
+        selector1.sendKeys(Keys.RIGHT)
+        eventually {
+          label1.getText should be(s"Range selector: ${i * 2 + 10}")
+          label2.getText should be(s"Second selector: ${i * 2 + 10}")
+        }
+      }
+
+      stepInput.clear()
+      stepInput.sendKeys("25")
+      eventually {
+        label1.getText should be("Range selector: 25")
+        label2.getText should be("Second selector: 25")
+      }
+
+      for (i <- 1 to 2) {
+        selector2.sendKeys(Keys.RIGHT)
+        eventually {
+          label1.getText should be(s"Range selector: ${i * 25 + 25}")
+          label2.getText should be(s"Second selector: ${i * 25 + 25}")
+        }
+      }
+
+      for (_ <- 1 to 20) {
+        selector1.sendKeys(Keys.RIGHT)
+        eventually {
+          label1.getText should be(s"Range selector: 100")
+          label2.getText should be(s"Second selector: 100")
+        }
+      }
+
+      stepInput.clear()
+      stepInput.sendKeys("5")
+      maxInput.clear()
+      maxInput.sendKeys("65")
+
+      eventually {
+        label1.getText should be(s"Range selector: 65")
+        label2.getText should be(s"Second selector: 65")
+      }
+
+      maxInput.clear()
+      maxInput.sendKeys("253")
+      minInput.clear()
+      minInput.sendKeys("89")
+
+      eventually {
+        label1.getText should be(s"Range selector: 89")
+        label2.getText should be(s"Second selector: 89")
+      }
+
+      for (i <- 1 to 200) {
+        selector1.sendKeys(Keys.RIGHT)
+        eventually {
+          label1.getText should be(s"Range selector: ${math.min(i * 5 + 89, 249)}")
+          label2.getText should be(s"Second selector: ${math.min(i * 5 + 89, 249)}")
+        }
+      }
+
+      eventually {
+        label1.getText should be(s"Range selector: 249")
+        label2.getText should be(s"Second selector: 249")
       }
     }
   }

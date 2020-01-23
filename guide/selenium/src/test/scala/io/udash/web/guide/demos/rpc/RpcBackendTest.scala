@@ -1,22 +1,15 @@
 package io.udash.web.guide.demos.rpc
 
 import io.udash.web.SeleniumTest
+import org.scalatest.BeforeAndAfterEach
 
-class RpcBackendTest extends SeleniumTest {
-  val rpcBackendUrl = "/rpc/client-server"
+class RpcBackendTest extends SeleniumTest with BeforeAndAfterEach {
+  override protected final val url = "/rpc/client-server"
 
-  "Rpcbackend view" should {
-    driver.get(server.createUrl(rpcBackendUrl))
-
-    "contain example button" in {
-      eventually {
-        driver.findElementById("client-id-demo")
-      }
-    }
-
+  "RpcBackend view" should {
     "receive ClientId in demo" in {
-      val callDemo = driver.findElementById("client-id-demo")
-      var response = driver.findElementById("client-id-demo-response")
+      val callDemo = findElementById("client-id-demo")
+      var response = findElementById("client-id-demo-response")
 
       callDemo.isEnabled should be(true)
       response.getText.equalsIgnoreCase("???") should be(true)
@@ -24,7 +17,7 @@ class RpcBackendTest extends SeleniumTest {
       callDemo.click()
 
       eventually {
-        response = driver.findElementById("client-id-demo-response")
+        response = findElementById("client-id-demo-response")
         response.getText.startsWith("ClientId") should be(true)
         callDemo.isEnabled should be(false)
       }

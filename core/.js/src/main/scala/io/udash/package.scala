@@ -3,8 +3,7 @@ package io
 package object udash
   extends io.udash.bindings.Bindings
   with io.udash.properties.Properties
-  with io.udash.routing.Routing
-  with io.udash.component.Components {
+    with io.udash.routing.Routing {
 
   // Defaults
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
@@ -17,17 +16,12 @@ package object udash
   type Presenter[S <: State] = io.udash.core.Presenter[S]
 
   type ViewFactory[S <: State] = io.udash.core.ViewFactory[S]
-  type ContainerViewFactory[S <: ContainerState] = io.udash.core.ContainerViewFactory[S]
-  type FinalViewFactory[S <: FinalState] = io.udash.core.FinalViewFactory[S]
 
   type View = io.udash.core.View
   type ContainerView = io.udash.core.ContainerView
-  type FinalView = io.udash.core.FinalView
 
   type State = io.udash.core.State
   type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
-  type ContainerState = io.udash.core.ContainerState
-  type FinalState = io.udash.core.FinalState
 
   type RoutingRegistry[HierarchyRoot <: State] = io.udash.routing.RoutingRegistry[HierarchyRoot]
 
@@ -41,4 +35,7 @@ package object udash
 
   // View
   type ViewRenderer = io.udash.view.ViewRenderer
+
+  type ComponentId = io.udash.component.ComponentId
+  final val ComponentId = io.udash.component.ComponentId
 }

@@ -6,12 +6,11 @@ import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
-import io.udash.properties.{PropertyCreator, seq}
-import org.scalajs.dom.Element
-import org.scalajs.dom.Event
+import io.udash.properties.seq
+import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
 
-final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]] private(
+final class UdashPagination[PageType, ElemType <: ReadableProperty[PageType]] private(
   pages: seq.ReadableSeqProperty[PageType, ElemType],
   selectedPageIdx: Property[Int],
   paginationSize: ReadableProperty[Option[BootstrapStyles.Size]],
@@ -56,7 +55,7 @@ final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProp
 
     tags2.nav(
       ul(
-        id := componentId, BootstrapStyles.Pagination.pagination,
+        componentId, BootstrapStyles.Pagination.pagination,
         nestedInterceptor((BootstrapStyles.Pagination.size _).reactiveOptionApply(paginationSize)),
         additionalListModifiers(nestedInterceptor)
       )(
@@ -173,13 +172,13 @@ object UdashPagination {
     * @tparam ElemType A type of a property containing an element in the `items` sequence.
     * @return A `UdashPagination` component, call `render` to create a DOM element.
     */
-  def apply[PageType: PropertyCreator, ElemType <: ReadableProperty[PageType]](
+  def apply[PageType, ElemType <: ReadableProperty[PageType]](
     pages: seq.ReadableSeqProperty[PageType, ElemType],
     selectedPageIdx: Property[Int],
     paginationSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     showArrows: ReadableProperty[Boolean] = UdashBootstrap.True,
     highlightActive: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     itemFactory: (ElemType, ReadableProperty[Int], Binding.NestedInterceptor) => Modifier = defaultPageFactory,
     arrowFactory: (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier = defaultArrowFactory(),

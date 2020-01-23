@@ -9,6 +9,18 @@ import scalatags.JsDom.all._
 object FileInput {
 
   /**
+    * Creates a file input providing information about the selected file.
+    *
+    * @param selectedFile This property contains information about the file selected by user.
+    * @param inputName Input element name.
+    * @param inputModifiers Additional modifiers to apply on a generated input.
+    * @return
+    */
+  def single(selectedFile: Property[File])(inputName: String, inputModifiers: Modifier*): InputBinding[JSInput] = {
+    apply(selectedFile.bitransformToSeq(Seq(_))(_.head), false.toProperty)(inputName, inputModifiers)
+  }
+
+  /**
     * Creates file input providing information about selected files.
     *
     * @param selectedFiles This property contains information about files selected by user.

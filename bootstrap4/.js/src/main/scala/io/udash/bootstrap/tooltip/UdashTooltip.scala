@@ -8,8 +8,8 @@ import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
-final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery)
-  extends Tooltip[TooltipEvent[UdashTooltip], UdashTooltip] {
+final class UdashTooltip private(selector: UdashTooltip.UdashTooltipJQuery) extends Tooltip {
+
   /** Shows the tooltip. */
   def show(): Unit =
     selector.tooltip("show")
@@ -46,7 +46,7 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
     new UdashTooltip(tp)
   }
 
-  override protected val defaultPlacement: (dom.Node, dom.Node) => Seq[Placement] = (_, _) => Seq(Placement.Top)
+  override protected val defaultPlacement = Placement.Top
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
     import scalatags.Text.all._

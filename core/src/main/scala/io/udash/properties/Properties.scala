@@ -23,17 +23,8 @@ trait Properties {
   type Blank[T] = io.udash.properties.Blank[T]
   final val Blank = io.udash.properties.Blank
 
-  type ValidationError = io.udash.properties.ValidationError
-  type DefaultValidationError = io.udash.properties.DefaultValidationError
-  type Validator[T] = io.udash.properties.Validator[T]
-  type ValidationResult = io.udash.properties.ValidationResult
-  final val Valid = io.udash.properties.Valid
-  final val Invalid = io.udash.properties.Invalid
-  final val DefaultValidationError = io.udash.properties.DefaultValidationError
-
   import Properties._
   implicit def any2Property[A](value: A): Any2Property[A] = new Any2Property(value)
-  implicit def any2ModelProperty[A: ModelPropertyCreator](value: A): Any2ModelProperty[A] = new Any2ModelProperty(value)
   implicit def any2SeqProperty[A](value: Seq[A]): Any2SeqProperty[A] = new Any2SeqProperty(value)
   implicit def propertySeq2SeqProperty[A](value: ISeq[ReadableProperty[A]]): PropertySeq2SeqProperty[A] = new PropertySeq2SeqProperty(value)
   implicit def booleanProp2BooleanOpsProperty(value: Property[Boolean]): BooleanPropertyOps = new BooleanPropertyOps(value)
@@ -41,6 +32,8 @@ trait Properties {
 
 object Properties extends Properties {
   class Any2Property[A] private[properties](private val value: A) extends AnyVal {
+    def toProperty[B >: A : PropertyCreator]: ReadableProperty[B] = PropertyCreator[B].newImmutableProperty(value)
+    def toModelProperty[B >: A : ModelPropertyCreator]: ReadableModelProperty[B] = ModelPropertyCreator[B].newImmutableProperty(value)
     def toProperty[B >: A]: ReadableProperty[B] = new ImmutableProperty[B](value)
   }
 
@@ -48,6 +41,8 @@ object Properties extends Properties {
     def toModelProperty[B >: A : ModelPropertyCreator]: ReadableModelProperty[B] = new ImmutableModelProperty[B](value)
   }
 
+  class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {
+    def toSeqProperty: ReadableSeqProperty[A] = new ImmutableSeqProperty[A, Seq](value)
   class Any2SeqProperty[A] private[properties](private val value: BSeq[A]) extends AnyVal {
     def toSeqProperty[B >: A]: ReadableSeqProperty[B] = new ImmutableSeqProperty[B](value)
   }

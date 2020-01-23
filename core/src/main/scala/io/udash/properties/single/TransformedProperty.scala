@@ -1,10 +1,8 @@
 package io.udash.properties
 package single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.utils.Registration
-
-import scala.concurrent.Future
 
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties] class TransformedReadableProperty[A, B](
@@ -16,15 +14,21 @@ private[properties] class TransformedReadableProperty[A, B](
   protected var originListenerRegistration: Registration = _
 
   protected def originListener(originValue: A) : Unit = {
-    lastValue = Opt(originValue)
-    transformedValue = transformer(originValue)
-    fireValueListeners()
+    val forced = lastValue.contains(originValue) //if the listener was triggered despite equal value, the update was forced
+    val newValue = transformer(originValue)
+    val transformedValueChanged = newValue != transformedValue
+    lastValue = originValue.opt
+    transformedValue = newValue
+    if (forced || transformedValueChanged) valueChanged()
   }
 
   private def initOriginListener(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
       originListenerRegistration = origin.listen(originListener)
+      val originValue = origin.get
+      lastValue = originValue.opt
+      lastValue.foreach(v => transformedValue = transformer(v))
     }
   }
 
@@ -63,7 +67,7 @@ private[properties] class TransformedReadableProperty[A, B](
 
   override def get: B = {
     val originValue = origin.get
-    if (lastValue.isEmpty || lastValue.get != originValue) {
+    if (originListenerRegistration == null && (lastValue.isEmpty || lastValue.get != originValue)) {
       lastValue = Opt(originValue)
       transformedValue = transformer(originValue)
     }
@@ -77,8 +81,6 @@ private[properties] class TransformedProperty[A, B](
   transformer: A => B, revert: B => A
 ) extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
 
-  protected var originValidatorRegistration: Registration = _
-
   override def set(t: B, force: Boolean = false): Unit =
     origin.set(revert(t), force)
 
@@ -87,35 +89,6 @@ private[properties] class TransformedProperty[A, B](
 
   override def touch(): Unit =
     origin.touch()
-
-  private def initOriginValidator(): Unit = {
-    if (originValidatorRegistration == null || !originValidatorRegistration.isActive) {
-      super.clearValidators()
-      originValidatorRegistration = origin.addValidator(new Validator[A] {
-        override def apply(element: A): Future[ValidationResult] = {
-          import Validator._
-
-          import scala.concurrent.ExecutionContext.Implicits.global
-
-          val transformedValue = transformer(element)
-          Future.sequence(
-            validators.map(_.apply(transformedValue)).toSeq
-          ).foldValidationResult
-        }
-      })
-    }
-  }
-
-  override def addValidator(v: Validator[B]): Registration = {
-    initOriginValidator()
-    super.addValidator(v)
-  }
-
-  override def clearValidators(): Unit = {
-    originValidatorRegistration = null
-    super.clearValidators()
-    origin.clearValidators()
-  }
 
   override def clearListeners(): Unit = {
     originListenerRegistration = null

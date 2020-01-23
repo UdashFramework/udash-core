@@ -4,21 +4,12 @@ import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
 
 class JQueryDemosTest extends SeleniumTest {
-  val url = "/ext/jquery"
+  override protected final val url = "/ext/jquery"
 
   "JQueryExt view" should {
-    driver.get(server.createUrl(url))
-
-    "contain demo elements" in {
-      eventually {
-        driver.findElementById("jquery-events-demo")
-        driver.findElementById("jquery-callbacks-demo")
-      }
-    }
-
     "contain working events demo" in {
       driver.navigate().refresh()
-      def events = driver.findElementById("jquery-events-demo")
+      def events = findElementById("jquery-events-demo")
 
       val clickButton = events.findElement(new ById("click"))
       val offButton = events.findElement(new ById("off"))
@@ -44,7 +35,7 @@ class JQueryDemosTest extends SeleniumTest {
 
     "contain working events demo (instant off)" in {
       driver.navigate().refresh()
-      def events = driver.findElementById("jquery-events-demo")
+      def events = findElementById("jquery-events-demo")
 
       val clickButton = events.findElement(new ById("click"))
       val offButton = events.findElement(new ById("off"))
@@ -63,7 +54,7 @@ class JQueryDemosTest extends SeleniumTest {
     }
 
     "contain working callbacks demo" in {
-      def events = driver.findElementById("jquery-callbacks-demo")
+      def events = findElementById("jquery-callbacks-demo")
 
       val clickButton = events.findElement(new ById("fire"))
       val plusList = events.findElement(new ById("plus"))

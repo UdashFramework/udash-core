@@ -48,7 +48,7 @@ trait HeaderButtonsStyles extends CssBase {
     textAlign.center,
     visibility.hidden,
     opacity(0),
-    pointerEvents := none,
+    pointerEvents.none,
 
     MediaQueries.tabletLandscape(
       display.none

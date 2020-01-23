@@ -30,26 +30,39 @@ class ImmutablePropertyTest extends UdashCoreTest {
 
   "ImmutableModelProperty" should {
     "handle standard operations of ReadableModelProperty" in {
-      val e = ModelEntity("a", Seq(1), ModelEntity("b", Seq(2), ModelEntity("c", Seq(3,4), null)))
+      val e = ModelEntity("a", Seq(1), Vector(2, 3), ModelEntity("b", Seq(4), Vector(5, 6), ModelEntity("c", Seq(7), Vector(8, 9), null)))
       val p: ReadableModelProperty[ModelEntity] = new ImmutableModelProperty[ModelEntity](e)
 
       p.get should be(e)
-      p.roSubProp(_.i).get should be(Seq(1))
       p.roSubProp(_.s).get should be("a")
+      p.roSubProp(_.i).get should be(Seq(1))
+      p.roSubProp(_.v).get shouldBe a[Vector[_]]
+      p.roSubSeq(_.v).get shouldBe a[Vector[_]]
+      p.roSubProp(_.v).get should be(Vector(2, 3))
+      p.roSubSeq(_.v).get should be(Vector(2, 3))
       p.roSubProp(_.m).get should be(e.m)
-      p.roSubProp(_.m.i).get should be(Seq(2))
+      p.roSubProp(_.m.i).get should be(Seq(4))
       p.roSubProp(_.m.s).get should be("b")
-      p.roSubSeq(_.m.m.i).elemProperties.head.get should be(3)
+      p.roSubSeq(_.m.m.i).elemProperties.head.get should be(7)
+      p.roSubSeq(_.m.m.v).get shouldBe a[Vector[_]]
+      p.roSubSeq(_.m.m.v).elemProperties.head.get should be(8)
+    }
+
+    "handle nested model" in {
+      import io.udash.properties.Properties._
+      val p = Nested(Nested(null)).toModelProperty
+
+      p.roSubModel(_.s).roSubProp(_.s).get shouldBe null
     }
   }
 
   "ImmutableSeqProperty" should {
     "handle standard operations of ReadableSeqProperty" in {
-      val p: ReadableSeqProperty[Int, ReadableProperty[Int]] = new ImmutableSeqProperty[Int](Seq(1,2,3))
+      val p: ReadableSeqProperty[Int, ReadableProperty[Int]] = new ImmutableSeqProperty[Int, Seq](Seq(1, 2, 3))
 
       p.get should be(Seq(1,2,3))
       p.elemProperties.map(_.get) should be(Seq(1,2,3))
-      p.transform((v: Int) => v + 1).get should be(Seq(2,3,4))
+      p.transformElements(_ + 1).get should be(Seq(2, 3, 4))
 
       var counter = 0
       p.listen(_ => counter += 1)
@@ -63,6 +76,9 @@ class ImmutablePropertyTest extends UdashCoreTest {
 }
 
 object ImmutablePropertyTest {
-  case class ModelEntity(s: String, i: Seq[Int], m: ModelEntity)
+  case class Nested(s: Nested)
+  object Nested extends HasModelPropertyCreator[Nested]
+
+  case class ModelEntity(s: String, i: Seq[Int], v: Vector[Int], m: ModelEntity)
   object ModelEntity extends HasModelPropertyCreator[ModelEntity]
 }

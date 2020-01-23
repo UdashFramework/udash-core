@@ -1,33 +1,25 @@
 package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
+import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {
-  val url = "/frontend/routing"
+  override protected final val url = "/frontend/routing"
 
   "FrontendRouting view" should {
     "contain demo element" in {
-      driver.get(server.createUrl(url))
-      eventually {
-        val link = driver.findElementById("url-demo-link")
-        driver.findElementById("url-demo-link-apple")
-        driver.findElementById("url-demo-link-orange")
-        driver.findElementById("url-demo-link-chocolate")
-        driver.findElementById("url-demo-link-pizza")
-
+      val link = findElementById("url-demo-link")
         link.getText should be("/frontend/routing")
-      }
     }
 
     "change URL without view redraw" in {
-      driver.get(server.createUrl(url))
-      val link = driver.findElementById("url-demo-link")
-      val input = driver.findElementById("url-demo-input")
+      val link = findElementById("url-demo-link")
+      val input = findElementById("url-demo-input")
 
-      val apple = driver.findElementById("url-demo-link-apple")
-      val orange = driver.findElementById("url-demo-link-orange")
-      val chocolate = driver.findElementById("url-demo-link-chocolate")
-      val pizza = driver.findElementById("url-demo-link-pizza")
+      val apple = findElementById("url-demo-link-apple")
+      val orange = findElementById("url-demo-link-orange")
+      val chocolate = findElementById("url-demo-link-chocolate")
+      val pizza = findElementById("url-demo-link-pizza")
 
       link.getText should be("/frontend/routing")
 
@@ -63,12 +55,11 @@ class FrontendRoutingTest extends SeleniumTest {
     }
 
     "change URL basing on input without view redraw" in {
-      driver.get(server.createUrl(url))
-      val link = driver.findElementById("url-demo-link")
-      val input = driver.findElementById("url-demo-input")
+      val link = findElementById("url-demo-link")
+      val input = findElementById("url-demo-input")
 
-      val linkChanger = driver.findElementById("url-demo-link-input")
-      val init = driver.findElementById("url-demo-link-init")
+      val linkChanger = findElementById("url-demo-link-input")
+      val init = findElementById("url-demo-link-init")
 
       init.getText should be("/frontend/routing")
       link.getText should be("/frontend/routing")
@@ -91,6 +82,34 @@ class FrontendRoutingTest extends SeleniumTest {
 
       init.getText should be("/frontend/routing")
       input.getAttribute("value") should be("It should not disappear... Selenium")
+    }
+
+    //todo migrate content from udash selenium or remove
+    "collect url changes" ignore {
+      val demoContainer = findElementById("routing-logger-demo")
+      val enableCheckbox = demoContainer.findElement(By.cssSelector("label[for=\"turn-on-logger\"]"))
+      val history = demoContainer.findElement(By.id("routing-history"))
+      val linkChanger = findElementById("url-demo-link-input")
+
+      enableCheckbox.click()
+      history.getText should be("")
+
+      linkChanger.sendKeys("test")
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test"
+        )
+      }
+
+      linkChanger.clear()
+      linkChanger.sendKeys("qwe")
+
+      eventually {
+        history.getText should be(
+          "Some(/frontend/routing) -> /frontend/routing/test\n" +
+            "Some(/frontend/routing/test) -> /frontend/routing/qwe"
+        )
+      }
     }
   }
 }

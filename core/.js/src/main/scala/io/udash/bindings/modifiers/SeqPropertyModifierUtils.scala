@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons._
 import io.udash.bindings.Bindings._
 import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.ReadableProperty
@@ -8,34 +8,27 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
-private[bindings]
-trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
+private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with DOMManipulator {
 
   protected val property: ReadableSeqProperty[T, E]
   protected def build(item: E): Seq[Node]
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
-  private val producedElementsCount = scala.collection.mutable.ArrayBuffer[Int]()
-  protected val nestedBindingsByProperty: js.Dictionary[js.Array[Binding]] = js.Dictionary.empty
+  private val producedElementsCount = MArrayBuffer[Int]()
+  private val nestedBindingsByProperty: MHashMap[E, js.Array[Binding]] = MHashMap.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
     super.nestedInterceptor(binding)
     binding.setup { b =>
-      val id: String = p.id.toString
-      if (!nestedBindingsByProperty.contains(id)) {
-        nestedBindingsByProperty(id) = js.Array()
-      }
-      nestedBindingsByProperty(id).push(b)
+      nestedBindingsByProperty.getOrElseUpdate(p, js.Array()).push(b)
     }
   }
 
   def clearPropertyAwareNestedInterceptor(p: E): Unit = {
-    val id = p.id.toString
-    if (nestedBindingsByProperty.contains(id)) {
-      nestedBindingsByProperty(id).foreach(_.kill())
-      nestedBindingsByProperty(id).length = 0
-      nestedBindingsByProperty.remove(id)
+    nestedBindingsByProperty.remove(p).foreach { bindings =>
+      bindings.foreach(_.kill())
+      bindings.length = 0
     }
   }
 
@@ -96,7 +89,7 @@ trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] extends Binding with
       }
 
       val sizeChange = patch.added.size - patch.removed.size
-      if (sizeChange > 0) producedElementsCount.insert(patch.idx, Seq.fill(sizeChange)(0): _*)
+      if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
       else producedElementsCount.remove(patch.idx, -sizeChange)
       newElements.zipWithIndex.foreach {
         case (res, idx) =>

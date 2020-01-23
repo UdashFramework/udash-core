@@ -1,7 +1,8 @@
 package io.udash.utils
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash._
-import io.udash.properties.{Blank, HasModelPropertyCreator}
+import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
 import org.scalajs.dom._
 import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
@@ -17,6 +18,13 @@ class FileUploader(url: Url) {
       (0 until input.files.length).map(input.files.item)
     )
 
+  /** Uploads provided `file` in a field named `fieldName`. */
+  def uploadFile(
+    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty
+  ): ReadableModelProperty[FileUploadModel] = {
+    upload(fieldName, Seq(file), extraData)
+  }
+
   /** Uploads provided `files` in a field named `fieldName`. */
   def upload(
     fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty
@@ -28,7 +36,7 @@ class FileUploader(url: Url) {
 
     extraData.foreach { case (key, value) => data.append(key, value) }
     files.foreach(file => {
-      data.append(s"$fieldName[]", file)
+      data.append(fieldName, file)
       p.subSeq(_.files).append(file)
     })
 
@@ -39,7 +47,7 @@ class FileUploader(url: Url) {
         p.subProp(_.bytesTotal).set(ev.total)
       }
     )
-    xhr.addEventListener("load", (ev: Event) => {
+    xhr.addEventListener("load", (_: Event) => {
         p.subProp(_.response).set(Some(new HttpResponse(xhr)))
         p.subProp(_.state).set(xhr.status / 100 match {
           case 2 => FileUploadState.Completed
@@ -47,10 +55,10 @@ class FileUploader(url: Url) {
         })
       }
     )
-    xhr.addEventListener("error", (ev: Event) =>
+    xhr.addEventListener("error", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
     )
-    xhr.addEventListener("abort", (ev: Event) =>
+    xhr.addEventListener("abort", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)
@@ -61,7 +69,7 @@ class FileUploader(url: Url) {
 }
 
 object FileUploader {
-  sealed trait FileUploadState
+  sealed trait FileUploadState extends AbstractCase
   object FileUploadState {
     case object NotStarted extends FileUploadState
     case object InProgress extends FileUploadState
@@ -74,7 +82,7 @@ object FileUploader {
     implicit val blank: Blank[FileUploadState] = Blank.Simple(NotStarted)
   }
 
-  class HttpResponse(private val xhr: XMLHttpRequest) {
+  final class HttpResponse(private val xhr: XMLHttpRequest) {
     def text: Option[String] = Option(xhr.responseText)
     def responseHeader(header: String): Option[String] = Option(xhr.getResponseHeader(header))
     def responseType: Option[String] = if (xhr.responseType.nonEmpty) Some(xhr.responseType) else None
@@ -82,8 +90,11 @@ object FileUploader {
     def xml: Option[Document] = Option(xhr.responseXML)
     def statusCode: Int = xhr.status
   }
+  object HttpResponse {
+    implicit val pc: PropertyCreator[HttpResponse] = PropertyCreator.materializeSingle
+  }
 
-  class FileUploadModel(
+  final class FileUploadModel(
     val files: Seq[File],
     val state: FileUploadState,
     val bytesSent: Double,

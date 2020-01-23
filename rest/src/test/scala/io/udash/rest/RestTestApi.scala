@@ -3,7 +3,7 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.{flatten, whenAbsent}
+import com.avsystem.commons.serialization.{GenCodec, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
@@ -34,11 +34,11 @@ case object SingletonEntity extends FlatBaseEntity
 case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
-    cr => RestResponse(200, IMapping("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
+    cr => RestResponse(200, IMapping.create("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
     resp => CustomResp(resp.headers("X-Value").value)
   )
   implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {
-    def responses(resolver: SchemaResolver, schemaTransform: RestSchema[CustomResp] => RestSchema[_]): Responses =
+    def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
       Responses(byStatusCode = Map(200 -> RefOr(Response(
         description = "Custom response",
         headers = Map("X-Value" -> RefOr(OASHeader(
@@ -55,6 +55,17 @@ object CustomResp {
 case class Bytes(bytes: Array[Byte]) extends AnyVal
 object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
 
+case class ThirdParty(thing: Int)
+object ThirdPartyImplicits {
+  implicit val thirdPartyCodec: GenCodec[ThirdParty] =
+    GenCodec.materialize[ThirdParty]
+  implicit val thirdPartySchema: RestSchema[ThirdParty] =
+    RestStructure.materialize[ThirdParty].standaloneSchema
+}
+
+case class HasThirdParty(dur: ThirdParty)
+object HasThirdParty extends RestDataCompanionWithDeps[ThirdPartyImplicits.type, HasThirdParty]
+
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
   @GET def failingGet: Future[Unit]
@@ -69,7 +80,7 @@ trait RestTestApi {
     @Path("p1") p1: Int, @description("Very serious path parameter") @title("Stri") @Path p2: String,
     @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
     q1: Int, @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
-    @Cookie c1: Int, @Cookie("coo") c2: String
+    @Cookie c1: Int, @Cookie("có") c2: String
   ): Future[RestEntity]
 
   @POST("multi/param") def multiParamPost(
@@ -117,13 +128,14 @@ trait RestTestApi {
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
   @CustomBody def wrappedBinaryEcho(bytes: Bytes): Future[Bytes]
   @CustomBody def wrappedBody(id: RestEntityId): Future[RestEntityId]
+  @CustomBody def thirdPartyBody(param: HasThirdParty): Future[HasThirdParty]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   val Impl: RestTestApi = new RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
-    def neverGet: Future[Unit] = Promise[Unit].future // Future.never if it wasn't for Scala 2.11
+    def neverGet: Future[Unit] = Promise[Unit].future // https://github.com/scala-js/scala-js/issues/3818
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))
@@ -142,6 +154,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
+    def thirdPartyBody(dur: HasThirdParty): Future[HasThirdParty] = Future.successful(dur)
   }
 }
 

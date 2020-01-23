@@ -1,43 +1,18 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.seq.{SeqProperty, SeqPropertyFromSingleValue}
 import io.udash.utils.Registration
 
-import scala.util.{Failure, Success}
-
 object Property {
   /** Creates a blank `DirectProperty[T]`.  */
-  def blank[T](implicit pc: PropertyCreator[T], blank: Blank[T]): CastableProperty[T] =
-    pc.newProperty(null)(blank)
+  def blank[T: PropertyCreator : Blank]: CastableProperty[T] =
+    PropertyCreator[T].newProperty(null)
 
   /** Creates `DirectProperty[T]` with initial value. */
-  def apply[T](init: T)(implicit pc: PropertyCreator[T]): CastableProperty[T] =
-    pc.newProperty(init, null)
-
-  private[single] class ValidationProperty[A](target: ReadableProperty[A]) {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    private var initialized: Boolean = false
-    private var p: Property[ValidationResult] = _
-    private val listener = (_: A) => target.isValid onComplete {
-      case Success(result) => p.set(result)
-      case Failure(ex) => p.set(Invalid(ex.getMessage))
-    }
-
-    def property: ReadableProperty[ValidationResult] = {
-      if (!initialized) {
-        initialized = true
-        p = Property[ValidationResult](Valid)
-        listener(target.get)
-        target.listen(listener)
-      }
-      p.readable
-    }
-
-    def clear(): Unit =
-      if (p != null) p.set(Valid)
-  }
+  def apply[T: PropertyCreator](init: T): CastableProperty[T] =
+    PropertyCreator[T].newProperty(init, null)
 }
 
 /** Property which can be modified. */
@@ -50,17 +25,8 @@ trait Property[A] extends ReadableProperty[A] {
   /** Changes current property value. Does not fire value change listeners. */
   def setInitValue(t: A): Unit
 
-  /** Fires value change listeners with current value and clears validation result. */
+  /** Fires value change listeners with current value. */
   def touch(): Unit
-
-  /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(v: Validator[A]): Registration
-
-  /** Adds new validator and clears current validation result. It does not fire validation process. */
-  def addValidator(f: A => ValidationResult): Registration
-
-  /** Removes all validators from property and clears current validation result. It does not fire validation process. */
-  def clearValidators(): Unit
 
   /** Removes all listeners from property. */
   def clearListeners(): Unit
@@ -73,7 +39,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of new Property.
     * @return New Property[B], which will be synchronised with original Property[A].
     */
-  def transform[B](transformer: A => B, revert: B => A): Property[B]
+  def bitransform[B](transformer: A => B)(revert: B => A): Property[B]
 
   /**
     * Creates SeqProperty[B] linked to `this`. Changes will be synchronized with `this` in both directions.
@@ -83,7 +49,7 @@ trait Property[A] extends ReadableProperty[A] {
     * @tparam B Type of elements in new SeqProperty.
     * @return New ReadableSeqProperty[B], which will be synchronised with original Property[A].
     */
-  def transformToSeq[B](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]]
+  def bitransformToSeq[B](transformer: A => BSeq[B])(revert: BSeq[B] => A): SeqProperty[B, Property[B]]
 
   /**
     * Bidirectionally synchronizes Property[B] with `this`. The transformed value is synchronized from `this`
@@ -100,20 +66,6 @@ trait Property[A] extends ReadableProperty[A] {
 
 /** Property which can be modified. */
 private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A] with Property[A] {
-  override def addValidator(v: Validator[A]): Registration = {
-    validators += v
-    validationResult = null
-    new MutableBufferRegistration(validators, v, Opt.empty)
-  }
-
-  override def addValidator(f: A => ValidationResult): Registration =
-    addValidator(Validator(f))
-
-  override def clearValidators(): Unit = {
-    validators.clear()
-    validationResult = null
-    validationProperty.clear()
-  }
 
   override def clearListeners(): Unit = {
     listenersUpdate()
@@ -121,10 +73,10 @@ private[properties] trait AbstractProperty[A] extends AbstractReadableProperty[A
     oneTimeListeners.clear()
   }
 
-  override def transform[B](transformer: A => B, revert: B => A): Property[B] =
+  override def bitransform[B](transformer: A => B)(revert: B => A): Property[B] =
     new TransformedProperty[A, B](this, transformer, revert)
 
-  override def transformToSeq[B](transformer: A => Seq[B], revert: Seq[B] => A): SeqProperty[B, Property[B]] =
+  override def bitransformToSeq[B](transformer: A => BSeq[B])(revert: BSeq[B] => A): SeqProperty[B, Property[B]] =
     new SeqPropertyFromSingleValue(this, transformer, revert)
 
   override def sync[B](p: Property[B])(transformer: A => B, revert: B => A): Registration = {

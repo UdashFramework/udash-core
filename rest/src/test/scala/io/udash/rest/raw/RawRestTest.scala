@@ -5,9 +5,10 @@ package raw
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import io.udash.rest.util.WithHeaders
 import org.scalactic.source.Position
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funsuite.AnyFunSuite
 
 case class UserId(id: String) extends AnyVal {
   override def toString: String = id
@@ -18,7 +19,8 @@ case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
 
 class omit[T](value: => T) extends AnnotationAggregate {
-  @transientDefault @whenAbsent(value) type Implied
+  @transientDefault @whenAbsent(value)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 trait UserApi {
@@ -59,10 +61,12 @@ trait RootApi {
   def subApi(id: Int, @Query query: String): UserApi
   def fail: Future[Unit]
   def failMore: Future[Unit]
+
+  @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
-class RawRestTest extends FunSuite with ScalaFutures {
+class RawRestTest extends AnyFunSuite with ScalaFutures {
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
     case tb@HttpBody.Textual(content, _, _) =>
@@ -106,6 +110,8 @@ class RawRestTest extends FunSuite with ScalaFutures {
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]] =
+      Future.successful(WithHeaders((), headers.toList))
   }
 
   var trafficLog: String = _
@@ -130,7 +136,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   }
 
   def mkDeep(value: Any): Any = value match {
-    case arr: Array[_] => arr.deep
+    case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
     case _ => value
   }
 
@@ -240,14 +246,25 @@ class RawRestTest extends FunSuite with ScalaFutures {
         |""".stripMargin)
   }
 
+  test("response with headers") {
+    testRestCall(_.echoHeaders(IListMap("X-A" -> "a", "X-B" -> "b")),
+      """-> POST /echoHeaders application/json;charset=utf-8
+        |{"X-A":"a","X-B":"b"}
+        |<- 204
+        |X-A: a
+        |X-B: b
+        |""".stripMargin
+    )
+  }
+
   test("OPTIONS") {
     val request = RestRequest(HttpMethod.OPTIONS, RestParameters(List(PlainValue("user"))), HttpBody.Empty)
-    val response = RestResponse(200, IMapping("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
+    val response = RestResponse(200, IMapping.create("Allow" -> PlainValue("GET,HEAD,PUT,OPTIONS")), HttpBody.Empty)
     assertRawExchange(request, response)
   }
 
   test("HEAD") {
-    val params = RestParameters(List(PlainValue("user")), query = Mapping("userId" -> PlainValue("UID")))
+    val params = RestParameters(List(PlainValue("user")), query = Mapping.create("userId" -> PlainValue("UID")))
     val request = RestRequest(HttpMethod.HEAD, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.empty)
     assertRawExchange(request, response)
@@ -256,7 +273,7 @@ class RawRestTest extends FunSuite with ScalaFutures {
   test("header case insensitivity") {
     val params = RestParameters(
       path = List(PlainValue("eatHeader")),
-      headers = IMapping("x-sTuFf" -> PlainValue("StUfF"))
+      headers = IMapping.create("x-sTuFf" -> PlainValue("StUfF"))
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))

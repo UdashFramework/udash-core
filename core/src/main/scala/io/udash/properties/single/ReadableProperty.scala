@@ -1,25 +1,21 @@
 package io.udash.properties.single
 
-import com.avsystem.commons.misc.Opt
+import com.avsystem.commons._
 import io.udash.properties._
 import io.udash.properties.seq.{ReadableSeqProperty, ReadableSeqPropertyFromSingleValue}
-import io.udash.utils.{CrossCollections, Registration}
-
-import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
+import io.udash.utils.Registration
 
 /** Base interface of every Property in Udash. */
-trait ReadableProperty[A] {
-  /** Unique property ID. */
-  val id: PropertyId
+trait ReadableProperty[+A] {
 
   /** @return Current property value. */
   def get: A
 
   /**
-    * Registers listener which will be called on value change.
-    * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
-    */
+   * Registers listener which will be called on value change.
+   *
+   * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
+   */
   def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
@@ -28,78 +24,59 @@ trait ReadableProperty[A] {
   /** Returns listeners count. */
   def listenersCount(): Int
 
-  /** @return validation result as Future, which will be completed on the validation process ending. It can fire validation process if needed. */
-  def isValid: Future[ValidationResult]
-
-  /** Property containing validation result. */
-  def valid: ReadableProperty[ValidationResult]
-
-  /** Ensures read-only access to this property. */
+  /** Read-only interface of this property. */
   def readable: ReadableProperty[A]
-
-  /** Parent property. `null` if this property has no parent. */
-  protected[properties] def parent: ReadableProperty[_]
-
-  /** Fires value listeners. */
-  protected[properties] def fireValueListeners(): Unit
 
   /** This method should be called when the value has changed. */
   protected[properties] def valueChanged(): Unit
-
-  /** Triggers validation. */
-  protected[properties] def validate(): Unit
 
   /** This method should be called when the listener is registered or removed. */
   protected[properties] def listenersUpdate(): Unit
 
   /**
-    * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
-    *
-    * @param transformer Method transforming type A of existing Property to type B of new Property.
-    * @tparam B Type of new Property.
-    * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
-    */
+   * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
+   *
+   * @param transformer Method transforming type A of existing Property to type B of new Property.
+   * @tparam B Type of new Property.
+   * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
+   */
   def transform[B](transformer: A => B): ReadableProperty[B]
 
   /**
-    * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
-    *
-    * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
-    * @tparam B Type of elements in new SeqProperty.
-    * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
-    */
-  def transformToSeq[B](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
+   * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
+   *
+   * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
+   * @tparam B Type of elements in new SeqProperty.
+   * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
+   */
+  def transformToSeq[B](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Streams value changes to the `target` property.
-    * It is not as strong relation as `transform`, because `target` can change value independently. */
+   * It is not as strong relation as `transform`, because `target` can change value independently. */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
 
   /**
-    * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
-    *
-    * @param property `Property[B]` to combine with `this`.
-    * @param combinedParent Parent of combined property, `null` by default.
-    * @param combiner Method combining values A and B into O.
-    * @tparam B Type of elements in provided property.
-    * @tparam O Output property elements type.
-    * @return Property[O] updated on any change in `this` or `property`.
-    */
-  def combine[B, O](
-    property: ReadableProperty[B], combinedParent: ReadableProperty[_] = null
-  )(combiner: (A, B) => O): ReadableProperty[O] =
-    new CombinedProperty[A, B, O](this, property, combinedParent, combiner)
+   * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
+   *
+   * @param property `Property[B]` to combine with `this`.
+   * @param combiner Method combining values A and B into O.
+   * @tparam B Type of elements in provided property.
+   * @tparam O Output property elements type.
+   * @return Property[O] updated on any change in `this` or `property`.
+   */
+  def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
+    new CombinedProperty[A, B, O](this, property, combiner)
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] final val listeners: mutable.ArrayBuffer[A => Any] = mutable.ArrayBuffer.empty[A => Any]
-  protected[this] final val oneTimeListeners: mutable.ArrayBuffer[Registration] = mutable.ArrayBuffer.empty[Registration]
-
-  protected[this] final lazy val validationProperty: Property.ValidationProperty[A] = new Property.ValidationProperty[A](this)
-  protected[this] final val validators: mutable.Buffer[Validator[A]] = CrossCollections.createArray[Validator[A]]
-  protected[this] var validationResult: Future[ValidationResult] = _
+  protected[this] final val listeners: MArrayBuffer[A => Any] = MArrayBuffer.empty
+  protected[this] final val oneTimeListeners: MArrayBuffer[Registration] = MArrayBuffer.empty
 
   protected def wrapListenerRegistration(reg: Registration): Registration = reg
   protected def wrapOneTimeListenerRegistration(reg: Registration): Registration = wrapListenerRegistration(reg)
+
+  /** Parent property. `null` if this property has no parent. */
+  protected def parent: ReadableProperty[_]
 
   override def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration = {
     listeners += valueListener
@@ -127,18 +104,12 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     if (parent != null) parent.listenersUpdate()
   }
 
-  override def isValid: Future[ValidationResult] = {
-    if (validationResult == null) validate()
-    validationResult
-  }
-
-  override lazy val readable: ReadableProperty[A] =
-    new ReadableWrapper[A](this)
+  override def readable: ReadableProperty[A] = this
 
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
 
-  override def transformToSeq[B](transformer: A => Seq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {
@@ -155,40 +126,15 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     }
   }
 
-  override lazy val valid: ReadableProperty[ValidationResult] = validationProperty.property
-
-  protected[properties] override def fireValueListeners(): Unit = {
+  protected[properties] override def valueChanged(): Unit = {
     val originalListeners = listeners.toSet
-    CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
+    CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
       listeners.foreach { listener => if (originalListeners.contains(listener)) listener(value) }
       oneTimeListeners.foreach(_.cancel())
       oneTimeListeners.clear()
     })
-  }
-
-  protected[properties] override def valueChanged(): Unit = {
-    validationResult = null
-    fireValueListeners()
     if (parent != null) parent.valueChanged()
-  }
-
-  protected[properties] override def validate(): Unit = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    if (validators.nonEmpty) {
-      val p = Promise[ValidationResult]
-      validationResult = p.future
-      CallbackSequencer().queue(s"${this.id.toString}:fireValidation", () => {
-        import Validator._
-        val currentValue = this.get
-        val cpy = CrossCollections.copyArray(validators)
-        p.completeWith {
-          Future.sequence(
-            cpy.map(_ (currentValue)).toSeq
-          ).foldValidationResult
-        }
-      })
-    } else validationResult = Future.successful(Valid)
   }
 
 }

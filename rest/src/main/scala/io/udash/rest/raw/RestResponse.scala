@@ -12,10 +12,12 @@ final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: Ht
   def header(name: String, value: String): RestResponse =
     copy(headers = headers.append(name, PlainValue(value)))
 
+  def isSuccess: Boolean =
+    code >= 200 && code < 300
   def toHttpError: HttpErrorException =
     HttpErrorException(code, body.textualContentOpt.toOptArg)
   def ensureNonError: RestResponse =
-    if (code >= 200 && code < 300) this else throw toHttpError
+    if (isSuccess) this else throw toHttpError
 }
 
 object RestResponse extends RestResponseLowPrio {
@@ -40,15 +42,12 @@ object RestResponse extends RestResponseLowPrio {
   implicit def effectFromAsyncResp[F[_], T](
     implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsReal[RestResponse, T]
   ): AsReal[RawRest.Async[RestResponse], Try[F[T]]] =
-    AsReal.create(async => Success(asyncEff.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp)))))
+    async => Success(asyncEff.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp))))
 
   implicit def effectToAsyncResp[F[_], T](
     implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsRaw[RestResponse, T]
   ): AsRaw[RawRest.Async[RestResponse], Try[F[T]]] =
-    AsRaw.create(_.fold(
-      RawRest.failingAsync,
-      ft => RawRest.mapAsync(asyncEff.toAsync(ft))(asResponse.asRaw)
-    ).recoverHttpError)
+    _.fold(RawRest.failingAsync, ft => RawRest.mapAsync(asyncEff.toAsync(ft))(asResponse.asRaw)).recoverHttpError
 
   // following two implicits provide nice error messages when serialization is lacking for HTTP method result
   // while the async wrapper is fine (e.g. Future)
@@ -79,10 +78,10 @@ object RestResponse extends RestResponseLowPrio {
 }
 trait RestResponseLowPrio { this: RestResponse.type =>
   implicit def bodyBasedFromResponse[T](implicit bodyAsReal: AsReal[HttpBody, T]): AsReal[RestResponse, T] =
-    AsReal.create(resp => bodyAsReal.asReal(resp.ensureNonError.body))
+    resp => bodyAsReal.asReal(resp.ensureNonError.body)
 
   implicit def bodyBasedToResponse[T](implicit bodyAsRaw: AsRaw[HttpBody, T]): AsRaw[RestResponse, T] =
-    AsRaw.create(value => bodyAsRaw.asRaw(value).defaultResponse.recoverHttpError)
+    value => bodyAsRaw.asRaw(value).defaultResponse.recoverHttpError
 
   // following two implicits forward implicit-not-found error messages for HttpBody as error messages for RestResponse
 

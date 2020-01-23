@@ -15,6 +15,7 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
     urlsHistory.append(url)
     url.value match {
       case "/" => ObjectState
+      case "/root" => RootState(None)
       case "/root" / v => RootState(Some(v.toInt))
       case "/exception" => ThrowExceptionState
       case "/next" => NextObjectState
