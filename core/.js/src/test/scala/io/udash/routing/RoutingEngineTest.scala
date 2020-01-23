@@ -4,6 +4,8 @@ import io.udash._
 import io.udash.testing._
 import org.scalactic.source.Position
 
+import scala.collection.compat._
+
 class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
   "RoutingEngine" should {
@@ -26,7 +28,6 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       )
 
       def testClosedAndReset(expectedClosed: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
-        import scala.collection.compat._
         state2VP.view.mapValues(expectedClosed).toVector.distinct.foreach { case (state, status) =>
           state -> status shouldBe state -> state2VP(state).view.closed
           state -> status shouldBe state -> state2VP(state).presenter.closed
@@ -37,7 +38,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         }
       }
 
-      initTestRoutingEngine(state2vp = state2VP.mapValues(() => _))
+      initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
 
       testClosedAndReset(_ => false)
 
@@ -292,7 +293,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
       )
 
-      initTestRoutingEngine(state2vp = state2VP.mapValues(() => _))
+      initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
 
       routingEngine.handleUrl(Url("/"))
       renderer.views.size should be(0)
@@ -338,9 +339,9 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         }
       }
       val state2VP: Map[TestState, () => ViewFactory[_ <: TestState]] = Map[TestState, () => ViewFactory[_ <: TestState]](
-        RootState(None) -> staticViewFactory,
-        RootState(Some(1)) -> staticViewFactory,
-        RootState(Some(2)) -> staticViewFactory,
+        RootState(None) -> staticViewFactory _,
+        RootState(Some(1)) -> staticViewFactory _,
+        RootState(Some(2)) -> staticViewFactory _,
       )
 
       initTestRoutingEngine(state2vp = state2VP)
