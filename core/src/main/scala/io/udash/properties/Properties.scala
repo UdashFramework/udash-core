@@ -32,7 +32,6 @@ trait Properties {
 
 object Properties extends Properties {
   class Any2Property[A] private[properties](private val value: A) extends AnyVal {
-    def toProperty[B >: A : PropertyCreator]: ReadableProperty[B] = PropertyCreator[B].newImmutableProperty(value)
     def toModelProperty[B >: A : ModelPropertyCreator]: ReadableModelProperty[B] = ModelPropertyCreator[B].newImmutableProperty(value)
     def toProperty[B >: A]: ReadableProperty[B] = new ImmutableProperty[B](value)
   }
@@ -43,8 +42,6 @@ object Properties extends Properties {
 
   class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {
     def toSeqProperty: ReadableSeqProperty[A] = new ImmutableSeqProperty[A, Seq](value)
-  class Any2SeqProperty[A] private[properties](private val value: BSeq[A]) extends AnyVal {
-    def toSeqProperty[B >: A]: ReadableSeqProperty[B] = new ImmutableSeqProperty[B](value)
   }
 
   class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[ReadableProperty[A]]) extends AnyVal {

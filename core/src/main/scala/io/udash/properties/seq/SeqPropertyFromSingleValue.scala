@@ -7,7 +7,7 @@ import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B, ElemType <: ReadableProperty[B]](
   origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
-) extends AbstractReadableSeqProperty[B, ElemType] {
+)(implicit pc: PropertyCreator[B]) extends AbstractReadableSeqProperty[B, ElemType] {
 
   override final protected[properties] def parent: ReadableProperty[_] = null
 

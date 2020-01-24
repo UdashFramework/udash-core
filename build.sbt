@@ -250,7 +250,7 @@ def frontendExecutable(proj: Project)(
 }
 
 lazy val udash = project.in(file("."))
-  .aggregate(`udash-jvm`, `udash-js`, guide, )
+  .aggregate(`udash-jvm`, `udash-js`, guide)
   .settings(
     aggregateProjectSettings,
     ideSkipProject := false,
@@ -296,7 +296,7 @@ lazy val core = jvmProject(project)
 lazy val `core-js` = jsProjectFor(project, core)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.coreSjsDeps.value,
+    libraryDependencies ++= Dependencies.coreCrossDeps.value,
   )
 
 lazy val `core-cats` = jvmProject(project.in(core.base / "cats"))

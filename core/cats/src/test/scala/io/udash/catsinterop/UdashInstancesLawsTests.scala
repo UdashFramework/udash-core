@@ -8,8 +8,6 @@ import org.typelevel.discipline.scalatest.Discipline
 
 
 class UdashInstancesLawsTests extends AnyFunSuite with CatsTestSpec with Discipline {
-  import CatsFun.ReadablePropertyInstances._
-  import CatsFun.PropertyInstances._
   import cats.implicits._
 
   checkAll("ReadableProperty.FunctorLaws", FunctorTests[ReadableProperty].functor[Int, Int, String])

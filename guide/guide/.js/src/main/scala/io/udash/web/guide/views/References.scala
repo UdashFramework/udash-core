@@ -7,6 +7,7 @@ object References {
   val UdashFilesDemoRepo = "https://github.com/UdashFramework/udash-demos/tree/master/file-upload"
   val AvScalaCommonsGitHub = "https://github.com/AVSystem/scala-commons"
   val BootstrapHomepage = "http://getbootstrap.com/"
+  val CatsHomepage = "https://typelevel.org/cats/"
   val JettyHomepage = "http://www.eclipse.org/jetty/"
   val MvpPattern = "https://martinfowler.com/eaaDev/uiArchs.html#Model-view-presentermvp"
   val ScalaCssHomepage = "https://github.com/japgolly/scalacss"

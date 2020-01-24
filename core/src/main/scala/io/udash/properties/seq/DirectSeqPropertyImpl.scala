@@ -7,13 +7,9 @@ import io.udash.utils.CrossCollections
 
 import scala.collection.compat._
 
-//todo:now look and fix dis
-private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
-  val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
+private[properties] class DirectSeqPropertyImpl[A, SeqTpe[T] <: BSeq[T]](
+  val parent: ReadableProperty[_])(implicit pc: PropertyCreator[A], fac: Factory[A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[BSeq[A]] {
-private[properties] class DirectSeqPropertyImpl[A, SeqTpe[T] <: Seq[T]](
-  val parent: ReadableProperty[_], override val id: PropertyId)(implicit pc: PropertyCreator[A], cbf: CanBuildFrom[Nothing, A, SeqTpe[A]])
-  extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[Seq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
 

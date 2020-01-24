@@ -90,4 +90,6 @@ case object I18NExtState extends RoutingState(Some(ContentState))
 
 case object UserActivityExtState extends RoutingState(Some(ContentState))
 
+case object CatsExtState extends RoutingState(Some(ContentState))
+
 
