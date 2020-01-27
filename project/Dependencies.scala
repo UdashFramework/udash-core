@@ -27,6 +27,7 @@ object Dependencies {
   val circeDerivationVersion = "0.12.0-M7" // Tests only
   val monixVersion = "3.1.0" // Tests only
 
+  val catsEffectVersion = "2.0.0"
   val sttpVersion = "1.7.2"
 
   val scalaLoggingVersion = "3.9.2"
@@ -113,6 +114,7 @@ object Dependencies {
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp" %%% "core" % sttpVersion,
+    "org.typelevel" %%% "cats-effect" % catsEffectVersion,
     "io.monix" %%% "monix" % monixVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,

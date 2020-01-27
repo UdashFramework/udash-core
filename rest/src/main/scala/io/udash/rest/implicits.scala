@@ -35,6 +35,16 @@ trait FutureRestImplicits {
 }
 object FutureRestImplicits extends FutureRestImplicits
 
+class CatsEffectRestImplicits[F[_]](implicit F: cats.effect.Effect[F]) {
+  implicit def catsAsyncEffect: RawRest.AsyncEffect[F] =
+    new RawRest.AsyncEffect[F] {
+      def toAsync[A](task: F[A]): RawRest.Async[A] =
+        callback => F.runAsync(task)(res => cats.effect.IO(callback(res.toTry)))
+      def fromAsync[A](async: RawRest.Async[A]): F[A] =
+        F.async(callback => async(res => callback(res.toEither)))
+    }
+}
+
 /**
   * Defines `GenCodec` and `GenKeyCodec` based serialization for REST API traits.
   */
