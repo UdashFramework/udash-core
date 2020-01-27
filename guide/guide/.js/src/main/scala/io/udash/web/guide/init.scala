@@ -79,6 +79,7 @@ object Context {
       MenuLink("Internationalization", I18NExtState),
       MenuLink("Authorization", AuthorizationExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
+      MenuLink("Cats Interoperability", CatsExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
       MenuLink("User activity", UserActivityExtState)
     )),
