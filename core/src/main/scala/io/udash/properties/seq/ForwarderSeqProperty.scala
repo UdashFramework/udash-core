@@ -1,6 +1,7 @@
 package io.udash.properties.seq
 
-import io.udash.properties.single.{ForwarderProperty, ForwarderReadableProperty, Property, ReadableProperty}
+import com.avsystem.commons.misc.Opt
+import io.udash.properties.single.{ForwarderReadableProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
@@ -79,7 +80,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
 
   protected def loadFromOrigin(): Seq[B]
   protected def elementsFromOrigin(): Seq[ElemType]
-  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType]
+  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
 
   override def get: Seq[B] = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) loadFromOrigin()
@@ -107,15 +108,9 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
   }
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
-    val transPatch = transformPatchAndUpdateElements(patch)
-    structureListeners.foreach(_.apply(transPatch))
-    fireValueListeners()
+    transformPatchAndUpdateElements(patch).foreach { transPatch =>
+      structureListeners.foreach(_.apply(transPatch))
+      fireValueListeners()
+    }
   }
-}
-
-
-private[properties] trait ForwarderSeqProperty[A, B, ElemType <: Property[B], OrigType <: Property[A]]
-  extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType]
-    with ForwarderProperty[Seq[B]] with AbstractSeqProperty[B, ElemType] {
-  protected def origin: SeqProperty[A, OrigType]
 }
