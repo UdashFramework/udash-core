@@ -13,7 +13,7 @@ object Dependencies {
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.8"
-  val scalaTagsVersion = "0.8.4"
+  val scalaTagsVersion = "0.8.5"
   val scalaCssVersion = "0.6.0"
 
   val servletVersion = "4.0.1"
