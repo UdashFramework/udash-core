@@ -310,6 +310,21 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
     }
+
+    "render DocumentFragment elements" in {
+      val p = Property(true)
+      val template = div(
+        showIf(p)(Seq("A", "B", "C").render)
+      ).render
+
+      template.textContent should be("ABC")
+
+      p.toggle()
+      template.textContent should be("")
+
+      p.toggle()
+      template.textContent should be("ABC")
+    }
   }
 
   "showIfElse" should {
@@ -455,6 +470,21 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       element2.textContent should be("OLD")
       elementElse2.textContent should be("OLD")
+    }
+
+    "render DocumentFragment elements" in {
+      val p = Property(true)
+      val template = div(
+        showIfElse(p)(Seq("A", "B", "C").render, span("else").render)
+      ).render
+
+      template.textContent should be("ABC")
+
+      p.toggle()
+      template.textContent should be("else")
+
+      p.toggle()
+      template.textContent should be("ABC")
     }
   }
 

@@ -64,7 +64,7 @@ trait Bindings {
     * @param elements `Element`s to show if property value is `true`.
     * @return property binding.
     */
-  def showIf(property: ReadableProperty[Boolean])(elements: Seq[Node]): Binding =
+  def showIf(property: ReadableProperty[Boolean])(elements: => Seq[Node]): Binding =
     showIfElse(property)(elements, Seq.empty)
 
   /**
@@ -78,7 +78,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: Seq[Node]): Binding =
+    (elements: => Seq[Node]): Binding =
     showIfElse(property, customElementsReplace)(elements, Seq.empty)
 
   /**
@@ -89,7 +89,7 @@ trait Bindings {
     * @param elseElements `Element`s to show if property value is `false`.
     * @return property binding.
     */
-  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
+  def showIfElse(property: ReadableProperty[Boolean])(elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
     showIfElse(property, DOMManipulator.DefaultElementReplace)(elements, elseElements)
 
   /**
@@ -104,7 +104,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: Seq[Node], elseElements: Seq[Node]): Binding =
+    (elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
     new PropertyModifier[Boolean](
       property,
       (show: Boolean, _) => if (show) elements else elseElements,
