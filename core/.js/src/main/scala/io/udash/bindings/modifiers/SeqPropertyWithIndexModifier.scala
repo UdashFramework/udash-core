@@ -17,8 +17,7 @@ class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val pro
   private val indexes: mutable.HashMap[E, Property[Int]] = mutable.HashMap.empty
 
   protected def indexProperty(p: E): ReadableProperty[Int] =
-    if (indexes.contains(p)) indexes(p)
-    else Property(property.elemProperties.indexOf(p).applyIf(_ == -1)(_ => 0)).setup(indexes(p) = _)
+    indexes.getOrElseUpdate(p, Property(property.elemProperties.indexOf(p).applyIf(_ == -1)(_ => 0)))
 
   override protected def build(item: E): Seq[Node] =
     builder(item, indexProperty(item), propertyAwareNestedInterceptor(item))
