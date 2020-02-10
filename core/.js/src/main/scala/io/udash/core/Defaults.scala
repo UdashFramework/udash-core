@@ -10,7 +10,7 @@ abstract class StaticViewFactory[S <: State](viewCreator: () => View) extends Vi
   override def create(): (View, EmptyPresenter.type) =
     (viewCreator(), EmptyPresenter)
 
-  override def equals(other: Any): Boolean = getClass.equals(other.getClass)
+  override def equals(other: Any): Boolean = other != null && getClass.equals(other.getClass)
   override def hashCode(): Int = getClass.hashCode()
 }
 

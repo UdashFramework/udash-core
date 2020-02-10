@@ -16,7 +16,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val classViewFactory = new TestViewFactory[ClassState]
       val class2ViewFactory = new TestViewFactory[ClassState]
       val errorViewFactory = new TestViewFactory[ErrorState.type]
-      val state2VP: Map[TestState, TestViewFactory[_ <: TestState]] = Map[TestState, TestViewFactory[_ <: TestState]](
+      val state2VP: Map[TestState, TestViewFactory[_ <: TestState]] = Map(
         RootState(None) -> rootViewFactory,
         RootState(Some(1)) -> rootViewFactory,
         RootState(Some(2)) -> rootViewFactory,
@@ -338,7 +338,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
           super.create()
         }
       }
-      val state2VP: Map[TestState, () => ViewFactory[_ <: TestState]] = Map[TestState, () => ViewFactory[_ <: TestState]](
+      val state2VP: Map[TestState, () => ViewFactory[_ <: TestState]] = Map(
         RootState(None) -> staticViewFactory _,
         RootState(Some(1)) -> staticViewFactory _,
         RootState(Some(2)) -> staticViewFactory _,
