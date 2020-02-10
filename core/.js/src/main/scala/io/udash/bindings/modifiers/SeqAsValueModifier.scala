@@ -22,11 +22,3 @@ class SeqAsValueModifier[T](override val property: ReadableSeqProperty[T, _ <: R
   override def checkNull: Boolean = false // SeqProperty can not return null from `get` method
 
 }
-
-
-
-
-
-
-
-

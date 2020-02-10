@@ -13,5 +13,3 @@ trait Legend extends js.Object {
     */
   def update(options: config.legend.Legend, redraw: Boolean = js.native): Unit = js.native
 }
-
-

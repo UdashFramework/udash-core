@@ -59,7 +59,3 @@ private[bindings] class ValidationValueModifier[T](
     listener(property.get)
   }
 }
-
-
-
-

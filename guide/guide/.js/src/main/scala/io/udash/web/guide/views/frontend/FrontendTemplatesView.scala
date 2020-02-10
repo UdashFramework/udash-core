@@ -458,10 +458,3 @@ class FrontendTemplatesView extends FinalView with CssView {
     )
   )
 }
-
-
-
-
-
-
-
