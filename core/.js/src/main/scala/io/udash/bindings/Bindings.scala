@@ -90,7 +90,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIfElse(property: ReadableProperty[Boolean])(elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
-    showIfElse(property, DOMManipulator.DefaultElementReplace)(elements, elseElements)
+    produce(property)(if (_) elements else elseElements)
 
   /**
     * Switches provided DOM elements depending on property value.
@@ -105,11 +105,7 @@ trait Bindings {
     */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
     (elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
-    new PropertyModifier[Boolean](
-      property,
-      (show: Boolean, _) => if (show) elements else elseElements,
-      true, customElementsReplace
-    )
+    produce(property, customElementsReplace, checkNull = true)(if (_) elements else elseElements)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -122,7 +118,24 @@ trait Bindings {
     * @return property binding.
     */
   def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
-    new PropertyModifier[T](property, builder, checkNull)
+    new PropertyModifier[T](property, builder, checkNull, DOMManipulator.DefaultElementReplace)
+
+  /**
+   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+   * If property value is null, empty text node will be added as placeholder.
+   *
+   * @param property              `Property` to bind.
+   * @param builder               `Element` builder which will be used to create HTML element.
+   * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+   *                              if it is false, then null value has to be handled by builder.
+   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+   *                              if it did not replace elements in DOM. Is such a case the default implementation
+   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+   * @return property binding.
+   */
+  def produce[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
+    (builder: T => Seq[Node]): Binding =
+    new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.

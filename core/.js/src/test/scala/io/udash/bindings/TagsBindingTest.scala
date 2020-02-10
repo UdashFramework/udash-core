@@ -783,12 +783,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = Property[Boolean](true)
       val template = div(
         span(),
-        produceWithNested(p, customElementsReplace = customReplace(true), checkNull = false)((v, _) => div(v.toString).render),
+        produce(p, customElementsReplace = customReplace(true), checkNull = false)(v => div(v.toString).render),
         span()
       ).render
       val template2 = div(
         span(),
-        produceWithNested(p, customElementsReplace = customReplace(false), checkNull = false)((v, _) => div(v.toString).render),
+        produce(p, customElementsReplace = customReplace(false), checkNull = false)(v => div(v.toString).render),
         span()
       ).render
 
@@ -1070,12 +1070,12 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       val p = SeqProperty[String]("a", "b", "c")
       val template = div(
         span(),
-        produceWithNested(p, customElementsReplace = customReplace(true))((v, _) => div(v.mkString(",")).render),
+        produce(p, customElementsReplace = customReplace(true))(v => div(v.mkString(",")).render),
         span()
       ).render
       val template2 = div(
         span(),
-        produceWithNested(p, customElementsReplace = customReplace(false))((v, _) => div(v.mkString(",")).render),
+        produce(p, customElementsReplace = customReplace(false))(v => div(v.mkString(",")).render),
         span()
       ).render
 
