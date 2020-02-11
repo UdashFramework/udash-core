@@ -4,6 +4,8 @@ import io.udash._
 import io.udash.testing._
 import org.scalactic.source.Position
 
+import scala.collection.compat._
+
 class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
   "RoutingEngine" should {
@@ -14,7 +16,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val classViewFactory = new TestViewFactory[ClassState]
       val class2ViewFactory = new TestViewFactory[ClassState]
       val errorViewFactory = new TestViewFactory[ErrorState.type]
-      val state2VP: Map[TestState, TestViewFactory[_ <: TestState]] = Map[TestState, TestViewFactory[_ <: TestState]](
+      val state2VP: Map[TestState, TestViewFactory[_ <: TestState]] = Map(
         RootState(None) -> rootViewFactory,
         RootState(Some(1)) -> rootViewFactory,
         RootState(Some(2)) -> rootViewFactory,
@@ -26,7 +28,6 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       )
 
       def testClosedAndReset(expectedClosed: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
-        import scala.collection.compat._
         state2VP.view.mapValues(expectedClosed).toVector.distinct.foreach { case (state, status) =>
           state -> status shouldBe state -> state2VP(state).view.closed
           state -> status shouldBe state -> state2VP(state).presenter.closed
@@ -37,7 +38,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         }
       }
 
-      initTestRoutingEngine(state2vp = state2VP)
+      initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
 
       testClosedAndReset(_ => false)
 
@@ -284,7 +285,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       val class2View = new TestView
       val errorView = new TestView
       val state2VP: Map[TestState, ViewFactory[_ <: TestState]] = Map(
-        RootState(None) -> new StaticViewFactory[RootState](() => rootView),
+        RootState(None) -> new StaticViewFactory[RootState](() => rootView) {},
         ObjectState -> new ExceptionViewFactory[ObjectState.type](objectView),
         NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
         ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),
@@ -292,7 +293,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
       )
 
-      initTestRoutingEngine(state2vp = state2VP)
+      initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
 
       routingEngine.handleUrl(Url("/"))
       renderer.views.size should be(0)
@@ -326,6 +327,45 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       routingEngine.handleUrl(Url("/next"))
       renderer.views shouldBe Seq(rootView)
+    }
+
+    "not rerender static views" in {
+      val staticView = new TestView
+      var staticCreateCount = 0
+      def staticViewFactory() = new StaticViewFactory[RootState](() => staticView) {
+        override def create(): (View, EmptyPresenter.type) = {
+          staticCreateCount += 1
+          super.create()
+        }
+      }
+      val state2VP: Map[TestState, () => ViewFactory[_ <: TestState]] = Map(
+        RootState(None) -> staticViewFactory _,
+        RootState(Some(1)) -> staticViewFactory _,
+        RootState(Some(2)) -> staticViewFactory _,
+      )
+
+      initTestRoutingEngine(state2vp = state2VP)
+
+      routingEngine.handleUrl(Url("/root"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe empty
+      renderer.lastPathToAdd.size shouldBe 1
+      staticCreateCount shouldBe 1
+
+      routingEngine.handleUrl(Url("/root/1"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe List(staticView)
+      renderer.lastPathToAdd.size shouldBe 0
+      staticCreateCount shouldBe 1
+
+      routingEngine.handleUrl(Url("/root/2"))
+
+      renderer.views shouldBe Seq(staticView)
+      renderer.lastSubPathToLeave shouldBe List(staticView)
+      renderer.lastPathToAdd.size shouldBe 0
+      staticCreateCount shouldBe 1
     }
   }
 }
