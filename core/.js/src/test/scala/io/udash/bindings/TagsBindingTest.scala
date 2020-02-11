@@ -1819,6 +1819,25 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       p.replace(1, 2, "a", "B")
       el.textContent should be("0x1a2B")
     }
+
+    "set initial index values to corresponding elements' position in underlying SeqProperty" in {
+      val p = SeqProperty("a", "b", "c", "d")
+      var counter = 0
+
+      val el = div(
+        repeatWithIndex(p)((item, idx, nested) =>
+          span(nested(bind(
+            item.combine(idx) { (itemValue, indexValue) =>
+              counter += 1
+              s"$indexValue$itemValue"
+            }
+          ))).render
+        )
+      ).render
+
+      el.textContent should be("0a1b2c3d")
+      counter shouldBe 4
+    }
   }
 
   "AttrOps" should {
