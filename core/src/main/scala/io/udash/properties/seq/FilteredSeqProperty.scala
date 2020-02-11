@@ -18,6 +18,8 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     origin.elemProperties.foreach { el => originListeners += el.listen(v => elementChanged(el, v)) }
   }
 
+  override protected def originListener(originValue: Seq[A]): Unit = ()
+
   override protected def onListenerDestroy(): Unit = {
     super.onListenerDestroy()
     originListeners.foreach(_.cancel())

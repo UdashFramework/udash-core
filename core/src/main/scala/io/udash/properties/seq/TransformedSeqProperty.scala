@@ -31,6 +31,8 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
     transPatch.opt
   }
 
+  override def originListener(originValue: Seq[A]): Unit = fireValueListeners()
+
   override protected def onListenerInit(): Unit = {
     lastValue = Seq.empty
     transformedLastValue = Seq.empty

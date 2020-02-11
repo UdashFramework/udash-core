@@ -21,6 +21,8 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
     CrossCollections.replace(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added: _*)
     transPatch.opt
   }
+
+  override def originListener(originValue: Seq[A]): Unit = fireValueListeners()
 }
 
 private[properties] class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])

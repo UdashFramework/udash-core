@@ -12,7 +12,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   protected var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
 
-  protected def originListener(originValue: Seq[A]): Unit = {}
+  protected def originListener(originValue: Seq[A]): Unit
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
