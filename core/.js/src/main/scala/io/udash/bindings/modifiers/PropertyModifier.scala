@@ -11,8 +11,8 @@ private[bindings] class PropertyModifier[T](
   override val customElementsReplace: DOMManipulator.ReplaceMethod
 ) extends ValueModifier[T] {
 
-  def this(property: ReadableProperty[T], builder: T => Seq[Node], checkNull: Boolean, customElementReplace: DOMManipulator.ReplaceMethod) = {
-    this(property, (data: T, _: Binding.NestedInterceptor) => builder(data), checkNull, customElementReplace)
+  def this(property: ReadableProperty[T], builder: T => Seq[Node], checkNull: Boolean, customElementsReplace: DOMManipulator.ReplaceMethod) = {
+    this(property, (data: T, _: Binding.NestedInterceptor) => builder(data), checkNull, customElementsReplace)
   }
 
   def listen(callback: T => Unit): Registration =
