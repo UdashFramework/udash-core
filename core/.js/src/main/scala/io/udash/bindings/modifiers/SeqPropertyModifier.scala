@@ -20,3 +20,5 @@ private[bindings] final class SeqPropertyModifier[T, E <: ReadableProperty[T]](
   protected def build(item: E): Seq[Node] =
     builder(item, propertyAwareNestedInterceptor(item))
 }
+
+

@@ -214,3 +214,5 @@ class UdashDatePickerTest extends AsyncUdashFrontendTest {
 private[datepicker] trait UdashDatePickerData extends js.Object {
   def date(formattedDate: String): Unit = js.native
 }
+
+

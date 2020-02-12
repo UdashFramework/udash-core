@@ -45,3 +45,17 @@ trait ValueModifier[T] extends Binding with DOMManipulator {
     rebuild(property.get)
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,3 +11,14 @@ object VerticalAlign {
 
   val ByName: Map[String, VerticalAlign] = Seq(Bottom, Middle, Top).map(i => (i.name, i)).toMap
 }
+
+
+
+
+
+
+
+
+
+
+

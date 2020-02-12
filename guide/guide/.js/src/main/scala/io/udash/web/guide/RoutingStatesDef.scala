@@ -92,3 +92,5 @@ case object JQueryExtState extends FinalRoutingState(Some(ContentState))
 case object I18NExtState extends FinalRoutingState(Some(ContentState))
 
 case object UserActivityExtState extends FinalRoutingState(Some(ContentState))
+
+
