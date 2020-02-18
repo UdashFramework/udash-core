@@ -6,14 +6,14 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.10"
-  val silencerVersion = "1.4.4"
-  val collectionCompatVersion = "2.1.4"
+  val silencerVersion = "1.5.0"
+  val collectionCompatVersion = "2.1.3"
 
   val jqueryWrapperVersion = "3.0.2"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "0.9.8"
-  val scalaTagsVersion = "0.8.5"
+  val scalaTagsVersion = "0.8.6"
   val scalaCssVersion = "0.6.0"
 
   val servletVersion = "4.0.1"
@@ -22,7 +22,7 @@ object Dependencies {
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.5.13"
 
-  val upickleVersion = "0.9.8" // Tests only
+  val upickleVersion = "0.9.9" // Tests only
   val circeVersion = "0.13.0" // Tests only
   val circeDerivationVersion = "0.12.0-M7" // Tests only
   val monixVersion = "3.1.0" // Tests only
