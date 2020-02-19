@@ -8,6 +8,7 @@ import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
+import org.scalajs.dom
 import scalatags.JsDom.all._
 
 import scala.concurrent.Future
@@ -253,12 +254,87 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         }
       } yield r
     }
+
+    "invoke setup callbacks when appending to the DOM" in {
+      def defaultPicker = UdashDatePicker(
+        Property(Option.empty),
+        new UdashDatePicker.DatePickerOptions("YYYY MM DD").toProperty
+      )
+
+      var firstPickerCount = 0
+      val firstPicker = defaultPicker
+        .setup(picker => UdashDatePicker.registerSetupCallback(picker.componentId, () => firstPickerCount += 1))
+        .render
+
+      var secondPickerCount = 0
+      val secondPicker = defaultPicker
+        .setup(picker => UdashDatePicker.registerSetupCallback(picker.componentId, () => secondPickerCount += 1))
+        .render
+
+      def assertCounters(expectedFirstPickerCount: Int, expectedSecondPickerCount: Int) =
+        (firstPickerCount, secondPickerCount) should be((expectedFirstPickerCount, expectedSecondPickerCount))
+
+      for {
+        _ <- {
+          dom.document.body.appendChild(firstPicker)
+          retrying(assertCounters(1, 0))
+        }
+        _ <- {
+          dom.document.body.appendChild(div(div("something"), span(width := "100%")(secondPicker)).render)
+          retrying(assertCounters(1, 1))
+        }
+        _ <- {
+          dom.document.body.removeChild(firstPicker)
+          retrying(assertCounters(1, 1))
+        }
+        r <- {
+          dom.document.body.appendChild(firstPicker)
+          retrying(assertCounters(2, 1))
+        }
+      } yield r
+    }
+
+    "apply custom options if embedded within a dynamic view" in {
+      val dateFormat = "MMMM Do YYYY, hh:mm a"
+      val localeString = "pl_PL"
+      val inlinePicker = true
+      val todayButton = true
+
+      val picker = UdashDatePicker(
+        Property(Option.empty),
+        new UdashDatePicker.DatePickerOptions(
+          format = dateFormat,
+          locale = Some(localeString),
+          inline = inlinePicker,
+          showToday = todayButton
+        ).toProperty
+      ).render
+
+      def assertOptions() = {
+        val jqPicker = jQ(picker).asInstanceOf[JQueryDatePickerExt]
+        jqPicker.datetimepicker("format") should be(dateFormat)
+        jqPicker.datetimepicker("locale") should be(localeString)
+        jqPicker.datetimepicker("inline") shouldBe inlinePicker
+        jqPicker.datetimepicker("buttons").asInstanceOf[js.Dictionary[Boolean]]("showToday") should be(todayButton)
+      }
+
+      for {
+        _ <- {
+          dom.document.body.appendChild(picker)
+          retrying(assertOptions())
+        }
+        r <- {
+          dom.document.body.removeChild(picker)
+          dom.document.body.appendChild(picker)
+          retrying(assertOptions())
+        }
+      } yield r
+    }
   }
 }
 
 @js.native
 private trait JQueryDatePickerExt extends JQuery {
-  def datetimepicker(settings: js.Dictionary[js.Any]): JQueryDatePickerExt = js.native
   def datetimepicker(function: String): js.Any = js.native
   def datetimepicker(option: String, value: js.Any): JQueryDatePickerExt = js.native
 }

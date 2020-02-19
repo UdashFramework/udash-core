@@ -41,10 +41,13 @@ final class UdashDatePicker private[datepicker](
 
   locally {
     registerSetupCallback(componentId, () => {
-      jQInput.datetimepicker(
-        optionsToJsDict(options.get)
-          .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
-      )
+      // initialization
+      jQInput.datetimepicker()
+
+      // options propagation
+      optionsToJsDict(options.get)
+        .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
+        .foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
 
       nestedInterceptor(new JQueryOnBinding(jQInput, "change.datetimepicker", (_: Element, event: JQueryEvent) => {
         val dateOption = event.asInstanceOf[DatePickerChangeJQEvent].option
@@ -509,7 +512,7 @@ object UdashDatePicker {
 
   @js.native
   private trait UdashDatePickerJQuery extends JQuery {
-    def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
+    def datetimepicker(): UdashDatePickerJQuery = js.native
     def datetimepicker(function: String): UdashDatePickerJQuery = js.native
     def datetimepicker(option: String, value: js.Any): UdashDatePickerJQuery = js.native
   }
@@ -553,7 +556,7 @@ object UdashDatePicker {
       val addedNodes = records.flatMap(record => for {i <- 0 until record.addedNodes.length} yield record.addedNodes(i))
       datePickerSetupCallbacks.foreach { case (pickerId, callback) =>
         if (addedNodes.exists {
-          case element: Element => element.querySelector(s"#$pickerId") != null
+          case element: Element => element.id == pickerId.id || element.querySelector(s"#$pickerId") != null
           case _ => false
         }) callback()
       }
