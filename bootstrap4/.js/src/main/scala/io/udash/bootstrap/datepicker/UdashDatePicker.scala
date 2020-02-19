@@ -556,7 +556,7 @@ object UdashDatePicker {
       val addedNodes = records.flatMap(record => for {i <- 0 until record.addedNodes.length} yield record.addedNodes(i))
       datePickerSetupCallbacks.foreach { case (pickerId, callback) =>
         if (addedNodes.exists {
-          case element: Element => element.id == pickerId.id || element.querySelector(s"#$pickerId") != null
+          case element: Element => element.id == pickerId.value || element.querySelector(s"#$pickerId") != null
           case _ => false
         }) callback()
       }
