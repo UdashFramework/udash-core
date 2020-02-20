@@ -13,7 +13,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   private var originStructureListenerRegistration: Registration = _
 
   protected def originListener(originValue: Seq[A]): Unit
-  protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
+  protected def originStructureListener(patch: Patch[OrigType]): Unit
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
 
@@ -101,10 +101,6 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
       fireValueListeners()
     }
     transformedElements = fromOrigin
-  }
-
-  override protected def originListener(originValue: Seq[A]) : Unit = {
-    fireValueListeners()
   }
 
   override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
