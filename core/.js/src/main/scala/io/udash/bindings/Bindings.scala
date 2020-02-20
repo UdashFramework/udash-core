@@ -60,7 +60,7 @@ trait Bindings {
     * @param elements `Element`s to show if property value is `true`.
     * @return property binding.
     */
-  def showIf(property: ReadableProperty[Boolean])(elements: Seq[Node]): Binding =
+  def showIf(property: ReadableProperty[Boolean])(elements: => Seq[Node]): Binding =
     showIfElse(property)(elements, Seq.empty)
 
   /**
@@ -74,7 +74,7 @@ trait Bindings {
     * @return property binding.
     */
   def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: Seq[Node]): Binding =
+    (elements: => Seq[Node]): Binding =
     showIfElse(property, customElementsReplace)(elements, Seq.empty)
 
   /**
@@ -85,8 +85,8 @@ trait Bindings {
     * @param elseElements `Element`s to show if property value is `false`.
     * @return property binding.
     */
-  def showIfElse(property: ReadableProperty[Boolean])(elements: Seq[Node], elseElements: Seq[Node]): Binding =
-    showIfElse(property, DOMManipulator.DefaultElementReplace)(elements, elseElements)
+  def showIfElse(property: ReadableProperty[Boolean])(elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
+    produce(property)(if (_) elements else elseElements)
 
   /**
     * Switches provided DOM elements depending on property value.
@@ -100,12 +100,8 @@ trait Bindings {
     * @return property binding.
     */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
-    (elements: Seq[Node], elseElements: Seq[Node]): Binding =
-    new PropertyModifier[Boolean](
-      property,
-      (show: Boolean, _) => if (show) elements else elseElements,
-      true, customElementsReplace
-    )
+    (elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
+    produce(property, customElementsReplace, checkNull = true)(if (_) elements else elseElements)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -118,7 +114,24 @@ trait Bindings {
     * @return property binding.
     */
   def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
-    new PropertyModifier[T](property, builder, checkNull)
+    produce(property, DOMManipulator.DefaultElementReplace, checkNull)(builder)
+
+  /**
+   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+   * If property value is null, empty text node will be added as placeholder.
+   *
+   * @param property              `Property` to bind.
+   * @param builder               `Element` builder which will be used to create HTML element.
+   * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+   *                              if it is false, then null value has to be handled by builder.
+   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+   *                              if it did not replace elements in DOM. Is such a case the default implementation
+   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+   * @return property binding.
+   */
+  def produce[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
+    (builder: T => Seq[Node]): Binding =
+    new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -142,7 +155,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
     (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
-    new PropertyModifier[T](property, builder, checkNull, DOMManipulator.DefaultElementReplace)
+    produceWithNested(property, DOMManipulator.DefaultElementReplace, checkNull)(builder)
 
   /**
     * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -181,7 +194,7 @@ trait Bindings {
     */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
     (builder: Seq[T] => Seq[Node]): Binding =
-    new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
+    produce(property, DOMManipulator.DefaultElementReplace)(builder)
 
   /**
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -194,8 +207,7 @@ trait Bindings {
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return property binding.
     */
-  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
-    customElementsReplace: DOMManipulator.ReplaceMethod)
+  def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], customElementsReplace: DOMManipulator.ReplaceMethod)
     (builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
@@ -212,7 +224,7 @@ trait Bindings {
     */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
     (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
-    new SeqAsValueModifier[T](property, builder, DOMManipulator.DefaultElementReplace)
+    produceWithNested(property, DOMManipulator.DefaultElementReplace)(builder)
 
   /**
     * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
@@ -228,8 +240,7 @@ trait Bindings {
     *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
     * @return property binding.
     */
-  def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
-    customElementsReplace: DOMManipulator.ReplaceMethod)
+  def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], customElementsReplace: DOMManipulator.ReplaceMethod)
     (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
