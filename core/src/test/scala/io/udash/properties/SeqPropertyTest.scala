@@ -19,6 +19,9 @@ class SeqPropertyTest extends UdashCoreTest {
     }
   }
 
+  case class D(a: String, b: Boolean)
+  object D extends HasModelPropertyCreator[D]
+
   trait TT {
     def i: Int
     def s: Option[String]
@@ -470,6 +473,28 @@ class SeqPropertyTest extends UdashCoreTest {
       f.nonEmpty should be(false)
     }
 
+    "return filtered version of combined property" in {
+      val p = Property.blank[Option[Int]]
+      val sp = SeqProperty(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+
+      val combined = sp.combine(p) { case (x, _) => x }
+      val wtf = combined.filter(_ % 2 == 0)
+
+      combined.get shouldBe sp.get
+      val original = wtf.get
+      original shouldBe Seq(2, 4, 6, 8, 10)
+
+      wtf.listenStructure { patch =>
+        println("Added: " + patch.added.map(_.get))
+        println("Removed: " + patch.removed.map(_.get))
+      }
+
+      p.touch()
+
+      combined.get shouldBe sp.get
+      wtf.get shouldBe original
+    }
+
     "return filtered version of sequence with ModelProperty" in {
       trait M {
         def x: Int
@@ -681,6 +706,33 @@ class SeqPropertyTest extends UdashCoreTest {
       r2.cancel()
 
       ensureNoListeners(p)
+    }
+
+    "handle subProp change in filtered sequence with listeners" in {
+      val f = Property[D => Boolean](!_.b)
+      val ts = SeqProperty.blank[D]
+      val filtered = ts.filter(f.get)
+      filtered.listen(s => println("listen " + s))
+
+      val s = Seq(
+        D("A", false),
+        D("B", false),
+        D("C", false),
+        D("D", false),
+        D("E", false)
+      )
+
+      ts.set(s)
+
+      filtered.get shouldBe s
+
+      ts.elemProperties(1).asModel.subProp(_.b).set(true)
+
+      filtered.get shouldBe s.slice(0, 1) ++ s.slice(2, 6)
+
+      ts.elemProperties(1).asModel.subProp(_.b).set(false)
+
+      filtered.get shouldBe s
     }
 
     "be able to modify after transformation" in {
