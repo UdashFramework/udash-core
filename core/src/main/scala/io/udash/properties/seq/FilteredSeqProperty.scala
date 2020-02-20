@@ -14,8 +14,9 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
 
   override protected def onListenerInit(): Unit = {
     super.onListenerInit()
-    lastValue = CrossCollections.toCrossArray(origin.elemProperties.filter(el => matcher(el.get)))
-    origin.elemProperties.foreach { el => originListeners += el.listen(v => elementChanged(el, v)) }
+    val originElements = origin.elemProperties
+    lastValue = CrossCollections.toCrossArray(originElements.filter(el => matcher(el.get)))
+    originElements.foreach { el => originListeners += el.listen(_ => elementChanged(el)) }
   }
 
   override protected def originListener(originValue: Seq[A]): Unit = ()
@@ -30,7 +31,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
   override protected def originStructureListener(patch: Patch[ElemType]): Unit = {
     // update origin elements listeners
     patch.removed.indices.foreach { i => originListeners(i + patch.idx).cancel() }
-    val newListeners = patch.added.map { el => el.listen(v => elementChanged(el, v)) }
+    val newListeners = patch.added.map { el => el.listen(_ => elementChanged(el)) }
     CrossCollections.replace(originListeners, patch.idx, patch.removed.size, newListeners: _*)
 
     // update last value
@@ -46,7 +47,7 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     }
   }
 
-  private def elementChanged(p: ElemType, value: A): Unit = {
+  private def elementChanged(p: ElemType): Unit = {
     val filteredProps = lastValue
     val oldIdx = filteredProps.indexOf(p)
     val matches = matcher(p.get)

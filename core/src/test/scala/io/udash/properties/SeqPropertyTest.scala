@@ -484,10 +484,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val original = wtf.get
       original shouldBe Seq(2, 4, 6, 8, 10)
 
-      wtf.listenStructure { patch =>
-        println("Added: " + patch.added.map(_.get))
-        println("Removed: " + patch.removed.map(_.get))
-      }
+      wtf.listen(_ => println("")) //initialize listeners
 
       p.touch()
 
