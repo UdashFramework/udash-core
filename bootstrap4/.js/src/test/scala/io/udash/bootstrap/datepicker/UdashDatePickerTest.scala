@@ -3,6 +3,7 @@ package datepicker
 
 import java.{util => ju}
 
+import com.avsystem.commons.SharedExtensions._
 import io.udash._
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
