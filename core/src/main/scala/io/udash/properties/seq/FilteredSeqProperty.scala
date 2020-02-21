@@ -40,8 +40,8 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
       CrossCollections.replace(lastValue, idx, removed.size, added: _*)
 
       val filteredPatch = Patch[ElemType](idx, removed, added, lastValue.isEmpty)
-      fireValueListeners()
       fireElementsListeners(filteredPatch)
+      fireValueListeners()
     }
   }
 
@@ -62,8 +62,8 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
       case _ => null
     }
 
-    if (matches || oldIdx != -1) fireValueListeners()
     if (patch != null) fireElementsListeners(patch)
+    if (matches || oldIdx != -1) fireValueListeners()
   }
 
   override def elemProperties: Seq[ElemType] =

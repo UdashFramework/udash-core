@@ -709,7 +709,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val f = Property[D => Boolean](!_.b)
       val ts = SeqProperty.blank[D]
       val filtered = ts.filter(f.get)
-      filtered.listen(s => println("listen " + s))
+      filtered.listen(_ => ())
 
       val s = Seq(
         D("A", false),
