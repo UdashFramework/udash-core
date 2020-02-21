@@ -23,8 +23,7 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
 }
 
 private[properties] final class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
-  extends ReversedReadableSeqProperty[A, Property[A]](origin)
-    with AbstractSeqProperty[A, Property[A]] {
+  extends ReversedReadableSeqProperty[A, Property[A]](origin) with AbstractSeqProperty[A, Property[A]] {
 
   override def setInitValue(t: Seq[A]): Unit =
     origin.setInitValue(t.reverse)

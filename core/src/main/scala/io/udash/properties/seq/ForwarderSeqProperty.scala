@@ -10,37 +10,33 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
-  protected var originListenerRegistration: Registration = _
+  private var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
+
+  protected final def initialized: Boolean = originListenerRegistration != null && originListenerRegistration.isActive
 
   protected def originListener(originValue: Seq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
 
-  protected def initOriginListeners(): Unit = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive) {
+  protected def initOriginListeners(): Unit =
+    if (!initialized) {
       listeners.clear()
       onListenerInit()
       originListenerRegistration = origin.listen(originListener)
-    }
-    if (originStructureListenerRegistration == null || !originStructureListenerRegistration.isActive) {
       structureListeners.clear()
       originStructureListenerRegistration = origin.listenStructure(originStructureListener)
     }
-  }
 
-  protected def killOriginListeners(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty && structureListeners.isEmpty) {
+  protected def killOriginListeners(): Unit =
+    if (initialized && listeners.isEmpty && structureListeners.isEmpty) {
       originListenerRegistration.cancel()
       onListenerDestroy()
       originListenerRegistration = null
-    }
-    if (originStructureListenerRegistration != null && listeners.isEmpty && structureListeners.isEmpty) {
       originStructureListenerRegistration.cancel()
       originStructureListenerRegistration = null
     }
-  }
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
@@ -77,21 +73,19 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
-  protected var transformedElements: mutable.Buffer[ElemType] = CrossCollections.createArray[ElemType]
+  protected final var transformedElements: mutable.Buffer[ElemType] = CrossCollections.createArray[ElemType]
 
   protected def loadFromOrigin(): Seq[B]
   protected def elementsFromOrigin(): Seq[ElemType]
   protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType]
 
-  override def get: Seq[B] = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive) loadFromOrigin()
-    else transformedElements.map(_.get)
-  }
+  override def get: Seq[B] =
+    if (initialized) transformedElements.map(_.get)
+    else loadFromOrigin()
 
-  override def elemProperties: Seq[ElemType] = {
-    if (originListenerRegistration == null || !originListenerRegistration.isActive) elementsFromOrigin()
-    else transformedElements
-  }
+  override def elemProperties: Seq[ElemType] =
+    if (initialized) transformedElements
+    else elementsFromOrigin()
 
   override protected def onListenerInit(): Unit = {
     val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin())
@@ -104,9 +98,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
     }
   }
 
-  override protected def originListener(originValue: Seq[A]): Unit = {
-    fireValueListeners()
-  }
+  override protected def originListener(originValue: Seq[A]): Unit = fireValueListeners()
 
   override protected def originStructureListener(patch: Patch[OrigType]): Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
