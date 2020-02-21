@@ -1,8 +1,9 @@
 package io.udash.properties.seq
 
-import com.avsystem.commons.misc.Opt
 import io.udash.properties.single.{ForwarderReadableProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
+
+import scala.collection.mutable
 
 private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[Seq[B]] {
@@ -12,8 +13,8 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   protected var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
 
-  protected def originListener(originValue: Seq[A]): Unit
-  protected def originStructureListener(patch: Patch[OrigType]): Unit
+  protected def originListener(originValue: Seq[A]): Unit = {}
+  protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
 
@@ -76,11 +77,11 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
   extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
-  protected var transformedElements = CrossCollections.createArray[ElemType]
+  protected var transformedElements: mutable.Buffer[ElemType] = CrossCollections.createArray[ElemType]
 
   protected def loadFromOrigin(): Seq[B]
   protected def elementsFromOrigin(): Seq[ElemType]
-  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
+  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType]
 
   override def get: Seq[B] = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) loadFromOrigin()
@@ -103,10 +104,13 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
     transformedElements = fromOrigin
   }
 
-  override protected def originStructureListener(patch: Patch[OrigType]) : Unit = {
-    transformPatchAndUpdateElements(patch).foreach { transPatch =>
-      structureListeners.foreach(_.apply(transPatch))
-      fireValueListeners()
-    }
+  override protected def originListener(originValue: Seq[A]): Unit = {
+    fireValueListeners()
+  }
+
+  override protected def originStructureListener(patch: Patch[OrigType]): Unit = {
+    val transPatch = transformPatchAndUpdateElements(patch)
+    structureListeners.foreach(_.apply(transPatch))
+    fireValueListeners()
   }
 }

@@ -1,6 +1,5 @@
 package io.udash.properties.seq
 
-import com.avsystem.commons.misc.Opt
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.CrossCollections
 
@@ -10,7 +9,7 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
 
   override protected def loadFromOrigin(): Seq[A] = origin.get.reverse
   override protected def elementsFromOrigin(): Seq[ElemType] = origin.elemProperties.reverse
-  override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
+  override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Patch[ElemType] = {
     val transPatch = Patch[ElemType](
       origin.size - patch.idx - patch.added.size,
       patch.removed.reverse,
@@ -19,13 +18,11 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
     )
 
     CrossCollections.replace(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added: _*)
-    transPatch.opt
+    transPatch
   }
-
-  override def originListener(originValue: Seq[A]): Unit = fireValueListeners()
 }
 
-private[properties] class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
+private[properties] final class ReversedSeqProperty[A](origin: SeqProperty[A, Property[A]])
   extends ReversedReadableSeqProperty[A, Property[A]](origin)
     with AbstractSeqProperty[A, Property[A]] {
 

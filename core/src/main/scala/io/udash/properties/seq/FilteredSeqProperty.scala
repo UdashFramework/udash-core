@@ -5,7 +5,7 @@ import io.udash.utils.{CrossCollections, Registration}
 
 import scala.collection.mutable
 
-private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
+private[properties] final class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
@@ -18,8 +18,6 @@ private[properties] class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]
     lastValue = CrossCollections.toCrossArray(originElements.filter(el => matcher(el.get)))
     originElements.foreach { el => originListeners += el.listen(_ => elementChanged(el)) }
   }
-
-  override protected def originListener(originValue: Seq[A]): Unit = ()
 
   override protected def onListenerDestroy(): Unit = {
     super.onListenerDestroy()
