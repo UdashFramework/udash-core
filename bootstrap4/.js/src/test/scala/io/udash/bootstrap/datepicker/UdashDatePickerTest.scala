@@ -345,6 +345,28 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         }
       } yield r
     }
+
+    "initialize a picker with pre-populated input" in {
+      val formatString = "DD/MM/YYYY"
+      val formattedDate = "01/01/1970"
+
+      val picker = UdashDatePicker(
+        date = Property(Some(new ju.Date(0L))),
+        options = new UdashDatePicker.DatePickerOptions(
+          format = formatString
+        ).toProperty
+      ).render
+      val jqPicker = jQ(picker).asInstanceOf[JQueryDatePickerExt]
+
+      // populate input value before appending the picker to the DOM
+      picker.setAttribute("value", formattedDate)
+      dom.document.body.appendChild(picker)
+
+      retrying {
+        jqPicker.datetimepicker("format") should be(formatString)
+        jqPicker.datetimepicker("date").asInstanceOf[MomentDate]._i should be(formattedDate)
+      }
+    }
   }
 }
 
@@ -352,4 +374,10 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 private trait JQueryDatePickerExt extends JQuery {
   def datetimepicker(function: String): js.Any = js.native
   def datetimepicker(option: String, value: js.Any): JQueryDatePickerExt = js.native
+}
+
+@js.native
+private trait MomentDate extends js.Any {
+  /** @return picker input string (currently set date formatted according to provided `format` string)  */
+  def _i: String = js.native
 }

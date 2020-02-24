@@ -65,7 +65,9 @@ final class UdashDatePicker private[datepicker](
       componentId,
       () => {
         // initialization
-        jQInput.datetimepicker()
+        date.get
+          .forEmpty(jQInput.datetimepicker())
+          .foreach(date => jQInput.datetimepicker(js.Dictionary[js.Any]("date" -> dateToMoment(date))))
 
         // options propagation
         optionsToJsDict(options.get)
@@ -529,6 +531,7 @@ object UdashDatePicker {
 
   @js.native
   private trait UdashDatePickerJQuery extends JQuery {
+    def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
     def datetimepicker(): UdashDatePickerJQuery = js.native
     def datetimepicker(function: String): UdashDatePickerJQuery = js.native
     def datetimepicker(option: String, value: js.Any): UdashDatePickerJQuery = js.native
