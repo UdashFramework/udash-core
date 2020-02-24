@@ -255,41 +255,56 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "invoke setup callbacks when appending to the DOM" in {
+    "invoke setup/detach callbacks when appending to/removing from the DOM" in {
       def defaultPicker = UdashDatePicker(
         Property(Option.empty),
         new UdashDatePicker.DatePickerOptions("YYYY MM DD").toProperty
       )
 
-      var firstPickerCount = 0
+      var firstPickerSetupCount = 0
+      var firstPickerDetachCount = 0
       val firstPicker = defaultPicker
-        .setup(picker => UdashDatePicker.registerSetupCallback(picker.componentId, () => firstPickerCount += 1))
-        .render
+        .setup(picker => UdashDatePicker.registerMutationCallbacks(
+          picker.componentId,
+          setupCallback = () => firstPickerSetupCount += 1,
+          detachCallback = () => firstPickerDetachCount += 1
+        )).render
 
-      var secondPickerCount = 0
+      var secondPickerSetupCount = 0
+      var secondPickerDetachCount = 0
       val secondPicker = defaultPicker
-        .setup(picker => UdashDatePicker.registerSetupCallback(picker.componentId, () => secondPickerCount += 1))
-        .render
+        .setup(picker => UdashDatePicker.registerMutationCallbacks(
+          picker.componentId,
+          setupCallback = () => secondPickerSetupCount += 1,
+          detachCallback = () => secondPickerDetachCount += 1
+        )).render
 
-      def assertCounters(expectedFirstPickerCount: Int, expectedSecondPickerCount: Int) =
-        (firstPickerCount, secondPickerCount) should be((expectedFirstPickerCount, expectedSecondPickerCount))
+      def assertCounters(
+        expectedFirstPickerSetupCount: Int,
+        expectedSecondPickerSetupCount: Int
+      )(
+        expectedFirstPickerDetachCount: Int,
+        expectedSecondPickerDetachCount: Int
+      ) =
+        (firstPickerSetupCount, secondPickerSetupCount, firstPickerDetachCount, secondPickerDetachCount) should be(
+          (expectedFirstPickerSetupCount, expectedSecondPickerSetupCount, expectedFirstPickerDetachCount, expectedSecondPickerDetachCount))
 
       for {
         _ <- {
           dom.document.body.appendChild(firstPicker)
-          retrying(assertCounters(1, 0))
+          retrying(assertCounters(1, 0)(0, 0))
         }
         _ <- {
           dom.document.body.appendChild(div(div("something"), span(width := "100%")(secondPicker)).render)
-          retrying(assertCounters(1, 1))
+          retrying(assertCounters(1, 1)(0, 0))
         }
         _ <- {
           dom.document.body.removeChild(firstPicker)
-          retrying(assertCounters(1, 1))
+          retrying(assertCounters(1, 1)(1, 0))
         }
         r <- {
           dom.document.body.appendChild(firstPicker)
-          retrying(assertCounters(2, 1))
+          retrying(assertCounters(2, 1)(1, 0))
         }
       } yield r
     }
