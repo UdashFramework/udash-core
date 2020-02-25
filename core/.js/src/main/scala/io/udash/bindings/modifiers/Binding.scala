@@ -3,9 +3,9 @@ package io.udash.bindings.modifiers
 import com.avsystem.commons.SharedExtensions._
 import io.udash.utils.Registration
 import org.scalajs.dom.Element
+import scalatags.generic.Modifier
 
 import scala.scalajs.js
-import scalatags.generic.Modifier
 
 /** Modifier representing data binding. */
 trait Binding extends Modifier[Element] {
@@ -13,8 +13,12 @@ trait Binding extends Modifier[Element] {
   protected final val nestedBindings: js.Array[Binding] = js.Array()
 
   /** Every interceptor is expected to return the value received as argument. */
-  protected def nestedInterceptor[T <: Binding](binding: T): T =
-    binding.setup { nestedBindings += _ }
+  def nestedInterceptor[T <: Binding](binding: T): T =
+    binding.setup {
+      nestedBindings += _
+    }
+
+  def addRegistration(registration: Registration): Unit = propertyListeners += registration
 
   /** This method clears all bindings and listeners. */
   def kill(): Unit = {

@@ -5,10 +5,8 @@ import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.{PropertyCreator, seq}
-import org.scalajs.dom.Element
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
 
 final class UdashPagination[PageType : PropertyCreator, ElemType <: ReadableProperty[PageType]] private(
@@ -121,34 +119,18 @@ object UdashPagination {
     (_, idx, nested) => span(nested(bind(idx.transform(_ + 1))))
 
   /**
-    * Creates standard arrows.
-    *
-    * @param srTexts Translation keys for previous and next arrows aria.label texts.
-    */
+   * Creates standard arrows.
+   *
+   * @param srTexts Translation keys for previous and next arrows aria.label texts.
+   */
   def defaultArrowFactory[ElemType](
-    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None
+    srTexts: Option[(ReadableProperty[String], ReadableProperty[String])] = None
   ): (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier =
-    (_, arrowType, nested) => {
-      if (arrowType == UdashPagination.ArrowType.PreviousPage) {
-        span(
-          srTexts.map { case (previous, _, lang, provider) =>
-            import io.udash.i18n._
-            nested(
-              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
-          }.getOrElse(aria.label := "Previous")
-        )(span(aria.hidden := true)("«"))
-      } else {
-        span(
-          srTexts.map { case (_, next, lang, provider) =>
-            import io.udash.i18n._
-            nested(
-              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
-          }.getOrElse(aria.label := "Next")
-        )(span(aria.hidden := true)("»"))
-      }
-    }
+    (_, arrowType, _) =>
+      if (arrowType == UdashPagination.ArrowType.PreviousPage)
+        span(aria.label.bind(srTexts.map(_._1).getOrElse("Previous".toProperty)))(span(aria.hidden := true)("«"))
+      else
+        span(aria.label.bind(srTexts.map(_._2).getOrElse("Next".toProperty)))(span(aria.hidden := true)("»"))
 
   /**
     * Creates pagination component.
