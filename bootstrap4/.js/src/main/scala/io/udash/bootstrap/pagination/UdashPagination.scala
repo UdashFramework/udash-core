@@ -121,7 +121,7 @@ object UdashPagination {
   /**
    * Creates standard arrows.
    *
-   * @param srTexts Translation keys for previous and next arrows aria.label texts.
+   * @param srTexts Optional properties for previous and next arrows aria.label texts.
    */
   def defaultArrowFactory[ElemType](
     srTexts: Option[(ReadableProperty[String], ReadableProperty[String])] = None
