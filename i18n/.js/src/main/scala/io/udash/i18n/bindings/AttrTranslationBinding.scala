@@ -10,18 +10,14 @@ import scalatags.JsDom.Modifier
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[i18n] class AttrTranslationBinding(translation: Future[Translated], attr: String)
+private[i18n] final class AttrTranslationBinding(translation: Future[Translated], attr: String)
   extends Modifier with Bindings with CrossLogging {
 
   override def applyTo(t: Element): Unit =
-    if (translation.isCompleted && translation.value.get.isSuccess) {
-      t.setAttribute(attr, translation.value.get.get.string)
-    } else {
-      translation.onCompleteNow {
-        case Success(text) =>
-          t.setAttribute(attr, text.string)
-        case Failure(ex) =>
-          logger.error(ex.getMessage)
-      }
+    translation.onCompleteNow {
+      case Success(text) =>
+        t.setAttribute(attr, text.string)
+      case Failure(ex) =>
+        logger.error(ex.getMessage)
     }
 }

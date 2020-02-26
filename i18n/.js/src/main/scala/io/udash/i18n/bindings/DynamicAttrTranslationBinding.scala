@@ -10,7 +10,7 @@ import org.scalajs.dom.Element
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[i18n] class DynamicAttrTranslationBinding[Key <: TranslationKey](
+private[i18n] final class DynamicAttrTranslationBinding[Key <: TranslationKey](
   key: Key, translator: Key => Future[Translated], attr: String
 )(implicit lang: ReadableProperty[Lang]) extends Binding with CrossLogging {
 

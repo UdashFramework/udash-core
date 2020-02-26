@@ -19,7 +19,7 @@ private[i18n] final class TranslationBinding(
 
   override def applyTo(t: Element): Unit = {
     val holder: Seq[Node] = t.appendChild(placeholder.getOrElse(emptyStringNode()))
-    translation onCompleteNow {
+    translation.onCompleteNow {
       case Success(Translated(text)) =>
         t.replaceChildren(holder, parseTranslation(rawHtml, text))
       case Failure(ex) =>

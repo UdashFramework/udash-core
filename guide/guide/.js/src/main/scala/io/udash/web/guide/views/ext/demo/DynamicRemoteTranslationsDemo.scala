@@ -43,27 +43,27 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
       ))(ul(
         li(
           "auth.loginLabel: ",
-          translatedDynamic(Translations.auth.loginLabel)(_.apply())
+          Translations.auth.loginLabel.translatedDynamic()
         ),
         li(
           "auth.passwordLabel: ",
-          translatedDynamic(Translations.auth.passwordLabel)(_.apply())
+          Translations.auth.passwordLabel.translatedDynamic()
         ),
         li(
           "auth.login.buttonLabel: ",
-          translatedDynamic(Translations.auth.login.buttonLabel)(_.apply())
+          Translations.auth.login.buttonLabel.translatedDynamic()
         ),
         li(
           "auth.login.retriesLeft: ",
-          translatedDynamic(Translations.auth.login.retriesLeft)(_.apply(3))
+          Translations.auth.login.retriesLeft(3).translatedDynamic()
         ),
         li(
           "auth.login.retriesLeftOne: ",
-          translatedDynamic(Translations.auth.login.retriesLeftOne)(_.apply())
+          Translations.auth.login.retriesLeftOne.translatedDynamic()
         ),
         li(
           "auth.register.buttonLabel: ",
-          translatedDynamic(Translations.auth.register.buttonLabel)(_.apply())
+          Translations.auth.register.buttonLabel.translatedDynamic()
         )
       ))
     )

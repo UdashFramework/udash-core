@@ -9,7 +9,7 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
 
   "LocalTranslationProvider" should {
     "provide translations without argument" in {
-      val translator = new LocalTranslationProvider(
+      implicit val translator = new LocalTranslationProvider(
         Map(
           Lang("en") -> Bundle(BundleHash("hash1"), Map(
             "tr1" -> "Translation",
@@ -19,14 +19,14 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
         ), missingTranslationError = "ERROR"
       )
 
-      getTranslatedString(translator.translate("tr1")) should be("Translation")
-      getTranslatedString(translator.translate("tr2")) should be("Translation2")
-      getTranslatedString(translator.translate("tr3")) should be("Translation3")
-      getTranslatedString(translator.translate("trMissing")) should be("ERROR")
+      getTranslatedString(TranslationKey.key("tr1")) should be("Translation")
+      getTranslatedString(TranslationKey.key("tr2")) should be("Translation2")
+      getTranslatedString(TranslationKey.key("tr3")) should be("Translation3")
+      getTranslatedString(TranslationKey.key("trMissing")) should be("ERROR")
     }
 
     "provide translations with arguments" in {
-      val translator = new LocalTranslationProvider(
+      implicit val translator = new LocalTranslationProvider(
         Map(
           Lang("en") -> Bundle(BundleHash("hash1"), Map(
             "tr1" -> "Translation {0}",
@@ -37,15 +37,15 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
         ), missingTranslationError = "ERROR"
       )
 
-      getTranslatedString(translator.translate("tr1", 123.3)) should be("Translation 123.3")
-      getTranslatedString(translator.translate("tr2", "test", true)) should be("Translation2 true test")
-      getTranslatedString(translator.translate("tr3", 8)) should be("Translation3 8")
-      getTranslatedString(translator.translate("tr4", "test", true, 1, 2)) should be("Translation4 true 1 2")
-      getTranslatedString(translator.translate("trMissing")) should be("ERROR")
+      getTranslatedString(TranslationKey.key1("tr1")(123.3)) should be("Translation 123.3")
+      getTranslatedString(TranslationKey.key2("tr2")("test", true)) should be("Translation2 true test")
+      getTranslatedString(TranslationKey.key1("tr3")(8)) should be("Translation3 8")
+      getTranslatedString(TranslationKey.key4("tr4")("test", true, 1, 2)) should be("Translation4 true 1 2")
+      getTranslatedString(TranslationKey.key("trMissing")) should be("ERROR")
     }
 
     "handle languages" in {
-      val translator = new LocalTranslationProvider(
+      implicit val translator = new LocalTranslationProvider(
         Map(
           Lang("en") -> Bundle(BundleHash("hash1"), Map(
             "tr1" -> "Translation {0}",
@@ -62,17 +62,20 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
         ), missingTranslationError = "ERROR"
       )
 
-      getTranslatedString(translator.translate("tr1", 123.3)) should be("Translation 123.3")
-      getTranslatedString(translator.translate("tr2", "test", true)) should be("Translation2 true test")
-      getTranslatedString(translator.translate("tr3", 8)) should be("Translation3 8")
-      getTranslatedString(translator.translate("tr4", "test", true, 1, 2)) should be("Translation4 true 1 2")
-      getTranslatedString(translator.translate("trMissing")) should be("ERROR")
+      getTranslatedString(TranslationKey.key1("tr1")(123.3)) should be("Translation 123.3")
+      getTranslatedString(TranslationKey.key2("tr2")("test", true)) should be("Translation2 true test")
+      getTranslatedString(TranslationKey.key1("tr3")(8)) should be("Translation3 8")
+      getTranslatedString(TranslationKey.key4("tr4")("test", true, 1, 2)) should be("Translation4 true 1 2")
+      getTranslatedString(TranslationKey.key("trMissing")) should be("ERROR")
 
-      getTranslatedString(translator.translate("tr1", 123.3)(Lang("pl"))) should be("Translation 123.3 pl")
-      getTranslatedString(translator.translate("tr2", "test", true)(Lang("pl"))) should be("Translation2 true test pl")
-      getTranslatedString(translator.translate("tr3", 8)(Lang("pl"))) should be("Translation3 8 pl")
-      getTranslatedString(translator.translate("tr4", "test", true, 1, 2)(Lang("pl"))) should be("Translation4 true 1 2 pl")
-      getTranslatedString(translator.translate("trMissing")(Lang("pl"))) should be("ERROR")
+      {
+        implicit val lang = Lang("pl")
+        getTranslatedString(TranslationKey.key1("tr1")(123.3)) should be("Translation 123.3 pl")
+        getTranslatedString(TranslationKey.key2("tr2")("test", true)) should be("Translation2 true test pl")
+        getTranslatedString(TranslationKey.key1("tr3")(8)) should be("Translation3 8 pl")
+        getTranslatedString(TranslationKey.key4("tr4")("test", true, 1, 2)) should be("Translation4 true 1 2 pl")
+        getTranslatedString(TranslationKey.key("trMissing")) should be("ERROR")
+      }
     }
   }
 

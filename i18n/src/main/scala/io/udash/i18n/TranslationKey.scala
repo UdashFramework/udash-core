@@ -9,89 +9,54 @@ sealed trait TranslationKey {
   def key: String
 }
 
-class TranslationKey0(override val key: String) extends TranslationKey {
-  def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key)
+sealed class TranslationKey0(override val key: String) extends TranslationKey {
+  def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] = provider.translate(key)
 }
 
 class TranslationKey1[T](override val key: String) extends TranslationKey {
-  def apply(arg1: T)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1)
-
-  def reduce(arg1: T): TranslationKey0 =
-    new TranslationKey.ReducedTranslationKey(key, arg1)
+  def apply(arg1: T): TranslationKey0 = new TranslationKey.ReducedTranslationKey(key, arg1)
 }
 
-class TranslationKey2[T1, T2](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2)
-
-  def reduce(arg1: T1, arg2: T2): TranslationKey0 =
-    new TranslationKey.ReducedTranslationKey(key, arg1, arg2)
+final class TranslationKey2[T1, T2](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2): TranslationKey0 = new TranslationKey.ReducedTranslationKey(key, arg1, arg2)
 }
 
-class TranslationKey3[T1, T2, T3](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3): TranslationKey0 =
-    new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3)
+final class TranslationKey3[T1, T2, T3](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3): TranslationKey0 = new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3)
 }
 
-class TranslationKey4[T1, T2, T3, T4](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4): TranslationKey0 =
+final class TranslationKey4[T1, T2, T3, T4](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4)
 }
 
-class TranslationKey5[T1, T2, T3, T4, T5](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4, arg5)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5): TranslationKey0 =
+final class TranslationKey5[T1, T2, T3, T4, T5](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5)
 }
 
-class TranslationKey6[T1, T2, T3, T4, T5, T6](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6): TranslationKey0 =
+final class TranslationKey6[T1, T2, T3, T4, T5, T6](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6)
 }
 
-class TranslationKey7[T1, T2, T3, T4, T5, T6, T7](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7): TranslationKey0 =
+final class TranslationKey7[T1, T2, T3, T4, T5, T6, T7](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 }
 
-class TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8): TranslationKey0 =
+final class TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 }
 
-class TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9](override val key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-
-  def reduce(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9): TranslationKey0 =
+final class TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9](override val key: String) extends TranslationKey {
+  def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9): TranslationKey0 =
     new TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 }
 
-class TranslationKeyX(override val key: String) extends TranslationKey {
-  def apply(argv: Any*)(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
-    provider.translate(key, argv: _*)
-
-  def reduce(argv: Any*): TranslationKey0 =
-    new TranslationKey.ReducedTranslationKey(key, argv: _*)
+final class TranslationKeyX(override val key: String) extends TranslationKey {
+  def apply(argv: Any*): TranslationKey0 = new TranslationKey.ReducedTranslationKey(key, argv: _*)
 }
 
 object TranslationKey {
@@ -131,12 +96,13 @@ object TranslationKey {
   def untranslatable(key: String): TranslationKey0 =
     new Untranslatable(key)
 
-  private[i18n] class ReducedTranslationKey(override val key: String, val argv: Any*) extends TranslationKey0(key) {
-    override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
+  private[i18n] final class ReducedTranslationKey(key: String, val argv: Any*) extends TranslationKey0(key) {
+    override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] = {
       provider.translate(key, argv: _*)
+    }
   }
 
-  private[i18n] class Untranslatable(override val key: String) extends TranslationKey0(key) {
+  private[i18n] final class Untranslatable(override val key: String) extends TranslationKey0(key) {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
       Future.successful(Translated(key))
   }
