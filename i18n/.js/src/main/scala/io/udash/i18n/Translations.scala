@@ -1,7 +1,7 @@
 package io.udash.i18n
 
 import io.udash.bindings.modifiers.Binding
-import io.udash.i18n.bindings.{AttrTranslationBinding, DynamicAttrTranslationBinding, DynamicTranslationBinding, TranslationBinding}
+import io.udash.i18n.bindings.{AttrTranslationModifier, DynamicAttrTranslationBinding, DynamicTranslationBinding, TranslationModifier}
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom.Element
 import scalatags.JsDom.Modifier
@@ -24,7 +24,7 @@ trait Translations {
   def translated(
     translation: Future[Translated], placeholder: Option[Element] = None, rawHtml: Boolean = false
   ): Modifier =
-    new TranslationBinding(translation, placeholder, rawHtml)
+    new TranslationModifier(translation, placeholder, rawHtml)
 
   /**
    * Binds translated string in DOM element and updates it when application language changes.
@@ -48,7 +48,7 @@ trait Translations {
    * @param attr        Attribute name which gonna be updated when `translation` text become ready.
    */
   def translatedAttr(translation: Future[Translated], attr: String): Modifier =
-    new AttrTranslationBinding(translation, attr)
+    new AttrTranslationModifier(translation, attr)
 
   /**
    * Binds translated string in DOM element attribute and updates it when application language changes.
