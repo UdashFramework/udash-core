@@ -125,7 +125,7 @@ class ExceptionsDemoComponent extends Component {
       UdashInputGroup()(
         UdashInputGroup.prependText(
           "Result: ",
-          produce(model.subProp(_.translatableException))(v => span(id := "translatable-exception-demo-response")(translated(v())).render)
+          produce(model.subProp(_.translatableException))(v => span(id := "translatable-exception-demo-response")(v.translated()).render)
         ),
         translatableExceptionButton.render
       ).render, br,
