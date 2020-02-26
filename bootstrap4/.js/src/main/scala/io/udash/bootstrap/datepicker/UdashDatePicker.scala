@@ -4,7 +4,7 @@ package datepicker
 import java.{util => ju}
 
 import com.avsystem.commons.SharedExtensions._
-import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
@@ -137,7 +137,7 @@ final class UdashDatePicker private[datepicker](
       "collapse" -> options.collapse,
       "disabledDates" -> (if (options.disabledDates.nonEmpty) options.disabledDates.map(dateToMoment).toJSArray else false),
       "enabledDates" -> (if (options.enabledDates.nonEmpty) options.enabledDates.map(dateToMoment).toJSArray else false),
-      "icons" -> iconsOptionToJSDict(options.icons),
+      "icons" -> options.icons.jsDictionary,
       "useStrict" -> options.useStrict,
       "sideBySide" -> options.sideBySide,
       "daysOfWeekDisabled" -> (if (options.daysOfWeekDisabled.nonEmpty) options.daysOfWeekDisabled.map(_.id).toJSArray else false),
@@ -167,26 +167,6 @@ final class UdashDatePicker private[datepicker](
         "showClear" -> options.showClear,
         "showClose" -> options.showClose
       )
-    )
-  }
-
-  private def iconsOptionToJSDict(icons: DatePickerIcons): js.Dictionary[js.Any] = {
-    import scalajs.js.JSConverters._
-
-    js.Dictionary[js.Any]().setup(dict =>
-      Iterator(
-        ("time", icons.time),
-        ("date", icons.date),
-        ("up", icons.up),
-        ("down", icons.down),
-        ("previous", icons.previous),
-        ("next", icons.next),
-        ("today", icons.today),
-        ("clear", icons.clear),
-        ("close", icons.close)
-      ).foreach { case (icon, style) =>
-        if (style.nonEmpty) dict.update(icon, style.flatMap(_.classNames).distinct.toJSArray)
-      }
     )
   }
 
@@ -412,7 +392,7 @@ object UdashDatePicker {
     val defaultDate: Option[ju.Date] = None,
     val disabledDates: Seq[ju.Date] = Seq.empty,
     val enabledDates: Seq[ju.Date] = Seq.empty,
-    val icons: DatePickerIcons = new DatePickerIcons(),
+    val icons: DatePickerIcons = DefaultDatePickerIcons,
     val useStrict: Boolean = false,
     val sideBySide: Boolean = false,
     val daysOfWeekDisabled: Seq[DayOfWeek] = Seq.empty,
@@ -466,17 +446,51 @@ object UdashDatePicker {
 
   object DatePickerOptions extends HasModelPropertyCreator[DatePickerOptions]
 
-  class DatePickerIcons(
-    val time: Seq[CssStyle] = Seq(FontAwesome.Regular.clock),
-    val date: Seq[CssStyle] = Seq(FontAwesome.Regular.calendar),
-    val up: Seq[CssStyle] = Seq(FontAwesome.Solid.angleUp),
-    val down: Seq[CssStyle] = Seq(FontAwesome.Solid.angleDown),
-    val previous: Seq[CssStyle] = Seq(FontAwesome.Solid.angleLeft),
-    val next: Seq[CssStyle] = Seq(FontAwesome.Solid.angleRight),
-    val today: Seq[CssStyle] = Seq(FontAwesome.Regular.calendarCheck),
-    val clear: Seq[CssStyle] = Seq(FontAwesome.Regular.trashAlt),
-    val close: Seq[CssStyle] = Seq(FontAwesome.Solid.times)
-  )
+  sealed trait DatePickerIcons {
+    def jsDictionary: js.Dictionary[js.Any]
+  }
+
+  final class CustomDatePickerIcons(
+      val time: Option[CssStyle] = Option.empty,
+      val date: Option[CssStyle] = Option.empty,
+      val up: Option[CssStyle] = Option.empty,
+      val down: Option[CssStyle] = Option.empty,
+      val previous: Option[CssStyle] = Option.empty,
+      val next: Option[CssStyle] = Option.empty,
+      val today: Option[CssStyle] = Option.empty,
+      val clear: Option[CssStyle] = Option.empty,
+      val close: Option[CssStyle] = Option.empty
+  ) extends DatePickerIcons {
+    import scala.scalajs.js.JSConverters._
+
+    override val jsDictionary: js.Dictionary[js.Any] = js.Dictionary(
+      Iterator("time", "date", "up", "down", "previous", "next", "today", "clear", "close")
+        .zip(Iterator(time, date, up, down, previous, next, today, clear, close))
+        .flatMap { case (key, valueOpt) => valueOpt.map(key -> _.classNames.toJSArray) }
+        .toSeq: _*
+    )
+  }
+
+  object DefaultDatePickerIcons extends DatePickerIcons {
+    override val jsDictionary: js.Dictionary[js.Any] = js.Dictionary(DefaultDatePickerIcon.values.map(_.jsDictionaryItem): _*)
+  }
+
+  final class DefaultDatePickerIcon(style: CssStyle)(implicit enumCtx: EnumCtx) extends AbstractValueEnum {
+    import scala.scalajs.js.JSConverters._
+
+    val jsDictionaryItem: (String, js.Array[String]) = name.toLowerCase() -> style.classNames.toJSArray
+  }
+  object DefaultDatePickerIcon extends AbstractValueEnumCompanion[DefaultDatePickerIcon] {
+    final val Time: Value = new DefaultDatePickerIcon(FontAwesome.Regular.clock)
+    final val Date: Value = new DefaultDatePickerIcon(FontAwesome.Regular.calendar)
+    final val Up: Value = new DefaultDatePickerIcon(FontAwesome.Solid.angleUp)
+    final val Down: Value = new DefaultDatePickerIcon(FontAwesome.Solid.angleDown)
+    final val Previous: Value = new DefaultDatePickerIcon(FontAwesome.Solid.angleLeft)
+    final val Next: Value = new DefaultDatePickerIcon(FontAwesome.Solid.angleRight)
+    final val Today: Value = new DefaultDatePickerIcon(FontAwesome.Regular.calendarCheck)
+    final val Clear: Value = new DefaultDatePickerIcon(FontAwesome.Regular.trashAlt)
+    final val Close: Value = new DefaultDatePickerIcon(FontAwesome.Solid.times)
+  }
 
   class DatePickerTooltips[LabelTypes](
     val today: LabelTypes,
