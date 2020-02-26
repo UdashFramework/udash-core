@@ -60,34 +60,6 @@ final class UdashDatePicker private[datepicker](
     fire(DatePickerEvent.Error(this, date.get))
   }
 
-  locally {
-    registerMutationCallbacks(
-      componentId,
-      () => {
-        // initialization
-        date.get
-          .forEmpty(jQInput.datetimepicker())
-          .foreach(date => jQInput.datetimepicker(js.Dictionary[js.Any]("date" -> dateToMoment(date))))
-
-        // options propagation
-        optionsToJsDict(options.get)
-          .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
-          .foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
-
-        jQInput.on(ChangeEvent, changeCallback)
-        jQInput.on(HideEvent, hideCallback)
-        jQInput.on(ShowEvent, showCallback)
-        jQInput.on(ErrorEvent, errorCallback)
-      },
-      () => {
-        jQInput.off(ChangeEvent, changeCallback)
-        jQInput.off(HideEvent, hideCallback)
-        jQInput.off(ShowEvent, showCallback)
-        jQInput.off(ErrorEvent, errorCallback)
-      }
-    )
-  }
-
   /** Shows date picker widget. */
   def show(): Unit =
     jQInput.datetimepicker("show")
@@ -117,9 +89,37 @@ final class UdashDatePicker private[datepicker](
   }
 
   override def kill(): Unit = {
-    deregisterMutationCallbacks(componentId)
+    deregisterMutationCallbacks(render)
     jQInput.datetimepicker("destroy")
     super.kill()
+  }
+
+  locally {
+    registerMutationCallbacks(
+      render,
+      () => {
+        // initialization
+        date.get
+          .forEmpty(jQInput.datetimepicker())
+          .foreach(date => jQInput.datetimepicker(js.Dictionary[js.Any]("date" -> dateToMoment(date))))
+
+        // options propagation
+        optionsToJsDict(options.get)
+          .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
+          .foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
+
+        jQInput.on(ChangeEvent, changeCallback)
+        jQInput.on(HideEvent, hideCallback)
+        jQInput.on(ShowEvent, showCallback)
+        jQInput.on(ErrorEvent, errorCallback)
+      },
+      () => {
+        jQInput.off(ChangeEvent, changeCallback)
+        jQInput.off(HideEvent, hideCallback)
+        jQInput.off(ShowEvent, showCallback)
+        jQInput.off(ErrorEvent, errorCallback)
+      }
+    )
   }
 
   private def optionsToJsDict(options: DatePickerOptions): js.Dictionary[js.Any] = {
@@ -573,52 +573,52 @@ object UdashDatePicker {
     def valueOf(): Double = js.native
   }
 
-  import org.scalajs.dom.raw.{MutationObserver, MutationObserverInit, MutationRecord, NodeList}
+  import org.scalajs.dom.{MutationObserver, MutationObserverInit, MutationRecord, Node, NodeList}
 
+  import scala.collection.Map
   import scala.collection.mutable.{Map => MMap}
 
-  private val datePickerSetupCallbacks = MMap.empty[ComponentId, () => Unit]
-  private val datePickerDetachCallbacks = MMap.empty[ComponentId, () => Unit]
+  private val datePickerSetupCallbacks = MMap.empty[Node, () => Unit]
+  private val datePickerDetachCallbacks = MMap.empty[Node, () => Unit]
 
   // When a date picker gets appended to a DOM, its options and listeners should be initialized once again. Thus, all
   // nodes with mutated children are examined whether there is a date picker defined within a corresponding DOM
-  // subtree. It is also substantially possible for any date picker to be reported by more than one `MutationRecord`
-  // since the `subtree` switch of `MutationObserverInit` is on, thus only the first update is considered for each
-  // picker (note `exists` call) to avoid double initialization. Similarly, Tempus Dominus custom jQuery event listeners
-  // get deregistered each time a date picker is detached from the DOM.
+  // subtree (note the `Node#contains` call). Added/removed nodes reported by a `MutationObserver` within single
+  // `MutationRecord` are roots of recently added/removed DOM subtrees (not all Nodes listed recursively), hence each
+  // registered picker is assured to be embedded within at most one of such subtrees.
+  //
+  // Similarly, Tempus Dominus custom jQuery event listeners get deregistered each time a date picker is detached from
+  // a DOM.
   //
   // This mutation observer is turned on just before the first callback registration and off when there are no components
   // registered to be watched.
   private val datePickerMutationObserver = {
     new MutationObserver((records: js.Array[MutationRecord], _: MutationObserver) => {
-      def mutationHandler(nodesExtractor: MutationRecord => NodeList, callbacks: MMap[ComponentId, () => Unit]): Unit = {
-        val nodes = records.flatMap(record =>
-          nodesExtractor(record) |> (recordNodes => for {i <- 0 until recordNodes.length} yield recordNodes(i))
-        )
-        callbacks
-          .iterator
-          .filter { case (pickerId, _) => nodes.exists {
-            case element: Element => element.id == pickerId.id || element.querySelector(s"#$pickerId") != null
-            case _ => false
-          }}
-          .foreach { case (_, callback) => callback() }
+      def mutationHandler(nodesExtractor: MutationRecord => NodeList, callbacks: Map[Node, () => Unit]): Unit = {
+        records
+          .flatMap(nodesExtractor(_) |> (recordNodes => for {i <- 0 until recordNodes.length} yield recordNodes(i)))
+          .foreach(node =>
+            callbacks.iterator
+              .filter { case (pickerNode, _) => node.contains(pickerNode) }
+              .foreach { case (_, callback) => callback() }
+          )
       }
 
-      mutationHandler(_.addedNodes, datePickerSetupCallbacks)
       mutationHandler(_.removedNodes, datePickerDetachCallbacks)
+      mutationHandler(_.addedNodes, datePickerSetupCallbacks)
     })
   }
 
-  def registerMutationCallbacks(id: ComponentId, setupCallback: () => Unit, detachCallback: () => Unit): Unit = {
+  def registerMutationCallbacks(pickerNode: Node, setupCallback: () => Unit, detachCallback: () => Unit): Unit = {
     if (datePickerSetupCallbacks.isEmpty && datePickerDetachCallbacks.isEmpty)
       datePickerMutationObserver.observe(document.body, MutationObserverInit(childList = true, subtree = true))
-    datePickerSetupCallbacks += (id -> setupCallback)
-    datePickerDetachCallbacks += (id -> detachCallback)
+    datePickerSetupCallbacks += (pickerNode -> setupCallback)
+    datePickerDetachCallbacks += (pickerNode -> detachCallback)
   }
 
-  def deregisterMutationCallbacks(id: ComponentId): Unit = {
-    datePickerSetupCallbacks -= id
-    datePickerDetachCallbacks -= id
+  def deregisterMutationCallbacks(pickerNode: Node): Unit = {
+    datePickerSetupCallbacks -= pickerNode
+    datePickerDetachCallbacks -= pickerNode
     if (datePickerSetupCallbacks.isEmpty && datePickerDetachCallbacks.isEmpty)
       datePickerMutationObserver.disconnect()
   }
