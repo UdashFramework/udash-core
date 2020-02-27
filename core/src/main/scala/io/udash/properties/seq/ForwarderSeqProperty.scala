@@ -95,7 +95,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
   override protected def onListenerInit(): Unit = {
     val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin())
     if (!(transformedElements == fromOrigin)) {
-      fireElementsListeners[ElemType](Patch[ElemType](0, transformedElements.toSeq, fromOrigin.toSeq, fromOrigin.isEmpty), structureListeners)
+      fireElementsListeners(Patch(0, transformedElements.toSeq, fromOrigin.toSeq, fromOrigin.isEmpty))
       valueChanged()
     } else if (transformedElements.map(_.get) != fromOrigin.map(_.get)) {
       valueChanged()

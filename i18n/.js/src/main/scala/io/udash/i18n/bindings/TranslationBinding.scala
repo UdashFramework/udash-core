@@ -2,7 +2,8 @@ package io.udash.i18n.bindings
 
 import com.avsystem.commons._
 import io.udash.bindings.Bindings
-import io.udash.i18n.Translated
+import io.udash.bindings.modifiers._
+import io.udash.i18n._
 import io.udash.logging.CrossLogging
 import org.scalajs.dom._
 import scalatags.JsDom.Modifier
@@ -10,24 +11,19 @@ import scalatags.JsDom.Modifier
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[i18n] class TranslationBinding(translation: Future[Translated], placeholder: Option[Element])
-  extends Modifier with Bindings with CrossLogging {
+private[i18n] final class TranslationBinding(
+  translation: Future[Translated],
+  placeholder: Option[Element],
+  rawHtml: Boolean
+) extends Modifier with Bindings with CrossLogging {
 
-  override def applyTo(t: Element): Unit =
-    if (translation.isCompleted && translation.value.get.isSuccess) {
-      t.appendChild(document.createTextNode(translation.value.get.get.string))
-    } else {
-      val holder: Node = placeholder.getOrElse(emptyStringNode())
-      t.appendChild(holder)
-
-      translation.onCompleteNow {
-        case Success(text) =>
-          t.replaceChild(
-            document.createTextNode(text.string),
-            holder
-          )
-        case Failure(ex) =>
-          logger.error(ex.getMessage)
-      }
+  override def applyTo(t: Element): Unit = {
+    val holder: Seq[Node] = t.appendChild(placeholder.getOrElse(emptyStringNode()))
+    translation onCompleteNow {
+      case Success(Translated(text)) =>
+        t.replaceChildren(holder, parseTranslation(rawHtml, text))
+      case Failure(ex) =>
+        logger.error(ex.getMessage)
     }
+  }
 }

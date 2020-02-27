@@ -17,12 +17,13 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 )(
   heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
   body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
-) extends UdashBootstrapComponent
-  with Listenable[UdashAccordion[ItemType, ElemType], UdashAccordion.AccordionEvent[ItemType, ElemType]] {
+) extends UdashBootstrapComponent with Listenable {
 
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
+
+  override type EventType = UdashAccordion.AccordionEvent[ItemType, ElemType]
 
   private val collapses = mutable.Map.empty[ElemType, UdashCollapse]
   propertyListeners += elements.listenStructure { patch =>
@@ -39,10 +40,10 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
     collapses.get(panel)
 
   override val render: Element =
-    div(BootstrapStyles.Collapse.accordion, id := componentId)(
+    div(BootstrapStyles.Collapse.accordion, componentId)(
       nestedInterceptor(
         repeatWithIndex(elements) { case (item, idx, nested) =>
-          val headingId = ComponentId.newId()
+          val headingId = ComponentId.generate()
           val card = UdashCard() { factory =>
             val collapse = UdashCollapse()(_ => Seq(
               aria.labelledby := headingId, dataParent := s"#$componentId",
@@ -52,7 +53,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
             collapses(item) = collapse
 
             val header = factory.header { nested => Seq(
-              id := headingId,
+              headingId,
               h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
                 button(
                   BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
@@ -88,7 +89,7 @@ object UdashAccordion {
     item: ItemType,
     idx: Int,
     collapseEvent: UdashCollapse.CollapseEvent
-  ) extends AbstractCase with ListenableEvent[UdashAccordion[ItemType, ElemType]]
+  ) extends AbstractCase with ListenableEvent
 
   /**
     * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
@@ -106,7 +107,7 @@ object UdashAccordion {
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     elements: seq.ReadableSeqProperty[ItemType, ElemType],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
     body: (ElemType, Binding.NestedInterceptor) => Seq[Element]

@@ -8,8 +8,7 @@ import org.scalajs.dom.Element
 
 import scala.scalajs.js
 
-final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery)
-  extends Tooltip[TooltipEvent[UdashPopover], UdashPopover] {
+final class UdashPopover(selector: UdashPopover.UdashPopoverJQuery) extends Tooltip {
 
   /** Shows popover. */
   def show(): Unit =

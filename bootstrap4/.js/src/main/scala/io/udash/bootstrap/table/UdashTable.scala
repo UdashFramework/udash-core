@@ -30,7 +30,7 @@ final class UdashTable[ItemType, ElemType <: ReadableProperty[ItemType]] private
     div(
       nestedInterceptor((BootstrapStyles.Table.responsive _).reactiveOptionApply(responsive)),
       table(
-        id := componentId,
+        componentId,
         BootstrapStyles.Table.table,
         nestedInterceptor(BootstrapStyles.Table.dark.styleIf(dark)),
         nestedInterceptor(BootstrapStyles.Table.striped.styleIf(striped)),
@@ -89,7 +89,7 @@ object UdashTable {
     borderless: ReadableProperty[Boolean] = UdashBootstrap.False,
     hover: ReadableProperty[Boolean] = UdashBootstrap.False,
     small: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     rowFactory: (ElemType, Binding.NestedInterceptor) => Element,
     headerFactory: Option[Binding.NestedInterceptor => Modifier] = None,

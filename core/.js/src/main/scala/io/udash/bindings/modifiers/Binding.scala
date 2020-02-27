@@ -14,7 +14,7 @@ trait Binding extends Modifier[Element] {
   private var active = true
 
   /** Every interceptor is expected to return the value received as argument. */
-  protected def nestedInterceptor[T <: Binding](binding: T): T =
+  protected final def nestedInterceptor[T <: Binding](binding: T): T =
     binding.setup {
       nestedBindings += _
     }

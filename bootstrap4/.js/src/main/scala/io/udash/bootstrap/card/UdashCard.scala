@@ -115,7 +115,7 @@ final class UdashCard private(
   }
 
   override val render: Element = div(
-    BootstrapStyles.Card.card, id := componentId,
+    BootstrapStyles.Card.card, componentId,
     nestedInterceptor((BootstrapStyles.Text.align(_: BootstrapStyles.Align, BootstrapStyles.ResponsiveBreakpoint.All)).reactiveOptionApply(textAlignment)),
     nestedInterceptor((BootstrapStyles.Text.color _).reactiveOptionApply(textColor)),
     nestedInterceptor((BootstrapStyles.Background.color _).reactiveOptionApply(backgroundColor)),
@@ -142,7 +142,7 @@ object UdashCard {
     borderColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
     textAlignment: ReadableProperty[Option[BootstrapStyles.Align]] = UdashBootstrap.None,
     textColor: ReadableProperty[Option[BootstrapStyles.Color]] = UdashBootstrap.None,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: UdashCard#CardElementsFactory => Modifier): UdashCard = {
     new UdashCard(backgroundColor, borderColor, textAlignment, textColor, componentId)(content)
   }

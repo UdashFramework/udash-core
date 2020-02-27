@@ -28,7 +28,6 @@ val deploymentConfiguration = Seq(
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
 
-  sonatypeBundleDirectory := (ThisBuild / baseDirectory).value / target.value.getName / "sonatype-staging" / s"udash-${version.value}",
   publishTo := sonatypePublishToBundle.value,
 
   credentials in Global += Credentials(
@@ -119,7 +118,7 @@ val testInBrowser = Seq(
 
 val noPublishSettings = Seq(
   publish / skip := true,
-  Compile / doc := (doc / target).value,
+  Compile / packageDoc / mappings := Seq.empty,
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(

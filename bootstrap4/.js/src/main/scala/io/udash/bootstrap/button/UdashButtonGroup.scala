@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package button
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
@@ -29,7 +30,7 @@ final class UdashButtonGroup[ItemType, ElemType <: ReadableProperty[ItemType]] p
   }
 
   override val render: Element =
-    div(id := componentId, role := "group", classes)(
+    div(componentId, role := "group", classes)(
       nestedInterceptor(
         repeatWithNested(items) { case (item, nested) =>
           val elements = itemFactory(item, nested)
@@ -56,7 +57,7 @@ object UdashButtonGroup {
     size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(buttons: Element*): UdashButtonGroup[Element, Property[Element]] = {
     reactive[Element, Property[Element]](
       SeqProperty[Element](buttons),
@@ -85,7 +86,7 @@ object UdashButtonGroup {
     size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(itemFactory: (ElemType, Binding.NestedInterceptor) => Seq[Element]): UdashButtonGroup[ItemType, ElemType] = {
     new UdashButtonGroup[ItemType, ElemType](
       items, size, vertical, justified, componentId
@@ -113,7 +114,7 @@ object UdashButtonGroup {
     size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     btnFactory: (ElemType, ReadableProperty[Boolean], Binding.NestedInterceptor) => UdashButton =
     (item: ElemType, active: ReadableProperty[Boolean], nested: Binding.NestedInterceptor) => {
@@ -156,7 +157,7 @@ object UdashButtonGroup {
     size: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
     vertical: ReadableProperty[Boolean] = UdashBootstrap.False,
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     btnFactory: (ElemType, ReadableProperty[Boolean], Binding.NestedInterceptor) => UdashButton =
     (item: ElemType, active: ReadableProperty[Boolean], nested: Binding.NestedInterceptor) =>

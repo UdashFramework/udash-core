@@ -8,17 +8,6 @@ private[bindings] final class SimplePropertyModifier[T](property: ReadableProper
   extends PropertyModifier[T](
     property,
     t => dom.document.createTextNode(t.toString),
-    true
+    checkNull = true,
+    DOMManipulator.DefaultElementReplace
   )
-
-
-
-
-
-
-
-
-
-
-
-

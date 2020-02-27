@@ -24,14 +24,16 @@ final class UdashDatePicker private[datepicker](
   val date: Property[Option[ju.Date]],
   options: ReadableProperty[UdashDatePicker.DatePickerOptions],
   override val componentId: ComponentId
-) extends UdashBootstrapComponent with Listenable[UdashDatePicker, UdashDatePicker.DatePickerEvent] with CrossLogging {
+) extends UdashBootstrapComponent with Listenable with CrossLogging {
 
   import UdashDatePicker._
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
+  override type EventType = UdashDatePicker.DatePickerEvent
+
   private val inp = input(
-    id := componentId.id, tpe := "text",
+    componentId, tpe := "text",
     BootstrapStyles.Form.control, CssStyleName("datetimepicker-input"),
     BootstrapTags.dataToggle := "datetimepicker", BootstrapTags.dataTarget := s"#$componentId"
   ).render
@@ -39,10 +41,13 @@ final class UdashDatePicker private[datepicker](
 
   locally {
     registerSetupCallback(componentId, () => {
-      jQInput.datetimepicker(
-        optionsToJsDict(options.get)
-          .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
-      )
+      // initialization
+      jQInput.datetimepicker()
+
+      // options propagation
+      optionsToJsDict(options.get)
+        .setup(optionsDict => date.get.foreach(date => optionsDict.update("date", dateToMoment(date))))
+        .foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
 
       nestedInterceptor(new JQueryOnBinding(jQInput, "change.datetimepicker", (_: Element, event: JQueryEvent) => {
         val dateOption = event.asInstanceOf[DatePickerChangeJQEvent].option
@@ -225,7 +230,7 @@ object UdashDatePicker {
   def apply(
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(): UdashDatePicker = {
     new UdashDatePicker(date, options, componentId)
   }
@@ -243,7 +248,7 @@ object UdashDatePicker {
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
     translatedTooltips: DatePickerTooltips[TranslationKey0],
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )()(implicit lang: LangProperty, provider: TranslationProvider): UdashDatePicker = {
     val optionsWithTranslation = Property(options.get)
 
@@ -327,7 +332,7 @@ object UdashDatePicker {
   def loadBootstrapDatePickerStyles(): Element =
     link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css").render
 
-  sealed trait DatePickerEvent extends AbstractCase with ListenableEvent[UdashDatePicker]
+  sealed trait DatePickerEvent extends AbstractCase with ListenableEvent
   object DatePickerEvent {
     final case class Show(source: UdashDatePicker) extends DatePickerEvent
     final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
@@ -507,7 +512,7 @@ object UdashDatePicker {
 
   @js.native
   private trait UdashDatePickerJQuery extends JQuery {
-    def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
+    def datetimepicker(): UdashDatePickerJQuery = js.native
     def datetimepicker(function: String): UdashDatePickerJQuery = js.native
     def datetimepicker(option: String, value: js.Any): UdashDatePickerJQuery = js.native
   }
@@ -535,6 +540,7 @@ object UdashDatePicker {
   }
 
   import org.scalajs.dom.raw.{MutationObserver, MutationObserverInit, MutationRecord}
+
   import scala.collection.mutable.{Map => MMap}
 
   private val datePickerSetupCallbacks = MMap.empty[ComponentId, () => Unit]
@@ -550,7 +556,7 @@ object UdashDatePicker {
       val addedNodes = records.flatMap(record => for {i <- 0 until record.addedNodes.length} yield record.addedNodes(i))
       datePickerSetupCallbacks.foreach { case (pickerId, callback) =>
         if (addedNodes.exists {
-          case element: Element => element.querySelector(s"#$pickerId") != null
+          case element: Element => element.id == pickerId.value || element.querySelector(s"#$pickerId") != null
           case _ => false
         }) callback()
       }
