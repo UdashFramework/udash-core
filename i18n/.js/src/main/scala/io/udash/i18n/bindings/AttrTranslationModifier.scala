@@ -9,7 +9,7 @@ import scalatags.JsDom.Modifier
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[i18n] final class AttrTranslationModifier(translation: Future[Translated], attr: String)
+private[i18n] class AttrTranslationModifier(translation: => Future[Translated], attr: String)
   extends Modifier with CrossLogging {
 
   override def applyTo(t: Element): Unit =
