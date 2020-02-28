@@ -1,7 +1,7 @@
 package io.udash.bootstrap.pagination
 
+import com.avsystem.commons._
 import io.udash._
-import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -160,23 +160,35 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
     }
 
     "translate aria labels of arrows" in {
-      val tp = new LocalTranslationProvider(
+      import io.udash.i18n._
+
+      implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
           Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
         )
       )
-      val lang = Property(Lang("test"))
+      val lang: LangProperty = Property(Lang("test"))
+
       val selected = Property(0)
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
+      val previous = Property.blank[String]
+      val next = Property.blank[String]
+
       val pagination = UdashPagination(pages, selected)(
-        arrowFactory = UdashPagination.defaultArrowFactory(Some((
-          TranslationKey.key("prev"),
-          TranslationKey.key("next"),
-          lang, tp
-        )))
-      )
+        arrowFactory = UdashPagination.defaultArrowFactory(Some((previous, next)))
+      ).setup(_.addRegistration(
+        lang.listen(implicit lang =>
+          for {
+            p <- TranslationKey.key("prev")()
+            n <- TranslationKey.key("next")()
+          } yield CallbackSequencer().sequence {
+            previous.set(p.string)
+            next.set(n.string)
+          },
+          initUpdate = true)
+      ))
       val el = pagination.render
 
       import scalatags.JsDom.all._
@@ -229,7 +241,7 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
     }
   }
 
-  def checkDisabled(els: Element*)(expectFirst: Boolean, expectLast: Boolean) = {
+  def checkDisabled(els: Element*)(expectFirst: Boolean, expectLast: Boolean): Unit = {
     els.foreach(el => {
       jQ(el).find("li").first().hasClass("disabled") should be(expectFirst)
       jQ(el).find("li").last().hasClass("disabled") should be(expectLast)

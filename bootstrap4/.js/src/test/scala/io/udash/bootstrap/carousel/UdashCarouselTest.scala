@@ -4,7 +4,6 @@ import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
 import io.udash.bootstrap.utils.BootstrapStyles.Carousel
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
-import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
@@ -158,24 +157,35 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
     }
 
     "translate aria.label arrow descriptions" in {
-      val tp = new LocalTranslationProvider(
+      import io.udash.i18n._
+
+      implicit val tp: LocalTranslationProvider = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
           Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
         )
       )
-      val lang = Property(Lang("test"))
+      val langProperty: LangProperty = Property(Lang("test"))
+
+      val previous = Property.blank[String]
+      val next = Property.blank[String]
 
       val sl = slides()
       val carousel = UdashCarousel.default(
         sl,
-        srTexts = Some((
-          TranslationKey.key("prev"),
-          TranslationKey.key("next"),
-          lang, tp
-        )),
+        srTexts = Some((previous, next)),
         animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
-      )()
+      )().setup(_.addRegistration(
+        langProperty.listen(implicit lang =>
+          for {
+            p <- TranslationKey.key("prev")()
+            n <- TranslationKey.key("next")()
+          } yield CallbackSequencer().sequence {
+            previous.set(p.string)
+            next.set(n.string)
+          },
+          initUpdate = true)
+      ))
       val el = carousel.render
       jQ("body").append(el)
 
@@ -184,9 +194,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
           el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Poprzedni")
           el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("Następny")
         }
-        _ <- Future {
-          lang.set(Lang("test2"))
-        }
+        _ <- Future(langProperty.set(Lang("test2")))
         r <- retrying {
           el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Prev")
           el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("next")
