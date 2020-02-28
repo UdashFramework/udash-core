@@ -464,7 +464,8 @@ object UdashDatePicker {
     import scala.scalajs.js.JSConverters._
 
     override val jsDictionary: js.Dictionary[js.Any] = js.Dictionary(
-      DefaultDatePickerIcon.values.iterator.map(_.name).zip(Iterator(time, date, up, down, previous, next, today, clear, close))
+      DefaultDatePickerIcon.values.iterator.map(_.name.toLowerCase())
+        .zip(Iterator(time, date, up, down, previous, next, today, clear, close))
         .flatMap { case (key, valueOpt) => valueOpt.map(key -> _.classNames.toJSArray) }
         .toSeq: _*
     )
