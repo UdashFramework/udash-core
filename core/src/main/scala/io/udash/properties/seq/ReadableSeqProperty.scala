@@ -43,9 +43,9 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
   def reversed(): ReadableSeqProperty[A, ReadableProperty[A]]
 
   /** Filters ReadableSeqProperty[A].
-    *
-    * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
-  def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType]
+   *
+   * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
+  def filter(matcher: A => Boolean): ReadableSeqProperty[A, ElemType]
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
   def combine[B, O : PropertyCreator](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
@@ -107,9 +107,9 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer)
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
-    new ReversedReadableSeqProperty[A](this)
+    new ReversedReadableSeqProperty[A, ReadableProperty[A]](this)
 
-  override def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType] =
+  override def filter(matcher: A => Boolean): ReadableSeqProperty[A, ElemType] =
     new FilteredSeqProperty[A, ElemType](this, matcher)
 
   lazy val zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =

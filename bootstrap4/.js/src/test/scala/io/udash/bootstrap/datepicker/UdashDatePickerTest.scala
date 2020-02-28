@@ -3,12 +3,12 @@ package datepicker
 
 import java.{util => ju}
 
-import com.avsystem.commons.SharedExtensions._
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bootstrap.datepicker.UdashDatePickerTest.JQueryDatePickerExt
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
-import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey, TranslationKey0}
+import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
@@ -209,7 +209,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
     }
 
     "translate tooltips in options" in {
-      val tp = new LocalTranslationProvider(
+      implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("today" -> "Dzisiaj", "clear" -> "Wyczyść")),
           Lang("test2") -> Bundle(BundleHash("h"), Map("today" -> "Today", "clear" -> "Clear"))
@@ -218,16 +218,27 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       val lang = Property(Lang("test"))
 
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
+      val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
       val emptyTk = TranslationKey.untranslatable("")
-      val tooltips = new UdashDatePicker.DatePickerTooltips[TranslationKey0](
-        TranslationKey.key("today"), TranslationKey.key("clear"), TranslationKey.untranslatable("close 123"),
-        emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk, emptyTk
-      )
-      val picker: UdashDatePicker = UdashDatePicker.i18n(date, pickerOptions, tooltips)()(lang, tp)
+
+      val picker = UdashDatePicker(date, pickerOptions)().setup(_.addRegistration(lang.listen(implicit lang =>
+        for {
+          today <- TranslationKey.key("today")().mapNow(_.string)
+          clear <- TranslationKey.key("clear")().mapNow(_.string)
+          close <- TranslationKey.untranslatable("close 123")().mapNow(_.string)
+          other <- emptyTk().mapNow(_.string)
+        } yield {
+          pickerOptions.subProp(_.tooltips).set(
+            UdashDatePicker.DatePickerTooltips(
+              today, clear, close, other, other, other, other, other, other, other, other, other, other, other
+            )
+          )
+        }
+        , initUpdate = true)))
+
       jQ("body").append(picker.render)
 
       val pickerJQ = jQ("#" + picker.componentId.id).asInstanceOf[JQueryDatePickerExt]

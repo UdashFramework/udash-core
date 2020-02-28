@@ -88,7 +88,6 @@ val commonSettings = Seq(
     ) else Seq.empty
   },
   moduleName := "udash-" + moduleName.value,
-  ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
@@ -367,7 +366,7 @@ lazy val bootstrap = jsProject(project)
   )
 
 lazy val bootstrap4 = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
+  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js` % Test)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,

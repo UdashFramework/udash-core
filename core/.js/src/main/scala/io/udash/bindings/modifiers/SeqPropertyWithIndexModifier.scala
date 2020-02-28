@@ -7,12 +7,12 @@ import org.scalajs.dom._
 
 import scala.collection.mutable
 
-private[bindings]
-class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](override val property: ReadableSeqProperty[T, E],
-                                                                builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
-                                                                override val customElementsReplace: DOMManipulator.ReplaceMethod,
-                                                                override val customElementsInsert: DOMManipulator.InsertMethod)
-  extends SeqPropertyModifierUtils[T, E] {
+private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](
+  override val property: ReadableSeqProperty[T, E],
+  builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
+  override val customElementsReplace: DOMManipulator.ReplaceMethod,
+  override val customElementsInsert: DOMManipulator.InsertMethod
+) extends SeqPropertyModifierUtils[T, E] {
 
   private val indexes: mutable.HashMap[E, Property[Int]] = mutable.HashMap.empty
 
