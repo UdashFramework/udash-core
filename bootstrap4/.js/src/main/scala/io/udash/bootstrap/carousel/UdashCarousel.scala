@@ -98,10 +98,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       a(Carousel.controlPrev, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "prev")(
         span(
           srTexts.map { case (previous, _, lang, provider) =>
-            import io.udash.i18n._
-            nestedInterceptor(
-              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
+            nestedInterceptor(previous.translatedAttrDynamic(aria.label.name)(provider, lang))
           }.getOrElse(aria.label := "Previous")
         )(Carousel.controlPrevIcon)
       ),
@@ -109,9 +106,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
         span(
           srTexts.map { case (_, next, lang, provider) =>
             import io.udash.i18n._
-            nestedInterceptor(
-              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
+            nestedInterceptor(next.translatedAttrDynamic(aria.label.name)(provider, lang))
           }.getOrElse(aria.label := "Next")
         )(Carousel.controlNextIcon)
       )

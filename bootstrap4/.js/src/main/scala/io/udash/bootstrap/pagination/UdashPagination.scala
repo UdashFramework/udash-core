@@ -131,19 +131,13 @@ object UdashPagination {
       if (arrowType == UdashPagination.ArrowType.PreviousPage) {
         span(
           srTexts.map { case (previous, _, lang, provider) =>
-            import io.udash.i18n._
-            nested(
-              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
+            nested(previous.translatedAttrDynamic(aria.label.name)(provider, lang))
           }.getOrElse(aria.label := "Previous")
         )(span(aria.hidden := true)("«"))
       } else {
         span(
           srTexts.map { case (_, next, lang, provider) =>
-            import io.udash.i18n._
-            nested(
-              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
+            nested(next.translatedAttrDynamic(aria.label.name)(provider, lang))
           }.getOrElse(aria.label := "Next")
         )(span(aria.hidden := true)("»"))
       }

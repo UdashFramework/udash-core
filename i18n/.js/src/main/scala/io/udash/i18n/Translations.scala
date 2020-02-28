@@ -19,7 +19,7 @@ trait Translations {
    *
    * @param translation Future containing translated string or error.
    * @param placeholder Placeholder, if `None` passed it will be empty text node.
-   * @param rawHtml     Use this translation as raw HTML (disabled by default)
+   * @param rawHtml     Use this translation as raw HTML (disabled by default).
    */
   def translated(
     translation: Future[Translated], placeholder: Option[Element] = None, rawHtml: Boolean = false
@@ -32,7 +32,7 @@ trait Translations {
    * @param key         TranslationKey which will be used in order to get text.
    * @param translator  Should apply any needed arguments to TranslationKey and create `Future[Translated]`.
    * @param placeholder Placeholder, if `None` passed it will be empty text node.
-   * @param rawHtml     Flag that force to use this translation as raw HTML, disabled by default
+   * @param rawHtml     Use this translation as raw HTML (disabled by default).
    */
   def translatedDynamic[Key <: TranslationKey](
     key: Key, placeholder: Option[Element] = None, rawHtml: Boolean = false

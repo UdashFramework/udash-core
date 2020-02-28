@@ -13,7 +13,7 @@ sealed class TranslationKey0(override val key: String) extends TranslationKey {
   def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] = provider.translate(key)
 }
 
-class TranslationKey1[T](override val key: String) extends TranslationKey {
+final class TranslationKey1[T](override val key: String) extends TranslationKey {
   def apply(arg1: T): TranslationKey0 = new TranslationKey.ReducedTranslationKey(key, arg1)
 }
 
@@ -102,7 +102,7 @@ object TranslationKey {
     }
   }
 
-  private[i18n] final class Untranslatable(override val key: String) extends TranslationKey0(key) {
+  private[i18n] final class Untranslatable(key: String) extends TranslationKey0(key) {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
       Future.successful(Translated(key))
   }
