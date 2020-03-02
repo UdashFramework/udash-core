@@ -11,19 +11,26 @@ import scalatags.JsDom.Modifier
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-private[i18n] final class TranslationModifier(
-  translation: Future[Translated],
+private[i18n] class TranslationModifier(
+  translation: => Future[Translated],
   placeholder: Option[Element],
   rawHtml: Boolean
 ) extends Modifier with CrossLogging {
 
-  override def applyTo(t: Element): Unit = {
-    val holder: Seq[Node] = Seq(t.appendChild(placeholder.getOrElse(Bindings.emptyStringNode())))
-    translation.onCompleteNow {
+  protected final def update(t: Element, holder: Seq[Node]): Future[Seq[Node]] = {
+    translation.transformNow {
       case Success(Translated(text)) =>
-        t.replaceChildren(holder, parseTranslation(rawHtml, text))
+        val newHolder: Seq[Node] = parseTranslation(rawHtml, text)
+        t.replaceChildren(holder, newHolder)
+        Success(newHolder)
       case Failure(ex) =>
         logger.error(ex.getMessage)
+        Success(holder)
     }
+  }
+
+  override def applyTo(t: Element): Unit = {
+    val holder: Seq[Node] = Seq(t.appendChild(placeholder.getOrElse(Bindings.emptyStringNode())))
+    update(t, holder).discard
   }
 }
