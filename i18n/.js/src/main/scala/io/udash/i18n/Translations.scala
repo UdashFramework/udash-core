@@ -65,15 +65,37 @@ trait Translations {
 
 object Translations extends Translations { outer =>
   final class Key0Ops(private val key: TranslationKey0) extends AnyVal {
+    /**
+     * Binds translated string in DOM element.
+     *
+     * @param placeholder Placeholder, if `None` passed it will be empty text node.
+     * @param rawHtml     Use this translation as raw HTML (disabled by default).
+     */
     def translated(placeholder: Option[Element] = None, rawHtml: Boolean = false)(implicit provider: TranslationProvider, lang: Lang): Modifier =
       outer.translated(key.apply(), placeholder, rawHtml)
 
+    /**
+     * Binds translated string in DOM element and updates it when application language changes.
+     *
+     * @param placeholder Placeholder, if `None` passed it will be empty text node.
+     * @param rawHtml     Use this translation as raw HTML (disabled by default).
+     */
     def translatedDynamic(placeholder: Option[Element] = None, rawHtml: Boolean = false)(implicit provider: TranslationProvider, lang: LangProperty): Modifier =
       outer.translatedDynamic(key, placeholder, rawHtml)(_.apply())
 
+    /**
+     * Binds translated string in DOM element attribute.
+     *
+     * @param attr Attribute name which gonna be updated when `translation` text become ready.
+     */
     def translatedAttr(attr: String)(implicit provider: TranslationProvider, lang: Lang): Modifier =
       outer.translatedAttr(key.apply(), attr)
 
+    /**
+     * Binds translated string in DOM element attribute and updates it when application language changes.
+     *
+     * @param attr Attribute name which gonna be updated when `translation` text become ready.
+     */
     def translatedAttrDynamic(attr: String)(implicit provider: TranslationProvider, lang: LangProperty): Binding =
       outer.translatedAttrDynamic(key, attr)(_.apply())
 
