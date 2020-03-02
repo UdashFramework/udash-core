@@ -44,14 +44,14 @@ trait Bindings {
   }
 
   /**
-    * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
-    * If property value is null, empty text node will be added.
-    *
-    * @param property `Property` to bind.
-    * @return property binding.
-    */
-  def bind[T](property: ReadableProperty[T]): Binding =
-    new SimplePropertyModifier[T](property)
+   * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
+   * If property value is null, empty text node will be added.
+   *
+   * @param property `Property` to bind.
+   * @return property binding.
+   */
+  def bind(property: ReadableProperty[_]): Binding =
+    new SimplePropertyModifier(property)
 
   /**
     * Shows provided DOM elements only if property value is `true`.
