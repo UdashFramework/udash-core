@@ -5,7 +5,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom._
 
-private[bindings] class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](
+private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](
   override val property: ReadableSeqProperty[T, E],
   builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
   override val customElementsReplace: DOMManipulator.ReplaceMethod,

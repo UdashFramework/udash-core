@@ -5,7 +5,6 @@ import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx, ValueEnumCompanion
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.seq
 import org.scalajs.dom.{Element, Event}
 import scalatags.JsDom.all._
@@ -120,28 +119,18 @@ object UdashPagination {
     (_, idx, nested) => span(nested(bind(idx.transform(_ + 1))))
 
   /**
-    * Creates standard arrows.
-    *
-    * @param srTexts Translation keys for previous and next arrows aria.label texts.
-    */
+   * Creates standard arrows.
+   *
+   * @param srTexts Optional properties for previous and next arrows aria.label texts.
+   */
   def defaultArrowFactory[ElemType](
-    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None
+    srTexts: Option[(ReadableProperty[String], ReadableProperty[String])] = None
   ): (ElemType, UdashPagination.ArrowType, Binding.NestedInterceptor) => Modifier =
-    (_, arrowType, nested) => {
-      if (arrowType == UdashPagination.ArrowType.PreviousPage) {
-        span(
-          srTexts.map { case (previous, _, lang, provider) =>
-            nested(previous.translatedAttrDynamic(aria.label.name)(provider, lang))
-          }.getOrElse(aria.label := "Previous")
-        )(span(aria.hidden := true)("«"))
-      } else {
-        span(
-          srTexts.map { case (_, next, lang, provider) =>
-            nested(next.translatedAttrDynamic(aria.label.name)(provider, lang))
-          }.getOrElse(aria.label := "Next")
-        )(span(aria.hidden := true)("»"))
-      }
-    }
+    (_, arrowType, _) =>
+      if (arrowType == UdashPagination.ArrowType.PreviousPage)
+        span(aria.label.bind(srTexts.map(_._1).getOrElse("Previous".toProperty)))(span(aria.hidden := true)("«"))
+      else
+        span(aria.label.bind(srTexts.map(_._2).getOrElse("Next".toProperty)))(span(aria.hidden := true)("»"))
 
   /**
     * Creates pagination component.

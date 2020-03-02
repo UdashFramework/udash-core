@@ -1,7 +1,6 @@
 package io.udash.bootstrap.tooltip
 
 import io.udash._
-import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.testing.AsyncUdashCoreFrontendTest
 
 import scala.concurrent.Future
@@ -10,6 +9,7 @@ import scala.util.Random
 class TooltipTestUtils extends AsyncUdashCoreFrontendTest {
   def tooltipTest(companion: TooltipUtils[_ <: Tooltip], expectContent: Boolean): Unit = {
     "display translated content" in {
+      import io.udash.i18n._
       import io.udash.wrappers.jquery._
       import scalatags.JsDom.all._
 
@@ -26,9 +26,9 @@ class TooltipTestUtils extends AsyncUdashCoreFrontendTest {
         )
       )
 
-      val tooltip = companion.i18n(
-        title = _ => TranslationKey.key("a"),
-        content = _ => TranslationKey.key("b")
+      val tooltip = companion.apply(
+        title = span(translatedDynamic(TranslationKey.key("a"))(_.apply())).render,
+        content = span(translatedDynamic(TranslationKey.key("b"))(_.apply())).render
       )(item)
 
       def expectedText(): String =
