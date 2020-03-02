@@ -92,12 +92,10 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
       !(transformedElements.iterator.map(_.get) sameElements fromOrigin.iterator.map(_.get))) {
       val removed = transformedElements.toVector
       transformedElements = fromOrigin
-      fireElementsListeners(Patch(0, removed, fromOrigin, fromOrigin.isEmpty))
+      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq, fromOrigin.isEmpty))
       valueChanged()
     }
   }
-
-  override protected def originListener(originValue: Seq[A]): Unit = valueChanged()
 
   override protected def originStructureListener(patch: Patch[OrigType]): Unit = {
     val transPatch = transformPatchAndUpdateElements(patch)
