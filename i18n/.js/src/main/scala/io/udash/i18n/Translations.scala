@@ -39,7 +39,7 @@ trait Translations {
   )(
     translator: Key => Future[Translated]
   )(implicit lang: LangProperty): Binding =
-    new DynamicTranslationBinding(key, translator, placeholder, rawHtml)
+    new DynamicTranslationBinding(translator(key), placeholder, rawHtml)
 
   /**
    * Binds translated string in DOM element attribute.
@@ -60,7 +60,7 @@ trait Translations {
   def translatedAttrDynamic[Key <: TranslationKey](
     key: Key, attr: String
   )(translator: Key => Future[Translated])(implicit lang: LangProperty): Binding =
-    new DynamicAttrTranslationBinding(key, translator, attr)
+    new DynamicAttrTranslationBinding(translator(key), attr)
 }
 
 object Translations extends Translations { outer =>
