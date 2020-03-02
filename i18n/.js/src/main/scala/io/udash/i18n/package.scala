@@ -1,13 +1,13 @@
 package io.udash
 
+import com.avsystem.commons._
 import io.udash.bindings.modifiers.Binding
 import io.udash.i18n.bindings._
+import io.udash.logging.CrossLogging
 import org.scalajs.dom.Element
 import scalatags.JsDom.Modifier
 
-import scala.concurrent.Future
-
-package object i18n {
+package object i18n extends CrossLogging {
   type LangProperty = ReadableProperty[Lang]
 
   implicit def langFromProperty(implicit property: LangProperty): Lang =
@@ -15,6 +15,7 @@ package object i18n {
 
   /**
    * Binds translated string in DOM element.
+   *
    * @param translation Future containing translated string or error.
    * @param placeholder Placeholder, if `None` passed it will be empty text node.
    * @param rawHtml Flag that force to use this translation as raw HTML, disabled by default
@@ -47,13 +48,21 @@ package object i18n {
     new AttrTranslationBinding(translation, attr)
 
   /**
-    * Binds translated string in DOM element attribute and updates it when application language changes.
-    * @param key TranslationKey which will be used in order to get text.
-    * @param translator Should apply any needed arguments to TranslationKey and create `Future[Translated]`.
-    * @param attr Attribute name which gonna be updated when `translation` text become ready.
-    */
+   * Binds translated string in DOM element attribute and updates it when application language changes.
+   *
+   * @param key        TranslationKey which will be used in order to get text.
+   * @param translator Should apply any needed arguments to TranslationKey and create `Future[Translated]`.
+   * @param attr       Attribute name which gonna be updated when `translation` text become ready.
+   */
   def translatedAttrDynamic[Key <: TranslationKey](
     key: Key, attr: String
   )(translator: Key => Future[Translated])(implicit lang: LangProperty): Binding =
-    new DynamicAttrTranslationBinding(key, translator, attr)
+    lang.reactiveApply((element, _) =>
+      translator(key).onCompleteNow {
+        case Success(text) =>
+          element.setAttribute(attr, text.string)
+        case Failure(ex) =>
+          logger.error(ex.getMessage)
+      }
+    )
 }
