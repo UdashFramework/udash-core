@@ -13,7 +13,7 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
   override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType] = {
     val transPatch = Patch[ElemType](
       patch.idx,
-      transformedElements.slice(patch.idx, patch.idx + patch.removed.size),
+      transformedElements.slice(patch.idx, patch.idx + patch.removed.size).toSeq,
       patch.added.map(transformElement),
       patch.clearsProperty
     )
