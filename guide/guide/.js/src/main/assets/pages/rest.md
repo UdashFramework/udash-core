@@ -546,7 +546,7 @@ macro which you can use to avoid writing the same default value twice:
 #### `@transientDefault`
 
 If your REST method parameter or case class parameter has a default value defined, you can
-also annotate it as `@transientDefault`. This way these parameters will not be omitted during serialization
+also annotate it as `@transientDefault`. This way these parameters will be omitted during serialization
 if their value is equal to the default value. During deserialization, of course, the default value
 will be picked up for them. This way you can reduce the amount of network traffic by sending only
 actually meaningful parameters.
