@@ -56,7 +56,7 @@ final class I18NExtView extends View with CssView {
     ),
     p(
       "It is possible to transform translation key with arguments to ", i("TranslationKey0"),
-      " by calling ", i(".reduce(<key_args>)"), ". You can also pass an ", i("Untranslatable"),
+      " by ", i(".apply"), "ing the arguments on it. You can also pass an ", i("Untranslatable"),
       " as ", i("TranslationKey0"), " instance in order to use raw string instead of translated key."
     ),
     h2("TranslationProvider"),
@@ -136,15 +136,15 @@ final class I18NExtView extends View with CssView {
     remoteTranslationsSnippet,
     p("Take a look at the example below."),
     ForceBootstrap(remoteTranslationsDemo),
-    h2("Translations binding"),
+    h2("Translation bindings"),
     p(
       "All translations are resolved asynchronously, so they cannot be statically added into DOM hierarchy. The Udash i18n plugin ",
-      "provides four methods for translations binding. These methods are divided into two groups: static and dynamic."
+      "provides four extension methods for translation bindings on the 0-argument or reduced keys. ",
+      "These methods are divided into two groups: static and dynamic."
     ),
     h3("Static binding"),
     p(
-      "Static binding takes ", i("Future[Translated]"),
-      " as an argument and when it completes it puts translated string into DOM hierarchy.",
+      "Static binding puts translated string into DOM hierarchy when available.",
       ul(GuideStyles.defaultList)(
         li(i("translated"), " - binds translated string in the DOM element."),
         li(i("translatedAttr"), " - binds translated string in the DOM element attribute.")
@@ -152,8 +152,7 @@ final class I18NExtView extends View with CssView {
     ),
     h3("Dynamic binding"),
     p(
-      "Dynamic binding is able to update translation after a change of ", i("LangProperty"), ". These methods take ",
-      "the following arguments: a translation key, a translator which applies arguments to translation and the lang property.",
+      "Dynamic binding is able to update translation after the change of ", i("LangProperty"), ".",
       ul(GuideStyles.defaultList)(
         li(i("translatedDynamic"), " - binds translated string in the DOM element and updates it when the application language changes."),
         li(i("translatedAttrDynamic"), " - binds translated string in the DOM element attribute and updates it when the application language changes.")
