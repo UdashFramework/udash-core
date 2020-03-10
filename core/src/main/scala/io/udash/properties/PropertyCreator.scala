@@ -28,8 +28,6 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
   def apply[T](implicit ev: PropertyCreator[T]): PropertyCreator[T] = ev
 
-  def newID(): PropertyId = PropertyIdGenerator.next()
-
   implicit final val Double: PropertyCreator[Double] = new SinglePropertyCreator
   implicit final val Float: PropertyCreator[Float] = new SinglePropertyCreator
   implicit final val Long: PropertyCreator[Long] = new SinglePropertyCreator
@@ -48,7 +46,7 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
 final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
-    new DirectPropertyImpl[T](prt, PropertyCreator.newID())
+    new DirectPropertyImpl[T](prt)
 
   override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
@@ -56,7 +54,7 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
 final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](implicit fac: Factory[A, SeqTpe[A]])
   extends PropertyCreator[SeqTpe[A]] {
   protected def create(parent: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
-    new DirectSeqPropertyImpl[A, SeqTpe](parent, PropertyCreator.newID()).asInstanceOf[CastableProperty[SeqTpe[A]]]
+    new DirectSeqPropertyImpl[A, SeqTpe](parent).asInstanceOf[CastableProperty[SeqTpe[A]]]
 
   override def newImmutableProperty(value: SeqTpe[A]): ImmutableProperty[SeqTpe[A]] =
     new ImmutableSeqProperty[A, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[A]]]

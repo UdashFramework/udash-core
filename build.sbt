@@ -28,7 +28,6 @@ val deploymentConfiguration = Seq(
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
 
-  sonatypeBundleDirectory := (ThisBuild / baseDirectory).value / target.value.getName / "sonatype-staging" / s"udash-${version.value}",
   publishTo := sonatypePublishToBundle.value,
 
   credentials in Global += Credentials(
@@ -84,7 +83,6 @@ val commonSettings = Seq(
   ),
   scalacOptions ++= (if(scalaBinaryVersion.value == "2.13") Seq("-P:silencer:checkUnused") else Seq.empty),
   moduleName := "udash-" + moduleName.value,
-  ideBasePackages := Seq("io.udash"),
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
@@ -119,7 +117,7 @@ val testInBrowser = Seq(
 
 val noPublishSettings = Seq(
   publish / skip := true,
-  Compile / doc := (doc / target).value,
+  Compile / packageDoc / mappings := Seq.empty,
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
@@ -357,7 +355,7 @@ lazy val `css-js` = jsProjectFor(project, css)
   )
 
 lazy val bootstrap4 = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js`)
+  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js` % Test)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,

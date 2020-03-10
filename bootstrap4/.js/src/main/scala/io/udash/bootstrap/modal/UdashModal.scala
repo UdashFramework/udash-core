@@ -21,12 +21,14 @@ final class UdashModal private(
   headerFactory: Option[Binding.NestedInterceptor => Element],
   bodyFactory: Option[Binding.NestedInterceptor => Element],
   footerFactory: Option[Binding.NestedInterceptor => Element]
-) extends UdashBootstrapComponent with Listenable[UdashModal, UdashModal.ModalEvent] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashModal._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
   import scalatags.JsDom.all._
+
+  override type EventType = UdashModal.ModalEvent
 
   /** Toggles modal visibility. */
   def toggle(): Unit = jQSelector().modal("toggle")
@@ -35,7 +37,7 @@ final class UdashModal private(
   /** Hides modal window. */
   def hide(): Unit = jQSelector().modal("hide")
   /** Readjusts the modal's positioning to counter a scrollbar in case one should
-    * appear, which would make the modal jump to the left. */
+   * appear, which would make the modal jump to the left. */
   def handleUpdate(): Unit = jQSelector().modal("handleUpdate")
 
   override val render: Element = {
@@ -49,7 +51,7 @@ final class UdashModal private(
 
     val el = div(
       BootstrapStyles.Modal.modal,
-      tabindex := "-1", role := "dialog", id := componentId,
+      tabindex := "-1", role := "dialog", componentId,
       nestedInterceptor(aria.labelledby.bindIf(labelId.transform(_.getOrElse("")), labelId.transform(_.isDefined))),
       nestedInterceptor(BootstrapTags.dataBackdrop.bind(backdrop.transform(_.jsValue))),
       nestedInterceptor(BootstrapTags.dataKeyboard.bind(keyboard.transform(_.toString))),
@@ -94,7 +96,7 @@ object UdashModal {
   final case class ModalEvent(
     override val source: UdashModal,
     tpe: ModalEvent.EventType
-  ) extends AbstractCase with ListenableEvent[UdashModal]
+  ) extends AbstractCase with ListenableEvent
 
   object ModalEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -136,7 +138,7 @@ object UdashModal {
     labelId: ReadableProperty[Option[String]] = UdashBootstrap.None,
     backdrop: ReadableProperty[UdashModal.BackdropType] = BackdropType.Active.toProperty,
     keyboard: ReadableProperty[Boolean] = UdashBootstrap.True,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     headerFactory: Option[Binding.NestedInterceptor => Element],
     bodyFactory: Option[Binding.NestedInterceptor => Element],

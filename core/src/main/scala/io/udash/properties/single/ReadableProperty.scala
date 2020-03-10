@@ -7,8 +7,6 @@ import io.udash.utils.Registration
 
 /** Base interface of every Property in Udash. */
 trait ReadableProperty[+A] {
-  /** Unique property ID. */
-  val id: PropertyId
 
   /** @return Current property value. */
   def get: A
@@ -130,7 +128,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
 
   protected[properties] override def valueChanged(): Unit = {
     val originalListeners = listeners.toSet
-    CallbackSequencer().queue(s"${this.id.toString}:fireValueListeners", () => {
+    CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
       listeners.foreach { listener => if (originalListeners.contains(listener)) listener(value) }
       oneTimeListeners.foreach(_.cancel())

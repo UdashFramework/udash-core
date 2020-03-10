@@ -14,15 +14,21 @@ private[properties] class TransformedReadableProperty[A, B](
   protected var originListenerRegistration: Registration = _
 
   protected def originListener(originValue: A) : Unit = {
-    lastValue = Opt(originValue)
-    transformedValue = transformer(originValue)
-    valueChanged()
+    val forced = lastValue.contains(originValue) //if the listener was triggered despite equal value, the update was forced
+    val newValue = transformer(originValue)
+    val transformedValueChanged = newValue != transformedValue
+    lastValue = originValue.opt
+    transformedValue = newValue
+    if (forced || transformedValueChanged) valueChanged()
   }
 
   private def initOriginListener(): Unit = {
     if (originListenerRegistration == null || !originListenerRegistration.isActive) {
       listeners.clear()
       originListenerRegistration = origin.listen(originListener)
+      val originValue = origin.get
+      lastValue = originValue.opt
+      lastValue.foreach(v => transformedValue = transformer(v))
     }
   }
 
@@ -61,7 +67,7 @@ private[properties] class TransformedReadableProperty[A, B](
 
   override def get: B = {
     val originValue = origin.get
-    if (lastValue.isEmpty || lastValue.get != originValue) {
+    if (originListenerRegistration == null && (lastValue.isEmpty || lastValue.get != originValue)) {
       lastValue = Opt(originValue)
       transformedValue = transformer(originValue)
     }

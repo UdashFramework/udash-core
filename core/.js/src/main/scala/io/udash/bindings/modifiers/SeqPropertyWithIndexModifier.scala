@@ -5,7 +5,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import org.scalajs.dom._
 
-private[bindings] class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](
+private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]](
   override val property: ReadableSeqProperty[T, E],
   builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
   override val customElementsReplace: DOMManipulator.ReplaceMethod,
@@ -15,10 +15,7 @@ private[bindings] class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]
   private val indexes = MHashMap.empty[E, Property[Int]]
 
   protected def indexProperty(p: E): ReadableProperty[Int] =
-    if (indexes.contains(p)) indexes(p)
-    else Property(0).setup {
-      indexes(p) = _
-    }
+    indexes.getOrElseUpdate(p, Property(property.elemProperties.indexOf(p).applyIf(_ == -1)(_ => 0)))
 
   override protected def build(item: E): Seq[Node] =
     builder(item, indexProperty(item), propertyAwareNestedInterceptor(item))
@@ -35,13 +32,4 @@ private[bindings] class SeqPropertyWithIndexModifier[T, E <: ReadableProperty[T]
     super.kill()
     indexes.clear()
   }
-
-  override def applyTo(root: Element): Unit = {
-    super.applyTo(root)
-    property.elemProperties.zipWithIndex.foreach { case (p, i) =>
-      indexes(p).set(i)
-    }
-  }
 }
-
-

@@ -200,7 +200,7 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
   private def generateModelProperty(tpe: Type): c.Tree = {
     def impl(members: Map[TermName, Type], getCreator: Tree): Tree = {
       q"""
-        new $ModelPropertyImplCls[$tpe](prt, $PropertyCreatorCompanion.newID()) {
+        new $ModelPropertyImplCls[$tpe](prt) {
           override protected def initialize(): Unit = {
             ..${
         members.map {

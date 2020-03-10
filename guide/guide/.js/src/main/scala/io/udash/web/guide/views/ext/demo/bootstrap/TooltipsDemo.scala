@@ -7,6 +7,7 @@ import scalatags.JsDom.all._
 object TooltipsDemo extends AutoDemo {
 
   private val (rendered, source) = {
+    import io.udash._
     import io.udash.bootstrap._
     import BootstrapStyles._
     import io.udash.bootstrap.badge.UdashBadge
@@ -55,7 +56,7 @@ object TooltipsDemo extends AutoDemo {
     val button = UdashButton()("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
-    div(id := tooltipContainerId)(
+    div(tooltipContainerId)(
       label1, label2, label3, button
     ).render
   }.withSourceCode

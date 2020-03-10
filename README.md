@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/UdashFramework/udash-core.svg?branch=master)](https://travis-ci.org/UdashFramework/udash-core) 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.udash/udash-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.udash/udash-core_2.12)
 [![Join the chat at https://gitter.im/UdashFramework/udash-core](https://badges.gitter.im/UdashFramework/udash-core.svg)](https://gitter.im/UdashFramework/udash-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 
 [Udash](http://udash.io/) is a Scala.js framework for building beautiful and maintainable web applications.
 
@@ -47,13 +48,3 @@ The whole framework code is available on GitHub under Apache v2 license.
 
 ### IDE support
 With any IDE supporting the Scala language. No extra plugin needed.
-
-# Try it on ScalaFiddle
-
-* [Hello World](https://scalafiddle.io/sf/z8zY6cP/0)
-* [Properties](https://scalafiddle.io/sf/OZe6XBJ/2)
-* [Validation](https://scalafiddle.io/sf/Yiz0JO2/0)
-* [i18n](https://scalafiddle.io/sf/ll4AVYz/0)
-* [UI Components](https://scalafiddle.io/sf/13Wn0gZ/0)
-
-Find more examples in the [Udash Demos](https://github.com/UdashFramework/udash-demos) repository.

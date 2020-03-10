@@ -35,4 +35,7 @@ package object udash
 
   // View
   type ViewRenderer = io.udash.view.ViewRenderer
+
+  type ComponentId = io.udash.component.ComponentId
+  final val ComponentId = io.udash.component.ComponentId
 }

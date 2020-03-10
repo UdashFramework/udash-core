@@ -1,15 +1,13 @@
 package io.udash.bootstrap
 package carousel
 
-import com.avsystem.commons._
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
-import io.udash.bootstrap.carousel.UdashCarousel.{AnimationOptions, CarouselEvent}
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.i18n.{LangProperty, TranslationKey0, TranslationProvider}
 import io.udash.properties.seq
 import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.{Element, Node}
@@ -23,18 +21,20 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
   slides: seq.ReadableSeqProperty[ItemType, ElemType],
   showIndicators: ReadableProperty[Boolean],
   animationOptions: ReadableProperty[AnimationOptions],
-  srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)],
+  srTexts: Option[(ReadableProperty[String], ReadableProperty[String])],
   val activeSlide: Property[Int],
   override val componentId: ComponentId
 )(
   slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
-) extends UdashBootstrapComponent with Listenable[UdashCarousel[ItemType, ElemType], CarouselEvent[ItemType, ElemType]] {
+) extends UdashBootstrapComponent with Listenable {
 
   import UdashCarousel._
   import io.udash.bootstrap.utils.BootstrapStyles.Carousel
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
   import io.udash.wrappers.jquery._
+
+  override type EventType = CarouselEvent[ItemType, ElemType]
 
   if (activeSlide.get >= slides.size) activeSlide.set(slides.size - 1)
   if (activeSlide.get < 0) activeSlide.set(0)
@@ -88,31 +88,17 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       (idx, direction.getOrElse(CarouselEvent.Direction.Unknown))
     }
 
-    val res: Element = div(id := componentId, Carousel.carousel, Carousel.slide)(
+    val res: Element = div(componentId, Carousel.carousel, Carousel.slide)(
       nestedInterceptor(produceWithNested(showIndicators) {
         case (true, nested) => span(nested(indicators())).render
         case (false, _) => span().render
       }),
       slidesComponent,
       a(Carousel.controlPrev, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "prev")(
-        span(
-          srTexts.map { case (previous, _, lang, provider) =>
-            import io.udash.i18n._
-            nestedInterceptor(
-              translatedAttrDynamic(previous, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
-          }.getOrElse(aria.label := "Previous")
-        )(Carousel.controlPrevIcon)
+        span(aria.label.bind(srTexts.map(_._1).getOrElse("Previous".toProperty)))(Carousel.controlPrevIcon)
       ),
       a(Carousel.controlNext, Carousel.control, href := s"#$componentId", role := "button", dataSlide := "next")(
-        span(
-          srTexts.map { case (_, next, lang, provider) =>
-            import io.udash.i18n._
-            nestedInterceptor(
-              translatedAttrDynamic(next, aria.label.name)(_.apply()(provider, lang.get))(lang)
-            ): Modifier
-          }.getOrElse(aria.label := "Next")
-        )(Carousel.controlNextIcon)
+        span(aria.label.bind(srTexts.map(_._2).getOrElse("Next".toProperty)))(Carousel.controlNextIcon)
       )
     ).render
 
@@ -165,28 +151,28 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
 
 object UdashCarousel {
   /**
-    * Creates a carousel component.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/carousel/">Bootstrap Docs</a>.
-    *
-    * @param slides              A SeqProperty of carousel slides.
-    * @param showIndicators      If true, the component shows carousel slide indicators.
-    * @param animationOptions    A carousel animation options.
-    * @param srTexts             Translation keys for previous and next arrows aria.label texts.
-    * @param activeSlide         An active carousel slide index.
-    * @param componentId         The arousel DOM element id.
-    * @param slideContentFactory Creates content of a slide.
-    *                            Use the provided interceptor to properly clean up bindings inside the content.
-    * @tparam ItemType A single element's type in the `items` sequence.
-    * @tparam ElemType A type of a property containing an element in the `items` sequence.
-    * @return A `UdashCarousel` component, call `render` to create a DOM element representing this button.
-    */
+   * Creates a carousel component.
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/carousel/">Bootstrap Docs</a>.
+   *
+   * @param slides              A SeqProperty of carousel slides.
+   * @param showIndicators      If true, the component shows carousel slide indicators.
+   * @param animationOptions    A carousel animation options.
+   * @param srTexts             Optional properties for previous and next arrows aria.label texts.
+   * @param activeSlide         An active carousel slide index.
+   * @param componentId         The arousel DOM element id.
+   * @param slideContentFactory Creates content of a slide.
+   *                            Use the provided interceptor to properly clean up bindings inside the content.
+   * @tparam ItemType A single element's type in the `items` sequence.
+   * @tparam ElemType A type of a property containing an element in the `items` sequence.
+   * @return A `UdashCarousel` component, call `render` to create a DOM element representing this button.
+   */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     slides: seq.ReadableSeqProperty[ItemType, ElemType],
     showIndicators: ReadableProperty[Boolean] = UdashBootstrap.True,
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
-    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
+    srTexts: Option[(ReadableProperty[String], ReadableProperty[String])] = None,
     activeSlide: Property[Int] = Property(0),
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     slideContentFactory: (ElemType, Binding.NestedInterceptor) => Modifier
   ): UdashCarousel[ItemType, ElemType] = {
@@ -194,43 +180,43 @@ object UdashCarousel {
   }
 
   /**
-    * Creates the UdashCarousel component consisting of `UdashCarouselSlide`.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/carousel/">Bootstrap Docs</a>.
-    *
-    * @param slides              A SeqProperty of carousel slides.
-    * @param showIndicators      If true, the component shows carousel slide indicators.
-    * @param animationOptions    A carousel animation options.
-    * @param srTexts             Translation keys for previous and next arrows aria.label texts.
-    * @param activeSlide         An active carousel slide index.
-    * @param componentId         The arousel DOM element id.
-    * @param slideContentFactory Creates content of a slide.
-    *                            Use the provided interceptor to properly clean up bindings inside the content.
-    * @return A `UdashCarousel` component, call `render` to create a DOM element representing this button.
-    */
+   * Creates the UdashCarousel component consisting of `UdashCarouselSlide`.
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/carousel/">Bootstrap Docs</a>.
+   *
+   * @param slides              A SeqProperty of carousel slides.
+   * @param showIndicators      If true, the component shows carousel slide indicators.
+   * @param animationOptions    A carousel animation options.
+   * @param srTexts             Optional properties for previous and next arrows aria.label texts.
+   * @param activeSlide         An active carousel slide index.
+   * @param componentId         The arousel DOM element id.
+   * @param slideContentFactory Creates content of a slide.
+   *                            Use the provided interceptor to properly clean up bindings inside the content.
+   * @return A `UdashCarousel` component, call `render` to create a DOM element representing this button.
+   */
   def default(
     slides: ReadableSeqProperty[UdashCarouselSlide],
     showIndicators: ReadableProperty[Boolean] = UdashBootstrap.True,
     animationOptions: ReadableProperty[AnimationOptions] = AnimationOptions().toProperty,
-    srTexts: Option[(TranslationKey0, TranslationKey0, LangProperty, TranslationProvider)] = None,
+    srTexts: Option[(ReadableProperty[String], ReadableProperty[String])] = None,
     activeSlide: Property[Int] = Property(0),
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     slideContentFactory: (ReadableProperty[UdashCarouselSlide], Binding.NestedInterceptor) => Modifier =
-      (slide, nested) => nested(produce(slide)(_.render))
+    (slide, nested) => nested(produce(slide)(_.render))
   ): UdashCarousel[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = {
     new UdashCarousel(slides, showIndicators, animationOptions, srTexts, activeSlide, componentId)(slideContentFactory)
   }
 
   /**
-    * Event emitted by [[UdashCarousel]] on slide change transition start
-    *
-    * @param source      The [[UdashCarousel]] emitting the event.
-    * @param targetIndex The index of the slide source transitioned to.
-    * @param direction   The animation direction. Either `CarouselEvent.Direction.Left` or `CarouselEvent.Direction.Right`.
-    */
+   * Event emitted by [[UdashCarousel]] on slide change transition start
+   *
+   * @param source      The [[UdashCarousel]] emitting the event.
+   * @param targetIndex The index of the slide source transitioned to.
+   * @param direction   The animation direction. Either `CarouselEvent.Direction.Left` or `CarouselEvent.Direction.Right`.
+   */
   final case class CarouselEvent[ItemType, ElemType <: ReadableProperty[ItemType]](
     source: UdashCarousel[ItemType, ElemType], targetIndex: Int, direction: Direction, changed: Boolean
-  ) extends AbstractCase with ListenableEvent[UdashCarousel[ItemType, ElemType]]
+  ) extends AbstractCase with ListenableEvent
 
   object CarouselEvent {
     /** Carousel animation direction. */

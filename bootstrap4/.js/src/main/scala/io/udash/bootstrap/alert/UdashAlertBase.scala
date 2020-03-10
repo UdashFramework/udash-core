@@ -18,7 +18,7 @@ private[alert] abstract class UdashAlertBase(
 
   protected final def template: TypedTag[Div] = {
     div(
-      id := componentId, role := "alert",
+      componentId, role := "alert",
       BootstrapStyles.Alert.alert,
       nestedInterceptor((BootstrapStyles.Alert.color _).reactiveApply(alertStyle))
     )
@@ -49,7 +49,7 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
     */
   def apply(
     alertStyle: ReadableProperty[BootstrapStyles.Color] = UdashBootstrap.ColorSecondary,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): T = {
     create(alertStyle, componentId)(content)
   }

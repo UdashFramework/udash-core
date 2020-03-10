@@ -30,7 +30,7 @@ class UdashAccordionTest extends AsyncUdashCoreFrontendTest {
       val removedCollapse = accordion.collapseOf(removed)
       news.remove("Title 2")
       accordionElement.textContent should be(">>Title 1Title 1>>Title 3Title 3")
-      removedCollapse.get.listenersCount() should be(0)
+      removedCollapse.get.listeners shouldBe empty
 
       news.elemProperties.forall(item => accordion.collapseOf(item).isDefined) should be(true)
       accordion.collapseOf(removed).isDefined should be(false)
@@ -38,7 +38,7 @@ class UdashAccordionTest extends AsyncUdashCoreFrontendTest {
       val firstCollapse = accordion.collapseOf(news.elemProperties.head)
       accordion.kill()
       ensureNoListeners(news)
-      firstCollapse.get.listenersCount() should be(0)
+      firstCollapse.get.listeners shouldBe empty
     }
 
     "expose collapse events" in {

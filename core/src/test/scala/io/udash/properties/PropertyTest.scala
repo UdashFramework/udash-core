@@ -7,7 +7,9 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
+import org.scalactic.source.Position
 
+import scala.collection.mutable
 import scala.util.Try
 
 class PropertyTest extends UdashCoreTest {
@@ -313,6 +315,58 @@ class PropertyTest extends UdashCoreTest {
       counter2 should be(1)
     }
 
+    "fire on transformed value changed or when forced" in {
+      val origin: Property[Option[Int]] = Property(Some(0))
+      val transformed: ReadableProperty[Boolean] = origin.transform((q: Option[Int]) => q.isDefined)
+      var counter = 0
+
+      transformed.listen(_ => counter += 1)
+
+      origin.set(Some(0))
+      counter shouldBe 0 //suppressed at origin
+
+      origin.set(Some(1))
+      counter shouldBe 0 //suppressed at transformed
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None, force = true)
+      counter shouldBe 2
+
+      origin.touch()
+      counter shouldBe 3
+    }
+
+    "fire on streamed value changed or when forced" in {
+      val origin: Property[Option[Int]] = Property(Some(0))
+      val target = Property.blank[Boolean]
+
+      origin.streamTo(target)((q: Option[Int]) => q.isDefined)
+      var counter = 0
+
+      target.listen(_ => counter += 1)
+
+      origin.set(Some(0))
+      counter shouldBe 0 //suppressed at origin
+
+      origin.set(Some(1))
+      counter shouldBe 0 //suppressed at target
+
+      origin.set(None)
+      counter shouldBe 1
+
+      origin.set(None)
+      counter shouldBe 1
+
+      //todo detect forced / touched?
+      //origin.set(None, force = true)
+      //counter shouldBe 2
+    }
+
     "combine with other properties (single properties)" in {
       val p1 = Property(1)
       val p2 = Property(2)
@@ -530,17 +584,62 @@ class PropertyTest extends UdashCoreTest {
       combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0) //r2 cancelled
     }
 
+    "trigger once for multiply combined properties" in {
+      val calls = mutable.Buffer.empty[(Int, Int, Int)]
+
+      val p0 = Property(-1)
+      val p1 = Property(-1)
+      val p2 = Property(-1)
+
+      p0.combine(p1)((_, _))
+        .combine(p2)((_, _))
+        .listen { case ((i1, i2), i3) =>
+          calls.append((i1, i2, i3))
+        }
+
+      CallbackSequencer().sequence {
+        p0.set(0)
+        p1.set(1)
+        p2.set(2)
+      }
+
+      calls should contain inOrderElementsOf Seq((0, 1, 2))
+
+      calls.clear()
+
+      CallbackSequencer().sequence {
+        p2.set(3)
+        p1.set(4)
+        p0.set(5)
+      }
+
+      calls should contain inOrderElementsOf Seq((5, 4, 3))
+    }
+
+    "short-circuit loops on self" in {
+      val p0 = Property.blank[Int]
+      p0.listen { v => if (v < 10) p0.set(v + 1) }
+
+      p0.set(1)
+
+      p0.get shouldBe 2
+
+      CallbackSequencer().sequence(p0.set(3))
+
+      p0.get shouldBe 4
+    }
+
     "transform to ReadableSeqProperty" in {
-      val elemListeners = MMap.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[ReadableProperty[_], Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]) =
         props.foreach { p =>
-          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+          elemListeners(p) = p.listen(_ => elementsUpdated += 1)
         }
 
       val p = Property("1,2,3,4,5")
       val s: ReadableSeqProperty[Int, ReadableProperty[Int]] =
-        p.transformToSeq((v: String) => Try(v.split(",").map(_.toInt).toSeq).getOrElse(Seq[Int]()))
+        p.transformToSeq((v: String) => Try(v.split(",").map(_.trim.toInt).toSeq).getOrElse(Seq[Int]()))
 
       p.listenersCount() should be(0)
 
@@ -553,7 +652,7 @@ class PropertyTest extends UdashCoreTest {
       val r2 = s.listenStructure { p =>
         registerElementListener(p.added)
         p.removed.foreach { p =>
-          elemListeners(p.id).cancel()
+          elemListeners(p).cancel()
         }
         lastPatch = p
       }
@@ -565,6 +664,14 @@ class PropertyTest extends UdashCoreTest {
       lastPatch = null
       elementsUpdated = 0
       p.set("5,4,3")
+      s.get should be(Seq(5, 4, 3))
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(2)
+      elementsUpdated should be(2)
+
+      //suppressed at s
+      p.set(" 5 ,4 ,3")
       s.get should be(Seq(5, 4, 3))
       lastValue should be(s.get)
       lastPatch.added.size should be(0)
@@ -706,12 +813,36 @@ class PropertyTest extends UdashCoreTest {
       s.get should be(Seq(1, 2, 3, 4, 5))
     }
 
+    "not emit patches to listeners which observed updated value in transformToSeq" in {
+      val patches = mutable.Buffer.empty[Patch[_]]
+
+      def test()(implicit position: Position) = {
+        val p = Property(1)
+        val sp = p.transformToSeq(Seq(_))
+        val transformed = sp.transformElements(_ + 1)
+        sp.get shouldBe Seq(1)
+        transformed.get should contain theSameElementsInOrderAs Seq(2) //current value observed immediately
+
+        sp.listenStructure(patches += _)
+      }
+
+      test()
+      patches shouldBe empty
+
+      CallbackSequencer().sequence(test()) //should behave the same
+
+      // No patch should be emitted to newly created structure listeners (after value was set).
+      // Previously the patches would be emitted after exiting the sequencer,
+      // so e.g. repeat based on `transformed`, would add a duplicate row.
+      patches shouldBe empty
+    }
+
     "transform to SeqProperty" in {
-      val elemListeners = MMap.empty[PropertyId, Registration]
+      val elemListeners = MMap.empty[ReadableProperty[_], Registration]
       var elementsUpdated = 0
       def registerElementListener(props: BSeq[ReadableProperty[_]]): Unit =
         props.foreach { p =>
-          elemListeners(p.id) = p.listen(_ => elementsUpdated += 1)
+          elemListeners(p) = p.listen(_ => elementsUpdated += 1)
         }
 
       val p = Property("1,2,3,4,5")
@@ -728,7 +859,7 @@ class PropertyTest extends UdashCoreTest {
       val r2 = s.listenStructure(p => {
         registerElementListener(p.added)
         p.removed.foreach { p =>
-          elemListeners(p.id).cancel()
+          elemListeners(p).cancel()
         }
         lastPatch = p
       })
@@ -1063,67 +1194,92 @@ class PropertyTest extends UdashCoreTest {
 
     "synchronize values with another property" in {
       val source = Property(1)
-      val target = Property(5)
+      var sourceListener = 0
+      source.listen(sourceListener = _, initUpdate = true)
 
-      source.get should be(1)
-      target.get should be(5)
+      val target = Property(5)
+      var targetListener = 0
+      target.listen(targetListener = _, initUpdate = true)
+
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 5
+      targetListener shouldBe 5
 
       //Init update
       val registration = source.sync(target)((i: Int) => i * 2, (i: Int) => i / 2)
 
-      registration.isActive should be(true)
-      source.get should be(1)
-      target.get should be(2)
+      registration.isActive shouldBe true
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 2
+      targetListener shouldBe 2
 
       // Source update
       source.set(2)
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Source touch
       source.touch()
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Target update
       target.set(8)
 
-      source.get should be(4)
-      target.get should be(8)
+      source.get shouldBe 4
+      sourceListener shouldBe 4
+      target.get shouldBe 8
+      targetListener shouldBe 8
 
       // Source update
       source.set(2)
 
-      source.get should be(2)
-      target.get should be(4)
+      source.get shouldBe 2
+      sourceListener shouldBe 2
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Registration cancel and source update
       registration.cancel()
       source.set(1)
 
-      registration.isActive should be(false)
-      source.get should be(1)
-      target.get should be(4)
+      registration.isActive shouldBe false
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 4
+      targetListener shouldBe 4
 
       // Target update
       target.set(1)
 
-      source.get should be(1)
-      target.get should be(1)
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 1
+      targetListener shouldBe 1
 
       // Restart streaming, source touch
       registration.restart()
 
-      source.get should be(1)
-      target.get should be(2)
+      source.get shouldBe 1
+      sourceListener shouldBe 1
+      target.get shouldBe 2
+      targetListener shouldBe 2
 
       // Target update
       target.set(8)
 
-      source.get should be(4)
-      target.get should be(8)
+      source.get shouldBe 4
+      sourceListener shouldBe 4
+      target.get shouldBe 8
+      targetListener shouldBe 8
     }
 
     "synchronize values with SeqProperty" in {

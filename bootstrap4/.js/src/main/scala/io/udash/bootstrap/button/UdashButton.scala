@@ -24,8 +24,11 @@ final class UdashButton private(
   disabled: ReadableProperty[Boolean],
   override val componentId: ComponentId,
   tag: UdashButton.ButtonTag
-)(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable[UdashButton, ButtonClickEvent] {
+)(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable {
+
   import io.udash.css.CssView._
+
+  override type EventType = ButtonClickEvent
 
   private val classes: List[Modifier] = {
     (BootstrapStyles.Button.btn: Modifier) ::
@@ -45,7 +48,7 @@ final class UdashButton private(
   }
 
   override val render: dom.html.Element = {
-    tag.value(id := componentId, tpe := "button")(classes: _*)(
+    tag.value(componentId, tpe := "button")(classes: _*)(
       //condition to support non-button tags
       onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
     )(content(nestedInterceptor)).render
@@ -61,8 +64,7 @@ final class UdashButton private(
 }
 
 object UdashButton {
-  final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent)
-    extends AbstractCase with ListenableEvent[UdashButton]
+  final case class ButtonClickEvent(source: UdashButton, mouseEvent: MouseEvent) extends AbstractCase with ListenableEvent
 
   /**
    * Holds button enclosing tag options. Since buttons have their own click listeners implemented they can be enclosed
@@ -102,7 +104,7 @@ object UdashButton {
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     active: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton =
     new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)
@@ -128,7 +130,7 @@ object UdashButton {
     outline: ReadableProperty[Boolean] = UdashBootstrap.False,
     block: ReadableProperty[Boolean] = UdashBootstrap.False,
     disabled: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId(),
+    componentId: ComponentId = ComponentId.generate(),
     tag: ButtonTag = ButtonTag.Button
   )(content: Binding.NestedInterceptor => Modifier): UdashButton = {
     val button = new UdashButton(buttonStyle, size, outline, block, active, disabled, componentId, tag)(content)

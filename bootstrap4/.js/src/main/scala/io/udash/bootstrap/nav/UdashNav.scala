@@ -31,7 +31,7 @@ final class UdashNav[ItemType, ElemType <: ReadableProperty[ItemType]] private(
 
   override val render: Element = {
     ul(
-      id := componentId,
+      componentId,
       BootstrapStyles.Navigation.nav,
       nestedInterceptor(BootstrapStyles.Navigation.justifyCenter.styleIf(align.transform(_ == BootstrapStyles.Align.Center))),
       nestedInterceptor(BootstrapStyles.Navigation.justifyRight.styleIf(align.transform(_ == BootstrapStyles.Align.Right))),
@@ -111,7 +111,7 @@ object UdashNav {
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     tabs: ReadableProperty[Boolean] = UdashBootstrap.False,
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     elemFactory: (ElemType, Binding.NestedInterceptor) => Element,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,
@@ -151,7 +151,7 @@ object UdashNav {
     justified: ReadableProperty[Boolean] = UdashBootstrap.False,
     tabs: ReadableProperty[Boolean] = UdashBootstrap.False,
     pills: ReadableProperty[Boolean] = UdashBootstrap.False,
-    componentId: ComponentId = ComponentId.newId()
+    componentId: ComponentId = ComponentId.generate()
   )(
     elemFactory: (ElemType, Binding.NestedInterceptor) => Element = defaultItemFactory,
     isActive: ElemType => ReadableProperty[Boolean] = (_: ElemType) => UdashBootstrap.False,

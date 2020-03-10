@@ -43,7 +43,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
   /** Filters ReadableSeqProperty[A].
    *
    * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
-  def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType]
+  def filter(matcher: A => Boolean): ReadableSeqProperty[A, ElemType]
 
   /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
   def combineElements[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
@@ -70,12 +70,12 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
   override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
-private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadableProperty[A]]
+private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[BSeq[A]] with ReadableSeqProperty[A, ElemType] {
 
   protected[this] final val structureListeners: MBuffer[Patch[ElemType] => Any] = MArrayBuffer.empty
 
-  override def structureListenersCount(): Int = structureListeners.size
+  override final def structureListenersCount(): Int = structureListeners.size
   protected def wrapStructureListenerRegistration(reg: Registration): Registration =
     wrapListenerRegistration(reg)
 
@@ -91,20 +91,18 @@ private[properties] trait AbstractReadableSeqProperty[A, +ElemType <: ReadablePr
     new TransformedReadableSeqProperty[A, B, ReadableProperty[B], ReadableProperty[A]](this, transformer)
 
   override def reversed(): ReadableSeqProperty[A, ReadableProperty[A]] =
-    new ReversedReadableSeqProperty[A](this)
+    new ReversedReadableSeqProperty[A, ReadableProperty[A]](this)
 
-  override def filter(matcher: A => Boolean): ReadableSeqProperty[A, _ <: ElemType] =
+  override def filter(matcher: A => Boolean): ReadableSeqProperty[A, ElemType] =
     new FilteredSeqProperty[A, ElemType](this, matcher)
 
   lazy val zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =
     new ZippedWithIndexReadableSeqProperty[A](this)
 
-  protected final def fireElementsListeners[ItemType <: ReadableProperty[A]](
-    patch: Patch[ItemType], structureListeners: MBuffer[Patch[ItemType] => Any]
-  ): Unit = {
+  protected final def fireElementsListeners(patch: Patch[ElemType]): Unit = {
     val originalListeners = structureListeners.toSet
     CallbackSequencer().queue(
-      s"${this.id.toString}:fireElementsListeners:${patch.hashCode()}",
+      s"$hashCode:fireElementsListeners:${patch.hashCode()}",
       () => structureListeners.foreach { listener => if (originalListeners.contains(listener)) listener(patch) }
     )
   }

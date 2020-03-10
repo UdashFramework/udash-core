@@ -1,6 +1,6 @@
 package io.udash.properties
 
-import io.udash.utils.CrossCollections
+import com.github.ghik.silencer.silent
 
 import scala.collection.mutable
 
@@ -12,43 +12,41 @@ import scala.collection.mutable
  * running commit().
  * In code you should use sequence method to group operation over the Property.
  */
-class CallbackSequencer {
+final class CallbackSequencer {
   type Id = String
 
   private var starts: Int = 0
-  private val queue: mutable.Buffer[(Id, () => Any)] = CrossCollections.createArray
+  private val queue: mutable.LinkedHashMap[Id, () => Any] = mutable.LinkedHashMap.empty
 
   private def start(): Unit =
     starts += 1
 
-  private def end(): Unit = {
+  private def end(): Unit =
     starts -= 1
-  }
 
-  private def commit(): Boolean = {
+  private def commit(): Unit = {
     if (starts == 1) {
       val used = mutable.HashSet[Id]()
-      val waiting = queue.reverseIterator.collect {
-        case (id, callback) if !used.contains(id) =>
-          used += id
-          callback
-      }.toSeq.reverseIterator
-      queue.clear()
-      waiting.foreach(c => c())
-      used.nonEmpty
-    } else false
+      while (queue.nonEmpty) {
+        queue.retain { case (id, callback) =>
+          if (used.add(id)) {
+            callback()
+          }
+          false //removes
+        }: @silent("deprecated")
+      }
+    }
   }
 
   def queue(id: Id, fireListeners: () => Any): Unit = {
-    if (starts == 0) fireListeners()
-    else queue += id -> fireListeners
+    sequence(queue += id -> fireListeners)
   }
 
   def sequence(code: => Any): Unit = {
     start()
     try {
       code
-      while (commit()) {}
+      commit()
     } finally {
       end()
     }
