@@ -1,9 +1,6 @@
 package io.udash
 package rest
 
-import java.net.ConnectException
-
-import com.softwaremill.sttp.SttpBackend
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
 import org.eclipse.jetty.server.Server
@@ -13,6 +10,8 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
+import sttp.client.SttpBackend
+import sttp.client.SttpClientException.ConnectException
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -53,7 +52,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     HttpBody.json(JsonValue(body))
   )
 
-  implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+  implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
 
   val rawHandler = futureHandle(SttpRestClient.asHandleRequest(baseUri))
   val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface](baseUri)

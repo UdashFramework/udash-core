@@ -1,15 +1,15 @@
 package io.udash
 package rest
 
-import com.softwaremill.sttp.SttpBackend
 import io.udash.rest.raw.HttpErrorException
 import io.udash.rest.raw.RawRest.HandleRequest
+import sttp.client.SttpBackend
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait SttpClientRestTest extends ServletBasedRestApiTest {
-  implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+  implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
 
   def clientHandle: HandleRequest =
     SttpRestClient.asHandleRequest(s"$baseUrl/api")
