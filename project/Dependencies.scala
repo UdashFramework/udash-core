@@ -27,7 +27,7 @@ object Dependencies {
   val circeDerivationVersion = "0.12.0-M7" // Tests only
   val monixVersion = "3.1.0" // Tests only
 
-  val sttpVersion = "1.7.2"
+  val sttpVersion = "2.0.6"
 
   val scalaLoggingVersion = "3.9.2"
 
@@ -108,7 +108,7 @@ object Dependencies {
 
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "com.softwaremill.sttp" %%% "core" % sttpVersion,
+    "com.softwaremill.sttp.client" %%% "core" % sttpVersion,
     "io.monix" %%% "monix" % monixVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
@@ -116,7 +116,7 @@ object Dependencies {
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
-    "com.softwaremill.sttp" %% "async-http-client-backend-future" % sttpVersion,
+    "com.softwaremill.sttp.client" %% "async-http-client-backend-future" % sttpVersion,
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
