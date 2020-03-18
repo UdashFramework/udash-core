@@ -139,38 +139,23 @@ object Dependencies {
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion,
   ))
 
-  val bootstrapSjsDeps = Def.setting(Seq(
-    "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion exclude("org.webjars", "momentjs")
-  ))
-
-  val bootstrapJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
-      minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrapVersion / "bootstrap.js"
-      minified "bootstrap.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js"
-      minified s"$momentJsVersion/min/moment-with-locales.min.js",
-
-    "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion /
-      s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
-      minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js"
-      dependsOn "bootstrap.js" dependsOn s"$momentJsVersion/min/moment-with-locales.js",
-  ))
-
   val bootstrap4SjsDeps = Def.setting(Seq(
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
+  private val jqueryResource = s"$jqueryVersion/jquery.js"
+  private val momentResource = s"$momentJsVersion/min/moment-with-locales.js"
+  private val bootstrap4Resource = "js/bootstrap.bundle.js"
+
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js"
+    "org.webjars" % "jquery" % jqueryVersion / jqueryResource
       minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrap4Version / "js/bootstrap.bundle.js"
-      minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / s"$momentJsVersion/min/moment-with-locales.js"
+    "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
+      minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
+    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / momentResource
       minified s"$momentJsVersion/min/moment-with-locales.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
-      minified "js/tempusdominus-bootstrap-4.min.js" dependsOn "bootstrap.bundle.js" dependsOn "moment-with-locales.js"
+      minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
   ))
 
   val benchmarksSjsDeps = Def.setting(Seq(
@@ -199,7 +184,6 @@ object Dependencies {
   val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
 
   val guideJsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / s"$jqueryVersion/jquery.js" minified s"$jqueryVersion/jquery.min.js",
     ProvidedJS / "prism.js",
   ))
 
