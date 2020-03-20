@@ -1,10 +1,10 @@
 package io.udash
 package rest
 
-import com.softwaremill.sttp.{FetchBackend, SttpBackend}
+import sttp.client.{FetchBackend, SttpBackend}
 
 import scala.concurrent.Future
 
 object DefaultSttpBackend {
-  def apply(): SttpBackend[Future, Nothing] = FetchBackend()
+  def apply(): SttpBackend[Future, Nothing, Nothing] = FetchBackend()
 }

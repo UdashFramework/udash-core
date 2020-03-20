@@ -25,11 +25,11 @@ final class AdvancedBootstrappingSbtView extends View with CssView {
   private val g8IndexContent = Property.blank[String]
 
   locally {
-    import com.softwaremill.sttp._
-    implicit val backend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
-    sttp.get(uri"${ExternalUrls.udashG8Build}").send().foreachNow(_.body.foreach(g8buildContent.set(_)))
-    sttp.get(uri"${ExternalUrls.udashG8Plugins}").send().foreachNow(_.body.foreach(g8PluginsContent.set(_)))
-    sttp.get(uri"${ExternalUrls.udashG8Index}").send().foreachNow(_.body.foreach(g8IndexContent.set(_)))
+    import sttp.client._
+    implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
+    basicRequest.get(uri"${ExternalUrls.udashG8Build}").send().foreachNow(_.body.foreach(g8buildContent.set(_)))
+    basicRequest.get(uri"${ExternalUrls.udashG8Plugins}").send().foreachNow(_.body.foreach(g8PluginsContent.set(_)))
+    basicRequest.get(uri"${ExternalUrls.udashG8Index}").send().foreachNow(_.body.foreach(g8IndexContent.set(_)))
   }
 
   override def getTemplate: Modifier =
