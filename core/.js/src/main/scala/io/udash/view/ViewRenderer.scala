@@ -1,5 +1,6 @@
 package io.udash.view
 
+import com.avsystem.commons._
 import io.udash.core.{ContainerView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
@@ -22,25 +23,23 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
     }
 
-  private def mergeViews(path: Iterable[View]): Option[View] = {
-    //todo consider rewrite
-    if (path.size == 1) {
-      val singleView: View = path.head
-      views.append(singleView)
-      Some(singleView)
-    } else {
-      val lastElement = path.reduceLeft[View]((parent, child) => {
+  private def mergeViews(path: Iterator[View]): Option[View] = {
+    val result = path.nextOpt.toOption
+
+    result.foreach { top =>
+      val lastElement = path.fold(top) { case (parent, child) =>
         renderChild(parent, Some(child))
         views.append(parent)
         child
-      })
+      }
       views.append(lastElement)
-      path.headOption
     }
+
+    result
   }
 
   private def replaceCurrentViews(path: Iterable[View]): Unit = {
-    val rootView = mergeViews(path)
+    val rootView = mergeViews(path.iterator)
 
     views.clear()
     views.appendAll(path)
@@ -79,7 +78,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       val removedViews = views.size - currentViewsToLeave.size
       views.trimEnd(removedViews)
       val rootView = currentViewsToLeave.last
-      val rootViewToAttach = if (pathToAdd.nonEmpty) mergeViews(pathToAdd) else None
+      val rootViewToAttach = mergeViews(pathToAdd.iterator)
       if (removedViews > 0 || rootViewToAttach.isDefined) {
         renderChild(rootView, rootViewToAttach)
       }
