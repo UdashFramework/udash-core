@@ -35,7 +35,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
    */
   def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
     if (fullReload) {
-      cleanup(statesMap.values)
+      cleanup(statesMap.valuesIterator)
       statesMap.clear()
     }
 
@@ -43,21 +43,18 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val oldState = currentStateProp.get
     currentStateProp.set(newState)
 
-    val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(Some(newState))
 
-    val samePathSize = findEqPrefix(newStatePath.iterator, currentStatePath.iterator).size
-    val diffPath = findDiffSuffix(newStatePath.iterator, currentStatePath.iterator).to[js.Array]
+    val samePathSize = findEqPrefix(newStatePath.iterator, statesMap.keysIterator).size
+    val diffPath = findDiffSuffix(newStatePath.iterator, statesMap.keysIterator).to[js.Array]
 
     val (viewsToLeave, viewsToAdd) = {
-      val toUpdateStatesSize = getUpdatablePathSize(diffPath.iterator, statesMap.keys.view(samePathSize, statesMap.size).iterator)
-      val toRemoveStates = statesMap.slice(samePathSize + toUpdateStatesSize, statesMap.size)
-      cleanup(toRemoveStates.values)
+      val toUpdateStatesSize = getUpdatablePathSize(diffPath.iterator, statesMap.slice(samePathSize, statesMap.size).keysIterator)
+      cleanup(statesMap.slice(samePathSize + toUpdateStatesSize, statesMap.size).valuesIterator) //cleanup removed states
 
       val oldViewFactories =
-        newStatePath
-          .slice(samePathSize, samePathSize + toUpdateStatesSize)
-          .zip(statesMap.slice(samePathSize, samePathSize + toUpdateStatesSize).values)
+        newStatePath.view(samePathSize, samePathSize + toUpdateStatesSize).iterator
+          .zip(statesMap.slice(samePathSize, samePathSize + toUpdateStatesSize).valuesIterator)
       var i = samePathSize
       statesMap.retain { (_, _) =>
         i -= 1
@@ -65,8 +62,8 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       }: @silent("deprecated")
       statesMap ++= oldViewFactories
 
-      val viewsToLeave = statesMap.values.map(_._1).toList
-      val views = resolvePath(diffPath.view(toUpdateStatesSize, diffPath.size).iterator)
+      val viewsToLeave = statesMap.values.map(_._1).iterator
+      val views = resolvePath(diffPath.view(toUpdateStatesSize, diffPath.size).iterator) //mutates statesMap
       (viewsToLeave, views)
     }
 
@@ -77,7 +74,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       currentState.parentState
     }
 
-    viewRenderer.renderView(viewsToLeave.iterator, viewsToAdd)
+    viewRenderer.renderView(viewsToLeave, viewsToAdd)
 
     if (fullReload || newState != oldState) callbacks.fire(StateChangeEvent(newState, oldState))
   }.recover { case ex: Throwable => statesMap.clear(); throw ex }
@@ -120,7 +117,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       case (h1, h2) => viewFactoryRegistry.matchStateToResolver(h1) == viewFactoryRegistry.matchStateToResolver(h2)
     }.length
 
-  private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
+  private def cleanup(state: Iterator[(View, Presenter[_])]): Unit = {
     state.foreach { case (view, presenter) =>
       Try(view.onClose()).failed.foreach(logger.warn("Error closing view.", _))
       Try(presenter.onClose()).failed.foreach(logger.warn("Error closing presenter.", _))
