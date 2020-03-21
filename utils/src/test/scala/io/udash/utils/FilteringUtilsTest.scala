@@ -33,23 +33,23 @@ class FilteringUtilsTest extends UdashSharedTest {
       val a = 1 :: 2 :: 3 :: 4 :: 5 :: Nil
       val b = 1 :: 2 :: 3 :: 6 :: 5 :: Nil
 
-      findDiffSuffix(a, b) should be(4 :: 5 :: Nil)
-      findDiffSuffix(b, a) should be(6 :: 5 :: Nil)
+      findDiffSuffix(a.iterator, b.iterator).toList should be(4 :: 5 :: Nil)
+      findDiffSuffix(b.iterator, a.iterator).toList should be(6 :: 5 :: Nil)
 
       val c = 3 :: 2 :: 3 :: 4 :: 5 :: Nil
       val d = 1 :: 2 :: 3 :: 6 :: 5 :: Nil
 
-      findDiffSuffix(c, d) should be(3 :: 2 :: 3 :: 4 :: 5 :: Nil)
-      findDiffSuffix(d, c) should be(1 :: 2 :: 3 :: 6 :: 5 :: Nil)
+      findDiffSuffix(c.iterator, d.iterator).toList should be(3 :: 2 :: 3 :: 4 :: 5 :: Nil)
+      findDiffSuffix(d.iterator, c.iterator).toList should be(1 :: 2 :: 3 :: 6 :: 5 :: Nil)
 
       val e = Nil
       val f = 1 :: 2 :: 3 :: 6 :: 5 :: Nil
 
-      findDiffSuffix(e, f) should be(Nil)
-      findDiffSuffix(f, e) should be(1 :: 2 :: 3 :: 6 :: 5 :: Nil)
+      findDiffSuffix(e.iterator, f.iterator).toList should be(Nil)
+      findDiffSuffix(f.iterator, e.iterator).toList should be(1 :: 2 :: 3 :: 6 :: 5 :: Nil)
 
-      findDiffSuffix(e, e) should be(Nil)
-      findDiffSuffix(f, f) should be(Nil)
+      findDiffSuffix(e.iterator, e.iterator).toList should be(Nil)
+      findDiffSuffix(f.iterator, f.iterator).toList should be(Nil)
     }
   }
 }

@@ -46,7 +46,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val newStatePath = getStatePath(Some(newState))
 
     val samePath = findEqPrefix(newStatePath, currentStatePath)
-    val diffPath = findDiffSuffix(newStatePath, currentStatePath)
+    val diffPath = findDiffSuffix(newStatePath.iterator, currentStatePath.iterator)
 
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
