@@ -49,7 +49,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val diffPath = findDiffSuffix(newStatePath.iterator, currentStatePath.iterator)
 
     val (viewsToLeave, viewsToAdd) = {
-      val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
+      val toUpdateStatesSize = getUpdatablePathSize(diffPath.iterator, statesMap.keys.view(samePath.size, statesMap.size).iterator)
       val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
       cleanup(toRemoveStates.values)
 
@@ -114,8 +114,8 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     case None => acc
   }
 
-  private def getUpdatablePathSize(path: Iterable[HierarchyRoot], oldPath: Iterable[HierarchyRoot]): Int =
-    path.iterator.zip(oldPath.iterator).takeWhile {
+  private def getUpdatablePathSize(path: Iterator[HierarchyRoot], oldPath: Iterator[HierarchyRoot]): Int =
+    path.zip(oldPath).takeWhile {
       case (h1, h2) => viewFactoryRegistry.matchStateToResolver(h1) == viewFactoryRegistry.matchStateToResolver(h2)
     }.length
 
