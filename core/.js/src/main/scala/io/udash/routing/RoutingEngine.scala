@@ -76,7 +76,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       currentState.parentState
     }
 
-    viewRenderer.renderView(viewsToLeave, viewsToAdd)
+    viewRenderer.renderView(viewsToLeave.iterator, viewsToAdd)
 
     if (fullReload || newState != oldState) callbacks.fire(StateChangeEvent(newState, oldState))
   }.recover { case ex: Throwable => statesMap.clear(); throw ex }

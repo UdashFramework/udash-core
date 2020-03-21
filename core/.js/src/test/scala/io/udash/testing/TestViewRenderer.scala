@@ -1,20 +1,20 @@
 package io.udash.testing
 
+import com.avsystem.commons._
 import io.udash._
 
-import scala.collection.mutable
-
 class TestViewRenderer extends ViewRenderer(null) {
-  val views = mutable.ArrayBuffer[View]()
+  val views = MArrayBuffer[View]()
   var lastSubPathToLeave: List[View] = Nil
-  var lastPathToAdd: List[View] = Nil
+  var lastPathToAdd: Iterable[View] = Nil
 
-  override def renderView(subPathToLeave: List[View], pathToAdd: List[View]): Unit = {
+  override def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
+    val subPathList = subPathToLeave.toList
     views.clear()
-    views.appendAll(subPathToLeave)
+    views.appendAll(subPathList)
     views.appendAll(pathToAdd)
 
-    lastSubPathToLeave = subPathToLeave
+    lastSubPathToLeave = subPathList
     lastPathToAdd = pathToAdd
   }
 }

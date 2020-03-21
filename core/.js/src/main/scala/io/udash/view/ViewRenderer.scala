@@ -21,7 +21,8 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
     }
 
-  private def mergeViews(path: List[View]): Option[View] = {
+  private def mergeViews(path: Iterable[View]): Option[View] = {
+    //todo consider rewrite
     if (path.size == 1) {
       val singleView: View = path.head
       views.append(singleView)
@@ -37,7 +38,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     }
   }
 
-  private def replaceCurrentViews(path: List[View]): Unit = {
+  private def replaceCurrentViews(path: Iterable[View]): Unit = {
     val rootView = mergeViews(path)
 
     views.clear()
@@ -57,18 +58,18 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     * Current views: A -> B -> C -> D <br/>
     * subPathToLeave: A -> B <br/>
     * pathToAdd: E -> F <br/>
-    * <br/>
-    * Calls:<br/>
-    * A - nothing<br/>
-    * B - renderChild(E)<br/>
-    * E - getTemplate(); renderChild(F)<br/>
-    * F - getTemplate()<br/>
-    *
-    * @param subPathToLeave prefix of views hierarchy, which will not be removed
-    * @param pathToAdd views list, which will be added to hierarchy
-    */
-  def renderView(subPathToLeave: List[View], pathToAdd: List[View]): Unit = {
-    val currentViewsToLeave = findEqPrefix(subPathToLeave.iterator, views.iterator)
+   * <br/>
+   * Calls:<br/>
+   * A - nothing<br/>
+   * B - renderChild(E)<br/>
+   * E - getTemplate(); renderChild(F)<br/>
+   * F - getTemplate()<br/>
+   *
+   * @param subPathToLeave prefix of views hierarchy, which will not be removed
+   * @param pathToAdd      views list, which will be added to hierarchy
+   */
+  def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
+    val currentViewsToLeave = findEqPrefix(subPathToLeave, views.iterator)
 
     if (currentViewsToLeave.isEmpty) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")

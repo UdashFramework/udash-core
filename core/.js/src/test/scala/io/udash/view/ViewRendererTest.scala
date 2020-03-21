@@ -12,7 +12,7 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestView
 
-      renderer.renderView(Nil, rootView :: childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -28,7 +28,7 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestView
 
-      renderer.renderView(Nil, rootView :: childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -43,7 +43,7 @@ class ViewRendererTest extends UdashFrontendTest {
       //clear last child
       Seq(rootView, childViewA, childViewB, childViewC).foreach(_.lastChild = null)
 
-      renderer.renderView(rootView :: childViewA :: Nil, childViewC :: childViewB :: Nil)
+      renderer.renderView(Iterator(rootView, childViewA), childViewC :: childViewB :: Nil)
 
       rootView.lastChild should be(null) // renderChild was not called
       childViewA.lastChild should be(childViewC)
@@ -64,7 +64,7 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestView
 
-      renderer.renderView(Nil, rootView :: childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -79,7 +79,7 @@ class ViewRendererTest extends UdashFrontendTest {
       //clear last child
       Seq(rootView, childViewA, childViewB, childViewC).foreach(_.lastChild = null)
 
-      renderer.renderView(rootView :: childViewB :: childViewA :: Nil, childViewC :: Nil)
+      renderer.renderView(Iterator(rootView, childViewB, childViewA), childViewC :: Nil)
 
       rootView.lastChild should be(childViewC)
       childViewA.lastChild should be(null)
@@ -100,7 +100,7 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestView
 
-      renderer.renderView(Nil, rootView :: childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -112,7 +112,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      renderer.renderView(rootView :: childViewA :: Nil, Nil)
+      renderer.renderView(Iterator(rootView, childViewA), Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(null)
@@ -131,8 +131,8 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestView
 
-      renderer.renderView(Nil, rootView :: Nil)
-      renderer.renderView(rootView :: Nil, childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: Nil)
+      renderer.renderView(Iterator(rootView), childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -144,7 +144,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      renderer.renderView(rootView :: childViewA :: childViewB :: childViewC :: Nil, Nil)
+      renderer.renderView(Iterator(rootView, childViewA, childViewB, childViewC), Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -165,8 +165,8 @@ class ViewRendererTest extends UdashFrontendTest {
       val childViewB = new TestView
       val childViewC = new TestFinalView
 
-      renderer.renderView(Nil, rootView :: Nil)
-      renderer.renderView(rootView :: Nil, childViewA :: childViewB :: childViewC :: Nil)
+      renderer.renderView(Iterator.empty, rootView :: Nil)
+      renderer.renderView(Iterator(rootView), childViewA :: childViewB :: childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -177,7 +177,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      renderer.renderView(rootView :: childViewA :: childViewB :: childViewC :: Nil, Nil)
+      renderer.renderView(Iterator(rootView, childViewA, childViewB, childViewC), Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -188,7 +188,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      renderer.renderView(rootView :: childViewA :: childViewB :: Nil, Nil)
+      renderer.renderView(Iterator(rootView, childViewA, childViewB), Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
@@ -199,7 +199,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      renderer.renderView(rootView :: childViewA :: childViewB :: Nil, childViewC :: Nil)
+      renderer.renderView(Iterator(rootView, childViewA, childViewB), childViewC :: Nil)
 
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
