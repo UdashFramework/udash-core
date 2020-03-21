@@ -10,7 +10,6 @@ import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
-import scala.scalajs.js
 
 final case class StateChangeEvent[S <: State](currentState: S, oldState: S) extends AbstractCase
 
@@ -46,14 +45,14 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val newStatePath = getStatePath(Some(newState))
 
     val samePathSize = findEqPrefix(newStatePath.iterator, statesMap.keysIterator).size
-    val diffPath = findDiffSuffix(newStatePath.iterator, statesMap.keysIterator).to[js.Array]
+    val diffPath = findDiffSuffix(newStatePath.iterator, statesMap.keysIterator).toSeq
 
     val (viewsToLeave, viewsToAdd) = {
       val toUpdateStatesSize = getUpdatablePathSize(diffPath.iterator, statesMap.slice(samePathSize, statesMap.size).keysIterator)
       cleanup(statesMap.slice(samePathSize + toUpdateStatesSize, statesMap.size).valuesIterator) //cleanup removed states
 
       val oldViewFactories =
-        newStatePath.view(samePathSize, samePathSize + toUpdateStatesSize).iterator
+        newStatePath.view.slice(samePathSize, samePathSize + toUpdateStatesSize).iterator
           .zip(statesMap.slice(samePathSize, samePathSize + toUpdateStatesSize).valuesIterator)
       var i = samePathSize
       statesMap.retain { (_, _) =>
@@ -63,7 +62,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       statesMap ++= oldViewFactories
 
       val viewsToLeave = statesMap.values.map(_._1).iterator
-      val views = diffPath.view(toUpdateStatesSize, diffPath.size).iterator.map { state =>
+      val views = diffPath.view.slice(toUpdateStatesSize, diffPath.size).iterator.map { state =>
         val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
         statesMap(state) = (view, presenter)
         view
