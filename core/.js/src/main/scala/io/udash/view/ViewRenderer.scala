@@ -5,6 +5,7 @@ import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
 import scala.collection.mutable
+import scala.scalajs.js
 
 /**
   * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
@@ -69,7 +70,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    * @param pathToAdd      views list, which will be added to hierarchy
    */
   def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
-    val currentViewsToLeave = findEqPrefix(subPathToLeave, views.iterator)
+    val currentViewsToLeave = findEqPrefix(subPathToLeave, views.iterator).to[js.Array]
 
     if (currentViewsToLeave.isEmpty) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
