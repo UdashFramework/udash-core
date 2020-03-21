@@ -63,7 +63,11 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
       statesMap ++= oldViewFactories
 
       val viewsToLeave = statesMap.values.map(_._1).iterator
-      val views = resolvePath(diffPath.view(toUpdateStatesSize, diffPath.size).iterator) //mutates statesMap
+      val views = diffPath.view(toUpdateStatesSize, diffPath.size).iterator.map { state =>
+        val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
+        statesMap(state) = (view, presenter)
+        view
+      }.toList
       (viewsToLeave, views)
     }
 
@@ -124,11 +128,4 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     }
   }
 
-  private def resolvePath(path: Iterator[HierarchyRoot]): List[View] = {
-    path.map { state =>
-      val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
-      statesMap(state) = (view, presenter)
-      view
-    }.toList
-  }
 }
