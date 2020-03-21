@@ -1,5 +1,6 @@
 package io.udash.routing
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc.AbstractCase
 import com.github.ghik.silencer.silent
 import io.udash._
@@ -9,8 +10,6 @@ import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.util.Try
 
 final case class StateChangeEvent[S <: State](currentState: S, oldState: S) extends AbstractCase
 
@@ -26,7 +25,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
 
   private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
-  private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
+  private val statesMap = MLinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
   /**
    * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewFactories.
@@ -115,15 +114,10 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     case None => acc
   }
 
-  @tailrec
-  private def getUpdatablePathSize(path: List[HierarchyRoot], oldPath: List[HierarchyRoot], acc: Int = 0): Int = {
-    (path, oldPath) match {
-      case (head1 :: tail1, head2 :: tail2)
-        if viewFactoryRegistry.matchStateToResolver(head1) == viewFactoryRegistry.matchStateToResolver(head2) =>
-        getUpdatablePathSize(tail1, tail2, acc + 1)
-      case _ => acc
-    }
-  }
+  private def getUpdatablePathSize(path: Iterable[HierarchyRoot], oldPath: Iterable[HierarchyRoot]): Int =
+    path.iterator.zip(oldPath.iterator).takeWhile {
+      case (h1, h2) => viewFactoryRegistry.matchStateToResolver(h1) == viewFactoryRegistry.matchStateToResolver(h2)
+    }.length
 
   private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
     state.foreach { case (view, presenter) =>
