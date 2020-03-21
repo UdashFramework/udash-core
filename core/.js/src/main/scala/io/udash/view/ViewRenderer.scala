@@ -68,7 +68,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     * @param pathToAdd views list, which will be added to hierarchy
     */
   def renderView(subPathToLeave: List[View], pathToAdd: List[View]): Unit = {
-    val currentViewsToLeave = findEqPrefix(subPathToLeave, views.toList)
+    val currentViewsToLeave = findEqPrefix(subPathToLeave.iterator, views.iterator)
 
     if (currentViewsToLeave.isEmpty) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")

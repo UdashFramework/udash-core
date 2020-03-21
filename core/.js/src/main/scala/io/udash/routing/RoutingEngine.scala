@@ -45,7 +45,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(Some(newState))
 
-    val samePath = findEqPrefix(newStatePath, currentStatePath)
+    val samePath = findEqPrefix(newStatePath.iterator, currentStatePath.iterator)
     val diffPath = findDiffSuffix(newStatePath.iterator, currentStatePath.iterator)
 
     val (viewsToLeave, viewsToAdd) = {
