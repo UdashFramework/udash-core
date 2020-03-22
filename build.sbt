@@ -417,7 +417,6 @@ lazy val `guide-backend` =
 
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
-    .enablePlugins(SbtWeb)
     .dependsOn(`guide-shared-js`)
     .settings(
       noPublishSettings,
