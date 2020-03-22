@@ -101,10 +101,9 @@ object Dependencies {
 
   val rpcSjsDeps = rpcCrossDeps
 
-  val rpcJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
-      minified s"$atmosphereJSVersion/atmosphere-min.js"
-  ))
+  val rpcJsDeps = Seq(
+    "atmosphere.js" -> atmosphereJSVersion,
+  )
 
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,

@@ -1,6 +1,5 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
-import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
 
@@ -94,8 +93,8 @@ val commonSettings = Seq(
 val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / scalaJSStage := FastOptStage,
-  Test / scalaJSUseMainModuleInitializer := false,
-  Test / jsEnv := new JSDOMNodeJSEnv,
+  requireJsDomEnv in Test := true,
+  version in installJsdom := "15.2.1",
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -155,12 +154,12 @@ def jvmProject(proj: Project): Project =
 
 def jsProject(proj: Project): Project =
   proj.in(proj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
     .settings(commonJsSettings)
 
 def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
   jsProj.in(jvmProj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
     .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
     .settings(
       commonJsSettings,
@@ -179,7 +178,7 @@ def frontendExecutable(proj: Project)(
   additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
 ) = {
   proj
-    .enablePlugins(ScalaJSPlugin, SbtWeb)
+    .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, SbtWeb)
     .settings(commonJsSettings)
     .settings(
       noPublishSettings,
@@ -309,7 +308,7 @@ lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
-    jsDependencies ++= Dependencies.rpcJsDeps.value,
+    Compile / npmDependencies ++= Dependencies.rpcJsDeps,
   )
 
 lazy val rest = jvmProject(project)
