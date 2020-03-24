@@ -35,7 +35,7 @@ final class UdashDatePicker private[datepicker](
     BootstrapStyles.Form.control, CssStyleName("datetimepicker-input"),
     BootstrapTags.dataToggle := "datetimepicker", BootstrapTags.dataTarget := s"#$componentId"
   ).render
-  private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
+  private val jQInput: BootstrapJs.DatePickerJQuery = BootstrapJs.datepickerInterface(inp)
 
   private val changeCallback = (_: Element, event: JQueryEvent) => {
     val dateOption = event.asInstanceOf[DatePickerChangeJQEvent].option
@@ -192,15 +192,15 @@ final class UdashDatePicker private[datepicker](
   private def internalFormat = options.get.format
   private def internalLocale = options.get.locale.getOrElse("en")
 
-  private def dateToMoment(date: ju.Date): MomentFormatWrapper = {
+  private def dateToMoment(date: ju.Date): Moment = {
     Try {
-      val fullDate = moment(internalLocale, date.getTime, "x")
+      val fullDate = new Moment(internalLocale, date.getTime, "x")
       // removes date part which is not present in format string; it prevents multiple updates of date from one user interaction
-      moment(internalLocale, fullDate.format(internalFormat), internalFormat)
+      new Moment(internalLocale, fullDate.format(internalFormat), internalFormat)
     }.getOrElse(null)
   }
 
-  private def momentToDate(date: MomentFormatWrapper): ju.Date =
+  private def momentToDate(date: Moment): ju.Date =
     Try {
       date.valueOf() match {
         case t if t.isNaN || t.isInfinity => null
@@ -465,37 +465,21 @@ object UdashDatePicker {
 
   }
 
-  @js.native
-  private trait UdashDatePickerJQuery extends JQuery {
-    def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
-    def datetimepicker(): UdashDatePickerJQuery = js.native
-    def datetimepicker(function: String): UdashDatePickerJQuery = js.native
-    def datetimepicker(option: String, value: js.Any): UdashDatePickerJQuery = js.native
-  }
-
-  private def sanitizeDate(maybeDate: MomentFormatWrapper | Boolean): Option[MomentFormatWrapper] =
-    maybeDate.option.filterNot(_.isInstanceOf[Boolean]).asInstanceOf[Option[MomentFormatWrapper]]
+  private def sanitizeDate(maybeDate: Moment | Boolean): Option[Moment] =
+    maybeDate.option.filterNot(_.isInstanceOf[Boolean]).asInstanceOf[Option[Moment]]
 
   @js.native
   private trait DateJQEvent extends JQueryEvent {
-    def date: MomentFormatWrapper | Boolean = js.native
+    def date: Moment | Boolean = js.native
   }
 
   @js.native
   private trait DatePickerChangeJQEvent extends DateJQEvent {
-    def oldDate: MomentFormatWrapper | Boolean = js.native
-  }
-
-  private def moment(locale: String, time: js.Any, format: String): MomentFormatWrapper =
-    js.Dynamic.global.moment(time, format, locale).asInstanceOf[MomentFormatWrapper]
-
-  @js.native
-  private trait MomentFormatWrapper extends js.Any {
-    def format(dateFormat: String): String = js.native
-    def valueOf(): Double = js.native
+    def oldDate: Moment | Boolean = js.native
   }
 
   import org.scalajs.dom.{MutationObserver, MutationObserverInit, MutationRecord, Node, NodeList}
+
   import scala.collection.Map
   import scala.collection.mutable.{Map => MMap}
 

@@ -356,9 +356,8 @@ lazy val `css-js` = jsProjectFor(project, css)
 lazy val bootstrap4 = jsProject(project)
   .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js` % Test)
   .settings(
-    testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrap4JsDeps.value
+    Compile / npmDependencies ++= Dependencies.bootstrap4JsDeps
   )
 
 lazy val benchmarks = jsProject(project)

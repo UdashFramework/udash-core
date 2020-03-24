@@ -40,11 +40,8 @@ object Dependencies {
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.1.1"
-  val bootstrapVersion = "3.3.7-1"
-  val bootstrapDatepickerVersion = "4.17.47"
-  val bootstrap4Version = "4.1.3"
+  val bootstrapVersion = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
-  val momentJsVersion = "2.22.2"
 
   val seleniumVersion = "3.141.59"
   val scalaJsBenchmarkVersion = "0.3.0-RC1"
@@ -142,20 +139,11 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  private val jqueryResource = s"$jqueryVersion/jquery.js"
-  private val momentResource = s"$momentJsVersion/min/moment-with-locales.js"
-  private val bootstrap4Resource = "js/bootstrap.bundle.js"
-
-  val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / jqueryResource
-      minified s"$jqueryVersion/jquery.min.js",
-    "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
-      minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / momentResource
-      minified s"$momentJsVersion/min/moment-with-locales.min.js",
-    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
-      minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
-  ))
+  val bootstrap4JsDeps = Seq(
+    "popper.js" -> "1.16.1",
+    "bootstrap" -> bootstrapVersion,
+    "tempusdominus-bootstrap-4" -> bootstrap4DatepickerVersion
+  )
 
   val benchmarksSjsDeps = Def.setting(Seq(
     "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,

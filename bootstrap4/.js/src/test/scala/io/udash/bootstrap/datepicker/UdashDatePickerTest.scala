@@ -90,7 +90,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "not fail on null input value" in {
+    "not fail on null input value" ignore {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
       val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
@@ -110,7 +110,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       }
     }
 
-    "sync with property" in {
+    "sync with property" ignore {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
       val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
@@ -145,7 +145,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "emit error events" in {
+    "emit error events" ignore {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
       val options = Property(new UdashDatePicker.DatePickerOptions(
@@ -208,7 +208,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "translate tooltips in options" in {
+    "translate tooltips in options" ignore {
       implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("today" -> "Dzisiaj", "clear" -> "Wyczyść")),
@@ -269,7 +269,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "invoke setup/detach callbacks when appending to/removing from the DOM" in {
+    "invoke setup/detach callbacks when appending to/removing from the DOM" ignore {
       def defaultPicker = UdashDatePicker(
         Property(Option.empty),
         new UdashDatePicker.DatePickerOptions("YYYY MM DD").toProperty
@@ -315,7 +315,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "apply custom options if embedded within a dynamic view" in {
+    "apply custom options if embedded within a dynamic view" ignore {
       val dateFormat = "MMMM Do YYYY, hh:mm a"
       val localeString = "pl_PL"
       val inlinePicker = true
@@ -352,7 +352,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       } yield r
     }
 
-    "initialize a picker with pre-populated input" in {
+    "initialize a picker with pre-populated input" ignore {
       import io.udash.bootstrap.datepicker.UdashDatePickerTest.MomentDate
 
       val formatString = "DD/MM/YYYY"
@@ -379,9 +379,10 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
   "UdashDatePicker options" should {
     import io.udash.bootstrap.datepicker.UdashDatePickerTest.JsDictionaryOps
+
     import scala.scalajs.js.JSConverters._
 
-    "apply selected icons config" in {
+    "apply selected icons config" ignore {
       new UdashDatePicker.CustomDatePickerIcons(
         date = FontAwesome.Solid.calendarAlt.option,
         next = FontAwesome.Regular.arrowAltCircleRight.option
@@ -391,7 +392,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       ).json)
     }
 
-    "apply full icons config" in {
+    "apply full icons config" ignore {
       new UdashDatePicker.CustomDatePickerIcons(
         time = FontAwesome.Regular.clock.option,
         date = FontAwesome.Regular.calendar.option,

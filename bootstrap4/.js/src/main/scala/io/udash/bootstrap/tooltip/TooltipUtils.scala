@@ -107,7 +107,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
     template: Option[String] = None,
     title: String | js.Function1[dom.Node, String] | dom.Node = "",
     trigger: Seq[Trigger] = defaultTrigger
-  )(el: dom.Node): TooltipType =
+  )(el: dom.Element): TooltipType =
     initTooltip(
       js.Dictionary(
         "animation" -> animation,
@@ -124,8 +124,8 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
       )
     )(el)
 
-  protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): TooltipType
-  protected val defaultPlacement: Placement
-  protected val defaultTemplate: String
-  protected val defaultTrigger: Seq[Trigger]
+  protected def initTooltip(options: js.Dictionary[Any])(el: dom.Element): TooltipType
+  protected def defaultPlacement: Placement
+  protected def defaultTemplate: String
+  protected def defaultTrigger: Seq[Trigger]
 }

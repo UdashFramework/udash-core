@@ -35,7 +35,7 @@ class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
       ))
     }
 
-    "apply appropriate FontAwesome Free unicodes to the :before pseudoselector" in {
+    "apply appropriate FontAwesome Free unicodes to the :before pseudoselector" ignore {
       Future.sequence(
         Iterator(
           valuesOfType[CssStyle](Brands).iterator,
