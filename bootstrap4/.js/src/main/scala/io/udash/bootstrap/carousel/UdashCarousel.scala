@@ -4,12 +4,12 @@ package carousel
 import com.avsystem.commons.misc._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
+import io.udash.bootstrap.BootstrapJs.CarouselOptionsJS
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions.PauseOption
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent.Direction
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import io.udash.properties.seq
-import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.{Element, Node}
 import scalatags.JsDom.all._
 
@@ -102,7 +102,7 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
       )
     ).render
 
-    val jqCarousel = jQ(res).asInstanceOf[UdashCarouselJQuery]
+    val jqCarousel = jQ(res)
     nestedInterceptor(new JQueryOnBinding(jqCarousel, "slide.bs.carousel", (_: Element, ev: JQueryEvent) => {
       val (idx, dir) = extractEventData(ev)
       fire(CarouselEvent(this, idx, dir, changed = false))
@@ -114,39 +114,36 @@ final class UdashCarousel[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     }))
 
     propertyListeners += animationOptions.listen { animationOptions =>
-      jqCarousel.carousel(animationOptions.native)
-      if (!animationOptions.active) jqCarousel.carousel("pause")
+      res.carousel(animationOptions.native)
+      if (!animationOptions.active) render.carousel("pause")
     }
 
     res
   }
 
   /** Turn on slide transition. */
-  def cycle(): Unit = jQSelector().carousel("cycle")
+  def cycle(): Unit = render.carousel("cycle")
 
   /** Pause slide transition. */
-  def pause(): Unit = jQSelector().carousel("pause")
+  def pause(): Unit = render.carousel("pause")
 
   /**
-    * Change active slide.
-    *
-    * @param slideNumber new active slide index
-    */
-  def goTo(slideNumber: Int): Unit = jQSelector().carousel(slideNumber)
+   * Change active slide.
+   *
+   * @param slideNumber new active slide index
+   */
+  def goTo(slideNumber: Int): Unit = render.carousel(slideNumber)
 
   /** Change active slide to the next one (index order). */
-  def nextSlide(): Unit = jQSelector().carousel("next")
+  def nextSlide(): Unit = render.carousel("next")
 
   /** Change active slide to the previous one (index order). */
-  def previousSlide(): Unit = jQSelector().carousel("prev")
+  def previousSlide(): Unit = render.carousel("prev")
 
   override def kill(): Unit = {
     super.kill()
-    jQSelector().carousel("dispose")
+    render.carousel("dispose")
   }
-
-  private def jQSelector(): UdashCarouselJQuery =
-    jQ(render).asInstanceOf[UdashCarouselJQuery]
 }
 
 object UdashCarousel {
@@ -228,22 +225,7 @@ object UdashCarousel {
     }
   }
 
-  @js.native
-  private trait UdashCarouselJQuery extends JQuery {
-    def carousel(options: CarouselOptionsJS): UdashCarouselJQuery = js.native
-    def carousel(cmd: String): UdashCarouselJQuery = js.native
-    def carousel(number: Int): UdashCarouselJQuery = js.native
-  }
-
   import scala.concurrent.duration._
-
-  @js.native
-  private trait CarouselOptionsJS extends js.Object {
-    var interval: Int = js.native
-    var pause: String = js.native
-    var wrap: Boolean = js.native
-    var keyboard: Boolean = js.native
-  }
 
   /**
     * [[UdashCarousel]] animation options.

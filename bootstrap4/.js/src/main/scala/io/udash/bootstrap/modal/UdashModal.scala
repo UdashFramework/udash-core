@@ -31,14 +31,14 @@ final class UdashModal private(
   override type EventType = UdashModal.ModalEvent
 
   /** Toggles modal visibility. */
-  def toggle(): Unit = jQSelector().modal("toggle")
+  def toggle(): Unit = render.modal("toggle")
   /** Shows modal window. */
-  def show(): Unit = jQSelector().modal("show")
+  def show(): Unit = render.modal("show")
   /** Hides modal window. */
-  def hide(): Unit = jQSelector().modal("hide")
+  def hide(): Unit = render.modal("hide")
   /** Readjusts the modal's positioning to counter a scrollbar in case one should
    * appear, which would make the modal jump to the left. */
-  def handleUpdate(): Unit = jQSelector().modal("handleUpdate")
+  def handleUpdate(): Unit = render.modal("handleUpdate")
 
   override val render: Element = {
     val content = Seq(
@@ -77,11 +77,8 @@ final class UdashModal private(
 
   override def kill(): Unit = {
     super.kill()
-    jQSelector().modal("dispose")
+    render.modal("dispose")
   }
-
-  private def jQSelector(): UdashModalJQuery =
-    jQ(s"#$componentId").asInstanceOf[UdashModalJQuery]
 }
 
 object UdashModal {

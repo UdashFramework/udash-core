@@ -5,12 +5,9 @@ package collapse
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
-import io.udash.wrappers.jquery.JQuery
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 import scalatags.generic.AttrPair
-
-import scala.scalajs.js
 
 final class UdashCollapse private(
   parentSelector: Option[String],
@@ -28,13 +25,13 @@ final class UdashCollapse private(
   override type EventType = UdashCollapse.CollapseEvent
 
   /** Toggle state of this collapse. */
-  def toggle(): Unit = jQSelector().collapse("toggle")
+  def toggle(): Unit = render.collapse("toggle")
 
   /** Shows this collapse. */
-  def show(): Unit = jQSelector().collapse("show")
+  def show(): Unit = render.collapse("show")
 
   /** Hides this collapse. */
-  def hide(): Unit = jQSelector().collapse("hide")
+  def hide(): Unit = render.collapse("hide")
 
   /** Attributes which should be added to the button toggling this collapse component.
     * Example: `UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))`*/
@@ -63,11 +60,8 @@ final class UdashCollapse private(
   override def kill(): Unit = {
     super.kill()
     hide()
-    jQSelector().collapse("dispose")
+    render.collapse("dispose")
   }
-
-  private def jQSelector(): UdashCollapseJQuery =
-    jQ(s"#$componentId").asInstanceOf[UdashCollapseJQuery]
 }
 
 object UdashCollapse {
@@ -109,10 +103,5 @@ object UdashCollapse {
     componentId: ComponentId = ComponentId.generate()
   )(content: Binding.NestedInterceptor => Modifier): UdashCollapse = {
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
-  }
-
-  @js.native
-  private trait UdashCollapseJQuery extends JQuery {
-    def collapse(cmd: String): UdashCollapseJQuery = js.native
   }
 }

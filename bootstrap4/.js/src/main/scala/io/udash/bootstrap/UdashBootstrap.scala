@@ -43,6 +43,9 @@ object BootstrapJs {
     val requireBootstrap: BootstrapRequire.type = BootstrapRequire
     jQ(el).asInstanceOf[BootstrapJQuery]
   }
+
+  def jqueryInterface(query: JQuery): BootstrapJQuery = query.asInstanceOf[BootstrapJQuery]
+
   def datepickerInterface(el: dom.Element): DatePickerJQuery = {
     //js.Dynamic.global.jQuery = jQ
     //val requireDatepicker: BootstrapDatepickerRequire.type = BootstrapDatepickerRequire
@@ -52,8 +55,24 @@ object BootstrapJs {
   @js.native
   trait BootstrapJQuery extends JQuery {
     def alert(cmd: String): Unit = js.native
+    def button(cmd: String): Unit = js.native
+    def carousel(options: CarouselOptionsJS): Unit = js.native
+    def carousel(cmd: String): Unit = js.native
+    def carousel(number: Int): Unit = js.native
+    def collapse(cmd: String): Unit = js.native
+    def dropdown(arg: String): Unit = js.native
+    def modal(cmd: String): Unit = js.native
+    def tab(cmd: String): Unit = js.native
     def tooltip(arg: js.Any): Unit = js.native
     def popover(arg: js.Any): Unit = js.native
+  }
+
+  @js.native
+  trait CarouselOptionsJS extends js.Object {
+    var interval: Int = js.native
+    var pause: String = js.native
+    var wrap: Boolean = js.native
+    var keyboard: Boolean = js.native
   }
 
   @js.native

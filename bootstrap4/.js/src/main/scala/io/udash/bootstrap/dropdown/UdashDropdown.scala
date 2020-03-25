@@ -88,8 +88,7 @@ final class UdashDropdown[ItemType, ElemType <: ReadableProperty[ItemType]] priv
     jQSelector().dropdown("dispose")
   }
 
-  private def jQSelector(): UdashDropdownJQuery =
-    jQ(s"#${buttonId.value}").asInstanceOf[UdashDropdownJQuery]
+  private def jQSelector(): BootstrapJs.BootstrapJQuery = jQ(s"#${buttonId.value}")
 }
 
 object UdashDropdown {
