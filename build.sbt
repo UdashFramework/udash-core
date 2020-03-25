@@ -93,6 +93,7 @@ val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / scalaJSStage := FastOptStage,
   requireJsDomEnv in Test := true,
+  npmExtraArgs += "--silent",
   version in installJsdom := "16.2.1",
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
