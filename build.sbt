@@ -1,6 +1,5 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
-import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.JSModuleID
 
 name := "udash"
@@ -94,7 +93,7 @@ val commonJsSettings = commonSettings ++ Seq(
   Compile / emitSourceMaps := true,
   Test / scalaJSStage := FastOptStage,
   requireJsDomEnv in Test := true,
-  version in installJsdom := "15.2.1",
+  version in installJsdom := "16.2.1",
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
@@ -107,11 +106,6 @@ val commonJsSettings = commonSettings ++ Seq(
   LessKeys.compress in Assets := true,
   LessKeys.strictMath in Assets := true,
   LessKeys.verbose in Assets := true,
-)
-
-val testInBrowser = Seq(
-  Test / parallelExecution := false,
-  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
 )
 
 val noPublishSettings = Seq(
@@ -294,7 +288,6 @@ lazy val core = jvmProject(project)
 lazy val `core-js` = jsProjectFor(project, core)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    testInBrowser,
     libraryDependencies ++= Dependencies.coreSjsDeps.value,
   )
 
