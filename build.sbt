@@ -202,6 +202,9 @@ def frontendExecutable(proj: Project)(
           (Assets / WebKeys.webJarsDirectory).value / WebKeys.webModulesLib.value / "font-awesome/webfonts",
           assets / "webfonts"
         )
+        IO.copy(Seq(
+          (Compile / npmInstallDependencies).value / "node_modules/bootstrap/dist/css/bootstrap.css" -> assets / "styles/bootstrap.css"
+        ))
       },
       // a font-awesome WebJar is required on the classpath to execute the copyAssets task
       Compile / copyAssets := (Compile / copyAssets).dependsOn(Assets / WebKeys.webJars).value,
@@ -217,24 +220,39 @@ def frontendExecutable(proj: Project)(
       }.value,
 
       // Compiles JS files without full optimizations
-      compileStatics := (Compile / fastOptJS / target).value / "UdashStatics",
-      compileStatics := compileStatics.dependsOn(Compile / fastOptJS, Compile / compileCss).value,
+      compileStatics := {
+        val sjsFileName = (Compile / fastOptJS).value.data.name.stripSuffix(".js")
+        IO.copyFile(
+          (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js",
+          target.value / staticsRoot / "scripts/frontend.js"
+        )
+        IO.copyFile(
+          (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js.map",
+          target.value / staticsRoot / "scripts/frontend.js.map"
+        )
+        (Compile / fastOptJS / target).value / "UdashStatics"
+      },
+      compileStatics := compileStatics.dependsOn(Compile / fastOptJS / webpack, Compile / compileCss).value,
 
       // Compiles JS files with full optimizations
-      compileAndOptimizeStatics := (Compile / fullOptJS / target).value / "UdashStatics",
-      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-        Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
-      ).value,
+      compileAndOptimizeStatics := {
+        val sjsFileName = (Compile / fullOptJS).value.data.name.stripSuffix(".js")
+        IO.copyFile(
+          (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js",
+          target.value / staticsRoot / "scripts/frontend.js"
+        )
+        IO.copyFile(
+          (Compile / npmUpdate / crossTarget).value / s"$sjsFileName-bundle.js.map",
+          target.value / staticsRoot / "scripts/frontend.js.map"
+        )
+        (Compile / fullOptJS / target).value / "UdashStatics"
+      },
+      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(Compile / fullOptJS / webpack, Compile / compileCss).value,
 
       // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
       skip in (Compile / packageJSDependencies) := true,
       (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
 
-      // Target files for Scala.js plugin
-      Compile / fastOptJS / artifactPath :=
-        (Compile / fastOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
-      Compile / fullOptJS / artifactPath :=
-        (Compile / fullOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
       Compile / packageJSDependencies / artifactPath :=
         (Compile / packageJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js",
       Compile / packageMinifiedJSDependencies / artifactPath :=
