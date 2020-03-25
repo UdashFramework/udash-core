@@ -13,10 +13,8 @@ import scalatags.JsDom.all._
 import scala.concurrent.Future
 
 class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
-  override protected def beforeAll(): Unit = document.body.appendChild(UdashBootstrap.loadFontAwesome())
 
   "Bootstrap icons" should {
-    document.body.appendChild(UdashBootstrap.loadFontAwesome())
 
     "work with .styleIf" in {
       import UdashIcons.FontAwesome.Regular._
@@ -35,7 +33,11 @@ class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
       ))
     }
 
+    //getComputedStyle doesn't work in jsdom
     "apply appropriate FontAwesome Free unicodes to the :before pseudoselector" ignore {
+      document.body.appendChild(UdashBootstrap.loadFontAwesome())
+
+
       Future.sequence(
         Iterator(
           valuesOfType[CssStyle](Brands).iterator,

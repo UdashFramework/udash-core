@@ -142,6 +142,7 @@ object Dependencies {
   val bootstrap4JsDeps = Seq(
     "popper.js" -> "1.16.1",
     "bootstrap" -> bootstrapVersion,
+    //"@fortawesome/fontawesome-free" -> fontAwesomeVersion,
     "tempusdominus-bootstrap-4" -> bootstrap4DatepickerVersion
   )
 
