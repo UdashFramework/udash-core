@@ -3,7 +3,7 @@ package io.udash.utils
 import com.avsystem.commons._
 
 object FilteringUtils {
-  /** Finds the longest lists prefix with equal elements. */
+  /** Finds the longest prefix with equal elements. */
   def findEqPrefix[T](newPath: Iterator[T], previousPath: Iterator[T]): Iterator[T] =
     newPath.zip(previousPath).takeWhile { case (h1, h2) => h1 == h2 }.map(_._1)
 

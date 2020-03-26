@@ -8,8 +8,8 @@ import org.scalajs.dom.Element
 import scala.collection.mutable
 
 /**
-  * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
-  */
+ * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
+ */
 private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views = mutable.ArrayBuffer[View]()
@@ -23,18 +23,14 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     }
 
   private def mergeViews(path: Iterator[View]): Option[View] = {
-    val result = path.nextOpt.toOption
-
-    result.foreach { top =>
+    path.nextOpt.setup(_.foreach { top =>
       val lastElement = path.fold(top) { case (parent, child) =>
         renderChild(parent, Some(child))
         views.append(parent)
         child
       }
       views.append(lastElement)
-    }
-
-    result
+    }).toOption
   }
 
   private def replaceCurrentViews(path: Iterable[View]): Unit = {
@@ -51,12 +47,12 @@ private[udash] class ViewRenderer(rootElement: => Element) {
   }
 
   /**
-    * Updates views hierarchy.
-    * <br/><br/>
-    * Example: <br/>
-    * Current views: A -> B -> C -> D <br/>
-    * subPathToLeave: A -> B <br/>
-    * pathToAdd: E -> F <br/>
+   * Updates views hierarchy.
+   * <br/><br/>
+   * Example: <br/>
+   * Current views: A -> B -> C -> D <br/>
+   * subPathToLeave: A -> B <br/>
+   * pathToAdd: E -> F <br/>
    * <br/>
    * Calls:<br/>
    * A - nothing<br/>
