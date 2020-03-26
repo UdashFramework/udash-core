@@ -5,8 +5,8 @@ import com.avsystem.commons._
 
 import scala.scalajs.js
 
-private[udash]
-object CrossCollections {
+private[udash] object CrossCollections {
+
   import scala.scalajs.js.JSConverters._
 
   def toCrossArray[T](t: Iterable[T]): MBuffer[T] = t.toJSArray

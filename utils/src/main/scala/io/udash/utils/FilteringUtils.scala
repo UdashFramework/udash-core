@@ -1,31 +1,15 @@
 package io.udash.utils
 
-import scala.annotation.tailrec
+import com.avsystem.commons._
 
 object FilteringUtils {
-  /** Finds the longest lists prefix with equal elements. */
-  def findEqPrefix[T](newPath: List[T], previousPath: List[T]): List[T] = {
-    @tailrec
-    def _findEqPrefix(newPath: List[T], previousPath: List[T], subPath: List[T]): List[T] = {
-      (newPath, previousPath) match {
-        case (head1 :: tail1, head2 :: tail2) if head1 == head2 => _findEqPrefix(tail1, tail2, subPath :+ head1)
-        case _ => subPath
-      }
-    }
-
-    _findEqPrefix(newPath, previousPath, Nil)
-  }
+  /** Finds the longest prefix with equal elements. */
+  def findEqPrefix[T](newPath: Iterator[T], previousPath: Iterator[T]): Iterator[T] =
+    newPath.zip(previousPath).takeWhile { case (h1, h2) => h1 == h2 }.map(_._1)
 
   /** Finds @newPath suffix which is different than in @previousPath. */
-  def findDiffSuffix[T](newPath: List[T], previousPath: List[T]): List[T] = {
-    @tailrec
-    def _findDiffSuffix(newPath: List[T], previousPath: List[T], subPath: List[T]): List[T] = (newPath, previousPath) match {
-      case (head1 :: tail1, head2 :: tail2) if subPath == Nil && head1 == head2 => _findDiffSuffix(tail1, tail2, subPath)
-      case (head1 :: tail1, _ :: tail2) => _findDiffSuffix(tail1, tail2, subPath :+ head1)
-      case (head1 :: tail1, Nil) => _findDiffSuffix(tail1, Nil, subPath :+ head1)
-      case _ => subPath
-    }
-
-    _findDiffSuffix(newPath, previousPath, Nil)
-  }
+  def findDiffSuffix[T](newPath: Iterator[T], previousPath: Iterator[T]): Iterator[T] =
+    newPath.map(_.opt).zipAll(previousPath.map(_.opt), Opt.Empty, Opt.Empty).dropWhile { case (h1, h2) =>
+      h1 == h2
+    }.flatMap(_._1)
 }
