@@ -12,12 +12,13 @@ case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.
 
 
 class BootstrapExtView extends View {
+
   import JsDom.all._
 
   private val (staticsDemo, staticsSnippet) = StaticsDemo.demoWithSnippet()
   private val (iconsDemo, iconsSnippet) = IconsDemo.demoWithSnippet()
-  private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
-  private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
+  //private val (datePickerDemo, datePickerSnippet) = DatePickerDemo.demoWithSnippet()
+  //private val (dateRangePickerDemo, dateRangePickerSnippet) = DateRangePickerDemo.demoWithSnippet()
   private val (tableDemo, tableSnippet) = TableDemo.demoWithSnippet()
   private val (dropdownsDemo, dropdownsSnippet) = DropdownsDemo.demoWithSnippet()
   private val (buttonsDemo, buttonsSnippet) = ButtonsDemo.demoWithSnippet()
@@ -74,11 +75,11 @@ class BootstrapExtView extends View {
     iconsSnippet,
     ForceBootstrap(iconsDemo),
     h3("Date Picker"),
-    datePickerSnippet,
-    ForceBootstrap(datePickerDemo),
+    //datePickerSnippet,
+    //ForceBootstrap(datePickerDemo),
     p("It is possible to create a date range selector from two pickers."),
-    dateRangePickerSnippet,
-    ForceBootstrap(dateRangePickerDemo),
+    //dateRangePickerSnippet,
+    //ForceBootstrap(dateRangePickerDemo),
     h3("Tables"),
     tableSnippet,
     ForceBootstrap(tableDemo),
