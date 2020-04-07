@@ -84,7 +84,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
           // Update firstElement
           if (newElementsFlatten.isEmpty && patch.idx == 0)
-            firstElement = root.childNodes(firstIndex + newElementsFlatten.size)
+            firstElement = root.childNodes(firstIndex)
         }
       }
 
