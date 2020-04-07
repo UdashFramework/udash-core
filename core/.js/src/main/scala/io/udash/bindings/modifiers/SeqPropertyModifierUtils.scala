@@ -44,6 +44,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
 
       val firstIndex = indexOf(root.childNodes, firstElement)
+      val allElements = producedElementsCount.sum
       val elementsBefore = producedElementsCount.slice(0, patch.idx).sum
 
       // Add new elements
@@ -73,7 +74,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
             // Replace old head of sequence with placeholder
             firstElementIsPlaceholder = true
             emptyStringNode()
-          }.optIf(patch.clearsProperty)
+          }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size + 1)
           replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), replacement.toSeq)
         }
       }
