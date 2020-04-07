@@ -32,9 +32,9 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     }
   }
 
-  protected def indexOf(nodes: NodeList, node: Node): Int = {
+  @inline private def indexOf(nodes: NodeList, node: Node): Int = {
     var i = 0
-    while (i < nodes.length && nodes(i) != node) i += 1
+    while (i < nodes.length && !nodes(i).eq(node)) i += 1
     i
   }
 
@@ -70,7 +70,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       } else if (patch.removed.nonEmpty) {
         def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
-        val nodesToRemove = (0 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
+        val nodesToRemove = (0 until producedElementsCount.iterator.slice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
 
         val replacement = {
