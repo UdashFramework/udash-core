@@ -70,19 +70,16 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       } else if (patch.removed.nonEmpty) {
         def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
-        // Remove elements from second to the last
-        val nodesToRemove = (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
+        val nodesToRemove = (0 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
-        replace(root)(nodesToRemove, Seq.empty)
 
         val replacement = {
-          // if all elements produced by the binding were removed and none were added, replace old head of sequence with a placeholder
-          // otherwise just remove the last element
+          // if no new elements were added and all old ones are to be removed, add a placeholder
           firstElementIsPlaceholder = true
           emptyStringNode()
-        }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size + 1)
+        }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size)
 
-        replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), replacement.toSeq)
+        replace(root)(nodesToRemove, replacement.toSeq)
       }
 
       firstElement = root.childNodes(firstIndex)
