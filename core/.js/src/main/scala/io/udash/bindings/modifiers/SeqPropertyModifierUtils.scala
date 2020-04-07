@@ -56,14 +56,10 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       if (firstElementIsPlaceholder) {
         if (newElementsFlatten.nonEmpty) {
           // Replace placeholder with first element of sequence
-          replace(root)(Seq(insertBefore), Seq.empty)
-          firstElement = newElementsFlatten.head
+          replace(root)(Seq(firstElement), Seq.empty)
           firstElementIsPlaceholder = false
         }
       } else {
-        // First element of sequence changed
-        if (newElementsFlatten.nonEmpty && patch.idx == 0) firstElement = newElementsFlatten.head
-
         def childToRemoveIdx(elIdx: Int): Int =
           elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
@@ -72,21 +68,17 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
         replace(root)(nodesToRemove, Seq.empty)
 
-        if (patch.clearsProperty) {
-          // Replace old head of sequence with placeholder
-          val newFirstElement = emptyStringNode()
-          replace(root)(Seq(firstElement), Seq(newFirstElement))
-          firstElement = newFirstElement
-          firstElementIsPlaceholder = true
-        } else {
-          // Remove first element from patch.removed sequence
-          if (patch.removed.nonEmpty) replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), Seq.empty)
-
-          // Update firstElement
-          if (newElementsFlatten.isEmpty && patch.idx == 0)
-            firstElement = root.childNodes(firstIndex)
+        if (patch.removed.nonEmpty) {
+          val replacement = {
+            // Replace old head of sequence with placeholder
+            firstElementIsPlaceholder = true
+            emptyStringNode()
+          }.optIf(patch.clearsProperty)
+          replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), replacement.toSeq)
         }
       }
+
+      firstElement = root.childNodes(firstIndex)
 
       val sizeChange = patch.added.size - patch.removed.size
       if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
