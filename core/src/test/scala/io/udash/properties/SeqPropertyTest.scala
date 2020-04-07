@@ -862,7 +862,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.idx should be(4)
       lastPatch.added.head.get should be(2)
       lastPatch.removed.size should be(0)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 4, 6, 8, 2))
 
       listenCalls.clear()
@@ -873,7 +872,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.head.get should be(4)
       lastPatch.removed.last.get should be(8)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 2))
 
       listenCalls.clear()
@@ -884,7 +882,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.head.get should be(12)
       lastPatch.added.last.get should be(16)
       lastPatch.removed.size should be(0)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 12, 14, 16, 2))
 
       listenCalls.clear()
@@ -902,7 +899,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.head.get should be(0)
       lastPatch.removed.last.get should be(2)
-      lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
 

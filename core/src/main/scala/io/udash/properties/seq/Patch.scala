@@ -11,5 +11,4 @@ import io.udash.properties.single.ReadableProperty
  * @param added   Properties added on index `idx`.
  * @tparam P Contained properties type.
  */
-final case class Patch[+P <: ReadableProperty[_]](idx: Int, removed: Seq[P], added: Seq[P], clearsProperty: Boolean)
-  extends AbstractCase
+final case class Patch[+P <: ReadableProperty[_]](idx: Int, removed: Seq[P], added: Seq[P]) extends AbstractCase
