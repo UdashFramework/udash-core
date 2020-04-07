@@ -43,40 +43,46 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       // Clean up nested bindings
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
 
+      //index of the first element produced by the binding
       val firstIndex = indexOf(root.childNodes, firstElement)
-      val allElements = producedElementsCount.sum
-      val elementsBefore = producedElementsCount.slice(0, patch.idx).sum
+
+      //number of nodes produced by properties before patch index
+      val elementsBefore = producedElementsCount.iterator.slice(0, patch.idx).sum
+
+      //total number of produced nodes
+      val allElements = elementsBefore + producedElementsCount.iterator.drop(patch.idx).sum
 
       // Add new elements
       val newElements = patch.added.map(build)
       val newElementsFlatten: Seq[Node] = newElements.flatten
-      val insertBefore = root.childNodes(elementsBefore + firstIndex)
-      if (insertBefore == null) replace(root)(Seq.empty, newElementsFlatten)
-      else insert(root)(insertBefore, newElementsFlatten)
+      root.childNodes(elementsBefore + firstIndex).opt match {
+        case Opt(insertBefore) => insert(root)(insertBefore, newElementsFlatten)
+        case Opt.Empty => replace(root)(Seq.empty, newElementsFlatten)
+      }
 
       if (firstElementIsPlaceholder) {
+        //first element was a placeholder => there's nothing to remove in the patch
         if (newElementsFlatten.nonEmpty) {
-          // Replace placeholder with first element of sequence
+          // there is a new element - remove placeholder
           replace(root)(Seq(firstElement), Seq.empty)
           firstElementIsPlaceholder = false
         }
-      } else {
-        def childToRemoveIdx(elIdx: Int): Int =
-          elIdx + firstIndex + newElementsFlatten.size + elementsBefore
+      } else if (patch.removed.nonEmpty) {
+        def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
         // Remove elements from second to the last
         val nodesToRemove = (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
         replace(root)(nodesToRemove, Seq.empty)
 
-        if (patch.removed.nonEmpty) {
-          val replacement = {
-            // Replace old head of sequence with placeholder
-            firstElementIsPlaceholder = true
-            emptyStringNode()
-          }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size + 1)
-          replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), replacement.toSeq)
-        }
+        val replacement = {
+          // if all elements produced by the binding were removed and none were added, replace old head of sequence with a placeholder
+          // otherwise just remove the last element
+          firstElementIsPlaceholder = true
+          emptyStringNode()
+        }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size + 1)
+
+        replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), replacement.toSeq)
       }
 
       firstElement = root.childNodes(firstIndex)
