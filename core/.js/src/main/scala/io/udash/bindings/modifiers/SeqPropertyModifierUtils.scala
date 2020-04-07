@@ -63,7 +63,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
         def childToRemoveIdx(elIdx: Int): Int =
           elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
-        // Remove elements form second to the last
+        // Remove elements from second to the last
         val nodesToRemove = (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
         replace(root)(nodesToRemove, Seq.empty)
@@ -97,13 +97,6 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       producedElementsCount.append(els.size)
       if (firstElement == null) firstElement = els.head
       replace(root)(Seq.empty, els)
-    }
-
-    if (firstElement == null) {
-      val el = emptyStringNode()
-      firstElement = el
-      replace(root)(Seq.empty, Seq(el))
-      firstElementIsPlaceholder = true
     }
   }
 }
