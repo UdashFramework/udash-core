@@ -55,19 +55,14 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       // Add new elements
       val newElements = patch.added.map(build)
       val newElementsFlatten: Seq[Node] = newElements.flatten
-      root.childNodes(elementsBefore + firstIndex).opt match {
-        case Opt(insertBefore) => insert(root)(insertBefore, newElementsFlatten)
-        case Opt.Empty => replace(root)(Seq.empty, newElementsFlatten)
+      if (newElementsFlatten.nonEmpty) {
+        if (firstElementIsPlaceholder) {
+          replace(root)(Seq(firstElement), newElementsFlatten)
+          firstElementIsPlaceholder = false
+        } else insert(root)(root.childNodes(elementsBefore + firstIndex), newElementsFlatten)
       }
 
-      if (firstElementIsPlaceholder) {
-        //first element was a placeholder => there's nothing to remove in the patch
-        if (newElementsFlatten.nonEmpty) {
-          // there is a new element - remove placeholder
-          replace(root)(Seq(firstElement), Seq.empty)
-          firstElementIsPlaceholder = false
-        }
-      } else if (patch.removed.nonEmpty) {
+      if (patch.removed.nonEmpty) {
         def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
         val nodesToRemove = (0 until producedElementsCount.iterator.slice(patch.idx, patch.idx + patch.removed.size).sum)
