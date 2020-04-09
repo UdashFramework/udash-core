@@ -92,7 +92,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
       !(transformedElements.iterator.map(_.get) sameElements fromOrigin.iterator.map(_.get))) {
       val removed = transformedElements.toVector
       transformedElements = fromOrigin
-      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq, fromOrigin.isEmpty))
+      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq))
       valueChanged()
     }
   }

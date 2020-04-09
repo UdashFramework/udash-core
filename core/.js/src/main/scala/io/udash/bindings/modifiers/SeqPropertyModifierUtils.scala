@@ -32,9 +32,9 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     }
   }
 
-  protected def indexOf(nodes: NodeList, node: Node): Int = {
+  @inline private def indexOf(nodes: NodeList, node: Node): Int = {
     var i = 0
-    while (i < nodes.length && nodes(i) != node) i += 1
+    while (i < nodes.length && !nodes(i).eq(node)) i += 1
     i
   }
 
@@ -43,50 +43,41 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       // Clean up nested bindings
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
 
+      //index of the first element produced by the binding
       val firstIndex = indexOf(root.childNodes, firstElement)
-      val elementsBefore = producedElementsCount.slice(0, patch.idx).sum
+
+      //number of nodes produced by properties before patch index
+      val elementsBefore = producedElementsCount.iterator.slice(0, patch.idx).sum
+
+      //total number of produced nodes
+      val allElements = elementsBefore + producedElementsCount.iterator.drop(patch.idx).sum
 
       // Add new elements
       val newElements = patch.added.map(build)
       val newElementsFlatten: Seq[Node] = newElements.flatten
-      val insertBefore = root.childNodes(elementsBefore + firstIndex)
-      if (insertBefore == null) replace(root)(Seq.empty, newElementsFlatten)
-      else insert(root)(insertBefore, newElementsFlatten)
-
-      if (firstElementIsPlaceholder) {
-        if (newElementsFlatten.nonEmpty) {
-          // Replace placeholder with first element of sequence
-          replace(root)(Seq(insertBefore), Seq.empty)
-          firstElement = newElementsFlatten.head
+      if (newElementsFlatten.nonEmpty) {
+        if (firstElementIsPlaceholder) {
+          replace(root)(Seq(firstElement), newElementsFlatten)
           firstElementIsPlaceholder = false
-        }
-      } else {
-        // First element of sequence changed
-        if (newElementsFlatten.nonEmpty && patch.idx == 0) firstElement = newElementsFlatten.head
-
-        def childToRemoveIdx(elIdx: Int): Int =
-          elIdx + firstIndex + newElementsFlatten.size + elementsBefore
-
-        // Remove elements form second to the last
-        val nodesToRemove = (1 until producedElementsCount.slice(patch.idx, patch.idx + patch.removed.size).sum)
-          .map(idx => root.childNodes(childToRemoveIdx(idx)))
-        replace(root)(nodesToRemove, Seq.empty)
-
-        if (patch.clearsProperty) {
-          // Replace old head of sequence with placeholder
-          val newFirstElement = emptyStringNode()
-          replace(root)(Seq(firstElement), Seq(newFirstElement))
-          firstElement = newFirstElement
-          firstElementIsPlaceholder = true
-        } else {
-          // Remove first element from patch.removed sequence
-          if (patch.removed.nonEmpty) replace(root)(Seq(root.childNodes(childToRemoveIdx(0))), Seq.empty)
-
-          // Update firstElement
-          if (newElementsFlatten.isEmpty && patch.idx == 0)
-            firstElement = root.childNodes(firstIndex + newElementsFlatten.size)
-        }
+        } else insert(root)(root.childNodes(elementsBefore + firstIndex), newElementsFlatten)
       }
+
+      if (patch.removed.nonEmpty) {
+        def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
+
+        val nodesToRemove = (0 until producedElementsCount.iterator.slice(patch.idx, patch.idx + patch.removed.size).sum)
+          .map(idx => root.childNodes(childToRemoveIdx(idx)))
+
+        val replacement = {
+          // if no new elements were added and all old ones are to be removed, add a placeholder
+          firstElementIsPlaceholder = true
+          emptyStringNode()
+        }.optIf(patch.added.isEmpty && allElements == nodesToRemove.size)
+
+        replace(root)(nodesToRemove, replacement.toSeq)
+      }
+
+      firstElement = root.childNodes(firstIndex)
 
       val sizeChange = patch.added.size - patch.removed.size
       if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
@@ -105,13 +96,6 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       producedElementsCount.append(els.size)
       if (firstElement == null) firstElement = els.head
       replace(root)(Seq.empty, els)
-    }
-
-    if (firstElement == null) {
-      val el = emptyStringNode()
-      firstElement = el
-      replace(root)(Seq.empty, Seq(el))
-      firstElementIsPlaceholder = true
     }
   }
 }

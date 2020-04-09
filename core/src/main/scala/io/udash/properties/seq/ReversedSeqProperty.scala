@@ -15,7 +15,6 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
       origin.size - patch.idx - patch.added.size,
       patch.removed.reverse,
       patch.added.reverse,
-      patch.clearsProperty
     )
 
     CrossCollections.replaceSeq(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added)

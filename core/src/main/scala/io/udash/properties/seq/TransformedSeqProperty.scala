@@ -15,7 +15,6 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
       patch.idx,
       transformedElements.slice(patch.idx, patch.idx + patch.removed.size).toSeq,
       patch.added.map(transformElement),
-      patch.clearsProperty
     )
 
     CrossCollections.replaceSeq(transformedElements, patch.idx, patch.removed.length, transPatch.added)
