@@ -13,7 +13,7 @@ import scala.concurrent.Future
 object SttpRestClient {
   def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
-  private final val defaultRequestOptions = RequestOptions(
+  final val defaultRequestOptions = RequestOptions(
     followRedirects = true,
     readTimeout = DefaultReadTimeout,
     maxRedirects = 32, //FollowRedirectsBackend.MaxRedirects
