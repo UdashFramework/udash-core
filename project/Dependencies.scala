@@ -43,7 +43,7 @@ object Dependencies {
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
-  val momentJsVersion = "2.22.2"
+  val momentJsVersion = "2.24.0"
   val highchartsVersion = "5.0.14"
 
   val seleniumVersion = "3.141.59"
@@ -144,14 +144,13 @@ object Dependencies {
   ))
 
   private val jqueryResource = s"$jqueryVersion/jquery.js"
-  private val momentResource = s"$momentJsVersion/min/moment-with-locales.js"
+  private val momentResource = s"$momentJsVersion/moment.js"
   private val bootstrapResource = "bootstrap.js"
 
   val bootstrapJsDeps = Def.setting(Seq[org.scalajs.sbtplugin.JSModuleID](
     "org.webjars" % "jquery" % jqueryVersion / jqueryResource minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrapVersion / bootstrapResource minified "bootstrap.min.js" dependsOn jqueryResource,
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / momentResource
-      minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "Eonasdan-bootstrap-datetimepicker" % bootstrapDatepickerVersion /
       s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.js"
       minified s"$bootstrapDatepickerVersion/js/bootstrap-datetimepicker.min.js"
@@ -169,8 +168,7 @@ object Dependencies {
       minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
       minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / momentResource
-      minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
   ))
