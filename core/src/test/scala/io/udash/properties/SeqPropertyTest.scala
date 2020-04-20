@@ -18,6 +18,9 @@ class SeqPropertyTest extends UdashCoreTest {
     }
   }
 
+  case class D(a: String, b: Boolean)
+  object D extends HasModelPropertyCreator[D]
+
   trait TT {
     def i: Int
     def s: Option[String]
@@ -463,6 +466,25 @@ class SeqPropertyTest extends UdashCoreTest {
       f.nonEmpty should be(false)
     }
 
+    "return filtered version of combined property" in {
+      val p = Property.blank[Option[Int]]
+      val sp = SeqProperty(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+
+      val combined = sp.combineElements(p) { case (x, _) => x }
+      val wtf = combined.filter(_ % 2 == 0)
+
+      combined.get shouldBe sp.get
+      val original = wtf.get
+      original shouldBe Seq(2, 4, 6, 8, 10)
+
+      wtf.listen(_ => println("")) //initialize listeners
+
+      p.touch()
+
+      combined.get shouldBe sp.get
+      wtf.get shouldBe original
+    }
+
     "return filtered version of sequence with ModelProperty" in {
       trait M {
         def x: Int
@@ -676,6 +698,33 @@ class SeqPropertyTest extends UdashCoreTest {
       ensureNoListeners(p)
     }
 
+    "handle subProp change in filtered sequence with listeners" in {
+      val f = Property[D => Boolean](!_.b)
+      val ts = SeqProperty.blank[D]
+      val filtered = ts.filter(f.get)
+      filtered.listen(_ => ())
+
+      val s = Seq(
+        D("A", false),
+        D("B", false),
+        D("C", false),
+        D("D", false),
+        D("E", false)
+      )
+
+      ts.set(s)
+
+      filtered.get shouldBe s
+
+      ts.elemProperties(1).asModel.subProp(_.b).set(true)
+
+      filtered.get shouldBe s.slice(0, 1) ++ s.slice(2, 6)
+
+      ts.elemProperties(1).asModel.subProp(_.b).set(false)
+
+      filtered.get shouldBe s
+    }
+
     "be able to modify after transformation" in {
       val numbers = SeqProperty[Int](1, 2, 3)
       val strings = numbers.bitransformElements(_.toString)(Integer.parseInt)
@@ -813,7 +862,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.idx should be(4)
       lastPatch.added.head.get should be(2)
       lastPatch.removed.size should be(0)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 4, 6, 8, 2))
 
       listenCalls.clear()
@@ -824,7 +872,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.head.get should be(4)
       lastPatch.removed.last.get should be(8)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 2))
 
       listenCalls.clear()
@@ -835,7 +882,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.head.get should be(12)
       lastPatch.added.last.get should be(16)
       lastPatch.removed.size should be(0)
-      lastPatch.clearsProperty should be(false)
       listenCalls shouldBe Seq(Seq(2, 12, 14, 16, 2))
 
       listenCalls.clear()
@@ -853,7 +899,6 @@ class SeqPropertyTest extends UdashCoreTest {
       lastPatch.added.size should be(0)
       lastPatch.removed.head.get should be(0)
       lastPatch.removed.last.get should be(2)
-      lastPatch.clearsProperty should be(true)
       listenCalls.size should be(1)
       listenCalls should contain(Seq())
 

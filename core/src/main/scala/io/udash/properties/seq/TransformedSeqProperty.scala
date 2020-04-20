@@ -8,33 +8,17 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B
 ) extends ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
 
-  private var lastValue: BSeq[A] = _
-  private var transformedLastValue: BSeq[B] = _
-
-  override protected def loadFromOrigin(): BSeq[B] = {
-    if (origin.size != transformedElements.length || origin.get != lastValue) {
-      lastValue = origin.get
-      transformedLastValue = lastValue.map(transformer)
-    }
-    transformedLastValue
-  }
+  override protected def loadFromOrigin(): BSeq[B] = origin.get.map(transformer)
   override protected def elementsFromOrigin(): BSeq[ElemType] = origin.elemProperties.map(transformElement)
   override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType] = {
     val transPatch = Patch[ElemType](
       patch.idx,
-      patch.removed.map(transformElement),
+      transformedElements.slice(patch.idx, patch.idx + patch.removed.size).toSeq,
       patch.added.map(transformElement),
-      patch.clearsProperty
     )
 
     CrossCollections.replaceSeq(transformedElements, patch.idx, patch.removed.length, transPatch.added)
     transPatch
-  }
-
-  override protected def onListenerInit(): Unit = {
-    lastValue = Seq.empty
-    transformedLastValue = Seq.empty
-    super.onListenerInit()
   }
 
   protected def transformElement(el: OrigType): ElemType =
@@ -42,11 +26,10 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
 }
 
 private[properties] final class TransformedSeqProperty[A, B](
-  override protected val origin: SeqProperty[A, Property[A]],
+  origin: SeqProperty[A, Property[A]],
   transformer: A => B, revert: B => A
 ) extends TransformedReadableSeqProperty[A, B, Property[B], Property[A]](origin, transformer)
-    with ForwarderSeqProperty[A, B, Property[B], Property[A]]
-    with AbstractSeqProperty[B, Property[B]] {
+  with AbstractSeqProperty[B, Property[B]] {
 
   override protected def transformElement(el: Property[A]): Property[B] =
     el.bitransform(transformer)(revert)

@@ -57,12 +57,12 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
       }
       if (listenChildren) childrenRegistrations ++= added.iterator.map(p => p -> p.listen(_ => valueChanged()))
       CrossCollections.replaceSeq(children, commonBegin, 0, added)
-      Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp), clearsProperty = false))
+      Some(Patch[ElemType](commonBegin, Seq(), added.map(toElemProp)))
     } else if (transformed.size < current.size) {
       val removed = CrossCollections.slice(children, commonBegin, commonBegin + current.size - transformed.size)
       if (listenChildren) removed.foreach(p => childrenRegistrations.remove(p).get.cancel())
       children.remove(commonBegin, current.size - transformed.size)
-      Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq(), transformed.isEmpty))
+      Some(Patch[ElemType](commonBegin, removed.map(toElemProp).toSeq, Seq()))
     } else None
 
     CallbackSequencer().sequence {

@@ -27,7 +27,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
     ))
   ), missingTranslationError = "ERROR")
 
-  val key0 = TranslationKey.keyX("tr0")
+  val key0 = TranslationKey.key("tr0")
   val key1 = TranslationKey.key1[String]("tr1")
   val key2 = TranslationKey.key2[Int, Double]("tr2")
   val key3 = TranslationKey.key1[Double]("tr3")
@@ -40,26 +40,26 @@ class BindingsTest extends AsyncUdashFrontendTest {
         implicit val lang = Lang("en")
         div(
           "Translation: ",
-          translated(key0()),
-          translated(key0(), rawHtml = true),
-          translated(key1("test")),
-          translated(key2(3, 3.14)),
-          translated(key3(0.99)),
-          translated(key4("test", 1, true, 3.1415)),
-          translated(keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]), rawHtml = true)
+          key0.translated(),
+          key0.translated(rawHtml = true),
+          key1("test").translated(),
+          key2(3, 3.14).translated(),
+          key3(0.99).translated(),
+          key4("test", 1, true, 3.1415).translated(),
+          keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]).translated(rawHtml = true)
         ).render
       }
       val template2 = {
         implicit val lang = Lang("pl")
         div(
           "Translation: ",
-          translated(key0()),
-          translated(key0(), rawHtml = true),
-          translated(key1("test")),
-          translated(key2(3, 3.14)),
-          translated(key3(0.99)),
-          translated(key4("test", 1, true, 3.1415)),
-          translated(keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"), rawHtml = true)
+          key0.translated(),
+          key0.translated(rawHtml = true),
+          key1("test").translated(),
+          key2(3, 3.14).translated(),
+          key3(0.99).translated(),
+          key4("test", 1, true, 3.1415).translated(),
+          keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash").translated(rawHtml = true)
         ).render
       }
 
@@ -123,13 +123,13 @@ class BindingsTest extends AsyncUdashFrontendTest {
       val template = {
         implicit val lang = Lang("en")
         div(
-          translatedAttr(key1("test"), "translation")
+          key1("test").translatedAttr("translation")
         ).render
       }
       val template2 = {
         implicit val lang = Lang("pl")
         div(
-          translatedAttr(key1("test"), "translation")
+          key1("test").translatedAttr("translation")
         ).render
       }
 
@@ -152,26 +152,26 @@ class BindingsTest extends AsyncUdashFrontendTest {
         implicit val langProperty = en
         div(
           "Translation: ",
-          translatedDynamic(key0)(_()),
-          translatedDynamic(key0, rawHtml = true)(_()),
-          translatedDynamic(key1)(key => key("test")),
-          translatedDynamic(key2)(key => key(3, 3.14)),
-          translatedDynamic(key3)(key => key(0.99)),
-          translatedDynamic(key4)(key => key("test", 1, true, 3.1415)),
-          translatedDynamic(keyX, rawHtml = true)(key => key("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]))
+          key0.translatedDynamic(),
+          key0.translatedDynamic(rawHtml = true),
+          key1("test").translatedDynamic(),
+          key2(3, 3.14).translatedDynamic(),
+          key3(0.99).translatedDynamic(),
+          key4("test", 1, true, 3.1415).translatedDynamic(),
+          keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]).translatedDynamic(rawHtml = true),
         ).render
       }
       val template2 = {
         implicit val langProperty = pl
         div(
           "Translation: ",
-          translatedDynamic(key0)(_()),
-          translatedDynamic(key0, rawHtml = true)(_()),
-          translatedDynamic(key1)(key => key("test")),
-          translatedDynamic(key2)(key => key(3, 3.14)),
-          translatedDynamic(key3)(key => key(0.99)),
-          translatedDynamic(key4)(key => key("test", 1, true, 3.1415)),
-          translatedDynamic(keyX, rawHtml = true)(key => key("test", 1.asInstanceOf[Any], true, 3.1415, "Udash"))
+          key0.translatedDynamic(),
+          key0.translatedDynamic(rawHtml = true),
+          key1("test").translatedDynamic(),
+          key2(3, 3.14).translatedDynamic(),
+          key3(0.99).translatedDynamic(),
+          key4("test", 1, true, 3.1415).translatedDynamic(),
+          keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash").translatedDynamic(rawHtml = true),
         ).render
       }
 
@@ -203,13 +203,13 @@ class BindingsTest extends AsyncUdashFrontendTest {
       val template = {
         implicit val langProperty = en
         div(
-          translatedAttrDynamic(key1, "translation")(key => key("test"))
+          key1("test").translatedAttrDynamic("translation")
         ).render
       }
       val template2 = {
         implicit val langProperty = pl
         div(
-          translatedAttrDynamic(key1, "translation")(key => key("test"))
+          key1("test").translatedAttrDynamic("translation")
         ).render
       }
 
@@ -244,7 +244,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
       val el = div(
         repeat(translations)(key =>
-          span(translatedDynamic(key.get)(k => k("test"))).render
+          span(key.get("test").translatedDynamic()).render
         )
       ).render
 
@@ -301,7 +301,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       implicit val en = Lang("en")
       val p: Property[TranslationKey0] = Property[TranslationKey0](null: TranslationKey0)
       val key1 = TranslationKey.key1[String]("tr1")
-      p.set(key1.reduce("test"))
+      p.set(key1("test"))
       retrying(p.get.apply().value.get.get.string should be("Translation test"))
     }
 
@@ -319,7 +319,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
           }) should be(true)
         }
         _ <- Future {
-          p.set(key1.reduce("asd"))
+          p.set(key1("asd"))
         }
         r <- retrying {
           (p.get match {

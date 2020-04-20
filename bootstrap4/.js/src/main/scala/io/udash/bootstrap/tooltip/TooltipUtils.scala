@@ -2,13 +2,10 @@ package io.udash.bootstrap
 package tooltip
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import io.udash.bootstrap.utils.BootstrapTags
-import io.udash.i18n.{LangProperty, TranslationKey, TranslationKey0, TranslationProvider}
 import io.udash.wrappers.jquery._
 import org.scalajs.dom
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.scalajs.js
 import scala.scalajs.js.|
@@ -126,77 +123,6 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
         "trigger" -> trigger.map(_.jsValue).mkString(" ")
       )
     )(el)
-
-  /**
-    * Adds tooltip/popover to provided element with translated content.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/tooltips/">Bootstrap Docs (Tooltip)</a>.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/popovers/">Bootstrap Docs (Popover)</a>.
-    *
-    * @param animation Apply a CSS fade transition to the popover.
-    * @param boundary  Keeps the popover within the bounds of this element.
-    * @param container Appends the popover to a specific element.
-    * @param content   Popover content.
-    * @param delay     Show/hide delay.
-    * @param html      Treat content and title as HTML.
-    * @param offset    Offset of the popover relative to its target.
-    * @param placement Tooltip/popover placement.
-    * @param template  Tooltip/popover template.
-    * @param title     Component title.
-    * @param trigger   Triggers to show/hide tooltip.
-    * @param el        Node which will own the created tooltip/popover.
-    */
-  def i18n(
-    animation: Boolean = true,
-    boundary: String = "scrollParent",
-    container: Option[String] = None,
-    content: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
-    delay: Delay | Long = Delay(0 millis, 0 millis),
-    html: Boolean = false,
-    offset: Int | String = "0",
-    placement: Placement = defaultPlacement,
-    template: Option[String] = None,
-    title: dom.Node => TranslationKey0 = _ => TranslationKey.untranslatable(""),
-    trigger: Seq[Trigger] = defaultTrigger
-  )(el: dom.Node)(implicit langProperty: LangProperty, translationProvider: TranslationProvider): TooltipType = {
-    import scalatags.JsDom.all.stringFrag
-    val tp = apply(
-      animation = animation,
-      boundary = boundary,
-      container = container,
-      content = "".render,
-      delay = delay,
-      html = html,
-      offset = offset,
-      placement = placement,
-      template = template,
-      title = "",
-      trigger = trigger
-    )(el)
-
-    var lastContent = ""
-    var lastTitle = ""
-    def updateContent(): Unit = {
-      implicit val ec: ExecutionContext = com.avsystem.commons.concurrent.RunNowEC
-      for {
-        contentTxt <- content(el)()
-        titleTxt <- title(el)()
-      } yield if (lastTitle != titleTxt.string || lastContent != contentTxt.string) {
-        import io.udash.wrappers.jquery._
-        jQ(el)
-          .attr(BootstrapTags.dataContent.name, contentTxt.string)
-          .attr(BootstrapTags.dataOriginalTitle.name, titleTxt.string)
-
-        lastTitle = titleTxt.string
-        lastContent = contentTxt.string
-
-        tp.reloadContent()
-      }
-    }
-
-    updateContent()
-    tp.listen { case TooltipEvent(_, TooltipEvent.EventType.Show) => updateContent() }
-    tp
-  }
 
   protected def initTooltip(options: js.Dictionary[Any])(el: dom.Node): TooltipType
   protected val defaultPlacement: Placement

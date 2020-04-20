@@ -70,7 +70,7 @@ class TranslationKeyTest extends UdashSharedTest {
 
   "TranslationKey" should {
     "obtain translation from provider" in {
-      getTranslatedString(testKey0()) should be("test0:")
+      getTranslatedString(testKey0) should be("test0:")
       getTranslatedString(testKey1(1)) should be("test1:1")
       getTranslatedString(testKey2(1, "2")) should be("test2:1,2")
       getTranslatedString(testKey3(1, "2", 3)) should be("test3:1,2,3")
@@ -81,21 +81,7 @@ class TranslationKeyTest extends UdashSharedTest {
       getTranslatedString(testKey8(1, "2", 3, "4", 5, "6", 7, "8")) should be("test8:1,2,3,4,5,6,7,8")
       getTranslatedString(testKey9(1, "2", 3, "4", 5, "6", 7, "8", 9)) should be("test9:1,2,3,4,5,6,7,8,9")
       getTranslatedString(testKeyX(1, 2, "3", 4.5)) should be("testX:1,2,3,4.5")
-      getTranslatedString(testKeyU()) should be("testUntranslatable")
-    }
-
-    "obtain translation of reduced key from provider" in {
-      getTranslatedString(testKey1.reduce(1)()) should be("test1:1")
-      getTranslatedString(testKey2.reduce(1, "2")()) should be("test2:1,2")
-      getTranslatedString(testKey3.reduce(1, "2", 3)()) should be("test3:1,2,3")
-      getTranslatedString(testKey4.reduce(1, "2", 3, "4")()) should be("test4:1,2,3,4")
-      getTranslatedString(testKey5.reduce(1, "2", 3, "4", 5)()) should be("test5:1,2,3,4,5")
-      getTranslatedString(testKey6.reduce(1, "2", 3, "4", 5, "6")()) should be("test6:1,2,3,4,5,6")
-      getTranslatedString(testKey7.reduce(1, "2", 3, "4", 5, "6", 7)()) should be("test7:1,2,3,4,5,6,7")
-      getTranslatedString(testKey8.reduce(1, "2", 3, "4", 5, "6", 7, "8")()) should be("test8:1,2,3,4,5,6,7,8")
-      getTranslatedString(testKey9.reduce(1, "2", 3, "4", 5, "6", 7, "8", 9)()) should be("test9:1,2,3,4,5,6,7,8,9")
-      getTranslatedString(testKeyX.reduce(1, 2, "3", 4.5)()) should be("testX:1,2,3,4.5")
-      getTranslatedString(testKeyX.reduce((1, 2, "3", 4.5))()) should be("testX:(1,2,3,4.5)")
+      getTranslatedString(testKeyU) should be("testUntranslatable")
     }
 
     "compile only with valid types" in {
@@ -107,27 +93,27 @@ class TranslationKeyTest extends UdashSharedTest {
     "serialize and deserialize TranslationKey0" in {
       val serialized = write(testKey0)
       val deserialized = read[TranslationKey0](serialized)
-      getTranslatedString(deserialized()) should be(getTranslatedString(testKey0()))
+      getTranslatedString(deserialized) should be(getTranslatedString(testKey0))
     }
 
     "serialize and deserialize Untranslatable" in {
       val serialized = write(testKeyU)
       val deserialized = read[TranslationKey0](serialized)
-      getTranslatedString(deserialized()) should be(getTranslatedString(testKeyU()))
+      getTranslatedString(deserialized) should be(getTranslatedString(testKeyU))
     }
 
     "serialize and deserialize reduced keys" in {
-      val serialized = write(testKey1.reduce(5))
+      val serialized = write(testKey1(5))
       val deserialized = read[TranslationKey0](serialized)
-      getTranslatedString(deserialized()) should be(getTranslatedString(testKey1(5)))
+      getTranslatedString(deserialized) should be(getTranslatedString(testKey1(5)))
 
-      val serialized2 = write(testKey5.reduce(1, "2", 3, "4", 5))
+      val serialized2 = write(testKey5(1, "2", 3, "4", 5))
       val deserialized2 = read[TranslationKey0](serialized2)
-      getTranslatedString(deserialized2()) should be(getTranslatedString(testKey5(1, "2", 3, "4", 5)))
+      getTranslatedString(deserialized2) should be(getTranslatedString(testKey5(1, "2", 3, "4", 5)))
 
-      val serializedX = write(testKeyX.reduce((1, 2, "3", 4.5)))
+      val serializedX = write(testKeyX((1, 2, "3", 4.5)))
       val deserializedX = read[TranslationKey0](serializedX)
-      getTranslatedString(deserializedX()) should be(getTranslatedString(testKeyX((1, 2, "3", 4.5))))
+      getTranslatedString(deserializedX) should be(getTranslatedString(testKeyX((1, 2, "3", 4.5))))
     }
   }
 }

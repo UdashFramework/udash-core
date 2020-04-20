@@ -1,5 +1,6 @@
 package io.udash.routing
 
+import com.avsystem.commons._
 import com.avsystem.commons.misc.AbstractCase
 import com.github.ghik.silencer.silent
 import io.udash._
@@ -9,8 +10,6 @@ import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
 
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.util.Try
 
 final case class StateChangeEvent[S <: State](currentState: S, oldState: S) extends AbstractCase
 
@@ -26,7 +25,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
 
   private val currentStateProp = Property(null: HierarchyRoot)
   private val callbacks = new CallbacksHandler[StateChangeEvent[HierarchyRoot]]
-  private val statesMap = mutable.LinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
+  private val statesMap = MLinkedHashMap.empty[HierarchyRoot, (View, Presenter[_ <: HierarchyRoot])]
 
   /**
    * Handles the URL change. Gets a routing states hierarchy for the provided URL and redraws <b>only</b> changed ViewFactories.
@@ -35,7 +34,7 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
    */
   def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] = Try {
     if (fullReload) {
-      cleanup(statesMap.values)
+      cleanup(statesMap.valuesIterator)
       statesMap.clear()
     }
 
@@ -43,30 +42,31 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     val oldState = currentStateProp.get
     currentStateProp.set(newState)
 
-    val currentStatePath = statesMap.keys.toList
     val newStatePath = getStatePath(Some(newState))
 
-    val samePath = findEqPrefix(newStatePath, currentStatePath)
-    val diffPath = findDiffSuffix(newStatePath, currentStatePath)
+    val samePathSize = findEqPrefix(newStatePath.iterator, statesMap.keysIterator).size
+    val diffPath = findDiffSuffix(newStatePath.iterator, statesMap.keysIterator).toSeq
 
     val (viewsToLeave, viewsToAdd) = {
-      val toUpdateStatesSize = getUpdatablePathSize(diffPath, statesMap.keys.slice(samePath.size, statesMap.size).toList)
-      val toRemoveStates = statesMap.slice(samePath.size + toUpdateStatesSize, statesMap.size)
-      cleanup(toRemoveStates.values)
+      val toUpdateStatesSize = getUpdatablePathSize(diffPath.iterator, statesMap.slice(samePathSize, statesMap.size).keysIterator)
+      cleanup(statesMap.slice(samePathSize + toUpdateStatesSize, statesMap.size).valuesIterator) //cleanup removed states
 
       val oldViewFactories =
-        newStatePath
-          .slice(samePath.size, samePath.size + toUpdateStatesSize)
-          .zip(statesMap.slice(samePath.size, samePath.size + toUpdateStatesSize).values)
-      var i = samePath.size
+        newStatePath.view.slice(samePathSize, samePathSize + toUpdateStatesSize).iterator
+          .zip(statesMap.slice(samePathSize, samePathSize + toUpdateStatesSize).valuesIterator)
+      var i = samePathSize
       statesMap.retain { (_, _) =>
         i -= 1
         i >= 0
       }: @silent("deprecated")
       statesMap ++= oldViewFactories
 
-      val viewsToLeave = statesMap.values.map(_._1).toList
-      val views = resolvePath(diffPath.slice(toUpdateStatesSize, diffPath.size))
+      val viewsToLeave = statesMap.values.map(_._1).iterator
+      val views = diffPath.view.slice(toUpdateStatesSize, diffPath.size).iterator.map { state =>
+        val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
+        statesMap(state) = (view, presenter)
+        view
+      }.toList
       (viewsToLeave, views)
     }
 
@@ -115,28 +115,16 @@ class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCre
     case None => acc
   }
 
-  @tailrec
-  private def getUpdatablePathSize(path: List[HierarchyRoot], oldPath: List[HierarchyRoot], acc: Int = 0): Int = {
-    (path, oldPath) match {
-      case (head1 :: tail1, head2 :: tail2)
-        if viewFactoryRegistry.matchStateToResolver(head1) == viewFactoryRegistry.matchStateToResolver(head2) =>
-        getUpdatablePathSize(tail1, tail2, acc + 1)
-      case _ => acc
-    }
-  }
+  private def getUpdatablePathSize(path: Iterator[HierarchyRoot], oldPath: Iterator[HierarchyRoot]): Int =
+    path.zip(oldPath).takeWhile {
+      case (h1, h2) => viewFactoryRegistry.matchStateToResolver(h1) == viewFactoryRegistry.matchStateToResolver(h2)
+    }.length
 
-  private def cleanup(state: Iterable[(View, Presenter[_])]): Unit = {
+  private def cleanup(state: Iterator[(View, Presenter[_])]): Unit = {
     state.foreach { case (view, presenter) =>
       Try(view.onClose()).failed.foreach(logger.warn("Error closing view.", _))
       Try(presenter.onClose()).failed.foreach(logger.warn("Error closing presenter.", _))
     }
   }
 
-  private def resolvePath(path: List[HierarchyRoot]): List[View] = {
-    path.map { state =>
-      val (view, presenter) = viewFactoryRegistry.matchStateToResolver(state).create()
-      statesMap(state) = (view, presenter)
-      view
-    }
-  }
 }

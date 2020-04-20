@@ -30,27 +30,27 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
       ul(
         li(
           "auth.loginLabel: ",
-          translated(Translations.auth.loginLabel())
+          Translations.auth.loginLabel.translated()
         ),
         li(
           "auth.passwordLabel: ",
-          translated(Translations.auth.passwordLabel())
+          Translations.auth.passwordLabel.translated()
         ),
         li(
           "auth.login.buttonLabel: ",
-          translated(Translations.auth.login.buttonLabel())
+          Translations.auth.login.buttonLabel.translated()
         ),
         li(
           "auth.login.retriesLeft: ",
-          translated(Translations.auth.login.retriesLeft(3))
+          Translations.auth.login.retriesLeft(3).translated()
         ),
         li(
           "auth.login.retriesLeftOne: ",
-          translated(Translations.auth.login.retriesLeftOne())
+          Translations.auth.login.retriesLeftOne.translated()
         ),
         li(
           "auth.register.buttonLabel: ",
-          translated(Translations.auth.register.buttonLabel())
+          Translations.auth.register.buttonLabel.translated()
         )
       )
     )

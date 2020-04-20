@@ -1,7 +1,6 @@
 package io.udash.properties.seq
 
 import com.avsystem.commons._
-import io.udash.properties._
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
@@ -25,8 +24,7 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
     val added = updatedPart(patch.idx)
     if (added.nonEmpty || removed.nonEmpty) {
       CrossCollections.replaceSeq(children, patch.idx, removed.size, added)
-      val mappedPatch = Patch(patch.idx, removed.toSeq, added, patch.clearsProperty)
-      fireElementsListeners(mappedPatch)
+      fireElementsListeners(Patch(patch.idx, removed.toSeq, added))
       valueChanged()
     }
   }
