@@ -13,7 +13,7 @@ import scala.concurrent.Future
 object SttpRestClient {
   def defaultBackend(): SttpBackend[Future, Nothing] = DefaultSttpBackend()
 
-  final val defaultRequestOptions = RequestOptions(
+  final val DefaultRequestOptions = RequestOptions(
     followRedirects = true,
     readTimeout = DefaultReadTimeout,
     maxRedirects = 32, //FollowRedirectsBackend.MaxRedirects
@@ -27,7 +27,7 @@ object SttpRestClient {
     */
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
     baseUri: String,
-    options: RequestOptions = defaultRequestOptions
+    options: RequestOptions = DefaultRequestOptions
   )(implicit backend: SttpBackend[Future, Nothing]): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri, options))
 
@@ -35,7 +35,7 @@ object SttpRestClient {
     * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
     * a specified base URI using default HTTP client implementation (sttp).
     */
-  def asHandleRequest(baseUri: String, options: RequestOptions = defaultRequestOptions)(
+  def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
     implicit backend: SttpBackend[Future, Nothing]
   ): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri", options)
