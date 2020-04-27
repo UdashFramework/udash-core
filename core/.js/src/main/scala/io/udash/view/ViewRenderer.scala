@@ -33,10 +33,9 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     }).toOption
 
   private def replaceCurrentViews(path: Iterable[View]): Unit = {
-    val rootView = mergeViews(path.iterator)
-
     views.clear()
-    views.appendAll(path)
+
+    val rootView = mergeViews(path.iterator)
 
     // Clear root element
     while (endpoint.firstChild != null) endpoint.removeChild(endpoint.firstChild)
@@ -63,7 +62,6 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    */
   def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
     val currentViewsToLeaveSize = findEqPrefix(subPathToLeave, views.iterator).size
-
     if (currentViewsToLeaveSize == 0) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
       replaceCurrentViews(pathToAdd)
@@ -72,9 +70,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       views.trimEnd(removedViews)
       val rootView = views.last
       val rootViewToAttach = mergeViews(pathToAdd.iterator)
-      if (removedViews > 0 || rootViewToAttach.isDefined) {
-        renderChild(rootView, rootViewToAttach)
-      }
+      if (removedViews > 0 || rootViewToAttach.isDefined) renderChild(rootView, rootViewToAttach)
     }
   }
 }
