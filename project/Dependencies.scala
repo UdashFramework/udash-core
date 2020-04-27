@@ -5,7 +5,7 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.10"
+  val versionOfScala = "2.12.11"
   val silencerVersion = "1.6.0"
   val collectionCompatVersion = "2.1.6"
 
@@ -44,7 +44,7 @@ object Dependencies {
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.1.2"
-  val momentJsVersion = "2.22.2"
+  val momentJsVersion = "2.24.0"
 
   val seleniumVersion = "3.141.59"
   val scalaJsBenchmarkVersion = "0.3.0-RC1"
@@ -144,7 +144,7 @@ object Dependencies {
   ))
 
   private val jqueryResource = s"$jqueryVersion/jquery.js"
-  private val momentResource = s"$momentJsVersion/min/moment-with-locales.js"
+  private val momentResource = s"$momentJsVersion/moment.js"
   private val bootstrap4Resource = "js/bootstrap.bundle.js"
 
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
@@ -152,8 +152,7 @@ object Dependencies {
       minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
       minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
-    "org.webjars.bower" % "momentjs" % s"$momentJsVersion" / momentResource
-      minified s"$momentJsVersion/min/moment-with-locales.min.js",
+    "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
   ))

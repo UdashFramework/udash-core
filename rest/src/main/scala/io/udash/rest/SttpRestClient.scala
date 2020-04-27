@@ -16,23 +16,37 @@ object SttpRestClient {
 
   def defaultBackend(): SttpBackend[Future, Nothing, Nothing] = DefaultSttpBackend()
 
+  final val DefaultRequestOptions = RequestOptions(
+    followRedirects = true,
+    readTimeout = DefaultReadTimeout,
+    maxRedirects = 32, //FollowRedirectsBackend.MaxRedirects
+    redirectToGet = false
+  )
+
   /**
    * Creates a client instance of some REST API trait which translates method calls into HTTP requests
    * to given URI using STTP.
    */
-  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](baseUri: String)(
-    implicit backend: SttpBackend[Future, Nothing, Nothing]
-  ): RestApi =
-    RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri))
+  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
+    baseUri: String,
+    options: RequestOptions = DefaultRequestOptions
+  )(implicit backend: SttpBackend[Future, Nothing, Nothing]): RestApi =
+    RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri, options))
 
   /**
    * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
    * a specified base URI using default HTTP client implementation (sttp).
    */
-  def asHandleRequest(baseUri: String)(implicit backend: SttpBackend[Future, Nothing, Nothing]): RawRest.HandleRequest =
-    asHandleRequest(uri"$baseUri")
+  def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
+    implicit backend: SttpBackend[Future, Nothing, Nothing]
+  ): RawRest.HandleRequest =
+    asHandleRequest(uri"$baseUri", options)
 
-  private def toSttpRequest(baseUri: Uri, request: RestRequest): Request[Array[Byte], Nothing] = {
+  private def toSttpRequest(
+    baseUri: Uri,
+    request: RestRequest,
+    options: RequestOptions
+  ): Request[Array[Byte], Nothing] = {
     val uri = baseUri |>
       (u => u.copy(pathSegments = u.pathSegments ++
         request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard)))) |>
@@ -60,6 +74,7 @@ object SttpRestClient {
         .headers(contentHeaders)
         .headers(paramHeaders: _*)
         .headers(cookieHeaders: _*)
+        .copy(options = options)
 
     val bodyRequest = request.body match {
       case HttpBody.Empty => paramsRequest
@@ -88,9 +103,11 @@ object SttpRestClient {
       }
     )
 
-  private def asHandleRequest(baseUri: Uri)(implicit backend: SttpBackend[Future, Nothing, Nothing]): RawRest.HandleRequest =
+  private def asHandleRequest(baseUri: Uri, options: RequestOptions)(
+    implicit backend: SttpBackend[Future, Nothing, Nothing]
+  ): RawRest.HandleRequest =
     RawRest.safeHandle(request => {
-      val sttpReq = toSttpRequest(baseUri, request)
+      val sttpReq = toSttpRequest(baseUri, request, options)
       callback =>
         sttpReq.send().onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
     })
