@@ -8,6 +8,7 @@ import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
+import io.udash.view.ViewRenderer
 
 import scala.annotation.tailrec
 
@@ -17,7 +18,7 @@ final case class StateChangeEvent[S <: State](currentState: S, oldState: S) exte
  * RoutingEngine handles URL changes by resolving application [[io.udash.core.State]] with
  * matching [[io.udash.core.ViewFactory]]s and rendering views via passed [[io.udash.ViewRenderer]].
  */
-class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreator](
+private[udash] final class RoutingEngine[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
   viewRenderer: ViewRenderer

@@ -6,17 +6,17 @@ import scala.collection.mutable
 import scala.util.{Failure, Try}
 
 /**
-  * Helper class for callbacks handling.
-  * The callbacks are executed in order of registration.
-  * Each callback is executed once, it swallows exceptions thrown in callbacks.
-  */
-class CallbacksHandler[ItemType] extends CrossLogging {
+ * Helper class for callbacks handling.
+ * The callbacks are executed in order of registration.
+ * Each callback is executed once, it swallows exceptions thrown in callbacks.
+ */
+final class CallbacksHandler[ItemType] extends CrossLogging {
   type CallbackType = PartialFunction[ItemType, Any]
 
   private val callbacks: mutable.Set[CallbackType] = mutable.LinkedHashSet.empty
 
   /** Registers callback and returns `Registration`.
-    * Registration operations don't preserve callbacks order. */
+   * Registration operations don't preserve callbacks order. */
   def register(callback: CallbackType): Registration = callbacks.synchronized {
     callbacks += callback
     new SetRegistration(callbacks, callback)

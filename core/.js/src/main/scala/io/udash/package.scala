@@ -33,9 +33,6 @@ package object udash
   type FileUploader = io.udash.utils.FileUploader
   final val FileUploader = io.udash.utils.FileUploader
 
-  // View
-  type ViewRenderer = io.udash.view.ViewRenderer
-
   type ComponentId = io.udash.component.ComponentId
   final val ComponentId = io.udash.component.ComponentId
 }

@@ -1,6 +1,9 @@
 package io.udash.view
 
+import com.avsystem.commons._
 import io.udash.testing.{TestFinalView, TestView, UdashFrontendTest}
+import org.scalactic.source.Position
+import org.scalajs.dom
 
 class ViewRendererTest extends UdashFrontendTest {
   "ViewRenderer" should {
@@ -123,39 +126,28 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewC.renderingCounter should be(1)
     }
 
-    "handle adding more than one view to existing path and rerendering of the same path" in {
-      val renderer = new ViewRenderer(emptyComponent())
+    def testReplace(endpoint: dom.Element)(implicit position: Position) = {
+      val renderer = new ViewRenderer(endpoint)
 
       val rootView = new TestView
-      val childViewA = new TestView
-      val childViewB = new TestView
-      val childViewC = new TestView
+      val rootView2 = new TestView
 
       renderer.renderView(Iterator.empty, rootView :: Nil)
-      renderer.renderView(Iterator(rootView), childViewA :: childViewB :: childViewC :: Nil)
 
-      rootView.lastChild should be(childViewA)
-      childViewA.lastChild should be(childViewB)
-      childViewB.lastChild should be(childViewC)
-      childViewC.lastChild should be(null)
+      endpoint.children.length shouldBe 1
+      val first = endpoint.lastChild
 
-      rootView.renderingCounter should be(1)
-      childViewA.renderingCounter should be(1)
-      childViewB.renderingCounter should be(1)
-      childViewC.renderingCounter should be(1)
+      renderer.renderView(Iterator.empty, rootView2 :: Nil)
 
-      renderer.renderView(Iterator(rootView, childViewA, childViewB, childViewC), Nil)
-
-      rootView.lastChild should be(childViewA)
-      childViewA.lastChild should be(childViewB)
-      childViewB.lastChild should be(childViewC)
-      childViewC.lastChild should be(null)
-
-      rootView.renderingCounter should be(1)
-      childViewA.renderingCounter should be(1)
-      childViewB.renderingCounter should be(1)
-      childViewC.renderingCounter should be(1)
+      endpoint.children.length shouldBe 1
+      endpoint.lastChild should not be first
     }
+
+    "handle replacing the whole hierarchy" in testReplace(emptyComponent())
+
+    "handle non-empty endpoint" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createElement("span"))))
+
+    "handle endpoint with non-element node" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createTextNode("lorem ipsum"))))
 
     "not try to call renderChild on non-container view" in {
       val renderer = new ViewRenderer(emptyComponent())

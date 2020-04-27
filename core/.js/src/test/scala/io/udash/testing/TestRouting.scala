@@ -9,7 +9,7 @@ trait TestRouting {
   var viewFactory: TestViewFactory[ErrorState.type] = _
   var vpRegistry: TestViewFactoryRegistry = _
   var renderer: TestViewRenderer = _
-  var routingEngine: RoutingEngine[TestState] = _
+  private[udash] var routingEngine: RoutingEngine[TestState] = _
 
   protected final def initTestRouting(routing: TestRoutingRegistry = new TestRoutingRegistry,
     state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty

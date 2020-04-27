@@ -22,7 +22,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
     }
 
-  private def mergeViews(path: Iterator[View]): Option[View] = {
+  private def mergeViews(path: Iterator[View]): Option[View] =
     path.nextOpt.setup(_.foreach { top =>
       val lastElement = path.fold(top) { case (parent, child) =>
         renderChild(parent, Some(child))
@@ -31,7 +31,6 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       }
       views.append(lastElement)
     }).toOption
-  }
 
   private def replaceCurrentViews(path: Iterable[View]): Unit = {
     val rootView = mergeViews(path.iterator)
@@ -40,8 +39,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     views.appendAll(path)
 
     // Clear root element
-    for (_ <- 0 until endpoint.childElementCount)
-      endpoint.removeChild(endpoint.childNodes(0))
+    while (endpoint.firstChild != null) endpoint.removeChild(endpoint.firstChild)
 
     rootView.foreach(_.getTemplate.applyTo(endpoint))
   }
