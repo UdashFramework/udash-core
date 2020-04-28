@@ -1,6 +1,7 @@
 package io.udash.testing
 
 import io.udash._
+import org.scalajs.dom
 
 class TestViewFactory[T <: TestState] extends ViewFactory[T] {
   val view = new TestView
@@ -26,9 +27,12 @@ class TestView extends ContainerView {
 
   override def getTemplate: Modifier = {
     renderingCounter += 1
-    div(
-      toString,
-      childViewContainer
+    Seq[Modifier](
+      div(
+        toString,
+        childViewContainer
+      ),
+      dom.document.createTextNode(toString),
     )
   }
 
