@@ -5,7 +5,7 @@ import io.udash.testing._
 class ApplicationTest extends UdashFrontendTest with TestRouting {
 
   "Application" should {
-    initTestRouting()
+    initTestRouting(default = () => new TestViewFactory[TestState])
     val initUrl = Url("/")
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
     val app = new Application[TestState](routing, vpRegistry, urlProvider)
@@ -16,7 +16,6 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
       urlProvider.changeListeners.size should be(1)
       routing.urlsHistory should contain(initUrl)
       vpRegistry.statesHistory should contain(RootState(None))
-      viewFactory.presenter.lastHandledState should be(RootState(None))
     }
 
     "change URL basing on state" in {

@@ -74,21 +74,31 @@ trait ContainerView extends View {
   /** Default implementation renders child views inside this element. */
   protected val childViewContainer: Element = div().render
 
-  /**
-    * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
-    * the parent view. <br/><br/>
-    *
-    * <b>This method can receive `None` as "view" argument, then previous child view should be removed.</b>
-    *
-    * The default implementation removes everything from `childViewContainer` and renders new subview inside.
-    *
-    * @param view view which origins from child
-    */
-  def renderChild(view: Option[View]): Unit = {
-    while (childViewContainer.childElementCount > 0) {
+  protected def clearChildViewContainer(): Unit = {
+    while (childViewContainer.childElementCount > 0) { //todo
       childViewContainer.removeChild(childViewContainer.firstChild)
     }
-    view.foreach(_.getTemplate.applyTo(childViewContainer))
+  }
+
+  /**
+   * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
+   * the parent view. <br/><br/>
+   *
+   * <b>This method can receive `None` as "view" argument, then previous child view should be removed.</b>
+   *
+   * The default implementation removes everything from `childViewContainer` and renders new subview inside.
+   *
+   * @param view view which origins from child
+    */
+  def renderChild(view: Option[View]): Unit = {
+    clearChildViewContainer()
+    view.foreach { view =>
+      view match {
+        case container: ContainerView => container.clearChildViewContainer()
+        case _ =>
+      }
+      view.getTemplate.applyTo(childViewContainer)
+    }
   }
 }
 
