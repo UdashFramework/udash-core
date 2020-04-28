@@ -74,11 +74,9 @@ trait ContainerView extends View {
   /** Default implementation renders child views inside this element. */
   protected val childViewContainer: Element = div().render
 
-  protected def clearChildViewContainer(): Unit = {
-    while (childViewContainer.childElementCount > 0) { //todo
+  protected def clearChildViewContainer(): Unit =
+    while (childViewContainer.firstChild != null)
       childViewContainer.removeChild(childViewContainer.firstChild)
-    }
-  }
 
   /**
    * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
