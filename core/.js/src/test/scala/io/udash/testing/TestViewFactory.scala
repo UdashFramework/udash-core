@@ -20,13 +20,16 @@ class TestView extends ContainerView {
   var closed = false
 
   override def renderChild(view: Option[View]): Unit = {
-    view.foreach(_.getTemplate)
+    super.renderChild(view)
     lastChild = view.orNull
   }
 
   override def getTemplate: Modifier = {
     renderingCounter += 1
-    div().render
+    div(
+      toString,
+      childViewContainer
+    )
   }
 
   override def onClose(): Unit = {
@@ -40,7 +43,7 @@ class TestFinalView extends View {
 
   override def getTemplate: Modifier = {
     renderingCounter += 1
-    div().render
+    span(toString)
   }
 }
 
