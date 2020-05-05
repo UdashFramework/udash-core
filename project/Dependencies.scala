@@ -13,20 +13,20 @@ object Dependencies {
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
 
-  val scalaJsDomVersion = "0.9.8"
-  val scalaTagsVersion = "0.9.0"
+  val scalaJsDomVersion = "1.0.0"
+  val scalaTagsVersion = "0.9.1"
   val scalaCssVersion = "0.6.0"
 
   val servletVersion = "4.0.1"
   val avsCommonsVersion = "2.0.0-M6"
 
   val atmosphereJSVersion = "2.3.8"
-  val atmosphereVersion = "2.5.13"
+  val atmosphereVersion = "2.5.14"
 
   val upickleVersion = "1.1.0" // Tests only
   val circeVersion = "0.13.0" // Tests only
   val circeDerivationVersion = "0.13.0-M4" // Tests only
-  val monixVersion = "3.2.0" // Tests only
+  val monixVersion = "3.2.1" // Tests only
 
   val sttpVersion = "2.1.0-RC1"
 
@@ -34,7 +34,7 @@ object Dependencies {
 
   val jettyVersion = "9.4.28.v20200408"
   val typesafeConfigVersion = "1.4.0"
-  val flexmarkVersion = "0.61.20"
+  val flexmarkVersion = "0.61.26"
   val logbackVersion = "1.2.3"
   val janinoVersion = "3.1.2"
   val fontAwesomeVersion = "5.10.1"
