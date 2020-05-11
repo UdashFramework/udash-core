@@ -10,7 +10,10 @@ class UrlLoggingTest extends AsyncUdashFrontendTest with TestRouting {
   "UrlLogging" should {
     "call logging impl on url change" in {
       val urlWithRef = ListBuffer.empty[(String, Option[String])]
-      initTestRouting()
+
+      new TestViewFactory[TestState]: ViewFactory[_ <: TestState]
+
+      initTestRouting(default = () => new TestViewFactory[TestState])
       val initUrl = Url("/")
       val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
       val app = new Application[TestState](routing, vpRegistry, urlProvider) with UrlLogging[TestState] {

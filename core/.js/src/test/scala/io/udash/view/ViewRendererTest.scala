@@ -1,6 +1,9 @@
 package io.udash.view
 
+import com.avsystem.commons._
 import io.udash.testing.{TestFinalView, TestView, UdashFrontendTest}
+import org.scalactic.source.Position
+import org.scalajs.dom
 
 class ViewRendererTest extends UdashFrontendTest {
   "ViewRenderer" should {
@@ -123,39 +126,52 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewC.renderingCounter should be(1)
     }
 
-    "handle adding more than one view to existing path and rerendering of the same path" in {
-      val renderer = new ViewRenderer(emptyComponent())
+    def testReplace(endpoint: dom.Element)(implicit position: Position) = {
+      val renderer = new ViewRenderer(endpoint)
 
       val rootView = new TestView
-      val childViewA = new TestView
-      val childViewB = new TestView
-      val childViewC = new TestView
+      val rootView2 = new TestView
 
       renderer.renderView(Iterator.empty, rootView :: Nil)
-      renderer.renderView(Iterator(rootView), childViewA :: childViewB :: childViewC :: Nil)
 
-      rootView.lastChild should be(childViewA)
-      childViewA.lastChild should be(childViewB)
-      childViewB.lastChild should be(childViewC)
-      childViewC.lastChild should be(null)
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      val first = endpoint.firstChild
+      val last = endpoint.lastChild
+      val content = endpoint.outerHTML
 
-      rootView.renderingCounter should be(1)
-      childViewA.renderingCounter should be(1)
-      childViewB.renderingCounter should be(1)
-      childViewC.renderingCounter should be(1)
+      renderer.renderView(Iterator.empty, rootView2 :: Nil)
 
-      renderer.renderView(Iterator(rootView, childViewA, childViewB, childViewC), Nil)
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      val first2 = endpoint.firstChild
+      val last2 = endpoint.lastChild
+      val content2 = endpoint.outerHTML
+      first2 should not be first
+      last2 should not be last
+      content2 should not be content
 
-      rootView.lastChild should be(childViewA)
-      childViewA.lastChild should be(childViewB)
-      childViewB.lastChild should be(childViewC)
-      childViewC.lastChild should be(null)
+      renderer.renderView(Iterator(rootView2), rootView :: Nil)
 
-      rootView.renderingCounter should be(1)
-      childViewA.renderingCounter should be(1)
-      childViewB.renderingCounter should be(1)
-      childViewC.renderingCounter should be(1)
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      endpoint.firstChild should not be first
+      endpoint.lastChild should not be last
+      endpoint.outerHTML should not be markup
+
+      renderer.renderView(Iterator(rootView2), Nil)
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      endpoint.firstChild shouldBe first2
+      endpoint.lastChild shouldBe last2
+      endpoint.outerHTML shouldBe content2
     }
+
+    "handle replacing the whole hierarchy" in testReplace(emptyComponent())
+
+    "handle non-empty endpoint" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createElement("span"))))
+
+    "handle endpoint with non-element node" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createTextNode("lorem ipsum"))))
 
     "not try to call renderChild on non-container view" in {
       val renderer = new ViewRenderer(emptyComponent())

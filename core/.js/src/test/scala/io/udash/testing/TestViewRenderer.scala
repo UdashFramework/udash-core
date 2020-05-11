@@ -2,6 +2,7 @@ package io.udash.testing
 
 import com.avsystem.commons._
 import io.udash._
+import io.udash.view.ViewRenderer
 
 class TestViewRenderer extends ViewRenderer(null) {
   val views = MArrayBuffer[View]()

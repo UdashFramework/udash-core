@@ -2,8 +2,9 @@ package io.udash
 
 import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
-import io.udash.routing.StateChangeEvent
+import io.udash.routing.{RoutingEngine, StateChangeEvent}
 import io.udash.utils.CallbacksHandler
+import io.udash.view.ViewRenderer
 import org.scalajs.dom.Element
 
 /**
