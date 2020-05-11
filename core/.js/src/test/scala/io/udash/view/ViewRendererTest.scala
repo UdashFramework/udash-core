@@ -134,13 +134,37 @@ class ViewRendererTest extends UdashFrontendTest {
 
       renderer.renderView(Iterator.empty, rootView :: Nil)
 
+      endpoint.childNodes.length shouldBe 2
       endpoint.children.length shouldBe 1
-      val first = endpoint.lastChild
+      val first = endpoint.firstChild
+      val last = endpoint.lastChild
+      val content = endpoint.outerHTML
 
       renderer.renderView(Iterator.empty, rootView2 :: Nil)
 
+      endpoint.childNodes.length shouldBe 2
       endpoint.children.length shouldBe 1
-      endpoint.lastChild should not be first
+      val first2 = endpoint.firstChild
+      val last2 = endpoint.lastChild
+      val content2 = endpoint.outerHTML
+      first2 should not be first
+      last2 should not be last
+      content2 should not be content
+
+      renderer.renderView(Iterator(rootView2), rootView :: Nil)
+
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      endpoint.firstChild should not be first
+      endpoint.lastChild should not be last
+      endpoint.outerHTML should not be markup
+
+      renderer.renderView(Iterator(rootView2), Nil)
+      endpoint.childNodes.length shouldBe 2
+      endpoint.children.length shouldBe 1
+      endpoint.firstChild shouldBe first2
+      endpoint.lastChild shouldBe last2
+      endpoint.outerHTML shouldBe content2
     }
 
     "handle replacing the whole hierarchy" in testReplace(emptyComponent())
