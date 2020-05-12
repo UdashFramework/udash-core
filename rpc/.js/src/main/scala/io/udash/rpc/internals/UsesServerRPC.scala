@@ -86,7 +86,7 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
         pendingCalls.put(callId, promise)
         dom.window.setTimeout(
           () => handleResponse(RpcResponseException("Request timeout", UsesServerRPC.CallTimeout(callTimeout), callId)),
-          callTimeout.toMillis
+          callTimeout.toMillis.toDouble
         )
       }.future
 
