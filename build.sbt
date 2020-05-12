@@ -1,8 +1,8 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
-//import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
-import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
+import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 
 name := "udash"
@@ -95,13 +95,12 @@ val commonSettings = Seq(
 val commonJsSettings = commonSettings ++ Seq(
   Test / scalaJSStage := FastOptStage,
   Test / scalaJSUseMainModuleInitializer := false,
-  //Test / jsEnv := new JSDOMNodeJSEnv,
+  Test / jsEnv := new JSDOMNodeJSEnv,
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
-  scalacOptions += "-P:scalajs:sjsDefinedByDefault",
 
   //library CSS settings
   LessKeys.cleancss in Assets := true,
@@ -112,7 +111,7 @@ val commonJsSettings = commonSettings ++ Seq(
 
 val testInBrowser = Seq(
   Test / parallelExecution := false,
-  //Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
+  Test / jsEnv := new SeleniumJSEnv(browserCapabilities),
 )
 
 val noPublishSettings = Seq(
@@ -231,9 +230,9 @@ def frontendExecutable(proj: Project)(
         Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
       ).value,
 
-      //      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
-      //      skip in (Compile / packageJSDependencies) := true,
-      //      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
+      // force fullOpt dependencies generation after fastOpt deps generation
+      packageMinifiedJSDependencies in Compile :=
+        (packageMinifiedJSDependencies in Compile).dependsOn(packageJSDependencies in Compile).value,
 
       // Target files for Scala.js plugin
       Compile / fastOptJS / artifactPath :=
@@ -361,14 +360,14 @@ lazy val bootstrap4 = jsProject(project)
     jsDependencies ++= Dependencies.bootstrap4JsDeps.value
   )
 
-lazy val benchmarks = jsProject(project)
-  .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-  .settings(
-    noPublishSettings,
-
-    libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
-    Compile / scalaJSUseMainModuleInitializer := true,
-  )
+//lazy val benchmarks = jsProject(project)
+//  .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+//  .settings(
+//    noPublishSettings,
+//
+//    libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
+//    Compile / scalaJSUseMainModuleInitializer := true,
+//  )
 
 // Custom SBT tasks
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")

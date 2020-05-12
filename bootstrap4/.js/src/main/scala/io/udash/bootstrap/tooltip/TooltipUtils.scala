@@ -49,7 +49,8 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
     val hide: Long
   }
   object Delay {
-    def apply(show: Duration, hide: Duration): Delay = js.Dynamic.literal(show = show.toMillis, hide = hide.toMillis).asInstanceOf[Delay]
+    def apply(show: Duration, hide: Duration): Delay =
+      js.Dynamic.literal(show = show.toMillis.toDouble, hide = hide.toMillis.toDouble).asInstanceOf[Delay]
   }
 
   trait Placement {

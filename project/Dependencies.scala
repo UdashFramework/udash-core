@@ -15,7 +15,7 @@ object Dependencies {
 
   val scalaJsDomVersion = "1.0.0"
   val scalaTagsVersion = "0.9.1"
-  val scalaCssVersion = "0.6.0"
+  val scalaCssVersion = "0.6.1"
 
   val servletVersion = "4.0.1"
   val avsCommonsVersion = "2.0.0-M6"
@@ -48,7 +48,7 @@ object Dependencies {
   val momentJsVersion = "2.24.0"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.3.0-RC1"
+  val scalaJsBenchmarkVersion = "0.5.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
