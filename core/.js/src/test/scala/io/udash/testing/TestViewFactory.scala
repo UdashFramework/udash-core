@@ -1,6 +1,7 @@
 package io.udash.testing
 
 import io.udash._
+import org.scalajs.dom
 
 class TestViewFactory[T <: TestState] extends ViewFactory[T] {
   val view = new TestView
@@ -20,13 +21,19 @@ class TestView extends ContainerView {
   var closed = false
 
   override def renderChild(view: Option[View]): Unit = {
-    view.foreach(_.getTemplate)
+    super.renderChild(view)
     lastChild = view.orNull
   }
 
   override def getTemplate: Modifier = {
     renderingCounter += 1
-    div().render
+    Seq[Modifier](
+      div(
+        toString,
+        childViewContainer
+      ),
+      dom.document.createTextNode(toString),
+    )
   }
 
   override def onClose(): Unit = {
@@ -40,7 +47,7 @@ class TestFinalView extends View {
 
   override def getTemplate: Modifier = {
     renderingCounter += 1
-    div().render
+    span(toString)
   }
 }
 

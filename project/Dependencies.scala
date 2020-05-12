@@ -21,7 +21,7 @@ object Dependencies {
   val avsCommonsVersion = "2.0.0-M6"
 
   val atmosphereJSVersion = "2.3.8"
-  val atmosphereVersion = "2.5.14"
+  val atmosphereVersion = "2.6.0"
 
   val upickleVersion = "1.1.0" // Tests only
   val circeVersion = "0.13.0" // Tests only
@@ -40,7 +40,7 @@ object Dependencies {
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.1.1"
+  val scalatestVersion = "3.1.2"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"

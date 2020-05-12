@@ -9,14 +9,14 @@ trait TestRouting {
   var viewFactory: TestViewFactory[ErrorState.type] = _
   var vpRegistry: TestViewFactoryRegistry = _
   var renderer: TestViewRenderer = _
-  var routingEngine: RoutingEngine[TestState] = _
+  private[udash] var routingEngine: RoutingEngine[TestState] = _
 
   protected final def initTestRouting(routing: TestRoutingRegistry = new TestRoutingRegistry,
-    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty
+    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty, default: () => ViewFactory[_ <: TestState] = () => viewFactory
   ): Unit = {
     this.routing = routing
     viewFactory = new TestViewFactory[ErrorState.type]
-    vpRegistry = new TestViewFactoryRegistry(state2vp, viewFactory)
+    vpRegistry = new TestViewFactoryRegistry(state2vp, default)
     renderer = new TestViewRenderer
   }
 

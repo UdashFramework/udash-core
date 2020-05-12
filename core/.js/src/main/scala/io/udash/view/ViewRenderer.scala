@@ -22,7 +22,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
     }
 
-  private def mergeViews(path: Iterator[View]): Option[View] = {
+  private def mergeViews(path: Iterator[View]): Option[View] =
     path.nextOpt.setup(_.foreach { top =>
       val lastElement = path.fold(top) { case (parent, child) =>
         renderChild(parent, Some(child))
@@ -31,17 +31,14 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       }
       views.append(lastElement)
     }).toOption
-  }
 
   private def replaceCurrentViews(path: Iterable[View]): Unit = {
+    views.clear()
+
     val rootView = mergeViews(path.iterator)
 
-    views.clear()
-    views.appendAll(path)
-
     // Clear root element
-    for (_ <- 0 until endpoint.childElementCount)
-      endpoint.removeChild(endpoint.childNodes(0))
+    while (endpoint.firstChild != null) endpoint.removeChild(endpoint.firstChild)
 
     rootView.foreach(_.getTemplate.applyTo(endpoint))
   }
@@ -65,7 +62,6 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    */
   def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
     val currentViewsToLeaveSize = findEqPrefix(subPathToLeave, views.iterator).size
-
     if (currentViewsToLeaveSize == 0) {
       require(pathToAdd.nonEmpty, "You cannot remove all views, without adding any new view.")
       replaceCurrentViews(pathToAdd)
@@ -74,9 +70,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       views.trimEnd(removedViews)
       val rootView = views.last
       val rootViewToAttach = mergeViews(pathToAdd.iterator)
-      if (removedViews > 0 || rootViewToAttach.isDefined) {
-        renderChild(rootView, rootViewToAttach)
-      }
+      if (removedViews > 0 || rootViewToAttach.isDefined) renderChild(rootView, rootViewToAttach)
     }
   }
 }
