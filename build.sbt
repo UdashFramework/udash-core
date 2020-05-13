@@ -360,14 +360,14 @@ lazy val bootstrap4 = jsProject(project)
     jsDependencies ++= Dependencies.bootstrap4JsDeps.value
   )
 
-//lazy val benchmarks = jsProject(project)
-//  .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-//  .settings(
-//    noPublishSettings,
-//
-//    libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
-//    Compile / scalaJSUseMainModuleInitializer := true,
-//  )
+lazy val benchmarks = jsProject(project)
+  .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+  .settings(
+    noPublishSettings,
+
+    libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
+    Compile / scalaJSUseMainModuleInitializer := true,
+  )
 
 // Custom SBT tasks
 val copyAssets = taskKey[Unit]("Copies all assets to the target directory.")
