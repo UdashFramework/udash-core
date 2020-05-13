@@ -3,9 +3,9 @@ package io.udash.routing
 import io.udash.core.{State, Url}
 
 /**
-  * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
-  * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
-  */
+ * The implementation of this trait should be injected to [[io.udash.Application]].
+ * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
+ */
 trait RoutingRegistry[HierarchyRoot <: State] {
   def matchUrl(url: Url): HierarchyRoot
   def matchState(state: HierarchyRoot): Url

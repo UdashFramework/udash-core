@@ -19,17 +19,16 @@ object Url extends HasModelPropertyCreator[Url]
   */
 trait Presenter[-S <: State] {
   /**
-    * This method will be called by [[io.udash.routing.RoutingEngine]] when relevant state need to be resolved.
-    * It can be uses to get parameters from state and use it to call eg. external API.
-    *
-    * @param state the instance of resolved state
-    */
+   * This method will be called when relevant state needs to be resolved.
+   * It can be uses to get parameters from state and use it to call eg. external API.
+   *
+   * @param state the instance of resolved state
+   */
   def handleState(state: S): Unit
 
   /**
-    * This method will be called by [[io.udash.routing.RoutingEngine]] when this presenter is replaced
-    * by another one. This is where you can do cleanup if needed.
-    */
+   * This method will be called when this presenter is replaced by another one. This is where you can do cleanup.
+   */
   def onClose(): Unit = ()
 }
 
@@ -60,8 +59,7 @@ trait View {
   def getTemplate: Modifier[Element]
 
   /**
-   * This method will be called by [[io.udash.routing.RoutingEngine]] when this view is replaced
-   * by another one. This is where you can do cleanup.
+   * This method will be called when this view is replaced by another one. This is where you can do cleanup.
    */
   def onClose(): Unit = ()
 }
@@ -79,15 +77,14 @@ trait ContainerView extends View {
       childViewContainer.removeChild(childViewContainer.firstChild)
 
   /**
-   * Will be invoked by [[io.udash.routing.RoutingEngine]] in order to render the child view inside
-   * the parent view. <br/><br/>
+   * Will be invoked in order to render the child view inside the parent view. <br/>
    *
    * <b>This method can receive `None` as "view" argument, then previous child view should be removed.</b>
    *
    * The default implementation removes everything from `childViewContainer` and renders new subview inside.
    *
    * @param view view which origins from child
-    */
+   */
   def renderChild(view: Option[View]): Unit = {
     clearChildViewContainer()
     view.foreach { view =>
@@ -100,16 +97,16 @@ trait ContainerView extends View {
   }
 }
 
-/** The class which should be used to present the state for [[io.udash.routing.RoutingEngine]]. */
+/** The class which should be used to present the state for [[io.udash.routing.RoutingRegistry]]. */
 trait State {
   type HierarchyRoot <: State {type HierarchyRoot = State.this.HierarchyRoot}
   def parentState: Option[HierarchyRoot]
 }
 
 /**
-  * The implementation of this trait should be injected to [[io.udash.routing.RoutingEngine]].
-  * It is used to map [[State]] to [[ViewFactory]].
-  */
+ * The implementation of this trait should be injected to [[io.udash.Application]].
+ * It is used to map [[State]] to [[ViewFactory]].
+ */
 trait ViewFactoryRegistry[HierarchyRoot <: State] {
   def matchStateToResolver(state: HierarchyRoot): ViewFactory[_ <: HierarchyRoot]
 }
