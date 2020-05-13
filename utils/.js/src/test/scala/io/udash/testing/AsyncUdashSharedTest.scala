@@ -30,7 +30,7 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
         } else {
           p.complete(Failure(lastEx.getOrElse(RetryingTimeout())))
         }
-      }, patienceConfig.interval.toMillis)
+      }, patienceConfig.interval.toMillis.toDouble)
     }
     startTest()
     p.future

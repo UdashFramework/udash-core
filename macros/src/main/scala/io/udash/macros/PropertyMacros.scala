@@ -308,14 +308,14 @@ class PropertyMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx
     val modelPath = getModelPath(f)
 
     @tailrec
-    def checkIfIsValidPath(tree: Tree, onFirstType: Type => Unit = _ => ()): Boolean = {
+    def checkIfIsValidPath(tree: Tree, onFirstType: Type => Unit): Boolean = {
       tree match {
         case Select(next@Ident(_), t) if isValidSubproperty(next.tpe, t) =>
           onFirstType(next.tpe.member(t).typeSignature.finalResultType)
           true
         case Select(next, t) if hasModelPropertyCreator(next.tpe.widen) && isValidSubproperty(next.tpe, t) =>
           onFirstType(next.tpe.member(t).typeSignature.finalResultType)
-          checkIfIsValidPath(next)
+          checkIfIsValidPath(next, _ => ())
         case Select(next, t) =>
           c.abort(c.enclosingPosition,
             s"""

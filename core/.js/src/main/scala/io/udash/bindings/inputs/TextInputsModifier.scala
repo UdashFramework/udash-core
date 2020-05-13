@@ -29,7 +29,7 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
         propertyUpdateHandler = window.setTimeout(() => {
           val value: String = elementValue(t)
           if (property.get != value) property.set(value)
-        }, debounce.get.toMillis)
+        }, debounce.get.toMillis.toDouble)
       }
     } else {
       _: Event => {

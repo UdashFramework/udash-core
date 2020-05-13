@@ -1,33 +1,34 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.sbtplugin.JSModuleID
+import org.scalajs.jsdependencies.sbtplugin.JSModuleID
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
   val versionOfScala = "2.12.11"
-  val silencerVersion = "1.6.0"
+  val silencerVersion = "1.7.0"
   val collectionCompatVersion = "2.1.6"
 
-  val jqueryWrapperVersion = "3.0.2"
+  val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
 
-  val scalaJsDomVersion = "0.9.8"
-  val scalaTagsVersion = "0.9.0"
-  val scalaCssVersion = "0.6.0"
+  val scalaJsDomVersion = "1.0.0"
+  val scalaTagsVersion = "0.9.1"
+  val scalaCssVersion = "0.6.1"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.0.0-M5"
+  val avsCommonsVersion = "2.0.0-M6"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.6.0"
 
   val upickleVersion = "1.1.0" // Tests only
   val circeVersion = "0.13.0" // Tests only
-  val circeDerivationVersion = "0.12.0-M7" // Tests only
+  val circeDerivationVersion = "0.13.0-M4" // Tests only
   val monixVersion = "3.2.1" // Tests only
 
-  val sttpVersion = "2.0.9"
+  val sttpVersion = "2.1.1"
 
   val scalaLoggingVersion = "3.9.2"
 
@@ -47,7 +48,7 @@ object Dependencies {
   val momentJsVersion = "2.24.0"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.3.0-RC1"
+  val scalaJsBenchmarkVersion = "0.6.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,

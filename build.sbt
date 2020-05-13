@@ -1,8 +1,9 @@
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
+import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
-import org.scalajs.sbtplugin.JSModuleID
+
 
 name := "udash"
 
@@ -62,7 +63,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.13.1"),
+  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.13.2"),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -92,7 +93,6 @@ val commonSettings = Seq(
 ) ++ deploymentConfiguration
 
 val commonJsSettings = commonSettings ++ Seq(
-  Compile / emitSourceMaps := true,
   Test / scalaJSStage := FastOptStage,
   Test / scalaJSUseMainModuleInitializer := false,
   Test / jsEnv := new JSDOMNodeJSEnv,
@@ -101,7 +101,6 @@ val commonJsSettings = commonSettings ++ Seq(
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
-  scalacOptions += "-P:scalajs:sjsDefinedByDefault",
 
   //library CSS settings
   LessKeys.cleancss in Assets := true,
@@ -155,12 +154,12 @@ def jvmProject(proj: Project): Project =
 
 def jsProject(proj: Project): Project =
   proj.in(proj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
     .settings(commonJsSettings)
 
 def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
   jsProj.in(jvmProj.base / ".js")
-    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
     .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
     .settings(
       commonJsSettings,
@@ -179,14 +178,13 @@ def frontendExecutable(proj: Project)(
   additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
 ) = {
   proj
-    .enablePlugins(ScalaJSPlugin, SbtWeb)
+    .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin, SbtWeb)
     .settings(commonJsSettings)
     .settings(
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
 
       jsDependencies ++= jsDeps.value,
-      Compile / emitSourceMaps := true,
       Compile / scalaJSUseMainModuleInitializer := true,
 
       Assets / LessKeys.less / includeFilter := "assets.less",
@@ -232,9 +230,9 @@ def frontendExecutable(proj: Project)(
         Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
       ).value,
 
-      // Workaround for source JS dependencies overwriting the minified ones - just use the latter all the time
-      skip in (Compile / packageJSDependencies) := true,
-      (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(Compile / packageMinifiedJSDependencies).value,
+      // force fullOpt dependencies generation after fastOpt deps generation
+      packageMinifiedJSDependencies in Compile :=
+        (packageMinifiedJSDependencies in Compile).dependsOn(packageJSDependencies in Compile).value,
 
       // Target files for Scala.js plugin
       Compile / fastOptJS / artifactPath :=

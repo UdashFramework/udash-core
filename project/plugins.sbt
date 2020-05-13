@@ -1,8 +1,10 @@
 logLevel := Level.Warn
 
-libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "0.3.0"
+libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "1.0.0"
+libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.32")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.0.1")
+addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.0")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.5.0")
 addSbtPlugin("org.jetbrains" % "sbt-ide-settings" % "1.0.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.1.2")

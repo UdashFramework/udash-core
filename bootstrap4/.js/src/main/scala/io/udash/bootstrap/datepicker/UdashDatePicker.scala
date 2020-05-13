@@ -194,7 +194,7 @@ final class UdashDatePicker private[datepicker](
 
   private def dateToMoment(date: ju.Date): MomentFormatWrapper = {
     Try {
-      val fullDate = moment(internalLocale, date.getTime, "x")
+      val fullDate = moment(internalLocale, date.getTime.toDouble, "x")
       // removes date part which is not present in format string; it prevents multiple updates of date from one user interaction
       moment(internalLocale, fullDate.format(internalFormat), internalFormat)
     }.getOrElse(null)
