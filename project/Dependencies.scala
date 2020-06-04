@@ -26,7 +26,7 @@ object Dependencies {
   val upickleVersion = "1.1.0" // Tests only
   val circeVersion = "0.13.0" // Tests only
   val circeDerivationVersion = "0.13.0-M4" // Tests only
-  val monixVersion = "3.2.1" // Tests only
+  val monixVersion = "3.2.2" // Tests only
 
   val sttpVersion = "2.1.5"
 
