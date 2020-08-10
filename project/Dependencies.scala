@@ -6,7 +6,7 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.11"
+  val versionOfScala = "2.12.12"
   val silencerVersion = "1.7.1"
   val collectionCompatVersion = "2.1.6"
 
@@ -18,7 +18,7 @@ object Dependencies {
   val scalaCssVersion = "0.6.1"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.0.0-M6"
+  val avsCommonsVersion = "2.0.0-M9"
 
   val atmosphereJSVersion = "2.3.8"
   val atmosphereVersion = "2.6.1"
@@ -34,7 +34,7 @@ object Dependencies {
 
   val jettyVersion = "9.4.31.v20200723"
   val typesafeConfigVersion = "1.4.0"
-  val flexmarkVersion = "0.62.0"
+  val flexmarkVersion = "0.62.2"
   val logbackVersion = "1.2.3"
   val janinoVersion = "3.1.2"
   val fontAwesomeVersion = "5.10.1"

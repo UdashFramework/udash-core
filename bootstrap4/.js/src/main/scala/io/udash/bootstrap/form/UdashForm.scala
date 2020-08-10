@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package form
 
 import com.avsystem.commons._
-import com.avsystem.commons.misc._
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.inputs.InputBinding
 import io.udash.bindings.modifiers.Binding
