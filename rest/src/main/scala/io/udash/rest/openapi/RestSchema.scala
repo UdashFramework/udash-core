@@ -4,7 +4,7 @@ package rest.openapi
 import java.util.UUID
 
 import com.avsystem.commons._
-import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion}
+import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
 import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
 
