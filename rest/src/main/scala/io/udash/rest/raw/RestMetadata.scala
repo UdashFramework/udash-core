@@ -228,7 +228,7 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def requestAdjusters: List[RequestAdjuster]
   def responseAdjusters: List[ResponseAdjuster]
 
-  val pathPattern: List[PathPatternElement] = methodPath.map(PathName) ++
+  lazy val pathPattern: List[PathPatternElement] = methodPath.map(PathName) ++
     parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName))
 
   def applyPathParams(params: List[PlainValue]): List[PlainValue] = {
@@ -272,7 +272,7 @@ final case class PrefixMetadata[T](
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T]
 ) extends RestMethodMetadata[T] {
-  def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
+  val methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
 
 final case class HttpMethodMetadata[T](
@@ -296,7 +296,7 @@ final case class HttpMethodMetadata[T](
   def singleBodyParam: Opt[ParamMetadata[_]] =
     if (customBody) bodyParams.headOpt else Opt.Empty
 
-  def methodPath: List[PlainValue] =
+  val methodPath: List[PlainValue] =
     PlainValue.decodePath(methodTag.path)
 }
 

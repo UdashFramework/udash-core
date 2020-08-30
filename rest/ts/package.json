@@ -1,0 +1,35 @@
+{
+  "name": "udash-rest-client",
+  "version": "0.8.5",
+  "description": "TypeScript client for Udash REST",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "jest --config jestconfig.json",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UdashFramework/udash-core"
+  },
+  "keywords": [
+    "rest"
+  ],
+  "author": "AVSystem",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.3.0",
+    "typescript": "^4.0.2"
+  },
+  "files": [
+    "src",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}

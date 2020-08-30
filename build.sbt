@@ -319,6 +319,8 @@ lazy val `rpc-js` = jsProjectFor(project, rpc)
 lazy val rest = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
+    cleanFiles ++= (baseDirectory.value / "ts/lib").allPaths.get,
+    ideExcludedDirectories := Seq(baseDirectory.value / "ts/lib", baseDirectory.value / "ts/node_modules"),
     libraryDependencies ++= Dependencies.restJvmDeps.value,
   )
 

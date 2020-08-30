@@ -134,3 +134,5 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+node_modules
+rest/ts/lib
