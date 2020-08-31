@@ -91,17 +91,19 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
 
   protected def quote(str: String): String = JsonStringOutput.write(str)
 
-  protected def mkPair(ctx: TsGenerationCtx, p: TsRestParameter[_, TsPlainType, _]): String =
-    s"[${quote(p.rawName)}, ${p.typeTag.tsType.plainCodecRef(ctx)}.writePlain(${p.name})]"
+  protected def mkWritePlain(ctx: TsGenerationCtx, codecRef: Opt[TsReference], value: String): String =
+    codecRef.fold(value)(c => s"${c.resolve(ctx)}.writePlain($value)")
+
+  protected def mkPair(ctx: TsGenerationCtx, p: TsRestParameter[_, TsPlainType, _]): String = {
+    s"[${quote(p.rawName)}, ${mkWritePlain(ctx, p.typeTag.tsType.plainCodecRef, p.name)}]"
+  }
 
   protected def restParamsDefn(ctx: TsGenerationCtx): String = {
     val pathValues =
       (path.iterator.map(quote) ++ info.pathParams.iterator.flatMap { p =>
-        Iterator(s"${p.typeTag.tsType.plainCodecRef(ctx)}.writePlain(${p.name})") ++
+        Iterator(mkWritePlain(ctx, p.typeTag.tsType.plainCodecRef, p.name)) ++
           PlainValue.decodePath(p.paramTag.pathSuffix).iterator.map(pv => quote(pv.value))
       }).mkStringOrEmpty("\n        _params.path.push(", ", ", ")")
-
-
 
     val queryValues = info.queryParams.iterator.map(mkPair(ctx, _))
       .mkStringOrEmpty("\n        _params.query.push(", ", ", ")")
@@ -130,7 +132,7 @@ final case class TsPrefixMethod[T](
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
   def declaration(ctx: TsGenerationCtx): String = {
-    val returnType = ctx.resolve(result.value)
+    val returnType = result.value.resolve(ctx)
     val paramDecls = params.iterator.map(_.declaration(ctx)).mkString("(", ", ", ")")
 
     s"""    ${info.name}$paramDecls: $returnType {
@@ -149,14 +151,17 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
 
   def declaration(ctx: TsGenerationCtx): String = {
     val paramDecls = params.iterator.map(_.declaration(ctx)).mkString("(", ", ", ")")
-    val returnType = result.tsType.reference(ctx)
+    val returnType = result.tsType.resolve(ctx)
     val methodStr = quote(info.methodTag.method.name)
+
+    val readerRef = result.tsType.responseReaderRef
+      .fold(s"${ctx.codecsModule}.responseFromBody<$returnType>()")(_.resolve(ctx))
 
     s"""    ${info.name}$paramDecls: Promise<$returnType> {
        |        ${restParamsDefn(ctx)}
        |        ${bodyDecl(ctx)}
        |        return this._handle({method: $methodStr, parameters: _params, body: _body})
-       |            .then(${result.tsType.responseReaderRef(ctx)}.readResponse)
+       |            .then($readerRef.readResponse)
        |    }
        |""".stripMargin
   }
@@ -179,7 +184,8 @@ final case class TsHttpJsonBodyMethod[T](
 ) extends TsHttpMethod[T] {
   protected def bodyDecl(ctx: TsGenerationCtx): String = {
     val bodyObj = bodyParams.iterator.map { p =>
-      s"${quote(p.rawName)}: ${p.typeTag.tsType.jsonCodecRef(ctx)}.writeJson(${p.name})"
+      val encoded = p.typeTag.tsType.jsonCodecRef.fold(p.name)(cr => s"${cr.resolve(ctx)}.writeJson(${p.name})")
+      s"${quote(p.rawName)}: $encoded"
     }.mkString("{", ", ", "}")
     s"const _body = ${ctx.rawModule}.mkJsonBody($bodyObj)"
   }
@@ -203,8 +209,12 @@ final case class TsHttpCustomBodyMethod[T](
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 
-  protected def bodyDecl(ctx: TsGenerationCtx): String =
-    s"const _body = ${bodyParam.typeTag.tsType.bodyCodecRef(ctx)}.writeBody(${bodyParam.name})"
+  protected def bodyDecl(ctx: TsGenerationCtx): String = {
+    val tsType = bodyParam.typeTag.tsType
+    val codecRef = tsType.bodyCodecRef
+      .fold(s"${ctx.codecsModule}.bodyFromJson<${tsType.resolve(ctx)}>()")(_.resolve(ctx))
+    s"const _body = $codecRef.writeBody(${bodyParam.name})"
+  }
 }
 
 //TODO: default values and stuff
@@ -216,5 +226,5 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
   @infer typeTag: TsTypeTag[TsT, T]
 ) extends TypedMetadata[T] {
   def declaration(ctx: TsGenerationCtx): String =
-    s"$name: ${typeTag.tsType.reference(ctx)}"
+    s"$name: ${typeTag.tsType.resolve(ctx)}"
 }

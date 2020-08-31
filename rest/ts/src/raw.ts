@@ -28,11 +28,15 @@ export interface RestParameters {
 }
 
 export function newParameters(prefixParameters?: RestParameters): RestParameters {
-    if(!prefixParameters) {
+    if (!prefixParameters) {
         return {path: [], query: [], header: []}
     } else {
         // make a copy of every array so that they can be safely appended with more values
-        return {path: [...prefixParameters.path], query: [...prefixParameters.query], header: [...prefixParameters.header]}
+        return {
+            path: [...prefixParameters.path],
+            query: [...prefixParameters.query],
+            header: [...prefixParameters.header]
+        }
     }
 }
 
@@ -72,40 +76,22 @@ export interface RestResponse {
 
 export type HandleRequest = (request: RestRequest) => Promise<RestResponse>
 
-export interface PlainWriter<T> {
+export interface PlainCodec<T> {
     writePlain(value: T): string
-}
 
-export interface PlainReader<T> {
     readPlain(plain: string): T
 }
 
-export interface PlainCodec<T> extends PlainWriter<T>, PlainReader<T> {
-}
-
-export interface JsonWriter<T> {
+export interface JsonCodec<T> {
     writeJson(value: T): any
-}
 
-export interface JsonReader<T> {
     readJson(json: any): T
 }
 
-export interface JsonCodec<T> extends JsonWriter<T>, JsonReader<T> {
-}
-
-export interface PlainAndJsonCodec<T> extends PlainCodec<T>, JsonCodec<T> {
-}
-
-export interface BodyWriter<T> {
+export interface BodyCodec<T> {
     writeBody(value: T): RestBody
-}
 
-export interface BodyReader<T> {
     readBody(body: RestBody): T
-}
-
-export interface BodyCodec<T> extends BodyWriter<T>, BodyReader<T> {
 }
 
 export interface ResponseReader<T> {

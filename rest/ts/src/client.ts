@@ -10,7 +10,7 @@ export function handleUsingFetch(baseUrl: string): HandleRequest {
         const fullUrl = baseUrl + joinedPath + encodeQuery(request.parameters.query)
 
         let body: BodyInit | null
-        let allHeaders: [string, string][] = request.parameters.header
+        let allHeaders: [string, any][] = request.parameters.header
         if (request.body === null) {
             body = null
         } else {

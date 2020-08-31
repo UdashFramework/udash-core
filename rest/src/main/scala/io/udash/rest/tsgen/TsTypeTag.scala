@@ -29,7 +29,6 @@ object TsTypeTag extends TsTypeTagLowPrio {
   def apply[TsT <: TsType, T](tsType: => TsT): TsTypeTag[TsT, T] =
     new TsTypeTag(tsType)
 
-  implicit val UnitTag: TsPlainAndJsonTypeTag[Unit] = TsPlainAndJsonTypeTag(TsType.Undefined)
   implicit val UnitResponseTag: TsResponseTypeTag[Unit] = TsResponseTypeTag(TsType.Void)
   implicit val NothingTag: TsPlainAndJsonTypeTag[Nothing] = TsPlainAndJsonTypeTag(TsType.Never)
   implicit val BooleanTag: TsPlainAndJsonTypeTag[Boolean] = TsPlainAndJsonTypeTag(TsType.Boolean)

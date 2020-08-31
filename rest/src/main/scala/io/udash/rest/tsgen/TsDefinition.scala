@@ -3,9 +3,18 @@ package tsgen
 
 import com.avsystem.commons.{MHashSet, MLinkedHashMap}
 
-trait TsDefinition {
+trait TsReference {
+  def resolve(ctx: TsGenerationCtx): String
+}
+
+trait TsDefinition extends TsReference {
   def name: String
   def definition(ctx: TsGenerationCtx): String
+
+  def resolve(ctx: TsGenerationCtx): String = {
+    ctx.add(this)
+    name
+  }
 }
 
 final class TsGenerationCtx(
@@ -17,11 +26,6 @@ final class TsGenerationCtx(
 
   private[this] val definitions = new MLinkedHashMap[String, Entry]
   private[this] val resolving = new MHashSet[TsDefinition]
-
-  def resolve(definition: TsDefinition): String = {
-    add(definition)
-    definition.name
-  }
 
   def add(definition: TsDefinition): Unit = if (resolving.add(definition)) {
     try {

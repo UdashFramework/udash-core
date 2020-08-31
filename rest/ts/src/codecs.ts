@@ -1,98 +1,35 @@
-import {BodyCodec, JsonCodec, PlainAndJsonCodec, ResponseReader, RestBody, RestResponse} from "./raw";
-
-export const Undefined: JsonCodec<undefined> & BodyCodec<undefined> = {
-    writeJson(value: undefined): any {
-        return null
-    },
-    readJson(json: any): undefined {
-        return undefined
-    },
-    writeBody(value: undefined): RestBody {
-        return null
-    },
-    readBody(body: RestBody): undefined {
-        return undefined
-    }
-}
+import {BodyCodec, JsonCodec, PlainCodec, ResponseReader, RestBody, RestResponse} from "./raw";
 
 export const Void: ResponseReader<void> = {
     readResponse(resp: RestResponse): void {
     }
 }
 
-export const Never: PlainAndJsonCodec<never> = {
-    writePlain(value: never): string {
-        throw Error("never")
-    },
-    readPlain(plain: string): never {
-        throw Error("never")
-    },
-    writeJson(value: never): any {
-        throw Error("never")
-    },
-    readJson(json: any): never {
-        throw Error("never")
-    },
-}
-
-export const Boolean: PlainAndJsonCodec<boolean> = {
+export const Boolean: PlainCodec<boolean> = {
     writePlain(value: boolean): string {
         return value ? "true" : "false"
     },
     readPlain(plain: string): boolean {
         return plain === "true"
     },
-    writeJson(value: boolean): any {
-        return value
-    },
-    readJson(json: any): boolean {
-        return json as boolean
-    }
 }
 
-export const String: PlainAndJsonCodec<string> = {
-    writePlain(value: string): string {
-        return value
-    },
-    readPlain(plain: string): string {
-        return plain
-    },
-    writeJson(value: string): any {
-        return value
-    },
-    readJson(json: any): string {
-        return json as string
-    },
-}
-
-export const Float: PlainAndJsonCodec<number> = {
+export const Float: PlainCodec<number> = {
     writePlain(value: number): string {
         return value.toString()
     },
     readPlain(plain: string): number {
         return parseFloat(plain)
     },
-    writeJson(value: number): any {
-        return value
-    },
-    readJson(json: any): number {
-        return json as number
-    }
 }
 
-export const Integer: PlainAndJsonCodec<number> = {
+export const Integer: PlainCodec<number> = {
     writePlain(value: number): string {
         return value.toString()
     },
     readPlain(plain: string): number {
         return parseInt(plain)
     },
-    writeJson(value: number): any {
-        return value
-    },
-    readJson(json: any): number {
-        return json as number
-    }
 }
 
 export function array<T>(elemCodec: JsonCodec<T>): JsonCodec<T[]> {
@@ -125,8 +62,19 @@ export function nullable<T>(elemCodec: JsonCodec<T>): JsonCodec<T | null> {
     }
 }
 
+export function identity<T>(): JsonCodec<T> {
+    return {
+        writeJson(value: T): any {
+            return value
+        },
+        readJson(json: any): T {
+            return json as T;
+        }
+    }
+}
+
 //TODO: use better JSON parser/serializer that can handle big numbers
-export function bodyFromJson<T>(jsonCodec: JsonCodec<T>): BodyCodec<T> {
+export function bodyFromJson<T>(jsonCodec: JsonCodec<T> = identity<T>()): BodyCodec<T> {
     return {
         writeBody(value: T): RestBody {
             return {
@@ -146,7 +94,7 @@ export function bodyFromJson<T>(jsonCodec: JsonCodec<T>): BodyCodec<T> {
     }
 }
 
-export function responseFromBody<T>(bodyCodec: BodyCodec<T>): ResponseReader<T> {
+export function responseFromBody<T>(bodyCodec: BodyCodec<T> = bodyFromJson<T>()): ResponseReader<T> {
     return {
         readResponse(resp: RestResponse): T {
             if (resp.status >= 200 && resp.status < 300) {
@@ -159,30 +107,43 @@ export function responseFromBody<T>(bodyCodec: BodyCodec<T>): ResponseReader<T> 
     }
 }
 
-export function record<T>(
-    constructor: { new(...fields: any): T },
-    fieldCodecs: [string, JsonCodec<any>][] //TODO: lazy! recursively defined records
-): JsonCodec<T> {
+//TODO: default values and transient default
+export interface FieldInfo {
+    readonly rawName?: string,
+    codec?: () => JsonCodec<any> // function because it must be lazy for recursively defined records
+}
+
+export function record<T>(managedFields: { [name: string]: FieldInfo }): JsonCodec<T> {
     type RawDict = { [key: string]: any }
 
-    //TODO: honor raw names
     return {
         writeJson<T>(value: T): any {
-            let rawValue = value as RawDict
-            let result = {} as RawDict
-            fieldCodecs.forEach(function ([fname, codec]) {
-                //TODO: honor @transientDefault
-                result[fname] = codec.writeJson(rawValue[fname])
-            })
+            // shallow copy
+            const result = Object.assign({}, value) as RawDict
+            for (const [name, {rawName, codec}] of Object.entries(managedFields)) {
+                if (codec) {
+                    result[name] = codec().writeJson(result[name])
+                }
+                if (rawName) {
+                    result[rawName] = result[name]
+                    delete result[name]
+                }
+            }
             return result
         },
         readJson(json: any): T {
-            let dict = json as RawDict
-            let fieldValues = fieldCodecs.map(function ([fname, codec]) {
-                //TODO: validate if each field actually exists, use default values
-                return codec.readJson(dict[fname])
-            })
-            return new constructor(...fieldValues);
+            // no need to copy when reading, we can just mutate the incoming object
+            const result = json as RawDict
+            for (const [name, {rawName, codec}] of Object.entries(managedFields)) {
+                if (rawName) {
+                    result[name] = result[rawName]
+                    delete result[rawName]
+                }
+                if (codec) {
+                    result[name] = codec().readJson(result[name])
+                }
+            }
+            return result as T
         }
     }
 }
