@@ -43,6 +43,7 @@ class TranslationKeyTest extends UdashSharedTest {
   val testKey9 = TranslationKey.key9[Int, String, Int, String, Int, String, Int, String, Int]("test9")
   val testKeyX = TranslationKey.keyX("testX")
   val testKeyU = TranslationKey.untranslatable("testUntranslatable")
+  val testKeyR = testKey3(1, "two", 5)
 
   "Test template placeholders substitution" in {
     implicit val provider: TranslationProvider = new TranslationProvider {
@@ -114,6 +115,49 @@ class TranslationKeyTest extends UdashSharedTest {
       val serializedX = write(testKeyX((1, 2, "3", 4.5)))
       val deserializedX = read[TranslationKey0](serializedX)
       getTranslatedString(deserializedX) should be(getTranslatedString(testKeyX((1, 2, "3", 4.5))))
+    }
+
+    "have descriptive toString" in {
+      testKey0.toString should be("TranslationKey0(test0)")
+      testKey1.toString should be("TranslationKey1(test1)")
+      testKey2.toString should be("TranslationKey2(test2)")
+      testKey3.toString should be("TranslationKey3(test3)")
+      testKey4.toString should be("TranslationKey4(test4)")
+      testKey5.toString should be("TranslationKey5(test5)")
+      testKey6.toString should be("TranslationKey6(test6)")
+      testKey7.toString should be("TranslationKey7(test7)")
+      testKey8.toString should be("TranslationKey8(test8)")
+      testKey9.toString should be("TranslationKey9(test9)")
+      testKeyX.toString should be("TranslationKeyX(testX)")
+      testKeyU.toString should be("Untranslatable(testUntranslatable)")
+      testKeyR.toString should be("ReducedTranslationKey(test3,1,two,5)")
+    }
+
+    "have content-based equals and hashCode" in {
+      def cmp(what: TranslationKey, same: TranslationKey, notSame: TranslationKey): Unit = {
+        what should be(same)
+        what.hashCode() should be(same.hashCode())
+
+        what shouldNot be(notSame)
+        what.hashCode() shouldNot be(notSame.hashCode())
+      }
+      cmp(testKey0, TranslationKey0("test0"), TranslationKey0("test1"))
+      cmp(testKey1, TranslationKey1("test1"), TranslationKey1("test2"))
+      cmp(testKeyU, TranslationKey.untranslatable("testUntranslatable"), TranslationKey.untranslatable("testUntranslatable2"))
+      cmp(testKeyR, testKey3(1, "two", 5), testKey3(1, "two", 6))
+    }
+
+    "not equal TranslationKeys of different types" in {
+      val ordinaryKey = TranslationKey.key("testUntranslatable")
+      testKeyU shouldNot be(ordinaryKey)
+      ordinaryKey shouldNot be(testKeyU)
+    }
+  }
+
+  "ReducedTranslationKey" should {
+    "behave like a Product" in {
+      testKeyR.productArity should be(2)
+      testKeyR.productIterator.toSeq should be(Seq("test3", Seq(1, "two", 5)))
     }
   }
 }
