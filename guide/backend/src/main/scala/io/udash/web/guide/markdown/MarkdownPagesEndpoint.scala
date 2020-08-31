@@ -1,7 +1,7 @@
 package io.udash.web.guide.markdown
 
 import java.io.{BufferedReader, File, FileReader}
-import java.nio.charset.{Charset, StandardCharsets}
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
