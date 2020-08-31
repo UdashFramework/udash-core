@@ -1,6 +1,7 @@
 package io.udash.web.guide.markdown
 
 import java.io.{BufferedReader, File, FileReader}
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,7 +20,7 @@ final class MarkdownPagesEndpoint(guideResourceBase: String)(implicit ec: Execut
   private val renderedPages = new ConcurrentHashMap[MarkdownPage, (Future[String], Instant)]
 
   private def render(file: File): Future[String] = Future {
-    val reader = new BufferedReader(new FileReader(file))
+    val reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))
     val document = parser.parseReader(reader)
     renderer.render(document)
   }
