@@ -1,4 +1,27 @@
-import {BodyCodec, JsonCodec, PlainCodec, ResponseReader, RestBody, RestResponse} from "./raw";
+import {RestBody, RestResponse} from "./raw";
+
+export interface PlainCodec<T> {
+    writePlain(value: T): string
+
+    readPlain(plain: string): T
+}
+
+export interface JsonCodec<T> {
+    writeJson(value: T): any
+
+    readJson(json: any): T
+}
+
+export interface BodyCodec<T> {
+    writeBody(value: T): RestBody
+
+    readBody(body: RestBody): T
+}
+
+export interface ResponseReader<T> {
+    readResponse(resp: RestResponse): T
+}
+
 
 export const Void: ResponseReader<void> = {
     readResponse(resp: RestResponse): void {
@@ -122,6 +145,8 @@ export function responseFromBody<T>(bodyCodec: BodyCodec<T> = bodyFromJson<T>())
     }
 }
 
+type RawDict = { [key: string]: any }
+
 //TODO: default values and transient default
 export interface FieldInfo {
     readonly rawName?: string,
@@ -129,8 +154,6 @@ export interface FieldInfo {
 }
 
 export function record<T>(managedFields: { [name: string]: FieldInfo }): JsonCodec<T> {
-    type RawDict = { [key: string]: any }
-
     return {
         writeJson<T>(value: T): any {
             // shallow copy
@@ -156,6 +179,81 @@ export function record<T>(managedFields: { [name: string]: FieldInfo }): JsonCod
                 }
                 if (codec) {
                     result[name] = codec().readJson(result[name])
+                }
+            }
+            return result as T
+        }
+    }
+}
+
+export interface CaseInfo {
+    readonly rawName?: string
+    codec?: () => JsonCodec<any>
+}
+
+export function nestedUnion<T>(managedCases: { [name: string]: CaseInfo }): JsonCodec<T> {
+    return {
+        writeJson(value: T): any {
+            let result = value as RawDict
+            for (const [cname, info] of Object.entries(managedCases)) {
+                if (result[cname]) {
+                    result = Object.assign({}, result) as RawDict
+                    if (info.codec) {
+                        result[cname] = info.codec().writeJson(result[cname])
+                    }
+                    if (info.rawName) {
+                        result[info.rawName] = result[cname]
+                        delete result[cname]
+                    }
+                }
+            }
+            return result
+        },
+        readJson(json: any): T {
+            const result = json as RawDict
+            for (const [cname, info] of Object.entries(managedCases)) {
+                if (info.rawName && result[info.rawName]) {
+                    result[cname] = result[info.rawName]
+                    delete result[info.rawName]
+                }
+                if (info.codec && result[cname]) {
+                    result[cname] = info.codec().readJson(result[cname])
+                }
+            }
+            return result as T
+        }
+    }
+}
+
+export function flatUnion<T>(discriminator: string, managedCases: { [name: string]: CaseInfo }): JsonCodec<T> {
+    return {
+        writeJson(value: T): any {
+            let result = value as RawDict
+            for (const [cname, info] of Object.entries(managedCases)) {
+                if (result[discriminator] === cname) {
+                    if (info.codec) {
+                        //TODO: this will blow up if case codec removes discriminator
+                        result = info.codec().writeJson(value)
+                    }
+                    if (info.rawName) {
+                        // only copy when there was no codec to do it
+                        if (!info.codec) {
+                            result = Object.assign({}, result) as RawDict
+                        }
+                        result[discriminator] = info.rawName
+                    }
+                }
+            }
+            return result
+        },
+        readJson(json: any): T {
+            let result = json as RawDict
+            for (const [cname, info] of Object.entries(managedCases)) {
+                if (info.rawName && result[discriminator] === info.rawName) {
+                    result[discriminator] = cname
+                }
+                if (info.codec && result[discriminator] === cname) {
+                    result = info.codec().readJson(result)
                 }
             }
             return result as T

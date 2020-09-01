@@ -20,7 +20,7 @@ object `package` {
 }
 
 sealed abstract class TsTypeTagCompanion[TsT <: TsType] {
-  def apply[T](tsType: TsT): TsTypeTag[TsT, T] = TsTypeTag(tsType)
+  def apply[T](tsType: => TsT): TsTypeTag[TsT, T] = TsTypeTag(tsType)
 }
 object TsPlainTypeTag extends TsTypeTagCompanion[TsPlainType]
 object TsJsonTypeTag extends TsTypeTagCompanion[TsJsonType]

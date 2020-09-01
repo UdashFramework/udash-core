@@ -20,7 +20,7 @@ trait TsRestDataInstances[T] extends CodecWithStructure[T] {
 }
 
 abstract class TsRestDataCompanion[T](implicit instances: MacroInstances[TsRestImplicits, TsRestDataInstances[T]]) {
-  implicit lazy val tsTypeTag: TsJsonTypeTag[T] = instances(TsRestImplicits, this).tsTypeMetadata.tsTypeTag
+  implicit lazy val tsTypeTag: TsJsonTypeTag[T] = TsJsonTypeTag(instances(TsRestImplicits, this).tsTypeMetadata)
   implicit lazy val codec: GenCodec[T] = instances(TsRestImplicits, this).codec
   implicit lazy val restSchema: RestSchema[T] = instances(TsRestImplicits, this).structure.standaloneSchema
 

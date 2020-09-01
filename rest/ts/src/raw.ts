@@ -75,25 +75,3 @@ export interface RestResponse {
 }
 
 export type HandleRequest = (request: RestRequest) => Promise<RestResponse>
-
-export interface PlainCodec<T> {
-    writePlain(value: T): string
-
-    readPlain(plain: string): T
-}
-
-export interface JsonCodec<T> {
-    writeJson(value: T): any
-
-    readJson(json: any): T
-}
-
-export interface BodyCodec<T> {
-    writeBody(value: T): RestBody
-
-    readBody(body: RestBody): T
-}
-
-export interface ResponseReader<T> {
-    readResponse(resp: RestResponse): T
-}
