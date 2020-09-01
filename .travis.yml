@@ -15,8 +15,8 @@ script:
 jdk: openjdk11
 
 scala:
-  - 2.12.11
-  - 2.13.2
+  - 2.12.12
+  - 2.13.3
 
 stages:
   - test
@@ -42,10 +42,10 @@ env:
 jobs:
   include:
     - stage: test
-      scala: 2.12.11
+      scala: 2.12.12
       env: TEST_PACKAGE="guide-selenium/test"
     - stage: release
-      scala: 2.13.2
+      scala: 2.13.3
       env: TEST_PACKAGE=none
       script:
         - openssl aes-256-cbc -K $encrypted_5c7170ca7f9b_key -iv $encrypted_5c7170ca7f9b_iv -in travis/travis.gpg.enc -out travis/travis.gpg -d

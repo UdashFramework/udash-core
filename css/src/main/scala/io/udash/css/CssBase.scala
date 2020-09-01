@@ -23,7 +23,7 @@ trait CssBase {
   class Dsl(val elementsBuffer: mutable.ArrayBuffer[CssStyle]) extends DslBase {
     implicit def compose: Compose = Compose.trust
 
-    def &(): Cond =
+    def `&`: Cond =
       Cond.empty
 
     /**

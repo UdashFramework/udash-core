@@ -1,12 +1,11 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.2"
+  val versionOfScala = "2.13.3"
   val silencerVersion = "1.7.1"
   val collectionCompatVersion = "2.1.6"
 

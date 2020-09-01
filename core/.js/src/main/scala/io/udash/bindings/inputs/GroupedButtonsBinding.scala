@@ -15,7 +15,7 @@ private[inputs] class GroupedButtonsBinding[T](
   refreshSelection: Seq[T] => Unit,
   onChange: (JSInput, T) => Event => Unit
 ) extends InputBinding[Div] {
-  private val groupIdPrefix: Long = Random.nextLong
+  private val groupIdPrefix: Long = Random.nextLong()
 
   private val buttons = div(
     produce(options) { opts =>

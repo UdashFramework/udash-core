@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.bootstrap.utils.BootstrapStyles.Color
@@ -15,7 +16,7 @@ object RpcLoggingDemo {
     span(GuideStyles.frame, GuideStyles.useBootstrap)(
       button(
         id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary),
-        onclick :+= ((_: MouseEvent) => loadCalls(), true)
+        onclick :+= ((_: MouseEvent) => loadCalls().thenReturn(true))
       )("Load call list"),
       produce(model)(seq => ul(seq.map(call => li(call.toString))).render)
     ).render

@@ -363,35 +363,23 @@ object Bindings extends Bindings {
       else AttrPair(attr, value, ev)
 
     /**
-      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
-      * If callback returns true, other listeners which are queued will not be invoked.
-      * If callback returns false, next callback in the queue will be invoked.
-      */
-    def :+=[T <: Event](callback: T => Boolean): Modifier[Element] = {
-      AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Boolean) => {
+     * Use this to add more events listeners to an attribute (:= always overrides previous binding).
+     * If callback returns true, other listeners which are queued will not be invoked.
+     * If callback returns false, next callback in the queue will be invoked.
+     * Results other than booleans are treated as false - the don't prevent event propagation.
+     */
+    def :+=[T <: Event](callback: T => Any): Modifier[Element] =
+      AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Any) => {
         val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
         val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
-        if (existingCallbacks == null) {
-          dyn.updateDynamic(attr.name) { e: T => if (callback(e)) e.preventDefault() }
-        } else {
+        if (existingCallbacks == null)
+          dyn.updateDynamic(attr.name) { e: T => if (callback(e) == true) e.preventDefault() }
+        else
           dyn.updateDynamic(attr.name) { e: T =>
             val preventDefault = callback(e)
-            if (preventDefault) e.preventDefault()
+            if (preventDefault == true) e.preventDefault()
             else existingCallbacks(e)
           }
-        }
-      })
-    }
-
-    /**
-      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
-      * If callback returns true, other listeners which are queued will not be invoked.
-      * If callback returns false, next callback in the queue will be invoked.
-      */
-    def :+=[T <: Event](callback: T => Any, stopPropagation: Boolean = false): Modifier[Element] =
-      :+=((v: T) => {
-        callback(v)
-        stopPropagation
       })
 
     /** Sets attribute on element. */

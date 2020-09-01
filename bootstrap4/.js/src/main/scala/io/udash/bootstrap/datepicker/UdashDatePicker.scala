@@ -229,9 +229,8 @@ object UdashDatePicker {
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
     componentId: ComponentId = ComponentId.generate()
-  )(): UdashDatePicker = {
+  ): UdashDatePicker =
     new UdashDatePicker(date, options, componentId)
-  }
 
   /** Combines two date pickers into a date range selector.
     * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
@@ -496,6 +495,7 @@ object UdashDatePicker {
   }
 
   import org.scalajs.dom.{MutationObserver, MutationObserverInit, MutationRecord, Node, NodeList}
+
   import scala.collection.Map
   import scala.collection.mutable.{Map => MMap}
 

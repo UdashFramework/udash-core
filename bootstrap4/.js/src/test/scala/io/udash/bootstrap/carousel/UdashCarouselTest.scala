@@ -1,5 +1,6 @@
 package io.udash.bootstrap.carousel
 
+import com.avsystem.commons._
 import io.udash._
 import io.udash.bootstrap.carousel.UdashCarousel.CarouselEvent
 import io.udash.bootstrap.utils.BootstrapStyles.Carousel
@@ -8,7 +9,6 @@ import io.udash.properties.seq.SeqProperty
 import io.udash.testing.AsyncUdashCoreFrontendTest
 import io.udash.wrappers.jquery._
 import scalatags.JsDom.all._
-import com.avsystem.commons._
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -206,7 +206,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
 
   private def activeIdx(carousel: UdashCarousel[_, _]): Int = {
     jQ(carousel.render)
-      .find(s".${BootstrapStyles.Carousel.item.className}").get
+      .find(s".${BootstrapStyles.Carousel.item.className}").get()
       .zipWithIndex
       .collectFirst { case (el, idx) if el.classList.contains(BootstrapStyles.active.className) => idx }
       .getOrElse(-1)
