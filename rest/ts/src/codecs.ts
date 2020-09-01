@@ -32,6 +32,21 @@ export const Integer: PlainCodec<number> = {
     },
 }
 
+export const Timestamp: PlainCodec<Date> & JsonCodec<Date> = {
+    writePlain(value: Date): string {
+        return value.toISOString();
+    },
+    readPlain(plain: string): Date {
+        return new Date(plain);
+    },
+    writeJson(value: Date): any {
+        return value.toISOString();
+    },
+    readJson(json: any): Date {
+        return new Date(json as string);
+    }
+}
+
 export function array<T>(elemCodec: JsonCodec<T>): JsonCodec<T[]> {
     return {
         writeJson(value: T[]): any {

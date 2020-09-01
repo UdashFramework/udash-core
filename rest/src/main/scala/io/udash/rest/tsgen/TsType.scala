@@ -91,4 +91,10 @@ object TsType {
     def plainCodecRef: Opt[TsReference] = Opt.Empty
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
+
+  final val Timestamp: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
+    def resolve(gen: TsGenerator): String = "Date"
+    def plainCodecRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Timestamp")
+    def jsonCodecRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Timestamp")
+  }
 }

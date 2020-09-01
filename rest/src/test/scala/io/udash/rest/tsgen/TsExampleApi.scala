@@ -4,7 +4,7 @@ import java.io.File
 
 import com.avsystem.commons._
 import io.udash.rest._
-import io.udash.rest.tsgen.other.OtherApi
+import io.udash.rest.tsgen.other.{Enumik, OtherApi}
 
 import scala.concurrent.Future
 
@@ -26,7 +26,7 @@ object TsExampleApi extends TsRestApiCompanion[TsExampleApi]
 
 object TsExampleApiImpl extends TsExampleApi {
   def prefix(paf: Boolean): OtherApi = new OtherApi {
-    def echo(frjend: MajFriend): Future[MajFriend] = Future.successful(frjend)
+    def echo(frjend: MajFriend, opcja: Enumik): Future[MajFriend] = Future.successful(frjend)
   }
 
   def postMe(id: String, thing: Int, body: MajFriend): Future[Unit] = Future.unit

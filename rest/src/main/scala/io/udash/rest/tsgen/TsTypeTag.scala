@@ -1,8 +1,11 @@
 package io.udash.rest
 package tsgen
 
-import com.avsystem.commons.{BSeq, BSet, Opt, OptArg}
+import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion, Timestamp}
+import com.avsystem.commons.{BSeq, BSet, JDate, Opt, OptArg, classTag}
 import io.udash.rest.raw.RawRest.AsyncEffect
+
+import scala.reflect.ClassTag
 
 final class TsTypeTag[+TsT <: TsType, T](lazyTsType: => TsT) {
   lazy val tsType: TsT = lazyTsType
@@ -39,6 +42,8 @@ object TsTypeTag extends TsTypeTagLowPrio {
   implicit val DoubleTag: TsPlainAndJsonTypeTag[Double] = TsPlainAndJsonTypeTag(TsType.Float)
   implicit val CharTag: TsPlainAndJsonTypeTag[Char] = TsPlainAndJsonTypeTag(TsType.String)
   implicit val StringTag: TsPlainAndJsonTypeTag[String] = TsPlainAndJsonTypeTag(TsType.String)
+  implicit val TimestampTag: TsPlainAndJsonTypeTag[Timestamp] = TsPlainAndJsonTypeTag(TsType.Timestamp)
+  implicit val DateTag: TsPlainAndJsonTypeTag[JDate] = TsPlainAndJsonTypeTag(TsType.Timestamp)
 
   implicit def seqTag[C[X] <: BSeq[X], T: TsJsonTypeTag]: TsJsonTypeTag[C[T]] =
     TsJsonTypeTag(TsType.arrayJson(TsJsonType[T]))
@@ -54,6 +59,14 @@ object TsTypeTag extends TsTypeTagLowPrio {
 
   implicit def optionTag[T: TsJsonTypeTag]: TsJsonTypeTag[Option[T]] =
     TsJsonTypeTag(TsType.nullableJson(TsJsonType[T]))
+
+  implicit def namedEnumTag[T <: NamedEnum : TsModuleTag : ClassTag](
+    implicit companion: NamedEnumCompanion[T]
+  ): TsPlainAndJsonTypeTag[T] = {
+    val name = classTag[T].runtimeClass.getSimpleName
+    val values = companion.values.map(_.name)
+    TsPlainAndJsonTypeTag(TsEnum(TsModule[T], name, values))
+  }
 }
 trait TsTypeTagLowPrio { this: TsTypeTag.type =>
   implicit def bodyTagFromJsonTag[T: TsJsonTypeTag]: TsBodyTypeTag[T] =

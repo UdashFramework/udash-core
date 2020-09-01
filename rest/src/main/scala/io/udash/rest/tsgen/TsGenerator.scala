@@ -44,6 +44,9 @@ final case class TsModule(path: List[String], external: Boolean = false) {
       loop(path, imported.path)
     }
 }
+object TsModule {
+  def apply[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
+}
 
 final case class TsModuleTag[T](module: TsModule) extends AnyVal
 
