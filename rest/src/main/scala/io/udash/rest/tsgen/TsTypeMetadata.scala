@@ -6,10 +6,8 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{GenCaseInfo, GenParamInfo}
 
-sealed trait TsTypeMetadata[T] extends TypedMetadata[T] {
-  def tsType: TsJsonType
-
-  final def tsTypeTag: TsJsonTypeTag[T] = TsJsonTypeTag(tsType)
+sealed trait TsTypeMetadata[T] extends TypedMetadata[T] with TsJsonType {
+  final def tsTypeTag: TsJsonTypeTag[T] = TsJsonTypeTag(this)
 }
 
 object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
@@ -18,8 +16,12 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   @positioned(positioned.here)
   final case class Record[T](
     @composite info: GenCaseInfo[T],
+    @infer moduleTag: TsModuleTag[T],
     @multi @adtParamMetadata fields: List[Field[_]],
   ) extends TsTypeMetadata[T] with TsJsonType with TsDefinition { rec =>
+    val module: TsModule =
+      moduleTag.module
+
     val name: String =
       info.sourceName
 
@@ -29,16 +31,14 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     val managedFields: List[Field[_]] =
       fields.filter(_.isManaged)
 
-    def tsType: TsJsonType = this
-
-    def definition(ctx: TsGenerationCtx): String = {
-      val fieldDefs = fields.iterator.map(_.declaration(ctx)).mkString("\n", ",\n", "\n")
+    def contents(gen: TsGenerator): String = {
+      val fieldDefs = fields.iterator.map(_.declaration(gen)).mkString("\n", ",\n", "\n")
 
       val namespaceDecl = if (managedFields.isEmpty) "" else {
-        val fieldInfos = managedFields.iterator.map(_.fieldInfoDeclaration(ctx)).mkString("{", ", ", "}")
+        val fieldInfos = managedFields.iterator.map(_.fieldInfoDeclaration(gen)).mkString("{", ", ", "}")
         s"""
            |export namespace $name {
-           |    export const codec = ${ctx.codecsModule}.record<$name>($fieldInfos)
+           |    export const codec = ${gen.codecsModule}.record<$name>($fieldInfos)
            |}""".stripMargin
       }
 
@@ -47,7 +47,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def jsonCodecRef: Opt[TsReference] =
       if (managedFields.isEmpty) Opt.Empty
-      else Opt(ctx => s"${resolve(ctx)}.codec")
+      else Opt(gen => s"${resolve(gen)}.codec")
   }
 
   final case class Field[T](
@@ -63,14 +63,14 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     def isManaged: Boolean =
       rawName != name || typeTag.tsType.jsonCodecRef.isDefined
 
-    def declaration(ctx: TsGenerationCtx): String = {
-      val tpeRef = typeTag.tsType.resolve(ctx)
+    def declaration(gen: TsGenerator): String = {
+      val tpeRef = typeTag.tsType.resolve(gen)
       s"    readonly $name: $tpeRef"
     }
 
-    def fieldInfoDeclaration(ctx: TsGenerationCtx): String = {
+    def fieldInfoDeclaration(gen: TsGenerator): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
-      val codecDef = typeTag.tsType.jsonCodecRef.map(c => s"codec: () => ${c.resolve(ctx)}")
+      val codecDef = typeTag.tsType.jsonCodecRef.map(c => s"codec: () => ${c.resolve(gen)}")
       (rawNameDef ++ codecDef).mkString(s"${quote(name)}: {", ", ", "}")
     }
   }

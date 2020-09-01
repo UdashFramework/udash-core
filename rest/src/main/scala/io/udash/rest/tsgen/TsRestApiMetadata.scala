@@ -20,6 +20,7 @@ import scala.annotation.implicitNotFound
 @methodTag[BodyTypeTag]
 final case class TsRestApiMetadata[T](
   @reifyName name: String,
+  @infer moduleTag: TsModuleTag[T],
 
   @multi @rpcMethodMetadata
   @tagged[Prefix](whenUntagged = new Prefix)
@@ -58,16 +59,19 @@ final case class TsRestApiMetadata[T](
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
   formBodyMethods: List[TsHttpFormBodyMethod[_]]
 ) extends TypedMetadata[T] with TsDefinition {
+  val module: TsModule =
+    moduleTag.module
+
   val methods: List[TsRestMethod[_]] =
     (List.empty[TsRestMethod[_]] ++ prefixes ++ gets ++ customBodyMethods ++ jsonBodyMethods ++ formBodyMethods)
       .sortBy(_.info.pos.index)
 
-  def definition(ctx: TsGenerationCtx): String = {
-    val methodDecls = methods.iterator.map(_.declaration(ctx)).mkString("\n")
+  def contents(gen: TsGenerator): String = {
+    val methodDecls = methods.iterator.map(_.declaration(gen)).mkString("\n")
     s"""export class $name {
        |    constructor(
-       |        private _handle: ${ctx.rawModule}.HandleRequest,
-       |        private _prefixParams?: ${ctx.rawModule}.RestParameters
+       |        private _handle: ${gen.rawModule}.HandleRequest,
+       |        private _prefixParams?: ${gen.rawModule}.RestParameters
        |    ) {}
        |
        |$methodDecls
@@ -82,7 +86,7 @@ object TsRestApiMetadata extends RpcMetadataCompanion[TsRestApiMetadata] {
 sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
   def info: TsMethodInfo[RestMethodTag]
   def bodyParams: List[TsRestParameter[Body, TsType, _]]
-  def declaration(ctx: TsGenerationCtx): String
+  def declaration(gen: TsGenerator): String
 
   val path: List[String] = PlainValue.decodePath(info.methodTag.path).map(_.value)
 
@@ -91,27 +95,27 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
 
   protected def quote(str: String): String = JsonStringOutput.write(str)
 
-  protected def mkWritePlain(ctx: TsGenerationCtx, codecRef: Opt[TsReference], value: String): String =
-    codecRef.fold(value)(c => s"${c.resolve(ctx)}.writePlain($value)")
+  protected def mkWritePlain(gen: TsGenerator, codecRef: Opt[TsReference], value: String): String =
+    codecRef.fold(value)(c => s"${c.resolve(gen)}.writePlain($value)")
 
-  protected def mkPair(ctx: TsGenerationCtx, p: TsRestParameter[_, TsPlainType, _]): String = {
-    s"[${quote(p.rawName)}, ${mkWritePlain(ctx, p.typeTag.tsType.plainCodecRef, p.name)}]"
+  protected def mkPair(gen: TsGenerator, p: TsRestParameter[_, TsPlainType, _]): String = {
+    s"[${quote(p.rawName)}, ${mkWritePlain(gen, p.typeTag.tsType.plainCodecRef, p.name)}]"
   }
 
-  protected def restParamsDefn(ctx: TsGenerationCtx): String = {
+  protected def restParamsDefn(gen: TsGenerator): String = {
     val pathValues =
       (path.iterator.map(quote) ++ info.pathParams.iterator.flatMap { p =>
-        Iterator(mkWritePlain(ctx, p.typeTag.tsType.plainCodecRef, p.name)) ++
+        Iterator(mkWritePlain(gen, p.typeTag.tsType.plainCodecRef, p.name)) ++
           PlainValue.decodePath(p.paramTag.pathSuffix).iterator.map(pv => quote(pv.value))
       }).mkStringOrEmpty("\n        _params.path.push(", ", ", ")")
 
-    val queryValues = info.queryParams.iterator.map(mkPair(ctx, _))
+    val queryValues = info.queryParams.iterator.map(mkPair(gen, _))
       .mkStringOrEmpty("\n        _params.query.push(", ", ", ")")
 
-    val headerValues = info.headerParams.iterator.map(mkPair(ctx, _))
+    val headerValues = info.headerParams.iterator.map(mkPair(gen, _))
       .mkStringOrEmpty("\n        _params.header.push(", ", ", ")")
 
-    s"const _params = ${ctx.rawModule}.newParameters(this._prefixParams)$pathValues$queryValues$headerValues"
+    s"const _params = ${gen.rawModule}.newParameters(this._prefixParams)$pathValues$queryValues$headerValues"
   }
 }
 
@@ -131,12 +135,12 @@ final case class TsPrefixMethod[T](
 ) extends TsRestMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
-  def declaration(ctx: TsGenerationCtx): String = {
-    val returnType = result.value.resolve(ctx)
-    val paramDecls = params.iterator.map(_.declaration(ctx)).mkString("(", ", ", ")")
+  def declaration(gen: TsGenerator): String = {
+    val returnType = result.value.resolve(gen)
+    val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
 
     s"""    ${info.name}$paramDecls: $returnType {
-       |        ${restParamsDefn(ctx)}
+       |        ${restParamsDefn(gen)}
        |        return new $returnType(this._handle, _params)
        |    }
        |""".stripMargin
@@ -147,19 +151,19 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
   def info: TsMethodInfo[HttpMethodTag]
   def result: TsResultTypeTag[T]
 
-  protected def bodyDecl(ctx: TsGenerationCtx): String
+  protected def bodyDecl(gen: TsGenerator): String
 
-  def declaration(ctx: TsGenerationCtx): String = {
-    val paramDecls = params.iterator.map(_.declaration(ctx)).mkString("(", ", ", ")")
-    val returnType = result.tsType.resolve(ctx)
+  def declaration(gen: TsGenerator): String = {
+    val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
+    val returnType = result.tsType.resolve(gen)
     val methodStr = quote(info.methodTag.method.name)
 
     val readerRef = result.tsType.responseReaderRef
-      .fold(s"${ctx.codecsModule}.responseFromBody<$returnType>()")(_.resolve(ctx))
+      .fold(s"${gen.codecsModule}.responseFromBody<$returnType>()")(_.resolve(gen))
 
     s"""    ${info.name}$paramDecls: Promise<$returnType> {
-       |        ${restParamsDefn(ctx)}
-       |        ${bodyDecl(ctx)}
+       |        ${restParamsDefn(gen)}
+       |        ${bodyDecl(gen)}
        |        return this._handle({method: $methodStr, parameters: _params, body: _body})
        |            .then($readerRef.readResponse)
        |    }
@@ -173,7 +177,7 @@ final case class TsHttpGetMethod[T](
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
-  protected def bodyDecl(ctx: TsGenerationCtx): String =
+  protected def bodyDecl(gen: TsGenerator): String =
     "const _body = null"
 }
 
@@ -182,12 +186,12 @@ final case class TsHttpJsonBodyMethod[T](
   @infer @checked result: TsResultTypeTag[T],
   @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsJsonType, _]],
 ) extends TsHttpMethod[T] {
-  protected def bodyDecl(ctx: TsGenerationCtx): String = {
+  protected def bodyDecl(gen: TsGenerator): String = {
     val bodyObj = bodyParams.iterator.map { p =>
-      val encoded = p.typeTag.tsType.jsonCodecRef.fold(p.name)(cr => s"${cr.resolve(ctx)}.writeJson(${p.name})")
+      val encoded = p.typeTag.tsType.jsonCodecRef.fold(p.name)(cr => s"${cr.resolve(gen)}.writeJson(${p.name})")
       s"${quote(p.rawName)}: $encoded"
     }.mkString("{", ", ", "}")
-    s"const _body = ${ctx.rawModule}.mkJsonBody($bodyObj)"
+    s"const _body = ${gen.rawModule}.mkJsonBody($bodyObj)"
   }
 }
 
@@ -196,9 +200,9 @@ final case class TsHttpFormBodyMethod[T](
   @infer @checked result: TsResultTypeTag[T],
   @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsPlainType, _]],
 ) extends TsHttpMethod[T] {
-  protected def bodyDecl(ctx: TsGenerationCtx): String = {
-    val formFields = bodyParams.iterator.map(mkPair(ctx, _)).mkString(", ")
-    s"const _body = ${ctx.rawModule}.mkFormBody($formFields)"
+  protected def bodyDecl(gen: TsGenerator): String = {
+    val formFields = bodyParams.iterator.map(mkPair(gen, _)).mkString(", ")
+    s"const _body = ${gen.rawModule}.mkFormBody($formFields)"
   }
 }
 
@@ -209,10 +213,10 @@ final case class TsHttpCustomBodyMethod[T](
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 
-  protected def bodyDecl(ctx: TsGenerationCtx): String = {
+  protected def bodyDecl(gen: TsGenerator): String = {
     val tsType = bodyParam.typeTag.tsType
     val codecRef = tsType.bodyCodecRef
-      .fold(s"${ctx.codecsModule}.bodyFromJson<${tsType.resolve(ctx)}>()")(_.resolve(ctx))
+      .fold(s"${gen.codecsModule}.bodyFromJson<${tsType.resolve(gen)}>()")(_.resolve(gen))
     s"const _body = $codecRef.writeBody(${bodyParam.name})"
   }
 }
@@ -225,6 +229,6 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
   @reifyAnnot paramTag: Tag,
   @infer typeTag: TsTypeTag[TsT, T]
 ) extends TypedMetadata[T] {
-  def declaration(ctx: TsGenerationCtx): String =
-    s"$name: ${typeTag.tsType.resolve(ctx)}"
+  def declaration(gen: TsGenerator): String =
+    s"$name: ${typeTag.tsType.resolve(gen)}"
 }

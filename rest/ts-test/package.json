@@ -1,0 +1,28 @@
+{
+  "name": "udash-rest-client-test",
+  "version": "0.8.5",
+  "description": "TypeScript client for Udash REST",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UdashFramework/udash-core"
+  },
+  "author": "AVSystem",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^4.0.2"
+  },
+  "files": [
+    "src",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "udash-rest-client": "file:../ts"
+  }
+}

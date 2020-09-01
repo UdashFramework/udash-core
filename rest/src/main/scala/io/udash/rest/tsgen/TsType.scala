@@ -32,62 +32,62 @@ object TsResponseType extends TsTypeCompanion[TsResponseType, TsResponseTypeTag]
 
 object TsType {
   def nullableJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String =
-      s"${tpe.resolve(ctx)} | null"
+    def resolve(gen: TsGenerator): String =
+      s"${tpe.resolve(gen)} | null"
     def jsonCodecRef: Opt[TsReference] =
-      tpe.jsonCodecRef.map(ref => ctx => s"${ctx.codecsModule}.nullable(${ref.resolve(ctx)})")
+      tpe.jsonCodecRef.map(ref => gen => s"${gen.codecsModule}.nullable(${ref.resolve(gen)})")
   }
 
   def arrayJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String =
-      s"${tpe.resolve(ctx)}[]"
+    def resolve(gen: TsGenerator): String =
+      s"${tpe.resolve(gen)}[]"
     def jsonCodecRef: Opt[TsReference] =
-      tpe.jsonCodecRef.map(ref => ctx => s"${ctx.codecsModule}.array(${ref.resolve(ctx)})")
+      tpe.jsonCodecRef.map(ref => gen => s"${gen.codecsModule}.array(${ref.resolve(gen)})")
   }
 
   def jsonAsBody(tpe: TsJsonType): TsBodyType = new TsBodyType {
-    def resolve(ctx: TsGenerationCtx): String = tpe.resolve(ctx)
+    def resolve(gen: TsGenerator): String = tpe.resolve(gen)
     def bodyCodecRef: Opt[TsReference] =
-      tpe.jsonCodecRef.map(ref => ctx => s"${ctx.codecsModule}.bodyFromJson(${ref.resolve(ctx)})")
+      tpe.jsonCodecRef.map(ref => gen => s"${gen.codecsModule}.bodyFromJson(${ref.resolve(gen)})")
   }
 
   def bodyAsResponse(tpe: TsBodyType): TsResponseType = new TsResponseType {
-    def resolve(ctx: TsGenerationCtx): String = tpe.resolve(ctx)
+    def resolve(gen: TsGenerator): String = tpe.resolve(gen)
     def responseReaderRef: Opt[TsReference] =
-      tpe.bodyCodecRef.map(ref => ctx => s"${ctx.codecsModule}.responseFromBody(${ref.resolve(ctx)})")
+      tpe.bodyCodecRef.map(ref => gen => s"${gen.codecsModule}.responseFromBody(${ref.resolve(gen)})")
   }
 
   final val Void: TsResponseType = new TsResponseType {
-    def resolve(ctx: TsGenerationCtx): String = "void"
-    def responseReaderRef: Opt[TsReference] = Opt(ctx => s"${ctx.codecsModule}.Void")
+    def resolve(gen: TsGenerator): String = "void"
+    def responseReaderRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Void")
   }
 
   final val Never: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String = "never"
+    def resolve(gen: TsGenerator): String = "never"
     def plainCodecRef: Opt[TsReference] = Opt.Empty
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
 
   final val Boolean: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String = "boolean"
-    def plainCodecRef: Opt[TsReference] = Opt(ctx => s"${ctx.codecsModule}.Boolean")
+    def resolve(gen: TsGenerator): String = "boolean"
+    def plainCodecRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Boolean")
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
 
   final val Integer: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String = "number"
-    def plainCodecRef: Opt[TsReference] = Opt(ctx => s"${ctx.codecsModule}.Integer")
+    def resolve(gen: TsGenerator): String = "number"
+    def plainCodecRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Integer")
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
 
   final val Float: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String = "number"
-    def plainCodecRef: Opt[TsReference] = Opt(ctx => s"${ctx.codecsModule}.Float")
+    def resolve(gen: TsGenerator): String = "number"
+    def plainCodecRef: Opt[TsReference] = Opt(gen => s"${gen.codecsModule}.Float")
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
 
   final val String: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(ctx: TsGenerationCtx): String = "string"
+    def resolve(gen: TsGenerator): String = "string"
     def plainCodecRef: Opt[TsReference] = Opt.Empty
     def jsonCodecRef: Opt[TsReference] = Opt.Empty
   }
