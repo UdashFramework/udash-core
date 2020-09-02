@@ -5,7 +5,7 @@ import com.avsystem.commons._
 
 import scala.scalajs.js
 
-private[udash] object CrossCollections {
+object CrossCollections {
 
   import scala.scalajs.js.JSConverters._
 
