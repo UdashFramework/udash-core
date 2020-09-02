@@ -5,7 +5,7 @@ import com.avsystem.commons._
 
 import scala.collection.compat._
 
-private[udash] object CrossCollections {
+object CrossCollections {
   def toCrossArray[T](t: Iterable[T]): MBuffer[T] = t.to(MArrayBuffer)
   def createArray[T]: MBuffer[T] = new MArrayBuffer[T]
   def createDictionary[T]: MMap[String, T] = new MHashMap[String, T]
