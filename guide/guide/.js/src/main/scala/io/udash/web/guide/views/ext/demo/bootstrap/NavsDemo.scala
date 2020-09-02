@@ -53,7 +53,7 @@ object NavsDemo extends AutoDemo {
         elemFactory = (panel, nested) => a(
           Navigation.link,
           href := "",
-          onclick :+= ((_: Event) => selected.set(panel.get), true)
+          onclick :+= ((_: Event) => selected.set(panel.get).thenReturn(true))
         )(nested(bind(panel.asModel.subProp(_.title)))).render,
         isActive = panel => panel.combine(selected)((panel, selected) =>
           panel.title == selected.title

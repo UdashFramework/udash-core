@@ -26,7 +26,7 @@ trait FutureRestImplicits {
       def toAsync[A](fa: Future[A]): RawRest.Async[A] =
         fa.onCompleteNow
       def fromAsync[A](async: RawRest.Async[A]): Future[A] =
-        Promise[A].setup(p => async(p.complete)).future
+        Promise[A]().setup(p => async(p.complete)).future
     }
 
   @implicitNotFound("${T} is not a valid result type of HTTP REST method - it must be a Future")

@@ -1,7 +1,7 @@
 package io.udash.bootstrap
 package dropdown
 
-import com.avsystem.commons.misc._
+import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bindings.modifiers.Binding.NestedInterceptor

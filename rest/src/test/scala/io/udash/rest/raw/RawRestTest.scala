@@ -141,7 +141,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
   }
 
   def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
-    val promise = Promise[RestResponse]
+    val promise = Promise[RestResponse]()
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)
   }

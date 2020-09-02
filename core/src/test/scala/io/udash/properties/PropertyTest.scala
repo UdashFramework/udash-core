@@ -1340,7 +1340,7 @@ class PropertyTest extends UdashCoreTest {
       val sp = p.asSeq[Int]
       sp.append(5)
 
-      sp.reversed().get shouldBe (5 to(1, -1))
+      sp.reversed().get shouldBe 5.to(1, -1)
       sp.get shouldBe (1 to 5)
       p.get shouldBe (1 to 5)
     }
@@ -1351,7 +1351,7 @@ class PropertyTest extends UdashCoreTest {
       val sp = p.asSeq[Int]
       sp.prepend(0)
 
-      sp.transformElements(_ + 1).reversed().get shouldBe (5 to(1, -1))
+      sp.transformElements(_ + 1).reversed().get shouldBe 5.to(1, -1)
       sp.get shouldBe (0 to 4)
       p.get shouldBe (0 to 4)
     }
