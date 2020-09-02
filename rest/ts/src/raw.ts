@@ -47,21 +47,6 @@ export interface RestContentBody {
 
 export type RestBody = RestContentBody | null
 
-export function mkJsonBody(json: any): RestBody {
-    return {
-        content: JSON.stringify(json),
-        contentType: "application/json; charset=utf-8"
-    }
-}
-
-export function mkFormBody(...params: [string, string][]): RestBody {
-    return {
-        content: encodeQuery(params),
-        contentType: "application/x-www-form-urlencoded; charset=utf-8"
-    }
-}
-
-
 export interface RestRequest {
     readonly method: RestMethod,
     readonly parameters: RestParameters,

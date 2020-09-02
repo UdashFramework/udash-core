@@ -2,7 +2,7 @@ package io.udash.rest
 package tsgen.other
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, Opt}
-import com.avsystem.commons.serialization.{flatten, name}
+import com.avsystem.commons.serialization.flatten
 import io.udash.rest.tsgen.{MajFriend, TsRestApiCompanion, TsRestDataCompanion}
 
 import scala.concurrent.Future
@@ -13,7 +13,7 @@ object Enumik extends AbstractValueEnumCompanion[Enumik] {
 }
 
 @flatten("type") sealed trait Tree
-@name("bra") case class Branch(left: Opt[Tree], right: Opt[Tree]) extends Tree
+case class Branch(left: Opt[Tree], right: Opt[Tree]) extends Tree
 case object Leaf extends Tree
 object Tree extends TsRestDataCompanion[Tree]
 

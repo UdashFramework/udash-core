@@ -10,7 +10,21 @@ import io.udash.rest.tsgen.TsTypeMetadata.Record.recursionBreaker
 
 import scala.util.DynamicVariable
 
-sealed trait TsTypeMetadata[T] extends TypedMetadata[T] with TsJsonType
+sealed trait TsTypeMetadata[T] extends TypedMetadata[T] with TsJsonType {
+  def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+    if(transparent) valueRef
+    else s"${resolve(gen)}.toJson($valueRef)"
+
+  def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+    if(transparent) s"$valueRef as ${resolve(gen)}"
+    else s"${resolve(gen)}.fromJson($valueRef)"
+
+  override def mkJsonWriter(gen: TsGenerator): String =
+    if(!transparent) s"${resolve(gen)}.toJson" else super.mkJsonWriter(gen)
+
+  override def mkJsonReader(gen: TsGenerator): String =
+    if(!transparent) s"${resolve(gen)}.fromJson" else super.mkJsonReader(gen)
+}
 
 object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   private def quote(str: String): String = JsonStringOutput.write(str)
@@ -25,7 +39,10 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
       moduleTag.module
 
     lazy val managedCases: List[Case[_]] =
-      cases.filter(_.managed)
+      cases.filterNot(_.transparent)
+
+    def transparent: Boolean =
+      managedCases.isEmpty
 
     val name: String =
       info.sourceName
@@ -41,31 +58,36 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
         case Opt.Empty => s"{readonly ${cse.name}: ${cse.tsType.resolve(gen)}}"
       }
 
+      def readerOrWriter(reader: Boolean): String = discriminator match {
+        case Opt(discr) =>
+          val funName = if (reader) "flatJsonToUnion" else "unionToFlatJson"
+          s"${gen.codecsModule}.$funName(${quote(discr)}, managedCases)"
+        case Opt.Empty =>
+          val funName = if (reader) "nestedJsonToUnion" else "unionToNestedJson"
+          s"${gen.codecsModule}.$funName(managedCases)"
+      }
+
       val namespaceDecl = if (managedCases.isEmpty) "" else {
         val caseInfos = managedCases.iterator.map(_.caseInfoDeclaration(gen)).mkString("{", ", ", "}")
-        val codecDecl = discriminator match {
-          case Opt(discr) => s"${gen.codecsModule}.flatUnion(${quote(discr)}, $caseInfos)"
-          case Opt.Empty => s"${gen.codecsModule}.nestedUnion($caseInfos)"
-        }
 
         s"""
            |export namespace $name {
-           |    export const codec: ${gen.codecsModule}.JsonCodec<$name> = $codecDecl
+           |    const managedCases: ${gen.codecsModule}.CaseInfos = $caseInfos
+           |    export const fromJson: ${gen.codecsModule}.JsonReader<$name> =
+           |        ${readerOrWriter(reader = true)}
+           |    export const toJson: ${gen.codecsModule}.JsonWriter<$name> =
+           |        ${readerOrWriter(reader = false)}
            |}""".stripMargin
       }
 
       s"export type $name = ${cases.iterator.map(caseType).mkString(" | ")}$namespaceDecl\n"
     }
-
-    def jsonCodecRef: Opt[TsReference] =
-      if (managedCases.isEmpty) Opt.Empty
-      else Opt(gen => s"${resolve(gen)}.codec")
   }
 
   sealed abstract class Case[T] extends TypedMetadata[T] {
     def info: GenCaseInfo[T]
     def moduleTag: TsModuleTag[T]
-    def managed: Boolean
+    def transparent: Boolean
     def tsType: TsJsonType
 
     lazy val module: TsModule =
@@ -79,8 +101,9 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def caseInfoDeclaration(gen: TsGenerator): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
-      val codecDef = tsType.jsonCodecRef.map(c => s"codec: () => ${c.resolve(gen)}")
-      (rawNameDef ++ codecDef).mkString(s"${quote(name)}: {", ", ", "}")
+      val readerDef = if(tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
+      val writerDef = if(tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
+      (rawNameDef ++ readerDef ++ writerDef).mkString(s"${quote(name)}: {", ", ", "}")
     }
   }
 
@@ -92,7 +115,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @infer @checked jsonTypeTag: TsJsonTypeTag[T]
   ) extends Case[T] {
     def tsType: TsJsonType = jsonTypeTag.tsType
-    def managed: Boolean = tsType.jsonCodecRef.isDefined
+    def transparent: Boolean = tsType.transparent
   }
 
   @positioned(positioned.here)
@@ -102,16 +125,16 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @multi @adtParamMetadata fields: List[Field[_]],
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition { rec =>
     lazy val managedFields: List[Field[_]] =
-      fields.filter(_.managed)
+      fields.filterNot(_.transparent)
 
-    def managed: Boolean = recursionBreaker.value match {
-      case Opt(thiz) if thiz == this => false
-      case Opt(_) => isManaged
-      case Opt.Empty => recursionBreaker.withValue(Opt(this))(isManaged)
+    def transparent: Boolean = recursionBreaker.value match {
+      case Opt(thiz) if thiz == this => true
+      case Opt(_) => isTransparent
+      case Opt.Empty => recursionBreaker.withValue(Opt(this))(isTransparent)
     }
 
-    private def isManaged: Boolean =
-      name != rawName || managedFields.nonEmpty
+    private def isTransparent: Boolean =
+      name == rawName && managedFields.isEmpty
 
     def tsType: TsJsonType = this
 
@@ -122,16 +145,16 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
         val fieldInfos = managedFields.iterator.map(_.fieldInfoDeclaration(gen)).mkString("{", ", ", "}")
         s"""
            |export namespace $name {
-           |    export const codec: ${gen.codecsModule}.JsonCodec<$name> = ${gen.codecsModule}.record($fieldInfos)
+           |    const managedFields: ${gen.codecsModule}.FieldInfos = $fieldInfos
+           |    export const fromJson: ${gen.codecsModule}.JsonReader<$name> =
+           |        ${gen.codecsModule}.jsonToRecord(managedFields)
+           |    export const toJson: ${gen.codecsModule}.JsonWriter<$name> =
+           |        ${gen.codecsModule}.recordToJson(managedFields)
            |}""".stripMargin
       }
 
       s"export interface $name {$fieldDefs}$namespaceDecl\n"
     }
-
-    def jsonCodecRef: Opt[TsReference] =
-      if (managedFields.isEmpty) Opt.Empty
-      else Opt(gen => s"${resolve(gen)}.codec")
   }
   object Record {
     private val recursionBreaker =
@@ -144,14 +167,18 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @infer moduleTag: TsModuleTag[T],
     @infer @checked value: ValueOf[T],
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
-    def managed: Boolean = false
-
     def tsType: TsJsonType = this
 
     def contents(gen: TsGenerator): String =
       s"export type $name = {}\n"
 
-    def jsonCodecRef: Opt[TsReference] = Opt.Empty
+    def transparent: Boolean = true
+
+    override def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+      valueRef
+
+    override def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+      s"$valueRef as ${resolve(gen)}"
   }
 
   final case class Field[T](
@@ -164,8 +191,10 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     val rawName: String =
       info.annotName.map(_.name).getOrElse(info.sourceName)
 
-    def managed: Boolean =
-      rawName != name || typeTag.tsType.jsonCodecRef.isDefined
+    def tsType: TsJsonType = typeTag.tsType
+
+    def transparent: Boolean =
+      rawName == name && tsType.transparent
 
     def declaration(gen: TsGenerator): String = {
       val tpeRef = typeTag.tsType.resolve(gen)
@@ -174,8 +203,9 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def fieldInfoDeclaration(gen: TsGenerator): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
-      val codecDef = typeTag.tsType.jsonCodecRef.map(c => s"codec: () => ${c.resolve(gen)}")
-      (rawNameDef ++ codecDef).mkString(s"${quote(name)}: {", ", ", "}")
+      val readerDef = if(tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
+      val writerDef = if(tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
+      (rawNameDef ++ readerDef ++ writerDef).mkString(s"${quote(name)}: {", ", ", "}")
     }
   }
 }

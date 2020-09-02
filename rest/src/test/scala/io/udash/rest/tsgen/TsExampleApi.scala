@@ -39,7 +39,7 @@ object TsExampleApiImpl extends TsExampleApi {
 
 object test {
   def main(args: Array[String]): Unit = {
-    val ctx = new TsGenerator("codecs", "raw")
+    val ctx = new TsGenerator
     ctx.resolve(TsExampleApi.tsRestApiMetadata)
     ctx.write(new File("./rest/ts-test/src"))
 
