@@ -32,9 +32,7 @@ class ErrorView extends View with CssView {
     )
   ).render
 
-  private def jqTemplate = jQ(content)
-
-  private def jqWindow = jQ(org.scalajs.dom.window)
+  private val jqWindow = jQ(org.scalajs.dom.window)
 
   locally {
     jqWindow.on(EventName.resize, (_: Element, _: JQueryEvent) => onResize())
@@ -46,7 +44,7 @@ class ErrorView extends View with CssView {
       val h = jqWindow.height() -
         jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d) -
         jQ(s".${HeaderStyles.header.className}").outerHeight().getOrElse(0d)
-      jqTemplate.css("min-height", s"${h}px")
+      jQ(content).css("min-height", s"${h}px")
     }
   }
 

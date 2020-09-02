@@ -366,7 +366,7 @@ object Bindings extends Bindings {
      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
      * If callback returns true, other listeners which are queued will not be invoked.
      * If callback returns false, next callback in the queue will be invoked.
-     * Results other than booleans are treated as false - the don't prevent event propagation.
+     * Results other than booleans are treated as false - they don't prevent event propagation.
      */
     def :+=[T <: Event](callback: T => Any): Modifier[Element] =
       AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Any) => {
