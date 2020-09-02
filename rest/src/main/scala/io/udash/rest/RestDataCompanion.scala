@@ -8,6 +8,7 @@ import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.openapi._
 import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
+import io.udash.rest.tsgen._
 
 trait CodecWithStructure[T] {
   def codec: GenCodec[T]
@@ -15,16 +16,16 @@ trait CodecWithStructure[T] {
 }
 
 /**
-  * Base class for companion objects of ADTs (case classes, objects, sealed hierarchies) which are used as
-  * parameter or result types in REST API traits. Automatically provides instances of
-  * `GenCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]].
-  *
-  * @example
-  * {{{
-  *   case class User(id: String, name: String, birthYear: Int)
-  *   object User extends RestDataCompanion[User]
-  * }}}
-  */
+ * Base class for companion objects of ADTs (case classes, objects, sealed hierarchies) which are used as
+ * parameter or result types in REST API traits. Automatically provides instances of
+ * `GenCodec` and [[io.udash.rest.openapi.RestSchema RestSchema]].
+ *
+ * @example
+ * {{{
+ *   case class User(id: String, name: String, birthYear: Int)
+ *   object User extends RestDataCompanion[User]
+ * }}}
+ */
 abstract class RestDataCompanion[T](implicit
   instances: MacroInstances[DefaultRestImplicits, CodecWithStructure[T]]
 ) extends {
@@ -34,19 +35,19 @@ abstract class RestDataCompanion[T](implicit
 }
 
 /**
-  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
-  * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
-  * assuming that these instances are available for the wrapped type.
-  *
-  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
-  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
-  *
-  * @example
-  * {{{
-  *   case class UserId(id: String) extends AnyVal
-  *   object UserId extends RestDataWrapperCompanion[String, UserId]
-  * }}}
-  */
+ * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
+ * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
+ * assuming that these instances are available for the wrapped type.
+ *
+ * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
+ * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
+ *
+ * @example
+ * {{{
+ *   case class UserId(id: String) extends AnyVal
+ *   object UserId extends RestDataWrapperCompanion[String, UserId]
+ * }}}
+ */
 abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
 ) extends TransparentWrapperCompanion[Wrapped, T] {
@@ -81,6 +82,8 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   implicit def responseAsReal(implicit wrappedAsRaw: AsReal[RestResponse, Wrapped]): AsReal[RestResponse, T] =
     AsReal.fromTransparentWrapping
 
+  // OpenAPI related implicits
+
   implicit def restSchema(implicit wrappedSchema: RestSchema[Wrapped]): RestSchema[T] =
     nameAndAdjusters.restSchema(wrappedSchema)
 
@@ -101,4 +104,18 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
       def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
         wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
     }
+
+  // TypeScript related implicits
+
+  implicit def tsPlainTypeTag(implicit moduleTag: TsModuleTag[T], wrappedTag: TsPlainTypeTag[Wrapped]): TsPlainTypeTag[T] =
+    TsPlainTypeTag(TsPlainNewtype(moduleTag.module, nameAndAdjusters.sourceName, wrappedTag.tsType))
+
+  implicit def tsJsonTypeTag(implicit moduleTag: TsModuleTag[T], wrappedTag: TsJsonTypeTag[Wrapped]): TsJsonTypeTag[T] =
+    TsJsonTypeTag(TsJsonNewtype(moduleTag.module, nameAndAdjusters.sourceName, wrappedTag.tsType))
+
+  implicit def tsBodyTypeTag(implicit moduleTag: TsModuleTag[T], wrappedTag: TsBodyTypeTag[Wrapped]): TsBodyTypeTag[T] =
+    TsBodyTypeTag(TsBodyNewtype(moduleTag.module, nameAndAdjusters.sourceName, wrappedTag.tsType))
+
+  implicit def tsResponseTypeTag(implicit moduleTag: TsModuleTag[T], wrappedTag: TsResponseTypeTag[Wrapped]): TsResponseTypeTag[T] =
+    TsResponseTypeTag(TsResponseNewtype(moduleTag.module, nameAndAdjusters.sourceName, wrappedTag.tsType))
 }
