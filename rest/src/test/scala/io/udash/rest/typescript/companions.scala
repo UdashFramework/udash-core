@@ -1,5 +1,5 @@
 package io.udash.rest
-package tsgen
+package typescript
 
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.serialization.GenCodec

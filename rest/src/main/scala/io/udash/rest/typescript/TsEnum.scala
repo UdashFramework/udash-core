@@ -1,4 +1,4 @@
-package io.udash.rest.tsgen
+package io.udash.rest.typescript
 
 case class TsEnum(module: TsModule, name: String, values: Seq[String])
   extends TsJsonType with TsPlainType with TsDefinition {

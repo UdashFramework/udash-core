@@ -1,9 +1,9 @@
 package io.udash.rest
-package tsgen.other
+package typescript.other
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, Opt}
 import com.avsystem.commons.serialization.flatten
-import io.udash.rest.tsgen.{MajFriend, TsRestApiCompanion, TsRestDataCompanion}
+import io.udash.rest.typescript.{MajFriend, TsRestApiCompanion, TsRestDataCompanion}
 
 import scala.concurrent.Future
 

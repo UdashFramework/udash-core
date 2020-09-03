@@ -1,4 +1,4 @@
-package io.udash.rest.tsgen
+package io.udash.rest.typescript
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.positioned
@@ -6,7 +6,7 @@ import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{GenCaseInfo, GenParamInfo, GenUnionInfo}
-import io.udash.rest.tsgen.TsTypeMetadata.Record.recursionBreaker
+import io.udash.rest.typescript.TsTypeMetadata.Record.recursionBreaker
 
 import scala.util.DynamicVariable
 

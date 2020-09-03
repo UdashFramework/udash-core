@@ -1,5 +1,5 @@
 package io.udash.rest
-package tsgen
+package typescript
 
 import java.io.{File, FileWriter}
 
@@ -24,7 +24,7 @@ trait TsDefinition extends TsReference {
 }
 
 final case class TsModule(path: List[String], external: Boolean = false) {
-  val name: String = path.lastOpt.getOrElse("")
+  val name: String = path.lastOpt.getOrElse("_root_")
 
   override def toString: String =
     path.mkString(if (external) "" else "/", "/", "")

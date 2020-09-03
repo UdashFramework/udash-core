@@ -1,10 +1,10 @@
-package io.udash.rest.tsgen
+package io.udash.rest.typescript
 
 import java.io.File
 
 import com.avsystem.commons._
 import io.udash.rest._
-import io.udash.rest.tsgen.other.{Enumik, OtherApi, Tree}
+import io.udash.rest.typescript.other.{Enumik, OtherApi, Tree}
 
 import scala.concurrent.Future
 

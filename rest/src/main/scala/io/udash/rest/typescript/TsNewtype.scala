@@ -1,4 +1,4 @@
-package io.udash.rest.tsgen
+package io.udash.rest.typescript
 
 abstract class TsNewtype extends TsDefinition { this: TsType =>
   type TsT >: this.type <: TsType

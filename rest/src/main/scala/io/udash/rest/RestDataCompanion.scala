@@ -8,7 +8,7 @@ import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.openapi._
 import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
-import io.udash.rest.tsgen._
+import io.udash.rest.typescript._
 
 trait CodecWithStructure[T] {
   def codec: GenCodec[T]

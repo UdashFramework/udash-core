@@ -1,5 +1,5 @@
 package io.udash.rest
-package tsgen
+package typescript
 
 import com.avsystem.commons._
 import com.avsystem.commons.meta._

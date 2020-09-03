@@ -1,5 +1,5 @@
 package io.udash.rest
-package tsgen
+package typescript
 
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion, Timestamp}
 import com.avsystem.commons.{BMap, BSeq, BSet, JDate, Opt, OptArg, classTag}

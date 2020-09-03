@@ -1,5 +1,5 @@
 package io.udash.rest
-package tsgen
+package typescript
 
 sealed trait TsType extends TsReference
 sealed abstract class TsTypeCompanion[TsT <: TsType, Tag[X] <: TsTypeTag[TsT, X]] {
