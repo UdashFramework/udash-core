@@ -4,6 +4,7 @@ package tsgen
 import java.io.{File, FileWriter}
 
 import com.avsystem.commons._
+import com.avsystem.commons.serialization.json.JsonStringOutput
 
 import scala.annotation.tailrec
 
@@ -18,6 +19,8 @@ trait TsDefinition extends TsReference {
 
   def resolve(gen: TsGenerator): String =
     gen.resolve(this)
+
+  protected def quote(str: String): String = JsonStringOutput.write(str)
 }
 
 final case class TsModule(path: List[String], external: Boolean = false) {
