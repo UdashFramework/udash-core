@@ -2,7 +2,7 @@ package io.udash.rest
 package tsgen
 
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion, Timestamp}
-import com.avsystem.commons.{BSeq, BSet, JDate, Opt, OptArg, classTag}
+import com.avsystem.commons.{BMap, BSeq, BSet, JDate, Opt, OptArg, classTag}
 import io.udash.rest.raw.RawRest.AsyncEffect
 
 import scala.reflect.ClassTag
@@ -50,6 +50,9 @@ object TsTypeTag extends TsTypeTagLowPrio {
 
   implicit def setTag[C[X] <: BSet[X], T: TsJsonTypeTag]: TsJsonTypeTag[C[T]] =
     TsJsonTypeTag(TsType.arrayJson(TsJsonType[T]))
+
+  implicit def mapTag[M[X, Y] <: BMap[X, Y], K: TsPlainTypeTag, V: TsJsonTypeTag]: TsJsonTypeTag[M[K, V]] =
+    TsJsonTypeTag(TsType.dictionaryJson(TsPlainType[K], TsJsonType[V]))
 
   implicit def optTag[T: TsJsonTypeTag]: TsJsonTypeTag[Opt[T]] =
     TsJsonTypeTag(TsType.nullableJson(TsJsonType[T]))

@@ -24,6 +24,7 @@ trait TsExampleApi {
   @CustomBody def postMe(@Path id: Ajdi, @Query("tink") thing: Int, body: MajFriend): Future[Unit]
   @PUT def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String]
   @GET def find(id: Ajdi): Future[Opt[MajFriend]]
+  @GET def allFriends: Future[Map[Ajdi, MajFriend]]
 }
 object TsExampleApi extends TsRestApiCompanion[TsExampleApi]
 
@@ -33,11 +34,14 @@ object TsExampleApiImpl extends TsExampleApi {
     def gimmeTree: Future[Tree] = Future.successful(other.Leaf)
   }
 
-  def postMe(id: Ajdi, thing: Int, body: MajFriend): Future[Unit] = Future.unit
+  def postMe(id: Ajdi, thing: Int, body: MajFriend): Future[Unit] =
+    Future.unit
   def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String] =
     Future.successful("ajdi")
   def find(id: Ajdi): Future[Opt[MajFriend]] =
     Future.successful(Opt(MajFriend("Fred", 18, Seq("doing"), Opt(3.14))))
+  def allFriends: Future[Map[Ajdi, MajFriend]] =
+    Future.successful(Map.empty)
 }
 
 object test {

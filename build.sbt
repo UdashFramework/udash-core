@@ -320,7 +320,12 @@ lazy val rest = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
     cleanFiles ++= (baseDirectory.value / "ts/lib").allPaths.get,
-    ideExcludedDirectories := Seq(baseDirectory.value / "ts/lib", baseDirectory.value / "ts/node_modules"),
+    ideExcludedDirectories := Seq("ts", "ts-test").flatMap { dir =>
+      Seq(
+        baseDirectory.value / dir / "lib",
+        baseDirectory.value / dir / "node_modules"
+      )
+    },
     libraryDependencies ++= Dependencies.restJvmDeps.value,
   )
 
@@ -401,7 +406,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`, 
+  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`,
     `guide-guide`, `guide-packager`, `guide-selenium`)
   .settings(
     aggregateProjectSettings,

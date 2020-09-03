@@ -53,7 +53,7 @@ final case class TsModuleTag[T](module: TsModule) extends AnyVal
 final class TsGenerator(
   val codecsModule: String = "_codecs",
   val rawModule: String = "_raw",
-  /** Code automatically added at the beginning of every TS file */
+  // Code automatically added at the beginning of every TS file
   val prelude: String = ""
 ) {
   private class ModuleEntry(module: TsModule) {

@@ -9,6 +9,7 @@ sealed abstract class TsTypeCompanion[TsT <: TsType, Tag[X] <: TsTypeTag[TsT, X]
 trait TsPlainType extends TsType {
   def mkPlainWrite(gen: TsGenerator, valueRef: String): String
   def mkPlainWriter(gen: TsGenerator): String = s"(v => ${mkPlainWrite(gen, "v")})"
+  def dictionaryKeyType: TsType = TsType.String
 }
 object TsPlainType extends TsTypeCompanion[TsPlainType, TsPlainTypeTag]
 
@@ -74,6 +75,24 @@ object TsType {
       else s"($valueRef as any[]).map(${tpe.mkJsonReader(gen)})"
   }
 
+  def dictionaryJson(keyType: TsPlainType, valueType: TsJsonType): TsJsonType = new TsJsonType {
+    def transparent: Boolean = valueType.transparent
+
+    def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+      if(transparent) valueRef
+      else s"${gen.codecsModule}.mapValues($valueRef, ${valueType.mkJsonWriter(gen)})"
+
+    def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+      if(transparent) s"$valueRef as ${resolve(gen)}"
+      else {
+        val castValueRef = s"$valueRef as ${gen.codecsModule}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, any>"
+        s"${gen.codecsModule}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, copy = false)"
+      }
+
+    def resolve(gen: TsGenerator): String =
+      s"${gen.codecsModule}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, ${valueType.resolve(gen)}>"
+  }
+
   def jsonAsBody(tpe: TsJsonType): TsBodyType = new TsBodyType {
     def resolve(gen: TsGenerator): String = tpe.resolve(gen)
 
@@ -119,6 +138,7 @@ object TsType {
     def mkPlainWrite(gen: TsGenerator, valueRef: String): String = s"$valueRef.toString()"
     def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
     def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"$valueRef as number"
+    override def dictionaryKeyType: TsType = this
   }
 
   final val String: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {

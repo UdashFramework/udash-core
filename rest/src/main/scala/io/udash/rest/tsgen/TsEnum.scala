@@ -15,4 +15,7 @@ case class TsEnum(module: TsModule, name: String, values: Seq[String])
   def mkPlainWrite(gen: TsGenerator, valueRef: String): String = valueRef
   def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
   def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"$valueRef as ${resolve(gen)}"
+
+  // since TS representation of enum extends string, we can use it as Dictionary key type
+  override def dictionaryKeyType: TsType = this
 }

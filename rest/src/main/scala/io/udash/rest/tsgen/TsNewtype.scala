@@ -15,6 +15,11 @@ case class TsPlainNewtype(module: TsModule, name: String, wrapped: TsPlainType)
   type TsT = TsPlainType
 
   def mkPlainWrite(gen: TsGenerator, valueRef: String): String = valueRef
+
+  // If this type wraps a string or a number then we can use it as a dictionary key type
+  // because its TS representation extends string | number
+  override def dictionaryKeyType: TsType =
+    if (wrapped == TsType.String || wrapped == TsType.Number) this else wrapped.dictionaryKeyType
 }
 
 case class TsJsonNewtype(module: TsModule, name: String, wrapped: TsJsonType)

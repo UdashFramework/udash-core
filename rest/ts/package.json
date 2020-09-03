@@ -1,6 +1,6 @@
 {
   "name": "udash-rest-client",
-  "version": "0.8.5",
+  "version": "0.8.0-SNAPSHOT",
   "description": "TypeScript client for Udash REST",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

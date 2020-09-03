@@ -7,6 +7,24 @@ export type BodyWriter<T> = (value: T) => RestBody
 export type BodyReader<T> = (json: RestBody) => T
 export type ResponseReader<T> = (resp: RestResponse) => T
 
+export type Dictionary<K extends string | number, V> = {
+    [K0 in K]: V
+}
+
+type RawDict = { [key: string]: any }
+
+export function mapValues<K extends string | number, V, V0>(
+    dict: Dictionary<K, V>,
+    fun: (value: V) => V0,
+    copy: boolean = true
+) {
+    const result = (copy ? Object.assign({}, dict) : dict) as RawDict
+    for (const [key, value] of Object.entries(dict)) {
+        result[key] = fun(value as V)
+    }
+    return result as Dictionary<K, V0>
+}
+
 export function bodyToJson(body: RestBody): any {
     //TODO: what if charset is missing and content is not string?
     if (body != null && body.contentType.startsWith('application/json')) {
@@ -40,14 +58,13 @@ export function successfulResponseToBody(resp: RestResponse): RestBody {
     }
 }
 
-type RawDict = { [key: string]: any }
-
 //TODO: default values and transient default
 export interface FieldInfo<T> {
     readonly rawName?: string,
     reader?: JsonReader<T>
     writer?: JsonWriter<T>
 }
+
 export type FieldInfos = { [name: string]: FieldInfo<any> }
 
 export function jsonToRecord<T>(managedFields: FieldInfos): JsonReader<T> {
@@ -89,6 +106,7 @@ export interface CaseInfo<T> {
     reader?: JsonReader<T>
     writer?: JsonWriter<T>
 }
+
 export type CaseInfos = { [name: string]: CaseInfo<any> }
 
 export function nestedJsonToUnion<T>(managedCases: CaseInfos): JsonReader<T> {
