@@ -13,9 +13,10 @@ import scala.concurrent.Future
 case class Ajdi(id: String) extends AnyVal
 object Ajdi extends RestDataWrapperCompanion[String, Ajdi]
 
+@tsMutable
 case class MajFriend(
   name: String,
-  age: Int,
+  @tsMutable(false) age: Int,
   skills: List[String],
   @tsOptional(Opt.Empty) extra: Opt[Double],
   @tsOptional(Opt.Empty) updateTime: Opt[Timestamp] = Opt.Empty,

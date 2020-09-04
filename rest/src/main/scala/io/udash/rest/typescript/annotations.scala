@@ -3,6 +3,8 @@ package io.udash.rest.typescript
 import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 
+import scala.annotation.StaticAnnotation
+
 /**
  * Use this annotation on case class field or REST API method parameter to instruct the TypeScript generator
  * to emit an optional field or parameter.
@@ -19,3 +21,5 @@ class tsOptional[+T](serverFallbackValue: => T) extends AnnotationAggregate {
 
   def fallbackValue: T = serverFallbackValue
 }
+
+class tsMutable(val mutable: Boolean = true) extends StaticAnnotation

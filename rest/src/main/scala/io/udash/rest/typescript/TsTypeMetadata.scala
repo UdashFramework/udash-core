@@ -136,6 +136,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Record[T](
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
+    @optional @reifyAnnot tsMutable: Opt[tsMutable],
     @multi @adtParamMetadata fields: List[Field[_]],
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     lazy val managedFields: List[Field[_]] =
@@ -153,7 +154,8 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     def tsType: TsJsonType = this
 
     def contents(gen: TsGenerator): String = {
-      val fieldDefs = fields.iterator.map(_.declaration(gen)).mkString("\n", ",\n", "\n")
+      val mutable = tsMutable.fold(false)(_.mutable)
+      val fieldDefs = fields.iterator.map(_.declaration(gen, mutable)).mkString("\n", ",\n", "\n")
 
       val namespaceDecl = if (managedFields.isEmpty) "" else {
         val fieldInfos = managedFields.iterator.map(_.fieldInfoDeclaration(gen)).mkString("{", ", ", "}")
@@ -199,6 +201,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @composite info: GenParamInfo[T],
     @infer typeTag: TsJsonTypeTag[T],
     @optional @reifyAnnot tsOptional: Opt[tsOptional[T]],
+    @optional @reifyAnnot tsMutable: Opt[tsMutable],
   ) extends TypedMetadata[T] {
     val name: String =
       info.sourceName
@@ -217,9 +220,11 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     def transparent: Boolean =
       rawName == name && tsType.transparent
 
-    def declaration(gen: TsGenerator): String = {
+    def declaration(gen: TsGenerator, mutableByDefault: Boolean): String = {
+      val mutable = tsMutable.fold(mutableByDefault)(_.mutable)
+      val readonly = if (mutable) "" else "readonly "
       val qmark = if (optional) "?" else ""
-      s"    readonly $name$qmark: ${tsType.resolve(gen)}"
+      s"    $readonly$name$qmark: ${tsType.resolve(gen)}"
     }
 
     def fieldInfoDeclaration(gen: TsGenerator): String = {

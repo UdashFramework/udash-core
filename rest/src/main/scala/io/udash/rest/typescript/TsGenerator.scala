@@ -48,7 +48,7 @@ final case class TsModule(path: List[String], external: Boolean = false) {
     }
 }
 object TsModule {
-  def apply[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
+  def of[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
 }
 
 final case class TsModuleTag[T](module: TsModule) extends AnyVal

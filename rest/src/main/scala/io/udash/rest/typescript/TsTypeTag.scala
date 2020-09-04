@@ -79,7 +79,7 @@ object TsTypeTag extends TsTypeTagLowPrio {
   ): TsPlainAndJsonTypeTag[T] = {
     val name = classTag[T].runtimeClass.getSimpleName
     val values = companion.values.map(_.name)
-    TsPlainAndJsonTypeTag(TsEnum(TsModule[T], name, values))
+    TsPlainAndJsonTypeTag(TsEnum(TsModule.of[T], name, values))
   }
 }
 trait TsTypeTagLowPrio { this: TsTypeTag.type =>
