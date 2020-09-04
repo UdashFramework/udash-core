@@ -99,7 +99,7 @@ object TsType {
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else {
         val castValueRef = s"$valueRef as ${gen.codecsModule}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, any>"
-        s"${gen.codecsModule}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, copy = false)"
+        s"${gen.codecsModule}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, false)"
       }
 
     def resolve(gen: TsGenerator): String =
@@ -110,7 +110,7 @@ object TsType {
     def resolve(gen: TsGenerator): String = tpe.resolve(gen)
 
     def mkBodyWrite(gen: TsGenerator, valueRef: String): String =
-      tpe.mkJsonWrite(gen, s"${gen.codecsModule}.jsonToBody($valueRef)")
+      s"${gen.codecsModule}.jsonToBody(${tpe.mkJsonWrite(gen, valueRef)})"
 
     def mkBodyRead(gen: TsGenerator, valueRef: String): String =
       tpe.mkJsonRead(gen, s"${gen.codecsModule}.bodyToJson($valueRef)")

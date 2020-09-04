@@ -3,6 +3,8 @@ package io.udash.rest.typescript
 import java.io.File
 
 import com.avsystem.commons._
+import com.avsystem.commons.misc.Timestamp
+import com.avsystem.commons.serialization.{transparent, whenAbsent}
 import io.udash.rest._
 import io.udash.rest.typescript.other.{Enumik, OtherApi, Tree}
 
@@ -14,16 +16,22 @@ object Ajdi extends RestDataWrapperCompanion[String, Ajdi]
 case class MajFriend(
   name: String,
   age: Int,
-  skills: Seq[String],
+  skills: List[String],
   @tsOptional(Opt.Empty) extra: Opt[Double],
+  @tsOptional(Opt.Empty) updateTime: Opt[Timestamp] = Opt.Empty,
+  @tsOptional(Wrappy("")) wrappy: Wrappy = whenAbsent.value
 )
 object MajFriend extends TsRestDataCompanion[MajFriend]
+
+@transparent
+case class Wrappy(stringu: String) extends AnyVal
+object Wrappy extends TsRestDataCompanion[Wrappy]
 
 trait TsExampleApi {
   @POST def postStuff(int: Int, @tsOptional(Opt.Empty) optstr: Opt[String]): Future[Boolean]
   @Prefix("fuu/bar") def prefix(@Path("after/paf") paf: Boolean): OtherApi
   @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @Query("tink") @tsOptional(0) thing: Int): Future[Unit]
-  @PUT def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String]
+  @PUT def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String]
   @GET def find(id: Ajdi): Future[Opt[MajFriend]]
   @GET def allFriends: Future[Map[Ajdi, MajFriend]]
 }
@@ -37,10 +45,10 @@ object TsExampleApiImpl extends TsExampleApi {
 
   def postMe(id: Ajdi, body: MajFriend, thing: Int): Future[Unit] =
     Future.unit
-  def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String] =
+  def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String] =
     Future.successful("ajdi")
   def find(id: Ajdi): Future[Opt[MajFriend]] =
-    Future.successful(Opt(MajFriend("Fred", 18, Seq("doing"), Opt(3.14))))
+    Future.successful(Opt(MajFriend("Fred", 18, List("doing"), Opt(3.14))))
   def allFriends: Future[Map[Ajdi, MajFriend]] =
     Future.successful(Map.empty)
   def postStuff(int: Int, optstr: Opt[String]): Future[Boolean] =

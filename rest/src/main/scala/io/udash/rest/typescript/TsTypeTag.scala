@@ -1,9 +1,7 @@
 package io.udash.rest
 package typescript
 
-import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion, Timestamp}
-import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 import com.avsystem.commons.{BMap, BSeq, BSet, JDate, Opt, OptArg, Try, classTag}
 import io.udash.rest.raw.RawRest.AsyncEffect
 

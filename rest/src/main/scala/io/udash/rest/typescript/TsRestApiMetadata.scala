@@ -111,9 +111,7 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
 
     s"""const _params = ${gen.rawModule}.newParameters(
        |            this._prefixParams,
-       |            $pathValues,
-       |            $queryValues,
-       |            $headerValues
+       |            $pathValues, $queryValues, $headerValues
        |        )""".stripMargin
   }
 }

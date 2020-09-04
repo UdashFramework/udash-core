@@ -5,7 +5,7 @@ import com.avsystem.commons.annotation.positioned
 import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCaseInfo, GenParamInfo, GenUnionInfo}
+import com.avsystem.commons.serialization.{GenCaseInfo, GenParamInfo, GenUnionInfo, transparent}
 import io.udash.rest.typescript.TsTypeMetadata.Record.recursionBreaker
 
 import scala.util.DynamicVariable
@@ -119,11 +119,25 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   }
 
   @positioned(positioned.here)
+  @annotated[transparent]
+  final case class Wrapper[T](
+    @composite info: GenCaseInfo[T],
+    @infer moduleTag: TsModuleTag[T],
+    @adtParamMetadata rawField: Field[_]
+  ) extends Case[T] with TsTypeMetadata[T] {
+    val field: Field[_] = rawField.asInstanceOf[Field[Any]].copy(tsOptional = Opt.Empty)
+
+    def tsType: TsJsonType = TsJsonNewtype(moduleTag.module, info.sourceName, field.tsType)
+    def transparent: Boolean = tsType.transparent
+    def resolve(gen: TsGenerator): String = tsType.resolve(gen)
+  }
+
+  @positioned(positioned.here)
   final case class Record[T](
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
     @multi @adtParamMetadata fields: List[Field[_]],
-  ) extends Case[T] with TsTypeMetadata[T] with TsDefinition { rec =>
+  ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     lazy val managedFields: List[Field[_]] =
       fields.filterNot(_.transparent)
 
