@@ -41,18 +41,17 @@ final class MarkdownPresenter[T <: MarkdownPageState](
     rpc.loadContent(state.page).onCompleteNow {
       case Success(rawHtml) =>
         model.subProp(_.content).set(rawHtml)
-        dom.window.location.hash.opt.collect { case id if id.nonEmpty => id.tail }.foreach { id =>
-          def scroll(): Unit = scalajs.js.timers.setTimeout(500) {
+        def scroll(): Unit = scalajs.js.timers.setTimeout(500) {
+          dom.window.location.hash.opt.collect { case id if id.nonEmpty => id.tail }.foreach(id =>
             dom.document.getElementById(id).opt match {
               case Opt(element) =>
                 element.scrollIntoView()
               case Opt.Empty =>
                 scroll()
             }
-          }
-          scroll()
+          )
         }
-
+        scroll()
       case Failure(exception) => model.subProp(_.error).set(exception.toString)
     }
   }
