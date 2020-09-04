@@ -11,18 +11,18 @@ import io.udash.rest.typescript.TsTypeMetadata.Record.recursionBreaker
 import scala.util.DynamicVariable
 
 sealed trait TsTypeMetadata[T] extends TypedMetadata[T] with TsJsonType {
-  def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+  def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
     if (transparent) valueRef
     else s"${resolve(gen)}.toJson($valueRef)"
 
-  def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+  def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
     if (transparent) s"$valueRef as ${resolve(gen)}"
     else s"${resolve(gen)}.fromJson($valueRef)"
 
-  override def mkJsonWriter(gen: TsGenerator): String =
+  override def mkJsonWriter(gen: TsGeneratorCtx): String =
     if (!transparent) s"${resolve(gen)}.toJson" else super.mkJsonWriter(gen)
 
-  override def mkJsonReader(gen: TsGenerator): String =
+  override def mkJsonReader(gen: TsGeneratorCtx): String =
     if (!transparent) s"${resolve(gen)}.fromJson" else super.mkJsonReader(gen)
 }
 
@@ -50,7 +50,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     val rawName: String =
       info.annotName.map(_.name).getOrElse(info.sourceName)
 
-    def contents(gen: TsGenerator): String = {
+    def contents(gen: TsGeneratorCtx): String = {
       val discriminator = info.flatten.map(_.caseFieldName)
 
       def caseType(cse: Case[_]): String = discriminator match {
@@ -99,7 +99,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     lazy val rawName: String =
       info.annotName.map(_.name).getOrElse(info.sourceName)
 
-    def caseInfoDeclaration(gen: TsGenerator): String = {
+    def caseInfoDeclaration(gen: TsGeneratorCtx): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
       val readerDef = if (tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
       val writerDef = if (tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
@@ -129,7 +129,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def tsType: TsJsonType = TsJsonNewtype(moduleTag.module, info.sourceName, field.tsType)
     def transparent: Boolean = tsType.transparent
-    def resolve(gen: TsGenerator): String = tsType.resolve(gen)
+    def resolve(gen: TsGeneratorCtx): String = tsType.resolve(gen)
   }
 
   @positioned(positioned.here)
@@ -153,7 +153,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def tsType: TsJsonType = this
 
-    def contents(gen: TsGenerator): String = {
+    def contents(gen: TsGeneratorCtx): String = {
       val mutable = tsMutable.fold(false)(_.mutable)
       val fieldDefs = fields.iterator.map(_.declaration(gen, mutable)).mkString("\n", ",\n", "\n")
 
@@ -185,15 +185,15 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     def tsType: TsJsonType = this
 
-    def contents(gen: TsGenerator): String =
+    def contents(gen: TsGeneratorCtx): String =
       s"export type $name = {}\n"
 
     def transparent: Boolean = true
 
-    override def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+    override def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       valueRef
 
-    override def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+    override def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       s"$valueRef as ${resolve(gen)}"
   }
 
@@ -220,14 +220,14 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     def transparent: Boolean =
       rawName == name && tsType.transparent
 
-    def declaration(gen: TsGenerator, mutableByDefault: Boolean): String = {
+    def declaration(gen: TsGeneratorCtx, mutableByDefault: Boolean): String = {
       val mutable = tsMutable.fold(mutableByDefault)(_.mutable)
       val readonly = if (mutable) "" else "readonly "
       val qmark = if (optional) "?" else ""
       s"    $readonly$name$qmark: ${tsType.resolve(gen)}"
     }
 
-    def fieldInfoDeclaration(gen: TsGenerator): String = {
+    def fieldInfoDeclaration(gen: TsGeneratorCtx): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
       val readerDef = if (tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
       val writerDef = if (tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")

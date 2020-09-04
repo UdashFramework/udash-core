@@ -7,13 +7,13 @@ sealed abstract class TsTypeCompanion[TsT <: TsType, Tag[X] <: TsTypeTag[TsT, X]
 }
 
 trait TsPlainType extends TsType {
-  def mkPlainWrite(gen: TsGenerator, valueRef: String): String
+  def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String
 
-  def mkOptionalPlainWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+  def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
     if (optional) s"${gen.codecsModule}.mapUndefined(${mkPlainWriter(gen)}, $valueRef)"
     else mkPlainWrite(gen, valueRef)
 
-  def mkPlainWriter(gen: TsGenerator): String = s"(v => ${mkPlainWrite(gen, "v")})"
+  def mkPlainWriter(gen: TsGeneratorCtx): String = s"(v => ${mkPlainWrite(gen, "v")})"
   def dictionaryKeyType: TsType = TsType.String
 }
 object TsPlainType extends TsTypeCompanion[TsPlainType, TsPlainTypeTag]
@@ -26,64 +26,64 @@ trait TsJsonType extends TsType {
    */
   def transparent: Boolean
 
-  def mkJsonWrite(gen: TsGenerator, valueRef: String): String
-  def mkJsonRead(gen: TsGenerator, valueRef: String): String
+  def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String
+  def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String
 
-  def mkOptionalJsonWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+  def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
     if (optional && !transparent) s"${gen.codecsModule}.mapUndefined(${mkJsonWriter(gen)}, $valueRef)"
     else mkJsonWrite(gen, valueRef)
 
-  def mkJsonWriter(gen: TsGenerator): String = s"(v => ${mkJsonWrite(gen, "v")})"
-  def mkJsonReader(gen: TsGenerator): String = s"(v => ${mkJsonRead(gen, "v")})"
+  def mkJsonWriter(gen: TsGeneratorCtx): String = s"(v => ${mkJsonWrite(gen, "v")})"
+  def mkJsonReader(gen: TsGeneratorCtx): String = s"(v => ${mkJsonRead(gen, "v")})"
 }
 object TsJsonType extends TsTypeCompanion[TsJsonType, TsJsonTypeTag]
 
 trait TsBodyType extends TsType {
-  def mkBodyWrite(gen: TsGenerator, valueRef: String): String
-  def mkBodyRead(gen: TsGenerator, valueRef: String): String
+  def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String
+  def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String
 
-  def mkBodyWriter(gen: TsGenerator): String = s"(v => ${mkBodyWrite(gen, "v")})"
-  def mkBodyReader(gen: TsGenerator): String = s"(v => ${mkBodyRead(gen, "v")})"
+  def mkBodyWriter(gen: TsGeneratorCtx): String = s"(v => ${mkBodyWrite(gen, "v")})"
+  def mkBodyReader(gen: TsGeneratorCtx): String = s"(v => ${mkBodyRead(gen, "v")})"
 }
 object TsBodyType extends TsTypeCompanion[TsBodyType, TsBodyTypeTag]
 
 trait TsResponseType extends TsType {
-  def mkResponseRead(gen: TsGenerator, valueRef: String): String
-  def mkResponseReader(gen: TsGenerator): String = s"(v => ${mkResponseRead(gen, "v")})"
+  def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String
+  def mkResponseReader(gen: TsGeneratorCtx): String = s"(v => ${mkResponseRead(gen, "v")})"
 }
 object TsResponseType extends TsTypeCompanion[TsResponseType, TsResponseTypeTag]
 
 trait TsResultType extends TsType {
-  def mkFromPromise(gen: TsGenerator, valueRef: String): String
+  def mkFromPromise(gen: TsGeneratorCtx, valueRef: String): String
 }
 
 object TsType {
   def nullableJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
-    def resolve(gen: TsGenerator): String =
+    def resolve(gen: TsGeneratorCtx): String =
       s"${tpe.resolve(gen)} | null"
 
     def transparent: Boolean = tpe.transparent
 
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
       else s"$valueRef === null ? null : ${tpe.mkJsonWrite(gen, valueRef)}"
 
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else s"$valueRef === null ? null : ${tpe.mkJsonRead(gen, valueRef)}"
   }
 
   def arrayJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
-    def resolve(gen: TsGenerator): String =
+    def resolve(gen: TsGeneratorCtx): String =
       s"${tpe.resolve(gen)}[]"
 
     def transparent: Boolean = tpe.transparent
 
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
       else s"$valueRef.map(${tpe.mkJsonWriter(gen)})"
 
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else s"($valueRef as any[]).map(${tpe.mkJsonReader(gen)})"
   }
@@ -91,103 +91,103 @@ object TsType {
   def dictionaryJson(keyType: TsPlainType, valueType: TsJsonType): TsJsonType = new TsJsonType {
     def transparent: Boolean = valueType.transparent
 
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
       else s"${gen.codecsModule}.mapValues($valueRef, ${valueType.mkJsonWriter(gen)})"
 
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String =
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else {
         val castValueRef = s"$valueRef as ${gen.codecsModule}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, any>"
         s"${gen.codecsModule}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, false)"
       }
 
-    def resolve(gen: TsGenerator): String =
+    def resolve(gen: TsGeneratorCtx): String =
       s"${gen.codecsModule}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, ${valueType.resolve(gen)}>"
   }
 
   def jsonAsBody(tpe: TsJsonType): TsBodyType = new TsBodyType {
-    def resolve(gen: TsGenerator): String = tpe.resolve(gen)
+    def resolve(gen: TsGeneratorCtx): String = tpe.resolve(gen)
 
-    def mkBodyWrite(gen: TsGenerator, valueRef: String): String =
+    def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String =
       s"${gen.codecsModule}.jsonToBody(${tpe.mkJsonWrite(gen, valueRef)})"
 
-    def mkBodyRead(gen: TsGenerator, valueRef: String): String =
+    def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String =
       tpe.mkJsonRead(gen, s"${gen.codecsModule}.bodyToJson($valueRef)")
   }
 
   def bodyAsResponse(tpe: TsBodyType): TsResponseType = new TsResponseType {
-    def resolve(gen: TsGenerator): String = tpe.resolve(gen)
+    def resolve(gen: TsGeneratorCtx): String = tpe.resolve(gen)
 
-    def mkResponseRead(gen: TsGenerator, valueRef: String): String =
+    def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String =
       tpe.mkBodyRead(gen, s"${gen.codecsModule}.successfulResponseToBody($valueRef)")
   }
 
   def resultAsPromise(tpe: TsResponseType): TsResultType = new TsResultType {
-    def mkFromPromise(gen: TsGenerator, valueRef: String): String =
+    def mkFromPromise(gen: TsGeneratorCtx, valueRef: String): String =
       s"$valueRef.then(${tpe.mkResponseReader(gen)})"
 
-    def resolve(gen: TsGenerator): String =
+    def resolve(gen: TsGeneratorCtx): String =
       s"Promise<${tpe.resolve(gen)}>"
   }
 
   final val Void: TsResponseType = new TsResponseType {
-    def resolve(gen: TsGenerator): String = "void"
+    def resolve(gen: TsGeneratorCtx): String = "void"
 
-    def mkResponseRead(gen: TsGenerator, valueRef: String): String = "undefined"
+    def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String = "undefined"
   }
 
   final val Never: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(gen: TsGenerator): String = "never"
+    def resolve(gen: TsGeneratorCtx): String = "never"
     def transparent: Boolean = true
-    def mkPlainWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String = valueRef
+    def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = valueRef
   }
 
   final val Boolean: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(gen: TsGenerator): String = "boolean"
+    def resolve(gen: TsGeneratorCtx): String = "boolean"
     def transparent: Boolean = true
-    def mkPlainWrite(gen: TsGenerator, valueRef: String): String = s"$valueRef.toString()"
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"$valueRef as boolean"
+    def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toString()"
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef as boolean"
 
-    override def mkOptionalPlainWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+    override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if(optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
   }
 
   final val Number: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(gen: TsGenerator): String = "number"
+    def resolve(gen: TsGeneratorCtx): String = "number"
     def transparent: Boolean = true
-    def mkPlainWrite(gen: TsGenerator, valueRef: String): String = s"$valueRef.toString()"
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"$valueRef as number"
+    def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toString()"
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef as number"
 
-    override def mkOptionalPlainWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+    override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if(optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
 
     override def dictionaryKeyType: TsType = this
   }
 
   final val String: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(gen: TsGenerator): String = "string"
+    def resolve(gen: TsGeneratorCtx): String = "string"
     def transparent: Boolean = true
-    def mkPlainWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String = valueRef
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"$valueRef as string"
+    def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef as string"
   }
 
   final val Timestamp: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
-    def resolve(gen: TsGenerator): String = "Date"
+    def resolve(gen: TsGeneratorCtx): String = "Date"
     def transparent: Boolean = false
-    def mkPlainWrite(gen: TsGenerator, valueRef: String): String = s"$valueRef.toISOString()"
-    def mkJsonWrite(gen: TsGenerator, valueRef: String): String = s"$valueRef.toISOString()"
-    def mkJsonRead(gen: TsGenerator, valueRef: String): String = s"new Date($valueRef as string)"
+    def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toISOString()"
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toISOString()"
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"new Date($valueRef as string)"
 
-    override def mkOptionalPlainWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+    override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if(optional) s"$valueRef?.toISOString()" else mkPlainWrite(gen, valueRef)
 
-    override def mkOptionalJsonWrite(gen: TsGenerator, valueRef: String, optional: Boolean): String =
+    override def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if(optional) s"$valueRef?.toISOString()" else mkJsonWrite(gen, valueRef)
   }
 }

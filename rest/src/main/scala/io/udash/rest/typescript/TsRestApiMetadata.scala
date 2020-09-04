@@ -64,7 +64,7 @@ final case class TsRestApiMetadata[T](
     (List.empty[TsRestMethod[_]] ++ prefixes ++ gets ++ customBodyMethods ++ jsonBodyMethods ++ formBodyMethods)
       .sortBy(_.info.pos.index)
 
-  def contents(gen: TsGenerator): String = {
+  def contents(gen: TsGeneratorCtx): String = {
     val methodDecls = methods.iterator.map(_.declaration(gen)).mkString("\n")
     s"""export class $name {
        |    constructor(
@@ -84,7 +84,7 @@ object TsRestApiMetadata extends RpcMetadataCompanion[TsRestApiMetadata] {
 sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
   def info: TsMethodInfo[RestMethodTag]
   def bodyParams: List[TsRestParameter[Body, TsType, _]]
-  def declaration(gen: TsGenerator): String
+  def declaration(gen: TsGeneratorCtx): String
 
   val path: List[String] = PlainValue.decodePath(info.methodTag.path).map(_.value)
 
@@ -93,10 +93,10 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
 
   protected def quote(str: String): String = JsonStringOutput.write(str)
 
-  protected def mkPair(gen: TsGenerator, p: TsRestParameter[_, TsPlainType, _]): String =
+  protected def mkPair(gen: TsGeneratorCtx, p: TsRestParameter[_, TsPlainType, _]): String =
     s"[${quote(p.rawName)}, ${p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)}]"
 
-  protected def restParamsDefn(gen: TsGenerator): String = {
+  protected def restParamsDefn(gen: TsGeneratorCtx): String = {
     val pathValues =
       (path.iterator.map(quote) ++ info.pathParams.iterator.flatMap { p =>
         Iterator(p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)) ++
@@ -132,7 +132,7 @@ final case class TsPrefixMethod[T](
 ) extends TsRestMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
-  def declaration(gen: TsGenerator): String = {
+  def declaration(gen: TsGeneratorCtx): String = {
     val returnType = result.value.resolve(gen)
     val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
 
@@ -148,9 +148,9 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
   def info: TsMethodInfo[HttpMethodTag]
   def result: TsResultTypeTag[T]
 
-  protected def bodyDecl(gen: TsGenerator): String
+  protected def bodyDecl(gen: TsGeneratorCtx): String
 
-  def declaration(gen: TsGenerator): String = {
+  def declaration(gen: TsGeneratorCtx): String = {
     val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
     val returnType = result.tsType.resolve(gen)
     val methodStr = quote(info.methodTag.method.name)
@@ -171,7 +171,7 @@ final case class TsHttpGetMethod[T](
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
-  protected def bodyDecl(gen: TsGenerator): String =
+  protected def bodyDecl(gen: TsGeneratorCtx): String =
     "const _body = null"
 }
 
@@ -180,7 +180,7 @@ final case class TsHttpJsonBodyMethod[T](
   @infer @checked result: TsResultTypeTag[T],
   @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsJsonType, _]],
 ) extends TsHttpMethod[T] {
-  protected def bodyDecl(gen: TsGenerator): String = {
+  protected def bodyDecl(gen: TsGeneratorCtx): String = {
     val bodyObj = bodyParams.iterator
       .map(p => s"${quote(p.rawName)}: ${p.tsType.mkOptionalJsonWrite(gen, p.name, p.optional)}")
       .mkString("{", ", ", "}")
@@ -193,7 +193,7 @@ final case class TsHttpFormBodyMethod[T](
   @infer @checked result: TsResultTypeTag[T],
   @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsPlainType, _]],
 ) extends TsHttpMethod[T] {
-  protected def bodyDecl(gen: TsGenerator): String = {
+  protected def bodyDecl(gen: TsGeneratorCtx): String = {
     val formFields = bodyParams.iterator.map(mkPair(gen, _)).mkString(", ")
     s"const _body = ${gen.codecsModule}.formToBody($formFields)"
   }
@@ -210,7 +210,7 @@ final case class TsHttpCustomBodyMethod[T](
 
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 
-  protected def bodyDecl(gen: TsGenerator): String =
+  protected def bodyDecl(gen: TsGeneratorCtx): String =
     s"const _body = ${bodyParam.tsType.mkBodyWrite(gen, bodyParam.name)}"
 }
 
@@ -227,7 +227,7 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
   def tsType: TsT =
     tsOptional.fold(typeTag.tsType)(to => typeTag.optionalParamType(to.fallbackValue))
 
-  def declaration(gen: TsGenerator): String = {
+  def declaration(gen: TsGeneratorCtx): String = {
     val qmark = if (optional) "?" else ""
     s"$name$qmark: ${tsType.resolve(gen)}"
   }

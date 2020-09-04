@@ -9,15 +9,15 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import scala.annotation.tailrec
 
 trait TsReference {
-  def resolve(gen: TsGenerator): String
+  def resolve(gen: TsGeneratorCtx): String
 }
 
 trait TsDefinition extends TsReference {
   def module: TsModule
   def name: String
-  def contents(gen: TsGenerator): String
+  def contents(gen: TsGeneratorCtx): String
 
-  def resolve(gen: TsGenerator): String =
+  def resolve(gen: TsGeneratorCtx): String =
     gen.resolve(this)
 
   protected def quote(str: String): String = JsonStringOutput.write(str)
@@ -29,6 +29,7 @@ final case class TsModule(path: List[String], external: Boolean = false) {
   override def toString: String =
     path.mkString(if (external) "" else "/", "/", "")
 
+  /** Returns path of some other module relative to this module. */
   def importPathFor(imported: TsModule): String =
     if (external) path.mkString("/")
     else {
@@ -52,6 +53,14 @@ object TsModule {
 }
 
 final case class TsModuleTag[T](module: TsModule) extends AnyVal
+
+case class TsGeneratorCtx(gen: TsGenerator, inModule: TsModule) {
+  def codecsModule: String = gen.codecsModule
+  def rawModule: String = gen.rawModule
+
+  def resolve(definition: TsDefinition): String = gen.resolve(inModule, definition)
+  def importModule(module: TsModule): String = gen.importModule(inModule, module)
+}
 
 final class TsGenerator(
   val codecsModule: String = "_codecs",
@@ -109,9 +118,13 @@ final class TsGenerator(
    * a string that can be used as a reference to this definition. Reference is relative to the module that this
    * definition is referred from (appropriate import is added if necessary).
    */
-  def resolve(definition: TsDefinition): String = {
-    val importingModule = resolving.headOpt.map(_.module).filter(_ != definition.module)
+  def resolve(inModule: TsModule, definition: TsDefinition): String = {
+    add(definition)
+    if (inModule == definition.module) definition.name
+    else s"${importModule(inModule, definition.module)}.${definition.name}"
+  }
 
+  def add(definition: TsDefinition): Unit = {
     val curModule = definition.module
     val moduleEntry = modules.getOrElseUpdate(curModule, new ModuleEntry(curModule))
 
@@ -122,7 +135,7 @@ final class TsGenerator(
         case Some(Entry(prevDefn, prevDefnStr)) =>
           if (prevDefn != definition) {
             // TODO: this can probably blow up stack
-            val definitionStr = definition.contents(this)
+            val definitionStr = definition.contents(TsGeneratorCtx(this, curModule))
             if (definitionStr != prevDefnStr) {
               throw new IllegalStateException(
                 s"duplicate TypeScript definition ${definition.name} in module ${definition.module}")
@@ -130,18 +143,16 @@ final class TsGenerator(
             moduleEntry.definitions += ((definition.name, Entry(definition, definitionStr)))
           }
         case None =>
-          val definitionStr = definition.contents(this)
+          val definitionStr = definition.contents(TsGeneratorCtx(this, curModule))
           moduleEntry.definitions += ((definition.name, Entry(definition, definitionStr)))
       }
     } finally {
       resolving = resolving.tail
     }
-
-    importingModule match {
-      case Opt(mod) => s"${modules(mod).importModule(curModule)}.${definition.name}"
-      case Opt.Empty => definition.name
-    }
   }
+
+  def importModule(importingModule: TsModule, importedModule: TsModule): String =
+    modules.getOrElseUpdate(importingModule, new ModuleEntry(importingModule)).importModule(importedModule)
 
   /**
    * Writes out all the collected TypeScript files into the target directory.

@@ -59,7 +59,7 @@ object TsExampleApiImpl extends TsExampleApi {
 object test {
   def main(args: Array[String]): Unit = {
     val ctx = new TsGenerator
-    ctx.resolve(TsExampleApi.tsRestApiMetadata)
+    ctx.add(TsExampleApi.tsRestApiMetadata)
     ctx.write(new File("./rest/ts-test/src"))
 
     //    val server = new Server(9090)
