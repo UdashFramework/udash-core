@@ -31,7 +31,7 @@ final case class TsModule(path: List[String], external: Boolean = false) {
 
   /** Returns path of some other module relative to this module. */
   def importPathFor(imported: TsModule): String =
-    if (external) path.mkString("/")
+    if (imported.external) imported.path.mkString("/")
     else {
       @tailrec def loop(thisPath: List[String], importedPath: List[String]): String =
         (thisPath, importedPath) match {
@@ -49,22 +49,35 @@ final case class TsModule(path: List[String], external: Boolean = false) {
     }
 }
 object TsModule {
+  /**
+   * Creates a [[TsModule]] based on its _absolute_ path, i.e.
+   * - if the path starts with `/` then it is interpreted as local module, relative to the output
+   *   directory passed to [[TsGenerator.write]]
+   * - if the path does not start with `/` then it is interpreted as external module (from `node_modules`).
+   */
+  def fromAbsolutePath(path: String): TsModule = {
+    val external = !path.startsWith("/")
+    val pathSegs = path.stripPrefix("/").split('/').toList
+    TsModule(pathSegs, external)
+  }
+
+  final val RawModule = fromAbsolutePath("udash-rest-client/lib/raw")
+  final val CodecsModule = fromAbsolutePath("udash-rest-client/lib/codecs")
+
   def of[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
 }
 
 final case class TsModuleTag[T](module: TsModule) extends AnyVal
 
 case class TsGeneratorCtx(gen: TsGenerator, inModule: TsModule) {
-  def codecsModule: String = gen.codecsModule
-  def rawModule: String = gen.rawModule
-
   def resolve(definition: TsDefinition): String = gen.resolve(inModule, definition)
   def importModule(module: TsModule): String = gen.importModule(inModule, module)
+
+  def codecs: String = gen.importModule(inModule, TsModule.CodecsModule)
+  def raw: String = gen.importModule(inModule, TsModule.RawModule)
 }
 
 final class TsGenerator(
-  val codecsModule: String = "_codecs",
-  val rawModule: String = "_raw",
   // Code automatically added at the beginning of every TS file
   val prelude: String = ""
 ) {
@@ -87,12 +100,7 @@ final class TsGenerator(
       moduleFile.getParentFile.mkdirs()
       val writer = new FileWriter(moduleFile)
       try {
-        writer.write(
-          s"""$prelude
-             |import * as $codecsModule from "udash-rest-client/lib/codecs"
-             |import * as $rawModule from "udash-rest-client/lib/raw"
-             |""".stripMargin
-        )
+        writer.write(prelude)
         imports.foreach { case (imported, ident) =>
           val path = module.importPathFor(imported)
           writer.write(s"""import * as $ident from "$path"""")

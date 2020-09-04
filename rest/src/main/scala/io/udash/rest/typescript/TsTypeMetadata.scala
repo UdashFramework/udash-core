@@ -61,10 +61,10 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
       def readerOrWriter(reader: Boolean): String = discriminator match {
         case Opt(discr) =>
           val funName = if (reader) "flatJsonToUnion" else "unionToFlatJson"
-          s"${gen.codecsModule}.$funName(${quote(discr)}, managedCases)"
+          s"${gen.codecs}.$funName(${quote(discr)}, managedCases)"
         case Opt.Empty =>
           val funName = if (reader) "nestedJsonToUnion" else "unionToNestedJson"
-          s"${gen.codecsModule}.$funName(managedCases)"
+          s"${gen.codecs}.$funName(managedCases)"
       }
 
       val namespaceDecl = if (managedCases.isEmpty) "" else {
@@ -72,10 +72,10 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
         s"""
            |export namespace $name {
-           |    const managedCases: ${gen.codecsModule}.CaseInfos = $caseInfos
-           |    export const fromJson: ${gen.codecsModule}.JsonReader<$name> =
+           |    const managedCases: ${gen.codecs}.CaseInfos = $caseInfos
+           |    export const fromJson: ${gen.codecs}.JsonReader<$name> =
            |        ${readerOrWriter(reader = true)}
-           |    export const toJson: ${gen.codecsModule}.JsonWriter<$name> =
+           |    export const toJson: ${gen.codecs}.JsonWriter<$name> =
            |        ${readerOrWriter(reader = false)}
            |}""".stripMargin
       }
@@ -161,11 +161,11 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
         val fieldInfos = managedFields.iterator.map(_.fieldInfoDeclaration(gen)).mkString("{", ", ", "}")
         s"""
            |export namespace $name {
-           |    const managedFields: ${gen.codecsModule}.FieldInfos = $fieldInfos
-           |    export const fromJson: ${gen.codecsModule}.JsonReader<$name> =
-           |        ${gen.codecsModule}.jsonToRecord(managedFields)
-           |    export const toJson: ${gen.codecsModule}.JsonWriter<$name> =
-           |        ${gen.codecsModule}.recordToJson(managedFields)
+           |    const managedFields: ${gen.codecs}.FieldInfos = $fieldInfos
+           |    export const fromJson: ${gen.codecs}.JsonReader<$name> =
+           |        ${gen.codecs}.jsonToRecord(managedFields)
+           |    export const toJson: ${gen.codecs}.JsonWriter<$name> =
+           |        ${gen.codecs}.recordToJson(managedFields)
            |}""".stripMargin
       }
 

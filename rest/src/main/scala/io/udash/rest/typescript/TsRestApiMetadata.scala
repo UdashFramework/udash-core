@@ -68,8 +68,8 @@ final case class TsRestApiMetadata[T](
     val methodDecls = methods.iterator.map(_.declaration(gen)).mkString("\n")
     s"""export class $name {
        |    constructor(
-       |        private _handle: ${gen.rawModule}.HandleRequest,
-       |        private _prefixParams?: ${gen.rawModule}.RestParameters
+       |        private _handle: ${gen.raw}.HandleRequest,
+       |        private _prefixParams?: ${gen.raw}.RestParameters
        |    ) {}
        |
        |$methodDecls
@@ -109,7 +109,7 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
     val headerValues = info.headerParams.iterator.map(mkPair(gen, _))
       .mkString("[", ", ", "]")
 
-    s"""const _params = ${gen.rawModule}.newParameters(
+    s"""const _params = ${gen.raw}.newParameters(
        |            this._prefixParams,
        |            $pathValues, $queryValues, $headerValues
        |        )""".stripMargin
@@ -184,7 +184,7 @@ final case class TsHttpJsonBodyMethod[T](
     val bodyObj = bodyParams.iterator
       .map(p => s"${quote(p.rawName)}: ${p.tsType.mkOptionalJsonWrite(gen, p.name, p.optional)}")
       .mkString("{", ", ", "}")
-    s"const _body = ${gen.codecsModule}.jsonToBody($bodyObj)"
+    s"const _body = ${gen.codecs}.jsonToBody($bodyObj)"
   }
 }
 
@@ -195,7 +195,7 @@ final case class TsHttpFormBodyMethod[T](
 ) extends TsHttpMethod[T] {
   protected def bodyDecl(gen: TsGeneratorCtx): String = {
     val formFields = bodyParams.iterator.map(mkPair(gen, _)).mkString(", ")
-    s"const _body = ${gen.codecsModule}.formToBody($formFields)"
+    s"const _body = ${gen.codecs}.formToBody($formFields)"
   }
 }
 
