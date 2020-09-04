@@ -13,6 +13,11 @@ export type Dictionary<K extends string | number, V> = {
 
 type RawDict = { [key: string]: any }
 
+export function mapUndefined<A, B>(f: (v: A) => B, value: A | undefined): B | undefined {
+    if (typeof value == 'undefined') return undefined
+    else return f(value)
+}
+
 export function mapValues<K extends string | number, V, V0>(
     dict: Dictionary<K, V>,
     fun: (value: V) => V0,
@@ -42,9 +47,9 @@ export function jsonToBody(json: any): RestBody {
     }
 }
 
-export function formToBody(...params: [string, string][]): RestBody {
+export function formToBody(...params: [string, string | undefined][]): RestBody {
     return {
-        content: encodeQuery(params),
+        content: encodeQuery(params.filter(([n, v]) => typeof v !== 'undefined') as [string, string][]),
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
     }
 }

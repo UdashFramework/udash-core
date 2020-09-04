@@ -27,17 +27,23 @@ export interface RestParameters {
     readonly header: [string, string][],
 }
 
-export function newParameters(prefixParameters?: RestParameters): RestParameters {
-    if (!prefixParameters) {
-        return {path: [], query: [], header: []}
-    } else {
-        // make a copy of every array so that they can be safely appended with more values
-        return {
-            path: [...prefixParameters.path],
-            query: [...prefixParameters.query],
-            header: [...prefixParameters.header]
-        }
+export function newParameters(
+    prefixParameters: RestParameters | undefined,
+    path: (string | undefined)[],
+    query: [string, string | undefined][],
+    header: [string, string | undefined][],
+): RestParameters {
+    const result: RestParameters = {path: [], query: [], header: []}
+    if (prefixParameters) {
+        // must make a copy of each array
+        result.path.push(...prefixParameters.path)
+        result.query.push(...prefixParameters.query)
+        result.header.push(...prefixParameters.header)
     }
+    result.path.push(...path.filter(v => typeof v != 'undefined') as string[])
+    result.query.push(...query.filter(([n, v]) => typeof v != 'undefined') as [string, string][])
+    result.header.push(...header.filter(([n, v]) => typeof v != 'undefined') as [string, string][])
+    return result
 }
 
 export interface RestContentBody {

@@ -44,7 +44,6 @@ final case class OpenApiMetadata[T](
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
-  @paramTag[RestParamTag](defaultTag = new Body)
   @unmatched(RawRest.NotValidHttpMethod)
   bodyMethods: List[OpenApiBodyOperation[_]]
 ) {

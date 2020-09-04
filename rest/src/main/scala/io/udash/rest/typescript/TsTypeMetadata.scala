@@ -12,18 +12,18 @@ import scala.util.DynamicVariable
 
 sealed trait TsTypeMetadata[T] extends TypedMetadata[T] with TsJsonType {
   def mkJsonWrite(gen: TsGenerator, valueRef: String): String =
-    if(transparent) valueRef
+    if (transparent) valueRef
     else s"${resolve(gen)}.toJson($valueRef)"
 
   def mkJsonRead(gen: TsGenerator, valueRef: String): String =
-    if(transparent) s"$valueRef as ${resolve(gen)}"
+    if (transparent) s"$valueRef as ${resolve(gen)}"
     else s"${resolve(gen)}.fromJson($valueRef)"
 
   override def mkJsonWriter(gen: TsGenerator): String =
-    if(!transparent) s"${resolve(gen)}.toJson" else super.mkJsonWriter(gen)
+    if (!transparent) s"${resolve(gen)}.toJson" else super.mkJsonWriter(gen)
 
   override def mkJsonReader(gen: TsGenerator): String =
-    if(!transparent) s"${resolve(gen)}.fromJson" else super.mkJsonReader(gen)
+    if (!transparent) s"${resolve(gen)}.fromJson" else super.mkJsonReader(gen)
 }
 
 object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
@@ -101,8 +101,8 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
 
     def caseInfoDeclaration(gen: TsGenerator): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
-      val readerDef = if(tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
-      val writerDef = if(tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
+      val readerDef = if (tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
+      val writerDef = if (tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
       (rawNameDef ++ readerDef ++ writerDef).mkString(s"${quote(name)}: {", ", ", "}")
     }
   }
@@ -184,6 +184,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Field[T](
     @composite info: GenParamInfo[T],
     @infer typeTag: TsJsonTypeTag[T],
+    @optional @reifyAnnot tsOptional: Opt[tsOptional[T]],
   ) extends TypedMetadata[T] {
     val name: String =
       info.sourceName
@@ -191,20 +192,26 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     val rawName: String =
       info.annotName.map(_.name).getOrElse(info.sourceName)
 
-    def tsType: TsJsonType = typeTag.tsType
+    lazy val tsType: TsJsonType =
+      tsOptional.fold(typeTag.tsType)(to => typeTag.optionalParamType(to.fallbackValue))
+
+    // fields annotated as @transientDefault must be optional because they may be absent in server data
+    // TODO: we could also reify and use the fallback value in that case
+    def optional: Boolean =
+      tsOptional.isDefined || ((info.flags.hasDefaultValue || info.hasWhenAbsent) && info.transientDefault)
 
     def transparent: Boolean =
       rawName == name && tsType.transparent
 
     def declaration(gen: TsGenerator): String = {
-      val tpeRef = typeTag.tsType.resolve(gen)
-      s"    readonly $name: $tpeRef"
+      val qmark = if (optional) "?" else ""
+      s"    readonly $name$qmark: ${tsType.resolve(gen)}"
     }
 
     def fieldInfoDeclaration(gen: TsGenerator): String = {
       val rawNameDef = Opt(rawName).filter(_ != name).map(rn => s"rawName: ${quote(rn)}")
-      val readerDef = if(tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
-      val writerDef = if(tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
+      val readerDef = if (tsType.transparent) Opt.Empty else Opt(s"reader: ${tsType.mkJsonReader(gen)}")
+      val writerDef = if (tsType.transparent) Opt.Empty else Opt(s"writer: ${tsType.mkJsonWriter(gen)}")
       (rawNameDef ++ readerDef ++ writerDef).mkString(s"${quote(name)}: {", ", ", "}")
     }
   }

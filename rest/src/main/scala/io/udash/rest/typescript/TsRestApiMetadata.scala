@@ -45,19 +45,17 @@ final case class TsRestApiMetadata[T](
 
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
-  @tagged[JsonBody](whenUntagged = new JsonBody)
-  @paramTag[RestParamTag](defaultTag = new Body)
+  @tagged[FormBody]
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
-  jsonBodyMethods: List[TsHttpJsonBodyMethod[_]],
+  formBodyMethods: List[TsHttpFormBodyMethod[_]],
 
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
-  @tagged[FormBody]
-  @paramTag[RestParamTag](defaultTag = new Body)
+  @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
-  formBodyMethods: List[TsHttpFormBodyMethod[_]]
+  jsonBodyMethods: List[TsHttpJsonBodyMethod[_]],
 ) extends TypedMetadata[T] with TsDefinition {
   val module: TsModule =
     moduleTag.module
@@ -90,28 +88,33 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
 
   val path: List[String] = PlainValue.decodePath(info.methodTag.path).map(_.value)
 
-  val params: List[TsRestParameter[RestParamTag, TsType, _]] =
+  lazy val params: List[TsRestParameter[RestParamTag, TsType, _]] =
     (info.pathParams ++ info.queryParams ++ info.headerParams ++ bodyParams).sortBy(_.pos.index)
 
   protected def quote(str: String): String = JsonStringOutput.write(str)
 
   protected def mkPair(gen: TsGenerator, p: TsRestParameter[_, TsPlainType, _]): String =
-    s"[${quote(p.rawName)}, ${p.tsType.mkPlainWrite(gen, p.name)}]"
+    s"[${quote(p.rawName)}, ${p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)}]"
 
   protected def restParamsDefn(gen: TsGenerator): String = {
     val pathValues =
       (path.iterator.map(quote) ++ info.pathParams.iterator.flatMap { p =>
-        Iterator(p.tsType.mkPlainWrite(gen, p.name)) ++
+        Iterator(p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)) ++
           PlainValue.decodePath(p.paramTag.pathSuffix).iterator.map(pv => quote(pv.value))
-      }).mkStringOrEmpty("\n        _params.path.push(", ", ", ")")
+      }).mkString("[", ", ", "]")
 
     val queryValues = info.queryParams.iterator.map(mkPair(gen, _))
-      .mkStringOrEmpty("\n        _params.query.push(", ", ", ")")
+      .mkString("[", ", ", "]")
 
     val headerValues = info.headerParams.iterator.map(mkPair(gen, _))
-      .mkStringOrEmpty("\n        _params.header.push(", ", ", ")")
+      .mkString("[", ", ", "]")
 
-    s"const _params = ${gen.rawModule}.newParameters(this._prefixParams)$pathValues$queryValues$headerValues"
+    s"""const _params = ${gen.rawModule}.newParameters(
+       |            this._prefixParams,
+       |            $pathValues,
+       |            $queryValues,
+       |            $headerValues
+       |        )""".stripMargin
   }
 }
 
@@ -154,11 +157,11 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
     val returnType = result.tsType.resolve(gen)
     val methodStr = quote(info.methodTag.method.name)
 
-    s"""    ${info.name}$paramDecls: Promise<$returnType> {
+    s"""    ${info.name}$paramDecls: $returnType {
        |        ${restParamsDefn(gen)}
        |        ${bodyDecl(gen)}
-       |        return this._handle({method: $methodStr, parameters: _params, body: _body})
-       |            .then(r => ${result.tsType.mkResponseRead(gen, "r")})
+       |        const _result = this._handle({method: $methodStr, parameters: _params, body: _body})
+       |        return ${result.tsType.mkFromPromise(gen, "_result")}
        |    }
        |""".stripMargin
   }
@@ -181,7 +184,7 @@ final case class TsHttpJsonBodyMethod[T](
 ) extends TsHttpMethod[T] {
   protected def bodyDecl(gen: TsGenerator): String = {
     val bodyObj = bodyParams.iterator
-      .map(p => s"${quote(p.rawName)}: ${p.tsType.mkJsonWrite(gen, p.name)}")
+      .map(p => s"${quote(p.rawName)}: ${p.tsType.mkOptionalJsonWrite(gen, p.name, p.optional)}")
       .mkString("{", ", ", "}")
     s"const _body = ${gen.codecsModule}.jsonToBody($bodyObj)"
   }
@@ -201,24 +204,33 @@ final case class TsHttpFormBodyMethod[T](
 final case class TsHttpCustomBodyMethod[T](
   @composite info: TsMethodInfo[BodyMethodTag],
   @infer @checked result: TsResultTypeTag[T],
-  @encoded @rpcParamMetadata @tagged[Body] bodyParam: TsRestParameter[Body, TsBodyType, _],
+  @encoded @rpcParamMetadata @tagged[Body] rawBodyParam: TsRestParameter[Body, TsBodyType, _],
 ) extends TsHttpMethod[T] {
+  // body param in @CustomBody method can't be TS-optional
+  val bodyParam: TsRestParameter[Body, TsBodyType, _] =
+    rawBodyParam.copy(tsOptional = Opt.Empty)
+
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 
   protected def bodyDecl(gen: TsGenerator): String =
     s"const _body = ${bodyParam.tsType.mkBodyWrite(gen, bodyParam.name)}"
 }
 
-//TODO: default values and stuff
 final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
   @reifyName name: String,
   @reifyName(useRawName = true) rawName: String,
   @reifyPosition pos: ParamPosition,
   @reifyAnnot paramTag: Tag,
+  @optional @reifyAnnot tsOptional: Opt[tsOptional[T]],
   @infer typeTag: TsTypeTag[TsT, T]
 ) extends TypedMetadata[T] {
-  def tsType: TsT = typeTag.tsType
+  def optional: Boolean = tsOptional.isDefined
 
-  def declaration(gen: TsGenerator): String =
-    s"$name: ${typeTag.tsType.resolve(gen)}"
+  def tsType: TsT =
+    tsOptional.fold(typeTag.tsType)(to => typeTag.optionalParamType(to.fallbackValue))
+
+  def declaration(gen: TsGenerator): String = {
+    val qmark = if (optional) "?" else ""
+    s"$name$qmark: ${tsType.resolve(gen)}"
+  }
 }

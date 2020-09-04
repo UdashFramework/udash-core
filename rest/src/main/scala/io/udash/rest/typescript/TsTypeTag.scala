@@ -1,14 +1,18 @@
 package io.udash.rest
 package typescript
 
+import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.misc.{NamedEnum, NamedEnumCompanion, Timestamp}
-import com.avsystem.commons.{BMap, BSeq, BSet, JDate, Opt, OptArg, classTag}
+import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import com.avsystem.commons.{BMap, BSeq, BSet, JDate, Opt, OptArg, Try, classTag}
 import io.udash.rest.raw.RawRest.AsyncEffect
 
 import scala.reflect.ClassTag
 
-final class TsTypeTag[+TsT <: TsType, T](lazyTsType: => TsT) {
+class TsTypeTag[+TsT <: TsType, T](lazyTsType: => TsT) {
   lazy val tsType: TsT = lazyTsType
+
+  def optionalParamType(fallbackValue: => T): TsT = tsType
 }
 
 object `package` {
@@ -17,6 +21,7 @@ object `package` {
   type TsPlainAndJsonTypeTag[T] = TsTypeTag[TsPlainType with TsJsonType, T]
   type TsBodyTypeTag[T] = TsTypeTag[TsBodyType, T]
   type TsResponseTypeTag[T] = TsTypeTag[TsResponseType, T]
+  type TsResultTypeTag[T] = TsTypeTag[TsResultType, T]
 }
 
 sealed abstract class TsTypeTagCompanion[TsT <: TsType] {
@@ -27,6 +32,7 @@ object TsJsonTypeTag extends TsTypeTagCompanion[TsJsonType]
 object TsPlainAndJsonTypeTag extends TsTypeTagCompanion[TsPlainType with TsJsonType]
 object TsBodyTypeTag extends TsTypeTagCompanion[TsBodyType]
 object TsResponseTypeTag extends TsTypeTagCompanion[TsResponseType]
+object TsResultTypeTag extends TsTypeTagCompanion[TsResultType]
 
 object TsTypeTag extends TsTypeTagLowPrio {
   def apply[TsT <: TsType, T](tsType: => TsT): TsTypeTag[TsT, T] =
@@ -54,14 +60,21 @@ object TsTypeTag extends TsTypeTagLowPrio {
   implicit def mapTag[M[X, Y] <: BMap[X, Y], K: TsPlainTypeTag, V: TsJsonTypeTag]: TsJsonTypeTag[M[K, V]] =
     TsJsonTypeTag(TsType.dictionaryJson(TsPlainType[K], TsJsonType[V]))
 
+  private def nullableJsonTag[T](wrapped: => TsJsonType, emptyValue: T): TsJsonTypeTag[T] =
+    new TsTypeTag[TsJsonType, T](TsType.nullableJson(wrapped)) {
+      override def optionalParamType(fallbackValue: => T): TsJsonType =
+        if (Try(fallbackValue).toOption.contains(emptyValue)) wrapped
+        else tsType
+    }
+
   implicit def optTag[T: TsJsonTypeTag]: TsJsonTypeTag[Opt[T]] =
-    TsJsonTypeTag(TsType.nullableJson(TsJsonType[T]))
+    nullableJsonTag(TsJsonType[T], Opt.Empty)
 
   implicit def optArgTag[T: TsJsonTypeTag]: TsJsonTypeTag[OptArg[T]] =
-    TsJsonTypeTag(TsType.nullableJson(TsJsonType[T]))
+    nullableJsonTag(TsJsonType[T], OptArg.Empty)
 
   implicit def optionTag[T: TsJsonTypeTag]: TsJsonTypeTag[Option[T]] =
-    TsJsonTypeTag(TsType.nullableJson(TsJsonType[T]))
+    nullableJsonTag(TsJsonType[T], None)
 
   implicit def namedEnumTag[T <: NamedEnum : TsModuleTag : ClassTag](
     implicit companion: NamedEnumCompanion[T]
@@ -77,10 +90,7 @@ trait TsTypeTagLowPrio { this: TsTypeTag.type =>
 
   implicit def responseTagFromBodyTag[T: TsBodyTypeTag]: TsResponseTypeTag[T] =
     TsResponseTypeTag(TsType.bodyAsResponse(TsBodyType[T]))
-}
 
-case class TsResultTypeTag[T](tsType: TsResponseType) extends AnyVal
-object TsResultTypeTag {
-  implicit def fromAsyncEffect[F[_] : AsyncEffect, T: TsResponseTypeTag]: TsResultTypeTag[F[T]] =
-    TsResultTypeTag(TsResponseType[T])
+  implicit def promiseResultTag[F[_] : AsyncEffect, T: TsResponseTypeTag]: TsResultTypeTag[F[T]] =
+    TsResultTypeTag(TsType.resultAsPromise(TsResponseType[T]))
 }

@@ -15,13 +15,14 @@ case class MajFriend(
   name: String,
   age: Int,
   skills: Seq[String],
-  extra: Opt[Double],
+  @tsOptional(Opt.Empty) extra: Opt[Double],
 )
 object MajFriend extends TsRestDataCompanion[MajFriend]
 
 trait TsExampleApi {
+  @POST def postStuff(int: Int, @tsOptional(Opt.Empty) optstr: Opt[String]): Future[Boolean]
   @Prefix("fuu/bar") def prefix(@Path("after/paf") paf: Boolean): OtherApi
-  @CustomBody def postMe(@Path id: Ajdi, @Query("tink") thing: Int, body: MajFriend): Future[Unit]
+  @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @Query("tink") @tsOptional(0) thing: Int): Future[Unit]
   @PUT def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String]
   @GET def find(id: Ajdi): Future[Opt[MajFriend]]
   @GET def allFriends: Future[Map[Ajdi, MajFriend]]
@@ -34,7 +35,7 @@ object TsExampleApiImpl extends TsExampleApi {
     def gimmeTree: Future[Tree] = Future.successful(other.Leaf)
   }
 
-  def postMe(id: Ajdi, thing: Int, body: MajFriend): Future[Unit] =
+  def postMe(id: Ajdi, body: MajFriend, thing: Int): Future[Unit] =
     Future.unit
   def create(name: String, age: Int, skills: Seq[String], extra: Opt[Double]): Future[String] =
     Future.successful("ajdi")
@@ -42,6 +43,8 @@ object TsExampleApiImpl extends TsExampleApi {
     Future.successful(Opt(MajFriend("Fred", 18, Seq("doing"), Opt(3.14))))
   def allFriends: Future[Map[Ajdi, MajFriend]] =
     Future.successful(Map.empty)
+  def postStuff(int: Int, optstr: Opt[String]): Future[Boolean] =
+    Future.successful(true)
 }
 
 object test {
