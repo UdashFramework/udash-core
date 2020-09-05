@@ -66,11 +66,11 @@ object TsType {
 
     def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
-      else s"$valueRef === null ? null : ${tpe.mkJsonWrite(gen, valueRef)}"
+      else s"${gen.codecs}.mapNullable(${tpe.mkJsonWriter(gen)}, $valueRef)"
 
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
-      else s"$valueRef === null ? null : ${tpe.mkJsonRead(gen, valueRef)}"
+      else s"${gen.codecs}.mapNullable(${tpe.mkJsonReader(gen)}, $valueRef)"
   }
 
   def arrayJson(tpe: TsJsonType): TsJsonType = new TsJsonType {

@@ -18,6 +18,11 @@ export function mapUndefined<A, B>(f: (v: A) => B, value: A | undefined): B | un
     else return f(value)
 }
 
+export function mapNullable<A, B>(f: (v: A) => B, value: A | null): B | null {
+    if (value === null) return null
+    else return f(value)
+}
+
 export function mapValues<K extends string | number, V, V0>(
     dict: Dictionary<K, V>,
     fun: (value: V) => V0,
