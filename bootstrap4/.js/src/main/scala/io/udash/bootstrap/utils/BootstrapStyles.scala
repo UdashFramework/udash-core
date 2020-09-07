@@ -221,7 +221,8 @@ trait BootstrapStyles {
     def shrink1(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-shrink-1")
 
-    def autoMargin(side: Side = Side.All) = CssStyleName(s"m${side.classMarker}-auto")
+    def autoMargin(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+      CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}-auto")
 
     def nowrap(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-nowrap")
