@@ -1,7 +1,7 @@
 package io.udash.rest.typescript
 
 import com.avsystem.commons.annotation.AnnotationAggregate
-import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import com.avsystem.commons.serialization.optionalParam
 
 import scala.annotation.StaticAnnotation
 
@@ -9,17 +9,13 @@ import scala.annotation.StaticAnnotation
  * Use this annotation on case class field or REST API method parameter to instruct the TypeScript generator
  * to emit an optional field or parameter.
  *
- * For `Option` and `Option`-like types, this annotation also changes the type of generated TypeScript field.
- * For example, case class field `int: Option[Int]` is normally represented as `int: number | null`
- * but with `@tsOptional(None)` annotation applied, it becomes `int?: number`.
- *
- * @param serverFallbackValue fallback value to be used on server-side during deserialization
+ * Parameter annotated as `@tsOptional` must be typed as an `Option`, `Opt`, `OptArg`, etc.
+ * Its TypeScript type will be derived from the type wrapped into the option-like wrapper. For example,
+ * `@tsOptional` parameter of type `Opt[Int]` will have TypeScript type `number` (not `number | null`
+ * which would be the case if the parameter wasn't marked as optional).
  */
-class tsOptional[+T](serverFallbackValue: => T) extends AnnotationAggregate {
-  // make all @tsOptional params automatically @transientDefault and give them fallback value
-  @transientDefault @whenAbsent(serverFallbackValue) type Implied
-
-  def fallbackValue: T = serverFallbackValue
+class tsOptional extends AnnotationAggregate {
+  @optionalParam type Implied
 }
 
 class tsMutable(val mutable: Boolean = true) extends StaticAnnotation

@@ -80,7 +80,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
            |}""".stripMargin
       }
 
-      s"export type $name = ${cases.iterator.map(caseType).mkString(" | ")}$namespaceDecl\n"
+      s"export type $name = \n${cases.iterator.map(caseType).map("    " + _).mkString(" |\n")}$namespaceDecl\n"
     }
   }
 
@@ -123,10 +123,8 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Wrapper[T](
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
-    @adtParamMetadata rawField: Field[_]
+    @adtParamMetadata field: Field[_]
   ) extends Case[T] with TsTypeMetadata[T] {
-    val field: Field[_] = rawField.asInstanceOf[Field[Any]].copy(tsOptional = Opt.Empty)
-
     def tsType: TsJsonType = TsJsonNewtype(moduleTag.module, info.sourceName, field.tsType)
     def transparent: Boolean = tsType.transparent
     def resolve(gen: TsGeneratorCtx): String = tsType.resolve(gen)
@@ -137,7 +135,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
     @optional @reifyAnnot tsMutable: Opt[tsMutable],
-    @multi @adtParamMetadata fields: List[Field[_]],
+    @multi @adtParamMetadata @allowOptional fields: List[Field[_]],
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     lazy val managedFields: List[Field[_]] =
       fields.filterNot(_.transparent)
@@ -200,7 +198,6 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Field[T](
     @composite info: GenParamInfo[T],
     @infer typeTag: TsJsonTypeTag[T],
-    @optional @reifyAnnot tsOptional: Opt[tsOptional[T]],
     @optional @reifyAnnot tsMutable: Opt[tsMutable],
   ) extends TypedMetadata[T] {
     val name: String =
@@ -209,13 +206,12 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     val rawName: String =
       info.annotName.map(_.name).getOrElse(info.sourceName)
 
-    lazy val tsType: TsJsonType =
-      tsOptional.fold(typeTag.tsType)(to => typeTag.optionalParamType(to.fallbackValue))
+    lazy val tsType: TsJsonType = typeTag.tsType
 
     // fields annotated as @transientDefault must be optional because they may be absent in server data
     // TODO: we could also reify and use the fallback value in that case
     def optional: Boolean =
-      tsOptional.isDefined || ((info.flags.hasDefaultValue || info.hasWhenAbsent) && info.transientDefault)
+      info.optional || ((info.flags.hasDefaultValue || info.hasWhenAbsent) && info.transientDefault)
 
     def transparent: Boolean =
       rawName == name && tsType.transparent

@@ -133,8 +133,23 @@ object TsType {
 
   final val Void: TsResponseType = new TsResponseType {
     def resolve(gen: TsGeneratorCtx): String = "void"
+    def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String = "void 0"
+  }
 
-    def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String = "undefined"
+  final val Undefined: TsJsonType with TsBodyType = new TsJsonType with TsBodyType {
+    def resolve(gen: TsGeneratorCtx): String = "undefined"
+    def transparent: Boolean = false
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = "null"
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = "undefined"
+    def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String = "null"
+    def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String = "undefined"
+  }
+
+  final val Null: TsJsonType = new TsJsonType {
+    def resolve(gen: TsGeneratorCtx): String = "null"
+    def transparent: Boolean = true
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = valueRef
   }
 
   final val Never: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
@@ -153,7 +168,7 @@ object TsType {
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef as boolean"
 
     override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-      if(optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
+      if (optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
   }
 
   final val Number: TsPlainType with TsJsonType = new TsPlainType with TsJsonType {
@@ -164,7 +179,7 @@ object TsType {
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef as number"
 
     override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-      if(optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
+      if (optional) s"$valueRef?.toString()" else mkPlainWrite(gen, valueRef)
 
     override def dictionaryKeyType: TsType = this
   }
@@ -185,9 +200,9 @@ object TsType {
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"new Date($valueRef as string)"
 
     override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-      if(optional) s"$valueRef?.toISOString()" else mkPlainWrite(gen, valueRef)
+      if (optional) s"$valueRef?.toISOString()" else mkPlainWrite(gen, valueRef)
 
     override def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-      if(optional) s"$valueRef?.toISOString()" else mkJsonWrite(gen, valueRef)
+      if (optional) s"$valueRef?.toISOString()" else mkJsonWrite(gen, valueRef)
   }
 }

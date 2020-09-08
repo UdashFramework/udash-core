@@ -7,7 +7,7 @@ export type BodyWriter<T> = (value: T) => RestBody
 export type BodyReader<T> = (json: RestBody) => T
 export type ResponseReader<T> = (resp: RestResponse) => T
 
-export type Dictionary<K extends string | number, V> = {
+export type Dictionary<K extends string | number | symbol, V> = {
     [K0 in K]: V
 }
 
@@ -23,7 +23,7 @@ export function mapNullable<A, B>(f: (v: A) => B, value: A | null): B | null {
     else return f(value)
 }
 
-export function mapValues<K extends string | number, V, V0>(
+export function mapValues<K extends string | number | symbol, V, V0>(
     dict: Dictionary<K, V>,
     fun: (value: V) => V0,
     copy: boolean = true

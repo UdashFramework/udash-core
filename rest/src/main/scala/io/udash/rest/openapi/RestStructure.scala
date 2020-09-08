@@ -61,8 +61,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   object Case extends AdtMetadataCompanion[Case]
 
   /**
-    * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
-    */
+   * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
+   */
   @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
     @composite info: GenCaseInfo[T]
@@ -88,11 +88,11 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   }
 
   /**
-    * Will be inferred for types having apply/unapply(Seq) pair in their companion.
-    */
+   * Will be inferred for types having apply/unapply(Seq) pair in their companion.
+   */
   @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
-    @adtParamMetadata @multi fields: List[Field[_]],
+    @adtParamMetadata @allowOptional @multi fields: List[Field[_]],
     @composite info: GenCaseInfo[T]
   ) extends RestStructure[T] with Case[T] {
 
@@ -110,7 +110,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
           val props = caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).iterator ++
             fields.iterator.map(f => (f.info.rawName, f.resolveSchema(resolver)))
           val required = caseFieldName.iterator ++
-            fields.iterator.filterNot(_.hasFallbackValue).map(_.info.rawName)
+            fields.iterator.filterNot(_.optional).map(_.info.rawName)
           RefOr(applyAdjusters(Schema(`type` = DataType.Object,
             properties = IListMap(props.toList: _*),
             required = required.toList
@@ -120,8 +120,8 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   object Record extends AdtMetadataCompanion[Record]
 
   /**
-    * Will be inferred for singleton types (objects).
-    */
+   * Will be inferred for singleton types (objects).
+   */
   @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: ValueOf[T],
@@ -151,8 +151,10 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   ) extends TypedMetadata[T] {
 
     val fallbackValue: Opt[JsonValue] =
-      (whenAbsentInfo.map(_.fallbackValue) orElse defaultValueInfo.map(_.fallbackValue)).flatten
-    val hasFallbackValue: Boolean = fallbackValue.isDefined
+      if (info.optional) Opt.Empty
+      else (whenAbsentInfo.map(_.fallbackValue) orElse defaultValueInfo.map(_.fallbackValue)).flatten
+
+    val optional: Boolean = info.optional || fallbackValue.isDefined
 
     def resolveSchema(resolver: SchemaResolver): RefOr[Schema] = {
       val bareSchema = resolver.resolve(restSchema).withDefaultValue(fallbackValue)

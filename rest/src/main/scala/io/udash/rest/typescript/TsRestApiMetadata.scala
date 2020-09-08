@@ -1,10 +1,10 @@
 package io.udash.rest
 package typescript
 
-import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import com.avsystem.commons.serialization.json.JsonStringOutput
+import com.avsystem.commons.serialization.optionalParam
 import io.udash.rest.raw.PlainValue
 
 import scala.annotation.implicitNotFound
@@ -202,12 +202,8 @@ final case class TsHttpFormBodyMethod[T](
 final case class TsHttpCustomBodyMethod[T](
   @composite info: TsMethodInfo[BodyMethodTag],
   @infer @checked result: TsResultTypeTag[T],
-  @encoded @rpcParamMetadata @tagged[Body] rawBodyParam: TsRestParameter[Body, TsBodyType, _],
+  @encoded @rpcParamMetadata @tagged[Body] bodyParam: TsRestParameter[Body, TsBodyType, _],
 ) extends TsHttpMethod[T] {
-  // body param in @CustomBody method can't be TS-optional
-  val bodyParam: TsRestParameter[Body, TsBodyType, _] =
-    rawBodyParam.copy(tsOptional = Opt.Empty)
-
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 
   protected def bodyDecl(gen: TsGeneratorCtx): String =
@@ -219,13 +215,10 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
   @reifyName(useRawName = true) rawName: String,
   @reifyPosition pos: ParamPosition,
   @reifyAnnot paramTag: Tag,
-  @optional @reifyAnnot tsOptional: Opt[tsOptional[T]],
+  @isAnnotated[optionalParam] optional: Boolean,
   @infer typeTag: TsTypeTag[TsT, T]
 ) extends TypedMetadata[T] {
-  def optional: Boolean = tsOptional.isDefined
-
-  def tsType: TsT =
-    tsOptional.fold(typeTag.tsType)(to => typeTag.optionalParamType(to.fallbackValue))
+  def tsType: TsT = typeTag.tsType
 
   def declaration(gen: TsGeneratorCtx): String = {
     val qmark = if (optional) "?" else ""
