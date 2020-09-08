@@ -9,12 +9,7 @@ export function urlEncode(str: string, spaceAsPlus: boolean): string {
 }
 
 export function encodeQuery(params: [string, string][]): string {
-    let queryString = params.map(kv =>
-        urlEncode(kv[0], true) + '=' + urlEncode(kv[1], true)).join("&")
-    if (queryString.length > 0) {
-        queryString = "?" + queryString
-    }
-    return queryString
+    return params.map(kv => urlEncode(kv[0], true) + '=' + urlEncode(kv[1], true)).join("&")
 }
 
 export type RestMethod = "GET" | "HEAD" | "PUT" | "POST" | "PATCH" | "DELETE" | "TRACE" | "CONNECT" | "OPTIONS"

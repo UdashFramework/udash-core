@@ -7,7 +7,11 @@ export function handleUsingFetch(baseUrl: string): HandleRequest {
         }
 
         const joinedPath = request.parameters.path.map(s => urlEncode(s, false)).join("/")
-        const fullUrl = baseUrl + joinedPath + encodeQuery(request.parameters.query)
+        let queryString = encodeQuery(request.parameters.query)
+        if(queryString.length > 0) {
+            queryString = "?" + queryString
+        }
+        const fullUrl = baseUrl + joinedPath + queryString
 
         let body: BodyInit | null
         let allHeaders: [string, any][] = request.parameters.header
