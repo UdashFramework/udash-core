@@ -55,7 +55,7 @@ final case class TsRestApiMetadata[T](
   @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
-  jsonBodyMethods: List[TsHttpJsonBodyMethod[_]],
+  jsonBodyMethods: List[TsHttpJsonBodyMethod[_]]
 ) extends TypedMetadata[T] with TsApiType with TsDefinition {
   val module: TsModule =
     moduleTag.module
@@ -130,12 +130,12 @@ final case class TsMethodInfo[+Tag <: RestMethodTag](
   @reifyAnnot methodTag: Tag,
   @multi @rpcParamMetadata @tagged[Path] pathParams: List[TsRestParameter[Path, TsPlainType, _]],
   @multi @rpcParamMetadata @tagged[Query] queryParams: List[TsRestParameter[Query, TsPlainType, _]],
-  @multi @rpcParamMetadata @tagged[Header] headerParams: List[TsRestParameter[Header, TsPlainType, _]],
+  @multi @rpcParamMetadata @tagged[Header] headerParams: List[TsRestParameter[Header, TsPlainType, _]]
 )
 
 final case class TsPrefixMethod[T](
   @composite info: TsMethodInfo[Prefix],
-  @infer @checked typeTag: TsApiTypeTag[T],
+  @infer @checked typeTag: TsApiTypeTag[T]
   // Note: no cookies! can't send them from browser based client
 ) extends TsRestMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
@@ -168,7 +168,7 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
 
 final case class TsHttpGetMethod[T](
   @composite info: TsMethodInfo[GET],
-  @infer @checked result: TsResultTypeTag[T],
+  @infer @checked result: TsResultTypeTag[T]
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
@@ -179,7 +179,7 @@ final case class TsHttpGetMethod[T](
 final case class TsHttpJsonBodyMethod[T](
   @composite info: TsMethodInfo[BodyMethodTag],
   @infer @checked result: TsResultTypeTag[T],
-  @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsJsonType, _]],
+  @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsJsonType, _]]
 ) extends TsHttpMethod[T] {
   protected def bodyDecl(gen: TsGeneratorCtx): String = {
     val bodyObj = bodyParams.iterator
@@ -192,7 +192,7 @@ final case class TsHttpJsonBodyMethod[T](
 final case class TsHttpFormBodyMethod[T](
   @composite info: TsMethodInfo[BodyMethodTag],
   @infer @checked result: TsResultTypeTag[T],
-  @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsPlainType, _]],
+  @multi @rpcParamMetadata @tagged[Body] bodyParams: List[TsRestParameter[Body, TsPlainType, _]]
 ) extends TsHttpMethod[T] {
   protected def bodyDecl(gen: TsGeneratorCtx): String = {
     val formFields = bodyParams.iterator.map(mkPair(gen, _)).mkString(", ")
@@ -203,7 +203,7 @@ final case class TsHttpFormBodyMethod[T](
 final case class TsHttpCustomBodyMethod[T](
   @composite info: TsMethodInfo[BodyMethodTag],
   @infer @checked result: TsResultTypeTag[T],
-  @encoded @rpcParamMetadata @tagged[Body] bodyParam: TsRestParameter[Body, TsBodyType, _],
+  @encoded @rpcParamMetadata @tagged[Body] bodyParam: TsRestParameter[Body, TsBodyType, _]
 ) extends TsHttpMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = List(bodyParam)
 

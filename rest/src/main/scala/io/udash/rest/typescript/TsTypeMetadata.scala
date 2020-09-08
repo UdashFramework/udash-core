@@ -135,7 +135,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
     @optional @reifyAnnot tsMutable: Opt[tsMutable],
-    @multi @adtParamMetadata @allowOptional fields: List[Field[_]],
+    @multi @adtParamMetadata @allowOptional fields: List[Field[_]]
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     lazy val managedFields: List[Field[_]] =
       fields.filterNot(_.transparent)
@@ -179,7 +179,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Singleton[T](
     @composite info: GenCaseInfo[T],
     @infer moduleTag: TsModuleTag[T],
-    @infer @checked value: ValueOf[T],
+    @infer @checked value: ValueOf[T]
   ) extends Case[T] with TsTypeMetadata[T] with TsDefinition {
     def tsType: TsJsonType = this
 
@@ -198,7 +198,7 @@ object TsTypeMetadata extends AdtMetadataCompanion[TsTypeMetadata] {
   final case class Field[T](
     @composite info: GenParamInfo[T],
     @infer typeTag: TsJsonTypeTag[T],
-    @optional @reifyAnnot tsMutable: Opt[tsMutable],
+    @optional @reifyAnnot tsMutable: Opt[tsMutable]
   ) extends TypedMetadata[T] {
     val name: String =
       info.sourceName
