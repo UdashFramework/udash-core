@@ -94,6 +94,11 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
   lazy val params: List[TsRestParameter[RestParamTag, TsType, _]] =
     (info.pathParams ++ info.queryParams ++ info.headerParams ++ bodyParams).sortBy(_.pos.index)
 
+  protected def declareParams(gen: TsGeneratorCtx): String =
+    params.foldRight((List.empty[String], true)) { case (param, (acc, optionalAllowed)) =>
+      (param.declaration(gen, optionalAllowed) :: acc, param.optional && optionalAllowed)
+    }._1.mkString("(", ", ", ")")
+
   protected def quote(str: String): String = JsonStringOutput.write(str)
 
   protected def mkPair(gen: TsGeneratorCtx, p: TsRestParameter[_, TsPlainType, _]): String =
@@ -135,16 +140,12 @@ final case class TsPrefixMethod[T](
 ) extends TsRestMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
-  def declaration(gen: TsGeneratorCtx): String = {
-    val returnType = typeTag.tsType.resolve(gen)
-    val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
-
-    s"""    ${info.name}$paramDecls: $returnType {
+  def declaration(gen: TsGeneratorCtx): String =
+    s"""    ${info.name}${declareParams(gen)}: ${typeTag.tsType.resolve(gen)} {
        |        ${restParamsDefn(gen)}
        |        return ${typeTag.tsType.instantiate(gen, "this._handle", "_params")}
        |    }
        |""".stripMargin
-  }
 }
 
 sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
@@ -154,11 +155,8 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
   protected def bodyDecl(gen: TsGeneratorCtx): String
 
   def declaration(gen: TsGeneratorCtx): String = {
-    val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
-    val returnType = result.tsType.resolve(gen)
     val methodStr = quote(info.methodTag.method.name)
-
-    s"""    ${info.name}$paramDecls: $returnType {
+    s"""    ${info.name}${declareParams(gen)}: ${result.tsType.resolve(gen)} {
        |        ${restParamsDefn(gen)}
        |        ${bodyDecl(gen)}
        |        const _result = this._handle({method: $methodStr, parameters: _params, body: _body})
@@ -223,8 +221,9 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
 ) extends TypedMetadata[T] {
   def tsType: TsT = typeTag.tsType
 
-  def declaration(gen: TsGeneratorCtx): String = {
-    val qmark = if (optional) "?" else ""
-    s"$name$qmark: ${tsType.resolve(gen)}"
+  def declaration(gen: TsGeneratorCtx, optionalAllowed: Boolean): String = {
+    val qmark = if (optional && optionalAllowed) "?" else ""
+    val orUndefined = if(optional && !optionalAllowed) " | undefined" else ""
+    s"$name$qmark: ${tsType.resolve(gen)}$orUndefined"
   }
 }

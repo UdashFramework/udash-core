@@ -28,7 +28,7 @@ case class Wrappy(stringu: String) extends AnyVal
 object Wrappy extends TsRestDataCompanion[Wrappy]
 
 trait TsExampleApi {
-  @POST def postStuff(int: Int, @OptBodyField optstr: Opt[String]): Future[Boolean]
+  @POST def postStuff(int: Int, @OptBodyField optstr: Opt[String], nono: Boolean): Future[Boolean]
   @Prefix("fuu/bar") def prefix(@Path("after/paf") paf: Boolean): OtherApi
   @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @OptQuery("tink") thing: Opt[Int]): Future[Unit]
   @PUT def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String]
@@ -43,6 +43,8 @@ object TsExampleApiImpl extends TsExampleApi {
     def gimmeTree: Future[Tree] = Future.successful(other.Leaf)
   }
 
+  def postStuff(int: Int, optstr: Opt[String], nono: Boolean): Future[Boolean] =
+    Future.successful(true)
   def postMe(id: Ajdi, body: MajFriend, thing: Opt[Int]): Future[Unit] =
     Future.unit
   def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String] =
@@ -51,8 +53,6 @@ object TsExampleApiImpl extends TsExampleApi {
     Future.successful(Opt(MajFriend("Fred", 18, List("doing"), Opt(3.14))))
   def allFriends: Future[Map[Ajdi, MajFriend]] =
     Future.successful(Map.empty)
-  def postStuff(int: Int, optstr: Opt[String]): Future[Boolean] =
-    Future.successful(true)
 }
 
 object test {
