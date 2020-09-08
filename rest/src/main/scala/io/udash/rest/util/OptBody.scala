@@ -2,7 +2,7 @@ package io.udash.rest.util
 
 import com.avsystem.commons.Opt
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
-import io.udash.rest.openapi.{RefOr, RestRequestBody}
+import io.udash.rest.openapi._
 import io.udash.rest.raw.HttpBody
 
 final case class OptBody[T](body: Opt[T])
@@ -17,9 +17,13 @@ object OptBody {
     case body => OptBody(Opt(wrapped.asReal(body)))
   }
 
-  implicit def restRequestBody[T: RestRequestBody]: RestRequestBody[OptBody[T]] =
-    (resolver, schemaTransform) => RestRequestBody[T].requestBody(resolver, schemaTransform) match {
-      case Opt(RefOr.Value(body)) => Opt(RefOr(body.copy(required = false)))
-      case body => body
+  implicit def restRequestBody[T: RestRequestBody]: RestRequestBody[OptBody[T]] = {
+    new RestRequestBody[OptBody[T]] {
+      def requestBody(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Opt[RefOr[RequestBody]] =
+        RestRequestBody[T].requestBody(resolver, schemaTransform) match {
+          case Opt(RefOr.Value(body)) => Opt(RefOr(body.copy(required = false)))
+          case body => body
+        }
     }
+  }
 }
