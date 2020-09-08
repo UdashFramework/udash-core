@@ -28,9 +28,9 @@ case class Wrappy(stringu: String) extends AnyVal
 object Wrappy extends TsRestDataCompanion[Wrappy]
 
 trait TsExampleApi {
-  @POST def postStuff(int: Int, @tsOptional optstr: Opt[String]): Future[Boolean]
+  @POST def postStuff(int: Int, @OptBodyField optstr: Opt[String]): Future[Boolean]
   @Prefix("fuu/bar") def prefix(@Path("after/paf") paf: Boolean): OtherApi
-  @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @Query("tink") @tsOptional thing: Opt[Int]): Future[Unit]
+  @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @OptQuery("tink") thing: Opt[Int]): Future[Unit]
   @PUT def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String]
   @GET def find(id: Ajdi): Future[Opt[MajFriend]]
   @GET def allFriends: Future[Map[Ajdi, MajFriend]]
