@@ -19,6 +19,7 @@ object `package` {
   type TsBodyTypeTag[T] = TsTypeTag[TsBodyType, T]
   type TsResponseTypeTag[T] = TsTypeTag[TsResponseType, T]
   type TsResultTypeTag[T] = TsTypeTag[TsResultType, T]
+  type TsApiTypeTag[T] = TsTypeTag[TsApiType, T]
 }
 
 sealed abstract class TsTypeTagCompanion[TsT <: TsType] {
@@ -31,6 +32,7 @@ object TsJsonAndBodyTypeTag extends TsTypeTagCompanion[TsJsonType with TsBodyTyp
 object TsBodyTypeTag extends TsTypeTagCompanion[TsBodyType]
 object TsResponseTypeTag extends TsTypeTagCompanion[TsResponseType]
 object TsResultTypeTag extends TsTypeTagCompanion[TsResultType]
+object TsApiTypeTag extends TsTypeTagCompanion[TsApiType]
 
 object TsTypeTag extends TsTypeTagLowPrio {
   def apply[TsT <: TsType, T](tsType: => TsT): TsTypeTag[TsT, T] =

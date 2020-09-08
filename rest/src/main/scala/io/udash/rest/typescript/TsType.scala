@@ -57,6 +57,10 @@ trait TsResultType extends TsType {
   def mkFromPromise(gen: TsGeneratorCtx, valueRef: String): String
 }
 
+trait TsApiType extends TsType {
+  def instantiate(gen: TsGeneratorCtx, handler: String, prefixParams: String): String
+}
+
 object TsType {
   def nullableJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
     def resolve(gen: TsGeneratorCtx): String =

@@ -56,7 +56,7 @@ final case class TsRestApiMetadata[T](
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
   jsonBodyMethods: List[TsHttpJsonBodyMethod[_]],
-) extends TypedMetadata[T] with TsDefinition {
+) extends TypedMetadata[T] with TsApiType with TsDefinition {
   val module: TsModule =
     moduleTag.module
 
@@ -76,6 +76,9 @@ final case class TsRestApiMetadata[T](
        |}
        |""".stripMargin
   }
+
+  def instantiate(gen: TsGeneratorCtx, handler: String, prefixParams: String): String =
+    s"new ${resolve(gen)}($handler, $prefixParams)"
 }
 object TsRestApiMetadata extends RpcMetadataCompanion[TsRestApiMetadata] {
   final val CookieParamsNotAllowed = "Cannot send cookie parameters from browser based TypeScript client"
@@ -127,18 +130,18 @@ final case class TsMethodInfo[+Tag <: RestMethodTag](
 
 final case class TsPrefixMethod[T](
   @composite info: TsMethodInfo[Prefix],
-  @infer @checked result: TsRestApiMetadata.Lazy[T],
+  @infer @checked typeTag: TsApiTypeTag[T],
   // Note: no cookies! can't send them from browser based client
 ) extends TsRestMethod[T] {
   def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
 
   def declaration(gen: TsGeneratorCtx): String = {
-    val returnType = result.value.resolve(gen)
+    val returnType = typeTag.tsType.resolve(gen)
     val paramDecls = params.iterator.map(_.declaration(gen)).mkString("(", ", ", ")")
 
     s"""    ${info.name}$paramDecls: $returnType {
        |        ${restParamsDefn(gen)}
-       |        return new $returnType(this._handle, _params)
+       |        return ${typeTag.tsType.instantiate(gen, "this._handle", "_params")}
        |    }
        |""".stripMargin
   }
