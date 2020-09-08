@@ -7,12 +7,12 @@ import io.udash.rest.raw.HttpBody
 
 final case class OptBody[T](body: Opt[T])
 object OptBody {
-  implicit def asHttpBody[T](implicit wrapped: AsRaw[HttpBody, T]): AsRaw[HttpBody, OptBody[T]] = {
+  implicit def asHttpBody[T](implicit wrapped: AsRaw[HttpBody, T]): AsRaw[HttpBody, OptBody[T]] = AsRaw.create {
     case OptBody(Opt(t)) => wrapped.asRaw(t)
     case OptBody(Opt.Empty) => HttpBody.empty
   }
 
-  implicit def fromHttpBody[T](implicit wrapped: AsReal[HttpBody, T]): AsReal[HttpBody, OptBody[T]] = {
+  implicit def fromHttpBody[T](implicit wrapped: AsReal[HttpBody, T]): AsReal[HttpBody, OptBody[T]] = AsReal.create {
     case HttpBody.Empty => OptBody(Opt.Empty)
     case body => OptBody(Opt(wrapped.asReal(body)))
   }
