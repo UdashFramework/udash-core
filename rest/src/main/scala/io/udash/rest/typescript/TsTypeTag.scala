@@ -42,6 +42,7 @@ object TsTypeTag extends TsTypeTagLowPrio {
   implicit val UnitTag: TsJsonAndBodyTypeTag[Unit] = TsJsonAndBodyTypeTag(TsType.Undefined)
   implicit val NullTag: TsJsonTypeTag[Null] = TsJsonTypeTag(TsType.Null)
   implicit val NothingTag: TsPlainAndJsonTypeTag[Nothing] = TsPlainAndJsonTypeTag(TsType.Never)
+
   implicit val BooleanTag: TsPlainAndJsonTypeTag[Boolean] = TsPlainAndJsonTypeTag(TsType.Boolean)
   implicit val ByteTag: TsPlainAndJsonTypeTag[Byte] = TsPlainAndJsonTypeTag(TsType.Number)
   implicit val ShortTag: TsPlainAndJsonTypeTag[Short] = TsPlainAndJsonTypeTag(TsType.Number)
@@ -49,6 +50,7 @@ object TsTypeTag extends TsTypeTagLowPrio {
   implicit val FloatTag: TsPlainAndJsonTypeTag[Float] = TsPlainAndJsonTypeTag(TsType.Number)
   implicit val DoubleTag: TsPlainAndJsonTypeTag[Double] = TsPlainAndJsonTypeTag(TsType.Number)
   implicit val CharTag: TsPlainAndJsonTypeTag[Char] = TsPlainAndJsonTypeTag(TsType.String)
+
   implicit val StringTag: TsPlainAndJsonTypeTag[String] = TsPlainAndJsonTypeTag(TsType.String)
   implicit val TimestampTag: TsPlainAndJsonTypeTag[Timestamp] = TsPlainAndJsonTypeTag(TsType.Timestamp)
   implicit val DateTag: TsPlainAndJsonTypeTag[JDate] = TsPlainAndJsonTypeTag(TsType.Timestamp)
