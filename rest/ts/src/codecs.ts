@@ -45,6 +45,14 @@ export function bodyToJson(body: RestBody): any {
     }
 }
 
+export function bodyToBinary(body: RestBody): Int8Array {
+    if (body != null && body.contentType === 'application/octet-stream') {
+        return new Int8Array(body.content as ArrayBuffer)
+    } else {
+        throw Error(`expected body with application/octet-stream media type`)
+    }
+}
+
 export function jsonToBody(json: any): RestBody {
     return {
         content: JSON.stringify(json),
@@ -56,6 +64,13 @@ export function formToBody(...params: [string, string | undefined][]): RestBody 
     return {
         content: encodeQuery(params.filter(([n, v]) => typeof v !== 'undefined') as [string, string][]),
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
+    }
+}
+
+export function binaryToBody(data: Int8Array): RestBody {
+    return {
+        content: data.buffer,
+        contentType: "application/octet-stream"
     }
 }
 

@@ -20,6 +20,7 @@ case class MajFriend(
   skills: List[String],
   @tsOptional extra: Opt[Double],
   @tsOptional updateTime: Opt[Timestamp] = Opt.Empty,
+  bytes: Array[Byte] = Array.empty,
 )
 object MajFriend extends TsRestDataCompanion[MajFriend]
 

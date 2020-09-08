@@ -52,6 +52,7 @@ object TsTypeTag extends TsTypeTagLowPrio {
   implicit val StringTag: TsPlainAndJsonTypeTag[String] = TsPlainAndJsonTypeTag(TsType.String)
   implicit val TimestampTag: TsPlainAndJsonTypeTag[Timestamp] = TsPlainAndJsonTypeTag(TsType.Timestamp)
   implicit val DateTag: TsPlainAndJsonTypeTag[JDate] = TsPlainAndJsonTypeTag(TsType.Timestamp)
+  implicit val ByteArrayTag: TsJsonAndBodyTypeTag[Array[Byte]] = TsJsonAndBodyTypeTag(TsType.Int8Array)
 
   implicit def seqTag[C[X] <: BSeq[X], T: TsJsonTypeTag]: TsJsonTypeTag[C[T]] =
     TsJsonTypeTag(TsType.arrayJson(TsJsonType[T]))

@@ -209,4 +209,18 @@ object TsType {
     override def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if (optional) s"$valueRef?.toISOString()" else mkJsonWrite(gen, valueRef)
   }
+
+  final val Int8Array: TsJsonType with TsBodyType = new TsJsonType with TsBodyType {
+    def resolve(gen: TsGeneratorCtx): String = "Int8Array"
+    def transparent: Boolean = false
+
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
+      s"Array.prototype.slice.call($valueRef)" // https://stackoverflow.com/a/29676964/931323
+    def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
+      s"Int8Array.from($valueRef as number[])"
+    def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String =
+      s"${gen.codecs}.binaryToBody($valueRef)"
+    def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String =
+      s"${gen.codecs}.bodyToBinary($valueRef)"
+  }
 }
