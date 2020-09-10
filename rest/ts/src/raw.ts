@@ -30,7 +30,7 @@ export interface RestParameters {
 }
 
 export interface RestContentBody {
-    readonly content: string | ArrayBuffer,
+    readonly content: ArrayBuffer,
     readonly contentType: string
 }
 
@@ -47,5 +47,3 @@ export interface RestResponse {
     readonly headers: [string, string][],
     readonly body: RestBody,
 }
-
-export type HandleRequest = (request: RestRequest) => Promise<RestResponse>

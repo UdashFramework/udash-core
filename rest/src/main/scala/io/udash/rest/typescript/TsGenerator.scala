@@ -63,6 +63,7 @@ object TsModule {
 
   final val RawModule = fromAbsolutePath("udash-rest-client/lib/raw")
   final val CodecsModule = fromAbsolutePath("udash-rest-client/lib/codecs")
+  final val ClientModule = fromAbsolutePath("udash-rest-client/lib/client")
 
   def of[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
 }

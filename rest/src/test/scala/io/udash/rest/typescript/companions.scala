@@ -39,5 +39,5 @@ abstract class TsRestApiCompanion[Real](
   implicit final lazy val restAsReal: RawRest.AsRealRpc[Real] = inst(TsRestImplicits, this).asReal
   implicit final lazy val openapiMetadata: OpenApiMetadata[Real] = inst(TsRestImplicits, this).openapiMetadata
   implicit final lazy val tsRestApiMetadata: TsRestApiMetadata[Real] = inst(TsRestImplicits, this).tsRestApiMetadata
-  implicit final lazy val tsTypeTag: TsApiTypeTag[Real] = TsApiTypeTag(tsRestApiMetadata)
+  implicit final lazy val tsTypeTag: TsApiTypeTag[Real] = TsApiTypeTag(tsRestApiMetadata.tsType)
 }

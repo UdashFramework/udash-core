@@ -54,12 +54,16 @@ trait TsResponseType extends TsType {
 object TsResponseType extends TsTypeCompanion[TsResponseType, TsResponseTypeTag]
 
 trait TsResultType extends TsType {
-  def mkFromPromise(gen: TsGeneratorCtx, valueRef: String): String
+  def mkSendRequest(gen: TsGeneratorCtx, httpClientRef: String, rawRequestRef: String): String
 }
 
 trait TsApiType extends TsType {
   def definition(pathPrefix: Vector[String]): TsDefinition
   def subApis: List[(Seq[String], TsApiType)]
+
+  // override so that API proxy class can accept something else than base URL
+  def constructorArgName: String = "baseUrl"
+  def constructorArgType(gen: TsGeneratorCtx): String = "string"
 }
 object TsApiType extends TsTypeCompanion[TsApiType, TsApiTypeTag]
 
@@ -131,8 +135,8 @@ object TsType {
   }
 
   def resultAsPromise(tpe: TsResponseType): TsResultType = new TsResultType {
-    def mkFromPromise(gen: TsGeneratorCtx, valueRef: String): String =
-      s"$valueRef.then(${tpe.mkResponseReader(gen)})"
+    def mkSendRequest(gen: TsGeneratorCtx, httpClientRef: String, rawRequestRef: String): String =
+      s"${gen.importModule(TsModule.ClientModule)}.handleUsingFetch($httpClientRef, $rawRequestRef).then(${tpe.mkResponseReader(gen)})"
 
     def resolve(gen: TsGeneratorCtx): String =
       s"Promise<${tpe.resolve(gen)}>"

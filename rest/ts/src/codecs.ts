@@ -31,10 +31,19 @@ export function mapValues<K extends string | number | symbol, V, V0>(
     return result as Record<K, V0>
 }
 
+const encoder = new TextEncoder()
+export function encodeStr(str: string): ArrayBuffer {
+    return encoder.encode(str).buffer
+}
+
+const decoder = new TextDecoder()
+export function decodeStr(buffer: ArrayBuffer): string {
+    return decoder.decode(buffer)
+}
+
 export function bodyToJson(body: RestBody): any {
-    //TODO: what if charset is missing and content is not string?
     if (body != null && body.contentType.startsWith('application/json')) {
-        return JSON.parse(body.content as string)
+        return JSON.parse(decodeStr(body.content))
     } else {
         //TODO: better error?
         throw Error(`expected body with application/json media type`)
@@ -51,14 +60,14 @@ export function bodyToBinary(body: RestBody): Int8Array {
 
 export function jsonToBody(json: any): RestBody {
     return {
-        content: JSON.stringify(json),
+        content: encodeStr(JSON.stringify(json)),
         contentType: "application/json; charset=utf-8"
     }
 }
 
 export function formToBody(...params: [string, string | undefined][]): RestBody {
     return {
-        content: encodeQuery(params.filter(([n, v]) => typeof v !== 'undefined') as [string, string][]),
+        content: encodeStr(encodeQuery(params.filter(([n, v]) => typeof v !== 'undefined') as [string, string][])),
         contentType: "application/x-www-form-urlencoded; charset=utf-8"
     }
 }
