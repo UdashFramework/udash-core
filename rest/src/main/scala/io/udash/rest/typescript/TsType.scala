@@ -10,7 +10,7 @@ trait TsPlainType extends TsType {
   def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String
 
   def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-    if (optional) s"${gen.codecs}.mapUndefined(${mkPlainWriter(gen)}, $valueRef)"
+    if (optional) s"${gen.codecs("mapUndefined")}(${mkPlainWriter(gen)}, $valueRef)"
     else mkPlainWrite(gen, valueRef)
 
   def mkPlainWriter(gen: TsGeneratorCtx): String = s"(v => ${mkPlainWrite(gen, "v")})"
@@ -30,7 +30,7 @@ trait TsJsonType extends TsType {
   def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String
 
   def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-    if (optional && !transparent) s"${gen.codecs}.mapUndefined(${mkJsonWriter(gen)}, $valueRef)"
+    if (optional && !transparent) s"${gen.codecs("mapUndefined")}(${mkJsonWriter(gen)}, $valueRef)"
     else mkJsonWrite(gen, valueRef)
 
   def mkJsonWriter(gen: TsGeneratorCtx): String = s"(v => ${mkJsonWrite(gen, "v")})"
@@ -76,11 +76,11 @@ object TsType {
 
     def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
-      else s"${gen.codecs}.mapNullable(${tpe.mkJsonWriter(gen)}, $valueRef)"
+      else s"${gen.codecs("mapNullable")}(${tpe.mkJsonWriter(gen)}, $valueRef)"
 
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
-      else s"${gen.codecs}.mapNullable(${tpe.mkJsonReader(gen)}, $valueRef)"
+      else s"${gen.codecs("mapNullable")}(${tpe.mkJsonReader(gen)}, $valueRef)"
   }
 
   def arrayJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
@@ -104,13 +104,13 @@ object TsType {
 
     def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) valueRef
-      else s"${gen.codecs}.mapValues($valueRef, ${valueType.mkJsonWriter(gen)})"
+      else s"${gen.codecs("mapValues")}($valueRef, ${valueType.mkJsonWriter(gen)})"
 
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else {
         val castValueRef = s"$valueRef as Record<${keyType.dictionaryKeyType.resolve(gen)}, any>"
-        s"${gen.codecs}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, false)"
+        s"${gen.codecs("mapValues")}($castValueRef, ${valueType.mkJsonReader(gen)}, false)"
       }
 
     def resolve(gen: TsGeneratorCtx): String =
@@ -121,22 +121,24 @@ object TsType {
     def resolve(gen: TsGeneratorCtx): String = tpe.resolve(gen)
 
     def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String =
-      s"${gen.codecs}.jsonToBody(${tpe.mkJsonWrite(gen, valueRef)})"
+      s"${gen.codecs("jsonToBody")}(${tpe.mkJsonWrite(gen, valueRef)})"
 
     def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String =
-      tpe.mkJsonRead(gen, s"${gen.codecs}.bodyToJson($valueRef)")
+      tpe.mkJsonRead(gen, s"${gen.codecs("bodyToJson")}($valueRef)")
   }
 
   def bodyAsResponse(tpe: TsBodyType): TsResponseType = new TsResponseType {
     def resolve(gen: TsGeneratorCtx): String = tpe.resolve(gen)
 
     def mkResponseRead(gen: TsGeneratorCtx, valueRef: String): String =
-      tpe.mkBodyRead(gen, s"${gen.codecs}.successfulResponseToBody($valueRef)")
+      tpe.mkBodyRead(gen, s"${gen.codecs("successfulResponseToBody")}($valueRef)")
   }
 
   def resultAsPromise(tpe: TsResponseType): TsResultType = new TsResultType {
-    def mkSendRequest(gen: TsGeneratorCtx, httpClientRef: String, rawRequestRef: String): String =
-      s"${gen.importModule(TsModule.ClientModule)}.handleUsingFetch($httpClientRef, $rawRequestRef).then(${tpe.mkResponseReader(gen)})"
+    def mkSendRequest(gen: TsGeneratorCtx, httpClientRef: String, rawRequestRef: String): String = {
+      val handleUsingFetch = gen.importIdentifier(TsModule.ClientModule, "handleUsingFetch")
+      s"$handleUsingFetch($httpClientRef, $rawRequestRef).then(${tpe.mkResponseReader(gen)})"
+    }
 
     def resolve(gen: TsGeneratorCtx): String =
       s"Promise<${tpe.resolve(gen)}>"
@@ -226,8 +228,8 @@ object TsType {
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       s"Int8Array.from($valueRef as number[])"
     def mkBodyWrite(gen: TsGeneratorCtx, valueRef: String): String =
-      s"${gen.codecs}.binaryToBody($valueRef)"
+      s"${gen.codecs("binaryToBody")}($valueRef)"
     def mkBodyRead(gen: TsGeneratorCtx, valueRef: String): String =
-      s"${gen.codecs}.bodyToBinary($valueRef)"
+      s"${gen.codecs("bodyToBinary")}($valueRef)"
   }
 }

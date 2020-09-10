@@ -7,6 +7,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.serialization.json.JsonStringOutput
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 trait TsReference {
   def resolve(gen: TsGeneratorCtx): String
@@ -25,9 +26,9 @@ trait TsDefinition extends TsReference {
 
 final case class TsModule(path: List[String], external: Boolean = false) {
   val name: String = path.lastOpt.getOrElse("_root_")
+  val absolutePath: String = path.mkString(if (external) "" else "/", "/", "")
 
-  override def toString: String =
-    path.mkString(if (external) "" else "/", "/", "")
+  override def toString: String = absolutePath
 
   /** Returns path of some other module relative to this module. */
   def importPathFor(imported: TsModule): String =
@@ -66,35 +67,80 @@ object TsModule {
   final val ClientModule = fromAbsolutePath("udash-rest-client/lib/client")
 
   def of[T](implicit tag: TsModuleTag[T]): TsModule = tag.module
+
+  implicit val ordering: Ordering[TsModule] = Ordering.by(_.absolutePath)
 }
 
 final case class TsModuleTag[T](module: TsModule) extends AnyVal
 
 case class TsGeneratorCtx(gen: TsGenerator, inModule: TsModule) {
-  def resolve(definition: TsDefinition): String = gen.resolve(inModule, definition)
-  def importModule(module: TsModule): String = gen.importModule(inModule, module)
+  def resolve(definition: TsDefinition): String =
+    gen.resolve(inModule, definition)
 
-  def codecs: String = gen.importModule(inModule, TsModule.CodecsModule)
-  def raw: String = gen.importModule(inModule, TsModule.RawModule)
+  def importIdentifier(module: TsModule, identifier: String): String =
+    gen.importIdentifier(inModule, module, identifier)
+
+  def codecs(identifier: String): String =
+    importIdentifier(TsModule.CodecsModule, identifier)
+
+  def raw(identifier: String): String =
+    importIdentifier(TsModule.RawModule, identifier)
 }
 
 final class TsGenerator(
   // Code automatically added at the beginning of every TS file
   val prelude: String = ""
 ) {
+  private case class Entry(definition: TsDefinition, contents: String)
+
   private class ModuleEntry(module: TsModule) {
     val definitions = new MLinkedHashMap[String, Entry]
 
-    private val imports = new MLinkedHashMap[TsModule, String]
-    private val importsByName = new MLinkedHashMap[String, MListBuffer[TsModule]]
+    private val imports = new mutable.TreeMap[TsModule, mutable.TreeMap[String, String]]
+    private val importsByName = new MHashMap[String, MHashSet[TsModule]]
+    private val importsByAliasName = new MHashMap[String, MHashSet[TsModule]]
 
-    def importModule(module: TsModule): String = imports.getOpt(module).getOrElse {
-      val conflictingModules = importsByName.getOrElseUpdate(module.name, new MListBuffer)
-      val importName = if (conflictingModules.isEmpty) module.name else s"${module.name}$$${conflictingModules.size}"
-      conflictingModules += module
-      imports(module) = importName
-      importName
-    }
+    def addDefinition(definition: TsDefinition): Unit =
+      definitions.get(definition.name) match {
+        case Some(Entry(prevDefn, prevDefnStr)) =>
+          if (prevDefn != definition) {
+            // TODO: this can probably blow up stack
+            doAddDefinition(definition, Opt(prevDefnStr))
+          }
+        case None =>
+          doAddDefinition(definition, Opt.Empty)
+      }
+
+    private def doAddDefinition(definition: TsDefinition, prevContents: Opt[String]): Unit =
+      if (importsByAliasName.contains(definition.name)) {
+        // trying to add definition with name that conflicts with some import
+        // must regenerate the entire module
+        val allDefinitions = definitions.valuesIterator.map(_.definition).toList
+        definitions.clear()
+        imports.clear()
+        importsByName.clear()
+        importsByAliasName.clear()
+        addDefinition(definition) // adding this definition first so that imports added by
+        allDefinitions.foreach(addDefinition)
+      } else {
+        importsByName.getOrElseUpdate(definition.name, new MHashSet) += definition.module
+        importsByAliasName.getOrElseUpdate(definition.name, new MHashSet) += definition.module
+        val contents = definition.contents(TsGeneratorCtx(TsGenerator.this, module))
+        if (prevContents.exists(_ != contents)) {
+          throw new IllegalStateException(
+            s"duplicate TypeScript definition ${definition.name} in module $module")
+        }
+        definitions += ((definition.name, Entry(definition, contents)))
+      }
+
+    def importIdentifier(module: TsModule, identifier: String): String =
+      imports.getOrElseUpdate(module, new mutable.TreeMap).getOrElseUpdate(identifier, {
+        val conflictingModules = importsByName.getOrElseUpdate(identifier, new MHashSet)
+        val aliasName = if (conflictingModules.isEmpty) identifier else s"$identifier${conflictingModules.size}"
+        importsByAliasName.getOrElseUpdate(aliasName, new MHashSet) += module
+        conflictingModules += module
+        aliasName
+      })
 
     def write(outputDir: File): Unit = {
       val moduleFile = new File(outputDir, module.path.mkString("", File.separator, ".ts"))
@@ -102,10 +148,14 @@ final class TsGenerator(
       val writer = new FileWriter(moduleFile)
       try {
         writer.write(prelude)
-        imports.foreach { case (imported, ident) =>
-          val path = module.importPathFor(imported)
-          writer.write(s"""import * as $ident from "$path"""")
-          writer.write('\n')
+        imports.foreach { case (importedModule, identifiers) =>
+          val path = module.importPathFor(importedModule)
+          val importClauses = identifiers.toVector.sortBy(_._1).iterator.map {
+            case (name, aliasName) if name == aliasName => name
+            case (name, aliasName) => s"$name as $aliasName"
+          }.mkString("{", ", ", "}")
+          writer.write(s"""import $importClauses from "$path"""")
+          writer.write("\n")
         }
         definitions.values.foreach { entry =>
           writer.write("\n")
@@ -116,8 +166,6 @@ final class TsGenerator(
       }
     }
   }
-
-  private case class Entry(definition: TsDefinition, contents: String)
 
   private[this] val modules = new MLinkedHashMap[TsModule, ModuleEntry]
   private[this] var resolving = List.empty[TsDefinition]
@@ -130,7 +178,7 @@ final class TsGenerator(
   def resolve(inModule: TsModule, definition: TsDefinition): String = {
     add(definition)
     if (inModule == definition.module) definition.name
-    else s"${importModule(inModule, definition.module)}.${definition.name}"
+    else importIdentifier(inModule, definition.module, definition.name)
   }
 
   def add[Api: TsApiTypeTag](pathPrefix: Vector[String]): Unit = {
@@ -149,29 +197,14 @@ final class TsGenerator(
 
     if (!resolving.contains(definition)) try {
       resolving ::= definition
-
-      moduleEntry.definitions.get(definition.name) match {
-        case Some(Entry(prevDefn, prevDefnStr)) =>
-          if (prevDefn != definition) {
-            // TODO: this can probably blow up stack
-            val definitionStr = definition.contents(TsGeneratorCtx(this, curModule))
-            if (definitionStr != prevDefnStr) {
-              throw new IllegalStateException(
-                s"duplicate TypeScript definition ${definition.name} in module ${definition.module}")
-            }
-            moduleEntry.definitions += ((definition.name, Entry(definition, definitionStr)))
-          }
-        case None =>
-          val definitionStr = definition.contents(TsGeneratorCtx(this, curModule))
-          moduleEntry.definitions += ((definition.name, Entry(definition, definitionStr)))
-      }
+      moduleEntry.addDefinition(definition)
     } finally {
       resolving = resolving.tail
     }
   }
 
-  def importModule(importingModule: TsModule, importedModule: TsModule): String =
-    modules.getOrElseUpdate(importingModule, new ModuleEntry(importingModule)).importModule(importedModule)
+  def importIdentifier(importingModule: TsModule, importedModule: TsModule, identifier: String): String =
+    modules.getOrElseUpdate(importingModule, new ModuleEntry(importingModule)).importIdentifier(importedModule, identifier)
 
   /**
    * Writes out all the collected TypeScript files into the target directory.

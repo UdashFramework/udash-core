@@ -152,7 +152,7 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
     val headerValues = info.headerParams.iterator.map(mkPair(gen, _))
       .mkString("[", ", ", "]")
 
-    s"""const _params: ${gen.raw}.RestParameters = {
+    s"""const _params: ${gen.raw("RestParameters")} = {
        |            path: $pathValues,
        |            query: $queryValues,
        |            header: $headerValues
@@ -163,7 +163,7 @@ sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
     val methodStr = quote(info.methodTag.method.name)
     s"""    ${info.name}${declareParams(gen)}: ${result.tsType.resolve(gen)} {
        |        ${restParamsDefn(gen, owner)}
-       |        const _request: ${gen.raw}.RestRequest = {method: $methodStr, parameters: _params, body: ${mkBody(gen)}}
+       |        const _request: ${gen.raw("RestRequest")} = {method: $methodStr, parameters: _params, body: ${mkBody(gen)}}
        |        return ${result.tsType.mkSendRequest(gen, s"this.${owner.constructorArgName}", "_request")}
        |    }
        |""".stripMargin
@@ -189,7 +189,7 @@ final case class TsHttpJsonBodyMethod[T](
     val bodyObj = bodyParams.iterator
       .map(p => s"${quote(p.rawName)}: ${p.tsType.mkOptionalJsonWrite(gen, p.name, p.optional)}")
       .mkString("{", ", ", "}")
-    s"${gen.codecs}.jsonToBody($bodyObj)"
+    s"${gen.codecs("jsonToBody")}($bodyObj)"
   }
 }
 
@@ -200,7 +200,7 @@ final case class TsHttpFormBodyMethod[T](
 ) extends TsHttpMethod[T] {
   protected def mkBody(gen: TsGeneratorCtx): String = {
     val formFields = bodyParams.iterator.map(mkPair(gen, _)).mkString(", ")
-    s"${gen.codecs}.formToBody($formFields)"
+    s"${gen.codecs("formToBody")}($formFields)"
   }
 }
 
