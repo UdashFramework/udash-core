@@ -92,7 +92,8 @@ object TsType {
       else s"($valueRef as any[]).map(${tpe.mkJsonReader(gen)})"
   }
 
-  def dictionaryJson(keyType: TsPlainType, valueType: TsJsonType): TsJsonType = new TsJsonType {
+  // TypeScript Record type (dictionary)
+  def recordJson(keyType: TsPlainType, valueType: TsJsonType): TsJsonType = new TsJsonType {
     def transparent: Boolean = valueType.transparent
 
     def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String =
@@ -102,12 +103,12 @@ object TsType {
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String =
       if (transparent) s"$valueRef as ${resolve(gen)}"
       else {
-        val castValueRef = s"$valueRef as ${gen.codecs}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, any>"
+        val castValueRef = s"$valueRef as Record<${keyType.dictionaryKeyType.resolve(gen)}, any>"
         s"${gen.codecs}.mapValues($castValueRef, ${valueType.mkJsonReader(gen)}, false)"
       }
 
     def resolve(gen: TsGeneratorCtx): String =
-      s"${gen.codecs}.Dictionary<${keyType.dictionaryKeyType.resolve(gen)}, ${valueType.resolve(gen)}>"
+      s"Record<${keyType.dictionaryKeyType.resolve(gen)}, ${valueType.resolve(gen)}>"
   }
 
   def jsonAsBody(tpe: TsJsonType): TsBodyType = new TsBodyType {
@@ -200,14 +201,14 @@ object TsType {
     def resolve(gen: TsGeneratorCtx): String = "Date"
     def transparent: Boolean = false
     def mkPlainWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toISOString()"
-    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = s"$valueRef.toISOString()"
+    def mkJsonWrite(gen: TsGeneratorCtx, valueRef: String): String = valueRef // Date has .toJSON()
     def mkJsonRead(gen: TsGeneratorCtx, valueRef: String): String = s"new Date($valueRef as string)"
 
     override def mkOptionalPlainWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
       if (optional) s"$valueRef?.toISOString()" else mkPlainWrite(gen, valueRef)
 
     override def mkOptionalJsonWrite(gen: TsGeneratorCtx, valueRef: String, optional: Boolean): String =
-      if (optional) s"$valueRef?.toISOString()" else mkJsonWrite(gen, valueRef)
+      valueRef
   }
 
   final val Int8Array: TsJsonType with TsBodyType = new TsJsonType with TsBodyType {

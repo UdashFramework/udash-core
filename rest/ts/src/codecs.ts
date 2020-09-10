@@ -7,10 +7,6 @@ export type BodyWriter<T> = (value: T) => RestBody
 export type BodyReader<T> = (json: RestBody) => T
 export type ResponseReader<T> = (resp: RestResponse) => T
 
-export type Dictionary<K extends string | number | symbol, V> = {
-    [K0 in K]: V
-}
-
 type RawDict = { [key: string]: any }
 
 export function mapUndefined<A, B>(f: (v: A) => B, value: A | undefined): B | undefined {
@@ -24,7 +20,7 @@ export function mapNullable<A, B>(f: (v: A) => B, value: A | null): B | null {
 }
 
 export function mapValues<K extends string | number | symbol, V, V0>(
-    dict: Dictionary<K, V>,
+    dict: Record<K, V>,
     fun: (value: V) => V0,
     copy: boolean = true
 ) {
@@ -32,7 +28,7 @@ export function mapValues<K extends string | number | symbol, V, V0>(
     for (const [key, value] of Object.entries(dict)) {
         result[key] = fun(value as V)
     }
-    return result as Dictionary<K, V0>
+    return result as Record<K, V0>
 }
 
 export function bodyToJson(body: RestBody): any {

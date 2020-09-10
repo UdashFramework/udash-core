@@ -63,7 +63,7 @@ object TsTypeTag extends TsTypeTagLowPrio {
     TsJsonTypeTag(TsType.arrayJson(TsJsonType[T]))
 
   implicit def mapTag[M[X, Y] <: BMap[X, Y], K: TsPlainTypeTag, V: TsJsonTypeTag]: TsJsonTypeTag[M[K, V]] =
-    TsJsonTypeTag(TsType.dictionaryJson(TsPlainType[K], TsJsonType[V]))
+    TsJsonTypeTag(TsType.recordJson(TsPlainType[K], TsJsonType[V]))
 
   private def nullableJsonTag[T](wrapped: => TsJsonType): TsJsonTypeTag[T] =
     TsJsonTypeTag(TsType.nullableJson(wrapped))
