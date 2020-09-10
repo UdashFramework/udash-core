@@ -30,7 +30,7 @@ object Wrappy extends TsRestDataCompanion[Wrappy]
 
 trait TsExampleApi {
   @POST def postStuff(int: Int, @OptBodyField optstr: Opt[String], nono: Boolean): Future[Boolean]
-  @Prefix("fuu/bar") def prefix(@Path("after/paf") paf: Boolean): OtherApi
+  @Prefix("fuu/bar") def prefix: OtherApi
   @CustomBody def postMe(@Path id: Ajdi, body: MajFriend, @OptQuery("tink") thing: Opt[Int]): Future[Unit]
   @PUT def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String]
   @GET def find(id: Ajdi): Future[Opt[MajFriend]]
@@ -39,7 +39,7 @@ trait TsExampleApi {
 object TsExampleApi extends TsRestApiCompanion[TsExampleApi]
 
 object TsExampleApiImpl extends TsExampleApi {
-  def prefix(paf: Boolean): OtherApi = new OtherApi {
+  def prefix: OtherApi = new OtherApi {
     def echo(frjend: MajFriend, opcja: Enumik): Future[MajFriend] = Future.successful(frjend)
     def gimmeTree: Future[Tree] = Future.successful(other.Leaf)
   }
@@ -58,9 +58,9 @@ object TsExampleApiImpl extends TsExampleApi {
 
 object test {
   def main(args: Array[String]): Unit = {
-    val ctx = new TsGenerator
-    ctx.add(TsExampleApi.tsRestApiMetadata)
-    ctx.write(new File("./rest/ts-test/src"))
+    val gen = new TsGenerator
+    gen.add[TsExampleApi](Vector("api"))
+    gen.write(new File("./rest/ts-test/src"))
 
     //    val server = new Server(9090)
     //    val handler = new ServletContextHandler

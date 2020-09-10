@@ -1,4 +1,4 @@
-import {encodeQuery, HandleRequest, RestBody, urlEncode} from "./raw"
+import {encodePath, encodeQuery, HandleRequest, RestBody} from "./raw"
 
 export function handleUsingFetch(baseUrl: string): HandleRequest {
     return request => {
@@ -6,15 +6,15 @@ export function handleUsingFetch(baseUrl: string): HandleRequest {
             baseUrl = baseUrl + "/"
         }
 
-        const joinedPath = request.parameters.path.map(s => urlEncode(s, false)).join("/")
+        const joinedPath = encodePath(request.parameters.path)
         let queryString = encodeQuery(request.parameters.query)
-        if(queryString.length > 0) {
+        if (queryString.length > 0) {
             queryString = "?" + queryString
         }
         const fullUrl = baseUrl + joinedPath + queryString
 
         let body: BodyInit | null
-        let allHeaders: [string, any][] = request.parameters.header
+        let allHeaders: [string, any][] = request.parameters.header //TODO: is undefined OK?
         if (request.body === null) {
             body = null
         } else {

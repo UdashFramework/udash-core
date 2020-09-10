@@ -52,7 +52,7 @@ object TsModule {
   /**
    * Creates a [[TsModule]] based on its _absolute_ path, i.e.
    * - if the path starts with `/` then it is interpreted as local module, relative to the output
-   *   directory passed to [[TsGenerator.write]]
+   * directory passed to [[TsGenerator.write]]
    * - if the path does not start with `/` then it is interpreted as external module (from `node_modules`).
    */
   def fromAbsolutePath(path: String): TsModule = {
@@ -130,6 +130,16 @@ final class TsGenerator(
     add(definition)
     if (inModule == definition.module) definition.name
     else s"${importModule(inModule, definition.module)}.${definition.name}"
+  }
+
+  def add[Api: TsApiTypeTag](pathPrefix: Vector[String]): Unit = {
+    def loop(apiType: TsApiType, pathPrefix: Vector[String]): Unit = {
+      add(apiType.definition(pathPrefix))
+      apiType.subApis.foreach { case (morePrefix, subApi) =>
+        loop(subApi, pathPrefix ++ morePrefix)
+      }
+    }
+    loop(TsApiType[Api], pathPrefix)
   }
 
   def add(definition: TsDefinition): Unit = {

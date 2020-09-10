@@ -25,8 +25,8 @@ final case class TsRestApiMetadata[T](
   @multi @rpcMethodMetadata
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
-  @paramTag[RestParamTag](defaultTag = new Path)
-  @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
+  @paramTag[RestParamTag]
+  @unmatchedParam[RestParamTag](TsRestApiMetadata.PrefixParamsNotAllowed)
   prefixes: List[TsPrefixMethod[_]],
 
   @multi @rpcMethodMetadata
@@ -56,40 +56,72 @@ final case class TsRestApiMetadata[T](
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatchedParam[Cookie](TsRestApiMetadata.CookieParamsNotAllowed)
   jsonBodyMethods: List[TsHttpJsonBodyMethod[_]]
-) extends TypedMetadata[T] with TsApiType with TsDefinition {
+) extends TypedMetadata[T] with TsApiType { apiMetadata =>
   val module: TsModule =
     moduleTag.module
 
-  val methods: List[TsRestMethod[_]] =
-    (List.empty[TsRestMethod[_]] ++ prefixes ++ gets ++ customBodyMethods ++ jsonBodyMethods ++ formBodyMethods)
+  val methods: List[TsHttpMethod[_]] =
+    (List.empty[TsHttpMethod[_]] ++ gets ++ customBodyMethods ++ jsonBodyMethods ++ formBodyMethods)
       .sortBy(_.info.pos.index)
 
-  def contents(gen: TsGeneratorCtx): String = {
-    val methodDecls = methods.iterator.map(_.declaration(gen)).mkString("\n")
-    s"""export class $name {
-       |    constructor(
-       |        private _handle: ${gen.raw}.HandleRequest,
-       |        private _prefixParams?: ${gen.raw}.RestParameters
-       |    ) {}
-       |
-       |$methodDecls
-       |}
-       |""".stripMargin
+  def resolve(gen: TsGeneratorCtx): String = name
+
+  def definition(pathPrefix: Vector[String]): TsDefinition = new TsDefinition {
+    def module: TsModule = moduleTag.module
+    def name: String = apiMetadata.name
+    def contents(gen: TsGeneratorCtx): String = {
+      val methodDecls = methods.iterator.map(_.declaration(gen, apiMetadata)).mkString("\n")
+      s"""export class $name {
+         |    private static readonly basePath = ${pathPrefix.iterator.map(quote).mkString("[", ", ", "]")}
+         |
+         |    constructor(
+         |        private _handle: ${gen.raw}.HandleRequest,
+         |    ) {}
+         |
+         |$methodDecls
+         |}
+         |""".stripMargin
+    }
   }
 
-  def instantiate(gen: TsGeneratorCtx, handler: String, prefixParams: String): String =
-    s"new ${resolve(gen)}($handler, $prefixParams)"
+  def subApis: List[(Seq[String], TsApiType)] = prefixes.map { prefix =>
+    (prefix.path, prefix.typeTag.tsType)
+  }
 }
 object TsRestApiMetadata extends RpcMetadataCompanion[TsRestApiMetadata] {
+  final val PrefixParamsNotAllowed = "In APIs that support TypeScript client generation, prefix method cannot take parameters"
   final val CookieParamsNotAllowed = "Cannot send cookie parameters from browser based TypeScript client"
 }
 
 sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
-  def info: TsMethodInfo[RestMethodTag]
-  def bodyParams: List[TsRestParameter[Body, TsType, _]]
-  def declaration(gen: TsGeneratorCtx): String
+  def methodTag: RestMethodTag
 
-  val path: List[String] = PlainValue.decodePath(info.methodTag.path).map(_.value)
+  val path: List[String] = PlainValue.decodePath(methodTag.path).map(_.value)
+}
+
+final case class TsMethodInfo[+Tag <: RestMethodTag](
+  @reifyName name: String,
+  @reifyPosition pos: MethodPosition,
+  @reifyAnnot methodTag: Tag,
+  @multi @rpcParamMetadata @tagged[Path] pathParams: List[TsRestParameter[Path, TsPlainType, _]],
+  @multi @rpcParamMetadata @tagged[Query] queryParams: List[TsRestParameter[Query, TsPlainType, _]],
+  @multi @rpcParamMetadata @tagged[Header] headerParams: List[TsRestParameter[Header, TsPlainType, _]]
+)
+
+final case class TsPrefixMethod[T](
+  @reifyAnnot methodTag: Prefix,
+  @infer @checked typeTag: TsApiTypeTag[T]
+  // Note: no cookies! can't send them from browser based client
+) extends TsRestMethod[T]
+
+sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
+  def info: TsMethodInfo[HttpMethodTag]
+  def result: TsResultTypeTag[T]
+  def bodyParams: List[TsRestParameter[Body, TsType, _]]
+
+  def methodTag: HttpMethodTag = info.methodTag
+
+  protected def bodyDecl(gen: TsGeneratorCtx): String
 
   lazy val params: List[TsRestParameter[RestParamTag, TsType, _]] =
     (info.pathParams ++ info.queryParams ++ info.headerParams ++ bodyParams).sortBy(_.pos.index)
@@ -104,12 +136,12 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
   protected def mkPair(gen: TsGeneratorCtx, p: TsRestParameter[_, TsPlainType, _]): String =
     s"[${quote(p.rawName)}, ${p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)}]"
 
-  protected def restParamsDefn(gen: TsGeneratorCtx): String = {
+  protected def restParamsDefn(gen: TsGeneratorCtx, owner: TsRestApiMetadata[_]): String = {
     val pathValues =
       (path.iterator.map(quote) ++ info.pathParams.iterator.flatMap { p =>
         Iterator(p.tsType.mkOptionalPlainWrite(gen, p.name, p.optional)) ++
           PlainValue.decodePath(p.paramTag.pathSuffix).iterator.map(pv => quote(pv.value))
-      }).mkString("[", ", ", "]")
+      }).mkString(s"[...${owner.resolve(gen)}.basePath, ", ", ", "]")
 
     val queryValues = info.queryParams.iterator.map(mkPair(gen, _))
       .mkString("[", ", ", "]")
@@ -117,47 +149,17 @@ sealed abstract class TsRestMethod[T] extends TypedMetadata[T] {
     val headerValues = info.headerParams.iterator.map(mkPair(gen, _))
       .mkString("[", ", ", "]")
 
-    s"""const _params = ${gen.raw}.newParameters(
-       |            this._prefixParams,
-       |            $pathValues, $queryValues, $headerValues
-       |        )""".stripMargin
+    s"""const _params: ${gen.raw}.RestParameters = {
+       |            path: $pathValues,
+       |            query: $queryValues,
+       |            header: $headerValues
+       |        }""".stripMargin
   }
-}
 
-final case class TsMethodInfo[+Tag <: RestMethodTag](
-  @reifyName name: String,
-  @reifyPosition pos: MethodPosition,
-  @reifyAnnot methodTag: Tag,
-  @multi @rpcParamMetadata @tagged[Path] pathParams: List[TsRestParameter[Path, TsPlainType, _]],
-  @multi @rpcParamMetadata @tagged[Query] queryParams: List[TsRestParameter[Query, TsPlainType, _]],
-  @multi @rpcParamMetadata @tagged[Header] headerParams: List[TsRestParameter[Header, TsPlainType, _]]
-)
-
-final case class TsPrefixMethod[T](
-  @composite info: TsMethodInfo[Prefix],
-  @infer @checked typeTag: TsApiTypeTag[T]
-  // Note: no cookies! can't send them from browser based client
-) extends TsRestMethod[T] {
-  def bodyParams: List[TsRestParameter[Body, TsType, _]] = Nil
-
-  def declaration(gen: TsGeneratorCtx): String =
-    s"""    ${info.name}${declareParams(gen)}: ${typeTag.tsType.resolve(gen)} {
-       |        ${restParamsDefn(gen)}
-       |        return ${typeTag.tsType.instantiate(gen, "this._handle", "_params")}
-       |    }
-       |""".stripMargin
-}
-
-sealed abstract class TsHttpMethod[T] extends TsRestMethod[T] {
-  def info: TsMethodInfo[HttpMethodTag]
-  def result: TsResultTypeTag[T]
-
-  protected def bodyDecl(gen: TsGeneratorCtx): String
-
-  def declaration(gen: TsGeneratorCtx): String = {
+  def declaration(gen: TsGeneratorCtx, owner: TsRestApiMetadata[_]): String = {
     val methodStr = quote(info.methodTag.method.name)
     s"""    ${info.name}${declareParams(gen)}: ${result.tsType.resolve(gen)} {
-       |        ${restParamsDefn(gen)}
+       |        ${restParamsDefn(gen, owner)}
        |        ${bodyDecl(gen)}
        |        const _result = this._handle({method: $methodStr, parameters: _params, body: _body})
        |        return ${result.tsType.mkFromPromise(gen, "_result")}
@@ -223,7 +225,7 @@ final case class TsRestParameter[+Tag <: RestParamTag, +TsT <: TsType, T](
 
   def declaration(gen: TsGeneratorCtx, optionalAllowed: Boolean): String = {
     val qmark = if (optional && optionalAllowed) "?" else ""
-    val orUndefined = if(optional && !optionalAllowed) " | undefined" else ""
+    val orUndefined = if (optional && !optionalAllowed) " | undefined" else ""
     s"$name$qmark: ${tsType.resolve(gen)}$orUndefined"
   }
 }

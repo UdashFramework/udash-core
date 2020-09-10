@@ -58,8 +58,10 @@ trait TsResultType extends TsType {
 }
 
 trait TsApiType extends TsType {
-  def instantiate(gen: TsGeneratorCtx, handler: String, prefixParams: String): String
+  def definition(pathPrefix: Vector[String]): TsDefinition
+  def subApis: List[(Seq[String], TsApiType)]
 }
+object TsApiType extends TsTypeCompanion[TsApiType, TsApiTypeTag]
 
 object TsType {
   def nullableJson(tpe: TsJsonType): TsJsonType = new TsJsonType {
