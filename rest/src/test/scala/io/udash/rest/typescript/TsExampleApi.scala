@@ -6,7 +6,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.misc.Timestamp
 import com.avsystem.commons.serialization.transparent
 import io.udash.rest._
-import io.udash.rest.typescript.other.{Enumik, OtherApi, Tree}
+import io.udash.rest.typescript.other.OtherApi
 
 import scala.concurrent.Future
 
@@ -37,24 +37,6 @@ trait TsExampleApi {
   @GET def allFriends: Future[Map[Ajdi, MajFriend]]
 }
 object TsExampleApi extends TsRestApiCompanion[TsExampleApi]
-
-object TsExampleApiImpl extends TsExampleApi {
-  def prefix: OtherApi = new OtherApi {
-    def echo(frjend: MajFriend, opcja: Enumik): Future[MajFriend] = Future.successful(frjend)
-    def gimmeTree: Future[Tree] = Future.successful(other.Leaf)
-  }
-
-  def postStuff(int: Int, optstr: Opt[String], nono: Boolean): Future[Boolean] =
-    Future.successful(true)
-  def postMe(id: Ajdi, body: MajFriend, thing: Opt[Int]): Future[Unit] =
-    Future.unit
-  def create(name: String, age: Int, skills: List[String], extra: Opt[Double]): Future[String] =
-    Future.successful("ajdi")
-  def find(id: Ajdi): Future[Opt[MajFriend]] =
-    Future.successful(Opt(MajFriend("Fred", 18, List("doing"), Opt(3.14))))
-  def allFriends: Future[Map[Ajdi, MajFriend]] =
-    Future.successful(Map.empty)
-}
 
 object test {
   def main(args: Array[String]): Unit = {

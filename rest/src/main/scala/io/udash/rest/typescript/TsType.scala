@@ -58,6 +58,7 @@ trait TsResultType extends TsType {
 }
 
 trait TsApiType extends TsType {
+  def empty: Boolean
   def definition(pathPrefix: Vector[String]): TsDefinition
   def subApis: List[(Seq[String], TsApiType)]
 

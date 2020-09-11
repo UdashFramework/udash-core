@@ -136,9 +136,9 @@ final class TsGenerator(
     def importIdentifier(module: TsModule, identifier: String): String =
       imports.getOrElseUpdate(module, new mutable.TreeMap).getOrElseUpdate(identifier, {
         val conflictingModules = importsByName.getOrElseUpdate(identifier, new MHashSet)
-        val aliasName = if (conflictingModules.isEmpty) identifier else s"$identifier${conflictingModules.size}"
-        importsByAliasName.getOrElseUpdate(aliasName, new MHashSet) += module
         conflictingModules += module
+        val aliasName = if (conflictingModules.size <= 1) identifier else s"${identifier}_${conflictingModules.size}"
+        importsByAliasName.getOrElseUpdate(aliasName, new MHashSet) += module
         aliasName
       })
 
@@ -183,7 +183,9 @@ final class TsGenerator(
 
   def add[Api: TsApiTypeTag](pathPrefix: Vector[String]): Unit = {
     def loop(apiType: TsApiType, pathPrefix: Vector[String]): Unit = {
-      add(apiType.definition(pathPrefix))
+      if(!apiType.empty) {
+        add(apiType.definition(pathPrefix))
+      }
       apiType.subApis.foreach { case (morePrefix, subApi) =>
         loop(subApi, pathPrefix ++ morePrefix)
       }

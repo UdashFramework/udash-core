@@ -72,6 +72,8 @@ object TsRestApiMetadata extends RpcMetadataCompanion[TsRestApiMetadata] {
   final val CookieParamsNotAllowed = "Cannot send cookie parameters from browser based TypeScript client"
 
   class ApiProxyClass(metadata: TsRestApiMetadata[_]) extends TsApiType {
+    def empty: Boolean = metadata.methods.isEmpty
+
     def resolve(gen: TsGeneratorCtx): String = metadata.name
 
     def subApis: List[(Seq[String], TsApiType)] = metadata.prefixes.map { prefix =>
