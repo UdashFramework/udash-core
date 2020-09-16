@@ -12,6 +12,8 @@ object CrossCollections {
   def toCrossArray[T](t: Iterable[T]): MBuffer[T] = t.toJSArray
   def createArray[T]: MBuffer[T] = js.Array[T]()
   def createDictionary[T]: MMap[String, T] = js.Dictionary[T]()
+  def createMap[K, V]: MMap[K, V] = js.Map.empty[K, V]
+  def createSet[T]: MSet[T] = js.Set.empty[T]
   def copyArray[T](a: MBuffer[T]): MBuffer[T] = a.toJSArray.jsSlice()
   def slice[T](a: MBuffer[T], from: Int, to: Int): MBuffer[T] = a.toJSArray.jsSlice(from, to)
   def replace[T](a: MBuffer[T], idx: Int, count: Int, items: T*): Unit = replaceSeq(a, idx, count, items)
