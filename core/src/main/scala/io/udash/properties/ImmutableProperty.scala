@@ -39,10 +39,10 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     ImmutableProperty.NoOpRegistration
   }
 
-  override def readable: ReadableProperty[A] = this
+  override final def readable: this.type = this
 }
 
-private[properties] class ImmutableModelProperty[A](value: A)
+private[properties] final class ImmutableModelProperty[A](value: A)
   extends ImmutableProperty[A](value) with ModelPropertyMacroApi[A] {
 
   override def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ImmutableProperty[T] =
@@ -50,11 +50,9 @@ private[properties] class ImmutableModelProperty[A](value: A)
 
   override def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T] =
     ModelPropertyCreator[T].newImmutableProperty(getter(value))
-
-  override def readable: ReadableModelProperty[A] = this
 }
 
-private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
+private[properties] final class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
   extends ImmutableProperty[BSeq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: BSeq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
@@ -78,8 +76,6 @@ private[properties] class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: S
 
   override def zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]] =
     new ImmutableSeqProperty(value.zipWithIndex)
-
-  override def readable: ReadableSeqProperty[A, ImmutableProperty[A]] = this
 }
 
 private[properties] object ImmutableProperty {

@@ -1,11 +1,14 @@
 package io.udash.properties
 package model
 
+import com.avsystem.commons.MMap
 import io.udash.properties.single.{CastableProperty, Property, ReadableProperty}
-
+import io.udash.utils.CrossCollections
 
 abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_])
   extends ModelProperty[A] with CastableProperty[A] with ModelPropertyMacroApi[A] {
+
+  protected final val properties: MMap[String, Property[_]] = CrossCollections.createDictionary[Property[_]]
 
   /** False if subproperties were not created yet. */
   protected var initialized: Boolean = false
