@@ -28,10 +28,3 @@ trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
   def getSubProperty[T: PropertyCreator](getter: A => T, key: String): ReadableProperty[T]
   def getSubModel[T: ModelPropertyCreator](getter: A => T, key: String): ReadableModelProperty[T]
 }
-
-private[properties] trait AbstractReadableModelProperty[A]
-  extends AbstractReadableProperty[A] with ModelPropertyMacroApi[A] {
-  protected val properties = CrossCollections.createDictionary[Property[_]]
-
-  override def readable: ReadableModelProperty[A] = this
-}

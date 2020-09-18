@@ -12,7 +12,7 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   override final protected[properties] def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]
-  private final val childrenRegistrations = MHashMap.empty[Property[B], Registration]
+  private final val childrenRegistrations = CrossCollections.createMap[Property[B], Registration]
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
