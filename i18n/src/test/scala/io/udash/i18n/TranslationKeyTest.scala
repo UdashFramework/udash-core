@@ -118,7 +118,7 @@ class TranslationKeyTest extends UdashSharedTest {
     }
 
     "have descriptive toString" in {
-      testKey0.toString should be("TranslationKey0(test0)")
+      testKey0.toString should be("SimpleTranslationKey0(test0)")
       testKey1.toString should be("TranslationKey1(test1)")
       testKey2.toString should be("TranslationKey2(test2)")
       testKey3.toString should be("TranslationKey3(test3)")
@@ -131,33 +131,6 @@ class TranslationKeyTest extends UdashSharedTest {
       testKeyX.toString should be("TranslationKeyX(testX)")
       testKeyU.toString should be("Untranslatable(testUntranslatable)")
       testKeyR.toString should be("ReducedTranslationKey(test3,1,two,5)")
-    }
-
-    "have content-based equals and hashCode" in {
-      def cmp(what: TranslationKey, same: TranslationKey, notSame: TranslationKey): Unit = {
-        what should be(same)
-        what.hashCode() should be(same.hashCode())
-
-        what shouldNot be(notSame)
-        what.hashCode() shouldNot be(notSame.hashCode())
-      }
-      cmp(testKey0, TranslationKey0("test0"), TranslationKey0("test1"))
-      cmp(testKey1, TranslationKey1("test1"), TranslationKey1("test2"))
-      cmp(testKeyU, TranslationKey.untranslatable("testUntranslatable"), TranslationKey.untranslatable("testUntranslatable2"))
-      cmp(testKeyR, testKey3(1, "two", 5), testKey3(1, "two", 6))
-    }
-
-    "not equal TranslationKeys of different types" in {
-      val ordinaryKey = TranslationKey.key("testUntranslatable")
-      testKeyU shouldNot be(ordinaryKey)
-      ordinaryKey shouldNot be(testKeyU)
-    }
-  }
-
-  "ReducedTranslationKey" should {
-    "behave like a Product" in {
-      testKeyR.productArity should be(2)
-      testKeyR.productIterator.toSeq should be(Seq("test3", Seq(1, "two", 5)))
     }
   }
 }
