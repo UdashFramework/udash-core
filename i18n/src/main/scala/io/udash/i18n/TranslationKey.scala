@@ -1,7 +1,7 @@
 package io.udash.i18n
 
 import com.avsystem.commons.misc.AbstractCase
-import com.avsystem.commons.serialization.{GenCodec, HasGenCodec}
+import com.avsystem.commons.serialization.HasGenCodec
 
 import scala.concurrent.Future
 
