@@ -7,6 +7,7 @@ import io.udash.bootstrap._
 import io.udash.bootstrap.alert.UdashAlert
 import io.udash.web.guide.markdown.{MarkdownPage, MarkdownPageRPC}
 import io.udash.web.guide.styles.MarkdownStyles
+import org.scalajs.dom
 
 import scala.util.{Failure, Success}
 
@@ -38,7 +39,25 @@ final class MarkdownPresenter[T <: MarkdownPageState](
   override def handleState(state: T): Unit = {
     model.set(MarkdownModel.blank.value)
     rpc.loadContent(state.page).onCompleteNow {
-      case Success(rawHtml) => model.subProp(_.content).set(rawHtml)
+      case Success(rawHtml) =>
+        model.subProp(_.content).set(rawHtml)
+        def scroll(): Unit =
+          dom.window.location.hash.opt.collect { case id if id.nonEmpty => id.tail }.foreach { id =>
+            dom.document.getElementById(id).opt match {
+              case Opt(element) =>
+                def loop(): Unit = {
+                  val offsetTop = element.asInstanceOf[scalajs.js.Dynamic].offsetTop.asInstanceOf[Int]
+                  if (dom.window.asInstanceOf[scalajs.js.Dynamic].scrollY.asInstanceOf[Int] != offsetTop) {
+                    dom.window.scrollTo(0, offsetTop)
+                    scalajs.js.timers.setTimeout(100)(loop())
+                  }
+                }
+                loop()
+              case Opt.Empty =>
+                scalajs.js.timers.setTimeout(100)(scroll())
+            }
+          }
+        scroll()
       case Failure(exception) => model.subProp(_.error).set(exception.toString)
     }
   }
