@@ -18,49 +18,49 @@ object TranslationKey0 extends HasGenCodec[TranslationKey0] {
 }
 
 final case class TranslationKey1[T](key: String) extends TranslationKey {
-  def apply(arg1: T): TranslationKey0 = TranslationKey.ReducedTranslationKey(key, arg1)
+  def apply(arg1: T): TranslationKey0 = TranslationKey.reduced(key, arg1)
 }
 
 final case class TranslationKey2[T1, T2](key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2): TranslationKey0 = TranslationKey.ReducedTranslationKey(key, arg1, arg2)
+  def apply(arg1: T1, arg2: T2): TranslationKey0 = TranslationKey.reduced(key, arg1, arg2)
 }
 
 final case class TranslationKey3[T1, T2, T3](key: String) extends TranslationKey {
-  def apply(arg1: T1, arg2: T2, arg3: T3): TranslationKey0 = TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3)
+  def apply(arg1: T1, arg2: T2, arg3: T3): TranslationKey0 = TranslationKey.reduced(key, arg1, arg2, arg3)
 }
 
 final case class TranslationKey4[T1, T2, T3, T4](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4)
 }
 
 final case class TranslationKey5[T1, T2, T3, T4, T5](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4, arg5)
 }
 
 final case class TranslationKey6[T1, T2, T3, T4, T5, T6](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4, arg5, arg6)
 }
 
 final case class TranslationKey7[T1, T2, T3, T4, T5, T6, T7](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 }
 
 final case class TranslationKey8[T1, T2, T3, T4, T5, T6, T7, T8](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 }
 
 final case class TranslationKey9[T1, T2, T3, T4, T5, T6, T7, T8, T9](key: String) extends TranslationKey {
   def apply(arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6, arg7: T7, arg8: T8, arg9: T9): TranslationKey0 =
-    TranslationKey.ReducedTranslationKey(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    TranslationKey.reduced(key, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 }
 
 final case class TranslationKeyX(key: String) extends TranslationKey {
-  def apply(argv: Any*): TranslationKey0 = TranslationKey.ReducedTranslationKey(key, argv: _*)
+  def apply(argv: Any*): TranslationKey0 = TranslationKey.reduced(key, argv: _*)
 }
 
 object TranslationKey {
@@ -100,31 +100,16 @@ object TranslationKey {
   def untranslatable(key: String): TranslationKey0 =
     Untranslatable(key)
 
+  private[i18n] def reduced(key: String, argv: Any*): ReducedTranslationKey =
+    ReducedTranslationKey(key, argv.map(_.toString): _*)
+
   private[i18n] final case class SimpleTranslationKey0(key: String) extends TranslationKey0
 
-  private[i18n] final case class ReducedTranslationKey(key: String, argv: Any*) extends TranslationKey0 {
+  private[i18n] final case class ReducedTranslationKey(key: String, argv: String*) extends TranslationKey0 {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
       provider.translate(key, argv: _*)
     // default toString puts argv inside "WrappedArray()"
     override def toString(): String = s"$productPrefix($key,${argv.mkString(",")})"
-  }
-
-  private[i18n] object ReducedTranslationKey {
-    // note: serialization loses information, as argv is converted to strings
-    implicit val codec: GenCodec[ReducedTranslationKey] = GenCodec.create[ReducedTranslationKey](
-      input => {
-        val list = input.readList()
-        val key = list.nextElement().readSimple().readString()
-        val items = list.iterator(_.readSimple().readString()).toList
-        ReducedTranslationKey(key, items: _*)
-      },
-      (output, value) => {
-        val list = output.writeList()
-        list.writeElement().writeSimple().writeString(value.key)
-        value.argv.foreach(arg => list.writeElement().writeSimple().writeString(arg.toString))
-        list.finish()
-      }
-    )
   }
 
   private[i18n] final case class Untranslatable(key: String) extends TranslationKey0 {
