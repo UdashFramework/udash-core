@@ -13,6 +13,10 @@ sealed trait TranslationKey0 extends TranslationKey {
   def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] = provider.translate(key)
 }
 
+object TranslationKey0 extends HasGenCodec[TranslationKey0] {
+  def apply(key: String): TranslationKey0 = TranslationKey.SimpleTranslationKey0(key)
+}
+
 final case class TranslationKey1[T](key: String) extends TranslationKey {
   def apply(arg1: T): TranslationKey0 = TranslationKey.ReducedTranslationKey(key, arg1)
 }
@@ -105,7 +109,7 @@ object TranslationKey {
     override def toString(): String = s"$productPrefix($key,${argv.mkString(",")})"
   }
 
-  private [i18n] object ReducedTranslationKey {
+  private[i18n] object ReducedTranslationKey {
     // note: serialization loses information, as argv is converted to strings
     implicit val codec: GenCodec[ReducedTranslationKey] = GenCodec.create[ReducedTranslationKey](
       input => {
@@ -127,8 +131,4 @@ object TranslationKey {
     override def apply()(implicit provider: TranslationProvider, lang: Lang): Future[Translated] =
       Future.successful(Translated(key))
   }
-}
-
-object TranslationKey0 extends HasGenCodec[TranslationKey0] {
-  def apply(key: String): TranslationKey0 = TranslationKey.SimpleTranslationKey0(key)
 }
