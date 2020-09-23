@@ -1,6 +1,7 @@
 package io.udash.properties
 
 import com.github.ghik.silencer.silent
+import io.udash.utils.CrossCollections
 
 import scala.collection.mutable
 
@@ -26,7 +27,7 @@ final class CallbackSequencer {
 
   private def commit(): Unit = {
     if (starts == 1) {
-      val used = mutable.HashSet[Id]()
+      val used = CrossCollections.createSet[Id]
       while (queue.nonEmpty) {
         queue.retain { case (id, callback) =>
           if (used.add(id)) {

@@ -38,7 +38,7 @@ object DatePickerDemo extends AutoDemo with CssView {
       case false => Seq.empty
     }
 
-    val picker = UdashDatePicker(date, pickerOptions)()
+    val picker = UdashDatePicker(date, pickerOptions)
 
     val events = SeqProperty[String](Seq.empty)
     picker.listen {

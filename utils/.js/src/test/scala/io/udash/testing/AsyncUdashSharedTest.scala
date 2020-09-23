@@ -14,7 +14,7 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
 
   override def retrying(code: => Any)(implicit patienceConfig: PatienceConfig, pos: Position): Future[Assertion] = {
     val start = Date.now()
-    val p = Promise[Assertion]
+    val p = Promise[Assertion]()
     var lastEx: Option[Throwable] = None
     def startTest(): Unit = {
       dom.window.setTimeout(() => {

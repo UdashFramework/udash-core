@@ -32,8 +32,8 @@ object DateRangePickerDemo extends AutoDemo with CssView {
       locale = Some("pl")
     ))
 
-    val fromPicker: UdashDatePicker = UdashDatePicker(from, fromPickerOptions)()
-    val toPicker: UdashDatePicker = UdashDatePicker(to, toPickerOptions)()
+    val fromPicker: UdashDatePicker = UdashDatePicker(from, fromPickerOptions)
+    val toPicker: UdashDatePicker = UdashDatePicker(to, toPickerOptions)
 
     UdashDatePicker.dateRange(fromPicker, toPicker)(fromPickerOptions, toPickerOptions)
 

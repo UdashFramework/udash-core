@@ -27,7 +27,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         format = "YYYY MM DD a",
         useCurrent = false
       ))
-      val picker = UdashDatePicker(date, options, ComponentId(contentId))()
+      val picker = UdashDatePicker(date, options, ComponentId(contentId))
 
       jQ("body").append(UdashInputGroup()(
         UdashInputGroup.input(picker.render),
@@ -96,7 +96,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
-      val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)()
+      val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)
       jQ("body").append(
         div(
           UdashDatePicker.loadBootstrapDatePickerStyles(),
@@ -116,7 +116,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB")
       ))
-      val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)()
+      val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)
       val r = div(
         UdashDatePicker.loadBootstrapDatePickerStyles(),
         UdashInputGroup()(
@@ -153,7 +153,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         minDate = Some(new ju.Date(1000000000)),
         maxDate = Some(new ju.Date(5000000000L))
       ))
-      val picker = UdashDatePicker(date, options, ComponentId(contentId))()
+      val picker = UdashDatePicker(date, options, ComponentId(contentId))
 
       jQ("body").append(UdashInputGroup()(
         UdashInputGroup.input(picker.render),
@@ -224,7 +224,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       ))
       val emptyTk = TranslationKey.untranslatable("")
 
-      val picker = UdashDatePicker(date, pickerOptions)().setup(_.addRegistration(lang.listen(implicit lang =>
+      val picker = UdashDatePicker(date, pickerOptions).setup(_.addRegistration(lang.listen(implicit lang =>
         for {
           today <- TranslationKey.key("today")().mapNow(_.string)
           clear <- TranslationKey.key("clear")().mapNow(_.string)
@@ -379,6 +379,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
   "UdashDatePicker options" should {
     import io.udash.bootstrap.datepicker.UdashDatePickerTest.JsDictionaryOps
+
     import scala.scalajs.js.JSConverters._
 
     "apply selected icons config" in {

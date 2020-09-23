@@ -2,6 +2,7 @@ package io.udash.properties
 
 import com.avsystem.commons.Opt
 import com.avsystem.commons.misc.AbstractCase
+import io.udash.utils.CrossCollections
 
 import scala.annotation.implicitNotFound
 import scala.collection.compat.{Factory => CFactory, _}
@@ -34,5 +35,5 @@ object Blank {
   implicit def option[A]: Blank[Option[A]] = Simple(None)
   implicit def opt[A]: Blank[Opt[A]] = Simple(Opt.Empty)
   implicit def map[K, V]: Blank[Map[K, V]] = Simple(Map.empty)
-  implicit def traversable[T, A[_] <: Iterable[_]](implicit fac: CFactory[T, A[T]]): Blank[A[T]] = Simple(Seq.empty[T].to(fac))
+  implicit def traversable[T, A[_] <: Iterable[_]](implicit fac: CFactory[T, A[T]]): Blank[A[T]] = Simple(CrossCollections.createArray[T].to(fac))
 }

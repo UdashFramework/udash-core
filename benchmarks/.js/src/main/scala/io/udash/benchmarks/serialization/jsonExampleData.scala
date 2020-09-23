@@ -2,6 +2,7 @@ package io.udash.benchmarks.serialization
 
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import com.avsystem.commons.serialization.{GenCodec, flatten}
+import com.github.ghik.silencer.silent
 import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
@@ -12,6 +13,8 @@ case class Something(
   stuffs: List[Stuff],
   ints: Set[Int]
 )
+
+@silent //https://github.com/scala/bug/issues/12072
 object Something {
   implicit val codec: GenCodec[Something] = GenCodec.materialize
   implicit val encoder: Encoder[Something] = deriveEncoder[Something]
@@ -39,6 +42,8 @@ object Something {
 }
 
 case class Stuff(map: Map[String, Boolean], factor: Double)
+
+@silent //https://github.com/scala/bug/issues/12072
 object Stuff {
   implicit val codec: GenCodec[Stuff] = GenCodec.materialize
   implicit val encoder: Encoder[Stuff] = deriveEncoder[Stuff]
@@ -76,6 +81,7 @@ case class Case7(i: Int) extends SealedStuff with FlatSealedStuff
 object Case7 {
   implicit val rw: upickle.default.ReadWriter[Case7] = upickle.default.macroRW
 }
+@silent //https://github.com/scala/bug/issues/12072
 object SealedStuff {
   implicit val codec: GenCodec[SealedStuff] = GenCodec.materialize
   implicit val encoder: Encoder[SealedStuff] = deriveEncoder[SealedStuff]
@@ -95,6 +101,7 @@ object FlatSealedStuff {
 }
 
 case class Foo(s: String, d: Double, i: Int, l: Long, bs: List[Boolean])
+@silent //https://github.com/scala/bug/issues/12072
 object Foo {
   implicit val circeEncodeFoo: Encoder[Foo] = deriveEncoder
   implicit val circeDecodeFoo: Decoder[Foo] = deriveDecoder

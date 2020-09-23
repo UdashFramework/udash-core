@@ -1,14 +1,13 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.12.12"
+  val versionOfScala = "2.13.3"
   val silencerVersion = "1.7.1"
-  val collectionCompatVersion = "2.1.6"
+  val collectionCompatVersion = "2.2.0"
 
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
@@ -21,14 +20,14 @@ object Dependencies {
   val avsCommonsVersion = "2.0.0-M12"
 
   val atmosphereJSVersion = "2.3.8"
-  val atmosphereVersion = "2.6.1"
+  val atmosphereVersion = "2.6.3"
 
   val upickleVersion = "1.2.0" // Tests only
   val circeVersion = "0.13.0" // Tests only
   val circeDerivationVersion = "0.13.0-M4" // Tests only
   val monixVersion = "3.2.2" // Tests only
 
-  val sttpVersion = "2.2.6"
+  val sttpVersion = "2.2.9"
 
   val scalaLoggingVersion = "3.9.2"
 
