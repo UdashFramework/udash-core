@@ -1,14 +1,7 @@
 package io.udash.core
 
-import io.udash.properties.HasModelPropertyCreator
 import org.scalajs.dom._
 import scalatags.generic.Modifier
-
-/**
-  * Url wrapper - just for avoiding strings.
-  */
-case class Url(value: String) extends AnyVal
-object Url extends HasModelPropertyCreator[Url]
 
 /**
   * The Presenter should contain all business logic of a view: user interaction callbacks, server communication.

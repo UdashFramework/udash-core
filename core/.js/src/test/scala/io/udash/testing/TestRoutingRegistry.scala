@@ -13,7 +13,7 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
 
   override def matchUrl(url: Url): TestState = {
     urlsHistory.append(url)
-    url.value match {
+    url match {
       case "/" => ObjectState
       case "/root" => RootState(None)
       case "/root" / v => RootState(Some(v.toInt))
@@ -26,7 +26,7 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
 
   override def matchState(state: TestState): Url = {
     statesHistory.append(state)
-    Url(state match {
+    state match {
       case ObjectState => "/"
       case RootState(None) => "/root"
       case RootState(Some(v)) => s"/root/$v"
@@ -34,6 +34,6 @@ class TestRoutingRegistry extends RoutingRegistry[TestState] {
       case NextObjectState => "/next"
       case ClassState(arg, arg2) => s"/$arg/$arg2"
       case _ => ""
-    })
+    }
   }
 }

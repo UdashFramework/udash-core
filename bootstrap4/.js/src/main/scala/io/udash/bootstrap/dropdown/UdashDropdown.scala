@@ -151,7 +151,7 @@ object UdashDropdown {
       case Text(text) =>
         span(BootstrapStyles.Dropdown.itemText, text).render
       case Link(title, url) =>
-        a(BootstrapStyles.Dropdown.item, href := url.value)(title).render
+        a(BootstrapStyles.Dropdown.item, href := url)(title).render
       case Button(title, callback) =>
         button(BootstrapStyles.Dropdown.item, onclick :+= ((_: Event) => {
           callback()

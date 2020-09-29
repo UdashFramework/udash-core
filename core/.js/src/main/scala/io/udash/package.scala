@@ -10,8 +10,7 @@ package object udash
   final val EmptyPresenter = io.udash.core.EmptyPresenter
 
   // Definitions
-  final val Url = io.udash.core.Url
-  type Url = io.udash.core.Url
+  type Url = String
 
   type Presenter[S <: State] = io.udash.core.Presenter[S]
 

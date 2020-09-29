@@ -61,7 +61,7 @@ class FileUploader(url: Url) {
     xhr.addEventListener("abort", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
-    xhr.open(method = "POST", url = url.value)
+    xhr.open(method = "POST", url = url)
     xhr.send(data)
 
     p

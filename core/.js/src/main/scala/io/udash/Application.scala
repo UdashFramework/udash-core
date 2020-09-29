@@ -10,7 +10,7 @@ import org.scalajs.dom.Element
 /**
  * Root application which is used to start single instance of app.
  *
- * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
+ * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.Url]] to [[io.udash.core.State]]
  * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
  * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
  */

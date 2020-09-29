@@ -13,10 +13,10 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
 
   private val elements: Seq[DefaultDropdownItem] =Seq(
     DefaultDropdownItem.Header("Header"),
-    DefaultDropdownItem.Link("Link 1", Url("#")),
-    DefaultDropdownItem.Link("Link 2", Url("#")),
+    DefaultDropdownItem.Link("Link 1", "#"),
+    DefaultDropdownItem.Link("Link 2", "#"),
     DefaultDropdownItem.Divider,
-    DefaultDropdownItem.Disabled(DefaultDropdownItem.Link("Link 3", Url("#")))
+    DefaultDropdownItem.Disabled(DefaultDropdownItem.Link("Link 3", "#"))
   )
 
   "UdashDropdown component" should {
@@ -123,7 +123,7 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
 
       el.childNodes(1).childNodes.length should be(els.get.length)
 
-      val tmp: DefaultDropdownItem.Link = DefaultDropdownItem.Link("New", Url("#"))
+      val tmp: DefaultDropdownItem.Link = DefaultDropdownItem.Link("New", "#")
       els.append(tmp)
       el.childNodes(1).childNodes.length should be(els.get.length)
       els.remove(tmp)

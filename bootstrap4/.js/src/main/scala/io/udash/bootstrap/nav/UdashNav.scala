@@ -75,7 +75,7 @@ object UdashNav {
   /** Default breadcrumb model factory. */
   val defaultItemFactory: (ReadableProperty[NavItem], Binding.NestedInterceptor) => Element = {
     (item, nested) => a(
-      nested(href.bind(item.transform(_.link.value))),
+      nested(href.bind(item.transform(_.link))),
       nested(bind(item.transform(_.name))),
       BootstrapStyles.Navigation.link
     ).render

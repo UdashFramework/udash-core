@@ -16,7 +16,7 @@ import scala.util.Random
 class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
 
   "UdashCarousel component" should {
-    val omitUrl = Url("//:0")
+    val omitUrl = "//:0"
     def newSlide() = UdashCarouselSlide(omitUrl)(BigInt.probablePrime(80, Random).toString(36))
     def slides() = SeqProperty((1 to 10).map(_ => newSlide()))
 

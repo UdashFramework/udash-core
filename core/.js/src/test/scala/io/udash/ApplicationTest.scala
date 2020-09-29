@@ -6,7 +6,7 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
 
   "Application" should {
     initTestRouting(default = () => new TestViewFactory[TestState])
-    val initUrl = Url("/")
+    val initUrl = "/"
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
     val app = new Application[TestState](routing, vpRegistry, urlProvider)
 
@@ -20,18 +20,18 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
 
     "change URL basing on state" in {
       app.goTo(NextObjectState)
-      urlProvider.currUrl.value should be("/next")
+      urlProvider.currUrl should be("/next")
       app.goTo(ObjectState)
-      urlProvider.currUrl.value should be("/")
+      urlProvider.currUrl should be("/")
       app.goTo(ClassState("abc", 1))
-      urlProvider.currUrl.value should be("/abc/1")
+      urlProvider.currUrl should be("/abc/1")
       app.goTo(ClassState("abcd", 234))
-      urlProvider.currUrl.value should be("/abcd/234")
+      urlProvider.currUrl should be("/abcd/234")
     }
 
     "redirect to URL" in {
       app.redirectTo("http://www.avsystem.com/")
-      urlProvider.currUrl.value should be("http://www.avsystem.com/")
+      urlProvider.currUrl should be("http://www.avsystem.com/")
     }
 
     "register callback for state change" in {
@@ -76,10 +76,10 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
     }
 
     "return URL of state" in {
-      app.matchState(ObjectState).value should be("/")
-      app.matchState(NextObjectState).value should be("/next")
-      app.matchState(ClassState("abc", 1)).value should be("/abc/1")
-      app.matchState(ClassState("abcd", 234)).value should be("/abcd/234")
+      app.matchState(ObjectState) should be("/")
+      app.matchState(NextObjectState) should be("/next")
+      app.matchState(ClassState("abc", 1)) should be("/abc/1")
+      app.matchState(ClassState("abcd", 234)) should be("/abcd/234")
     }
   }
 }

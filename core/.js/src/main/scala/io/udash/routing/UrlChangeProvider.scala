@@ -1,7 +1,7 @@
 package io.udash.routing
 
 import com.avsystem.commons._
-import io.udash.core.Url
+import io.udash.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
@@ -45,11 +45,11 @@ final class WindowUrlFragmentChangeProvider extends UrlChangeProvider {
     new MutableBufferRegistration(callbacks, callback, Opt.Empty)
   }
 
-  override def currentFragment: Url = Url(window.location.hash.stripPrefix("#"))
+  override def currentFragment: Url = window.location.hash.stripPrefix("#")
 
   override def changeFragment(url: Url, replaceCurrent: Boolean): Unit = {
-    if (replaceCurrent) window.location.replace(window.location.href.takeWhile(_ != '#') + "#" + url.value)
-    else window.location.hash = url.value
+    if (replaceCurrent) window.location.replace(window.location.href.takeWhile(_ != '#') + "#" + url)
+    else window.location.hash = url
   }
 }
 
@@ -107,7 +107,7 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
           val (samePath, sameHash, sameOrigin) =
             (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
           if (!shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)) {
-            if (!samePath) changeFragment(Url(href))
+            if (!samePath) changeFragment(href)
             event.preventDefault()
           }
         }
@@ -122,14 +122,14 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
   }
 
   override def changeFragment(url: Url, replaceCurrent: Boolean): Unit = {
-    (null, "", url.value) |> (
+    (null, "", url) |> (
       if (replaceCurrent) window.history.replaceState(_: js.Any, _: String, _: String)
       else window.history.pushState(_: js.Any, _: String, _: String)
       ).tupled
-    val withoutHash = Url(url.value.takeWhile(_ != '#'))
+    val withoutHash = url.takeWhile(_ != '#')
     callbacks.foreach(_.apply(withoutHash))
   }
 
   override def currentFragment: Url =
-    Url(window.history.state.opt.map(_.asInstanceOf[js.Dynamic].url.toString).getOrElse(window.location.pathname))
+    window.history.state.opt.map(_.asInstanceOf[js.Dynamic].url.toString).getOrElse(window.location.pathname)
 }

@@ -15,19 +15,19 @@ import scala.scalajs.js
 
 case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState] {
   override def create(): (View, Presenter[FrontendRoutingState]) = {
-    val url = Property.blank[String]
+    val url = Property.blank[Url]
     (new FrontendRoutingView(url), new FrontendRoutingPresenter(url))
   }
 }
 
-class FrontendRoutingPresenter(url: Property[String]) extends Presenter[FrontendRoutingState] {
+class FrontendRoutingPresenter(url: Property[Url]) extends Presenter[FrontendRoutingState] {
   import Context.applicationInstance
   override def handleState(state: FrontendRoutingState) = {
-    url.set(applicationInstance.currentUrl.value)
+    url.set(applicationInstance.currentUrl)
   }
 }
 
-class FrontendRoutingView(url: Property[String]) extends View with CssView {
+class FrontendRoutingView(url: Property[Url]) extends View with CssView {
   import Context._
   import JsDom.all._
 
@@ -191,7 +191,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
             true
           })
         )),
-        p("This view was created with: ", span(id := "url-demo-link-init")(applicationInstance.currentUrl.value))
+        p("This view was created with: ", span(id := "url-demo-link-init")(applicationInstance.currentUrl))
       )
     ),
     h3("Handling routing errors"),

@@ -24,7 +24,7 @@ object CarouselDemo extends AutoDemo with CssView {
 
     def newSlide(): UdashCarouselSlide = {
       UdashCarouselSlide(
-        Url("/assets/images/ext/bootstrap/carousel.jpg")
+        "/assets/images/ext/bootstrap/carousel.jpg"
       )(
         h3(randomString()),
         p(randomString())

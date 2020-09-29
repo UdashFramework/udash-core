@@ -1,33 +1,33 @@
 package io.udash.routing
 
-import io.udash.core.{State, Url}
+import io.udash.{State, Url}
 
 /**
  * The implementation of this trait should be injected to [[io.udash.Application]].
- * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
+ * It should implement a bidirectional mapping between [[io.udash.Url]] and [[io.udash.core.State]].
  */
 trait RoutingRegistry[HierarchyRoot <: State] {
   def matchUrl(url: Url): HierarchyRoot
   def matchState(state: HierarchyRoot): Url
 
-  protected def bidirectional(pf: PartialFunction[String, HierarchyRoot]): (PartialFunction[String, HierarchyRoot], PartialFunction[HierarchyRoot, String]) =
-  macro com.avsystem.commons.macros.misc.BidirectionalMacro.impl[String, HierarchyRoot]
+  protected def bidirectional(pf: PartialFunction[Url, HierarchyRoot]): (PartialFunction[Url, HierarchyRoot], PartialFunction[HierarchyRoot, Url]) =
+  macro com.avsystem.commons.macros.misc.BidirectionalMacro.impl[Url, HierarchyRoot]
 
   import RoutingRegistry._
 
   protected final val / = RoutingRegistry./
 
-  protected implicit def stringRoutingOps(str: String): StringRoutingOps =
+  protected implicit def stringRoutingOps(str: Url): StringRoutingOps =
     new StringRoutingOps(str)
 }
 
 object RoutingRegistry {
   implicit final class StringRoutingOps(private val left: String) extends AnyVal {
-    def /(right: Any): String = RoutingRegistry./(left, right.toString)
+    def /(right: Any): Url = RoutingRegistry./(left, right.toString)
   }
 
   object / {
-    def unapply(path: String): Option[(String, String)] = {
+    def unapply(path: Url): Option[(Url, Url)] = {
       val strippedPath = path.stripSuffix("/")
       Some(strippedPath.lastIndexOf("/")).collect {
         case splitIndex if splitIndex >= 0 =>
@@ -37,7 +37,7 @@ object RoutingRegistry {
       }
     }
 
-    def apply(left: String, right: String): String =
+    def apply(left: Url, right: Url): Url =
       left + "/" + right
   }
 }

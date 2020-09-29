@@ -19,10 +19,10 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
-    val url = Url(BootstrapExtState.url)
+    val url = BootstrapExtState.url
     val items = SeqProperty[UdashDropdown.DefaultDropdownItem](Seq(
       UdashDropdown.DefaultDropdownItem.Header("Start"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
+      UdashDropdown.DefaultDropdownItem.Link("Intro", IntroState.url),
       UdashDropdown.DefaultDropdownItem.Disabled(
         UdashDropdown.DefaultDropdownItem.Link("Test Disabled", url)
       ),

@@ -42,7 +42,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       testClosedAndReset(_ => false)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
 
       renderer.views.size should be(2)
       renderer.views(0) should be(rootViewFactory.view)
@@ -51,7 +51,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.lastPathToAdd.size should be(2)
       testClosedAndReset(_ => false)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       renderer.views.size should be(3)
       renderer.views(0) should be(rootViewFactory.view)
@@ -61,7 +61,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.lastPathToAdd should be(nextObjectViewFactory.view :: Nil)
       testClosedAndReset(_ => false)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
 
       renderer.views.size should be(2)
       renderer.views(0) should be(rootViewFactory.view)
@@ -73,7 +73,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl("/abc/1")
 
       renderer.views.size should be(2)
       renderer.views(0) should be(rootViewFactory.view)
@@ -85,7 +85,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/abcd/234"))
+      routingEngine.handleUrl("/abcd/234")
 
       renderer.views.size should be(2)
       renderer.views(0) should be(rootViewFactory.view)
@@ -97,7 +97,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       renderer.views.size should be(3)
       renderer.views(0) should be(rootViewFactory.view)
@@ -111,7 +111,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/next"), fullReload = true)
+      routingEngine.handleUrl("/next", fullReload = true)
 
       renderer.views.size should be(3)
       renderer.views(0) should be(rootViewFactory.view)
@@ -125,7 +125,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/root/1"))
+      routingEngine.handleUrl("/root/1")
 
       rootViewFactory.count shouldBe 2
       testClosedAndReset {
@@ -133,7 +133,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         case _ => false
       }
 
-      routingEngine.handleUrl(Url("/root/2"))
+      routingEngine.handleUrl("/root/2")
 
       rootViewFactory.count shouldBe 2
       testClosedAndReset(_ => false)
@@ -149,81 +149,81 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         calls += 1
       })
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
 
       calls should be(1)
       lastCallbackEvent.oldState should be(null)
       lastCallbackEvent.currentState should be(ObjectState)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       calls should be(2)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
 
       calls should be(3)
       lastCallbackEvent.oldState should be(NextObjectState)
       lastCallbackEvent.currentState should be(ObjectState)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
 
       calls should be(3)
       lastCallbackEvent.oldState should be(NextObjectState)
       lastCallbackEvent.currentState should be(ObjectState)
 
-      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl("/abc/1")
 
       calls should be(4)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(ClassState("abc", 1))
 
-      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl("/abc/1")
 
       calls should be(4)
       lastCallbackEvent.oldState should be(ObjectState)
       lastCallbackEvent.currentState should be(ClassState("abc", 1))
 
-      routingEngine.handleUrl(Url("/abcd/234"))
+      routingEngine.handleUrl("/abcd/234")
 
       calls should be(5)
       lastCallbackEvent.oldState should be(ClassState("abc", 1))
       lastCallbackEvent.currentState should be(ClassState("abcd", 234))
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
 
       reg.cancel()
-      routingEngine.handleUrl(Url("/abcd/123"))
+      routingEngine.handleUrl("/abcd/123")
 
       calls should be(6)
       lastCallbackEvent.oldState should be(ClassState("abcd", 234))
       lastCallbackEvent.currentState should be(NextObjectState)
 
       reg.restart()
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       calls should be(7)
       lastCallbackEvent.oldState should be(ClassState("abcd", 123))
       lastCallbackEvent.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
 
       calls should be(7)
       lastCallbackEvent.oldState should be(ClassState("abcd", 123))
       lastCallbackEvent.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/next"), fullReload = true)
+      routingEngine.handleUrl("/next", fullReload = true)
 
       calls should be(8)
       lastCallbackEvent.oldState should be(NextObjectState)
@@ -233,28 +233,28 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
     "return valid current app state" in {
       initTestRoutingEngine()
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
       routingEngine.currentState should be(ObjectState)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
       routingEngine.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
       routingEngine.currentState should be(ObjectState)
 
-      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl("/abc/1")
       routingEngine.currentState should be(ClassState("abc", 1))
 
-      routingEngine.handleUrl(Url("/abcd/234"))
+      routingEngine.handleUrl("/abcd/234")
       routingEngine.currentState should be(ClassState("abcd", 234))
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
       routingEngine.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/next"), fullReload = true)
+      routingEngine.handleUrl("/next", fullReload = true)
       routingEngine.currentState should be(NextObjectState)
 
-      routingEngine.handleUrl(Url("/abcd/234"), fullReload = true)
+      routingEngine.handleUrl("/abcd/234", fullReload = true)
       routingEngine.currentState should be(ClassState("abcd", 234))
     }
 
@@ -295,37 +295,37 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
       renderer.views.size should be(0)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
       renderer.views.size should be(0)
 
-      routingEngine.handleUrl(Url("/"))
+      routingEngine.handleUrl("/")
       renderer.views.size should be(0)
 
-      routingEngine.handleUrl(Url("/abc/1"))
+      routingEngine.handleUrl("/abc/1")
       renderer.views.size should be(0)
 
       //handleState exception doesn't prevent routing to valid state
-      routingEngine.handleUrl(Url("/root"))
+      routingEngine.handleUrl("/root")
       renderer.views shouldBe Seq(rootView)
 
-      routingEngine.handleUrl(Url("/abcd/234"))
+      routingEngine.handleUrl("/abcd/234")
       renderer.views shouldBe Seq(rootView, class2View)
 
       //onClose exception doesn't prevent routing to valid state
-      routingEngine.handleUrl(Url("/root"))
+      routingEngine.handleUrl("/root")
       renderer.views shouldBe Seq(rootView)
 
-      routingEngine.handleUrl(Url("/abcd/234"))
+      routingEngine.handleUrl("/abcd/234")
       renderer.views shouldBe Seq(rootView, class2View)
 
       //onClose exception doesn't prevent routing to valid state
-      routingEngine.handleUrl(Url("/root"), fullReload = true)
+      routingEngine.handleUrl("/root", fullReload = true)
       renderer.views shouldBe Seq(rootView)
 
-      routingEngine.handleUrl(Url("/next"))
+      routingEngine.handleUrl("/next")
       renderer.views shouldBe Seq(rootView)
     }
 
@@ -346,21 +346,21 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       initTestRoutingEngine(state2vp = state2VP)
 
-      routingEngine.handleUrl(Url("/root"))
+      routingEngine.handleUrl("/root")
 
       renderer.views shouldBe Seq(staticView)
       renderer.lastSubPathToLeave shouldBe empty
       renderer.lastPathToAdd.size shouldBe 1
       staticCreateCount shouldBe 1
 
-      routingEngine.handleUrl(Url("/root/1"))
+      routingEngine.handleUrl("/root/1")
 
       renderer.views shouldBe Seq(staticView)
       renderer.lastSubPathToLeave shouldBe List(staticView)
       renderer.lastPathToAdd.size shouldBe 0
       staticCreateCount shouldBe 1
 
-      routingEngine.handleUrl(Url("/root/2"))
+      routingEngine.handleUrl("/root/2")
 
       renderer.views shouldBe Seq(staticView)
       renderer.lastSubPathToLeave shouldBe List(staticView)

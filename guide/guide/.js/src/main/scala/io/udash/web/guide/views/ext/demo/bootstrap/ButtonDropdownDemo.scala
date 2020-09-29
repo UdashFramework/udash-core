@@ -20,9 +20,9 @@ object ButtonDropdownDemo extends AutoDemo with CssView {
 
     val items = SeqProperty[DefaultDropdownItem](
       DefaultDropdownItem.Header("Start"),
-      DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
+      DefaultDropdownItem.Link("Intro", IntroState.url),
       DefaultDropdownItem.Disabled(
-        DefaultDropdownItem.Link("Test Disabled", Url(BootstrapExtState.url))
+        DefaultDropdownItem.Link("Test Disabled", BootstrapExtState.url)
       ),
       DefaultDropdownItem.Divider,
       DefaultDropdownItem.Header("End"),

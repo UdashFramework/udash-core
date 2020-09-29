@@ -14,9 +14,9 @@ class WindowUrlPathChangeProviderTest extends AsyncUdashFrontendTest {
       val originalFragment = provider.currentFragment
       val fragment = "lol"
 
-      provider.changeFragment(Url(fragment), replaceCurrent = false)
+      provider.changeFragment(fragment, replaceCurrent = false)
 
-      provider.currentFragment.value should endWith(s"/$fragment")
+      provider.currentFragment should endWith(s"/$fragment")
       dom.window.location.pathname should endWith(s"/$fragment")
       retrying {
         //sometimes history takes time to catch up here
@@ -35,10 +35,10 @@ class WindowUrlPathChangeProviderTest extends AsyncUdashFrontendTest {
       val historyLength = dom.window.history.length
       val fragment = "lol"
 
-      provider.changeFragment(Url(fragment), replaceCurrent = true)
+      provider.changeFragment(fragment, replaceCurrent = true)
 
       retrying {
-        provider.currentFragment.value should endWith(s"/$fragment")
+        provider.currentFragment should endWith(s"/$fragment")
         dom.window.location.pathname should endWith(s"/$fragment")
         dom.window.history.length shouldBe historyLength
       }

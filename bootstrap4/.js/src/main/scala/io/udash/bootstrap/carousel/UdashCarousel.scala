@@ -290,7 +290,7 @@ case class UdashCarouselSlide(imgSrc: Url)(caption: Modifier*) {
 
   lazy val render: Node = {
     Seq(
-      img(src := imgSrc.value, BootstrapStyles.Sizing.width100),
+      img(src := imgSrc, BootstrapStyles.Sizing.width100),
       div(BootstrapStyles.Carousel.caption)(
         caption
       )

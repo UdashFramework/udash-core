@@ -15,10 +15,10 @@ object BreadcrumbsDemo extends AutoDemo with CssView {
     import scalatags.JsDom.all._
 
     val pages = SeqProperty[Breadcrumb](
-      new Breadcrumb("Udash", Url("https://udash.io/")),
-      new Breadcrumb("Dev's Guide", Url("https://guide.udash.io/")),
-      new Breadcrumb("Extensions", Url("https://guide.udash.io/")),
-      new Breadcrumb("Bootstrap wrapper", Url("https://guide.udash.io/ext/bootstrap"))
+      new Breadcrumb("Udash", "https://udash.io/"),
+      new Breadcrumb("Dev's Guide", "https://guide.udash.io/"),
+      new Breadcrumb("Extensions", "https://guide.udash.io/"),
+      new Breadcrumb("Bootstrap wrapper", "https://guide.udash.io/ext/bootstrap")
     ).readable
 
     div(

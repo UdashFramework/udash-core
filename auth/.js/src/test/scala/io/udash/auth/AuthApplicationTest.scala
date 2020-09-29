@@ -1,6 +1,6 @@
 package io.udash.auth
 
-import io.udash.Application
+import io.udash.{Application, Url}
 import io.udash.core._
 import io.udash.routing.RoutingRegistry
 import io.udash.testing.AsyncUdashFrontendTest
@@ -28,8 +28,8 @@ class AuthApplicationTest extends AsyncUdashFrontendTest with AuthTestUtils with
       case "/s3" => ThirdState
     }
 
-    override def matchUrl(url: Url): TestStates = url2State(url.value)
-    override def matchState(state: TestStates): Url = Url(state2Url(state))
+    override def matchUrl(url: Url): TestStates = url2State(url)
+    override def matchState(state: TestStates): Url = state2Url(state)
   }
 
   "AuthApplication" should {

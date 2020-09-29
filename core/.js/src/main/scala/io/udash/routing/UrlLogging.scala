@@ -12,7 +12,7 @@ trait UrlLogging[S >: Null <: GState[S]] extends CrossLogging { app: Application
   protected def log(url: String, referrer: Option[String]): Unit
 
   app.onStateChange(event =>
-    Try(log(matchState(event.currentState).value, Try(matchState(event.oldState).value).toOption))
+    Try(log(matchState(event.currentState), Try(matchState(event.oldState)).toOption))
       .failed
       .foreach(t => logger.warn("Logging url change failed: {}", t.getMessage)))
 }
