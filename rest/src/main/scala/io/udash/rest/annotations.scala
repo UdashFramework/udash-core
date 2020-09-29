@@ -4,6 +4,7 @@ package rest
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
+import com.avsystem.commons.serialization.optionalParam
 import io.udash.rest.raw._
 
 /**
@@ -239,6 +240,38 @@ class Cookie(@defaultsToName override val name: String = RestParamTag.paramName)
   */
 class Body(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with RestParamTag
+
+/**
+  * Like [[Query]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  */
+class OptQuery(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Query(name) @optionalParam type Implied
+}
+
+/**
+  * Like [[Header]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  */
+class OptHeader(name: String) extends AnnotationAggregate {
+  @Header(name) @optionalParam type Implied
+}
+
+/**
+  * Like [[Cookie]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  */
+class OptCookie(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Cookie(name) @optionalParam type Implied
+}
+
+/**
+  * Like [[Body]] (for body field parameters) but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  */
+class OptBodyField(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Body(name) @optionalParam type Implied
+}
 
 /**
   * Base trait for annotations which may be applied on REST API methods (including prefix methods)

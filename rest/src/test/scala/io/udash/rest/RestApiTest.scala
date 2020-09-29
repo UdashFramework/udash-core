@@ -43,7 +43,8 @@ trait RestApiTestScenarios extends RestApiTest {
   }
 
   test("complex GET") {
-    testCall(_.complexGet(0, "a/ +&", 1, "b/ +&", 2, "ć/ +&", 3, "ó /&f"))
+    testCall(_.complexGet(0, "a/ +&", 1, "b/ +&", 2, "ć/ +&", Opt(3), 4, "ó /&f"))
+    testCall(_.complexGet(0, "a/ +&", 1, "b/ +&", 2, "ć/ +&", Opt.Empty, 3, "ó /&f"))
   }
 
   test("multi-param body POST") {

@@ -4,7 +4,7 @@ package rest.openapi
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, name, transparent}
+import com.avsystem.commons.serialization.{GenCodec, name, optionalParam, transparent}
 import io.udash.rest.openapi.adjusters.description
 import io.udash.rest.{PolyRestDataCompanion, RestDataCompanion}
 import org.scalatest.FunSuite
@@ -25,7 +25,8 @@ class RestSchemaTest extends FunSuite {
   case class KejsKlass(
     @name("integer") @customWa(42) int: Int,
     @description("serious dependency") dep: Dependency,
-    @description("serious string") str: Opt[String] = Opt.Empty
+    @description("optional thing") @optionalParam opty: Opt[String],
+    @description("serious string") str: Opt[String] = Opt.Empty,
   )
   object KejsKlass extends RestDataCompanion[KejsKlass]
 
@@ -47,6 +48,10 @@ class RestSchemaTest extends FunSuite {
         |          "$ref": "Dependency.json"
         |        }
         |      ]
+        |    },
+        |    "opty": {
+        |      "type": "string",
+        |      "description": "optional thing"
         |    },
         |    "str": {
         |      "type": "string",

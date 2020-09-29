@@ -280,7 +280,7 @@ final case class HttpMethodMetadata[T](
   @reifyAnnot methodTag: HttpMethodTag,
   @reifyAnnot bodyTypeTag: BodyTypeTag,
   @composite parametersMetadata: RestParametersMetadata,
-  @multi @tagged[Body] @rpcParamMetadata bodyParams: List[ParamMetadata[_]],
+  @multi @tagged[Body] @rpcParamMetadata @allowOptional bodyParams: List[ParamMetadata[_]],
   @isAnnotated[FormBody] formBody: Boolean,
   @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
@@ -322,9 +322,9 @@ object HttpResponseType {
 
 final case class RestParametersMetadata(
   @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],
-  @multi @tagged[Header] @rpcParamMetadata headerParams: List[ParamMetadata[_]],
-  @multi @tagged[Query] @rpcParamMetadata queryParams: List[ParamMetadata[_]],
-  @multi @tagged[Cookie] @rpcParamMetadata cookieParams: List[ParamMetadata[_]]
+  @multi @tagged[Header] @rpcParamMetadata @allowOptional headerParams: List[ParamMetadata[_]],
+  @multi @tagged[Query] @rpcParamMetadata @allowOptional queryParams: List[ParamMetadata[_]],
+  @multi @tagged[Cookie] @rpcParamMetadata @allowOptional cookieParams: List[ParamMetadata[_]]
 ) {
   lazy val headerParamsMap: Map[String, ParamMetadata[_]] =
     headerParams.toMapBy(_.name.toLowerCase)
