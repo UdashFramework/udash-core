@@ -26,13 +26,13 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   }
 
   private val homepage = {
-    val ctx = createContextHandler(Array("udash.io", "www.udash.io", "127.0.0.1"))
+    val ctx = createContextHandler(Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"))
     ctx.addServlet(createStaticHandler(homepageResourceBase), "/*")
     ctx
   }
 
   private val guide = {
-    val ctx = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "127.0.0.2", "localhost"))
+    val ctx = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "guide.udash.local", "127.0.0.2", "localhost"))
     ctx.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
     ctx.addServlet(createStaticHandler(guideResourceBase), "/*")
 
