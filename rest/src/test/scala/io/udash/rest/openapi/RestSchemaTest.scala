@@ -26,7 +26,7 @@ class RestSchemaTest extends FunSuite {
     @name("integer") @customWa(42) int: Int,
     @description("serious dependency") dep: Dependency,
     @description("optional thing") @optionalParam opty: Opt[String],
-    @description("serious string") str: Opt[String] = Opt.Empty,
+    @description("serious string") str: Opt[String] = Opt.Empty
   )
   object KejsKlass extends RestDataCompanion[KejsKlass]
 
