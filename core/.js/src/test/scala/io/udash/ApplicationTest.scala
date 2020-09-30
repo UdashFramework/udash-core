@@ -30,7 +30,7 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
     }
 
     "redirect to URL" in {
-      app.redirectTo("http://www.avsystem.com/")
+      app.redirectTo(Url("http://www.avsystem.com/"))
       urlProvider.currUrl.value should be("http://www.avsystem.com/")
     }
 

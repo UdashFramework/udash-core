@@ -26,7 +26,7 @@ trait UrlChangeProvider {
   def onFragmentChange(callback: Url => Unit): Registration
 
   /** Changes the whole URL. */
-  def changeUrl(url: String): Unit = dom.window.location.assign(url)
+  def changeUrl(url: Url): Unit = dom.window.location.assign(url.value)
 }
 
 /** Used for routing based on the URL part following # sign. */
