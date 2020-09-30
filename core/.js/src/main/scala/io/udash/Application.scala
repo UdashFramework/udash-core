@@ -72,7 +72,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   }
 
   /** Redirects to selected URL. */
-  def redirectTo(url: String): Unit =
+  def redirectTo(url: Url): Unit =
     urlChangeProvider.changeUrl(url)
 
   /**
