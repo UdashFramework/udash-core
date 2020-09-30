@@ -25,7 +25,7 @@ class RestSchemaTest extends FunSuite {
   case class KejsKlass(
     @name("integer") @customWa(42) int: Int,
     @description("serious dependency") dep: Dependency,
-    @description("optional thing") @optionalParam opty: Opt[String],
+    @description("optional thing") @optionalParam opty: Opt[String] = Opt("defaultThatMustBeIgnored"),
     @description("serious string") str: Opt[String] = Opt.Empty
   )
   object KejsKlass extends RestDataCompanion[KejsKlass]

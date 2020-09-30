@@ -72,7 +72,7 @@ trait RestTestApi {
     @Header("X-H2") h2: String,
     q1: Int,
     @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
-    @OptQuery q3: Opt[Int],
+    @OptQuery @whenAbsent(Opt(42)) q3: Opt[Int], // @whenAbsent value must be completely ignored in this case
     @Cookie c1: Int,
     @Cookie("coo") c2: String
   ): Future[RestEntity]

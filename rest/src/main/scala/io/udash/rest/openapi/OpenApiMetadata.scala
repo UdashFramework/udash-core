@@ -231,8 +231,11 @@ final case class OpenApiParamInfo[T](
   @reifyFlags flags: ParamFlags,
   @infer restSchema: RestSchema[T]
 ) extends TypedMetadata[T] {
-  val whenAbsentValue: Opt[JsonValue] = whenAbsentInfo.flatMap(_.fallbackValue)
-  val isOptional: Boolean = optional || whenAbsentInfo.fold(flags.hasDefaultValue)(_.fallbackValue.isDefined)
+  val whenAbsentValue: Opt[JsonValue] =
+    if (optional) Opt.Empty
+    else whenAbsentInfo.flatMap(_.fallbackValue)
+
+  val isOptional: Boolean = optional || flags.hasDefaultValue || whenAbsentValue.isDefined
 
   @bincompat private[rest] def hasFallbackValue: Boolean = isOptional
 

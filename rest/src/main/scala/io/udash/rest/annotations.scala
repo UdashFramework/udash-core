@@ -243,7 +243,12 @@ class Body(@defaultsToName override val name: String = RestParamTag.paramName)
 
 /**
   * Like [[Query]] but indicates that the parameter is optional.
-  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the parameter in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional query parameter has
+  * type `Opt[Something]`.
   */
 class OptQuery(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
   @Query(name) @optionalParam type Implied
@@ -251,7 +256,12 @@ class OptQuery(@defaultsToName name: String = RestParamTag.paramName) extends An
 
 /**
   * Like [[Header]] but indicates that the parameter is optional.
-  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the header in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional header parameter has
+  * type `Opt[Something]`.
   */
 class OptHeader(name: String) extends AnnotationAggregate {
   @Header(name) @optionalParam type Implied
@@ -259,7 +269,12 @@ class OptHeader(name: String) extends AnnotationAggregate {
 
 /**
   * Like [[Cookie]] but indicates that the parameter is optional.
-  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the parameter in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional cookie parameter has
+  * type `Opt[Something]`.
   */
 class OptCookie(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
   @Cookie(name) @optionalParam type Implied
@@ -267,7 +282,12 @@ class OptCookie(@defaultsToName name: String = RestParamTag.paramName) extends A
 
 /**
   * Like [[Body]] (for body field parameters) but indicates that the parameter is optional.
-  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the field in the request body.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[JsonValue, Something]` is needed when an optional field has
+  * type `Opt[Something]`.
   */
 class OptBodyField(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
   @Body(name) @optionalParam type Implied
