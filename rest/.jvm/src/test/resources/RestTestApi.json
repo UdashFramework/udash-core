@@ -336,6 +336,15 @@
             }
           },
           {
+            "name": "q3",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "c1",
             "in": "cookie",
             "required": true,
