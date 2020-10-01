@@ -950,6 +950,18 @@ class PropertyTest extends UdashCoreTest {
       lastPatch.removed.size should be(3)
       elementsUpdated should be(0)
 
+      p.set("-1,-2,-3")
+
+      lastValue = null
+      lastPatch = null
+      elementsUpdated = 0
+      s.replace(1, 1, 2)
+      p.get should be("-1,2,-3")
+      lastValue should be(s.get)
+      lastPatch.added.size should be(0)
+      lastPatch.removed.size should be(0)
+      elementsUpdated should be(1)
+
       s.set(Seq(1, 0, 1, 0, 1))
       p.get should be("1,0,1,0,1")
 
