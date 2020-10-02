@@ -31,12 +31,14 @@ class PropertyTest extends UdashCoreTest {
   trait M {
     def x: Double
     def y: Double
+    def z: String
   }
   object M extends HasModelPropertyCreator[M] {
-    def apply(_x: Double, _y: Double): M =
+    def apply(_x: Double, _y: Double, _z: String = "z"): M =
       new M {
         override def x: Double = _x
         override def y: Double = _y
+        override def z: String = _z
       }
   }
 
@@ -1379,6 +1381,29 @@ class PropertyTest extends UdashCoreTest {
 
       mp.get.x shouldBe 4
       mp.get.y shouldBe 4
+    }
+
+    "trigger updates correctly when subprop is initialized with null" in {
+
+      def checkChanges(mp: ModelProperty[M])(implicit position: Position) = {
+        val changes = MArrayBuffer.empty[String]
+        val transformed = mp.subProp(_.z).transform { v =>
+          v + "suffix"
+        }
+
+        val initial = transformed.get
+
+        transformed.listen(changes += _, true)
+
+        changes.toList shouldBe List(initial)
+
+        mp.subProp(_.z).set(null)
+
+        changes.toList shouldBe List(initial, "nullsuffix")
+      }
+
+      checkChanges(ModelProperty(M(4, 2, "text")))
+      checkChanges(ModelProperty(M(4, 2, null)))
     }
 
     "safely cast nested ModelProperty" in {
