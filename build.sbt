@@ -11,7 +11,8 @@ inThisBuild(Seq(
   version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.9.0-SNAPSHOT"),
   organization := "io.udash",
   cancelable := true,
-  resolvers += Resolver.defaultLocal
+  resolvers += Resolver.defaultLocal,
+  usePipelining := true,
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
