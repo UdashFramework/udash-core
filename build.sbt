@@ -271,6 +271,7 @@ lazy val macros = project
   .settings(
     commonSettings,
     libraryDependencies ++= Dependencies.macroDeps.value,
+    exportPipelining := false,
   )
 
 lazy val utils = jvmProject(project)
