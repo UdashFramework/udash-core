@@ -123,6 +123,7 @@ hs_err_pid*
 .cache
 .history
 .lib/
+.bsp/
 dist/*
 target/
 lib_managed/
