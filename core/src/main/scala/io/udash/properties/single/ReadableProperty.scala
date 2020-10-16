@@ -55,6 +55,9 @@ trait ReadableProperty[+A] {
    * It is not as strong relation as `transform`, because `target` can change value independently. */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
 
+  def mirror[B >: A : PropertyCreator](): CastableProperty[B] =
+    PropertyCreator[B].newProperty(get, null).setup(streamTo(_, initUpdate = false)(identity))
+
   /**
    * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
    *
