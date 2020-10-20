@@ -17,5 +17,5 @@ object UdashBootstrap {
 
   /** Loads Bootstrap styles. */
   def loadBootstrapStyles(): Element =
-    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css").render
+    link(rel := "stylesheet", href := "https://maxcdn.bootstrapcdn.com/bootstrap/4.5.3/css/bootstrap.min.css").render
 }
