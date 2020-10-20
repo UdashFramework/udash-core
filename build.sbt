@@ -4,14 +4,14 @@ import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
-
 name := "udash"
+
+Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
   version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.9.0-SNAPSHOT"),
   organization := "io.udash",
-  cancelable := true,
-  resolvers += Resolver.defaultLocal
+  resolvers += Resolver.defaultLocal,
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
@@ -101,12 +101,6 @@ val commonJsSettings = commonSettings ++ Seq(
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
-
-  //library CSS settings
-  LessKeys.cleancss in Assets := true,
-  LessKeys.compress in Assets := true,
-  LessKeys.strictMath in Assets := true,
-  LessKeys.verbose in Assets := true,
 )
 
 val testInBrowser = Seq(
@@ -187,6 +181,11 @@ def frontendExecutable(proj: Project)(
       jsDependencies ++= jsDeps.value,
       Compile / scalaJSUseMainModuleInitializer := true,
 
+      //library CSS settings
+      Assets / LessKeys.cleancss := true,
+      Assets / LessKeys.compress := true,
+      Assets / LessKeys.strictMath := true,
+      Assets / LessKeys.verbose := true,
       Assets / LessKeys.less / includeFilter := "assets.less",
       Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
 
