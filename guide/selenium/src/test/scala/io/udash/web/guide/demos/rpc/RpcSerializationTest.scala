@@ -12,16 +12,18 @@ class RpcSerializationTest extends SeleniumTest {
       callDemo.isEnabled should be(true)
       callDemo.click()
 
-      findElementById("gencodec-demo-int").getText shouldNot be(empty)
-      findElementById("gencodec-demo-double").getText shouldNot be(empty)
-      findElementById("gencodec-demo-string").getText shouldNot be(empty)
-      findElementById("gencodec-demo-seq").getText shouldNot be(empty)
-      findElementById("gencodec-demo-map").getText shouldNot be(empty)
-      findElementById("gencodec-demo-caseClass").getText shouldNot be(empty)
-      findElementById("gencodec-demo-cls-int").getText shouldNot be(empty)
-      findElementById("gencodec-demo-cls-string").getText shouldNot be(empty)
-      findElementById("gencodec-demo-cls-var").getText shouldNot be(empty)
-      findElementById("gencodec-demo-sealedTrait").getText shouldNot be(empty)
+      eventually {
+        findElementById("gencodec-demo-int").getText shouldNot be(empty)
+        findElementById("gencodec-demo-double").getText shouldNot be(empty)
+        findElementById("gencodec-demo-string").getText shouldNot be(empty)
+        findElementById("gencodec-demo-seq").getText shouldNot be(empty)
+        findElementById("gencodec-demo-map").getText shouldNot be(empty)
+        findElementById("gencodec-demo-caseClass").getText shouldNot be(empty)
+        findElementById("gencodec-demo-cls-int").getText shouldNot be(empty)
+        findElementById("gencodec-demo-cls-string").getText shouldNot be(empty)
+        findElementById("gencodec-demo-cls-var").getText shouldNot be(empty)
+        findElementById("gencodec-demo-sealedTrait").getText shouldNot be(empty)
+      }
     }
   }
 }
