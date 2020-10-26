@@ -138,8 +138,7 @@ private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: Propert
   origin: ReadableProperty[A], transformer: A => BSeq[B]
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer, listenChildren = false) {
 
-  override protected def toElemProp(p: Property[B]): ReadableProperty[B] =
-    p.readable
+  override protected def toElemProp(p: Property[B]): ReadableProperty[B] = p
 }
 
 private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator](
