@@ -1407,11 +1407,7 @@ class PropertyTest extends UdashCoreTest {
       val filtered = transformed.filter(_ < 10)
       val sum = filtered.transform(_.sum)
 
-      println(source.listenersCount())
-
       val target = sum.mirror()
-
-      println(source.listenersCount())
 
       target.get should be(12)
 
@@ -1430,7 +1426,11 @@ class PropertyTest extends UdashCoreTest {
       source.remove(2)
       target.get should be(16)
 
-      println(source.listenersCount())
+      target.cancel()
+
+      source.append(2)
+      target.get should be(16)
+      source.listenersCount() shouldBe 0
     }
   }
 }

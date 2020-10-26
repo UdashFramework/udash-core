@@ -55,8 +55,8 @@ trait ReadableProperty[+A] {
    * It is not as strong relation as `transform`, because `target` can change value independently. */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
 
-  def mirror[B >: A : PropertyCreator](): CastableProperty[B] =
-    PropertyCreator[B].newProperty(get, null).setup(streamTo(_, initUpdate = false)(identity))
+  def mirror[B >: A : PropertyCreator](): MirrorProperty[B] =
+    new MirrorProperty(this)
 
   /**
    * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
@@ -69,6 +69,16 @@ trait ReadableProperty[+A] {
    */
   def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
+}
+
+final class MirrorProperty[B](origin: ReadableProperty[B]) {
+  private val castable: CastableProperty[B] = PropertyCreator[B].newProperty(origin.get, null)
+  private val registration = origin.streamTo(castable, initUpdate = false)(identity)
+  def cancel(): Unit = registration.cancel()
+}
+object MirrorProperty {
+  implicit def castable[B](property: MirrorProperty[B]): CastableProperty[B] = property.castable
+  implicit def registration(property: MirrorProperty[_]): Registration = property.registration
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
