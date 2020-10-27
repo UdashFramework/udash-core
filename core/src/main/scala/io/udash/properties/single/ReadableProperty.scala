@@ -74,7 +74,7 @@ trait ReadableProperty[+A] {
     new CombinedProperty[A, B, O](this, property, combiner)
 }
 
-final class MirrorProperty[B](origin: ReadableProperty[B]) {
+final class MirrorProperty[B: PropertyCreator](origin: ReadableProperty[B]) {
   private val castable: CastableProperty[B] = PropertyCreator[B].newProperty(origin.get, null)
   private val registration = origin.streamTo(castable, initUpdate = false)(identity)
   def cancel(): Unit = registration.cancel()
