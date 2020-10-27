@@ -51,10 +51,16 @@ trait ReadableProperty[+A] {
    */
   def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
-  /** Streams value changes to the `target` property.
-   * It is not as strong relation as `transform`, because `target` can change value independently. */
+  /**
+   * Streams value changes to the `target` property.
+   * It is not as strong relation as `transform`, because `target` can change value independently.
+   */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
 
+  /**
+   * Creates a mutable copy of this property which follows the stream of updates from this property.
+   * Similarly to [[streamTo]], the target can change value independently and origin value updates can be cancelled.
+   */
   def mirror[B >: A : PropertyCreator](): MirrorProperty[B] =
     new MirrorProperty(this)
 
