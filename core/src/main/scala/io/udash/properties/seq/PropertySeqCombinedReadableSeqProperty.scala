@@ -10,7 +10,6 @@ private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[
 
   override protected[properties] val parent: ReadableProperty[_] = null
 
-  private val children = value.map(_.readable)
   private var originListenerRegistration: Registration = _
 
   private def killOriginListeners(): Unit = {
@@ -66,10 +65,10 @@ private[properties] class PropertySeqCombinedReadableSeqProperty[A](value: ISeq[
   }
 
   override def get: ISeq[A] =
-    children.map(_.get)
+    value.map(_.get)
 
   override def elemProperties: ISeq[ReadableProperty[A]] =
-    children
+    value
 
   override def listenStructure(structureListener: Patch[ReadableProperty[A]] => Any): Registration =
     ImmutableProperty.NoOpRegistration

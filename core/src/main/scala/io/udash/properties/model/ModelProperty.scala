@@ -32,6 +32,5 @@ trait ModelProperty[A] extends AbstractProperty[A] with ModelPropertyMacroApi[A]
     implicit ev: SeqPropertyCreator[B, SeqTpe]
   ): SeqProperty[B, CastableProperty[B]] = macro io.udash.macros.PropertyMacros.reifySubSeq[A, B, SeqTpe]
 
-  override def readable: ModelProperty[A] = this
 }
 

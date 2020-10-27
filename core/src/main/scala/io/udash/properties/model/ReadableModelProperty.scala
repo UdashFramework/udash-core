@@ -19,9 +19,6 @@ trait ReadableModelProperty[+A] extends ReadableProperty[A] {
   /** Returns child DirectSeqProperty[B] */
   def roSubSeq[B, SeqTpe[T] <: BSeq[T]](f: A => SeqTpe[B])(implicit ev: SeqPropertyCreator[B, SeqTpe]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
-
-  /** Ensures read-only access to this property. */
-  override def readable: ReadableModelProperty[A]
 }
 
 trait ModelPropertyMacroApi[A] extends ReadableModelProperty[A] {
