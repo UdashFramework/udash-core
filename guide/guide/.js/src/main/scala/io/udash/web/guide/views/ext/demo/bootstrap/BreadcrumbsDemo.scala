@@ -19,7 +19,7 @@ object BreadcrumbsDemo extends AutoDemo with CssView {
       new Breadcrumb("Dev's Guide", Url("https://guide.udash.io/")),
       new Breadcrumb("Extensions", Url("https://guide.udash.io/")),
       new Breadcrumb("Bootstrap wrapper", Url("https://guide.udash.io/ext/bootstrap"))
-    ).readable
+    )
 
     div(
       UdashBreadcrumbs(pages)(

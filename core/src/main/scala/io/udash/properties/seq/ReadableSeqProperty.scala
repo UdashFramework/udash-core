@@ -66,8 +66,6 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
 
   /** Zips elements from `this` SeqProperty with their indexes. */
   def zipWithIndex: ReadableSeqProperty[(A, Int), ReadableProperty[(A, Int)]]
-
-  override def readable: ReadableSeqProperty[A, ReadableProperty[A]]
 }
 
 private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadableProperty[A]]
@@ -107,5 +105,4 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     )
   }
 
-  override def readable: ReadableSeqProperty[A, ReadableProperty[A]] = this
 }

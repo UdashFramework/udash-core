@@ -39,7 +39,6 @@ private[properties] class ImmutableProperty[A](value: A) extends ReadablePropert
     ImmutableProperty.NoOpRegistration
   }
 
-  override final def readable: this.type = this
 }
 
 private[properties] final class ImmutableModelProperty[A](value: A)

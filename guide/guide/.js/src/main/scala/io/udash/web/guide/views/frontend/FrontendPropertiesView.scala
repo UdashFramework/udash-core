@@ -321,15 +321,6 @@ class FrontendPropertiesView extends View with CssView {
         |strings.clear()
         |// withIdx.get == Seq()""".stripMargin
     )(GuideStyles),
-    h4("Ensuring readonly access"),
-    p(
-      "When you expose a property and you want to ensure that the exposed reference enables only the read access ",
-      "use the ", i("_.readable"), " method which does not allow to modify the property by type casting. "
-    ),
-    CodeBlock(
-      """val p: Property[Int] = Property(0)
-        |val ro: ReadableProperty[Int] = p.readable""".stripMargin
-    )(GuideStyles),
     h3("Immutable properties"),
     p(
       "GUI components may take numerous arguments defining their behaviour as the properties. ",
