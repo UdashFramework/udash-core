@@ -1,5 +1,6 @@
 package io.udash.testing
 
+import com.avsystem.commons.misc.OptArg
 import io.udash._
 import org.scalajs.dom
 
@@ -14,11 +15,15 @@ class TestViewFactory[T <: TestState] extends ViewFactory[T] {
   }
 }
 
-class TestView extends ContainerView {
+class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends ContainerView {
+
   import scalatags.JsDom.all._
+
   var lastChild: View = _
   var renderingCounter = 0
   var closed = false
+
+  private def content: String = overrideContent.getOrElse(toString)
 
   override def renderChild(view: Option[View]): Unit = {
     super.renderChild(view)
@@ -29,10 +34,10 @@ class TestView extends ContainerView {
     renderingCounter += 1
     Seq[Modifier](
       div(
-        toString,
+        content,
         childViewContainer
       ),
-      dom.document.createTextNode(toString),
+      dom.document.createTextNode("end"),
     )
   }
 

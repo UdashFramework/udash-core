@@ -88,6 +88,7 @@ trait ContainerView extends View {
   def renderChild(view: Option[View]): Unit = {
     clearChildViewContainer()
     view.foreach { view =>
+      //todo this is a bad heuristic
       view match {
         case container: ContainerView => container.clearChildViewContainer()
         case _ =>
