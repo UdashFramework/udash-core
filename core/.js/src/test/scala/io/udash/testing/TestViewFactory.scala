@@ -23,7 +23,7 @@ class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends Container
   var renderingCounter = 0
   var closed = false
 
-  private def content: String = overrideContent.getOrElse(toString)
+  private def content: String = overrideContent.getOrElse(super.toString)
 
   override def renderChild(view: Option[View]): Unit = {
     super.renderChild(view)
@@ -44,6 +44,8 @@ class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends Container
   override def onClose(): Unit = {
     closed = true
   }
+
+  override def toString: String = s"TestView($content)"
 }
 
 class TestFinalView extends View {

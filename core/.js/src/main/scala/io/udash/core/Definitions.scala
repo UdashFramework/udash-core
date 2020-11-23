@@ -72,7 +72,7 @@ trait ContainerView extends View {
   /** Default implementation renders child views inside this element. */
   protected val childViewContainer: Element = div().render
 
-  protected def clearChildViewContainer(): Unit =
+  def clearChildViewContainer(): Unit =
     while (childViewContainer.firstChild != null)
       childViewContainer.removeChild(childViewContainer.firstChild)
 
@@ -87,14 +87,8 @@ trait ContainerView extends View {
    */
   def renderChild(view: Option[View]): Unit = {
     clearChildViewContainer()
-    view.foreach { view =>
-      //todo this is a bad heuristic
-      view match {
-        case container: ContainerView => container.clearChildViewContainer()
-        case _ =>
-      }
-      view.getTemplate.applyTo(childViewContainer)
-    }
+    println(this.toString + " renderChild " + view)
+    view.foreach(_.getTemplate.applyTo(childViewContainer))
   }
 }
 

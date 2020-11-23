@@ -67,9 +67,14 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       replaceCurrentViews(pathToAdd)
     } else {
       val removedViews = views.size - currentViewsToLeaveSize
+      views.takeRight(removedViews).foreach {
+        case c: ContainerView => c.clearChildViewContainer()
+        case _ =>
+      }
       views.trimEnd(removedViews)
       val rootView = views.last
       val rootViewToAttach = mergeViews(pathToAdd.iterator)
+      //rootViewToAttach != rootView since there was at least one (root) view to leave
       if (removedViews > 0 || rootViewToAttach.isDefined) renderChild(rootView, rootViewToAttach)
     }
   }
