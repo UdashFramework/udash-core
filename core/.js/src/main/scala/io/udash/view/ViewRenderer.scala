@@ -14,22 +14,22 @@ private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views: MBuffer[View] = js.Array[View]()
 
-  private def mergeViews(path: Iterator[View]): Option[View] = {
-    def renderChild(parent: View, child: Option[View]): Unit =
+  private def mergeViews(pathIterator: Iterator[View]): Opt[View] = {
+    def renderChild(parent: View, child: View): Unit =
       parent match {
         case p: ContainerView =>
-          p.renderChild(child)
+          p.renderChild(Some(child))
         case rest =>
           throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
       }
-    path.nextOpt.setup(_.foreach { top =>
-      val lastElement = path.fold(top) { case (parent, child) =>
-        renderChild(parent, Some(child))
-        views.append(parent)
+    pathIterator.nextOpt.setup(_.foreach { top =>
+      views.append(top)
+      pathIterator.foldLeft(top) { case (parent, child) =>
+        renderChild(parent, child)
+        views.append(child)
         child
       }
-      views.append(lastElement)
-    }).toOption
+    })
   }
 
   /**
@@ -42,7 +42,9 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    * <br/>
    * Calls:<br/>
    * A - nothing<br/>
-   * B - renderChild(E)<br/>
+   * B - renderChild(None); renderChild(E)<br/>
+   * C - renderChild(None)<br/>
+   * D - renderChild(None)<br/>
    * E - getTemplate(); renderChild(F)<br/>
    * F - getTemplate()<br/>
    *
@@ -50,15 +52,15 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    * @param pathToAdd      views list, which will be added to hierarchy
    */
   def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
-    //technically e.g. B from docs is left in the hierarchy, but we run it through the algorithm for proper cleanup
+    //technically e.g. B from docs stays, but we run it through the algorithm anyway for proper cleanup
     val unmodifiedViews = findEqPrefix(subPathToLeave, views.iterator).size - 1
     views.drop(unmodifiedViews).foreach {
       case c: ContainerView => c.renderChild(None)
       case _ =>
     }
     val rootView = views.applyOpt(unmodifiedViews)
-    views.takeInPlace(unmodifiedViews)
-    val rootViewToAttach = mergeViews(rootView.iterator ++ pathToAdd.iterator)
+    views.trimEnd(views.length - unmodifiedViews)
+    val rootViewToAttach = mergeViews(rootView.iterator ++ pathToAdd)
     if (rootView.isEmpty) {
       while (endpoint.firstChild != null) endpoint.removeChild(endpoint.firstChild)
       rootViewToAttach.foreach(_.getTemplate.applyTo(endpoint))
