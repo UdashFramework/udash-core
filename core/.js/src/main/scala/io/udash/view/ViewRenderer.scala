@@ -67,7 +67,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       replaceCurrentViews(pathToAdd)
     } else {
       val removedViews = views.size - currentViewsToLeaveSize
-      views.takeRight(removedViews).foreach {
+      views.takeRight(removedViews + 1).foreach {
         case c: ContainerView => c.clearChildViewContainer()
         case _ =>
       }

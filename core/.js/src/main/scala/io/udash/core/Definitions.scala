@@ -85,11 +85,8 @@ trait ContainerView extends View {
    *
    * @param view view which origins from child
    */
-  def renderChild(view: Option[View]): Unit = {
-    clearChildViewContainer()
-    println(this.toString + " renderChild " + view)
+  def renderChild(view: Option[View]): Unit =
     view.foreach(_.getTemplate.applyTo(childViewContainer))
-  }
 }
 
 /** The class which should be used to present the state for [[io.udash.routing.RoutingRegistry]]. */
