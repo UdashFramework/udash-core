@@ -72,7 +72,7 @@ trait ContainerView extends View {
   /** Default implementation renders child views inside this element. */
   protected val childViewContainer: Element = div().render
 
-  def clearChildViewContainer(): Unit =
+  protected def clearChildViewContainer(): Unit =
     while (childViewContainer.firstChild != null)
       childViewContainer.removeChild(childViewContainer.firstChild)
 
@@ -85,8 +85,10 @@ trait ContainerView extends View {
    *
    * @param view view which origins from child
    */
-  def renderChild(view: Option[View]): Unit =
+  def renderChild(view: Option[View]): Unit = {
+    clearChildViewContainer()
     view.foreach(_.getTemplate.applyTo(childViewContainer))
+  }
 }
 
 /** The class which should be used to present the state for [[io.udash.routing.RoutingRegistry]]. */

@@ -30,6 +30,11 @@ class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends Container
     lastChild = view.orNull
   }
 
+  override def clearChildViewContainer(): Unit = {
+    super.clearChildViewContainer()
+    lastChild = null
+  }
+
   override def getTemplate: Modifier = {
     renderingCounter += 1
     Seq[Modifier](

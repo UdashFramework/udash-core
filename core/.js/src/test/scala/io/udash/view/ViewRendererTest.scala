@@ -50,7 +50,6 @@ class ViewRendererTest extends UdashFrontendTest {
 
       renderer.renderView(Iterator(rootView, childViewA), childViewC :: childViewB :: Nil)
 
-      println(element.outerHTML)
       element.outerHTML shouldBe "<div><div>root<div><div>a<div><div>c<div><div>b<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
       rootView.lastChild should be(null) // renderChild was not called
       childViewA.lastChild should be(childViewC)
