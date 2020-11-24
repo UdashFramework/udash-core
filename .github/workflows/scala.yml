@@ -1,21 +1,50 @@
 name: CI
 
+env:
+  JAVA_OPTS: "-Dfile.encoding=UTF-8 -Xms1024M -Xmx3072M -Xss4M -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
+
 on:
   push:
-    branches: [ master ]
+    branches: '*'
   pull_request:
-    branches: [ master ]
+    types: [opened]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        scala: [2.12.12, 2.13.3]
+        command: [udash-jvm/test, udash-js/test]
+        include:
+          - scala: 2.13.3
+            command: guide-selenium/test
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Run tests
-      run: sbt test
+      - name: Cache npm
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - name: Cache sbt
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.coursier/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-${{ matrix.scala }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.scala }}-sbt-
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+      - name: Install jsdom
+        run: npm install jsdom@15.2.1
+      - name: Run tests
+        run: sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++${{ matrix.scala }} ${{ matrix.command }}
