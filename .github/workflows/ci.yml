@@ -81,4 +81,4 @@ jobs:
           SONATYPE_GPG: ${{ secrets.SONATYPE_GPG }}
         run: echo -e $SONATYPE_GPG | gpg --import -
       - name: Publish artifacts
-        run: sbt 'set version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned sonatypeBundleRelease
+        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned sonatypeBundleRelease
