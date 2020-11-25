@@ -6,11 +6,13 @@ env:
 on:
   push:
     branches: '*'
+    tags: [ "v[0-9]+*" ]
   pull_request:
     types: [opened]
 
 jobs:
   test:
+    name: Run tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -48,3 +50,35 @@ jobs:
         run: npm install jsdom@15.2.1
       - name: Run tests
         run: sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++${{ matrix.scala }} ${{ matrix.command }}
+
+  publish:
+    name: Publish to Sonatype
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v'))
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache sbt
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.coursier/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
+          restore-keys: ${{ runner.os }}-sbt-
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Get version
+        id: get_tag_name
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+      - name: Import GPG key
+        env:
+          #exported via gpg -a --export-secret-keys <key> | cat -e | sed 's/\$/\\n/g' | xclip -selection clipboard and added to org secrets
+          SONATYPE_GPG: ${{ secrets.SONATYPE_GPG }}
+        run: echo -e $SONATYPE_GPG | gpg --import -
+      - name: Publish artifacts
+        run: sbt 'set version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned sonatypeBundleRelease
