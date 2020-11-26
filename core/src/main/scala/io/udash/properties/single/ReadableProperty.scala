@@ -48,9 +48,18 @@ trait ReadableProperty[+A] {
    */
   def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
-  /** Streams value changes to the `target` property.
-   * It is not as strong relation as `transform`, because `target` can change value independently. */
+  /**
+   * Streams value changes to the `target` property.
+   * It is not as strong relation as `transform`, because `target` can change value independently.
+   */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
+
+  /**
+   * Creates a mutable copy of this property which follows the stream of updates from this property.
+   * Similarly to [[streamTo]], the target can change value independently and origin value updates can be cancelled.
+   */
+  def mirror[B >: A : PropertyCreator](): MirrorProperty[B] =
+    new MirrorProperty(this)
 
   /**
    * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
@@ -63,6 +72,15 @@ trait ReadableProperty[+A] {
    */
   def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
+}
+
+final class MirrorProperty[A: PropertyCreator](origin: ReadableProperty[A]) {
+  private val castable: CastableProperty[A] = PropertyCreator[A].newProperty(origin.get, null)
+  private val registration = origin.streamTo(castable, initUpdate = false)(identity)
+}
+object MirrorProperty {
+  implicit def castable[A](property: MirrorProperty[A]): CastableProperty[A] = property.castable
+  implicit def registration(property: MirrorProperty[_]): Registration = property.registration
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {

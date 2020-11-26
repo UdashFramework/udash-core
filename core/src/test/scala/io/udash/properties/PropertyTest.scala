@@ -1400,6 +1400,38 @@ class PropertyTest extends UdashCoreTest {
 
       p.get shouldBe SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(SimpleSeq(Seq(), null)), null)), null)), null)
     }
+
+    "support mirroring" in {
+      val source = SeqProperty(1, 2, 3)
+      val transformed = source.transformElements(_ * 2)
+      val filtered = transformed.filter(_ < 10)
+      val sum = filtered.transform(_.sum)
+
+      val target = sum.mirror()
+
+      target.get should be(12)
+
+      source.append(4)
+      target.get should be(20)
+
+      source.touch()
+      target.get should be(20)
+
+      target.set(0)
+      target.get should be(0)
+
+      source.touch()
+      target.get should be(20)
+
+      source.remove(2)
+      target.get should be(16)
+
+      target.cancel()
+
+      source.append(2)
+      target.get should be(16)
+      source.listenersCount() shouldBe 0
+    }
   }
 }
 
