@@ -74,13 +74,12 @@ trait ReadableProperty[+A] {
     new CombinedProperty[A, B, O](this, property, combiner)
 }
 
-final class MirrorProperty[B: PropertyCreator](origin: ReadableProperty[B]) {
-  private val castable: CastableProperty[B] = PropertyCreator[B].newProperty(origin.get, null)
+final class MirrorProperty[A: PropertyCreator](origin: ReadableProperty[A]) {
+  private val castable: CastableProperty[A] = PropertyCreator[A].newProperty(origin.get, null)
   private val registration = origin.streamTo(castable, initUpdate = false)(identity)
-  def cancel(): Unit = registration.cancel()
 }
 object MirrorProperty {
-  implicit def castable[B](property: MirrorProperty[B]): CastableProperty[B] = property.castable
+  implicit def castable[A](property: MirrorProperty[A]): CastableProperty[A] = property.castable
   implicit def registration(property: MirrorProperty[_]): Registration = property.registration
 }
 
