@@ -84,4 +84,10 @@ jobs:
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned sonatypeBundleRelease
+        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
+      - name: Release Sonatype bundle
+        if: ${{ !endsWith(steps.get_tag_name.outputs.VERSION, 'SNAPSHOT') }}
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease
