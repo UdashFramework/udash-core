@@ -8,6 +8,7 @@ on:
     branches: '*'
     tags: [ "v[0-9]+*" ]
   pull_request:
+    # avoid duplicate checks (push & PR) further in the review process
     types: [opened]
 
 jobs:
@@ -53,6 +54,7 @@ jobs:
 
   publish:
     name: Publish to Sonatype
+    # only run on tag push
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v'))
     needs: [ test ]
     runs-on: ubuntu-latest
@@ -77,7 +79,7 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
       - name: Import GPG key
         env:
-          #exported via gpg -a --export-secret-keys <key> | cat -e | sed 's/\$/\\n/g' | xclip -selection clipboard and added to org secrets
+          #exported via `gpg -a --export-secret-keys <key> | cat -e | sed 's/\$/\\n/g' | xclip -selection clipboard` and added to org secrets
           SONATYPE_GPG: ${{ secrets.SONATYPE_GPG }}
         run: echo -e $SONATYPE_GPG | gpg --import -
       - name: Publish artifacts
@@ -86,6 +88,7 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
       - name: Release Sonatype bundle
+        #https://github.com/xerial/sbt-sonatype#publishing-your-artifact
         if: ${{ !endsWith(steps.get_tag_name.outputs.VERSION, 'SNAPSHOT') }}
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
