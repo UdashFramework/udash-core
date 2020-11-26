@@ -22,6 +22,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         case rest =>
           throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
       }
+
     pathIterator.nextOpt.setup(_.foreach { top =>
       views.append(top)
       pathIterator.foldLeft(top) { case (parent, child) =>
@@ -44,7 +45,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
    * A - nothing<br/>
    * B - renderChild(None); renderChild(E)<br/>
    * C - renderChild(None)<br/>
-   * D - renderChild(None)<br/>
+   * D - renderChild(None) // if D is a ContainerView <br/>
    * E - getTemplate(); renderChild(F)<br/>
    * F - getTemplate()<br/>
    *
@@ -56,7 +57,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     val rootView = views.applyOpt(viewsToLeaveSize - 1)
     //technically e.g. B from docs stays, but we run it through the algorithm anyway for proper children cleanup
     val unmodifiedViews = rootView.foldLeft(viewsToLeaveSize)((unmodified, _) => unmodified - 1)
-    views.drop(unmodifiedViews).foreach {
+    views.drop(unmodifiedViews).foreach { //doesn't mutate views
       case c: ContainerView => c.renderChild(None)
       case _ =>
     }

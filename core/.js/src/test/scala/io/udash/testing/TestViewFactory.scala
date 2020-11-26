@@ -27,7 +27,7 @@ class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends Container
 
   override def renderChild(view: Option[View]): Unit = {
     super.renderChild(view)
-    lastChild = view.orNull
+    view.foreach(lastChild = _)
   }
 
   override def clearChildViewContainer(): Unit = {
