@@ -87,13 +87,7 @@ trait ContainerView extends View {
    */
   def renderChild(view: Option[View]): Unit = {
     clearChildViewContainer()
-    view.foreach { view =>
-      view match {
-        case container: ContainerView => container.clearChildViewContainer()
-        case _ =>
-      }
-      view.getTemplate.applyTo(childViewContainer)
-    }
+    view.foreach(_.getTemplate.applyTo(childViewContainer))
   }
 }
 

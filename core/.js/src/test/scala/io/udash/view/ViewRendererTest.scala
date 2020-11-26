@@ -24,15 +24,17 @@ class ViewRendererTest extends UdashFrontendTest {
     }
 
     "render changed views without touching old ones" in {
-      val renderer = new ViewRenderer(emptyComponent())
+      val element = emptyComponent()
+      val renderer = new ViewRenderer(element)
 
-      val rootView = new TestView
-      val childViewA = new TestView
-      val childViewB = new TestView
-      val childViewC = new TestView
+      val rootView = new TestView("root")
+      val childViewA = new TestView("a")
+      val childViewB = new TestView("b")
+      val childViewC = new TestView("c")
 
       renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
+      element.outerHTML shouldBe "<div><div>root<div><div>a<div><div>b<div><div>c<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
       childViewB.lastChild should be(childViewC)
@@ -48,6 +50,7 @@ class ViewRendererTest extends UdashFrontendTest {
 
       renderer.renderView(Iterator(rootView, childViewA), childViewC :: childViewB :: Nil)
 
+      element.outerHTML shouldBe "<div><div>root<div><div>a<div><div>c<div><div>b<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
       rootView.lastChild should be(null) // renderChild was not called
       childViewA.lastChild should be(childViewC)
       childViewB.lastChild should be(null)
