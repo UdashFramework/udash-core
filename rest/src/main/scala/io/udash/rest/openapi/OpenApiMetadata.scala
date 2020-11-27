@@ -2,8 +2,10 @@ package io.udash
 package rest.openapi
 
 import com.avsystem.commons._
+import com.avsystem.commons.annotation.bincompat
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
+import com.avsystem.commons.serialization.optionalParam
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.raw._
 import io.udash.rest.{Header => HeaderAnnot, _}
@@ -43,7 +45,6 @@ final case class OpenApiMetadata[T](
   @multi @rpcMethodMetadata
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
-  @paramTag[RestParamTag](defaultTag = new Body)
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatched(RawRest.NotValidHttpMethod)
   bodyMethods: List[OpenApiBodyOperation[_]]
@@ -115,7 +116,7 @@ final case class PathOperation(
 sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
   @reifyName(useRawName = true) def name: String
   @reifyAnnot def methodTag: RestMethodTag
-  @multi @rpcParamMetadata @tagged[NonBodyTag] def parameters: List[OpenApiParameter[_]]
+  @multi @rpcParamMetadata @tagged[NonBodyTag] @allowOptional def parameters: List[OpenApiParameter[_]]
   @multi @reifyAnnot def operationAdjusters: List[OperationAdjuster]
   @multi @reifyAnnot def pathAdjusters: List[PathItemAdjuster]
 
@@ -203,7 +204,7 @@ final case class OpenApiBodyOperation[T](
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
   parameters: List[OpenApiParameter[_]],
-  @multi @rpcParamMetadata @tagged[Body] bodyFields: List[OpenApiBodyField[_]],
+  @multi @rpcParamMetadata @tagged[Body] @allowOptional bodyFields: List[OpenApiBodyField[_]],
   @reifyAnnot bodyTypeTag: BodyTypeTag,
   resultType: RestResultType[T]
 ) extends OpenApiOperation[T] {
@@ -211,7 +212,7 @@ final case class OpenApiBodyOperation[T](
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
     if (bodyFields.isEmpty) Opt.Empty else {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
-      val requiredFields = bodyFields.collect { case p if !p.info.hasFallbackValue => p.info.name }
+      val requiredFields = bodyFields.collect { case p if !p.info.isOptional => p.info.name }
       val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
       val mediaType = bodyTypeTag match {
         case _: JsonBody => HttpBody.JsonType
@@ -226,14 +227,24 @@ final case class OpenApiBodyOperation[T](
 final case class OpenApiParamInfo[T](
   @reifyName(useRawName = true) name: String,
   @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
+  @isAnnotated[optionalParam] optional: Boolean,
   @reifyFlags flags: ParamFlags,
   @infer restSchema: RestSchema[T]
 ) extends TypedMetadata[T] {
-  val whenAbsentValue: Opt[JsonValue] = whenAbsentInfo.flatMap(_.fallbackValue)
-  val hasFallbackValue: Boolean = whenAbsentInfo.fold(flags.hasDefaultValue)(_.fallbackValue.isDefined)
+  val whenAbsentValue: Opt[JsonValue] =
+    if (optional) Opt.Empty
+    else whenAbsentInfo.flatMap(_.fallbackValue)
+
+  val isOptional: Boolean = optional || flags.hasDefaultValue || whenAbsentValue.isDefined
+
+  @bincompat private[rest] def hasFallbackValue: Boolean = isOptional
 
   def schema(resolver: SchemaResolver, withDefaultValue: Boolean): RefOr[Schema] =
     resolver.resolve(restSchema) |> (s => if (withDefaultValue) s.withDefaultValue(whenAbsentValue) else s)
+
+  @bincompat private[rest] def this(
+    name: String, whenAbsentInfo: Opt[WhenAbsentInfo[T]], flags: ParamFlags, restSchema: RestSchema[T]
+  ) = this(name, whenAbsentInfo, false, flags, restSchema)
 }
 
 final case class OpenApiParameter[T](
@@ -253,7 +264,7 @@ final case class OpenApiParameter[T](
     val urlEncodeName = in == Location.Query || in == Location.Cookie
     val name = if(urlEncodeName) URLEncoder.encode(info.name, spaceAsPlus = true) else info.name
     val param = Parameter(name, in,
-      required = pathParam || !info.hasFallbackValue,
+      required = pathParam || !info.isOptional,
       schema = info.schema(resolver, withDefaultValue = !pathParam),
       // repeated query/cookie/header params are not supported for now so ensure `explode` is never assumed to be true
       explode = if (in.defaultStyle.explodeByDefault) OptArg(false) else OptArg.Empty

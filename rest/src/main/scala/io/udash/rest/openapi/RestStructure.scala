@@ -92,7 +92,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
    */
   @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
-    @adtParamMetadata @multi fields: List[Field[_]],
+    @adtParamMetadata @allowOptional @multi fields: List[Field[_]],
     @composite info: GenCaseInfo[T]
   ) extends RestStructure[T] with Case[T] {
 
@@ -110,7 +110,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
           val props = caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).iterator ++
             fields.iterator.map(f => (f.info.rawName, f.resolveSchema(resolver)))
           val required = caseFieldName.iterator ++
-            fields.iterator.filterNot(_.hasFallbackValue).map(_.info.rawName)
+            fields.iterator.filterNot(_.optional).map(_.info.rawName)
           RefOr(applyAdjusters(Schema(`type` = DataType.Object,
             properties = IListMap(props.toList: _*),
             required = required.toList
@@ -151,8 +151,10 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   ) extends TypedMetadata[T] {
 
     val fallbackValue: Opt[JsonValue] =
-      (whenAbsentInfo.map(_.fallbackValue) orElse defaultValueInfo.map(_.fallbackValue)).flatten
-    val hasFallbackValue: Boolean = fallbackValue.isDefined
+      if (info.optional) Opt.Empty
+      else (whenAbsentInfo.map(_.fallbackValue) orElse defaultValueInfo.map(_.fallbackValue)).flatten
+
+    val optional: Boolean = info.optional || fallbackValue.isDefined
 
     def resolveSchema(resolver: SchemaResolver): RefOr[Schema] = {
       val bareSchema = resolver.resolve(restSchema).withDefaultValue(fallbackValue)

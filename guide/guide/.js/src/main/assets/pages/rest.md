@@ -441,13 +441,13 @@ explicitly. However, the only reason to use it explicitly is in order to customi
 Body parameters are serialized into `JsonValue` objects.
 See [serialization](#body-parameter-serialization) for more details.
 
-#### `@FormBody`
+##### `@FormBody`
 
 Non-`GET` methods may be annotated with `@FormBody`. This changes serialization of body parameters
 from JSON object to HTTP form, encoded as `application/x-www-form-urlencoded`. Each body parameter
 is then serialized into `PlainValue` rather than `JsonValue`.
 
-#### `@CustomBody`
+##### `@CustomBody`
 
 Methods annotated with `@CustomBody` are required to take **exactly one** body parameter. This body parameter will
 be then serialized directly into `HttpBody`. This makes it possible to fully customize the way HTTP body is built.
@@ -459,6 +459,32 @@ object User extends RestDataCompanion[User]
 
 @PUT @CustomBody def updateUser(user: User): Future[Unit]
 ```
+
+#### Optional parameters
+
+Instead of `@Query`, `@Header`, `@Cookie` and `@Body`, you can also use `@OptQuery`, `@OptHeader`, `@OptCookie` 
+and `@OptBodyField` to make your parameters explicitly optional. The type of such a parameter must be wrapped into
+an `Option`, `Opt`, `OptArg` or similar option-like wrapper, i.e.
+
+```scala
+@GET def pageContent(@OptQuery lang: Opt[String]): Future[String]
+```
+
+When `Opt.Empty` is passed, this query parameter will simply be omitted in the request.
+
+Note how this is different from simply declaring a (non-optional) parameter typed as `Opt[String]`:
+
+```scala
+@GET def pageContent(@Query lang: Opt[String]): Future[String]
+```
+
+In the example above the framework will simply try to encode `Opt[String]` into
+`PlainValue` (see [serialization](#path-query-header-and-cookie-serialization) for more details).
+This will fail because an `Opt[String]` can't be unambiguously represented as a plain string - compilation
+will fail because of lack of appropriate implicit (`AsRaw/AsReal[PlainValue, Opt[String]]`).
+
+However, when the parameter is explicitly optional, the framework knows that the `Opt` is used to express
+possible lack of this parameter while the actual type of that parameter (that needs to be serialized) is `String`.
 
 ### Prefix methods
 

@@ -77,17 +77,26 @@ trait RestTestApi {
   @pathDescription("path with a followed by b")
   @description("A really complex GET operation")
   @GET("multi/param") def complexGet(
-    @Path("p1") p1: Int, @description("Very serious path parameter") @title("Stri") @Path p2: String,
-    @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
-    q1: Int, @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
-    @Cookie c1: Int, @Cookie("có") c2: String
+    @Path("p1") p1: Int,
+    @description("Very serious path parameter") @title("Stri") @Path p2: String,
+    @Header("X-H1") h1: Int,
+    @Header("X-H2") h2: String,
+    q1: Int,
+    @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
+    @OptQuery @whenAbsent(Opt(42)) q3: Opt[Int], // @whenAbsent value must be completely ignored in this case
+    @Cookie c1: Int,
+    @Cookie("có") c2: String
   ): Future[RestEntity]
 
   @POST("multi/param") def multiParamPost(
-    @Path("p1") p1: Int, @Path p2: String,
-    @Header("X-H1") h1: Int, @Header("X-H2") h2: String,
-    @Query q1: Int, @Query("q=2") q2: String,
-    b1: Int, @Body("b\"2") @description("weird body field") b2: String
+    @Path("p1") p1: Int,
+    @Path p2: String,
+    @Header("X-H1") h1: Int,
+    @Header("X-H2") h2: String,
+    @Query q1: Int,
+    @Query("q=2") q2: String,
+    b1: Int,
+    @Body("b\"2") @description("weird body field") b2: String
   ): Future[RestEntity]
 
   @CustomBody
@@ -137,8 +146,8 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
     def neverGet: Future[Unit] = Future.never
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
-    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, c1: Int, c2: String): Future[RestEntity] =
-      Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-$c2"))
+    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, q3: Opt[Int], c1: Int, c2: String): Future[RestEntity] =
+      Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-${q3.getOrElse(".")}-$c2"))
     def multiParamPost(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, b1: Int, b2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$b1"), s"$p2-$h2-$q2-$b2"))
     def singleBodyPut(entity: RestEntity): Future[String] =

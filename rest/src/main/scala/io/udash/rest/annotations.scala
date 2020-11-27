@@ -4,6 +4,7 @@ package rest
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
 import com.avsystem.commons.rpc._
+import com.avsystem.commons.serialization.optionalParam
 import io.udash.rest.raw._
 
 import scala.annotation.StaticAnnotation
@@ -246,6 +247,62 @@ class Cookie(@defaultsToName override val name: String = RestParamTag.paramName)
   */
 class Body(@defaultsToName override val name: String = RestParamTag.paramName)
   extends rpcName(name) with RestParamTag
+
+/**
+  * Like [[Query]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the parameter in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional query parameter has
+  * type `Opt[Something]`.
+  */
+class OptQuery(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Query(name) @optionalParam
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
+}
+
+/**
+  * Like [[Header]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the header in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional header parameter has
+  * type `Opt[Something]`.
+  */
+class OptHeader(name: String) extends AnnotationAggregate {
+  @Header(name) @optionalParam
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
+}
+
+/**
+  * Like [[Cookie]] but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the parameter in the request.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[PlainValue, Something]` is needed when an optional cookie parameter has
+  * type `Opt[Something]`.
+  */
+class OptCookie(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Cookie(name) @optionalParam
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
+}
+
+/**
+  * Like [[Body]] (for body field parameters) but indicates that the parameter is optional.
+  * This means that its type must be wrapped into an `Option`, `Opt`, `OptArg`, etc. and empty value
+  * corresponds to an absence of the field in the request body.
+  *
+  * Also, the macro engine looks for serialization and other implicits directly for the type wrapped in an
+  * `Opt`, `Option`, e.g. `AsRaw/AsReal[JsonValue, Something]` is needed when an optional field has
+  * type `Opt[Something]`.
+  */
+class OptBodyField(@defaultsToName name: String = RestParamTag.paramName) extends AnnotationAggregate {
+  @Body(name) @optionalParam
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
+}
 
 /**
   * Base trait for annotations which may be applied on REST API methods (including prefix methods)
