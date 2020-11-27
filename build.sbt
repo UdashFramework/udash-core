@@ -87,7 +87,6 @@ val commonSettings = Seq(
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
-  libraryDependencies ++= Dependencies.commonDeps.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
   autoAPIMappings := true
 ) ++ deploymentConfiguration

@@ -2,7 +2,6 @@ package io.udash.routing
 
 import com.avsystem.commons._
 import com.avsystem.commons.misc.AbstractCase
-import com.github.ghik.silencer.silent
 import io.udash._
 import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
@@ -10,7 +9,7 @@ import io.udash.utils.CallbacksHandler
 import io.udash.utils.FilteringUtils._
 import io.udash.view.ViewRenderer
 
-import scala.annotation.tailrec
+import scala.annotation.{nowarn, tailrec}
 
 final case class StateChangeEvent[S <: State](currentState: S, oldState: S) extends AbstractCase
 
@@ -59,7 +58,7 @@ private[udash] final class RoutingEngine[HierarchyRoot >: Null <: GState[Hierarc
       statesMap.retain { (_, _) =>
         i -= 1
         i >= 0
-      }: @silent("deprecated")
+      }: @nowarn("msg=deprecated")
       statesMap ++= oldViewFactories
 
       val viewsToLeave = statesMap.values.map(_._1).iterator

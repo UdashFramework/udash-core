@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.frontend.demos
 
-import com.github.ghik.silencer.silent
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -13,8 +12,7 @@ object BindDemo extends AutoDemo with CssView {
     import org.scalajs.dom.window
     import scalatags.JsDom.all._
 
-    @silent("deprecated")
-    val names = Stream.continually(Stream("John", "Amy", "Bryan", "Diana")).flatten.iterator
+    val names = Iterator.continually(Seq("John", "Amy", "Bryan", "Diana")).flatten
 
     val name = Property(names.next())
     window.setInterval(() => name.set(names.next()), 500)
