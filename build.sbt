@@ -466,6 +466,7 @@ lazy val `guide-packager` =
 
       dockerExposedPorts += 8080, //should match ui.server.port
       dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
+      dockerBaseImage := "openjdk:11",
     )
 
 lazy val `guide-selenium` =
