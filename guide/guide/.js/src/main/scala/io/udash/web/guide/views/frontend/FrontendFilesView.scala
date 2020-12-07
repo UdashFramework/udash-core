@@ -24,6 +24,8 @@ class FrontendFilesView extends View {
     ),
     p("You can find a working demo application in the ", a(href := References.UdashFilesDemoRepo, target := "_blank")("Udash Demos"), " repositiory."),
     h3("Frontend forms"),
+    p(i("FileService"), " is an object that allows to convert ", i("Array[Byte]")," to URL, save it as file from frontend ",
+      " and asynchronously convert ", i("File"), " to ", i("Future[Array[Byte]]"), "."),
     p(i("FileInput"), " is the file HTML input wrapper providing a property containing selected files. "),
     fileInputSnippet,
     p("Take a look at the following live demo:"),
