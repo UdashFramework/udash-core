@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Common setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/actions/setup
       - name: Cache npm
         uses: actions/cache@v2
         with:
@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Common setup
-        uses: ./.github/actions/setup.yml
+        uses: ./.github/actions/setup
       - name: Get version
         id: get_tag_name
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
