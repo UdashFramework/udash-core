@@ -9,7 +9,7 @@ name := "udash"
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
-  version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.9.0-SNAPSHOT"),
+  version := "0.9.0-SNAPSHOT",
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
 ))
