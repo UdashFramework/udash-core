@@ -6,7 +6,6 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.3"
-  val silencerVersion = "1.7.1"
   val collectionCompatVersion = "2.3.2"
 
   val jqueryWrapperVersion = "3.0.4"
@@ -50,13 +49,8 @@ object Dependencies {
   val scalaJsBenchmarkVersion = "0.6.0"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
-
-  val commonDeps = Def.setting(Seq(
-    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
-  ))
 
   val commonTestDeps = Def.setting(Seq(
     "org.scalatest" %%% "scalatest" % scalatestVersion
