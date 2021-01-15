@@ -115,7 +115,7 @@ object DemoStyles extends CssBase {
 
     &.before(
       CommonStyleUtils.transition(),
-      content := "\" \"",
+      content.string(" "),
       position.absolute,
       left(`0`),
       bottom(-2 px),
@@ -128,7 +128,7 @@ object DemoStyles extends CssBase {
 
     &.after(
       CommonStyleUtils.transition(),
-      content := "\" \"",
+      content.string(" "),
       position.absolute,
       left(`0`),
       bottom(-1 px),
@@ -228,7 +228,7 @@ object DemoStyles extends CssBase {
 
     &.before.not(_.firstChild)(
       CommonStyleUtils.absoluteMiddle,
-      content := "\"|\"",
+      content.string("|"),
       left(`0`),
 
       &.hover(

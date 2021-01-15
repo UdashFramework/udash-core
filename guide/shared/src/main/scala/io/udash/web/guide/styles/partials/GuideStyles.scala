@@ -143,7 +143,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
 
       &.before(
         liBulletStyle,
-        content := "\"•\""
+        content.string("•"),
       )
     )
   )
@@ -154,7 +154,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
 
       &.before(
         liBulletStyle,
-        content := "\"‣\""
+        content.string("‣"),
       )
     )
   )
@@ -274,7 +274,7 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     textShadow := "0 0 15px black",
 
     &.after(
-      content := "\" \"",
+      content.string(" "),
       position.absolute,
       bottom(-110 px),
       right(-30 px),

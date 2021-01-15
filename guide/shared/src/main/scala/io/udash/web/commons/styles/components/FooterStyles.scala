@@ -98,7 +98,7 @@ object FooterStyles extends CssBase {
 
     &.before.not(_.firstChild)(
       CommonStyleUtils.absoluteMiddle,
-      content := "\"|\"",
+      content.string("|"),
       left(`0`),
 
       &.hover(

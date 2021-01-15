@@ -4,6 +4,7 @@
       <option name="RIGHT_MARGIN" value="-1" />
     </MarkdownNavigatorCodeStyleSettings>
     <ScalaCodeStyleSettings>
+      <option name="addImportsRelativeToBasePackage" value="false" />
       <option name="alwaysUsedImports">
         <array>
           <option value="io.udash.properties.Properties._" />
