@@ -55,7 +55,7 @@ trait HeaderNavStyles extends CssBase {
 
     &.before.not(_.firstChild)(
       CommonStyleUtils.absoluteMiddle,
-      content := "\"|\"",
+      content.string("|"),
       left(`0`),
 
       &.hover(
@@ -63,7 +63,7 @@ trait HeaderNavStyles extends CssBase {
       ),
 
       MediaQueries.tabletPortrait(
-        content := "\"\""
+        content.string("")
       )
     ),
 
@@ -84,7 +84,7 @@ trait HeaderNavStyles extends CssBase {
       position.absolute,
       top(100 %%),
       left(`0`),
-      content := "\" \"",
+      content.string(" "),
       width(100 %%),
       borderBottomColor.white,
       borderBottomWidth(1 px),

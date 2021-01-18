@@ -17,7 +17,7 @@ object MarkdownStyles extends CssBase {
         position.absolute,
         left(`0`),
         top(`0`),
-        content := "\"•\""
+        content.string("•"),
       )
     ),
 

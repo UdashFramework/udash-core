@@ -114,7 +114,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     textShadow := "0 0 15px black",
 
     &.after(
-      content := "\" \"",
+      content.string(" "),
       position.absolute,
       bottom(-40 px),
       right(-30 px),
@@ -199,7 +199,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
 
     &.after(
       UdashFonts.roboto(FontWeight.Light),
-      content := "\"—\"",
+      content.string("—"),
       position.absolute,
       width(100 %%),
       bottom(`0`),

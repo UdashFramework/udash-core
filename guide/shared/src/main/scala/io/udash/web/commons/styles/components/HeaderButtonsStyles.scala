@@ -67,7 +67,7 @@ trait HeaderButtonsStyles extends CssBase {
     zIndex(9),
 
     &.after(
-      content := "\" \"",
+      content.string(" "),
       position.absolute,
       bottom :=! "calc(100% - 1px)",
       right(9 px),

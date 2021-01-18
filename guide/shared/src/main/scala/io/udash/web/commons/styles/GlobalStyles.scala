@@ -10,12 +10,12 @@ object GlobalStyles extends CssBase {
 
   val clearfix: CssStyle = style(
     &.before (
-      content := "\" \"",
+      content.string(" "),
       display.table
     ),
 
-    &.after (
-      content := "\" \"",
+    &.after(
+      content.string(" "),
       display.table,
       clear.both
     )
@@ -88,7 +88,7 @@ object GlobalStyles extends CssBase {
       position.absolute,
       top(100 %%),
       left(`0`),
-      content := "\" \"",
+      content.string(" "),
       width(100 %%),
       borderBottomColor.white,
       borderBottomWidth(1 px),
