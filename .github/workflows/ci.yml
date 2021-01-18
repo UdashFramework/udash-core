@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ 2.12.12, 2.13.3 ]
+        scala: [ 2.12.13, 2.13.3 ]
         command: [ udash-jvm/test, udash-js/test ]
         include:
           - scala: 2.13.3
