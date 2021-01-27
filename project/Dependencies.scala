@@ -6,13 +6,13 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.4" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.3.2"
+  val collectionCompatVersion = "2.4.0"
 
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "1.1.0"
-  val scalaTagsVersion = "0.9.2"
+  val scalaTagsVersion = "0.9.3"
   val scalaCssVersion = "0.7.0"
 
   val servletVersion = "4.0.1"
@@ -30,11 +30,11 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "9.4.35.v20201120"
+  val jettyVersion = "9.4.36.v20210114"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
   val logbackVersion = "1.2.3"
-  val janinoVersion = "3.1.2"
+  val janinoVersion = "3.1.3"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
