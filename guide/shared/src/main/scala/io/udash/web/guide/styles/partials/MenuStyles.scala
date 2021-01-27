@@ -127,7 +127,7 @@ object MenuStyles extends CssBase {
         position.absolute,
         left(`0`),
         top(`0`),
-        content := "\"•\""
+        content.string("•"),
       ),
 
       &.hover(
@@ -147,7 +147,7 @@ object MenuStyles extends CssBase {
         position.absolute,
         top(100 %%),
         left(`0`),
-        content := "\" \"",
+        content.string(" "),
         width(100 %%),
         borderBottomColor.black,
         borderBottomWidth(1 px),
