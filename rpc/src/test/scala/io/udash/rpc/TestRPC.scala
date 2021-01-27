@@ -2,9 +2,9 @@ package io.udash.rpc
 
 import com.avsystem.commons.rpc.rpcName
 import com.avsystem.commons.serialization.HasGenCodec
-import com.github.ghik.silencer.silent
 import io.udash.rpc.utils.Logged
 
+import scala.annotation.nowarn
 import scala.concurrent.Future
 
 case class Record(i: Int, fuu: String)
@@ -14,7 +14,7 @@ case class CustomRPCException(i: Int) extends Throwable
 object CustomRPCException extends HasGenCodec[CustomRPCException]
 
 trait RPCMethods {
-  @silent
+  @nowarn
   def handle: Unit
 
   def handleMore(): Unit
@@ -111,7 +111,7 @@ trait RPCMethodsImpl extends RPCMethods {
   def doStuffWithFail(no: Boolean): Future[String] =
     onFailingCall("doStuffWithFail", List(List(no)), new Exception)
 
-  @silent
+  @nowarn
   override def handle: Unit =
     onFire("handle", Nil)
 
@@ -122,7 +122,7 @@ trait RPCMethodsImpl extends RPCMethods {
     onFire("srslyDude", List(Nil))
 }
 
-@silent
+@nowarn
 object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
   /** Returns implementation of server side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
@@ -173,7 +173,7 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
     }
 }
 
-@silent
+@nowarn
 object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
   /** Returns implementation of client side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestClientRPC =
@@ -182,10 +182,7 @@ object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
 
       override def innerRpc(name: String): InnerClientRPC = {
         onInvocationInternal("innerRpc", List(List(name)), None)
-        new InnerClientRPC {
-          def proc(): Unit =
-            onFire("innerRpc.proc", List(Nil))
-        }
+        () => onFire("innerRpc.proc", List(Nil))
       }
     }
 }

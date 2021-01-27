@@ -905,44 +905,44 @@ class PropertyCreatorTest extends UdashCoreTest {
         |  def x: T
         |}
         |object Test {
-        |  implicit val pc: PropertyCreator[T] = PropertyCreator[T]
+        |  val pc: PropertyCreator[T] = PropertyCreator[T]
         |}""".stripMargin should compile
     }
 
     "handle explicit creation of property creator for recursive model (case class)" in {
       """case class T(a: Int, t: T)
         |object Test {
-        |  implicit val pc: PropertyCreator[T] = PropertyCreator[T]
+        |  val pc: PropertyCreator[T] = PropertyCreator[T]
         |}""".stripMargin should compile
     }
 
     "handle explicit creation of property creator for recursive model (case class with Seq)" in {
       """case class T(a: Int, t: T, st: Seq[T])
         |object Test {
-        |  implicit val pc: PropertyCreator[T] = PropertyCreator[T]
-        |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator[Seq[T]]
+        |  val pc: PropertyCreator[T] = PropertyCreator[T]
+        |  val pcS: PropertyCreator[Seq[T]] = PropertyCreator[Seq[T]]
         |}""".stripMargin should compile
     }
 
     "handle explicit creation of property creator for recursive model (case class with Vector, PropertyCreator[Seq[T]])" in {
       """case class T(a: Int, t: T, st: Vector[T])
         |object Test {
-        |  implicit val pc: PropertyCreator[T] = PropertyCreator[T]
-        |  implicit val pcS: PropertyCreator[Seq[T]] = PropertyCreator[Seq[T]]
+        |  val pc: PropertyCreator[T] = PropertyCreator[T]
+        |  val pcS: PropertyCreator[Seq[T]] = PropertyCreator[Seq[T]]
         |}""".stripMargin should compile
     }
 
     "handle explicit creation of property creator for recursive model (case class with Vector, PropertyCreator[Vector[T]])" in {
       """case class T(a: Int, t: T, st: Vector[T])
         |object Test {
-        |  implicit val pc: PropertyCreator[T] = PropertyCreator[T]
-        |  implicit val pcS: PropertyCreator[Vector[T]] = PropertyCreator[Vector[T]]
+        |  val pc: PropertyCreator[T] = PropertyCreator[T]
+        |  val pcS: PropertyCreator[Vector[T]] = PropertyCreator[Vector[T]]
         |}""".stripMargin should compile
     }
 
     "work with generic subproperties" in {
       """object Test {
-        |  class A[T](val a: T)
+        |  class A[TT](val a: TT)
         |  case class B(x: A[_], y: String)
         |  object B {
         |    implicit val mpc: ModelPropertyCreator[B] = ModelPropertyCreator.materialize
@@ -957,7 +957,7 @@ class PropertyCreatorTest extends UdashCoreTest {
 
     "work with Seq[_] in model" in {
       """object Test {
-        |  class A[T](val a: T)
+        |  class A[TT](val a: TT)
         |  case class B(x: A[_], y: String, z: Seq[_])
         |  object B {
         |    implicit val mpc: ModelPropertyCreator[B] = ModelPropertyCreator.materialize

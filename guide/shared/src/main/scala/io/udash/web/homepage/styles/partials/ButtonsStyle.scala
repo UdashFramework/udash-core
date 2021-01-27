@@ -25,7 +25,7 @@ object ButtonsStyle extends CssBase {
   )
 
   private val btnDefaultLine = mixin(
-    content := "\" \"",
+    content.string(" "),
     position.absolute,
     backgroundColor.white
   )

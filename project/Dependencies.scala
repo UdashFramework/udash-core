@@ -6,36 +6,35 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.3"
-  val silencerVersion = "1.7.1"
-  val collectionCompatVersion = "2.2.0"
+  val collectionCompatVersion = "2.4.0"
 
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "1.1.0"
-  val scalaTagsVersion = "0.9.2"
-  val scalaCssVersion = "0.6.1"
+  val scalaTagsVersion = "0.9.3"
+  val scalaCssVersion = "0.7.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.0.0-M15"
+  val avsCommonsVersion = "2.0.0-M16"
 
   val atmosphereJSVersion = "3.0.4"
   val atmosphereVersion = "2.6.4"
 
   val upickleVersion = "1.2.2" // Tests only
   val circeVersion = "0.13.0" // Tests only
-  val circeDerivationVersion = "0.13.0-M4" // Tests only
+  val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.3.0" // Tests only
 
   val sttpVersion = "2.2.9"
 
   val scalaLoggingVersion = "3.9.2"
 
-  val jettyVersion = "11.0.0"
+  val jettyVersion = "9.4.36.v20210114"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
   val logbackVersion = "1.2.3"
-  val janinoVersion = "3.1.2"
+  val janinoVersion = "3.1.3"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
@@ -50,13 +49,8 @@ object Dependencies {
   val scalaJsBenchmarkVersion = "0.6.0"
 
   val compilerPlugins = Def.setting(Seq(
-    "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full,
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
-
-  val commonDeps = Def.setting(Seq(
-    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
-  ))
 
   val commonTestDeps = Def.setting(Seq(
     "org.scalatest" %%% "scalatest" % scalatestVersion

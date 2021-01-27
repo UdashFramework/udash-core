@@ -50,8 +50,8 @@ trait DefaultStyles extends CssBase {
     ),
 
     unsafeRoot("blockquote:before, blockquote:after, q:before, q:after")(
-      content := "''",
-      content := none
+      content.string(""),
+      content.none
     ),
 
     unsafeRoot("table")(
@@ -88,8 +88,8 @@ trait DefaultStyles extends CssBase {
       fontSize(3 rem),
       textAlign.left,
 
-      &.after (
-        content := "\"—\"",
+      &.after(
+        content.string("—"),
         position.absolute,
         left(`0`),
         bottom(`0`),
@@ -123,7 +123,7 @@ trait DefaultStyles extends CssBase {
 
       &.before(
         CommonStyleUtils.border(StyleConstants.Colors.Red,.1875 rem),
-        content := "\" \"",
+        content.string(" "),
         position.absolute,
         top(`0`),
         left(`0`),

@@ -1,8 +1,8 @@
 package io.udash.properties
 
-import com.github.ghik.silencer.silent
 import io.udash.utils.CrossCollections
 
+import scala.annotation.nowarn
 import scala.collection.mutable
 
 /**
@@ -34,7 +34,7 @@ final class CallbackSequencer {
             callback()
           }
           false //removes
-        }: @silent("deprecated")
+        }: @nowarn("msg=deprecated")
       }
     }
   }

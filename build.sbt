@@ -9,7 +9,7 @@ name := "udash"
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
-  version := sys.env.get("TRAVIS_TAG").filter(_.startsWith("v")).map(_.drop(1)).getOrElse("0.9.0-SNAPSHOT"),
+  version := "0.9.0-SNAPSHOT",
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
 ))
@@ -63,7 +63,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.12.12"),
+  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.12.13"),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -74,7 +74,6 @@ val commonSettings = Seq(
     "-language:postfixOps",
     "-language:higherKinds",
     "-language:experimental.macros",
-    "-Xfuture",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator,-unused",
     "-Yrangepos",
@@ -82,12 +81,10 @@ val commonSettings = Seq(
     "-Ycache-plugin-class-loader:last-modified",
     "-Ycache-macro-class-loader:last-modified"
   ),
-  scalacOptions ++= (if(scalaBinaryVersion.value == "2.13") Seq("-P:silencer:checkUnused") else Seq.empty),
   moduleName := "udash-" + moduleName.value,
   ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
   ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
-  libraryDependencies ++= Dependencies.commonDeps.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
   autoAPIMappings := true
 ) ++ deploymentConfiguration
