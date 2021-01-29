@@ -17,7 +17,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit = {
     val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
-    val newProperties = if (values != null) values.map(value => PropertyCreator[A].newProperty(value, this)) else Seq.empty
+    val newProperties = values.map(value => PropertyCreator[A].newProperty(value, this))
 
     CrossCollections.replaceSeq(properties, idx, amount, newProperties)
 
