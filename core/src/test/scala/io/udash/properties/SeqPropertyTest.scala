@@ -5,6 +5,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
+import org.scalactic.source.Position
 
 import scala.util.Random
 
@@ -71,7 +72,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val pt = SeqProperty[T](TO1, TC1(5), TO2)
       val ptt = SeqProperty[TT](randTT(), randTT(), randTT())
 
-      def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt)) = {
+      def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt))(implicit position: Position) = {
         props.foreach(p => {
           p.get.size should be(expectedSize)
           p.get should be(p.elemProperties.map(_.get))
