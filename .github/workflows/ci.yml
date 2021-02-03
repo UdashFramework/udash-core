@@ -18,10 +18,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ 2.12.13, 2.13.3 ]
+        scala: [ 2.12.13, 2.13.4 ]
         command: [ udash-jvm/test, udash-js/test ]
         include:
-          - scala: 2.13.3
+          - scala: 2.13.4
             command: guide-selenium/test
     steps:
       - uses: actions/checkout@v2
