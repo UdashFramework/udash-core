@@ -2,7 +2,7 @@ package io.udash.properties
 
 import com.avsystem.commons._
 import io.udash.properties.seq.DirectSeqPropertyImpl
-import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
+import io.udash.properties.single.{CastableProperty, DirectProperty, ReadableProperty}
 
 import scala.annotation.implicitNotFound
 import scala.collection.compat.Factory
@@ -46,7 +46,7 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
 final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
-    new DirectPropertyImpl[T](prt)
+    new DirectProperty[T](prt)
 
   override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
