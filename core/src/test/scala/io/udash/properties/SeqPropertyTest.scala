@@ -520,7 +520,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val r1 = f.listen(v => states += v)
       val r2 = f.listenStructure(p => patches += p)
 
-      p.listenersCount() should be(1)
+      p.listenersCount() should be(0)
       p.structureListenersCount() should be(1)
 
       p.append(4)
@@ -690,7 +690,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
       f.get should be(Seq(2, 2, 4, 6))
 
-      p.listenersCount() should be(1)
+      p.listenersCount() should be(0)
       p.structureListenersCount() should be(1)
 
       r1.cancel()
@@ -750,12 +750,12 @@ class SeqPropertyTest extends UdashCoreTest {
 
       val r1 = evens.listenStructure(_ => ())
 
-      doubles.listenersCount() should be(1)
-      ints.listenersCount() should be(1)
+      doubles.listenersCount() should be(0)
+      ints.listenersCount() should be(0)
 
-      doubles.listenersCount() should be(1)
+      doubles.listenersCount() should be(0)
       doubles.structureListenersCount() should be(1)
-      ints.listenersCount() should be(1)
+      ints.listenersCount() should be(0)
       ints.structureListenersCount() should be(1)
 
       doubles.get should be(Seq(1.5, 2.3, 3.7))

@@ -9,12 +9,10 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
-  private var originListenerRegistration: Registration = _
   private var originStructureListenerRegistration: Registration = _
 
-  protected final def initialized: Boolean = originListenerRegistration != null && originListenerRegistration.isActive
+  protected final def initialized: Boolean = originStructureListenerRegistration != null && originStructureListenerRegistration.isActive
 
-  protected def originListener(originValue: BSeq[A]): Unit = {}
   protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
   protected def onListenerInit(): Unit = {}
   protected def onListenerDestroy(): Unit = {}
@@ -23,16 +21,13 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     if (!initialized) {
       listeners.clear()
       onListenerInit()
-      originListenerRegistration = origin.listen(originListener)
       structureListeners.clear()
       originStructureListenerRegistration = origin.listenStructure(originStructureListener)
     }
 
   protected def killOriginListeners(): Unit =
     if (initialized && listeners.isEmpty && structureListeners.isEmpty) {
-      originListenerRegistration.cancel()
       onListenerDestroy()
-      originListenerRegistration = null
       originStructureListenerRegistration.cancel()
       originStructureListenerRegistration = null
     }
