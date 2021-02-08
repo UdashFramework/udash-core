@@ -77,6 +77,7 @@ private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadablePrope
     if (initialized) transformedElements.map(_.get)
     else loadFromOrigin()
 
+  //todo this is the reason filters don't work - elem properties change every time when there are no listeners
   override def elemProperties: BSeq[ElemType] =
     if (initialized) transformedElements
     else elementsFromOrigin()

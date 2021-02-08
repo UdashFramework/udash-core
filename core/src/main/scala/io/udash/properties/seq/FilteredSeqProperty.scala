@@ -33,7 +33,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
 
     // update last value
     val added = patch.added.filter(p => matcher(p.get))
-    val removed = patch.removed.filter(p => matcher(p.get))
+    val removed = patch.removed.filter(p => matcher(p.get)) //todo
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
       CrossCollections.replaceSeq(lastValue, idx, removed.size, added)
@@ -43,25 +43,34 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
   }
 
   private def elementChanged(p: ElemType): Unit = {
-    val oldIdx = lastValue.indexOf(p)
     val matches = matcher(p.get)
+    val patch: Opt[Patch[ElemType]] =
+      lastValue.indexOfOpt(p) match {
+        case Opt(oldIdx) =>
+          if (matches) {
+            //value changed, but still matching
+            valueChanged()
+            Opt.Empty
+          } else {
+            //value stopped matching
+            lastValue.remove(oldIdx, 1)
+            Patch[ElemType](oldIdx, Seq(p), Seq.empty).opt
+          }
+        case Opt.Empty => {
+          val originProps = origin.elemProperties
+          val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get)) //todo don't call matcher
+          CrossCollections.replace(lastValue, newIdx, 0, p)
+          Patch[ElemType](newIdx, Seq.empty, Seq(p))
+        }.optIf(matches) //value started matching
+      }
 
-    val patch = (oldIdx, matches) match {
-      case (old, false) if old != -1 =>
-        lastValue.remove(old, 1)
-        Patch[ElemType](old, Seq(p), Seq.empty)
-      case (-1, true) =>
-        val originProps = origin.elemProperties
-        val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get)) //todo don't call matcher
-        CrossCollections.replace(lastValue, newIdx, 0, p)
-        Patch[ElemType](newIdx, Seq.empty, Seq(p))
-      case _ => null
+    patch.foreach { p =>
+      fireElementsListeners(p)
+      valueChanged()
     }
-
-    if (patch != null) fireElementsListeners(patch)
-    if (matches || oldIdx != -1) valueChanged()
   }
 
+  //todo different initialization scheme than forwarders
   override def elemProperties: BSeq[ElemType] =
     if (lastValue != null) lastValue.toVector
     else origin.elemProperties.filter(el => matcher(el.get))
