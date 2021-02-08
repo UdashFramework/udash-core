@@ -43,8 +43,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
   }
 
   private def elementChanged(p: ElemType): Unit = {
-    val filteredProps = lastValue
-    val oldIdx = filteredProps.indexOf(p)
+    val oldIdx = lastValue.indexOf(p)
     val matches = matcher(p.get)
 
     val patch = (oldIdx, matches) match {
@@ -53,8 +52,8 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
         Patch[ElemType](old, Seq(p), Seq.empty)
       case (-1, true) =>
         val originProps = origin.elemProperties
-        val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get))
-        CrossCollections.replace(filteredProps, newIdx, 0, p)
+        val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get)) //todo don't call matcher
+        CrossCollections.replace(lastValue, newIdx, 0, p)
         Patch[ElemType](newIdx, Seq.empty, Seq(p))
       case _ => null
     }
