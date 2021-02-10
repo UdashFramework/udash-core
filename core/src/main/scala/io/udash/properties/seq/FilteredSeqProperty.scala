@@ -14,9 +14,9 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
   override protected def elementsFromOrigin(elemProperties: BSeq[ElemType]): BSeq[ElemType] =
     elemProperties.filter(p => matcher(p.get))
 
-  override protected def onListenerInit(): Unit = {
-    super.onListenerInit()
-    lastOriginProperties.foreach { el => originListeners += el.listen(_ => elementChanged(el)) }
+  override protected def onListenerInit(originElems: BSeq[ElemType]): Unit = {
+    super.onListenerInit(originElems)
+    originElems.foreach { el => originListeners += el.listen(_ => elementChanged(el)) }
   }
 
   override protected def onListenerDestroy(): Unit = {
