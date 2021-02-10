@@ -6,7 +6,7 @@ import io.udash.utils.CrossCollections
 
 private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType]
-) extends ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
+) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
   override protected def loadFromOrigin(): BSeq[A] = origin.get.reverse
   override protected def elementsFromOrigin(elemProperties: BSeq[ElemType]): BSeq[ElemType] = elemProperties.reverse

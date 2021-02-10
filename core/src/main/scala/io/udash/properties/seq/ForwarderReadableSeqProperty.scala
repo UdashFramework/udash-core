@@ -9,15 +9,37 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
+  //todo remove?
+  protected final var lastOriginProperties: BSeq[OrigType] = _
+  protected final var transformedElements: MBuffer[ElemType] = CrossCollections.createArray[ElemType]
   private var originStructureListenerRegistration: Registration = _
 
   protected final def initialized: Boolean = originStructureListenerRegistration != null && originStructureListenerRegistration.isActive
 
-  protected def originStructureListener(patch: Patch[OrigType]): Unit = {}
-  protected def onListenerInit(): Unit = {}
+  protected def loadFromOrigin(): BSeq[B]
+  protected def elementsFromOrigin(elemProperties: BSeq[OrigType]): BSeq[ElemType]
+  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
+
+  protected def originStructureListener(patch: Patch[OrigType]): Unit =
+    transformPatchAndUpdateElements(patch).foreach { transformed =>
+      structureListeners.foreach(_.apply(transformed))
+      valueChanged()
+    }
+
+  protected def onListenerInit(): Unit = {
+    val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin(loadElemProperties()))
+    if (!(transformedElements.iterator sameElements fromOrigin.iterator) ||
+      !(transformedElements.iterator.map(_.get) sameElements fromOrigin.iterator.map(_.get))) {
+      val removed = transformedElements.toVector
+      transformedElements = fromOrigin
+      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq))
+      valueChanged()
+    }
+  }
+
   protected def onListenerDestroy(): Unit = {}
 
-  protected def initOriginListeners(): Unit =
+  private def initOriginListeners(): Unit =
     if (!initialized) {
       listeners.clear()
       onListenerInit()
@@ -25,12 +47,25 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
       originStructureListenerRegistration = origin.listenStructure(originStructureListener)
     }
 
-  protected def killOriginListeners(): Unit =
+  private def killOriginListeners(): Unit =
     if (initialized && listeners.isEmpty && structureListeners.isEmpty) {
       onListenerDestroy()
       originStructureListenerRegistration.cancel()
       originStructureListenerRegistration = null
     }
+
+  private def loadElemProperties(): BSeq[OrigType] = {
+    lastOriginProperties = origin.elemProperties
+    lastOriginProperties
+  }
+
+  override def get: BSeq[B] =
+    if (initialized) transformedElements.map(_.get)
+    else loadFromOrigin()
+
+  override def elemProperties: BSeq[ElemType] =
+    if (initialized) transformedElements
+    else elementsFromOrigin(loadElemProperties())
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
@@ -62,47 +97,4 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
       override def isActive: Boolean =
         reg.isActive
     })
-}
-
-private[properties] trait ForwarderWithLocalCopy[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
-  extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
-
-  //todo remove?
-  protected final var lastOriginProperties: BSeq[OrigType] = _
-  protected final var transformedElements: MBuffer[ElemType] = CrossCollections.createArray[ElemType]
-
-  protected def loadFromOrigin(): BSeq[B]
-  protected def elementsFromOrigin(elemProperties: BSeq[OrigType]): BSeq[ElemType]
-  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
-
-  private def loadElemProperties(): BSeq[OrigType] = {
-    lastOriginProperties = origin.elemProperties
-    lastOriginProperties
-  }
-
-  override def get: BSeq[B] =
-    if (initialized) transformedElements.map(_.get)
-    else loadFromOrigin()
-
-  //todo this is the reason filters don't work - elem properties change every time when there are no listeners
-  override def elemProperties: BSeq[ElemType] =
-    if (initialized) transformedElements
-    else elementsFromOrigin(loadElemProperties())
-
-  override protected def onListenerInit(): Unit = {
-    val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin(loadElemProperties()))
-    if (!(transformedElements.iterator sameElements fromOrigin.iterator) ||
-      !(transformedElements.iterator.map(_.get) sameElements fromOrigin.iterator.map(_.get))) {
-      val removed = transformedElements.toVector
-      transformedElements = fromOrigin
-      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq))
-      valueChanged()
-    }
-  }
-
-  override protected def originStructureListener(patch: Patch[OrigType]): Unit =
-    transformPatchAndUpdateElements(patch).foreach { transformed =>
-      structureListeners.foreach(_.apply(transformed))
-      valueChanged()
-    }
 }

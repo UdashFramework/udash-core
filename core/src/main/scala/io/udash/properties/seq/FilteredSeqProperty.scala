@@ -6,7 +6,7 @@ import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] final class FilteredSeqProperty[A, ElemType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
-) extends ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
+) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
   private val originListeners: MBuffer[Registration] = CrossCollections.createArray
 

@@ -6,7 +6,7 @@ import io.udash.utils.CrossCollections
 
 private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B
-) extends ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
+) extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
   override protected def loadFromOrigin(): BSeq[B] = origin.get.map(transformer)
   override protected def elementsFromOrigin(elemProperties: BSeq[OrigType]): BSeq[ElemType] = elemProperties.map(transformElement)
