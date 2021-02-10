@@ -9,8 +9,8 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
 ) extends ForwarderWithLocalCopy[A, A, ElemType, ElemType] {
 
   override protected def loadFromOrigin(): BSeq[A] = origin.get.reverse
-  override protected def elementsFromOrigin(): BSeq[ElemType] = origin.elemProperties.reverse
-  override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Patch[ElemType] = {
+  override protected def elementsFromOrigin(elemProperties: BSeq[ElemType]): BSeq[ElemType] = elemProperties.reverse
+  override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
     val transPatch = Patch[ElemType](
       origin.size - patch.idx - patch.added.size,
       patch.removed.reverse,
@@ -18,7 +18,7 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
     )
 
     CrossCollections.replaceSeq(transformedElements, transPatch.idx, transPatch.removed.length, transPatch.added)
-    transPatch
+    transPatch.opt
   }
 }
 
