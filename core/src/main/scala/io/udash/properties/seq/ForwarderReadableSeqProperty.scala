@@ -27,14 +27,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     }
 
   protected def onListenerInit(): Unit = {
-    val fromOrigin = CrossCollections.toCrossArray(elementsFromOrigin(loadElemProperties()))
-    if (!(transformedElements.iterator sameElements fromOrigin.iterator) ||
-      !(transformedElements.iterator.map(_.get) sameElements fromOrigin.iterator.map(_.get))) {
-      val removed = transformedElements.toVector
-      transformedElements = fromOrigin
-      fireElementsListeners(Patch(0, removed, fromOrigin.toSeq))
-      valueChanged()
-    }
+    transformedElements = CrossCollections.toCrossArray(elementsFromOrigin(loadElemProperties()))
   }
 
   protected def onListenerDestroy(): Unit = {}
