@@ -1,13 +1,13 @@
 package io.udash.bindings
 
-import java.util.concurrent.atomic.AtomicInteger
-
 import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Node
+
+import java.util.concurrent.atomic.AtomicInteger
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
 
@@ -2088,7 +2088,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       )
     }
 
-    //todo https://github.com/UdashFramework/udash-core/issues/282
+    //todo https://github.com/UdashFramework/udash-core/issues/290
     "avoid multiple updates in produceWithNested on transformed properties" ignore {
       val p = Property(2)
       val s = Property(3)

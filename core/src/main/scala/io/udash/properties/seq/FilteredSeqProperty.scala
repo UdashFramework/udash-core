@@ -11,7 +11,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
   private val originListeners: MBuffer[Registration] = CrossCollections.createArray
 
   override protected def loadFromOrigin(): BSeq[A] = origin.get.filter(matcher)
-  override protected def elementsFromOrigin(elemProperties: BSeq[ElemType]): BSeq[ElemType] =
+  override protected def transformElements(elemProperties: BSeq[ElemType]): BSeq[ElemType] =
     elemProperties.filter(p => matcher(p.get))
 
   override protected def onListenerInit(originElems: BSeq[ElemType]): Unit = {
@@ -32,7 +32,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
 
     // update last value
     val added = patch.added.filter(p => matcher(p.get))
-    val removed = patch.removed.filter(p => matcher(p.get)) //todo
+    val removed = patch.removed.filter(p => matcher(p.get))
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
       CrossCollections.replaceSeq(transformedElements, idx, removed.size, added)
@@ -56,7 +56,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
           }
         case Opt.Empty => {
           val originProps = origin.elemProperties
-          val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get)) //todo don't call matcher
+          val newIdx = originProps.slice(0, originProps.indexOf(p)).count(el => matcher(el.get))
           CrossCollections.replace(transformedElements, newIdx, 0, p)
           Patch[ElemType](newIdx, Seq.empty, Seq(p))
         }.optIf(matches) //value started matching

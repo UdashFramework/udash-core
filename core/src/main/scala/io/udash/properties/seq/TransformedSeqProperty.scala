@@ -9,7 +9,7 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
 ) extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
   override protected def loadFromOrigin(): BSeq[B] = origin.get.map(transformer)
-  override protected def elementsFromOrigin(elemProperties: BSeq[OrigType]): BSeq[ElemType] = elemProperties.map(transformElement)
+  override protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType] = elemProperties.map(transformElement)
   override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]] = {
     val transPatch = Patch[ElemType](
       patch.idx,

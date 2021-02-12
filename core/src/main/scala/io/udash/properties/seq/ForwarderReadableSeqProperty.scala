@@ -12,10 +12,11 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   protected final var transformedElements: MBuffer[ElemType] = CrossCollections.createArray[ElemType]
   private var originStructureListenerRegistration: Registration = _
 
-  protected final def initialized: Boolean = originStructureListenerRegistration != null && originStructureListenerRegistration.isActive
+  protected final def initialized: Boolean =
+    originStructureListenerRegistration != null && originStructureListenerRegistration.isActive
 
   protected def loadFromOrigin(): BSeq[B]
-  protected def elementsFromOrigin(elemProperties: BSeq[OrigType]): BSeq[ElemType]
+  protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType]
   protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
 
   protected def originStructureListener(patch: Patch[OrigType]): Unit =
@@ -25,7 +26,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     }
 
   protected def onListenerInit(originElems: BSeq[OrigType]): Unit = {
-    transformedElements = CrossCollections.toCrossArray(elementsFromOrigin(originElems))
+    transformedElements = CrossCollections.toCrossArray(transformElements(originElems))
   }
 
   protected def onListenerDestroy(): Unit = {}
@@ -51,7 +52,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   override def elemProperties: BSeq[ElemType] =
     if (initialized) transformedElements
-    else elementsFromOrigin(origin.elemProperties)
+    else transformElements(origin.elemProperties)
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
     initOriginListeners()
