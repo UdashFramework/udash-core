@@ -12,4 +12,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.6")
 
 // Deployment configuration
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.5")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.6")
