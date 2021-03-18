@@ -41,7 +41,7 @@ object Dependencies {
   val scalatestVersion = "3.2.6"
   val bootstrapVersion = "3.3.7-1"
   val bootstrapDatepickerVersion = "4.17.47"
-  val bootstrap4Version = "4.1.3"
+  val bootstrap4Version = "4.6.0-1"
   val bootstrap4DatepickerVersion = "5.1.2"
   val momentJsVersion = "2.24.0"
 
