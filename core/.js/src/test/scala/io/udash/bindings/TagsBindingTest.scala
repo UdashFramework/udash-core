@@ -1253,6 +1253,44 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template.childNodes(4).textContent should be("")
     }
 
+    "handle init with empty SeqProperty" in {
+      val p = seq.SeqProperty.blank[Int]
+      val template = div(
+        span(),
+        repeat(p)((p: Property[Int]) => {
+          val v = p.get
+          if (v % 2 == 0) b(v.toString).render
+          else i(v.toString).render
+        }),
+        span()
+      ).render
+
+      template.childNodes.length should be(3) // spans + placeholder
+      p.set(Seq(1,2,3))
+
+      template.childNodes.length should be(3 + 2)
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).nodeName should be("I")
+      template.childNodes(1).textContent should be("1")
+      template.childNodes(2).nodeName should be("B")
+      template.childNodes(2).textContent should be("2")
+      template.childNodes(3).nodeName should be("I")
+      template.childNodes(3).textContent should be("3")
+      template.childNodes(4).textContent should be("")
+
+      p.set(Seq())
+      template.childNodes.length should be(1 + 2)
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("")
+      template.childNodes(2).textContent should be("")
+
+      p.append(1)
+      template.childNodes.length should be(1 + 2)
+      template.childNodes(0).textContent should be("")
+      template.childNodes(1).textContent should be("1")
+      template.childNodes(2).textContent should be("")
+    }
+
     "handle Seq of produced elements" in {
       val p1 = SeqProperty[Int](1, 2, 3)
       val p2 = SeqProperty[Int](4, 5, 6)
