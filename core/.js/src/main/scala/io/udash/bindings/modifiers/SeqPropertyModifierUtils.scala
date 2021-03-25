@@ -97,6 +97,13 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       if (firstElement == null) firstElement = els.head
       replace(root)(Seq.empty, els)
     }
+
+    if (firstElement == null) {
+      val el = emptyStringNode()
+      firstElement = el
+      replace(root)(Seq.empty, Seq(el))
+      firstElementIsPlaceholder = true
+    }
   }
 }
 
