@@ -6,7 +6,7 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.4" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.4.2"
+  val collectionCompatVersion = "2.4.3"
 
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
