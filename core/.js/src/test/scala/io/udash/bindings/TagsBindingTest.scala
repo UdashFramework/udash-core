@@ -1922,6 +1922,27 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.replace(1, 2, "a", "B")
       el.textContent should be("0x1a2B")
+
+      p.set(Seq("q", "w", "e", "r"))
+      el.textContent should be("0q1w2e3r")
+
+      p.set(Seq("z", "x"))
+      el.textContent should be("0z1x")
+
+      p.set(Seq("q", "w", "e", "r"))
+      el.textContent should be("0q1w2e3r")
+
+      CallbackSequencer().sequence {
+        p.set(Seq())
+        p.set(Seq("c", "d"))
+      }
+      el.textContent should be("0c1d")
+
+      CallbackSequencer().sequence {
+        p.set(Seq("a", "b"))
+        p.set(Seq("x", "y"))
+      }
+      el.textContent should be("0x1y")
     }
 
     "set initial index values to corresponding elements' position in underlying SeqProperty" in {

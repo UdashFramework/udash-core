@@ -14,7 +14,7 @@ private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadablePrope
 
   private val indexes = MHashMap.empty[E, Property[Int]]
 
-  protected def indexProperty(p: E): ReadableProperty[Int] =
+  protected def indexProperty(p: E): Property[Int] =
     indexes.getOrElseUpdate(p, Property(property.elemProperties.indexOf(p).applyIf(_ == -1)(_ => 0)))
 
   override protected def build(item: E): Seq[Node] =
@@ -24,7 +24,7 @@ private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadablePrope
     super.handlePatch(root)(patch)
     patch.removed.foreach(indexes.remove)
     property.elemProperties.zipWithIndex.drop(patch.idx).foreach { case (p, i) =>
-      indexes(p).set(i)
+      indexProperty(p).set(i)
     }
   }
 
