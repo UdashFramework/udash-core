@@ -5,6 +5,7 @@ import io.udash.core.{ContainerView, View}
 import io.udash.utils.FilteringUtils._
 import org.scalajs.dom.Element
 
+import scala.annotation.nowarn
 import scala.scalajs.js
 
 /**
@@ -61,7 +62,7 @@ private[udash] class ViewRenderer(rootElement: => Element) {
       case c: ContainerView => c.renderChild(None)
       case _ =>
     }
-    views.trimEnd(views.length - unmodifiedViews)
+    views.trimEnd(views.length - unmodifiedViews): @nowarn
     val rootViewToAttach = mergeViews(rootView.iterator ++ pathToAdd)
     if (rootView.isEmpty) {
       while (endpoint.firstChild != null) endpoint.removeChild(endpoint.firstChild)
