@@ -21,7 +21,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def originStructureListener(patch: Patch[OrigType]): Unit =
     transformPatchAndUpdateElements(patch).foreach { transformed =>
-      structureListeners.foreach(_.apply(transformed))
+      fireElementsListeners(transformed)
       valueChanged()
     }
 
