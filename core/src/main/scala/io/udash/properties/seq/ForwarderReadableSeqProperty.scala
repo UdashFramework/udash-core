@@ -31,7 +31,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def onListenerDestroy(): Unit = {}
 
-  private def initOriginListeners(): Unit =
+  private def initOriginListener(): Unit =
     if (!initialized) {
       listeners.clear()
       onListenerInit(origin.elemProperties)
@@ -39,7 +39,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
       originStructureListenerRegistration = origin.listenStructure(originStructureListener)
     }
 
-  private def killOriginListeners(): Unit =
+  private def killOriginListener(): Unit =
     if (initialized && listeners.isEmpty && structureListeners.isEmpty) {
       onListenerDestroy()
       originStructureListenerRegistration.cancel()
@@ -55,30 +55,30 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     else transformElements(origin.elemProperties)
 
   override def listenStructure(structureListener: Patch[ElemType] => Any): Registration = {
-    initOriginListeners()
+    initOriginListener()
     super.listenStructure(structureListener)
   }
 
   override def listen(valueListener: BSeq[B] => Any, initUpdate: Boolean = false): Registration = {
-    initOriginListeners()
+    initOriginListener()
     super.listen(valueListener, initUpdate)
   }
 
   override def listenOnce(valueListener: BSeq[B] => Any): Registration = {
-    initOriginListeners()
+    initOriginListener()
     super.listenOnce(valueListener)
   }
 
   override protected def wrapListenerRegistration(reg: Registration): Registration =
     super.wrapListenerRegistration(new Registration {
       override def restart(): Unit = {
-        initOriginListeners()
+        initOriginListener()
         reg.restart()
       }
 
       override def cancel(): Unit = {
         reg.cancel()
-        killOriginListeners()
+        killOriginListener()
       }
 
       override def isActive: Boolean =
