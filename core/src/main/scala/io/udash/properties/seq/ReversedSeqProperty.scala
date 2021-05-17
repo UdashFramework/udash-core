@@ -8,7 +8,7 @@ private[properties] class ReversedReadableSeqProperty[A, ElemType <: ReadablePro
   override protected val origin: ReadableSeqProperty[A, ElemType]
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  override protected def loadFromOrigin(): BSeq[A] = origin.get.reverse
+  override protected def getFromOrigin(): BSeq[A] = origin.get.reverse
   override protected def transformElements(elemProperties: BSeq[ElemType]): BSeq[ElemType] = elemProperties.reverse
   override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
     val transPatch = Patch[ElemType](

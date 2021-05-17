@@ -15,7 +15,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   protected final def initialized: Boolean =
     originStructureListenerRegistration != null && originStructureListenerRegistration.isActive
 
-  protected def loadFromOrigin(): BSeq[B]
+  protected def getFromOrigin(): BSeq[B]
   protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType]
   protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
 
@@ -48,7 +48,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   override def get: BSeq[B] =
     if (initialized) transformedElements.map(_.get)
-    else loadFromOrigin()
+    else getFromOrigin()
 
   override def elemProperties: BSeq[ElemType] =
     if (initialized) transformedElements

@@ -10,7 +10,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
 
   private val originListeners: MBuffer[Registration] = CrossCollections.createArray
 
-  override protected def loadFromOrigin(): BSeq[A] = origin.get.filter(matcher)
+  override protected def getFromOrigin(): BSeq[A] = origin.get.filter(matcher)
   override protected def transformElements(elemProperties: BSeq[ElemType]): BSeq[ElemType] =
     elemProperties.filter(p => matcher(p.get))
 

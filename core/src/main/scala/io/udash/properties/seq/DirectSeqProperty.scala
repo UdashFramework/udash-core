@@ -7,7 +7,7 @@ import io.udash.utils.CrossCollections
 
 import scala.collection.compat._
 
-private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
+private[properties] final class DirectSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
   override protected val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[BSeq[A]] {
 

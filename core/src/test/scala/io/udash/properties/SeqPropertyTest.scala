@@ -751,9 +751,6 @@ class SeqPropertyTest extends UdashCoreTest {
       val r1 = evens.listenStructure(_ => ())
 
       doubles.listenersCount() should be(0)
-      ints.listenersCount() should be(0)
-
-      doubles.listenersCount() should be(0)
       doubles.structureListenersCount() should be(1)
       ints.listenersCount() should be(0)
       ints.structureListenersCount() should be(1)
