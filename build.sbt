@@ -26,7 +26,7 @@ val browserCapabilities: Capabilities = {
 // Deployment configuration
 val deploymentConfiguration = Seq(
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { _ => false },
 
   publishTo := sonatypePublishToBundle.value,
@@ -89,8 +89,8 @@ val commonSettings = Seq(
     ) else Seq.empty
   },
   moduleName := "udash-" + moduleName.value,
-  ideOutputDirectory in Compile := Some(target.value.getParentFile / "out/production"),
-  ideOutputDirectory in Test := Some(target.value.getParentFile / "out/test"),
+  Compile / ideOutputDirectory := Some(target.value.getParentFile / "out/production"),
+  Test / ideOutputDirectory := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
   autoAPIMappings := true
@@ -234,8 +234,8 @@ def frontendExecutable(proj: Project)(
       ).value,
 
       // force fullOpt dependencies generation after fastOpt deps generation
-      packageMinifiedJSDependencies in Compile :=
-        (packageMinifiedJSDependencies in Compile).dependsOn(packageJSDependencies in Compile).value,
+      Compile / packageMinifiedJSDependencies :=
+        (Compile / packageMinifiedJSDependencies).dependsOn(Compile / packageJSDependencies).value,
 
       // Target files for Scala.js plugin
       Compile / fastOptJS / artifactPath :=
