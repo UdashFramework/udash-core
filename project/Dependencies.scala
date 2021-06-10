@@ -16,12 +16,12 @@ object Dependencies {
   val scalaCssVersion = "0.7.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.2.1"
+  val avsCommonsVersion = "2.2.3"
 
   val atmosphereJSVersion = "3.0.4"
   val atmosphereVersion = "2.7.2"
 
-  val upickleVersion = "1.3.15" // Tests only
+  val upickleVersion = "1.4.0" // Tests only
   val circeVersion = "0.14.1" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.0" // Tests only
@@ -30,7 +30,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.3"
 
-  val jettyVersion = "9.4.41.v20210516"
+  val jettyVersion = "9.4.42.v20210604"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
   val logbackVersion = "1.2.3"
