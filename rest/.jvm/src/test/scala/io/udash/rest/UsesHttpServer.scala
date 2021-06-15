@@ -1,13 +1,13 @@
 package io.udash
 package rest
 
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.{AbstractNetworkConnector, Server}
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 trait UsesHttpServer extends BeforeAndAfterAll { this: Suite =>
-  def port: Int
-  val server: Server = new Server(port)
-  def baseUrl = s"http://localhost:$port"
+  private val server: Server = new Server(0)
+  protected final def port: Int = server.getConnectors.head.asInstanceOf[AbstractNetworkConnector].getLocalPort
+  protected final def baseUrl = s"http://localhost:$port"
 
   protected def setupServer(server: Server): Unit
 
