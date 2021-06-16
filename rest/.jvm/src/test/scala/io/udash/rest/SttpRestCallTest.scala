@@ -21,8 +21,6 @@ trait SttpClientRestTest extends ServletBasedRestApiTest {
 }
 
 class SttpRestCallTest extends SttpClientRestTest with RestApiTestScenarios {
-  def port: Int = 9090
-
   test("too large binary request") {
     val future = proxy.binaryEcho(Array.fill[Byte](maxPayloadSize + 1)(5))
     val exception = future.failed.futureValue
@@ -31,7 +29,6 @@ class SttpRestCallTest extends SttpClientRestTest with RestApiTestScenarios {
 }
 
 class ServletTimeoutTest extends SttpClientRestTest {
-  def port: Int = 9091
   override def serverTimeout: FiniteDuration = 500.millis
 
   test("rest method timeout") {

@@ -6,7 +6,6 @@ import io.udash.rest.{RestApiTestScenarios, ServletBasedRestApiTest}
 import org.eclipse.jetty.client.HttpClient
 
 final class JettyRestCallTest extends ServletBasedRestApiTest with RestApiTestScenarios {
-  def port: Int = 9092
   val client: HttpClient = new HttpClient
 
   def clientHandle: HandleRequest =
