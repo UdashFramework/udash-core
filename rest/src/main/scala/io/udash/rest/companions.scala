@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.meta.MacroInstances
+import com.avsystem.commons.meta.MacroInstances.materializeWith
 import io.udash.rest.openapi.OpenApiMetadata
 import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.{RawRest, RestMetadata}
@@ -21,6 +22,18 @@ trait OpenApiInstances[Real] {
 }
 trait OpenApiServerInstances[Real] extends ServerInstances[Real] with OpenApiInstances[Real]
 trait OpenApiFullInstances[Real] extends FullInstances[Real] with OpenApiInstances[Real]
+
+trait ServerImplInstances[Real] {
+  @materializeWith(RawRest, "materializeApiAsRaw")
+  def asRaw: RawRest.AsRawRpc[Real]
+  @materializeWith(RestMetadata, "materializeForImpl")
+  def metadata: RestMetadata[Real]
+}
+trait OpenApiImplInstances[Real] {
+  @materializeWith(OpenApiMetadata, "materializeForImpl")
+  def openapiMetadata: OpenApiMetadata[Real]
+}
+trait OpenApiServerImplInstances[Real] extends ServerImplInstances[Real] with OpenApiImplInstances[Real]
 
 /** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
 abstract class RestClientApiCompanion[Implicits, Real](protected val implicits: Implicits)(
@@ -106,4 +119,34 @@ abstract class DefaultPolyRestApiCompanion[T[_[_]]](implicit
   implicit def fromRawRest[F[_] : AsyncEffect]: RawRest.AsRealRpc[T[F]] = inst.fromRawRest
   implicit def restMetadata[F[_] : AsyncEffect]: RestMetadata[T[F]] = inst.restMetadata
   implicit def openapiMetadata[F[_] : AsyncEffect]: OpenApiMetadata[T[F]] = inst.openapiMetadata
+}
+
+/**
+ * Like [[RestServerApiCompanion]] but the [[Real]] type is supposed to be a class with REST methods
+ * already implemented - as opposed to a trait with abstract methods that needs separate implementation.
+ * All public methods of this class - abstract or concrete - will be interpreted as REST methods
+ * (unless annotated with [[com.avsystem.commons.meta.ignore ignore]]).
+ */
+abstract class RestServerApiImplCompanion[Implicits, Real](protected val implicits: Implicits)(
+  implicit inst: MacroInstances[Implicits, ServerImplInstances[Real]]
+) {
+  implicit final lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
+  implicit final lazy val restAsRaw: RawRest.AsRawRpc[Real] = inst(implicits, this).asRaw
+
+  final def asHandleRequest(real: Real): RawRest.HandleRequest =
+    RawRest.asHandleRequest(real)
+}
+
+/**
+ * Like [[RestServerApiImplCompanion]] additionally materializes [[OpenApiMetadata]] for the class.
+ */
+abstract class RestServerOpenApiImplCompanion[Implicits, Real](protected val implicits: Implicits)(
+  implicit inst: MacroInstances[Implicits, OpenApiServerImplInstances[Real]]
+) {
+  implicit final lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
+  implicit final lazy val restAsRaw: RawRest.AsRawRpc[Real] = inst(implicits, this).asRaw
+  implicit final lazy val openapiMetadata: OpenApiMetadata[Real] = inst(implicits, this).openapiMetadata
+
+  final def asHandleRequest(real: Real): RawRest.HandleRequest =
+    RawRest.asHandleRequest(real)
 }

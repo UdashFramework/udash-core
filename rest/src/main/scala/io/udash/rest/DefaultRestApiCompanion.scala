@@ -23,11 +23,15 @@ abstract class DefaultRestServerApiCompanion[Real](implicit
 ) extends RestServerOpenApiCompanion[DefaultRestImplicits, Real](DefaultRestImplicits)
 
 /**
-  * Base class for companions of REST API traits used for both REST clients and servers.
-  * Injects `Future` as the wrapper for asynchronous responses and `GenCodec`/`GenKeyCodec` based serialization
-  * for parameters and responses.
-  * Also, forces derivation of [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
-  */
+ * Base class for companions of REST API traits used for both REST clients and servers.
+ * Injects `Future` as the wrapper for asynchronous responses and `GenCodec`/`GenKeyCodec` based serialization
+ * for parameters and responses.
+ * Also, forces derivation of [[io.udash.rest.openapi.OpenApiMetadata OpenApiMetadata]].
+ */
 abstract class DefaultRestApiCompanion[Real](implicit
   inst: MacroInstances[DefaultRestImplicits, OpenApiFullInstances[Real]]
 ) extends RestOpenApiCompanion[DefaultRestImplicits, Real](DefaultRestImplicits)
+
+abstract class DefaultRestServerApiImplCompanion[Real](implicit
+  inst: MacroInstances[DefaultRestImplicits, OpenApiServerImplInstances[Real]]
+) extends RestServerOpenApiImplCompanion[DefaultRestImplicits, Real](DefaultRestImplicits)

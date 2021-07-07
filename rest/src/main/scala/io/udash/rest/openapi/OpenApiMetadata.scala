@@ -6,6 +6,7 @@ import com.avsystem.commons.annotation.bincompat
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import com.avsystem.commons.serialization.optionalParam
+import io.udash.macros.RestMacros
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.raw._
 import io.udash.rest.{Header => HeaderAnnot, _}
@@ -104,7 +105,9 @@ final case class OpenApiMetadata[T](
     )
   }
 }
-object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata]
+object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata] {
+  def materializeForImpl[Real]: OpenApiMetadata[Real] = macro RestMacros.materializeImplOpenApiMetadata[Real]
+}
 
 final case class PathOperation(
   path: String,
