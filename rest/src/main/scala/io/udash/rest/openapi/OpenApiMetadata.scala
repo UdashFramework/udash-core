@@ -6,6 +6,7 @@ import com.avsystem.commons.annotation.bincompat
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import com.avsystem.commons.serialization.optionalParam
+import io.udash.macros.RestMacros
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.raw._
 import io.udash.rest.{Header => HeaderAnnot, _}
@@ -104,7 +105,15 @@ final case class OpenApiMetadata[T](
     )
   }
 }
-object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata]
+object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata] {
+  /**
+   * Materializes [[OpenApiMetadata]] for an arbitrary type - usually a class that implements REST API directly,
+   * without a base trait. All public methods of this type are scanned and interpreted as REST methods
+   * (as opposed to REST traits which only have their abstract methods scanned).
+   * You can exclude methods using the [[com.avsystem.commons.meta.ignore ignore]] annotation.
+   */
+  def materializeForImpl[Real]: OpenApiMetadata[Real] = macro RestMacros.materializeImplOpenApiMetadata[Real]
+}
 
 final case class PathOperation(
   path: String,

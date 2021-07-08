@@ -5,6 +5,7 @@ package raw
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
+import io.udash.macros.RestMacros
 import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.RestMetadata.ResolutionTrie
 
@@ -111,6 +112,12 @@ final case class RestMetadata[T](
     resolutionTrie.resolvePath(this, Nil, Nil, path).toList
 }
 object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
+  /**
+   * Materializes [[RestMetadata]] for an arbitrary type rather than a trait.
+   * Scans all public methods instead of just abstract methods.
+   */
+  def materializeForImpl[Real]: RestMetadata[Real] = macro RestMacros.materializeImplMetadata[Real]
+
   private class ResolutionTrie(methods: List[(List[PathPatternElement], RestMethodMetadata[_])]) {
     private val named: Map[PlainValue, ResolutionTrie] = methods.iterator
       .collect { case (PathName(pv) :: tail, method) => (pv, (tail, method)) }
