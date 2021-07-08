@@ -138,7 +138,7 @@ abstract class RestServerApiImplCompanion[Implicits, Real](protected val implici
 }
 
 /**
- * Like [[RestServerApiImplCompanion]] additionally materializes [[OpenApiMetadata]] for the class.
+ * Like [[RestServerApiImplCompanion]] but additionally materializes [[OpenApiMetadata]] for the class.
  */
 abstract class RestServerOpenApiImplCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiServerImplInstances[Real]]
