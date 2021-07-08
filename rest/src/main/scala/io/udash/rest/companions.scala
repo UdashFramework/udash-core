@@ -122,7 +122,7 @@ abstract class DefaultPolyRestApiCompanion[T[_[_]]](implicit
 }
 
 /**
- * Like [[RestServerApiCompanion]] but the [[Real]] type is supposed to be a class with REST methods
+ * Like [[RestServerApiCompanion]] but the `Real` type is supposed to be a class with REST methods
  * already implemented - as opposed to a trait with abstract methods that needs separate implementation.
  * All public methods of this class - abstract or concrete - will be interpreted as REST methods
  * (unless annotated with [[com.avsystem.commons.meta.ignore ignore]]).
@@ -138,7 +138,7 @@ abstract class RestServerApiImplCompanion[Implicits, Real](protected val implici
 }
 
 /**
- * Like [[RestServerApiImplCompanion]] but additionally materializes [[OpenApiMetadata]] for the class.
+ * Like [[RestServerApiImplCompanion]] but additionally materializes `OpenApiMetadata` for the class.
  */
 abstract class RestServerOpenApiImplCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, OpenApiServerImplInstances[Real]]
