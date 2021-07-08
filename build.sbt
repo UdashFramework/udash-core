@@ -89,11 +89,11 @@ val commonSettings = Seq(
     ) else Seq.empty
   },
   moduleName := "udash-" + moduleName.value,
+  Compile / doc / sources := Seq.empty,
   Compile / ideOutputDirectory := Some(target.value.getParentFile / "out/production"),
   Test / ideOutputDirectory := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
-  autoAPIMappings := true
 ) ++ deploymentConfiguration
 
 val commonJsSettings = commonSettings ++ Seq(
