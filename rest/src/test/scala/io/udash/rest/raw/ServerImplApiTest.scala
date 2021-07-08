@@ -18,13 +18,23 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
     assert(promise.future.futureValue == response)
   }
 
-  test("simple call") {
+  test("simple GET call") {
     val params = RestParameters(
       path = PlainValue.decodePath("/thingy"),
       query = Mapping.create("param" -> PlainValue("42"))
     )
     val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"41\"")))
+    assertRawExchange(request, response)
+  }
+
+  test("subapi POST call") {
+    val params = RestParameters(
+      path = PlainValue.decodePath("/subapi/yeet"),
+    )
+    val body = HttpBody.createJsonBody(Mapping.create("data" -> JsonValue(JsonStringOutput.write("foo"))))
+    val request = RestRequest(HttpMethod.POST, params, body)
+    val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"yeet foo\"")))
     assertRawExchange(request, response)
   }
 
@@ -40,6 +50,41 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
         |    "version": "0.1"
         |  },
         |  "paths": {
+        |    "/subapi/yeet": {
+        |      "post": {
+        |        "operationId": "subapi_yeet",
+        |        "requestBody": {
+        |          "content": {
+        |            "application/json": {
+        |              "schema": {
+        |                "type": "object",
+        |                "properties": {
+        |                  "data": {
+        |                    "type": "string"
+        |                  }
+        |                },
+        |                "required": [
+        |                  "data"
+        |                ]
+        |              }
+        |            }
+        |          },
+        |          "required": true
+        |        },
+        |        "responses": {
+        |          "200": {
+        |            "description": "Success",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "type": "string"
+        |                }
+        |              }
+        |            }
+        |          }
+        |        }
+        |      }
+        |    },
         |    "/thingy": {
         |      "get": {
         |        "operationId": "thingy",
