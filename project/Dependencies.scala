@@ -39,10 +39,8 @@ object Dependencies {
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.9"
-  val bootstrapVersion = "3.3.7-1"
-  val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
-  val bootstrap4DatepickerVersion = "5.1.2"
+  val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
 
   val seleniumVersion = "3.141.59"
