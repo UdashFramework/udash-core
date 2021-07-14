@@ -36,8 +36,8 @@ object RepeatDemo extends AutoDemo {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.css.CssView._
-    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source.linesIterator)
+    (div(id := "repeat-demo", GuideStyles.frame)(rendered), source)
   }
 }

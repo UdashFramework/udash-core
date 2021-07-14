@@ -26,8 +26,7 @@ object JumbotronDemo extends AutoDemo with CssView {
     ))
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (div(GuideStyles.frame)(rendered), source.linesIterator)
-  }
+  override protected def demoWithSource(): (Modifier, String) =
+    (div(GuideStyles.frame)(rendered), source)
 }
 

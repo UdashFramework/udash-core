@@ -38,14 +38,14 @@ object ProduceDemo extends AutoDemo {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.css.CssView._
     (
       div(
         id := "produce-demo",
         GuideStyles.frame
       )(rendered),
-      source.linesIterator
+      source
     )
   }
 }

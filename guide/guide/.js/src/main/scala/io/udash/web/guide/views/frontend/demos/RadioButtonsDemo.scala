@@ -41,18 +41,20 @@ object RadioButtonsDemo extends AutoDemo {
     )
 
     radioButtons.render
-
     (radioButtons, radioButtons)
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+    (
+      div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(containerFluid)(
         div(Grid.row)(firstRadioButtons),
         div(Grid.row)(secondRadioButtons)
       )
-    ), source.linesIterator.take(source.linesIterator.size - 2))
+    ),
+      source.linesWithSeparators.toList.view.dropRight(1).mkString
+    )
   }
 }

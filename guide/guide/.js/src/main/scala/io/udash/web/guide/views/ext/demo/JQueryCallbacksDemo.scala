@@ -55,14 +55,13 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) =
     (
       div(
         id := "jquery-callbacks-demo",
         GuideStyles.frame,
         GuideStyles.useBootstrap
       )(rendered),
-      source.linesIterator
+      source
     )
-  }
 }

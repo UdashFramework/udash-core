@@ -21,13 +21,12 @@ object BindAttributeDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) =
     (
       div(
         id := "bind-attr-demo",
         GuideStyles.frame
       )(rendered),
-      source.linesIterator
+      source
     )
-  }
 }

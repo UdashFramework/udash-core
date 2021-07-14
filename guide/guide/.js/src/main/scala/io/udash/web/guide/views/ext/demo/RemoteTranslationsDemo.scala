@@ -56,7 +56,7 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) =
     (
       div(
         BootstrapUtils.wellStyles,
@@ -64,7 +64,6 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
         GuideStyles.frame,
         GuideStyles.useBootstrap
       )(rendered),
-      source.linesIterator
+      source
     )
-  }
 }

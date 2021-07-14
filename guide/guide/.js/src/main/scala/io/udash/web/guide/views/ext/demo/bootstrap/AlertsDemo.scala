@@ -62,9 +62,9 @@ object AlertsDemo extends AutoDemo {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.css.CssView._
-    (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
 

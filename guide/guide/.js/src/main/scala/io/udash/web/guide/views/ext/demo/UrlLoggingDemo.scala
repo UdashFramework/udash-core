@@ -18,13 +18,12 @@ object UrlLoggingDemo extends AutoDemo with CssView {
     def log(url: String, referrer: Option[String]): Unit = {
       if (enabled.get) history.append((url, referrer))
     }
-
     (enabled, history, log _)
   }.withSourceCode
 
   def log(url: String, referrer: Option[String]): Unit = add(url, referrer)
 
-  override protected final def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected final def demoWithSource(): (Modifier, String) = {
     import io.udash._
     val rendered =
       span(GuideStyles.frame, GuideStyles.useBootstrap)(
@@ -64,6 +63,6 @@ object UrlLoggingDemo extends AutoDemo with CssView {
         )
       ).render
 
-    (rendered, source.linesIterator.take(source.linesIterator.size - 2))
+    (rendered, source.linesWithSeparators.toList.view.dropRight(1).mkString)
   }
 }

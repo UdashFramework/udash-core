@@ -46,11 +46,10 @@ object CheckboxDemo extends AutoDemo {
     )
 
     checkboxes.render
-
     (checkboxes, checkboxes)
     }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
     (
@@ -62,6 +61,8 @@ object CheckboxDemo extends AutoDemo {
         form(containerFluid)(
           firstCheckboxes, br, secondCheckboxes
         )
-      ), source.linesIterator.take(source.linesIterator.size - 2))
+      ),
+      source.linesWithSeparators.toList.view.dropRight(1).mkString
+    )
   }
 }

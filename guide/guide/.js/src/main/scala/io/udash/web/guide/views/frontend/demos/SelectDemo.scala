@@ -20,10 +20,10 @@ object SelectDemo extends AutoDemo {
 
     val favoriteFruit = Property[Fruit](Apple)
     val favoriteFruitString = favoriteFruit.bitransform(_.toString) {
-        case "Apple" => Apple
-        case "Orange" => Orange
-        case "Banana" => Banana
-      }
+      case "Apple" => Apple
+      case "Orange" => Orange
+      case "Banana" => Banana
+    }
 
     def select: UdashInputGroup = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),
@@ -36,18 +36,20 @@ object SelectDemo extends AutoDemo {
     )
 
     select.render
-
     (select, select)
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        div(Grid.row)(firstSelect),
-        div(Grid.row)(secondSelect)
-      )
-    ), source.linesIterator.take(source.linesIterator.size - 2))
+    (
+      div(id := "select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+        form(containerFluid)(
+          div(Grid.row)(firstSelect),
+          div(Grid.row)(secondSelect)
+        )
+      ),
+      source.linesWithSeparators.toList.view.dropRight(1).mkString
+    )
   }
 }
