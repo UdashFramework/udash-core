@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -53,7 +54,7 @@ object TooltipsDemo extends AutoDemo {
       container = Some(s"#$tooltipContainerId")
     )(label3)
 
-    val button = UdashButton()("Toggle tooltip")
+    val button = UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
     div(tooltipContainerId)(

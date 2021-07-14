@@ -20,7 +20,7 @@ object IconsDemo extends AutoDemo {
           UdashIcons.FontAwesome.Solid.alignCenter,
           UdashIcons.FontAwesome.Solid.alignRight,
           UdashIcons.FontAwesome.Solid.alignJustify
-        ).map(icon => UdashButton()(i(icon)).render): _*,
+        ).map(icon => UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))(i(icon)).render): _*,
       ).render,
       UdashButtonGroup()(
         Seq(

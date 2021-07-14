@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -24,10 +25,8 @@ object SimpleCollapseDemo extends AutoDemo with CssView {
     )
     collapse.listen { case ev => events.append(ev) }
 
-    val toggleButton = UdashButton(
-      buttonStyle = Color.Primary.toProperty
-    )(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))
-    val openAndCloseButton = UdashButton()(
+    val toggleButton = UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))
+    val openAndCloseButton = UdashButton(options = UdashButtonOptions(color = Color.Secondary))(
       "Open and close after 2 seconds..."
     )
     openAndCloseButton.listen { case _ =>
