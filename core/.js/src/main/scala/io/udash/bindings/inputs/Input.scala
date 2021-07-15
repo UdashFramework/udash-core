@@ -56,3 +56,13 @@ object PasswordInput extends Input("password")
 
 /** Number input. (HTML5) */
 object NumberInput extends Input("number")
+
+/** Datetime input (Doesn't work on firefox - falls back to text input). (HTML5) */
+object Datetimepicker extends Input("datetime-local")
+
+/** Date input. (HTML5) */
+object Datepicker extends Input("date")
+
+/** Time input. (HTML5) */
+object Timepicker extends Input("time")
+
