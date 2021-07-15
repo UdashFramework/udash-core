@@ -1,5 +1,8 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.{UdashButton, UdashButtonOptions}
+import io.udash.bootstrap.button.UdashButton.ButtonTag
+import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -36,11 +39,24 @@ object NavigationDemo extends AutoDemo {
           case MenuContainer(name, children) =>
             val dropdown = UdashDropdown(children.toSeqProperty)(
               (item, _) => linkFactory(item.get),
-              _ => span(name, " ")
+              _ => span(name, " "),
+              buttonFactory = UdashButton(
+                options = UdashButtonOptions(
+                  tag = ButtonTag.Anchor,
+                  color = BootstrapStyles.Color.Link,
+                  customModifiers = Seq(Navigation.link)
+                )
+              )
             ).render
-            dropdown.firstElementChild.applyTags(Navigation.link)
             dropdown
-          case link: MenuLink => linkFactory(link, dropdown = false)
+          case link: MenuLink => UdashButton(
+            options = UdashButtonOptions(
+              tag = ButtonTag.Anchor,
+              color = BootstrapStyles.Color.Link,
+              href = link.state.url.opt,
+              customModifiers = Seq(Navigation.link)
+            )
+          )(_ => link.name).render
         })).render,
         isDropdown = _.transform {
           case _: MenuContainer => true

@@ -78,20 +78,17 @@ class ExceptionsDemoComponent extends Component {
 
     private val exceptionButtonDisabled = Property(false)
     private val exceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = exceptionButtonDisabled,
       componentId = ComponentId("exception-demo")
     )(_ => "Call registered exception!")
 
     private val translatableExceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = exceptionButtonDisabled,
       componentId = ComponentId("translatable-exception-demo")
     )(_ => "Call registered translatable exception!")
 
     private val unknownExceptionButtonDisabled = Property(false)
     private val unknownExceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = unknownExceptionButtonDisabled,
       componentId = ComponentId("unknown-exception-demo")
     )(_ => "Call unknown exception!")

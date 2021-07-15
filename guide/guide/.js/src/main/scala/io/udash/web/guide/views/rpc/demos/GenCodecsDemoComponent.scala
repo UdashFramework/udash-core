@@ -106,7 +106,6 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
 
     val loadDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = loadDisabled,
       componentId = ComponentId("gencodec-demo")
     )(_ => "Send request")

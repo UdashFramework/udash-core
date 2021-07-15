@@ -1,6 +1,8 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.bootstrap.form.{Invalid, Valid}
+import io.udash.bootstrap.utils.BootstrapStyles.Color
 import io.udash.css.CssView
 import io.udash.properties.{Blank, HasModelPropertyCreator}
 import io.udash.web.guide.demos.AutoDemo
@@ -93,7 +95,7 @@ object SimpleFormDemo extends AutoDemo with CssView {
           inline = true.toProperty,
           validationTrigger = UdashForm.ValidationTrigger.None
         )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
-        factory.disabled()(_ => UdashButton()("Send").render)
+        factory.disabled()(_ => UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Send").render)
       ))
     ).render
   }.withSourceCode

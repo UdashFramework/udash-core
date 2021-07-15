@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -8,7 +9,6 @@ import scalatags.JsDom.all._
 object JumbotronDemo extends AutoDemo with CssView {
 
   private val (rendered, source) = {
-    import io.udash._
     import io.udash.bootstrap.button.UdashButton
     import io.udash.bootstrap.jumbotron.UdashJumbotron
     import io.udash.bootstrap.utils.BootstrapStyles._
@@ -20,8 +20,11 @@ object JumbotronDemo extends AutoDemo with CssView {
         "one component to bring them all and in the darkness bind them."
       ),
       UdashButton(
-        buttonStyle = Color.Info.toProperty,
-        size = Some(Size.Large).toProperty
+        options = UdashButtonOptions(
+
+          color = Color.Info,
+          size = Size.Large.opt
+        )
       )(_ => "Click")
     ))
   }.withSourceCode

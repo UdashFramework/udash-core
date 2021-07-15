@@ -87,7 +87,6 @@ object IntroFormDemo extends AutoDemo {
 
       // Button from Udash Bootstrap wrapper
       private val randomizeButton = UdashButton(
-        buttonStyle = BootstrapStyles.Color.Primary.toProperty,
         componentId = ComponentId("randomize")
       )(_ => "Randomize")
 

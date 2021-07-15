@@ -43,11 +43,11 @@ class PingPongPushDemoComponent extends Component {
   }
 
   class PingPongPushDemoView(model: Property[Int], presenter: PingPongPushDemoPresenter) {
+
     import JsDom.all._
 
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = pingDisabled,
       componentId = ComponentId("ping-pong-push-demo")
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))

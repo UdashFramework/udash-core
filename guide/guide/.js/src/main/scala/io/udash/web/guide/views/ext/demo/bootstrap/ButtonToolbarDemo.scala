@@ -22,7 +22,7 @@ object ButtonToolbarDemo extends AutoDemo with CssView {
           size = Some(Size.Large).toProperty[Option[Size]]
         ) {
           case (element, nested) =>
-            val btn = UdashButton()(_ => nested(bind(element)))
+            val btn = UdashButton(options = UdashButtonOptions(color = Color.Secondary))(_ => nested(bind(element)))
             nested(btn)
             btn.render
         }

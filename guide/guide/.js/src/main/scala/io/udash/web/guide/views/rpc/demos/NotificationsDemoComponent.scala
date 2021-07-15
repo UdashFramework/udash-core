@@ -68,7 +68,6 @@ class NotificationsDemoComponent extends Component {
 
     val registerDisabled = Property(false)
     val registerButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = registerDisabled,
       componentId = ComponentId("notifications-demo")
     )(nested => nested(produce(model.subProp(_.registered))(

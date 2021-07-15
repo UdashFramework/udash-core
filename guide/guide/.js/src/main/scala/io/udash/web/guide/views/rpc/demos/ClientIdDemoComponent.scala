@@ -39,7 +39,6 @@ class ClientIdDemoComponent extends Component {
 
     val loadIdButtonDisabled = Property(false)
     val loadIdButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = loadIdButtonDisabled,
       componentId = ComponentId("client-id-demo")
     )(_ => "Load client id")
