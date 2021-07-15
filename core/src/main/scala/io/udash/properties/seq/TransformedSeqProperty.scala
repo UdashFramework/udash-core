@@ -6,11 +6,11 @@ import io.udash.utils.CrossCollections
 
 private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B
-) extends ForwarderWithLocalCopy[A, B, ElemType, OrigType] {
+) extends ForwarderReadableSeqProperty[A, B, ElemType, OrigType] {
 
-  override protected def loadFromOrigin(): BSeq[B] = origin.get.map(transformer)
-  override protected def elementsFromOrigin(): BSeq[ElemType] = origin.elemProperties.map(transformElement)
-  override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Patch[ElemType] = {
+  override protected def getFromOrigin(): BSeq[B] = origin.get.map(transformer)
+  override protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType] = elemProperties.map(transformElement)
+  override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]] = {
     val transPatch = Patch[ElemType](
       patch.idx,
       transformedElements.slice(patch.idx, patch.idx + patch.removed.size).toSeq,
@@ -18,7 +18,7 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
     )
 
     CrossCollections.replaceSeq(transformedElements, patch.idx, patch.removed.length, transPatch.added)
-    transPatch
+    transPatch.opt
   }
 
   protected def transformElement(el: OrigType): ElemType =

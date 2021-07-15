@@ -1,8 +1,8 @@
 package io.udash.properties
 
 import com.avsystem.commons._
-import io.udash.properties.seq.DirectSeqPropertyImpl
-import io.udash.properties.single.{CastableProperty, DirectPropertyImpl, ReadableProperty}
+import io.udash.properties.seq.DirectSeqProperty
+import io.udash.properties.single.{CastableProperty, DirectProperty, ReadableProperty}
 
 import scala.annotation.implicitNotFound
 import scala.collection.compat.Factory
@@ -46,7 +46,7 @@ object PropertyCreator extends PropertyCreatorImplicits {
 
 final class SinglePropertyCreator[T] extends PropertyCreator[T] {
   protected def create(prt: ReadableProperty[_]): CastableProperty[T] =
-    new DirectPropertyImpl[T](prt)
+    new DirectProperty[T](prt)
 
   override def newImmutableProperty(value: T): ImmutableProperty[T] = new ImmutableProperty[T](value)
 }
@@ -54,7 +54,7 @@ final class SinglePropertyCreator[T] extends PropertyCreator[T] {
 final class SeqPropertyCreator[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](implicit fac: Factory[A, SeqTpe[A]])
   extends PropertyCreator[SeqTpe[A]] {
   protected def create(parent: ReadableProperty[_]): CastableProperty[SeqTpe[A]] =
-    new DirectSeqPropertyImpl[A, SeqTpe](parent).asInstanceOf[CastableProperty[SeqTpe[A]]]
+    new DirectSeqProperty[A, SeqTpe](parent).asInstanceOf[CastableProperty[SeqTpe[A]]]
 
   override def newImmutableProperty(value: SeqTpe[A]): ImmutableProperty[SeqTpe[A]] =
     new ImmutableSeqProperty[A, SeqTpe](value).asInstanceOf[ImmutableProperty[SeqTpe[A]]]
