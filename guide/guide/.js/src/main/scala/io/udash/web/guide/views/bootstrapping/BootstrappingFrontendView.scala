@@ -6,6 +6,7 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import scalatags.JsDom.Modifier
@@ -13,15 +14,14 @@ import scalatags.JsDom.Modifier
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
 class BootstrappingFrontendView extends View with CssView {
-
   import com.avsystem.commons.SharedExtensions.universalOps
 
-  private val statesSource: String = {
+  private val statesSource = {
     import io.udash._
 
     sealed abstract class RoutingState(
       val parentState: Option[RoutingState]
-    )  extends State {
+    ) extends State {
       override type HierarchyRoot = RoutingState
     }
 
@@ -57,7 +57,7 @@ class BootstrappingFrontendView extends View with CssView {
         "A state can contain other ", i("State"), "s. ",
         "For example:"
       ),
-      CodeBlock.lines(statesSource.linesIterator)(GuideStyles),
+      AutoDemo.snippet(statesSource),
       ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
       h3("Routing system"),
       p(

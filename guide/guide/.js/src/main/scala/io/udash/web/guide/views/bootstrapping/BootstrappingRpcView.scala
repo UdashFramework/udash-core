@@ -2,16 +2,42 @@ package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
 import io.udash.css.CssView
-import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
-import scalatags.JsDom
 
 case object BootstrappingRpcViewFactory extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
 class BootstrappingRpcView extends View with CssView {
+
   import Context._
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
+
+  private val clientRpcSource = {
+    import io.udash.rpc._
+
+    trait MainClientRPC {
+      def pong(id: Int): Unit
+    }
+
+    object MainClientRPC
+      extends DefaultClientRpcCompanion[MainClientRPC]
+  }.sourceCode
+
+  private val serverRpcSource = {
+    import io.udash.rpc._
+
+    import scala.concurrent.Future
+
+    trait MainServerRPC {
+      def ping(id: Int): Unit
+      def hello(name: String): Future[String]
+    }
+
+    object MainServerRPC
+      extends DefaultServerRpcCompanion[MainServerRPC]
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h2("Bootstrapping RPC interfaces"),
@@ -46,7 +72,7 @@ class BootstrappingRpcView extends View with CssView {
     ),
     p(
       "RPC interfaces may also have non-abstract members - these will be invoked locally. However, they may invoke " +
-      "remote members in their implementations."
+        "remote members in their implementations."
     ),
     p(
       "Client RPC is basically the same as standard RPC interface, but it cannot contain abstract methods returning Future[T]. ",
@@ -63,26 +89,8 @@ class BootstrappingRpcView extends View with CssView {
     ),
     h4("Examples"),
     p("Example of RPC interfaces:"),
-    CodeBlock(
-      """import io.udash.rpc._
-        |
-        |trait MainClientRPC {
-        |  def pong(id: Int): Unit
-        |}
-        |
-        |object MainClientRPC
-        |  extends DefaultClientRpcCompanion[MainClientRPC]""".stripMargin)(GuideStyles),
-    CodeBlock(
-      """import io.udash.rpc._
-        |import scala.concurrent.Future
-        |
-        |trait MainServerRPC {
-        |  def ping(id: Int): Unit
-        |  def hello(name: String): Future[String]
-        |}
-        |
-        |object MainServerRPC
-        |  extends DefaultServerRpcCompanion[MainServerRPC]""".stripMargin)(GuideStyles),
+    AutoDemo.snippet(clientRpcSource),
+    AutoDemo.snippet(serverRpcSource),
     h2("What's next?"),
     p(
       "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),

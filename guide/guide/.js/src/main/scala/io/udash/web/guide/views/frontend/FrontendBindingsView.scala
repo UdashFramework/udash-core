@@ -3,22 +3,40 @@ package io.udash.web.guide.views.frontend
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.frontend.demos._
 import io.udash.web.guide.{Context, _}
-import scalatags.JsDom
 
 case object FrontendBindingsViewFactory extends StaticViewFactory[FrontendBindingsState.type](() => new FrontendBindingsView)
 
 class FrontendBindingsView extends View with CssView {
+
   import Context._
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
 
   private val (bindDemo, bindSnippet) = BindDemo.demoWithSnippet()
   private val (produceDemo, produceSnippet) = ProduceDemo.demoWithSnippet()
   private val (repeatDemo, repeatSnippet) = RepeatDemo.demoWithSnippet()
   private val (showIfDemo, showIfSnippet) = ShowIfDemo.demoWithSnippet()
   private val (bindAttributeDemo, bindAttributeSnippet) = BindAttributeDemo.demoWithSnippet()
+
+  private val bindingSource = {
+    val p = Property("A")
+    val p2 = Property("a")
+    produce(p) { v =>
+      div(v, bind(p2)).render
+    }
+  }.sourceCode
+
+  private val nestedBindingSource = {
+    val p = Property("A")
+    val p2 = Property("a")
+    produceWithNested(p) { (v, nested) =>
+      div(v, nested(bind(p2))).render
+    }
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h2("Property Bindings"),
@@ -27,9 +45,7 @@ class FrontendBindingsView extends View with CssView {
       "What really distinguishes Udash from other frameworks is the fact that it is type-safe."
     ),
     p("Udash provides many ways to bind properties to Scalatags templates. To use them you have to add this import in your code:"),
-    CodeBlock(
-      """import io.udash._""".stripMargin
-    )(GuideStyles),
+    CodeBlock("import io.udash._")(GuideStyles),
     p("Let's briefly introduce all these methods:"),
     ul(GuideStyles.defaultList)(
       li(i("bind"), " - the simplest way to bind a property to a template, it uses the ", i(".toString"), " method to get the string which should be displayed."),
@@ -52,7 +68,7 @@ class FrontendBindingsView extends View with CssView {
     h3("repeat"),
     repeatSnippet,
     repeatDemo,
-    p("Notice that the version of ", i("produce"), " for ", i("SeqProperty"),  ", ",
+    p("Notice that the version of ", i("produce"), " for ", i("SeqProperty"), ", ",
       "redraws the whole sequence every time - it is ok when the sequence is small. The ", i("repeat"),
       " method updates only changed elements of the sequence. To make it easier to notice, every added element is highlighted. "
     ),
@@ -73,13 +89,7 @@ class FrontendBindingsView extends View with CssView {
     bindAttributeDemo,
     h2("Nested bindings"),
     p("Sometimes you want to create property binding inside another binding builder. For example:"),
-    CodeBlock(
-      """val p = Property("A")
-        |val p2 = Property("a")
-        |produce(p) { v =>
-        |  div(v, bind(p2)).render
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(bindingSource),
     p(
       "When you change ", i("p"), " value, the builder creates a new element with a new binding inside, but unfortunately ",
       "the old one is still working. There is no way to kill or reuse the old binding, so it will be working as long ",
@@ -90,13 +100,7 @@ class FrontendBindingsView extends View with CssView {
       i("produceWithNested"), " and ", i("repeatWithNested"), ". These bindings provide not only the property value, ",
       "but also the interceptor which prepares the nested binding to be removed when it's no longer needed."
     ),
-    CodeBlock(
-      """val p = Property("A")
-        |val p2 = Property("a")
-        |produceWithNested(p) { (v, nested) =>
-        |  div(v, nested(bind(p2))).render
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(nestedBindingSource),
     p("Each binding method returns a ", i("Binding"), " which enables manual management of the binding lifecycle. "),
     h2("What's next?"),
     p(

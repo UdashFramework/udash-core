@@ -1,9 +1,8 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
-import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
+import io.udash.web.commons.components.ForceBootstrap
 import io.udash.web.guide._
-import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.views.frontend.demos._
 import scalatags.JsDom
@@ -11,6 +10,7 @@ import scalatags.JsDom
 case object FrontendFilesViewFactory extends StaticViewFactory[FrontendFilesState.type](() => new FrontendFilesView)
 
 class FrontendFilesView extends View {
+
   import JsDom.all._
   import io.udash.web.guide.Context._
 
@@ -24,41 +24,17 @@ class FrontendFilesView extends View {
     ),
     p("You can find a working demo application in the ", a(href := References.UdashFilesDemoRepo, target := "_blank")("Udash Demos"), " repositiory."),
     h3("Frontend forms"),
-    p(i("FileService"), " is an object that allows to convert ", i("Array[Byte]")," to URL, save it as file from frontend ",
+    p(i("FileService"), " is an object that allows to convert ", i("Array[Byte]"), " to URL, save it as file from frontend ",
       " and asynchronously convert ", i("File"), " to ", i("Future[Array[Byte]]"), "."),
     p(i("FileInput"), " is the file HTML input wrapper providing a property containing selected files. "),
     fileInputSnippet,
     p("Take a look at the following live demo:"),
     ForceBootstrap(fileInputDemo),
-    p(i("FileUploader"), " is a class taking the server URL as a constructor argument and containing two methods:"),
-    CodeBlock(
-      """def upload(input: html.Input): ReadableModelProperty[FileUploadModel]
-        |def upload(
-        |  fieldName: String, files: Seq[File],
-        |  extraData: Map[Any, Any]
-        |): ReadableModelProperty[FileUploadModel]""".stripMargin
-    )(GuideStyles),
-    p("The first one takes a file HTML input and uploads its content to the server. The second takes a field name, a sequence of files and request's extra data."),
-    p("Both methods return property containing ", i("FileUploadModel"), " which provides information about the upload progress."),
-    CodeBlock(
-      """trait FileUploadModel {
-        |  def files: Seq[File]
-        |  def state: FileUploadState
-        |  def bytesSent: Double
-        |  def bytesTotal: Double
-        |}
-        |
-        |sealed trait FileUploadState
-        |object FileUploadState {
-        |  case object NotStarted extends FileUploadState
-        |  case object InProgress extends FileUploadState
-        |
-        |  sealed trait Done extends FileUploadState
-        |  case object Completed extends Done
-        |  case object Failed extends Done
-        |  case object Cancelled extends Done
-        |}""".stripMargin
-    )(GuideStyles),
+    p(
+      i("FileUploader"), " facilitates sending files to the server.",
+      "There are helpers for uploading file specified via an HTML input or a sequence of files including additional data."
+    ),
+    p("All methods return a property containing ", i("FileUploadModel"), ", which provides information about the upload progress."),
     h3("Backend support"),
     p("The ", i("udash-rpc"), " module contains two servlet templates: ", i("FileUploadServlet"), " and ", i("FileDownloadServlet"), "."),
     p(

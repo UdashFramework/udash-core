@@ -10,7 +10,6 @@ import scalatags.JsDom
 
 case object BootstrapExtViewFactory extends StaticViewFactory[BootstrapExtState.type](() => new BootstrapExtView)
 
-
 class BootstrapExtView extends View {
   import JsDom.all._
 
@@ -54,9 +53,7 @@ class BootstrapExtView extends View {
     h1("Udash Bootstrap Components"),
     h2("First steps"),
     p("To start development with the Bootstrap wrapper add the following line in you frontend module dependencies: "),
-    CodeBlock(
-      s""""io.udash" %%% "udash-bootstrap4" % "${Versions.udashVersion}"""".stripMargin
-    )(GuideStyles),
+    CodeBlock(s""""io.udash" %%% "udash-bootstrap4" % "${Versions.udashVersion}"""")(GuideStyles),
     p("The wrapper provides a typed equivalent of the ", a(href := References.BootstrapHomepage, target := "_blank")("Twitter Bootstrap"), " API."),
     h2("Statics"),
     p(
