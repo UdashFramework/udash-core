@@ -16,7 +16,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
   private val producedElementsCount = js.Array[Int]()
-  private val nestedBindingsByProperty: MHashMap[E, js.Array[Binding]] = MHashMap.empty
+  private val nestedBindingsByProperty = js.Map.empty[E, js.Array[Binding]]
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
     super.nestedInterceptor(binding)
