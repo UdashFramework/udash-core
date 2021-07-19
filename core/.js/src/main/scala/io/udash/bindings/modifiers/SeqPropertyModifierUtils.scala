@@ -25,19 +25,14 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     }
   }
 
-  def clearPropertyAwareNestedInterceptor(p: E): Unit = {
+  def clearPropertyAwareNestedInterceptor(p: E): Unit =
     nestedBindingsByProperty.remove(p).foreach { bindings =>
       bindings.foreach(_.kill())
       bindings.length = 0
     }
-  }
 
-  //todo remove
-  @inline private def indexOf(nodes: NodeList, node: Node): Int = {
-    var i = 0
-    while (i < nodes.length && !nodes(i).eq(node)) i += 1
-    i
-  }
+  @inline private def indexOf(nodes: NodeList, node: Node): Int =
+    js.Dynamic.global.Array.prototype.slice.call(nodes).asInstanceOf[js.Array[Node]].indexOf(node)
 
   protected def handlePatch(root: Node)(patch: Patch[E]): Unit =
     if (patch.added.nonEmpty || patch.removed.nonEmpty) {
