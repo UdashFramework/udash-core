@@ -6,8 +6,6 @@ import io.udash.properties.single.ReadableProperty
 import io.udash.utils.Registration
 import org.scalajs.dom._
 
-import scala.scalajs.js
-
 private[bindings] trait ValueModifier[T] extends Binding with DOMManipulator {
 
   import Bindings._
@@ -30,12 +28,7 @@ private[bindings] trait ValueModifier[T] extends Binding with DOMManipulator {
           .filter(_.nonEmpty)
           .getOrElse(emptyStringNode())
 
-      elements = newEls.iterator.flatMap {
-        case fragment: DocumentFragment =>
-          //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
-          js.Dynamic.global.Array.prototype.slice.call(fragment.childNodes).asInstanceOf[js.Array[Node]].iterator
-        case node => Iterator(node)
-      }.toSeq
+      elements = defragment(newEls)
 
       replace(t)(oldEls, elements)
     }
