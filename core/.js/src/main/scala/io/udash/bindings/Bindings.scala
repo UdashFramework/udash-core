@@ -23,6 +23,9 @@ trait Bindings {
   final val TextArea = inputs.TextArea
   final val TextInput = inputs.TextInput
   final val RangeInput = inputs.RangeInput
+  final val DateTimeLocalInput = inputs.DateTimeLocalInput
+  final val DateInput = inputs.DateInput
+  final val TimeInput = inputs.TimeInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
@@ -44,12 +47,12 @@ trait Bindings {
   }
 
   /**
-   * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
-   * If property value is null, empty text node will be added.
-   *
-   * @param property `Property` to bind.
-   * @return property binding.
-   */
+    * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
+    * If property value is null, empty text node will be added.
+    *
+    * @param property `Property` to bind.
+    * @return property binding.
+    */
   def bind(property: ReadableProperty[_]): Binding =
     new SimplePropertyModifier(property)
 
@@ -117,18 +120,18 @@ trait Bindings {
     produce(property, DOMManipulator.DefaultElementReplace, checkNull)(builder)
 
   /**
-   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * If property value is null, empty text node will be added as placeholder.
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Element` builder which will be used to create HTML element.
-   * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
-   *                              if it is false, then null value has to be handled by builder.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element.
+    * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+    *                              if it is false, then null value has to be handled by builder.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def produce[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
     (builder: T => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
@@ -363,11 +366,11 @@ object Bindings extends Bindings {
       else AttrPair(attr, value, ev)
 
     /**
-     * Use this to add more events listeners to an attribute (:= always overrides previous binding).
-     * If callback returns true, other listeners which are queued will not be invoked.
-     * If callback returns false, next callback in the queue will be invoked.
-     * Results other than booleans are treated as false - they don't prevent event propagation.
-     */
+      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
+      * If callback returns true, other listeners which are queued will not be invoked.
+      * If callback returns false, next callback in the queue will be invoked.
+      * Results other than booleans are treated as false - they don't prevent event propagation.
+      */
     def :+=[T <: Event](callback: T => Any): Modifier[Element] =
       AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Any) => {
         val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
