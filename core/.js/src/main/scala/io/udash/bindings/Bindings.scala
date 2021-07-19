@@ -23,9 +23,9 @@ trait Bindings {
   final val TextArea = inputs.TextArea
   final val TextInput = inputs.TextInput
   final val RangeInput = inputs.RangeInput
-  final val DateTimeInput = inputs.DateTimepicker
-  final val DateInput = inputs.Datepicker
-  final val TimeInput = inputs.Timepicker
+  final val DateTimeLocalInput = inputs.DateTimeLocalInput
+  final val DateInput = inputs.DateInput
+  final val TimeInput = inputs.TimeInput
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
@@ -37,9 +37,9 @@ trait Bindings {
     document.createTextNode("")
 
   /**
-   * Renders component with provided timeout.
-   * It's useful to render heavy components after displaying the main view.
-   */
+    * Renders component with provided timeout.
+    * It's useful to render heavy components after displaying the main view.
+    */
   def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
     val el = document.createElement("div")
     t.appendChild(el)
@@ -47,223 +47,223 @@ trait Bindings {
   }
 
   /**
-   * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
-   * If property value is null, empty text node will be added.
-   *
-   * @param property `Property` to bind.
-   * @return property binding.
-   */
+    * Use it to bind value of property into DOM structure. Value of the property will be rendered as text node. (Using .toString method.)
+    * If property value is null, empty text node will be added.
+    *
+    * @param property `Property` to bind.
+    * @return property binding.
+    */
   def bind(property: ReadableProperty[_]): Binding =
     new SimplePropertyModifier(property)
 
   /**
-   * Shows provided DOM elements only if property value is `true`.
-   *
-   * @param property `Property` to check.
-   * @param elements `Element`s to show if property value is `true`.
-   * @return property binding.
-   */
+    * Shows provided DOM elements only if property value is `true`.
+    *
+    * @param property `Property` to check.
+    * @param elements `Element`s to show if property value is `true`.
+    * @return property binding.
+    */
   def showIf(property: ReadableProperty[Boolean])(elements: => Seq[Node]): Binding =
     showIfElse(property)(elements, Seq.empty)
 
   /**
-   * Shows provided DOM elements only if property value is `true`.
-   *
-   * @param property              `Property` to check.
-   * @param elements              `Element`s to show if property value is `true`.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Shows provided DOM elements only if property value is `true`.
+    *
+    * @param property              `Property` to check.
+    * @param elements              `Element`s to show if property value is `true`.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def showIf(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
     (elements: => Seq[Node]): Binding =
     showIfElse(property, customElementsReplace)(elements, Seq.empty)
 
   /**
-   * Switches provided DOM elements depending on property value.
-   *
-   * @param property     `Property` to check.
-   * @param elements     `Element`s to show if property value is `true`.
-   * @param elseElements `Element`s to show if property value is `false`.
-   * @return property binding.
-   */
+    * Switches provided DOM elements depending on property value.
+    *
+    * @param property     `Property` to check.
+    * @param elements     `Element`s to show if property value is `true`.
+    * @param elseElements `Element`s to show if property value is `false`.
+    * @return property binding.
+    */
   def showIfElse(property: ReadableProperty[Boolean])(elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
     produce(property)(if (_) elements else elseElements)
 
   /**
-   * Switches provided DOM elements depending on property value.
-   *
-   * @param property              `Property` to check.
-   * @param elements              `Element`s to show if property value is `true`.
-   * @param elseElements          `Element`s to show if property value is `false`.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Switches provided DOM elements depending on property value.
+    *
+    * @param property              `Property` to check.
+    * @param elements              `Element`s to show if property value is `true`.
+    * @param elseElements          `Element`s to show if property value is `false`.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def showIfElse(property: ReadableProperty[Boolean], customElementsReplace: DOMManipulator.ReplaceMethod)
     (elements: => Seq[Node], elseElements: => Seq[Node]): Binding =
     produce(property, customElementsReplace, checkNull = true)(if (_) elements else elseElements)
 
   /**
-   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * If property value is null, empty text node will be added as placeholder.
-   *
-   * @param property  `Property` to bind.
-   * @param builder   `Element` builder which will be used to create HTML element.
-   * @param checkNull if it is true, then null value of property will result in rendering empty text node.
-   *                  if it is false, then null value has to be handled by builder.
-   * @return property binding.
-   */
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.
+    *
+    * @param property  `Property` to bind.
+    * @param builder   `Element` builder which will be used to create HTML element.
+    * @param checkNull if it is true, then null value of property will result in rendering empty text node.
+    *                  if it is false, then null value has to be handled by builder.
+    * @return property binding.
+    */
   def produce[T](property: ReadableProperty[T], checkNull: Boolean = true)(builder: T => Seq[Node]): Binding =
     produce(property, DOMManipulator.DefaultElementReplace, checkNull)(builder)
 
   /**
-   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * If property value is null, empty text node will be added as placeholder.
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Element` builder which will be used to create HTML element.
-   * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
-   *                              if it is false, then null value has to be handled by builder.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element.
+    * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+    *                              if it is false, then null value has to be handled by builder.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def produce[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
     (builder: T => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
-   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * If property value is null, empty text node will be added as placeholder.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * For example:
-   * {{{
-   * produceWithNested(property) { case (data, nested) =>
-   *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
-   * }
-   * }}}
-   *
-   * @param property  `Property` to bind.
-   * @param builder   `Element` builder which will be used to create HTML element.
-   * @param checkNull if it is true, then null value of property will result in rendering empty text node.
-   *                  if it is false, then null value has to be handled by builder.
-   * @return property binding.
-   */
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * For example:
+    * {{{
+    * produceWithNested(property) { case (data, nested) =>
+    *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
+    * }
+    * }}}
+    *
+    * @param property  `Property` to bind.
+    * @param builder   `Element` builder which will be used to create HTML element.
+    * @param checkNull if it is true, then null value of property will result in rendering empty text node.
+    *                  if it is false, then null value has to be handled by builder.
+    * @return property binding.
+    */
   def produceWithNested[T](property: ReadableProperty[T], checkNull: Boolean = true)
     (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     produceWithNested(property, DOMManipulator.DefaultElementReplace, checkNull)(builder)
 
   /**
-   * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * If property value is null, empty text node will be added as placeholder.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * For example:
-   * {{{
-   * produceWithNested(property) { case (data, nested) =>
-   *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
-   * }
-   * }}}
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Element` builder which will be used to create HTML element.
-   * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
-   *                              if it is false, then null value has to be handled by builder.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * If property value is null, empty text node will be added as placeholder.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * For example:
+    * {{{
+    * produceWithNested(property) { case (data, nested) =>
+    *   div(data, nested(produce(anotherProperty) { innerData => span(innerData).render })).render
+    * }
+    * }}}
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element.
+    * @param checkNull             if it is true, then null value of property will result in rendering empty text node.
+    *                              if it is false, then null value has to be handled by builder.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def produceWithNested[T](property: ReadableProperty[T], customElementsReplace: DOMManipulator.ReplaceMethod, checkNull: Boolean)
     (builder: (T, Binding.NestedInterceptor) => Seq[Node]): Binding =
     new PropertyModifier[T](property, builder, checkNull, customElementsReplace)
 
   /**
-   * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * Notice that on every property change, whole element representing property will be rendered again.
-   *
-   * @param property `Property` to bind.
-   * @param builder  `Element` builder which will be used to create HTML element. `Seq` passed to the builder cannot be null.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * Notice that on every property change, whole element representing property will be rendered again.
+    *
+    * @param property `Property` to bind.
+    * @param builder  `Element` builder which will be used to create HTML element. `Seq` passed to the builder cannot be null.
+    * @return property binding.
+    */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
     (builder: Seq[T] => Seq[Node]): Binding =
     produce(property, DOMManipulator.DefaultElementReplace)(builder)
 
   /**
-   * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * Notice that on every property change, whole element representing property will be rendered again.
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * Notice that on every property change, whole element representing property will be rendered again.
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def produce[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], customElementsReplace: DOMManipulator.ReplaceMethod)
     (builder: Seq[T] => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
-   * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * Notice that on every property change, whole element representing property will be rendered again.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * @param property `Property` to bind.
-   * @param builder  `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * Notice that on every property change, whole element representing property will be rendered again.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property `Property` to bind.
+    * @param builder  `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @return property binding.
+    */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]])
     (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     produceWithNested(property, DOMManipulator.DefaultElementReplace)(builder)
 
   /**
-   * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
-   * Notice that on every property change, whole element representing property will be rendered again.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure, given `builder` will be used to generate DOM element on every value change.
+    * Notice that on every property change, whole element representing property will be rendered again.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Element` builder which will be used to create HTML element. Seq passed to the builder can not be null.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def produceWithNested[T](property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], customElementsReplace: DOMManipulator.ReplaceMethod)
     (builder: (Seq[T], Binding.NestedInterceptor) => Seq[Node]): Binding =
     new SeqAsValueModifier[T](property, builder, customElementsReplace)
 
   /**
-   * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
-   * sequence and also removes those which were removed. You only need to provide builder which is used to
-   * create HTML element for each sequence member. <br/>
-   * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
-   * another binding method inside `builder`.
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Builder` which is used for every element.
-   * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
-   *                              if it does not insert elements in DOM. Is such a case the default implementation
-   *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
+    * sequence and also removes those which were removed. You only need to provide builder which is used to
+    * create HTML element for each sequence member. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
+    * another binding method inside `builder`.
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
+    *                              if it does not insert elements in DOM. Is such a case the default implementation
+    *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def repeat[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
@@ -271,25 +271,25 @@ trait Bindings {
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
-   * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
-   * sequence and also removes those which were removed. You only need to provide builder which is used to
-   * create HTML element for each sequence member. <br/>
-   * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
-   * another binding method inside `builder`.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Builder` which is used for every element.
-   * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
-   *                              if it does not insert elements in DOM. Is such a case the default implementation
-   *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
+    * sequence and also removes those which were removed. You only need to provide builder which is used to
+    * create HTML element for each sequence member. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
+    * another binding method inside `builder`.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
+    *                              if it does not insert elements in DOM. Is such a case the default implementation
+    *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def repeatWithNested[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
@@ -297,25 +297,25 @@ trait Bindings {
     new SeqPropertyModifier[T, E](property, builder, customElementsReplace, customElementsInsert)
 
   /**
-   * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
-   * sequence and also removes those which were removed. You only need to provide builder which is used to
-   * create HTML element for each sequence member. This modifier provides also property with element index in sequence. <br/>
-   * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
-   * another binding method inside `builder`.<br/><br/>
-   *
-   * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
-   * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
-   *
-   * @param property              `Property` to bind.
-   * @param builder               `Builder` which is used for every element.
-   * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
-   *                              if it does not insert elements in DOM. Is such a case the default implementation
-   *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
-   * @param customElementsReplace takes root element, old children and new children. It should return `true`,
-   *                              if it did not replace elements in DOM. Is such a case the default implementation
-   *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
-   * @return property binding.
-   */
+    * Use it to bind sequence property into DOM structure. This method cares about adding new elements which appears in
+    * sequence and also removes those which were removed. You only need to provide builder which is used to
+    * create HTML element for each sequence member. This modifier provides also property with element index in sequence. <br/>
+    * <b>Note:</b> This will handle only structure changes, if you want to handle concrete subproperties changes, you should use
+    * another binding method inside `builder`.<br/><br/>
+    *
+    * The builder takes nested bindings interceptor - it should be used if you want to create another binding inside
+    * this builder. This prevents memory leaks by killing nested bindings on property change. <br/><br/>
+    *
+    * @param property              `Property` to bind.
+    * @param builder               `Builder` which is used for every element.
+    * @param customElementsInsert  takes root element, ref node and new children. It should return `true`,
+    *                              if it does not insert elements in DOM. Is such a case the default implementation
+    *                              will insert the elements. Otherwise you have to insert elements in DOM manually.
+    * @param customElementsReplace takes root element, old children and new children. It should return `true`,
+    *                              if it did not replace elements in DOM. Is such a case the default implementation
+    *                              will replace the elements. Otherwise you have to replace elements in DOM manually.
+    * @return property binding.
+    */
   def repeatWithIndex[T, E <: ReadableProperty[T]](property: ReadableSeqProperty[T, E],
     customElementsReplace: DOMManipulator.ReplaceMethod = DOMManipulator.DefaultElementReplace,
     customElementsInsert: DOMManipulator.InsertMethod = DOMManipulator.DefaultElementInsert)
@@ -344,9 +344,9 @@ trait Bindings {
       }
 
     /**
-     * Synchronises style value with property content by adding it when property is not null and
-     * condition property is 'true' and removing otherwise.
-     */
+      * Synchronises style value with property content by adding it when property is not null and
+      * condition property is 'true' and removing otherwise.
+      */
     def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Binding =
       property.combine(conditionProperty)((_, _)).reactiveApply {
         case (elem: HTMLElement, (null, _) | (_, false)) => removeFrom(elem)
@@ -366,11 +366,11 @@ object Bindings extends Bindings {
       else AttrPair(attr, value, ev)
 
     /**
-     * Use this to add more events listeners to an attribute (:= always overrides previous binding).
-     * If callback returns true, other listeners which are queued will not be invoked.
-     * If callback returns false, next callback in the queue will be invoked.
-     * Results other than booleans are treated as false - they don't prevent event propagation.
-     */
+      * Use this to add more events listeners to an attribute (:= always overrides previous binding).
+      * If callback returns true, other listeners which are queued will not be invoked.
+      * If callback returns false, next callback in the queue will be invoked.
+      * Results other than booleans are treated as false - they don't prevent event propagation.
+      */
     def :+=[T <: Event](callback: T => Any): Modifier[Element] =
       AttrPair(attr, callback, (el: Element, attr: Attr, callback: T => Any) => {
         val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
@@ -401,9 +401,9 @@ object Bindings extends Bindings {
       }
 
     /**
-     * Synchronises attribute value with property content by adding it when property is not null and
-     * condition property is 'true' and removing otherwise.
-     */
+      * Synchronises attribute value with property content by adding it when property is not null and
+      * condition property is 'true' and removing otherwise.
+      */
     def bindIf(property: ReadableProperty[String], conditionProperty: ReadableProperty[Boolean]): Binding =
       property.combine(conditionProperty)((_, _)).reactiveApply {
         case (elem, (null, _) | (_, false)) => removeFrom(elem)

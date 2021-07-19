@@ -21,6 +21,9 @@ class FrontendFormsView extends View with CssView {
   private val (radioButtonsDemo, radioButtonsSnippet) = RadioButtonsDemo.demoWithSnippet()
   private val (selectDemo, selectSnippet) = SelectDemo.demoWithSnippet()
   private val (multiSelectDemo, multiSelectSnippet) = MultiSelectDemo.demoWithSnippet()
+  private val (dateTimeLocalDemo, dateTimeLocalSnippet) = DateTimeLocalDemo.demoWithSnippet()
+  private val (dateDemo, dateSnippet) = DateDemo.demoWithSnippet()
+  private val (timeDemo, timeSnippet) = TimeDemo.demoWithSnippet()
 
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
@@ -37,7 +40,10 @@ class FrontendFormsView extends View with CssView {
       li(i("RadioButtons"), " - a group of radio buttons bound to ", i("Property[T]"), "."),
       li(i("Select"), " - a select element bound to ", i("Property[T]"), "."),
       li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
-      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), ".")
+      li(i("TextInput"), " - standard input bound to ", i("Property[String]"), "."),
+      li(i("DateTimeLocalInput"), " - date and time input bound to ", i("Property[String]"), "."),
+      li(i("DateInput"), " - date input bound to ", i("Property[String]"), "."),
+      li(i("TimeInput"), " - time input bound to ", i("Property[String]"), ".")
     ),
     h3("TextInput & NumberInput & PasswordInput"),
     p(
@@ -82,6 +88,15 @@ class FrontendFormsView extends View with CssView {
     p("Notice that the only difference is the type of the used property."),
     multiSelectSnippet,
     ForceBootstrap(multiSelectDemo),
+    h3("Date"),
+    p("Below examples show how to utilise `datetime-local`, `date` and `time` input bindings. All of them are bound to String property, " +
+      "so additional parsing might be required."),
+    dateTimeLocalSnippet,
+    ForceBootstrap(dateTimeLocalDemo),
+    dateSnippet,
+    ForceBootstrap(dateDemo),
+    timeSnippet,
+    ForceBootstrap(timeDemo),
     h2("What's next?"),
     p(
       "Now you know everything you need to start frontend development using Udash. ",
