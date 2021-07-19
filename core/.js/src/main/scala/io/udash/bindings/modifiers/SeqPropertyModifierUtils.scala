@@ -15,7 +15,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
-  private val producedElementsCount = MArrayBuffer[Int]()
+  private val producedElementsCount = MArrayBuffer[Int]() //todo js collections
   private val nestedBindingsByProperty: MHashMap[E, js.Array[Binding]] = MHashMap.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
@@ -32,6 +32,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     }
   }
 
+  //todo remove
   @inline private def indexOf(nodes: NodeList, node: Node): Int = {
     var i = 0
     while (i < nodes.length && !nodes(i).eq(node)) i += 1
@@ -53,7 +54,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       val allElements = elementsBefore + producedElementsCount.iterator.drop(patch.idx).sum
 
       // Add new elements
-      val newElements = patch.added.map(build)
+      val newElements = patch.added.map(p => defragment(build(p)))
       val newElementsFlatten: Seq[Node] = newElements.flatten
       if (newElementsFlatten.nonEmpty) {
         if (firstElementIsPlaceholder) {
@@ -92,7 +93,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     propertyListeners += property.listenStructure(handlePatch(root))
 
     property.elemProperties.foreach { element =>
-      val els = build(element)
+      val els = defragment(build(element))
       producedElementsCount.append(els.size)
       if (firstElement == null) firstElement = els.head
       replace(root)(Seq.empty, els)
