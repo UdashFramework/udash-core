@@ -15,7 +15,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
   private var firstElement: Node = _
   private var firstElementIsPlaceholder = false
-  private val producedElementsCount = MArrayBuffer[Int]() //todo js collections
+  private val producedElementsCount = js.Array[Int]()
   private val nestedBindingsByProperty: MHashMap[E, js.Array[Binding]] = MHashMap.empty
 
   def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
@@ -48,7 +48,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       val firstIndex = indexOf(root.childNodes, firstElement)
 
       //number of nodes produced by properties before patch index
-      val elementsBefore = producedElementsCount.iterator.slice(0, patch.idx).sum
+      val elementsBefore = producedElementsCount.jsSlice(0, patch.idx).sum
 
       //total number of produced nodes
       val allElements = elementsBefore + producedElementsCount.iterator.drop(patch.idx).sum
@@ -66,7 +66,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       if (patch.removed.nonEmpty) {
         def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
-        val nodesToRemove = (0 until producedElementsCount.iterator.slice(patch.idx, patch.idx + patch.removed.size).sum)
+        val nodesToRemove = (0 until producedElementsCount.jsSlice(patch.idx, patch.idx + patch.removed.size).sum)
           .map(idx => root.childNodes(childToRemoveIdx(idx)))
 
         val replacement = {
@@ -94,7 +94,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
     property.elemProperties.foreach { element =>
       val els = defragment(build(element))
-      producedElementsCount.append(els.size)
+      producedElementsCount.push(els.size)
       if (firstElement == null) firstElement = els.head
       replace(root)(Seq.empty, els)
     }
