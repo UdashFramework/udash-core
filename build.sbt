@@ -367,7 +367,7 @@ lazy val benchmarks = jsProject(project)
   .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
   .settings(
     noPublishSettings,
-
+    crossScalaVersions := Seq(Dependencies.versionOfScala),
     libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
     Compile / scalaJSUseMainModuleInitializer := true,
   )
