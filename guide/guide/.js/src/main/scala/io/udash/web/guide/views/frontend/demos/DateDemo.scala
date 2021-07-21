@@ -7,7 +7,6 @@ import scalatags.JsDom.all._
 
 object DateDemo extends AutoDemo {
 
-
   private val ((firstInput, secondInput), source) = {
     import io.udash._
     import io.udash.bootstrap.form.UdashInputGroup
@@ -17,7 +16,7 @@ object DateDemo extends AutoDemo {
     import org.scalajs.dom.html.Div
     import scalatags.JsDom
 
-    val dateProperty = Property("")
+    val dateProperty = Property.blank[String]
 
     def input: JsDom.TypedTag[Div] = div(Grid.row)(
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -25,7 +24,7 @@ object DateDemo extends AutoDemo {
           UdashInputGroup.input(
             DateInput(dateProperty)().render
           ),
-        ).render
+        )
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         produce(dateProperty) { date => span(s"Selected date: $date": Modifier).render }

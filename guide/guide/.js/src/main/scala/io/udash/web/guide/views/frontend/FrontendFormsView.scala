@@ -11,6 +11,7 @@ import scalatags.JsDom
 case object FrontendFormsViewFactory extends StaticViewFactory[FrontendFormsState.type](() => new FrontendFormsView)
 
 class FrontendFormsView extends View with CssView {
+
   import JsDom.all._
   import io.udash.web.guide.Context._
 
@@ -41,7 +42,11 @@ class FrontendFormsView extends View with CssView {
       li(i("Select"), " - a select element bound to ", i("Property[T]"), "."),
       li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
       li(i("TextInput"), " - standard input bound to ", i("Property[String]"), "."),
-      li(i("DateTimeLocalInput"), " - date and time input bound to ", i("Property[String]"), "."),
+      li(
+        i("DateTimeLocalInput"), " - date and time input bound to ", i("Property[String]"), ". ",
+        "This input type is not supported by Firefox and Internet Explorer as stated in ",
+        a(`href` := "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local", "documentation.")
+      ),
       li(i("DateInput"), " - date input bound to ", i("Property[String]"), "."),
       li(i("TimeInput"), " - time input bound to ", i("Property[String]"), ".")
     ),

@@ -2,11 +2,9 @@ package io.udash.web.guide.views.frontend.demos
 
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.demos.AutoDemo
-import io.udash.web.guide.views.frontend.demos.DateDemo.{firstInput, secondInput}
 import scalatags.JsDom.all._
 
 object TimeDemo extends AutoDemo {
-
 
   private val ((firstInput, secondInput), source) = {
     import io.udash._
@@ -17,7 +15,7 @@ object TimeDemo extends AutoDemo {
     import org.scalajs.dom.html.Div
     import scalatags.JsDom
 
-    val timeProperty = Property("")
+    val timeProperty = Property.blank[String]
 
     def input: JsDom.TypedTag[Div] = div(Grid.row)(
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -25,7 +23,7 @@ object TimeDemo extends AutoDemo {
           UdashInputGroup.input(
             TimeInput(timeProperty)().render
           ),
-        ).render
+        )
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         produce(timeProperty) { date => span(s"Selected date: $date": Modifier).render }

@@ -9,7 +9,7 @@ import scalatags.JsDom.all._
 
 object DateTimeLocalDemo extends AutoDemo {
 
-  private val dateTimeProperty = Property("")
+  private val dateTimeProperty = Property.blank[String]
 
   private val ((firstInput, secondInput), source) = {
     import io.udash._
@@ -26,7 +26,7 @@ object DateTimeLocalDemo extends AutoDemo {
           UdashInputGroup.input(
             DateTimeLocalInput(dateTimeProperty)().render
           ),
-        ).render
+        )
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         produce(dateTimeProperty) { date => span(s"Selected date: $date": Modifier).render }
