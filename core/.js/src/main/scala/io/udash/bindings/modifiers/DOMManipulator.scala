@@ -1,6 +1,6 @@
 package io.udash.bindings.modifiers
 
-import org.scalajs.dom.{DocumentFragment, Node}
+import org.scalajs.dom.{DocumentFragment, Node, NodeList}
 
 import scala.scalajs.js
 
@@ -9,24 +9,27 @@ private[bindings] trait DOMManipulator {
   import DOMManipulator._
 
   /**
-   * Provides custom child elements replace method. This method takes
-   * root element, old children and new children.
-   * It should return `true`, if it does not replace elements in DOM.
-   * Is such a case the default implementation will replace the elements.
+    * Provides custom child elements replace method. This method takes
+    * root element, old children and new children.
+    * It should return `true`, if it does not replace elements in DOM.
+    * Is such a case the default implementation will replace the elements.
     * Otherwise you have to replace elements in DOM manually.
     */
   def customElementsReplace: ReplaceMethod
 
   /**
-   * Provides custom child elements insert method. This method takes
-   * root element, ref node and new children.
-   * It should return `true`, if it does not insert elements in DOM.
-   * Is such a case the default implementation will insert the elements.
-   * Otherwise you have to replace elements in DOM manually.
-   */
+    * Provides custom child elements insert method. This method takes
+    * root element, ref node and new children.
+    * It should return `true`, if it does not insert elements in DOM.
+    * Is such a case the default implementation will insert the elements.
+    * Otherwise you have to replace elements in DOM manually.
+    */
   def customElementsInsert: InsertMethod = DefaultElementInsert
 
-  protected def defragment(elements: Seq[Node]): Seq[Node] =
+  @inline protected final def indexOf(nodes: NodeList, node: Node): Int =
+    js.Dynamic.global.Array.prototype.slice.call(nodes).asInstanceOf[js.Array[Node]].indexOf(node)
+
+  protected final def defragment(elements: Seq[Node]): Seq[Node] =
     elements.flatMap {
       case fragment: DocumentFragment =>
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects

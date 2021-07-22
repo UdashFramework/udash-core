@@ -31,9 +31,6 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       bindings.length = 0
     }
 
-  @inline private def indexOf(nodes: NodeList, node: Node): Int =
-    js.Dynamic.global.Array.prototype.slice.call(nodes).asInstanceOf[js.Array[Node]].indexOf(node)
-
   protected def handlePatch(root: Node)(patch: Patch[E]): Unit =
     if (patch.added.nonEmpty || patch.removed.nonEmpty) {
       // Clean up nested bindings
