@@ -44,6 +44,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
 
   def reload(): Unit = {
     routingEngine.handleUrl(urlChangeProvider.currentFragment, fullReload = true)
+      .recover { case ex: Throwable => handleRoutingFailure(ex) }
   }
 
   /**
