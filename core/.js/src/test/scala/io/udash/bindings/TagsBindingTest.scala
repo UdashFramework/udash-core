@@ -1,13 +1,13 @@
 package io.udash.bindings
 
-import java.util.concurrent.atomic.AtomicInteger
-
 import com.avsystem.commons._
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.properties.{HasModelPropertyCreator, seq}
 import io.udash.testing.UdashFrontendTest
 import org.scalajs.dom.Node
+
+import java.util.concurrent.atomic.AtomicInteger
 
 class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindings =>
 
@@ -1890,6 +1890,19 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       template2.textContent should be("")
       oldCounter should be(6)
       newCounter should be(12)
+    }
+
+    "handle nested document frag" in {
+      val sp = SeqProperty(1, 2, 3)
+      val template = div(
+        repeat(sp)(p => Seq(p.get.toString).render),
+      ).render
+
+      template.textContent should be("123")
+
+      sp.remove(2)
+
+      template.textContent should be("13")
     }
   }
 

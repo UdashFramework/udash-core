@@ -1,6 +1,8 @@
 package io.udash.bindings.modifiers
 
-import org.scalajs.dom.Node
+import org.scalajs.dom.{DocumentFragment, Node, NodeList}
+
+import scala.scalajs.js
 
 private[bindings] trait DOMManipulator {
 
@@ -23,6 +25,16 @@ private[bindings] trait DOMManipulator {
     * Otherwise you have to replace elements in DOM manually.
     */
   def customElementsInsert: InsertMethod = DefaultElementInsert
+
+  //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
+  @inline protected final def nodeListArray(nodeList: NodeList): js.Array[Node] =
+    js.Dynamic.global.Array.prototype.slice.call(nodeList).asInstanceOf[js.Array[Node]]
+
+  protected final def defragment(elements: Seq[Node]): Seq[Node] =
+    elements.flatMap {
+      case fragment: DocumentFragment => nodeListArray(fragment.childNodes)
+      case node => js.Array(node)
+    }
 
   protected def replace(root: Node)(oldElements: Seq[Node], newElements: Seq[Node]): Unit =
     if (customElementsReplace(root, oldElements, newElements)) {
