@@ -242,6 +242,6 @@ object UdashDropdown {
 
   @js.native
   private trait UdashDropdownJQuery extends JQuery {
-    def dropdown(arg: String): UdashDropdownJQuery = js.native
+    def dropdown(arg: String): Unit = js.native
   }
 }

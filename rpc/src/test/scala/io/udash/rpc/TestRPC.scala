@@ -76,7 +76,7 @@ trait TestClientRPC extends RPCMethods {
 
 /** Basic RPC methods implementation with callbacks support */
 trait RPCMethodsImpl extends RPCMethods {
-  def onInvocationInternal: (String, List[Any], Option[Any]) => Any
+  def onInvocationInternal: (String, List[Any], Option[Any]) => Unit
 
   protected def onFire(methodName: String, args: List[Any]): Unit =
     onInvocationInternal(methodName, args, None)
@@ -125,7 +125,7 @@ trait RPCMethodsImpl extends RPCMethods {
 @nowarn
 object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
   /** Returns implementation of server side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Unit): TestRPC =
     new TestRPC with RPCMethodsImpl {
       override def doStuff(yes: Boolean): Future[String] =
         onCall("doStuff", List(List(yes)), "doStuffResult")
@@ -145,7 +145,7 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
       override def fireSomething(arg: Int): Unit =
         onFire("fireSomething", List(List(arg)))
 
-      override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
+      override def onInvocationInternal: (String, List[Any], Option[Any]) => Unit = onInvocation
 
       override def innerRpc(name: String): InnerRPC = {
         onInvocationInternal("innerRpc", List(List(name)), None)
@@ -176,9 +176,9 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
 @nowarn
 object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
   /** Returns implementation of client side RPC interface */
-  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestClientRPC =
+  def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Unit): TestClientRPC =
     new TestClientRPC with RPCMethodsImpl {
-      override def onInvocationInternal: (String, List[Any], Option[Any]) => Any = onInvocation
+      override def onInvocationInternal: (String, List[Any], Option[Any]) => Unit = onInvocation
 
       override def innerRpc(name: String): InnerClientRPC = {
         onInvocationInternal("innerRpc", List(List(name)), None)

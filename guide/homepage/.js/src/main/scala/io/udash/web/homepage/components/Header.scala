@@ -1,5 +1,6 @@
 package io.udash.web.homepage.components
 
+import com.avsystem.commons.universalOps
 import io.udash.web.commons.components.{HeaderButtons, HeaderNav}
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
@@ -62,11 +63,10 @@ object Header extends HeaderButtons with HeaderNav {
     val scrollTop = jQ(org.scalajs.dom.window).scrollTop()
     val introHeight = jQ(s".${HomepageStyles.sectionIntro.className}").height()
 
-    if (scrollTop >= introHeight && !pin) {
-      jQ(template).attr(pinnedAttr, "true")
-    } else if (scrollTop < introHeight && pin) {
-      jQ(template).attr(pinnedAttr, "false")
-    }
+    if (scrollTop >= introHeight && !pin)
+      jQ(template).attr(pinnedAttr, "true").discard
+    else if (scrollTop < introHeight && pin)
+      jQ(template).attr(pinnedAttr, "false").discard
   }
 
   def getTemplate: Modifier = template
@@ -75,6 +75,6 @@ object Header extends HeaderButtons with HeaderNav {
     val activeOption = jqElement.attr(attribute)
     val newValue = if (activeOption.isEmpty || !activeOption.get.toBoolean) true else false
 
-    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString)
+    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString).discard
   }
 }

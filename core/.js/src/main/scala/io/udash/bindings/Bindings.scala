@@ -40,7 +40,7 @@ trait Bindings {
   def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
     val el = document.createElement("div")
     t.appendChild(el)
-    window.setTimeout(() => t.replaceChildren(el, component), timeout)
+    window.setTimeout(() => t.replaceChildren(el, component), timeout).discard
   }
 
   /**
@@ -330,7 +330,7 @@ trait Bindings {
 
     /** Removes style from element. */
     def removeFrom(element: HTMLElement): Unit =
-      element.style.removeProperty(HasCssName[T].cssName(style))
+      element.style.removeProperty(HasCssName[T].cssName(style)).discard
 
     /** Synchronises style value with property content. */
     def bind(property: ReadableProperty[String]): Binding =

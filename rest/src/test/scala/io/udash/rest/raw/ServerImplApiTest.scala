@@ -5,6 +5,7 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.rest.SomeServerApiImpl
 import io.udash.rest.openapi.Info
 import org.scalactic.source.Position
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -12,7 +13,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
   private val apiImpl = new SomeServerApiImpl
   private val serverHandle = SomeServerApiImpl.asHandleRequest(apiImpl)
 
-  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
+  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Assertion = {
     val promise = Promise[RestResponse]()
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)

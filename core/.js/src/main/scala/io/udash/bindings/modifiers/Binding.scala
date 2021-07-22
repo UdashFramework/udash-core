@@ -18,7 +18,7 @@ trait Binding extends Modifier[Element] {
       nestedBindings += _
     }
 
-  def addRegistration(registration: Registration): Unit = propertyListeners += registration
+  def addRegistration(registration: Registration): Unit = (propertyListeners += registration).discard
 
   /** This method clears all bindings and listeners. */
   def kill(): Unit = {

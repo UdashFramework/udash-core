@@ -1,6 +1,7 @@
 package io.udash.bootstrap.utils
 
 import com.avsystem.commons.concurrent.RunNowEC
+import com.avsystem.commons.universalOps
 import io.udash.bootstrap.UdashBootstrap
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome._
 import io.udash.css.{CssStyle, CssView}
@@ -13,7 +14,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.Future
 
 class UdashIconsTest extends AsyncUdashCoreFrontendTest with CssView {
-  override protected def beforeAll(): Unit = document.body.appendChild(UdashBootstrap.loadFontAwesome())
+  override protected def beforeAll(): Unit = document.body.appendChild(UdashBootstrap.loadFontAwesome()).discard
 
   "Bootstrap icons" should {
     document.body.appendChild(UdashBootstrap.loadFontAwesome())

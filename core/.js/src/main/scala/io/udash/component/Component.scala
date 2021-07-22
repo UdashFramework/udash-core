@@ -1,5 +1,6 @@
 package io.udash.component
 
+import com.avsystem.commons.universalOps
 import io.udash.bindings.modifiers.Binding
 import org.scalajs.dom.Element
 
@@ -12,5 +13,5 @@ trait Component extends Binding {
   def render: Element
 
   override def applyTo(t: Element): Unit =
-    t.appendChild(render)
+    t.appendChild(render).discard
 }

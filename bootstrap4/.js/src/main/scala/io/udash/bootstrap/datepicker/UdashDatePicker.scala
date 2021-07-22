@@ -111,13 +111,13 @@ final class UdashDatePicker private[datepicker](
         jQInput.on(ChangeEvent, changeCallback)
         jQInput.on(HideEvent, hideCallback)
         jQInput.on(ShowEvent, showCallback)
-        jQInput.on(ErrorEvent, errorCallback)
+        jQInput.on(ErrorEvent, errorCallback).discard
       },
       () => {
         jQInput.off(ChangeEvent, changeCallback)
         jQInput.off(HideEvent, hideCallback)
         jQInput.off(ShowEvent, showCallback)
-        jQInput.off(ErrorEvent, errorCallback)
+        jQInput.off(ErrorEvent, errorCallback).discard
       }
     )
   }
@@ -467,8 +467,8 @@ object UdashDatePicker {
   @js.native
   private trait UdashDatePickerJQuery extends JQuery {
     def datetimepicker(settings: js.Dictionary[js.Any]): UdashDatePickerJQuery = js.native
-    def datetimepicker(): UdashDatePickerJQuery = js.native
-    def datetimepicker(function: String): UdashDatePickerJQuery = js.native
+    def datetimepicker(): Unit = js.native
+    def datetimepicker(function: String): Unit = js.native
     def datetimepicker(option: String, value: js.Any): UdashDatePickerJQuery = js.native
   }
 

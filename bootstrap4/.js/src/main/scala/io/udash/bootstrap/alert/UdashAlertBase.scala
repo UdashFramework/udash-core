@@ -1,6 +1,7 @@
 package io.udash.bootstrap
 package alert
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
@@ -29,7 +30,7 @@ private[alert] abstract class UdashAlertBase(
     jQSelector().alert("dispose")
   }
 
-  protected def jQSelector(): UdashAlertJQuery =
+  protected final def jQSelector(): UdashAlertJQuery =
     jQ(s"#$componentId").asInstanceOf[UdashAlertJQuery]
 }
 
@@ -60,5 +61,5 @@ private[alert] trait UdashAlertBaseCompanion[T <: UdashAlertBase] {
 
 @js.native
 private trait UdashAlertJQuery extends JQuery {
-  def alert(cmd: String): UdashAlertJQuery = js.native
+  def alert(cmd: String): Unit = js.native
 }

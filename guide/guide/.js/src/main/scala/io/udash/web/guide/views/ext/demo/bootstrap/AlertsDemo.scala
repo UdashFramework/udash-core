@@ -44,7 +44,7 @@ object AlertsDemo extends AutoDemo {
 
     val create = UdashButton()("Create dismissible alert")
     create.listen { case _ =>
-      alerts.appendChild(randomDismissible)
+      alerts.appendChild(randomDismissible).discard
     }
 
     div(

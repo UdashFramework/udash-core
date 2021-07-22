@@ -165,6 +165,6 @@ object UdashNav {
 
   @js.native
   private trait UdashTabJQuery extends JQuery {
-    def tab(cmd: String): UdashTabJQuery = js.native
+    def tab(cmd: String): Unit = js.native
   }
 }

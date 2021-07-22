@@ -803,11 +803,10 @@ final class FormElementsFactory(
           Seq(
             eventBasedModifiers(validationResult),
             nested(new Binding {
-              override def applyTo(t: Element): Unit = {
-                propertyListeners += property.listen { _ =>
+              override def applyTo(t: Element): Unit =
+                (propertyListeners += property.listen { _ =>
                   startValidation(validationResult, triggerGroup = true)
-                }
-              }
+                }).discard
             })
           )
         case ValidationTrigger.OnSubmit =>
@@ -815,12 +814,11 @@ final class FormElementsFactory(
           Seq(
             eventBasedModifiers(validationResult),
             nested(new Binding {
-              override def applyTo(t: Element): Unit = {
-                propertyListeners ++= form.toOpt.map(_.listen {
+              override def applyTo(t: Element): Unit =
+                (propertyListeners ++= form.toOpt.map(_.listen {
                   case ev: UdashForm.FormEvent if ev.tpe == UdashForm.FormEvent.EventType.Submit =>
                     startValidation(validationResult, triggerGroup = true)
-                })
-              }
+                })).discard
             })
           )
       }

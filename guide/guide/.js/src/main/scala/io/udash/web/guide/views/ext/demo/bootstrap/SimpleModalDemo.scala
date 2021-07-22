@@ -59,7 +59,7 @@ object SimpleModalDemo extends AutoDemo {
     openAndCloseButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>
         modal.show()
-        window.setTimeout(() => modal.hide(), 2000)
+        window.setTimeout(() => modal.hide(), 2000).discard
     }
 
     div(

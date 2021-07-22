@@ -1,6 +1,7 @@
 package io.udash.rpc.serialization
 
 import com.avsystem.commons.serialization._
+import com.avsystem.commons.universalOps
 
 import scala.scalajs.js
 import scala.scalajs.js.JSON
@@ -48,7 +49,7 @@ class NativeJsonOutput(valueConsumer: js.Any => Unit) extends OutputAndSimpleOut
 class NativeJsonListOutput(valueConsumer: js.Any => Unit) extends ListOutput {
   private val builder = new js.Array[js.Any]()
   override def writeElement(): Output =
-    new NativeJsonOutput(el => builder.append(el))
+    new NativeJsonOutput(builder.append(_).discard)
   override def finish(): Unit =
     valueConsumer(builder)
 }

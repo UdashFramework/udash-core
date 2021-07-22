@@ -4,6 +4,7 @@ import com.avsystem.commons.serialization.GenCodec
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import io.udash.rpc.JsonStr
 import io.udash.testing.UdashSharedTest
+import org.scalatest.Assertion
 
 import scala.concurrent.Future
 
@@ -134,7 +135,7 @@ class TranslationKeyTest extends UdashSharedTest {
     }
 
     "have content-based equals and hashCode" in {
-      def cmp(what: TranslationKey, same: TranslationKey, notSame: TranslationKey): Unit = {
+      def cmp(what: TranslationKey, same: TranslationKey, notSame: TranslationKey): Assertion = {
         what should be(same)
         what.hashCode() should be(same.hashCode())
 

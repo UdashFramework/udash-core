@@ -9,7 +9,7 @@ trait Validation extends Any {
 
 object Validation {
   implicit final class DirectValidation(private val result: ValidationResult) extends AnyVal with Validation {
-    override def onComplete[U](f: Try[ValidationResult] => U): Unit = f(Success(result))
+    override def onComplete[U](f: Try[ValidationResult] => U): Unit = f(Success(result)).discard
   }
 
   implicit final class FutureValidation(private val result: Future[ValidationResult]) extends AnyVal with Validation {

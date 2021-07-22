@@ -26,8 +26,8 @@ abstract class AtmosphereServerConnector(
 
   protected val clientRpc: ExposesClientRPC[_]
 
-  def handleResponse(response: RpcResponse): Any
-  def handleRpcFire(fire: RpcFire): Any
+  def handleResponse(response: RpcResponse): Unit
+  def handleRpcFire(fire: RpcFire): Unit
 
   private val waitingRequests = new mutable.ArrayBuffer[RpcRequest]()
   private var isReady: ConnectionStatus = ConnectionStatus.Closed
@@ -135,14 +135,14 @@ abstract class AtmosphereServerConnector(
 
 class DefaultAtmosphereServerConnector(
   override protected val clientRpc: DefaultExposesClientRPC[_],
-  responseHandler: RpcResponse => Any,
+  responseHandler: RpcResponse => Unit,
   serverUrl: String,
   override val exceptionsRegistry: ExceptionCodecRegistry
 ) extends AtmosphereServerConnector(serverUrl, exceptionsRegistry) {
 
-  override def handleResponse(response: RpcResponse): Any =
+  override def handleResponse(response: RpcResponse): Unit =
     responseHandler(response)
 
-  override def handleRpcFire(fire: RpcFire): Any =
+  override def handleRpcFire(fire: RpcFire): Unit =
     clientRpc.handleRpcFire(fire)
 }

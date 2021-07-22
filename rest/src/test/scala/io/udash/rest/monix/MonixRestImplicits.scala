@@ -18,7 +18,7 @@ trait MonixRestImplicits extends GenCodecRestImplicits {
   implicit def taskToAsync: AsyncEffect[Task] =
     new AsyncEffect[Task] {
       def toAsync[A](task: Task[A]): Async[A] =
-        callback => task.runAsync(res => callback(res.fold(Failure(_), Success(_))))
+        callback => task.runAsync(res => callback(res.fold(Failure(_), Success(_)))).discard
       def fromAsync[A](async: Async[A]): Task[A] =
         Task.async(callback => async(res => callback(res.fold(Left(_), Right(_)))))
     }

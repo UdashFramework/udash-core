@@ -1,6 +1,7 @@
 package io.udash
 package css
 
+import com.avsystem.commons.universalOps
 import io.udash.bindings.modifiers.{Binding, EmptyModifier}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all.Modifier
@@ -66,8 +67,8 @@ object CssView extends CssView {
 
     def reactiveOptionApply(property: ReadableProperty[Option[T]]): Binding = new Binding {
       private var prevStyle: CssStyle = _
-      override def applyTo(el: Element): Unit = {
-        propertyListeners += property.listen(t => {
+      override def applyTo(el: Element): Unit =
+        (propertyListeners += property.listen({ t =>
           if (prevStyle != null) {
             prevStyle.classNames.foreach(el.classList.remove)
           }
@@ -79,8 +80,7 @@ object CssView extends CssView {
             case None =>
               prevStyle = null
           }
-        }, initUpdate = true)
-      }
+        }, initUpdate = true)).discard
     }
   }
 }

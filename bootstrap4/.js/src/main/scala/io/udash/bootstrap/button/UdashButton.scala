@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package button
 
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton.{ButtonClickEvent, UdashButtonJQuery}
@@ -140,6 +141,6 @@ object UdashButton {
 
   @js.native
   private trait UdashButtonJQuery extends JQuery {
-    def button(cmd: String): UdashButtonJQuery = js.native
+    def button(cmd: String): Unit = js.native
   }
 }

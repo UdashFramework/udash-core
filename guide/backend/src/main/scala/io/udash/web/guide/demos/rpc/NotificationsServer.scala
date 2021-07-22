@@ -6,30 +6,31 @@ import java.{time => jt}
 import io.udash.rpc._
 import io.udash.web.guide.rpc.ClientRPC
 
+import com.avsystem.commons._
+
 import scala.concurrent.Future
 
 class NotificationsServer(implicit clientId: ClientId) extends NotificationsServerRPC {
-  import io.udash.web.Implicits.backendExecutionContext
+  override def register(): Future[Unit] = Future.eval(NotificationsService.register)
 
-  override def register(): Future[Unit] = Future { NotificationsService.register }
-
-  override def unregister(): Future[Unit] = Future { NotificationsService.unregister }
+  override def unregister(): Future[Unit] = Future.eval(NotificationsService.unregister)
 }
 
 object NotificationsService {
-  import io.udash.web.Implicits.backendExecutionContext
 
   private val clients = scala.collection.mutable.ArrayBuffer[ClientId]()
 
-  def register(implicit clientId: ClientId) = clients.synchronized {
+  def register(implicit clientId: ClientId): Unit = clients.synchronized {
     clients += clientId
-  }
+  }.discard
 
-  def unregister(implicit clientId: ClientId) = clients.synchronized {
+  def unregister(implicit clientId: ClientId): Unit = clients.synchronized {
     clients -= clientId
-  }
+  }.discard
 
-  backendExecutionContext.execute(() => {
+  import io.udash.web.Implicits.backendExecutionContext
+
+  backendExecutionContext.execute { () =>
     while (true) {
       val msg = jt.LocalDateTime.now().toString
       clients.synchronized {
@@ -39,5 +40,5 @@ object NotificationsService {
       }
       TimeUnit.SECONDS.sleep(1)
     }
-  })
+  }
 }

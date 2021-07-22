@@ -77,9 +77,10 @@ val commonSettings = Seq(
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator,-unused",
     "-Yrangepos",
+    "-Ywarn-value-discard",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
-    "-Ycache-macro-class-loader:last-modified"
+    "-Ycache-macro-class-loader:last-modified",
   ),
   Compile / scalacOptions ++= {
     //https://github.com/scala/bug/issues/12314#issuecomment-762331480

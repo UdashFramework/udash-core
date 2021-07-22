@@ -158,6 +158,6 @@ object UdashModal {
 
   @js.native
   private trait UdashModalJQuery extends JQuery {
-    def modal(cmd: String): UdashModalJQuery = js.native
+    def modal(cmd: String): Unit = js.native
   }
 }

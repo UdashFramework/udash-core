@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package collapse
 
 import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.card.UdashCard
@@ -52,26 +53,26 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
 
             collapses(item) = collapse
 
-            val header = factory.header { nested => Seq(
-              headingId,
-              h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
-                button(
-                  BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
-                  tpe := "button", dataToggle:= "collapse", href := s"#${collapse.componentId}",
-                  heading(item, nested)
+            val header = factory.header { nested =>
+              Seq(
+                headingId,
+                h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
+                  button(
+                    BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
+                    tpe := "button", dataToggle := "collapse", href := s"#${collapse.componentId}",
+                    heading(item, nested)
+                  )
                 )
               )
-            )}
-            nested(collapse)
+            }
             Seq[Modifier](
-              header, collapse.render,
+              header, nested(collapse),
               nested(
                 new Binding {
-                  override def applyTo(t: Element): Unit = {
-                    propertyListeners += collapse.listen { case ev =>
+                  override def applyTo(t: Element): Unit =
+                    (propertyListeners += collapse.listen { case ev =>
                       fire(UdashAccordion.AccordionEvent(UdashAccordion.this, item.get, idx.get, ev))
-                    }
-                  }
+                    }).discard
                 }
               )
             )
@@ -92,19 +93,19 @@ object UdashAccordion {
   ) extends AbstractCase with ListenableEvent
 
   /**
-    * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#accordion-example">Bootstrap Docs</a>.
-    *
-    * @param elements    Data items which will be represented as cards in the accordion.
-    * @param componentId An id of the root DOM node.
-    * @param heading     Creates panel header.
-    *                    Use the provided interceptor to properly clean up bindings inside the content.
-    * @param body        Creates panel body.
-    *                    Use the provided interceptor to properly clean up bindings inside the content.
-    * @tparam ItemType A single element's type in the `items` sequence.
-    * @tparam ElemType A type of a property containing an element in the `items` sequence.
-    * @return A `UdashAccordion` component, call `render` to create a DOM element.
-    */
+   * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#accordion-example">Bootstrap Docs</a>.
+   *
+   * @param elements    Data items which will be represented as cards in the accordion.
+   * @param componentId An id of the root DOM node.
+   * @param heading     Creates panel header.
+   *                    Use the provided interceptor to properly clean up bindings inside the content.
+   * @param body        Creates panel body.
+   *                    Use the provided interceptor to properly clean up bindings inside the content.
+   * @tparam ItemType A single element's type in the `items` sequence.
+   * @tparam ElemType A type of a property containing an element in the `items` sequence.
+   * @return A `UdashAccordion` component, call `render` to create a DOM element.
+   */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     elements: seq.ReadableSeqProperty[ItemType, ElemType],
     componentId: ComponentId = ComponentId.generate()

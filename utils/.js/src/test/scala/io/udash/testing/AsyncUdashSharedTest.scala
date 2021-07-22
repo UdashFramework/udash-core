@@ -1,5 +1,6 @@
 package io.udash.testing
 
+import com.avsystem.commons.universalOps
 import org.scalactic.source.Position
 import org.scalajs.dom
 import org.scalatest.{Assertion, Succeeded}
@@ -17,7 +18,7 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
     val p = Promise[Assertion]()
     var lastEx: Option[Throwable] = None
     def startTest(): Unit = {
-      dom.window.setTimeout(() => {
+      dom.window.setTimeout({ () =>
         if (patienceConfig.timeout.toMillis > Date.now() - start) {
           try {
             code
@@ -30,7 +31,7 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
         } else {
           p.complete(Failure(lastEx.getOrElse(RetryingTimeout())))
         }
-      }, patienceConfig.interval.toMillis.toDouble)
+      }, patienceConfig.interval.toMillis.toDouble).discard
     }
     startTest()
     p.future

@@ -2,7 +2,9 @@ package io.udash.rpc
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization._
-import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, EscapeUtils, ExceptionCodecRegistry}
+import com.avsystem.commons.serialization.json.JsonStringOutput
+import com.avsystem.commons.universalOps
+import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.testing.UdashSharedTest
 
 import scala.util.Random
@@ -18,15 +20,17 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   exceptionsRegistry.register(GenCodec.materialize[CustomException])
   exceptionsRegistry.register(GenCodec.materialize[SealedExceptions])
 
+  private def escape(str: String): String = JsonStringOutput.write(str) |> (s => s.substring(1, s.length - 1))
+
   def tests(): Unit = {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
-    val inv = RpcInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
+    val inv = RpcInvocation("r{p[c\"]}Name", List(JsonStr(s""""${escape("val{lu} [e1\"2]3")}"""")))
     val getter1 = RpcInvocation("g{}[]\",\"etter1",
       List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\""), JsonStr("\"xy,z\"")))
     val getter2 = RpcInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
     val req = RpcCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
-    val success = RpcResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
+    val success = RpcResponseSuccess(JsonStr(s""""${escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
     val failure = RpcResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
     val exception = RpcResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
     val runtimeException = RpcResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")

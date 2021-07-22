@@ -18,5 +18,5 @@ object CrossCollections {
   def slice[T](a: MBuffer[T], from: Int, to: Int): MBuffer[T] = a.toJSArray.jsSlice(from, to)
   def replace[T](a: MBuffer[T], idx: Int, count: Int, items: T*): Unit = replaceSeq(a, idx, count, items)
   def replaceSeq[T](a: MBuffer[T], idx: Int, count: Int, items: BSeq[T]): Unit =
-    a.toJSArray.splice(idx, count, items.toSeq: _*)
+    a.toJSArray.splice(idx, count, items.toSeq: _*).discard
 }

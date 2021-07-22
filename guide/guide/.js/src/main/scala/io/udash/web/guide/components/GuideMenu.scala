@@ -1,6 +1,6 @@
 package io.udash.web.guide.components
 
-import com.avsystem.commons.OptArg
+import com.avsystem.commons.{OptArg, universalOps}
 import io.udash._
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.MobileMenuStyles
@@ -86,7 +86,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
     menuSubs.on(ClickEvent, onSubClick)
 
-    jqMobileButton.on(ClickEvent, onMobileMenuClick)
+    jqMobileButton.on(ClickEvent, onMobileMenuClick).discard
   }
 
   private def onCurrentItemUpdate(update: String) = {
@@ -129,7 +129,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
     val activeOption = jqElement.attr(attribute)
     val newValue = if (activeOption.isEmpty || !activeOption.get.toBoolean) true else false
 
-    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString)
+    jqElement.attr(Attributes.data(Attributes.Active), newValue.toString).discard
   }
 }
 

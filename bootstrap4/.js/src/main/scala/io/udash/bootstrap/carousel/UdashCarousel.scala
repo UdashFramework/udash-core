@@ -2,6 +2,7 @@ package io.udash.bootstrap
 package carousel
 
 import com.avsystem.commons.misc._
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.carousel.UdashCarousel.AnimationOptions
@@ -231,8 +232,8 @@ object UdashCarousel {
   @js.native
   private trait UdashCarouselJQuery extends JQuery {
     def carousel(options: CarouselOptionsJS): UdashCarouselJQuery = js.native
-    def carousel(cmd: String): UdashCarouselJQuery = js.native
-    def carousel(number: Int): UdashCarouselJQuery = js.native
+    def carousel(cmd: String): Unit = js.native
+    def carousel(number: Int): Unit = js.native
   }
 
   import scala.concurrent.duration._

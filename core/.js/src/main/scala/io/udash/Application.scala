@@ -1,5 +1,6 @@
 package io.udash
 
+import com.avsystem.commons.universalOps
 import io.udash.logging.CrossLogging
 import io.udash.properties.PropertyCreator
 import io.udash.routing.{RoutingEngine, StateChangeEvent}
@@ -34,17 +35,14 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
     rootElement = attachElement
 
     urlChangeProvider.initialize()
-    urlChangeProvider.onFragmentChange { frag =>
-      routingEngine.handleUrl(frag)
-        .recover { case ex: Throwable => handleRoutingFailure(ex) }
-    }
-    routingEngine.handleUrl(urlChangeProvider.currentFragment)
-      .recover { case ex: Throwable => handleRoutingFailure(ex) }
+    urlChangeProvider
+      .onFragmentChange(routingEngine.handleUrl(_).recover { case ex: Throwable => handleRoutingFailure(ex) }.get)
+      .discard //closing the tab terminates that one
+    routingEngine.handleUrl(urlChangeProvider.currentFragment).recover { case ex: Throwable => handleRoutingFailure(ex) }.get
   }
 
-  def reload(): Unit = {
-    routingEngine.handleUrl(urlChangeProvider.currentFragment, fullReload = true)
-  }
+  def reload(): Unit =
+    routingEngine.handleUrl(urlChangeProvider.currentFragment, fullReload = true).get
 
   /**
    * Registers callback which will be called after routing failure.

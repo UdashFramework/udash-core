@@ -60,6 +60,6 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
 
   @js.native
   private trait UdashPopoverJQuery extends JQuery {
-    def popover(arg: js.Any): UdashPopoverJQuery = js.native
+    def popover(arg: js.Any): Unit = js.native
   }
 }

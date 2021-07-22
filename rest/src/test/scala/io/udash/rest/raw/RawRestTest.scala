@@ -7,6 +7,7 @@ import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 import io.udash.rest.util.WithHeaders
 import org.scalactic.source.Position
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -130,7 +131,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
 
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
-  def testRestCall[T](call: RootApi => Future[T], expectedTraffic: String)(implicit pos: Position): Unit = {
+  def testRestCall[T](call: RootApi => Future[T], expectedTraffic: String)(implicit pos: Position): Assertion = {
     assert(call(realProxy).wrapToTry.futureValue.map(mkDeep) == call(real).catchFailures.wrapToTry.futureValue.map(mkDeep))
     assert(trafficLog == expectedTraffic)
   }
@@ -140,7 +141,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     case _ => value
   }
 
-  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
+  def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Assertion = {
     val promise = Promise[RestResponse]()
     serverHandle(request).apply(promise.complete)
     assert(promise.future.futureValue == response)

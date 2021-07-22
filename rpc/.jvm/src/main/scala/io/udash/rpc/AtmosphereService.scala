@@ -98,12 +98,13 @@ class AtmosphereService[ServerRPCType](
     try {
       resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
-      handleRequest(resource,
-        data => {
+      handleRequest(
+        resource,
+        onCall = { data =>
           resource.getResponse.write(data.json)
-          resource.resume()
+          resource.resume().discard
         },
-        () => resource.resume()
+        onFire = () => resource.resume().discard
       )
     } catch {
       case e: Exception =>
@@ -154,7 +155,7 @@ class AtmosphereService[ServerRPCType](
       resource.transport() match {
         case TRANSPORT.LONG_POLLING | TRANSPORT.POLLING | TRANSPORT.JSONP =>
           writeMsg()
-          resource.resume()
+          resource.resume().discard
         case TRANSPORT.WEBSOCKET | TRANSPORT.STREAMING | TRANSPORT.SSE =>
           writeMsg()
           response.getWriter.flush()

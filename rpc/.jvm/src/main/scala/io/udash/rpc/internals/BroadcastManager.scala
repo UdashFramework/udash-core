@@ -1,5 +1,6 @@
 package io.udash.rpc.internals
 
+import com.avsystem.commons.universalOps
 import com.typesafe.scalalogging.LazyLogging
 import org.atmosphere.cpr._
 
@@ -35,15 +36,15 @@ private[rpc] trait BroadcasterInit extends LazyLogging {
 private[rpc] object BroadcastManager extends BroadcasterInit {
 
   def registerResource(resource: AtmosphereResource, clientId: String): Unit =
-    withBroadcaster(clientId)(_.addAtmosphereResource(resource))
+    withBroadcaster(clientId)(_.addAtmosphereResource(resource).discard)
 
   def sendToClient(clientId: String, msg: String): Unit =
-    withBroadcaster(clientId)(_.broadcast(msg))
+    withBroadcaster(clientId)(_.broadcast(msg).discard)
 
   def broadcastToAllClients(msg: String): Unit =
-    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg))
+    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg).discard)
 
   def broadcast(msg: String): Unit =
-    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg))
+    withMetaBroadcaster(_.broadcastTo(clientPath(pathWildcard), msg).discard)
 
 }

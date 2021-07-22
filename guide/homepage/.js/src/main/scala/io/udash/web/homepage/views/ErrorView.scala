@@ -1,5 +1,6 @@
 package io.udash.web.homepage.views
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.styles.GlobalStyles
@@ -44,7 +45,7 @@ class ErrorView extends View with CssView {
   private def onResize(): Unit = {
     if (jqWindow.width() <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
       val h = jqWindow.height() - jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d)
-      jqTemplate.css("min-height", s"${h}px")
+      jqTemplate.css("min-height", s"${h}px").discard
     }
   }
 

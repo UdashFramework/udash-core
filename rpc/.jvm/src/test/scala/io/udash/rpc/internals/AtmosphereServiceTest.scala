@@ -263,8 +263,8 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val loggerMock = new {
           private val errors = new MArrayBuffer[(String, Throwable)]
-          def error(msg: String, throwable: Throwable) = errors += msg -> throwable
-          def currentErrors = errors.toList
+          def error(msg: String, throwable: Throwable): Unit = errors += msg -> throwable
+          def currentErrors: ISeq[(String, Throwable)] = errors.toList
         }
         val expectedMsg = "Request handling failure"
 
@@ -428,8 +428,8 @@ class AtmosphereServiceTest extends UdashRpcBackendTest {
 
         val loggerMock = new {
           private val errors = new MArrayBuffer[(String, Throwable)]
-          def error(msg: String, throwable: Throwable) = errors += msg -> throwable
-          def currentErrors = errors.toList
+          def error(msg: String, throwable: Throwable): Unit = errors += msg -> throwable
+          def currentErrors: ISeq[(String, Throwable)] = errors.toList
         }
         val expectedMsg = "Request handling failure"
 

@@ -49,7 +49,7 @@ final class MarkdownPresenter[T <: MarkdownPageState](
                   val offsetTop = element.asInstanceOf[scalajs.js.Dynamic].offsetTop.asInstanceOf[Int]
                   if (dom.window.asInstanceOf[scalajs.js.Dynamic].scrollY.asInstanceOf[Int] != offsetTop) {
                     dom.window.scrollTo(0, offsetTop)
-                    scalajs.js.timers.setTimeout(100)(loop())
+                    scalajs.js.timers.setTimeout(100)(loop()).discard
                   }
                 }
                 loop()

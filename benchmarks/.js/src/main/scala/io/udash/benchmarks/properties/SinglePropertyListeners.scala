@@ -1,5 +1,6 @@
 package io.udash.benchmarks.properties
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
@@ -35,7 +36,7 @@ object SinglePropertyListeners extends BenchmarkUtils {
   private val benchmarks = generateGetSetListenBenchmarks[Property[Int], ReadableProperty[Int]](properties)(
     Seq(20), Seq(0.1, 1, 10), Seq(0, 1, 10, 100),
     Seq(("simple int set", _.set(_), _.get)),
-    Seq(("empty listener", _.listen(_ => ())))
+    Seq(("empty listener", _.listen(_ => ()).discard))
   )
 
   val suite = GuiSuite(

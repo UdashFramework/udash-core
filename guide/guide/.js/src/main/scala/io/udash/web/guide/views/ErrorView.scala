@@ -1,5 +1,6 @@
 package io.udash.web.guide.views
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.styles.GlobalStyles
@@ -44,7 +45,7 @@ class ErrorView extends View with CssView {
       val h = jqWindow.height() -
         jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d) -
         jQ(s".${HeaderStyles.header.className}").outerHeight().getOrElse(0d)
-      jQ(content).css("min-height", s"${h}px")
+      jQ(content).css("min-height", s"${h}px").discard
     }
   }
 

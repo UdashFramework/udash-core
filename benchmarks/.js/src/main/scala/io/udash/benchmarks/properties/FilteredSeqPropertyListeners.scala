@@ -1,5 +1,6 @@
 package io.udash.benchmarks.properties
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import japgolly.scalajs.benchmark._
 import japgolly.scalajs.benchmark.gui._
@@ -29,7 +30,7 @@ object FilteredSeqPropertyListeners extends BenchmarkUtils {
       ("whole Seq set", (p, i) => p.set(Seq.tabulate(seqSize)(_ + i)), _.get),
       ("replace part of Seq", replaceElements, _.get)
     ),
-    Seq(("empty listener", _.listen(_ => ())))
+    Seq(("empty listener", _.listen(_ => ()).discard))
   )
 
   val suite = GuiSuite(

@@ -1,5 +1,7 @@
 package io.udash.rpc
 
+import com.avsystem.commons.universalOps
+
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.atmosphere.cpr._
@@ -12,7 +14,7 @@ import org.atmosphere.cpr._
 class RpcServlet(framework: AtmosphereFramework) extends HttpServlet {
   override def init(config: ServletConfig): Unit = {
     super.init(config)
-    framework.init(config)
+    framework.init(config).discard
   }
 
   override def doTrace(req: HttpServletRequest, resp: HttpServletResponse): Unit = doPost(req, resp)
@@ -21,7 +23,6 @@ class RpcServlet(framework: AtmosphereFramework) extends HttpServlet {
 
   override def doPut(req: HttpServletRequest, resp: HttpServletResponse): Unit = doPost(req, resp)
 
-  override def doPost(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
-    framework.doCometSupport(AtmosphereRequestImpl.wrap(req), AtmosphereResponseImpl.wrap(resp))
-  }
+  override def doPost(req: HttpServletRequest, resp: HttpServletResponse): Unit =
+    framework.doCometSupport(AtmosphereRequestImpl.wrap(req), AtmosphereResponseImpl.wrap(resp)).discard
 }

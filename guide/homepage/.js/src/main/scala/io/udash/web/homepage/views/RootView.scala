@@ -29,6 +29,6 @@ class RootView extends ContainerView with CssView {
 
   override def renderChild(view: Option[View]): Unit = {
     super.renderChild(view)
-    js.Dynamic.global.svg4everybody()
+    js.Dynamic.global.svg4everybody().discard
   }
 }

@@ -113,6 +113,6 @@ object UdashCollapse {
 
   @js.native
   private trait UdashCollapseJQuery extends JQuery {
-    def collapse(cmd: String): UdashCollapseJQuery = js.native
+    def collapse(cmd: String): Unit = js.native
   }
 }

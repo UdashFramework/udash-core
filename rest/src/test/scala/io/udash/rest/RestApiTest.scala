@@ -5,6 +5,7 @@ import com.avsystem.commons._
 import io.udash.rest.raw.RawRest
 import io.udash.rest.raw.RawRest.HandleRequest
 import org.scalactic.source.Position
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -17,7 +18,7 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
   lazy val proxy: RestTestApi =
     RawRest.fromHandleRequest[RestTestApi](clientHandle)
 
-  def testCall[T](call: RestTestApi => Future[T])(implicit pos: Position): Unit =
+  def testCall[T](call: RestTestApi => Future[T])(implicit pos: Position): Assertion =
     assert(
       call(proxy).wrapToTry.futureValue.map(mkDeep) ==
         call(RestTestApi.Impl).catchFailures.wrapToTry.futureValue.map(mkDeep)

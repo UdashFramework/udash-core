@@ -1,5 +1,6 @@
 package io.udash.i18n.bindings
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.i18n.{Lang, Translated}
@@ -9,5 +10,6 @@ import scala.concurrent.Future
 
 private[i18n] final class DynamicAttrTranslationBinding(translation: => Future[Translated], attr: String)(
   implicit lang: ReadableProperty[Lang]) extends AttrTranslationModifier(translation, attr) with Binding {
-  override def applyTo(t: Element): Unit = propertyListeners += lang.listen(_ => super.applyTo(t), initUpdate = true)
+  override def applyTo(t: Element): Unit =
+    (propertyListeners += lang.listen(_ => super.applyTo(t), initUpdate = true)).discard
 }

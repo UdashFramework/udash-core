@@ -59,6 +59,6 @@ object UdashTooltip extends TooltipUtils[UdashTooltip] {
 
   @js.native
   private trait UdashTooltipJQuery extends JQuery {
-    def tooltip(arg: js.Any): UdashTooltipJQuery = js.native
+    def tooltip(arg: js.Any): Unit = js.native
   }
 }

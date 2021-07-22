@@ -1,6 +1,7 @@
 package io.udash
 package rest.examples
 
+import com.avsystem.commons.Try
 import io.udash.rest.SttpRestClient
 import sttp.client.SttpBackend
 
@@ -16,15 +17,9 @@ object ClientMain {
     // make a remote REST call
     val result: Future[User] = proxy.createUser("Fred")
 
-    // use whatever execution context is appropriate
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    result.onComplete {
+    Try(Await.result(result, 10.seconds)) match {
       case Success(user) => println(s"User $user created")
       case Failure(cause) => cause.printStackTrace()
     }
-
-    // just wait until future is complete so that main thread doesn't finish prematurely
-    Await.ready(result, 10.seconds)
   }
 }

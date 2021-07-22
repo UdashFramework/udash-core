@@ -1,5 +1,6 @@
 package io.udash.web.guide
 
+import com.avsystem.commons.universalOps
 import io.udash._
 import io.udash.routing.{UrlLogging, WindowUrlPathChangeProvider}
 import io.udash.rpc._
@@ -80,10 +81,9 @@ object Context {
       MenuLink("Authorization", AuthorizationExtState),
       MenuLink("Bootstrap Components", BootstrapExtState),
       MenuLink("jQuery wrapper", JQueryExtState),
-      MenuLink("User activity", UserActivityExtState)
+      MenuLink("User activity", UserActivityExtState),
     )),
-    MenuLink("License", LicenseState) /*,
-    MenuLink("FAQ", FAQState)*/
+    MenuLink("License", LicenseState),
   )
 }
 
@@ -92,17 +92,16 @@ object Init {
   import Context._
 
   @JSExport
-  def main(args: Array[String]): Unit = {
-    jQ((_: Element) => {
+  def main(args: Array[String]): Unit =
+    jQ { _: Element =>
       val appRoot = jQ("#application").get(0).get
       applicationInstance.run(appRoot)
 
       // Scroll view to top on state change
-      applicationInstance.onStateChange(ev => {
+      applicationInstance.onStateChange { ev =>
         if (ev.currentState.getClass != ev.oldState.getClass) {
-          jQ("html, body").animate(Map[String, Any]("scrollTop" -> 0), 250)
+          jQ("html, body").animate(Map[String, Any]("scrollTop" -> 0), 250).discard
         }
-      })
-    })
-  }
+      }.discard
+    }.discard
 }

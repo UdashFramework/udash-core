@@ -32,7 +32,7 @@ object SimpleCollapseDemo extends AutoDemo with CssView {
     )
     openAndCloseButton.listen { case _ =>
       collapse.show()
-      window.setTimeout(() => collapse.hide(), 2000)
+      window.setTimeout(() => collapse.hide(), 2000).discard
     }
 
     div(
