@@ -70,9 +70,15 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
       app.goTo(NextObjectState)
       app.goTo(ThrowExceptionState)
       app.goTo(NextObjectState)
+      app.goTo(ThrowExceptionState)
 
       counter should be(4)
-      failCounter should be(8)
+      failCounter should be(12)
+
+      app.reload()
+
+      counter should be(4)
+      failCounter should be(16)
     }
 
     "return URL of state" in {
