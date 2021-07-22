@@ -22,8 +22,11 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
 
   private var rootElement: Element = _
   private val routingFailureListeners = new CallbacksHandler[Throwable]
-  private lazy val viewRenderer = new ViewRenderer(rootElement)
-  private lazy val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
+  private val viewRenderer = new ViewRenderer(rootElement)
+  private val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
+
+  private def handleUrl(url: Url, fullReload: Boolean = false) =
+    routingEngine.handleUrl(url, fullReload).recover { case t => handleRoutingFailure(t) }
 
   /**
    * Starts the application using selected element as root.
@@ -34,18 +37,12 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
     rootElement = attachElement
 
     urlChangeProvider.initialize()
-    urlChangeProvider.onFragmentChange { frag =>
-      routingEngine.handleUrl(frag)
-        .recover { case ex: Throwable => handleRoutingFailure(ex) }
-    }
-    routingEngine.handleUrl(urlChangeProvider.currentFragment)
-      .recover { case ex: Throwable => handleRoutingFailure(ex) }
+    urlChangeProvider.onFragmentChange(handleUrl(_))
+    handleUrl(urlChangeProvider.currentFragment)
   }
 
-  def reload(): Unit = {
-    routingEngine.handleUrl(urlChangeProvider.currentFragment, fullReload = true)
-      .recover { case ex: Throwable => handleRoutingFailure(ex) }
-  }
+  def reload(): Unit =
+    handleUrl(urlChangeProvider.currentFragment, fullReload = true)
 
   /**
    * Registers callback which will be called after routing failure.
