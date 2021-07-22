@@ -93,8 +93,8 @@ class FrontendFormsView extends View with CssView {
     p("Notice that the only difference is the type of the used property."),
     multiSelectSnippet,
     ForceBootstrap(multiSelectDemo),
-    h3("Date"),
-    p("Below examples show how to utilise `datetime-local`, `date` and `time` input bindings. All of them are bound to String property, " +
+    h3("Date and time"),
+    p("Below examples show how to utilise ", i("datetime-local"), ", ", i("date"), " and ", i("time"), " input bindings. All of them are bound to String property, " +
       "so additional parsing might be required."),
     dateTimeLocalSnippet,
     ForceBootstrap(dateTimeLocalDemo),
