@@ -26,14 +26,13 @@ private[bindings] trait DOMManipulator {
     */
   def customElementsInsert: InsertMethod = DefaultElementInsert
 
-  @inline protected final def indexOf(nodes: NodeList, node: Node): Int =
-    js.Dynamic.global.Array.prototype.slice.call(nodes).asInstanceOf[js.Array[Node]].indexOf(node)
+  //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
+  @inline protected final def nodeListArray(nodeList: NodeList): js.Array[Node] =
+    js.Dynamic.global.Array.prototype.slice.call(nodeList).asInstanceOf[js.Array[Node]]
 
   protected final def defragment(elements: Seq[Node]): Seq[Node] =
     elements.flatMap {
-      case fragment: DocumentFragment =>
-        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice#Array-like_objects
-        js.Dynamic.global.Array.prototype.slice.call(fragment.childNodes).asInstanceOf[js.Array[Node]]
+      case fragment: DocumentFragment => nodeListArray(fragment.childNodes)
       case node => js.Array(node)
     }
 

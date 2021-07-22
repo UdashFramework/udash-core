@@ -37,7 +37,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
 
       //index of the first element produced by the binding
-      val firstIndex = indexOf(root.childNodes, firstElement)
+      val firstIndex = nodeListArray(root.childNodes).indexOf(firstElement)
 
       //number of nodes produced by properties before patch index
       val elementsBefore = producedElementsCount.jsSlice(0, patch.idx).sum
