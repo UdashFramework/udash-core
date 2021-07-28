@@ -1,6 +1,8 @@
 package io.udash
 
+import com.avsystem.commons.SharedExtensions.universalOps
 import io.udash.testing._
+import org.scalajs.dom
 
 class ApplicationTest extends UdashFrontendTest with TestRouting {
 
@@ -9,8 +11,9 @@ class ApplicationTest extends UdashFrontendTest with TestRouting {
     val initUrl = Url("/")
     val urlProvider: TestUrlChangeProvider = new TestUrlChangeProvider(initUrl)
     val app = new Application[TestState](routing, vpRegistry, urlProvider)
-
-    app.run(emptyComponent())
+    val rootId = "app"
+    dom.document.body.appendChild(emptyComponent().setup(_.setAttribute("id", rootId)))
+    app.run(s"#$rootId")
 
     "register for url changes on start and handle initial state" in {
       urlProvider.changeListeners.size should be(1)
