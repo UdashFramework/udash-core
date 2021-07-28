@@ -6,7 +6,7 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.6" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.4.4"
+  val collectionCompatVersion = "2.5.0"
 
   val jqueryWrapperVersion = "3.0.4"
   val jqueryVersion = "3.3.1"
@@ -33,20 +33,18 @@ object Dependencies {
   val jettyVersion = "9.4.43.v20210629"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
-  val logbackVersion = "1.2.3"
+  val logbackVersion = "1.2.5"
   val janinoVersion = "3.1.4"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.9"
-  val bootstrapVersion = "3.3.7-1"
-  val bootstrapDatepickerVersion = "4.17.47"
   val bootstrap4Version = "4.1.3"
-  val bootstrap4DatepickerVersion = "5.1.2"
+  val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.6.0"
+  val scalaJsBenchmarkVersion = "0.9.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
