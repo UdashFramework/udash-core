@@ -3,9 +3,9 @@ package io.udash.web.guide.views.frontend
 import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
-import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.guide._
-import io.udash.web.guide.styles.demo.ExampleStyles
+import io.udash.web.guide.demos.AutoDemo
+import io.udash.web.guide.styles.demo.{ExampleKeyframes, ExampleMixins, ExampleStyles}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.wrappers.jquery._
@@ -14,8 +14,311 @@ import scalatags.JsDom
 case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
 class FrontendTemplatesView extends View with CssView {
-  import JsDom.all._
+
+  import com.avsystem.commons.SharedExtensions.universalOps
   import io.udash.web.guide.Context._
+
+  private val scalatagsSource = {
+    import scalatags.JsDom.all._
+
+    html(
+      head(
+        meta(charset := "UTF-8"),
+        meta(name := "viewport", content := "width=device-width, initial-scale=1"),
+        script(src := "scripts/fastopt.js")
+      ),
+      body(
+        header(cls := "site-header")(
+          "Hello, World!"
+        ),
+        div(
+          h1("I'm a title."),
+          div(id := "link-wrapper")(
+            a(href := "#", target := "_blank")(
+              "I'm a link."
+            )
+          )
+        )
+      )
+    )
+  }.sourceCode
+
+  private val stylesSource = {
+    import io.udash.css._
+
+    object ExampleStyles extends CssBase {
+
+      import dsl._
+
+      val btn: CssStyle = style(
+        display.inlineBlock,
+        padding(6.px, 12.px),
+        fontSize(14.px),
+        fontWeight._400,
+        textAlign.center,
+        whiteSpace.nowrap,
+        verticalAlign.middle,
+        cursor.pointer,
+        borderWidth(1.px),
+        borderStyle.solid,
+        borderColor.transparent,
+        borderRadius(4.px),
+        userSelect.none,
+      )
+
+      val btnDefault: CssStyle = style(
+        color(c"#000000"),
+        backgroundColor(c"#FFFFFF"),
+        borderColor(c"#CCCCCC"),
+
+        &.hover(
+          color(c"#333333"),
+          backgroundColor(c"#E6E6E6"),
+          borderColor(c"#ADADAD"),
+          textDecoration := "none"
+        )
+      )
+
+      val btnSuccess: CssStyle = style(
+        color(c"#FFFFFF"),
+        backgroundColor(c"#5CB85C"),
+        borderColor(c"#4CAE4C"),
+
+        &.hover(
+          color(c"#FFFFFF"),
+          backgroundColor(c"#449D44"),
+          borderColor(c"#398439")
+        )
+      )
+    }
+  }.sourceCode
+
+  private val styleNestingSource = {
+    import io.udash.css._
+
+    object ExampleStyles extends CssBase {
+
+      import dsl._
+
+      val innerOff: CssStyle = style(
+        padding(6.px, 12.px),
+        borderBottomWidth(1.px),
+        borderBottomStyle.solid,
+        borderBottomColor(c"#CCCCCC")
+      )
+
+      val innerOn: CssStyle = style(
+        padding(6.px, 12.px),
+        color(c"#FFFFFF"),
+        backgroundColor(c"#5CB85C"),
+        borderTopWidth(1.px),
+        borderTopStyle.solid,
+        borderTopColor(c"#4CAE4C")
+      )
+
+      val switcher: CssStyle = style(
+        display.inlineBlock,
+        borderWidth(1.px),
+        borderStyle.solid,
+        borderRadius(4.px),
+        borderColor(c"#CCCCCC"),
+        cursor.pointer,
+        userSelect.none,
+
+        &.hover(
+          textDecoration := "none"
+        ),
+
+        &.attr("data-state", "on")(
+          unsafeChild(s".${innerOff.className}")(
+            visibility.hidden
+          ),
+          unsafeChild(s".${innerOn.className}")(
+            visibility.visible
+          )
+        ),
+        &.attr("data-state", "off")(
+          unsafeChild(s".${innerOff.className}")(
+            visibility.visible
+          ),
+          unsafeChild(s".${innerOn.className}")(
+            visibility.hidden
+          )
+        )
+      )
+    }
+  }.sourceCode
+
+  private val mediaQueriesSource = {
+    import io.udash.css._
+
+    object ExampleStyles extends CssBase {
+
+      import dsl._
+
+      val mediaContainer = style(
+        position.relative,
+        fontSize(28.px),
+        textAlign.center,
+        padding(40.px, 0.px),
+        borderWidth(2.px),
+        borderStyle.solid,
+        borderColor(c"#000000")
+      )
+
+      val mediaDesktop = style(
+        media.maxWidth(769.px)(
+          display.none
+        )
+      )
+
+      val mediaTablet = style(
+        display.none,
+
+        media.maxWidth(768.px)(
+          display.block
+        )
+      )
+    }
+  }.sourceCode
+
+  import JsDom.all._
+
+  private val callbacksSource = {
+    a(
+      cls := "btn btn-default",
+      id := "example-button",
+      onclick := { () => jQ("#example-button").toggleClass("btn-success") }
+    )("Click me")
+  }.sourceCode
+
+  private val (buttonDemo, buttonSource) = {
+    import org.scalajs.dom.document
+
+    div(
+      a(
+        ExampleStyles.btn, ExampleStyles.btnDefault,
+        id := "example-button",
+        onclick := { () =>
+          document.getElementById("example-button").classList.toggle(ExampleStyles.btnSuccess.className)
+        }
+      )("Click me")
+    )
+  }.withSourceCode
+
+  private val (switcherDemo, switcherSource) = {
+    a(
+      ExampleStyles.switcher,
+      id := "example-switcher",
+      data("state") := "off",
+      onclick := { () =>
+        val jqSwitcher = jQ("#example-switcher")
+
+        if (jqSwitcher.attr("data-state").get == "on")
+          jqSwitcher.attr("data-state", "off")
+        else
+          jqSwitcher.attr("data-state", "on")
+      }
+    )(
+      div(ExampleStyles.innerOff)("Off"),
+      div(ExampleStyles.innerOn)("On")
+    )
+  }.withSourceCode
+
+  private val keyframeSource = {
+    import io.udash.css._
+
+    import scala.concurrent.duration._
+
+    object ExampleKeyframes extends CssBase {
+
+      import dsl._
+
+      val colorPulse = keyframes(
+        0d -> keyframe(
+          color(c"#000000"),
+          backgroundColor(c"#FFFFFF")
+        ),
+
+        50d -> keyframe(
+          color(c"#FFFFFF"),
+          backgroundColor(c"#5CB85C")
+        ),
+
+        100d -> keyframe(
+          color(c"#000000"),
+          backgroundColor(c"#FFFFFF")
+        )
+      )
+
+      val animated = style(
+        animationName(colorPulse),
+        animationIterationCount.count(1),
+        animationDuration(2.seconds)
+      )
+    }
+  }.sourceCode
+
+  private val mixinsSource = {
+    import io.udash.css._
+    import scalacss.internal.AV
+
+    import scala.concurrent.duration.FiniteDuration
+
+    object ExampleMixins extends CssBase {
+
+      import dsl._
+
+      def animation(
+        keyframes: CssStyle,
+        duration: FiniteDuration,
+        iterationCount: AV = animationIterationCount.infinite,
+        easing: AV = animationTimingFunction.easeInOut
+      ): CssStyle = mixin(
+        animationName(keyframes),
+        iterationCount,
+        animationDuration(duration),
+        easing
+      )
+    }
+  }.sourceCode
+
+  private val keyframeAnimationSource = {
+    import io.udash.css._
+
+    import scala.concurrent.duration._
+
+    object ExampleStyles extends CssBase {
+
+      import dsl._
+
+      val btnAnimated = style(
+        &.hover {
+          ExampleMixins.animation(
+            ExampleKeyframes.colorPulse,
+            750.millis,
+          )
+        }
+      )
+    }
+  }.sourceCode
+
+  private val (animationDemo, animationSource) = {
+    a(
+      ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated
+    )("Hover over me")
+  }.withSourceCode
+
+  private val (responsiveDemo, responsiveSource) = {
+    div(
+      div(
+        ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop
+      )("Reduce the browser width"),
+      div(
+        ExampleStyles.mediaContainer, ExampleStyles.mediaTablet
+      )("Increase the browser width"),
+    )
+  }.withSourceCode
 
   override def getTemplate: Modifier = div(
     h2("Scalatags & UdashCSS"),
@@ -30,30 +333,7 @@ class FrontendTemplatesView extends View with CssView {
       "The important advantage of Scalatags is the ability to maintain views and logic in one place."
     ),
     p("For example, this piece of code:"),
-    CodeBlock(
-      """import scalatags.JsDom.all._
-        |
-        |html(
-        |  head(
-        |    meta(charset := "UTF-8"),
-        |    meta(name := "viewport", content := "width=device-width, initial-scale=1"),
-        |    script(src := "scripts/fastopt.js")
-        |  ),
-        |  body(
-        |    header(cls := "site-header")(
-        |      "Hello, World!"
-        |    ),
-        |    main(
-        |      h1("I'm a title."),
-        |      div(id := "link-wrapper")(
-        |        a(href := "#", target := "_blank")(
-        |          "I'm a link."
-        |        )
-        |      )
-        |    )
-        |  )
-        |)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(scalatagsSource),
     p("Will be compiled to this HTML:"),
     CodeBlock(
       """<html>
@@ -64,23 +344,17 @@ class FrontendTemplatesView extends View with CssView {
         |  </head>
         |  <body>
         |    <header class="site-header">Hello, World!</header>
-        |    <main>
+        |    <div>
         |      <h1>I'm a title.</h1>
         |      <div id="link-wrapper">
         |        <a href="#" target="_blank">I'm a link.</a>
         |      </div>
-        |    </main>
+        |    </div>
         |  </body>
         |</html>""".stripMargin
     )(GuideStyles),
     p("With Scalatags you can also bind callbacks, just like in HTML."),
-    CodeBlock(
-      """a(
-        |  cls := "btn btn-default",
-        |  id := "example-button",
-        |  onclick := { () => jQ("#example-button").toggleClass("btn-success") }
-        |)("Click me")""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(callbacksSource),
     h2("UdashCSS"),
     p(
       a(href := References.ScalaCssHomepage, target := "_blank")("ScalaCSS"),
@@ -105,278 +379,30 @@ class FrontendTemplatesView extends View with CssView {
       )
     ),
     p("Look at a simple button example:"),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleStyles extends CssBase {
-        |  import dsl._
-        |
-        |  val btn: CssStyle = style(
-        |    display.inlineBlock,
-        |    padding(6 px, 12 px),
-        |    fontSize(14 px),
-        |    fontWeight._400,
-        |    textAlign.center,
-        |    whiteSpace.nowrap,
-        |    verticalAlign.middle,
-        |    cursor.pointer,
-        |    borderWidth(1 px),
-        |    borderStyle.solid,
-        |    borderColor.transparent,
-        |    borderRadius(4 px),
-        |    userSelect := "none"
-        |  )
-        |
-        |  val btnDefault: CssStyle = style(
-        |    color(c"#000000"),
-        |    backgroundColor(c"#FFFFFF"),
-        |    borderColor(c"#CCCCCC"),
-        |
-        |    &.hover (
-        |      color(c"#333333"),
-        |      backgroundColor(c"#E6E6E6"),
-        |      borderColor(c"#ADADAD"),
-        |      textDecoration := "none"
-        |    )
-        |  )
-        |
-        |  val btnSuccess: CssStyle = style(
-        |    color(c"#FFFFFF"),
-        |    backgroundColor(c"#5CB85C"),
-        |    borderColor(c"#4CAE4C"),
-        |
-        |    &.hover (
-        |      color(c"#FFFFFF"),
-        |      backgroundColor(c"#449D44"),
-        |      borderColor(c"#398439")
-        |    )
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
-    p("Using with Scalatags:"),
-    CodeBlock(
-      """div(
-        |  a(
-        |    ExampleStyles.btn, ExampleStyles.btnDefault,
-        |    id := "example-button",
-        |    onclick := { () =>
-        |      jQ("#example-button")
-        |        .toggleClass(ExampleStyles.btnSuccess.className)
-        |    }
-        |  )("Click me")
-        |)""".stripMargin
-    )(GuideStyles),
-    div(GuideStyles.frame)(
-      a(
-        ExampleStyles.btn, ExampleStyles.btnDefault, id := "example-button",
-        onclick := { () => jQ("#example-button").toggleClass(ExampleStyles.btnSuccess.className)}
-      )("Click me")
-    ),
+    AutoDemo.snippet(stylesSource),
+    p("Used with Scalatags:"),
+    AutoDemo.snippet(buttonSource),
+    buttonDemo,
     h3("Nested styles"),
     p("If you need styles nesting, you can use unsafeChild():"),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleStyles extends CssBase {
-        |  import dsl._
-        |
-        |  val innerOff: CssStyle = style(
-        |    padding(6 px, 12 px),
-        |    borderBottomWidth(1 px),
-        |    borderBottomStyle.solid,
-        |    borderBottomColor(c"#CCCCCC")
-        |  )
-        |
-        |  val innerOn: CssStyle = style(
-        |    padding(6 px, 12 px),
-        |    color(c"#FFFFFF"),
-        |    backgroundColor(c"#5CB85C"),
-        |    borderTopWidth(1 px),
-        |    borderTopStyle.solid,
-        |    borderTopColor(c"#4CAE4C")
-        |  )
-        |
-        |  val swither: CssStyle = style(
-        |    display.inlineBlock,
-        |    borderWidth(1 px),
-        |    borderStyle.solid,
-        |    borderRadius(4 px),
-        |    borderColor(c"#CCCCCC"),
-        |    cursor.pointer,
-        |    userSelect := "none",
-        |
-        |    &.hover (
-        |      textDecoration := "none"
-        |    ),
-        |
-        |    &.attr("data-state", "on") (
-        |      unsafeChild(s".${innerOff.className}") (
-        |        visibility.hidden
-        |      ),
-        |      unsafeChild(s".${innerOn.className}") (
-        |        visibility.visible
-        |      )
-        |    ),
-        |    &.attr("data-state", "off") (
-        |      unsafeChild(s".${innerOff.className}") (
-        |        visibility.visible
-        |      ),
-        |      unsafeChild(s".${innerOn.className}") (
-        |        visibility.hidden
-        |      )
-        |    )
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
-    CodeBlock(
-      """a(
-        |  ExampleStyles.swither,
-        |  id := "example-switcher",
-        |  data("state") := "off",
-        |  onclick := { () =>
-        |    val jqSwitcher = jQ("#example-switcher")
-        |
-        |    if (jqSwitcher.attr("data-state").get == "on")
-        |      jqSwitcher.attr("data-state", "off")
-        |    else
-        |      jqSwitcher.attr("data-state", "on")
-        |  }
-        |)(
-        |  div(ExampleStyles.innerOff)("Off"),
-        |  div(ExampleStyles.innerOn)("On")
-        |)""".stripMargin
-    )(GuideStyles),
-    div(GuideStyles.frame)(
-      a(ExampleStyles.swither, id := "example-switcher", data("state") := "off", onclick := { () =>
-        val jqSwitcher = jQ("#example-switcher")
-        if (jqSwitcher.attr(Attributes.data(Attributes.State)).get == "on") jqSwitcher.attr(Attributes.data(Attributes.State), "off")
-        else jqSwitcher.attr(Attributes.data(Attributes.State), "on")
-      })(
-        div(ExampleStyles.innerOff)("Off"),
-        div(ExampleStyles.innerOn)("On")
-      )
-    ),
+    AutoDemo.snippet(styleNestingSource),
+    AutoDemo.snippet(switcherSource),
+    switcherDemo,
     h3("Keyframe animation"),
     p("You can use DSL methods for keyframe animations."),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleKeyframes extends CssBase {
-        |  import dsl._
-        |
-        |  val colorPulse = keyframes(
-        |    0d -> keyframe(
-        |      color(c"#000000"),
-        |      backgroundColor(c"#FFFFFF")
-        |    ),
-        |
-        |    50d -> keyframe(
-        |      color(c"#FFFFFF"),
-        |      backgroundColor(c"#5CB85C")
-        |    ),
-        |
-        |    100d -> keyframe(
-        |      color(c"#000000"),
-        |      backgroundColor(c"#FFFFFF")
-        |    )
-        |  )
-        |
-        |  val animated = style(
-        |    animationName(colorPulse),
-        |    animationIterationCount.count(1),
-        |    animationDuration(2 seconds)
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(keyframeSource),
     h3("Mixins"),
     p("If you need some mixins, you can define methods which return a CssStyle typed object:"),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleMixins extends CssBase {
-        |  import dsl._
-        |
-        |  def animation(name: String, duration: FiniteDuration,
-        |                iterationCount: AV = animationIterationCount.infinite,
-        |                easing: AV = animationTimingFunction.easeInOut): CssStyle =
-        |    mixin(
-        |      animationName := name,
-        |      iterationCount,
-        |      animationDuration(duration),
-        |      easing
-        |    )
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(mixinsSource),
     p("Using keyframes and animation mixins, you can create a button with a simple animation when you hover over it, for example:"),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleStyles extends CssBase {
-        |  import dsl._
-        |
-        |  val btnAnimated = style(
-        |    &.hover {
-        |      ExampleMixins.animation(
-        |        ExampleKeyframes.colorPulse.name.value,
-        |        FiniteDuration(750, TimeUnit.MILLISECONDS)
-        |      )
-        |    }
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
-    CodeBlock(
-      """a(
-        |  ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated
-        |)("Hover over me")""".stripMargin
-    )(GuideStyles),
-    div(GuideStyles.frame)(
-      a(ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated)( "Hover over me" )
-    ),
+    AutoDemo.snippet(keyframeAnimationSource),
+    AutoDemo.snippet(animationSource),
+    animationDemo,
     h3("Media queries"),
     p("It is also possible to create styles for responsive designs:"),
-    CodeBlock(
-      """import io.udash.css._
-        |
-        |object ExampleStyles extends CssBase {
-        |  import dsl._
-        |
-        |  val mediaContainer = style(
-        |    position.relative,
-        |    fontSize(28 px),
-        |    textAlign.center,
-        |    padding(40 px, 0 px),
-        |    borderWidth(2 px),
-        |    borderStyle.solid,
-        |    borderColor(c"#000000")
-        |  )
-        |
-        |  val mediaDesktop = style(
-        |    media.maxWidth(769 px) (
-        |      display.none
-        |    )
-        |  )
-        |
-        |  val mediaTablet = style(
-        |    display.none,
-        |
-        |    media.maxWidth(768 px) (
-        |      display.block
-        |    )
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
-    CodeBlock(
-      """div(
-        |  ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop
-        |)("Reduce the browser width"),
-        |div(
-        |  ExampleStyles.mediaContainer, ExampleStyles.mediaTablet
-        |)("Increase the browser width")""".stripMargin
-    )(GuideStyles),
-    div(
-      div(ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop)( "Reduce the browser width" ),
-      div(ExampleStyles.mediaContainer, ExampleStyles.mediaTablet)( "Increase the browser width" )
-    ),
+    AutoDemo.snippet(mediaQueriesSource),
+    AutoDemo.snippet(responsiveSource),
+    responsiveDemo,
     h3("Rendering"),
     p(
       "The JavaScript version of this cross-compiled code contains only the class names of CSS rules. ",

@@ -52,31 +52,6 @@ final class I18NExtView extends View with CssView {
     }
   }.sourceCode
 
-  private val translationServerSource = {
-    import com.avsystem.commons.concurrent.RunNowEC.Implicits.executionContext
-    {
-      import io.udash.i18n._
-
-      import java.{util => ju}
-
-      class TranslationServer extends TranslationRPCEndpoint(
-        new ResourceBundlesTranslationTemplatesProvider(
-          TranslationServer.langs
-            .map(lang =>
-              Lang(lang) -> TranslationServer.bundlesNames.map(name =>
-                ju.ResourceBundle.getBundle(name, new ju.Locale(lang))
-              )
-            ).toMap
-        )
-      )
-
-      object TranslationServer {
-        val langs = Seq("en", "pl")
-        val bundlesNames = Seq("demo_translations")
-      }
-    }
-  }.sourceCode
-
   override def getTemplate: Modifier = div(
     h1("Udash i18n"),
     p(
@@ -132,7 +107,26 @@ final class I18NExtView extends View with CssView {
       "The Udash i18n plugin makes ", i("RemoteTranslationRPC"), " easier, because it provides ",
       i("TranslationRPCEndpoint"), " and ", i("ResourceBundlesTranslationTemplatesProvider"), " classes."
     ),
-    AutoDemo.snippet(translationServerSource),
+    CodeBlock(
+      s"""import io.udash.i18n._
+         |import java.{util => ju}
+         |
+         |class TranslationServer extends TranslationRPCEndpoint(
+         |  new ResourceBundlesTranslationTemplatesProvider(
+         |    TranslationServer.langs
+         |      .map(lang =>
+         |        Lang(lang) -> TranslationServer.bundlesNames.map(name =>
+         |          ju.ResourceBundle.getBundle(name, new ju.Locale(lang))
+         |        )
+         |      ).toMap
+         |  )
+         |)
+         |
+         |object TranslationServer {
+         |  val langs = Seq("en", "pl")
+         |  val bundlesNames = Seq("demo_translations")
+         |}""".stripMargin
+    )(GuideStyles),
     p(
       i("ResourceBundlesTranslationTemplatesProvider"), " expects ", i("Map[Lang, Seq[ju.ResourceBundle]]"), " as a constructor argument, whereas ",
       i("TranslationRPCEndpoint"), " takes ", i("ResourceBundlesTranslationTemplatesProvider"), " instance. ",
