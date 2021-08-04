@@ -142,7 +142,7 @@ object ServerRawRpc extends RawRpcCompanion[ServerRawRpc] {
 case class ServerRpcMetadata[T](
   @reifyName name: String,
   @multi @rpcMethodMetadata getters: Map[String, GetterMethod[_]],
-  @multi @rpcMethodMetadata @annotated[Logged] loggedMethods: Map[String, LoggedMethod[_]]
+  @multi @rpcMethodMetadata methods: Map[String, LoggedMethod[_]]
 )
 object ServerRpcMetadata extends RpcMetadataCompanion[ServerRpcMetadata]
 
@@ -153,5 +153,6 @@ case class GetterMethod[T](
 
 @allowIncomplete
 case class LoggedMethod[T](
-  @reifyName name: String
+  @reifyName name: String,
+  @optional @reifyAnnot logged: Opt[Logged],
 ) extends TypedMetadata[T]
