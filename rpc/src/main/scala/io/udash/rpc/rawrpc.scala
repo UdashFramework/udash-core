@@ -154,5 +154,5 @@ case class GetterMethod[T](
 @allowIncomplete
 case class RpcMethod[T](
   @reifyName name: String,
-  @optional @reifyAnnot logged: Opt[Logged],
+  @isAnnotated[Logged] logged: Boolean,
 ) extends TypedMetadata[T]

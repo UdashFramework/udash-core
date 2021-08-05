@@ -23,7 +23,7 @@ trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
 
     val methodMetadata = classMetadata.methods(msg.invocation.rpcName)
 
-    if (logAll || methodMetadata.logged.isDefined)
+    if (logAll || methodMetadata.logged)
       log(classMetadata.name, methodMetadata.name, msg.invocation.args.map(_.json))
   }
 
