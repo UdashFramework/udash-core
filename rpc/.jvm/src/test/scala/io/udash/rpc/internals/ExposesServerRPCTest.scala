@@ -127,18 +127,19 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
     new UPickleExposesServerRPC[TestRPC](impl)
   }
 
-  val loggedCalls = ListBuffer.empty[String]
 
-  def createLoggingRpc(calls: mutable.Builder[String, Seq[String]]): ExposesServerRPC[TestRPC] = {
+  def createLoggingRpc(calls: mutable.Builder[String, Seq[String]], all: Boolean = false): (ExposesServerRPC[TestRPC], ListBuffer[String]) = {
+    val loggedCalls = ListBuffer.empty[String]
     val impl = TestRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
       calls += method
     })
     new DefaultExposesServerRPC[TestRPC](impl) with CallLogging[TestRPC] {
       override protected val metadata: ServerRpcMetadata[TestRPC] = TestRPC.metadata
+      override protected def logAll: Boolean = all
 
       override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
         loggedCalls += s"$rpcName $methodName $args"
-    }
+    } -> loggedCalls
   }
 
   "DefaultExposesServerRPC" should tests(createDefaultRpc)
@@ -146,10 +147,11 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
 
   "LoggingExposesServerRPC" should {
     import io.udash.rpc.InnerRPC
-    val calls = Seq.newBuilder[String]
-    val rpc: ExposesServerRPC[TestRPC] = createLoggingRpc(calls)
 
     "not log calls of regular RPC methods" in {
+      val calls = Seq.newBuilder[String]
+      val (rpc, loggedCalls) = createLoggingRpc(calls)
+
       rpc.handleRpcCall(
         RpcCall(
           RpcInvocation("doStuff", List(write[Boolean](true))),
@@ -161,7 +163,7 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
         RpcCall(
           RpcInvocation("doStuff", List(write[Boolean](false))),
           List(),
-          "callId1"
+          "callId2"
         )
       )
       rpc.handleRpcFire(
@@ -170,10 +172,67 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
           List(RpcInvocation("innerRpc", List(write[String]("arg0"))))
         )
       )
+
       loggedCalls shouldBe empty
     }
 
     "log calls of annotated RPC methods" in {
+      val calls = Seq.newBuilder[String]
+      val (rpc, loggedCalls) = createLoggingRpc(calls)
+
+      rpc.handleRpcCall(
+        RpcCall(
+          RpcInvocation("func", List(write[Int](5))),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0")))),
+          "callId1"
+        )
+      )
+      rpc.handleRpcCall(
+        RpcCall(
+          RpcInvocation("func", List(write[Int](10))),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0")))),
+          "callId2"
+        )
+      )
+      rpc.handleRpcFire(
+        RpcFire(
+          RpcInvocation("fireSomething", List(write[Int](13))),
+          List()
+        )
+      )
+
+      loggedCalls should contain theSameElementsInOrderAs List(
+        s"${classOf[InnerRPC].getSimpleName} func List(5)",
+        s"${classOf[InnerRPC].getSimpleName} func List(10)",
+        s"${classOf[TestRPC].getSimpleName} fireSomething List(13)"
+      )
+    }
+
+    "log calls of all RPC methods" in {
+      val calls = Seq.newBuilder[String]
+      val (rpc, loggedCalls) = createLoggingRpc(calls, all = true)
+
+      rpc.handleRpcCall(
+        RpcCall(
+          RpcInvocation("doStuff", List(write[Boolean](true))),
+          List(),
+          "callId1"
+        )
+      )
+      rpc.handleRpcCall(
+        RpcCall(
+          RpcInvocation("doStuff", List(write[Boolean](false))),
+          List(),
+          "callId2"
+        )
+      )
+      rpc.handleRpcFire(
+        RpcFire(
+          RpcInvocation("proc", List()),
+          List(RpcInvocation("innerRpc", List(write[String]("arg0"))))
+        )
+      )
+
       rpc.handleRpcCall(
         RpcCall(
           RpcInvocation("func", List(write[Int](5))),
@@ -194,7 +253,11 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
           List()
         )
       )
-      loggedCalls.toList shouldBe List(
+
+      loggedCalls should contain theSameElementsInOrderAs List(
+        s"${classOf[TestRPC].getSimpleName} doStuff List(true)",
+        s"${classOf[TestRPC].getSimpleName} doStuff List(false)",
+        s"${classOf[InnerRPC].getSimpleName} proc List()",
         s"${classOf[InnerRPC].getSimpleName} func List(5)",
         s"${classOf[InnerRPC].getSimpleName} func List(10)",
         s"${classOf[TestRPC].getSimpleName} fireSomething List(13)"
