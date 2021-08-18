@@ -5,7 +5,9 @@ import io.udash.properties.PropertyCreator
 import io.udash.routing.{RoutingEngine, StateChangeEvent}
 import io.udash.utils.CallbacksHandler
 import io.udash.view.ViewRenderer
-import org.scalajs.dom.Element
+import org.scalajs.dom
+import org.scalajs.dom.raw.EventListenerOptions
+import org.scalajs.dom.{Element, Event, document}
 
 /**
  * Root application which is used to start single instance of app.
@@ -39,6 +41,26 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
     urlChangeProvider.initialize()
     urlChangeProvider.onFragmentChange(handleUrl(_))
     handleUrl(urlChangeProvider.currentFragment)
+  }
+
+  /**
+   * Starts the application using selectors to find root element. Handles waiting for document to be ready.
+   *
+   * @param selectors A DOMString containing one or more selectors to match.
+   *                  This string must be a valid CSS selector string; if it isn't, a native SyntaxError exception is thrown.
+   *                  See https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
+   * @param callback  Callback ran after the application is started.
+   */
+  final def run(selectors: String, callback: => Unit = ()): Unit = {
+    def onReady(): Unit = {
+      run(dom.document.querySelector(selectors))
+      callback
+    }
+    if (document.readyState != "loading") onReady()
+    else dom.document.addEventListener("DOMContentLoaded", { _: Event => onReady() }, new EventListenerOptions {
+      once = true
+      passive = true
+    })
   }
 
   def reload(): Unit =
