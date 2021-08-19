@@ -6,7 +6,7 @@ import org.scalajs.dom.html.Select
 import scalatags.JsDom.all._
 
 private[inputs] class SelectBinding[T](
-  options: ReadableSeqProperty[T], label: T => Modifier, selectModifiers: Modifier*
+  options: ReadableSeqProperty[T], label: T => Modifier, labelNoValue:Option[Modifier], selectModifiers: Modifier*
 )(
   checkedIf: T => ReadableProperty[Boolean],
   refreshSelection: Seq[T] => Unit,
@@ -17,7 +17,11 @@ private[inputs] class SelectBinding[T](
       kill()
       refreshSelection(opts)
 
-      opts.zipWithIndex.map { case (opt, idx) =>
+      val empty = labelNoValue.map{ l =>
+        option(l, value := "").render
+      }.toSeq
+
+      empty ++ opts.zipWithIndex.map { case (opt, idx) =>
         val el = option(value := idx.toString, label(opt)).render
 
         val selected = checkedIf(opt)

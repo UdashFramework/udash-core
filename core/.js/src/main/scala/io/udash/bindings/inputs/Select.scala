@@ -25,10 +25,34 @@ object Select {
   def apply[T](
     selectedItem: Property[T], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
-    new SelectBinding(options, label, selectModifiers)(
+    new SelectBinding(options, label, None, selectModifiers)(
       opt => selectedItem.transform(_ == opt),
       opts => if (opts.nonEmpty && !opts.contains(selectedItem.get)) selectedItem.set(opts.head),
       selector => (_: Event) => selectedItem.set(options.get.apply(selector.value.toInt))
+    )
+  }
+
+
+  /**
+   * Single select for optional ValueProperty.
+   *
+   * @param selectedItem Property to bind.
+   * @param options SeqProperty of available options.
+   * @param labelNoValue Add empty option with selected label
+   * @param label Provides element's label.
+   * @param selectModifiers Additional Modifiers for the select tag, don't use modifiers on value, onchange and selected attributes.
+   * @return Binding with `select` element, which can be used as Scalatags modifier.
+   */
+  def optional[T](
+    selectedItem: Property[Option[T]], options: ReadableSeqProperty[T], labelNoValue:Modifier
+  )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
+    new SelectBinding(options, label, Some(labelNoValue), selectModifiers)(
+      opt => selectedItem.transform(_.contains(opt)),
+      opts => if (!opts.exists(x => selectedItem.get.contains(x))) selectedItem.set(None),
+      selector => (_: Event) => selector.value match {
+        case ""  => selectedItem.set(None)
+        case s:String =>  selectedItem.set(Some(options.get.apply(selector.value.toInt)))
+      }
     )
   }
 
@@ -44,7 +68,7 @@ object Select {
   def apply[T, ElemType <: Property[T]](
     selectedItems: SeqProperty[T, ElemType], options: ReadableSeqProperty[T]
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
-    new SelectBinding(options, label, selectModifiers :+ (multiple := true))(
+    new SelectBinding(options, label, None, selectModifiers :+ (multiple := true))(
       opt => selectedItems.transform(_.contains(opt)),
       opts => selectedItems.set(selectedItems.get.filter(opts.contains)),
       selector => (_: Event) => {
