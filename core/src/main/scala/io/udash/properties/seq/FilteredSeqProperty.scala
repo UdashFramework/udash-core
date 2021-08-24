@@ -25,7 +25,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
     originElementListeners.clear()
   }
 
-  override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
+  override protected def transformPatch(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
     patch.removed.indices.foreach { i => originElementListeners(i + patch.idx).cancel() }
     val newListeners = patch.added.map { el => el.listen(_ => elementChanged(el)) }
     CrossCollections.replaceSeq(originElementListeners, patch.idx, patch.removed.size, newListeners)
@@ -34,7 +34,6 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
     val removed = patch.removed.filter(p => matcher(p.get))
     if (added.nonEmpty || removed.nonEmpty) {
       val idx = origin.elemProperties.slice(0, patch.idx).count(p => matcher(p.get))
-      CrossCollections.replaceSeq(transformedElements, idx, removed.size, added)
       Patch[ElemType](idx, removed, added).opt
     } else Opt.Empty
   }

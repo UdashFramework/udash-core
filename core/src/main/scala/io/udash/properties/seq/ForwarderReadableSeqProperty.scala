@@ -17,10 +17,11 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
 
   protected def getFromOrigin(): BSeq[B]
   protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType]
-  protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]]
+  protected def transformPatch(patch: Patch[OrigType]): Opt[Patch[ElemType]]
 
   protected def originStructureListener(patch: Patch[OrigType]): Unit =
-    transformPatchAndUpdateElements(patch).foreach { transformed =>
+    transformPatch(patch).foreach { transformed =>
+      CrossCollections.replaceSeq(transformedElements, transformed.idx, transformed.removed.length, transformed.added)
       fireElementsListeners(transformed)
       valueChanged()
     }

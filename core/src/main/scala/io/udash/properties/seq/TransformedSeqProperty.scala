@@ -2,7 +2,6 @@ package io.udash.properties.seq
 
 import com.avsystem.commons._
 import io.udash.properties.single.{Property, ReadableProperty}
-import io.udash.utils.CrossCollections
 
 private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]](
   override protected val origin: ReadableSeqProperty[A, OrigType], transformer: A => B
@@ -10,16 +9,12 @@ private[properties] class TransformedReadableSeqProperty[A, B, ElemType <: Reada
 
   override protected def getFromOrigin(): BSeq[B] = origin.get.map(transformer)
   override protected def transformElements(elemProperties: BSeq[OrigType]): BSeq[ElemType] = elemProperties.map(transformElement)
-  override protected def transformPatchAndUpdateElements(patch: Patch[OrigType]): Opt[Patch[ElemType]] = {
-    val transPatch = Patch[ElemType](
+  override protected def transformPatch(patch: Patch[OrigType]): Opt[Patch[ElemType]] =
+    Patch[ElemType](
       patch.idx,
       transformedElements.slice(patch.idx, patch.idx + patch.removed.size).toSeq,
       patch.added.map(transformElement),
-    )
-
-    CrossCollections.replaceSeq(transformedElements, patch.idx, patch.removed.length, transPatch.added)
-    transPatch.opt
-  }
+    ).opt
 
   protected def transformElement(el: OrigType): ElemType =
     el.transform(transformer).asInstanceOf[ElemType]
