@@ -8,7 +8,7 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
   override protected val origin: ReadableSeqProperty[A, ElemType], matcher: A => Boolean
 ) extends ForwarderReadableSeqProperty[A, A, ElemType, ElemType] {
 
-  private val originListeners: MBuffer[Registration] = CrossCollections.createArray
+  private val originElementListeners: MBuffer[Registration] = CrossCollections.createArray
 
   override protected def getFromOrigin(): BSeq[A] = origin.get.filter(matcher)
   override protected def transformElements(elemProperties: BSeq[ElemType]): BSeq[ElemType] =
@@ -16,19 +16,19 @@ private[properties] final class FilteredSeqProperty[A, ElemType <: ReadablePrope
 
   override protected def onListenerInit(originElems: BSeq[ElemType]): Unit = {
     super.onListenerInit(originElems)
-    originElems.foreach { el => originListeners += el.listen(_ => elementChanged(el)) }
+    originElems.foreach { el => originElementListeners += el.listen(_ => elementChanged(el)) }
   }
 
   override protected def onListenerDestroy(): Unit = {
     super.onListenerDestroy()
-    originListeners.foreach(_.cancel())
-    originListeners.clear()
+    originElementListeners.foreach(_.cancel())
+    originElementListeners.clear()
   }
 
   override protected def transformPatchAndUpdateElements(patch: Patch[ElemType]): Opt[Patch[ElemType]] = {
-    patch.removed.indices.foreach { i => originListeners(i + patch.idx).cancel() }
+    patch.removed.indices.foreach { i => originElementListeners(i + patch.idx).cancel() }
     val newListeners = patch.added.map { el => el.listen(_ => elementChanged(el)) }
-    CrossCollections.replaceSeq(originListeners, patch.idx, patch.removed.size, newListeners)
+    CrossCollections.replaceSeq(originElementListeners, patch.idx, patch.removed.size, newListeners)
 
     val added = patch.added.filter(p => matcher(p.get))
     val removed = patch.removed.filter(p => matcher(p.get))
