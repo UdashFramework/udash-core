@@ -22,7 +22,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
   protected def originStructureListener(patch: Patch[OrigType]): Unit =
     transformPatch(patch).foreach { transformed =>
       CrossCollections.replaceSeq(transformedElements, transformed.idx, transformed.removed.length, transformed.added)
-      fireElementsListeners(transformed)
+      structureListeners.foreach(_.apply(transformed))
       valueChanged()
     }
 

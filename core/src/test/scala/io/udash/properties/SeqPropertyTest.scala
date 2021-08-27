@@ -1392,11 +1392,11 @@ class SeqPropertyTest extends UdashCoreTest {
       pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(11)
       patches(9).idx should be(0)
-      patches(9).added.size should be(4)
+      patches(9).added.size should be(5)
       patches(9).removed.size should be(5)
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
-      patches.last.removed.size should be(4)
+      patches.last.removed.size should be(5)
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)
