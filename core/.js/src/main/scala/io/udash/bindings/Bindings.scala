@@ -43,7 +43,7 @@ trait Bindings {
   def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
     val el = document.createElement("div")
     t.appendChild(el)
-    window.setTimeout(() => t.replaceChildren(el, component), timeout)
+    window.setTimeout(() => t.replaceChildren(Seq(el), component), timeout)
   }
 
   /**

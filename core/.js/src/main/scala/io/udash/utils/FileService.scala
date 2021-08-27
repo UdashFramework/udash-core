@@ -1,22 +1,14 @@
 package io.udash.utils
 
 import com.avsystem.commons.misc.AbstractCase
-
-import java.io.IOException
 import org.scalajs.dom._
+import org.scalajs.dom.experimental.FileReaderSync
 import org.scalajs.dom.raw.Blob
 
-import scala.scalajs.js
+import java.io.IOException
 import scala.concurrent.{Future, Promise}
-import scala.scalajs.js.annotation.JSGlobal
-import scala.scalajs.js.typedarray.ArrayBuffer
+import scala.scalajs.js
 import scala.util.Try
-
-@js.native
-@JSGlobal
-private[utils] final class FileReaderSync() extends js.Object {
-  def readAsArrayBuffer(blob: Blob): ArrayBuffer = js.native
-}
 
 final case class CloseableUrl(value: String) extends AbstractCase with AutoCloseable {
   override def close(): Unit = {
@@ -84,7 +76,7 @@ object FileService {
     fileReader.onabort = (e: Event) =>
       promise.failure(new IOException(e.toString))
 
-    fileReader.onload = (_: UIEvent) =>
+    fileReader.onload = (_: ProgressEvent) =>
       promise.complete(Try(
         new Int8Array(fileReader.result.asInstanceOf[ArrayBuffer]).toArray
       ))
