@@ -1,6 +1,6 @@
 package io.udash.properties.single
 
-private[properties] class DirectPropertyImpl[A](val parent: ReadableProperty[_])
+private[properties] final class DirectProperty[A](override protected val parent: ReadableProperty[_])
   extends AbstractProperty[A] with CastableProperty[A] {
 
   private var value: A = _
@@ -18,4 +18,6 @@ private[properties] class DirectPropertyImpl[A](val parent: ReadableProperty[_])
 
   override def touch(): Unit =
     valueChanged()
+
+  override def toString: String = s"DirectProperty($value)"
 }

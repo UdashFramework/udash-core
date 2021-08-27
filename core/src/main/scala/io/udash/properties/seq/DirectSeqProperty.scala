@@ -7,8 +7,8 @@ import io.udash.utils.CrossCollections
 
 import scala.collection.compat._
 
-private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
-  val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
+private[properties] final class DirectSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
+  override protected val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
   extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[BSeq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
@@ -17,7 +17,7 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit = {
     val oldProperties = CrossCollections.slice(properties, idx, idx + amount)
-    val newProperties = if (values != null) values.map(value => PropertyCreator[A].newProperty(value, this)) else Seq.empty
+    val newProperties = values.map(value => PropertyCreator[A].newProperty(value, this))
 
     CrossCollections.replaceSeq(properties, idx, amount, newProperties)
 
@@ -37,8 +37,10 @@ private[properties] class DirectSeqPropertyImpl[A: PropertyCreator, SeqTpe[T] <:
     properties.insertAll(0, newProperties)
   }
 
-  override def touch(): Unit =
-    replaceSeq(0, properties.length, get.toSeq)
+  override def touch(): Unit = {
+    fireElementsListeners(Patch(0, properties.toSeq, properties.toSeq))
+    valueChanged()
+  }
 
   def get: SeqTpe[A] = properties.map(_.get).to(fac)
 }
