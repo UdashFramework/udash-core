@@ -8,7 +8,7 @@ object Dependencies {
   val versionOfScala = "2.13.6" //update .github/workflows/ci.yml as well
   val collectionCompatVersion = "2.5.0"
 
-  val jqueryWrapperVersion = "3.0.4"
+  val jqueryWrapperVersion = "3.1.1"
   val jqueryVersion = "3.3.1"
 
   val scalaJsDomVersion = "1.1.0"
