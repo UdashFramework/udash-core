@@ -8,10 +8,10 @@ object Dependencies {
   val versionOfScala = "2.13.6" //update .github/workflows/ci.yml as well
   val collectionCompatVersion = "2.5.0"
 
-  val jqueryWrapperVersion = "3.0.4"
-  val jqueryVersion = "3.3.1"
+  val jqueryWrapperVersion = "3.1.1"
+  val jqueryVersion = "3.4.1" //keep consistent with wrapper
 
-  val scalaJsDomVersion = "1.1.0"
+  val scalaJsDomVersion = "1.2.0"
   val scalaTagsVersion = "0.9.4"
   val scalaCssVersion = "0.7.0"
 
@@ -140,8 +140,6 @@ object Dependencies {
   private val bootstrap4Resource = "js/bootstrap.bundle.js"
 
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / jqueryResource
-      minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
       minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
     "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
