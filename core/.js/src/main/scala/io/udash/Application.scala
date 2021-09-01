@@ -46,15 +46,18 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   /**
    * Starts the application using selectors to find root element. Handles waiting for document to be ready.
    *
-   * @param selectors A DOMString containing one or more selectors to match.
-   *                  This string must be a valid CSS selector string; if it isn't, a native SyntaxError exception is thrown.
-   *                  See https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
-   * @param callback  Callback ran after the application is started.
+   * @param selectors            A DOMString containing one or more selectors to match.
+   *                             This string must be a valid CSS selector string; if it isn't, a native SyntaxError exception is thrown.
+   *                             See https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
+   * @param onContentLoaded      Callback ran on the application root element before the application is started.
+   * @param onApplicationStarted Callback ran on the application root element after the application is started.
    */
-  final def run(selectors: String, callback: => Unit = ()): Unit = {
+  final def run(selectors: String, onContentLoaded: Element => Unit = _ => (), onApplicationStarted: Element => Unit = _ => ()): Unit = {
     def onReady(): Unit = {
-      run(dom.document.querySelector(selectors))
-      callback
+      val rootElement = dom.document.querySelector(selectors)
+      onContentLoaded(rootElement)
+      run(rootElement)
+      onApplicationStarted(rootElement)
     }
     if (document.readyState != "loading") onReady()
     else dom.document.addEventListener("DOMContentLoaded", { _: Event => onReady() }, new EventListenerOptions {

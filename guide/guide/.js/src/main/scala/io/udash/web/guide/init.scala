@@ -80,8 +80,7 @@ object Init {
 
   @JSExport
   def main(args: Array[String]): Unit =
-    applicationInstance.run("#application", applicationInstance.onStateChange { ev =>
-      println("run")
+    applicationInstance.run("#application", onApplicationStarted = _ => applicationInstance.onStateChange { ev =>
       if (ev.currentState.getClass != ev.oldState.getClass) {
         jQ("html, body").animate(Map[String, Any]("scrollTop" -> 0), 250)
       }
