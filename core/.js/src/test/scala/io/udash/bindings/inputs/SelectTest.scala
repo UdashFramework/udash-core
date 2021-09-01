@@ -135,6 +135,18 @@ class SelectTest extends UdashFrontendTest {
       select.childElementCount should be(4) // empty value should be included
       select.value should be("1")
 
+      def trimHtml(s:String):String = s.split("\n").map(_.trim).mkString
+
+      val expectedHtml = """<select>
+                           |  <option value="">empty</option>
+                           |  <option value="0">A</option>
+                           |  <option value="1"></option>
+                           |  <option value="2">B</option>
+                           |</select>
+                           |""".stripMargin
+
+      trimHtml(select.outerHTML) should be(trimHtml(expectedHtml))
+
       p.set(None)
       select.value should be("")
 

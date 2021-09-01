@@ -59,11 +59,8 @@ object Select {
     selectedItem: Property[Option[T]], options: ReadableSeqProperty[T], labelNoValue: Modifier
   )(label: T => Modifier, selectModifiers: Modifier*): InputBinding[Select] = {
     new SelectBinding(options, label, Some(labelNoValue), selectModifiers)(
-      opt => selectedItem.transform {
-        case None => false
-        case Some(si) => si == opt
-      },
-      opts => if (!opts.exists(x => selectedItem.get.contains(x))) selectedItem.set(None),
+      opt => selectedItem.transform(_.contains(opt)),
+      opts => if (selectedItem.get.isEmpty && !opts.exists(x => selectedItem.get.contains(x))) selectedItem.set(None),
       selector => (_: Event) => selector.value match {
         case ""  => selectedItem.set(None)
         case s:String =>  selectedItem.set(Some(options.get.apply(s.toInt)))
