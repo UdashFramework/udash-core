@@ -7,7 +7,9 @@ import io.udash.utils.CallbacksHandler
 import io.udash.view.ViewRenderer
 import org.scalajs.dom
 import org.scalajs.dom.raw.EventListenerOptions
-import org.scalajs.dom.{Element, Event, document}
+import org.scalajs.dom.{Element, Event}
+
+import scala.util.Try
 
 /**
  * Root application which is used to start single instance of app.
@@ -27,7 +29,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   private val viewRenderer = new ViewRenderer(rootElement)
   private val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
-  private def handleUrl(url: Url, fullReload: Boolean = false) =
+  private def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] =
     routingEngine.handleUrl(url, fullReload).recover { case t => handleRoutingFailure(t) }
 
   /**
@@ -49,17 +51,17 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
    * @param selectors            A DOMString containing one or more selectors to match.
    *                             This string must be a valid CSS selector string; if it isn't, a native SyntaxError exception is thrown.
    *                             See https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
-   * @param onContentLoaded      Callback ran on the application root element before the application is started.
+   * @param onDocumentReady      Callback ran on the application root element before the application is started but once the DOM document is ready.
    * @param onApplicationStarted Callback ran on the application root element after the application is started.
    */
-  final def run(selectors: String, onContentLoaded: Element => Unit = _ => (), onApplicationStarted: Element => Unit = _ => ()): Unit = {
+  final def run(selectors: String, onDocumentReady: Element => Unit = _ => (), onApplicationStarted: Element => Unit = _ => ()): Unit = {
     def onReady(): Unit = {
       val rootElement = dom.document.querySelector(selectors)
-      onContentLoaded(rootElement)
+      onDocumentReady(rootElement)
       run(rootElement)
       onApplicationStarted(rootElement)
     }
-    if (document.readyState != "loading") onReady()
+    if (dom.document.readyState != "loading") onReady()
     else dom.document.addEventListener("DOMContentLoaded", { _: Event => onReady() }, new EventListenerOptions {
       once = true
       passive = true
