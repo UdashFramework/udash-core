@@ -9,7 +9,6 @@ object Dependencies {
   val collectionCompatVersion = "2.5.0"
 
   val jqueryWrapperVersion = "3.1.1"
-  val jqueryVersion = "3.4.1" //keep consistent with wrapper
 
   val scalaJsDomVersion = "1.2.0"
   val scalaTagsVersion = "0.9.4"
@@ -135,13 +134,12 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  private val jqueryResource = s"$jqueryVersion/jquery.js"
   private val momentResource = s"$momentJsVersion/moment.js"
   private val bootstrap4Resource = "js/bootstrap.bundle.js"
 
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
-      minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
+      minified "js/bootstrap.bundle.min.js" dependsOn s"jquery.js",
     "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
