@@ -17,7 +17,8 @@ import scala.scalajs.js
 
 /**
  * Options for `UdashButton` component
- * @param color     A button style, one of the standard bootstrap colors `BootstrapStyles.Color`.
+ *
+ * @param color           A button style, one of the standard bootstrap colors `BootstrapStyles.Color`.
  * @param size            A button size, one of the standard bootstrap sizes `BootstrapStyles.Size`.
  * @param outline         If true, selects the outline style for the button. More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/#outline-buttons">Bootstrap Docs</a>.
  * @param block           If true, rendered button will be a full-width block.
@@ -26,7 +27,7 @@ import scala.scalajs.js
  * @param customModifiers Sequence of custom modifiers.
  */
 final case class UdashButtonOptions(
-  color: BootstrapStyles.Color = BootstrapStyles.Color.Primary,
+  color: Opt[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.opt,
   size: Opt[BootstrapStyles.Size] = Opt.empty,
   outline: Boolean = false,
   block: Boolean = false,
@@ -49,7 +50,7 @@ final class UdashButton private(
   private val classes: Seq[Modifier] =
     Seq(
       BootstrapStyles.Button.btn: Modifier,
-      (if (options.outline) BootstrapStyles.Button.outline _ else BootstrapStyles.Button.color _) (options.color): Modifier,
+      options.color.map(if (options.outline) BootstrapStyles.Button.outline _ else BootstrapStyles.Button.color _): Modifier,
       BootstrapStyles.Button.block.styleIf(options.block),
       nestedInterceptor(BootstrapStyles.active.styleIf(active)),
       nestedInterceptor(BootstrapStyles.disabled.styleIf(disabled)),
@@ -59,20 +60,20 @@ final class UdashButton private(
 
 
   override val render: dom.html.Element = {
-    options.tag match {
+    (options.tag match {
       case ButtonTag.Button =>
         button(componentId, tpe := "button")(classes: _*)(
           onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
-        )(content(nestedInterceptor)).render
+        )
       case ButtonTag.Anchor =>
         a(componentId)(classes: _*)(
-          options.href.map(value => href := value)
-        )(content(nestedInterceptor)).render
+          options.href.map(href := _)
+        )
       case ButtonTag.Div =>
         div(componentId)(classes: _*)(
           onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
-        )(content(nestedInterceptor)).render
-    }
+        )
+    }) (content(nestedInterceptor)).render
   }
 
   override def kill(): Unit = {

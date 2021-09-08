@@ -22,7 +22,7 @@ object BadgesDemo extends AutoDemo with CssView {
     div(
       UdashButton(
         options = UdashButtonOptions(
-          color = Color.Primary,
+          color = Color.Primary.opt,
           size = Size.Large.opt
         )
       )(_ => Seq[Modifier](

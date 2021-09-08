@@ -50,10 +50,10 @@ object DatePickerDemo extends AutoDemo with CssView {
         events.append(s"Widget change from $oldDate to $date")
     }
 
-    val showButton = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Show")
-    val hideButton = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Hide")
-    val enableButton = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Enable")
-    val disableButton = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Disable")
+    val showButton = UdashButton()("Show")
+    val hideButton = UdashButton()("Hide")
+    val enableButton = UdashButton()("Enable")
+    val disableButton = UdashButton()("Disable")
     showButton.listen { case _ => picker.show() }
     hideButton.listen { case _ => picker.hide() }
     enableButton.listen { case _ => picker.enable() }

@@ -95,7 +95,7 @@ object SimpleFormDemo extends AutoDemo with CssView {
           inline = true.toProperty,
           validationTrigger = UdashForm.ValidationTrigger.None
         )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
-        factory.disabled()(_ => UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Send").render)
+        factory.disabled()(_ => UdashButton()("Send").render)
       ))
     ).render
   }.withSourceCode

@@ -32,7 +32,7 @@ object ButtonsDemo extends AutoDemo {
     val buttons = Color.values.map(color =>
       UdashButton(
         options = UdashButtonOptions(
-          color,
+          color.opt,
           smallBtn,
         ),
         disabled = disabledButtons.transform(_.contains(color.ordinal))
@@ -50,7 +50,6 @@ object ButtonsDemo extends AutoDemo {
 
     val push = UdashButton(
       options = UdashButtonOptions(
-        color = Color.Secondary,
         size = Size.Large.opt,
         block = true
       )

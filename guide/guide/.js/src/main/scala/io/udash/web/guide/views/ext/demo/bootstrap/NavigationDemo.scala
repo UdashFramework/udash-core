@@ -43,7 +43,7 @@ object NavigationDemo extends AutoDemo {
               buttonFactory = UdashButton(
                 options = UdashButtonOptions(
                   tag = ButtonTag.Anchor,
-                  color = BootstrapStyles.Color.Link,
+                  color = BootstrapStyles.Color.Link.opt,
                   customModifiers = Seq(Navigation.link)
                 )
               )
@@ -52,7 +52,7 @@ object NavigationDemo extends AutoDemo {
           case link: MenuLink => UdashButton(
             options = UdashButtonOptions(
               tag = ButtonTag.Anchor,
-              color = BootstrapStyles.Color.Link,
+              color = BootstrapStyles.Color.Link.opt,
               href = link.state.url.opt,
               customModifiers = Seq(Navigation.link)
             )

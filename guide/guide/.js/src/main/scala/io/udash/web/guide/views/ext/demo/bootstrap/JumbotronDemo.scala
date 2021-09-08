@@ -21,8 +21,7 @@ object JumbotronDemo extends AutoDemo with CssView {
       ),
       UdashButton(
         options = UdashButtonOptions(
-
-          color = Color.Info,
+          color = Color.Info.opt,
           size = Size.Large.opt
         )
       )(_ => "Click")

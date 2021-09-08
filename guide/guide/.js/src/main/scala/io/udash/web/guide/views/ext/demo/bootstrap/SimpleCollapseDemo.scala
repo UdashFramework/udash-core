@@ -26,7 +26,7 @@ object SimpleCollapseDemo extends AutoDemo with CssView {
     collapse.listen { case ev => events.append(ev) }
 
     val toggleButton = UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))
-    val openAndCloseButton = UdashButton(options = UdashButtonOptions(color = Color.Secondary))(
+    val openAndCloseButton = UdashButton()(
       "Open and close after 2 seconds..."
     )
     openAndCloseButton.listen { case _ =>

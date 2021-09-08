@@ -20,7 +20,7 @@ object ToggleButtonsDemo extends AutoDemo {
         val btn = UdashButton.toggle(
           active = active,
           options = UdashButtonOptions(
-            color
+            color.opt
           )
         )(_ => Seq[Modifier](
           color.name,

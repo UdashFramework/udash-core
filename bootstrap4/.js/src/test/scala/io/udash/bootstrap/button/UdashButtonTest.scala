@@ -76,7 +76,7 @@ class UdashButtonTest extends UdashCoreFrontendTest {
     }
 
     "apply style changes" in {
-      val buttonStyle  = BootstrapStyles.Color.Secondary
+      val buttonStyle = BootstrapStyles.Color.Secondary.opt
       val size = BootstrapStyles.Size.Large.opt
       val outline: Boolean = false
       val block: Boolean = true

@@ -36,21 +36,21 @@ object SimpleModalDemo extends AutoDemo {
       },
       footerFactory = Some { _ =>
         div(
-          UdashButton(options = UdashButtonOptions(color = Color.Secondary))(_ => Seq[Modifier](
+          UdashButton()(_ => Seq[Modifier](
             UdashModal.CloseButtonAttr, "Close"
           )).render,
-          UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Something...").render
+          UdashButton()("Something...").render
         ).render
       }
     )
     modal.listen { case ev => events.append(ev) }
 
-    val openModalButton = UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Show modal...")
+    val openModalButton = UdashButton()("Show modal...")
     openModalButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>
         modal.show()
     }
-    val openAndCloseButton = UdashButton(options = UdashButtonOptions(color = Color.Secondary))(
+    val openAndCloseButton = UdashButton()(
       "Open and close after 2 seconds..."
     )
     openAndCloseButton.listen {

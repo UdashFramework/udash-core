@@ -18,7 +18,7 @@ final class DismissibleUdashAlert private[alert](
   def dismissed: ReadableProperty[Boolean] =
     _dismissed
 
-  private val button = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Link)) { _ => Seq[Modifier](
+  private val button = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Link.opt)) { _ => Seq[Modifier](
     componentId.withSuffix("close"),
     `type` := "button", BootstrapStyles.close,
     BootstrapTags.dataDismiss := "alert", aria.label := "close",

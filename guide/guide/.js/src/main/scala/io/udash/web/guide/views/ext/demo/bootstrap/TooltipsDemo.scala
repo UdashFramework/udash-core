@@ -54,7 +54,7 @@ object TooltipsDemo extends AutoDemo {
       container = Some(s"#$tooltipContainerId")
     )(label3)
 
-    val button = UdashButton(options = UdashButtonOptions(color = Color.Secondary))("Toggle tooltip")
+    val button = UdashButton()("Toggle tooltip")
     button.listen { case _ => label3Tooltip.toggle() }
 
     div(tooltipContainerId)(

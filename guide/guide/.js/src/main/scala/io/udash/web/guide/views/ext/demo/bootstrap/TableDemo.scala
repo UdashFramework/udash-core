@@ -25,11 +25,11 @@ object TableDemo extends AutoDemo with CssView {
     val hover = Property(true)
     val small = Property(false)
 
-    val darkButton = UdashButton.toggle(active = dark, options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Dark theme")
-    val stripedButton = UdashButton.toggle(active = striped, options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Striped")
-    val borderedButton = UdashButton.toggle(active = bordered, options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Bordered")
-    val hoverButton = UdashButton.toggle(active = hover, options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Hover")
-    val smallButton = UdashButton.toggle(active = small, options = UdashButtonOptions(color = BootstrapStyles.Color.Secondary))("Small")
+    val darkButton = UdashButton.toggle(active = dark)("Dark theme")
+    val stripedButton = UdashButton.toggle(active = striped)("Striped")
+    val borderedButton = UdashButton.toggle(active = bordered)("Bordered")
+    val hoverButton = UdashButton.toggle(active = hover)("Hover")
+    val smallButton = UdashButton.toggle(active = small)("Small")
 
     val items = SeqProperty(Seq.fill(7, 3)(Random.nextDouble()))
     val table = UdashTable(items, responsive, dark, striped, bordered, hover, small)(
