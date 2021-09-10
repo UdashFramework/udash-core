@@ -1,9 +1,14 @@
 package io.udash.web.guide.demos
 
 import com.avsystem.commons.SharedExtensions
+import com.avsystem.commons.serialization.GenCodec
+import io.udash.properties.ModelPropertyCreator
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
+
+import scala.reflect.{ClassTag, classTag}
+import scala.util.matching.Regex
 
 trait AutoDemo extends SharedExtensions {
 
@@ -23,12 +28,21 @@ object AutoDemo {
     def dropFinalLine: String = source.linesWithSeparators.toSeq.view.dropRight(1).mkString
   }
 
-  private val mpcRegex =
-    """object (.+) \{
-      |    implicit val .+: ModelPropertyCreator\[\1\] = ModelPropertyCreator\.materialize
-      |}""".stripMargin.r
+  private def companionRegex[T: ClassTag]: Regex = {
+    val className = classTag[T].runtimeClass.getSimpleName
+    s"""object (.+) \\{
+       |    implicit val .+: $className\\[\\1\\] = $className\\.materialize
+       |}""".stripMargin.r
+  }
+
+  private val MpcRegex = companionRegex[ModelPropertyCreator[_]]
+  private val GenCodecRegex = companionRegex[GenCodec[_]]
+
   private[demos] def mpcFix(source: String): String =
-    mpcRegex.replaceAllIn(source, m => s"object ${m.group(1)} extends HasModelPropertyCreator[${m.group(1)}]")
+    MpcRegex.replaceAllIn(source, m => s"object ${m.group(1)} extends HasModelPropertyCreator[${m.group(1)}]")
+
+  private[demos] def codecFix(source: String): String =
+    GenCodecRegex.replaceAllIn(source, m => s"object ${m.group(1)} extends HasGenCodec[${m.group(1)}]")
 
   def snippet(code: String): Modifier = CodeBlock.lines(code.linesIterator.drop(1).map(_.drop(2)).toList.view.dropRight(1).iterator)(GuideStyles)
 }
