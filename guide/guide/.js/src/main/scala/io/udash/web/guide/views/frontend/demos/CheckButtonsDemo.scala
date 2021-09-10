@@ -52,7 +52,7 @@ object CheckButtonsDemo extends AutoDemo {
           div(Grid.row)(div(secondCheckButtons))
         )
       ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }

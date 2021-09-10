@@ -59,7 +59,7 @@ object TextInputDemo extends AutoDemo {
           firstInputs, br, secondInputs
         )
       ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }

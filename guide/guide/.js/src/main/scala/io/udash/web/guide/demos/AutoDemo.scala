@@ -7,7 +7,6 @@ import scalatags.JsDom.all._
 
 trait AutoDemo extends SharedExtensions {
 
-
   final def demoWithSnippet(): (Modifier, Modifier) = {
     val (demo, code) = demoWithSource()
     (demo, AutoDemo.snippet(code))
@@ -15,8 +14,13 @@ trait AutoDemo extends SharedExtensions {
 
   protected def demoWithSource(): (Modifier, String)
 
+  protected implicit def sourceOps(source: String): AutoDemo.SourceOps = new AutoDemo.SourceOps(source)
+
 }
 
 object AutoDemo {
+  final class SourceOps(private val source: String) extends AnyVal {
+    def dropFinalLine: String = source.linesWithSeparators.toSeq.view.dropRight(1).mkString
+  }
   def snippet(code: String): Modifier = CodeBlock.lines(code.linesIterator.drop(1).map(_.drop(2)).toList.view.dropRight(1).iterator)(GuideStyles)
 }

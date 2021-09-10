@@ -42,6 +42,6 @@ object DateDemo extends AutoDemo {
       form(containerFluid)(
         firstInput, br, secondInput
       )
-    ), source.linesWithSeparators.toList.dropRight(1).mkString)
+    ), source.dropFinalLine)
   }
 }

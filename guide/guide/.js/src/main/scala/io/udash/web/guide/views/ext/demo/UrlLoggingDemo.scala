@@ -63,6 +63,6 @@ object UrlLoggingDemo extends AutoDemo with CssView {
         )
       ).render
 
-    (rendered, source.linesWithSeparators.toList.view.dropRight(1).mkString)
+    (rendered, source.dropFinalLine)
   }
 }

@@ -49,7 +49,7 @@ object SelectDemo extends AutoDemo {
           div(Grid.row)(secondSelect)
         )
       ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }

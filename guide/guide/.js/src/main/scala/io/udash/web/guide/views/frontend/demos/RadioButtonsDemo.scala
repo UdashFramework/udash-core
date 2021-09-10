@@ -54,7 +54,7 @@ object RadioButtonsDemo extends AutoDemo {
         div(Grid.row)(secondRadioButtons)
       )
     ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }

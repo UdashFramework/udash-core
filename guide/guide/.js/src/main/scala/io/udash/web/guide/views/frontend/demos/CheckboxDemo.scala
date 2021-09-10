@@ -62,7 +62,7 @@ object CheckboxDemo extends AutoDemo {
           firstCheckboxes, br, secondCheckboxes
         )
       ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }

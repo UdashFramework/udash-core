@@ -49,7 +49,7 @@ object MultiSelectDemo extends AutoDemo {
           div(Grid.row)(secondMultiSelect)
         )
       ),
-      source.linesWithSeparators.toList.view.dropRight(1).mkString
+      source.dropFinalLine
     )
   }
 }
