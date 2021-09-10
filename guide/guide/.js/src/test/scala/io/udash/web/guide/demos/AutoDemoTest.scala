@@ -14,6 +14,16 @@ class AutoDemoTest extends AnyFunSuite {
         |""".stripMargin
     )
 
+    AutoDemo.mpcFix(
+      """
+        |class SubscribeModel(val email: String)
+        |object SubscribeModel {
+        |    implicit val mpc: ModelPropertyCreator[SubscribeModel] = ModelPropertyCreator.materialize
+        |}
+        |println("sth")
+        |""".stripMargin
+    )
+
     val expected =
       """
         |class SubscribeModel(val email: String)

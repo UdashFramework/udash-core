@@ -28,21 +28,18 @@ object AutoDemo {
     def dropFinalLine: String = source.linesWithSeparators.toSeq.view.dropRight(1).mkString
   }
 
-  private def companionRegex[T: ClassTag]: Regex = {
+  private def companionFix[T: ClassTag]: String => String = {
     val className = classTag[T].runtimeClass.getSimpleName
-    s"""object (.+) \\{
-       |    implicit val .+: $className\\[\\1\\] = $className\\.materialize
-       |}""".stripMargin.r
+    val companionRegex: Regex =
+      s"""object (.+) \\{
+         |    implicit val .+: $className\\[\\1\\] = $className\\.materialize
+         |}""".stripMargin.r
+
+    code => companionRegex.replaceAllIn(code, m => s"object ${m.group(1)} extends Has$className[${m.group(1)}]")
   }
 
-  private val MpcRegex = companionRegex[ModelPropertyCreator[_]]
-  private val GenCodecRegex = companionRegex[GenCodec[_]]
-
-  private[demos] def mpcFix(source: String): String =
-    MpcRegex.replaceAllIn(source, m => s"object ${m.group(1)} extends HasModelPropertyCreator[${m.group(1)}]")
-
-  private[demos] def codecFix(source: String): String =
-    GenCodecRegex.replaceAllIn(source, m => s"object ${m.group(1)} extends HasGenCodec[${m.group(1)}]")
+  private[demos] val mpcFix = companionFix[ModelPropertyCreator[_]]
+  private[demos] val codecFix = companionFix[GenCodec[_]]
 
   def snippet(code: String): Modifier = CodeBlock.lines(code.linesIterator.drop(1).map(_.drop(2)).toList.view.dropRight(1).iterator)(GuideStyles)
 }
