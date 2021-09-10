@@ -2,6 +2,7 @@ package io.udash.web.guide.views.bootstrapping
 
 import io.udash._
 import io.udash.css.CssView
+import io.udash.properties.ModelPropertyCreator
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
@@ -31,6 +32,124 @@ class BootstrappingFrontendView extends View with CssView {
     case object SubscribeState extends RoutingState(Some(NewsletterState))
     case object UnsubscribeState extends RoutingState(Some(NewsletterState))
   }.sourceCode
+
+  private val (registrySource, factorySource) = {
+    sealed abstract class RoutingState(
+      val parentState: Option[RoutingState]
+    ) extends State {
+      override type HierarchyRoot = RoutingState
+    }
+
+    case object RootState extends RoutingState(None)
+    case object LandingPageState extends RoutingState(Some(RootState))
+    case object NewsletterState extends RoutingState(Some(RootState))
+    case object SubscribeState extends RoutingState(Some(NewsletterState))
+    case object UnsubscribeState extends RoutingState(Some(NewsletterState))
+
+    val registrySource = {
+      import io.udash._
+
+      class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
+        def matchUrl(url: Url): RoutingState =
+          url2State.applyOrElse(
+            url.value.stripSuffix("/"),
+            (x: String) => LandingPageState
+          )
+
+        def matchState(state: RoutingState): Url =
+          Url(state2Url.apply(state))
+
+        private val (url2State, state2Url) = bidirectional {
+          case "/" => LandingPageState
+          case "/newsletter" => SubscribeState
+          case "/newsletter/unsubscribe" => UnsubscribeState
+        }
+      }
+    }.sourceCode
+
+    val RootViewFactory, LandingPageViewFactory, NewsletterViewFactory, NewsletterSubscribeViewFactory, NewsletterUnsubscribeViewFactory, ErrorViewFactory = null
+
+    val factorySource = {
+      import io.udash._
+
+      class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
+        def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
+          state match {
+            case RootState => RootViewFactory
+            case LandingPageState => LandingPageViewFactory
+            case NewsletterState => NewsletterViewFactory
+            case SubscribeState => NewsletterSubscribeViewFactory
+            case UnsubscribeState => NewsletterUnsubscribeViewFactory
+            case _ => ErrorViewFactory
+          }
+      }
+    }.sourceCode
+
+    (registrySource, factorySource)
+  }
+
+  private val subscribeSource = {
+    case object SubscribeState extends State {
+      override type HierarchyRoot = this.type
+      override def parentState: Option[SubscribeState.type] = None
+    }
+
+    {
+      import io.udash._
+      import org.scalajs.dom.Event
+      import scala.concurrent.Future
+
+      case class SubscribeModel(email: String)
+      // HasModelPropertyCreator indicates that
+      // you can create ModelProperty for SubscribeModel
+      object SubscribeModel {
+        implicit val mpc: ModelPropertyCreator[SubscribeModel] = ModelPropertyCreator.materialize
+      }
+
+      case object NewsletterSubscribeViewFactory
+        extends ViewFactory[SubscribeState.type] {
+
+        override def create(): (View, Presenter[SubscribeState.type]) = {
+          val model = ModelProperty(new SubscribeModel(""))
+          val presenter = new NewsletterSubscribePresenter(model)
+          val view = new NewsletterSubscribeView(model, presenter)
+
+          (view, presenter)
+        }
+      }
+
+      class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel])
+        extends Presenter[SubscribeState.type] {
+
+        /** Called before view starts rendering. */
+        override def handleState(state: SubscribeState.type): Unit = {
+          model.subProp(_.email).set("") // Clear email
+        }
+
+        // Send RPC request to server
+        def subscribe(): Future[Boolean] = ???
+      }
+
+      class NewsletterSubscribeView(
+        model: ModelProperty[SubscribeModel],
+        presenter: NewsletterSubscribePresenter
+      ) extends View {
+
+        import scalatags.JsDom.all._
+
+        /** Renders view HTML code */
+        override def getTemplate: Modifier = div(
+          // automatic two way binding with html input
+          TextInput(model.subProp(_.email))().render,
+          // :+= operator allows to add more than one callback for one event
+          button(onclick :+= ((_: Event) => {
+            presenter.subscribe()
+            true // prevent default
+          }))("Subscribe")
+        )
+      }
+    }.sourceCode
+  }
 
   override def getTemplate: Modifier = {
     import Context._
@@ -65,26 +184,7 @@ class BootstrappingFrontendView extends View with CssView {
           "and back from the state to the URL."
       ),
       p("Take a look at example ", i("RoutingRegistry"), " implementation:"),
-      CodeBlock(
-        """import io.udash._
-          |
-          |class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
-          |  def matchUrl(url: Url): RoutingState =
-          |    url2State.applyOrElse(
-          |      url.value.stripSuffix("/"),
-          |      (x: String) => LandingPageState
-          |    )
-          |
-          |  def matchState(state: RoutingState): Url =
-          |    Url(state2Url.apply(state))
-          |
-          |  private val (url2State, state2Url) = bidirectional {
-          |    case "/" => LandingPageState
-          |    case "/newsletter" => SubscribeState
-          |    case "/newsletter/unsubscribe" => UnsubscribeState
-          |  }
-          |}""".stripMargin
-      )(GuideStyles),
+      AutoDemo.snippet(registrySource),
       p(
         i("Bidirectional"), " returns tuple ",
         i("(PartialFunction[String, RoutingState], PartialFunction[RoutingState, String])"),
@@ -96,77 +196,12 @@ class BootstrappingFrontendView extends View with CssView {
           "for matching a current application state to ViewFactory. Below you can find an example implementation of ",
         i("ViewFactoryRegistry"), "."
       ),
-      CodeBlock(
-        """io.udash._
-          |
-          |class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
-          |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
-          |    state match {
-          |      case RootState => RootViewFactory
-          |      case LandingPageState => LandingPageViewFactory
-          |      case NewsletterState => NewsletterViewFactory
-          |      case SubscribeState => NewsletterSubscribeViewFactory
-          |      case UnsubscribeState => NewsletterUnsubscribeViewFactory
-          |      case _ => ErrorViewFactory
-          |    }
-          |}""".stripMargin
-      )(GuideStyles),
+      AutoDemo.snippet(factorySource),
       p(
         "Each ViewFactory is expected to initialize a View and a Presenter. At this point you can ",
         "create the shared model for them. Take a look at following view implementation."
       ),
-      CodeBlock(
-        """import io.udash._
-          |import org.scalajs.dom.Event
-          |import scala.concurrent.Future
-          |
-          |class SubscribeModel(val email: String)
-          |// HasModelPropertyCreator indicates that
-          |// you can create ModelProperty for SubscribeModel
-          |object SubscribeModel extends HasModelPropertyCreator[SubscribeModel]
-          |
-          |case object NewsletterSubscribeViewFactory
-          |  extends ViewFactory[SubscribeState.type] {
-          |
-          |  override def create(): (View, Presenter[SubscribeState.type]) = {
-          |    val model = ModelProperty(new SubscribeModel(""))
-          |    val presenter = new NewsletterSubscribePresenter(model)
-          |    val view = new NewsletterSubscribeView(model, presenter)
-          |
-          |    (view, presenter)
-          |  }
-          |}
-          |
-          |class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel])
-          |  extends Presenter[SubscribeState.type] {
-          |
-          |  /** Called before view starts rendering. */
-          |  override def handleState(state: SubscribeState.type): Unit = {
-          |    model.subProp(_.email).set("") // Clear email
-          |  }
-          |
-          |  // Send RPC request to server
-          |  def subscribe(): Future[Boolean] = ???
-          |}
-          |
-          |class NewsletterSubscribeView(
-          |  model: ModelProperty[SubscribeModel],
-          |  presenter: NewsletterSubscribePresenter
-          |) extends View {
-          |  import scalatags.JsDom.all._
-          |
-          |  /** Renders view HTML code */
-          |  override def getTemplate: Modifier = div(
-          |    // automatic two way binding with html input
-          |    TextInput(model.subProp(_.email))().render,
-          |    // :+= operator allows to add more than one callback for one event
-          |    button(onclick :+= ((_: Event) => {
-          |      presenter.subscribe()
-          |      true // prevent default
-          |    }))("Subscribe")
-          |  )
-          |}""".stripMargin
-      )(GuideStyles),
+      AutoDemo.snippet(subscribeSource),
       p(
         "The above example shows simple View, Presenter and ViewFactory implementations. ",
         ul(GuideStyles.defaultList)(
