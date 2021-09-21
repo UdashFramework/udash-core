@@ -37,7 +37,7 @@ object Dependencies {
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.2.9"
+  val scalatestVersion = "3.2.10"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
