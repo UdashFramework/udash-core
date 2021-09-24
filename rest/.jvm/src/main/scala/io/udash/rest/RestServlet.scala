@@ -1,17 +1,17 @@
 package io.udash
 package rest
 
-import java.io.ByteArrayOutputStream
-
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
 import io.udash.utils.URLEncoder
+
+import java.io.ByteArrayOutputStream
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
-
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 
@@ -47,10 +47,19 @@ class RestServlet(
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
+    val completed = new AtomicBoolean(false)
+
+    // need to protect asyncContext from being completed twice because
+    // servlet may reuse the same context instance between subsequent requests (not cool)
+    def completeWith(code: => Unit): Unit =
+      if (!completed.getAndSet(true)) {
+        code
+      }
+
     asyncContext.setTimeout(handleTimeout.toMillis)
     asyncContext.addListener(new AsyncListener {
       def onComplete(event: AsyncEvent): Unit = ()
-      def onTimeout(event: AsyncEvent): Unit = {
+      def onTimeout(event: AsyncEvent): Unit = completeWith {
         writeFailure(response, Opt("server operation timed out"))
         asyncContext.complete()
       }
@@ -58,16 +67,19 @@ class RestServlet(
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
     RawRest.safeAsync(handleRequest(readRequest(request))) {
-      case Success(restResponse) =>
+      case Success(restResponse) => completeWith {
         writeResponse(response, restResponse)
         asyncContext.complete()
-      case Failure(e: HttpErrorException) =>
+      }
+      case Failure(e: HttpErrorException) => completeWith {
         writeResponse(response, e.toResponse)
         asyncContext.complete()
-      case Failure(e) =>
+      }
+      case Failure(e) => completeWith {
         writeFailure(response, e.getMessage.opt)
         logger.error("Failed to handle REST request", e)
         asyncContext.complete()
+      }
     }
   }
 
