@@ -67,19 +67,22 @@ class RestServlet(
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
     RawRest.safeAsync(handleRequest(readRequest(request))) {
-      case Success(restResponse) => completeWith {
-        writeResponse(response, restResponse)
-        asyncContext.complete()
-      }
-      case Failure(e: HttpErrorException) => completeWith {
-        writeResponse(response, e.toResponse)
-        asyncContext.complete()
-      }
-      case Failure(e) => completeWith {
-        writeFailure(response, e.getMessage.opt)
+      case Success(restResponse) =>
+        completeWith {
+          writeResponse(response, restResponse)
+          asyncContext.complete()
+        }
+      case Failure(e: HttpErrorException) =>
+        completeWith {
+          writeResponse(response, e.toResponse)
+          asyncContext.complete()
+        }
+      case Failure(e) =>
         logger.error("Failed to handle REST request", e)
-        asyncContext.complete()
-      }
+        completeWith {
+          writeFailure(response, e.getMessage.opt)
+          asyncContext.complete()
+        }
     }
   }
 
