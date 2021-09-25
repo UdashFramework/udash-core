@@ -33,7 +33,7 @@ object WaiterImpl extends Waiter {
 }
 
 class RestServletTest extends AnyFunSuite with BeforeAndAfterAll {
-  val port = Random.between(32768, 65536)
+  val port: Int = 32768 + Random.nextInt(32768)
 
   val server = new Server(port)
   val handler = new ServletContextHandler
