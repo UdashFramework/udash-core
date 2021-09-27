@@ -37,9 +37,9 @@ class ServletTimeoutTest extends SttpClientRestTest {
   }
 
   test("subsequent requests with timeout") {
-    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
-    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
-    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
-    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
+    assertThrows[HttpErrorException](Await.result(proxy.wait(600), Duration.Inf))
+    assertThrows[HttpErrorException](Await.result(proxy.wait(600), Duration.Inf))
+    assertThrows[HttpErrorException](Await.result(proxy.wait(600), Duration.Inf))
+    assertThrows[HttpErrorException](Await.result(proxy.wait(600), Duration.Inf))
   }
 }
