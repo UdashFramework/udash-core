@@ -8,8 +8,8 @@ import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
 
-import java.util.concurrent.{Executors, TimeUnit}
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 @description("Entity identifier")
 case class RestEntityId(value: String) extends AnyVal
@@ -144,18 +144,12 @@ trait RestTestApi {
   @CustomBody def thirdPartyBody(param: HasThirdParty): Future[HasThirdParty]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
-  private val scheduler = Executors.newSingleThreadScheduledExecutor()
-
   val Impl: RestTestApi = new RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
     def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
     def neverGet: Future[Unit] = Future.never
-    def wait(millis: Int): Future[String] = {
-      val result = Promise[String]()
-      scheduler.schedule(() => result.success(s"waited $millis ms"), millis, TimeUnit.MILLISECONDS)
-      result.future
-    }
+    def wait(millis: Int): Future[String] = FutureUtils.delay(millis.millis).mapNow(_ => s"waited $millis ms")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, q3: Opt[Int], c1: Int, c2: String): Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-${q3.getOrElse(".")}-$c2"))
