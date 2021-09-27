@@ -1,14 +1,11 @@
 package io.udash.rest
 
-import com.avsystem.commons._
 import io.udash.rest.raw.HttpErrorException
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.time.{Seconds, Span}
-import sttp.client.{HttpError, SttpBackend}
+import sttp.client.SttpBackend
 import sttp.client.asynchttpclient.WebSocketHandler
 
 import java.util.concurrent.Executors

@@ -49,8 +49,9 @@ class RestServlet(
     val asyncContext = request.startAsync()
     val completed = new AtomicBoolean(false)
 
-    // need to protect asyncContext from being completed twice because
-    // servlet may reuse the same context instance between subsequent requests (not cool)
+    // Need to protect asyncContext from being completed twice because after a timeout the
+    // servlet may recycle the same context instance between subsequent requests (not cool)
+    // https://stackoverflow.com/a/27744537
     def completeWith(code: => Unit): Unit =
       if (!completed.getAndSet(true)) {
         code
@@ -61,7 +62,7 @@ class RestServlet(
     asyncContext.addListener(new AsyncListener {
       def onComplete(event: AsyncEvent): Unit = ()
       def onTimeout(event: AsyncEvent): Unit =
-        completeWith(writeFailure(response, Opt("server operation timed out")))
+        completeWith(writeFailure(response, Opt(s"server operation timed out after $handleTimeout")))
       def onError(event: AsyncEvent): Unit = ()
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
