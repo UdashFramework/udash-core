@@ -5,7 +5,7 @@ import io.udash.rest.raw.HttpErrorException
 import io.udash.rest.raw.RawRest.HandleRequest
 import sttp.client.SttpBackend
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 trait SttpClientRestTest extends ServletBasedRestApiTest {
@@ -33,6 +33,11 @@ class ServletTimeoutTest extends SttpClientRestTest {
 
   test("rest method timeout") {
     val exception = proxy.neverGet.failed.futureValue
-    assert(exception == HttpErrorException(500, "server operation timed out"))
+    assert(exception == HttpErrorException(500, "server operation timed out after 500 milliseconds"))
+  }
+
+  test("subsequent requests with timeout") {
+    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
+    assertThrows[HttpErrorException](Await.result(proxy.wait(510), Duration.Inf))
   }
 }
