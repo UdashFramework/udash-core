@@ -54,35 +54,25 @@ class RestServlet(
     def completeWith(code: => Unit): Unit =
       if (!completed.getAndSet(true)) {
         code
+        asyncContext.complete()
       }
 
     asyncContext.setTimeout(handleTimeout.toMillis)
     asyncContext.addListener(new AsyncListener {
       def onComplete(event: AsyncEvent): Unit = ()
-      def onTimeout(event: AsyncEvent): Unit = completeWith {
-        writeFailure(response, Opt("server operation timed out"))
-        asyncContext.complete()
-      }
+      def onTimeout(event: AsyncEvent): Unit =
+        completeWith(writeFailure(response, Opt("server operation timed out")))
       def onError(event: AsyncEvent): Unit = ()
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
     RawRest.safeAsync(handleRequest(readRequest(request))) {
       case Success(restResponse) =>
-        completeWith {
-          writeResponse(response, restResponse)
-          asyncContext.complete()
-        }
+        completeWith(writeResponse(response, restResponse))
       case Failure(e: HttpErrorException) =>
-        completeWith {
-          writeResponse(response, e.toResponse)
-          asyncContext.complete()
-        }
+        completeWith(writeResponse(response, e.toResponse))
       case Failure(e) =>
         logger.error("Failed to handle REST request", e)
-        completeWith {
-          writeFailure(response, e.getMessage.opt)
-          asyncContext.complete()
-        }
+        completeWith(writeFailure(response, e.getMessage.opt))
     }
   }
 
