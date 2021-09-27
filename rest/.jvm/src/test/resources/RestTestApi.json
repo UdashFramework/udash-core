@@ -640,6 +640,35 @@
         }
       }
     },
+    "/wait": {
+      "get": {
+        "operationId": "wait",
+        "parameters": [
+          {
+            "name": "millis",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/wrappedBinaryEcho": {
       "post": {
         "operationId": "wrappedBinaryEcho",
