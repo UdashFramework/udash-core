@@ -39,12 +39,12 @@ object RestResponse extends RestResponseLowPrio {
       }
   }
 
-  implicit def effectFromAsyncResp[F[_], T](
+  implicit def taskLikeFromResponseTask[F[_], T](
     implicit fromTask: FromTask[F], asResponse: AsReal[RestResponse, T]
   ): AsReal[Task[RestResponse], Try[F[T]]] =
     rawTask => Success(fromTask.fromTask(rawTask.map(asResponse.asReal)))
 
-  implicit def effectToAsyncResp[F[_], T](
+  implicit def taskLikeToResponseTask[F[_], T](
     implicit taskLike: TaskLike[F], asResponse: AsRaw[RestResponse, T]
   ): AsRaw[Task[RestResponse], Try[F[T]]] =
     _.fold(Task.raiseError, ft => Task.from(ft).map(asResponse.asRaw)).recoverHttpError
