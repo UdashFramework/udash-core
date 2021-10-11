@@ -7,7 +7,7 @@ import com.avsystem.commons.serialization.{GenCodec, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
-import _root_.monix.execution.{Scheduler, FutureUtils}
+import monix.execution.{Scheduler, FutureUtils}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

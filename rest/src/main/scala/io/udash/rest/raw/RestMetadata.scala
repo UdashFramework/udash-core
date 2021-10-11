@@ -6,8 +6,8 @@ import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.rpc._
 import io.udash.macros.RestMacros
-import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw.RestMetadata.ResolutionTrie
+import monix.eval.{Task, TaskLike}
 
 import scala.annotation.implicitNotFound
 
@@ -266,9 +266,9 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def adjustRequest(request: RestRequest): RestRequest =
     requestAdjusters.foldRight(request)(_ adjustRequest _)
 
-  def adjustResponse(asyncResponse: RawRest.Async[RestResponse]): RawRest.Async[RestResponse] =
+  def adjustResponse(asyncResponse: Task[RestResponse]): Task[RestResponse] =
     if (responseAdjusters.isEmpty) asyncResponse
-    else RawRest.mapAsync(asyncResponse)(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
+    else asyncResponse.map(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
 }
 
 final case class PrefixMetadata[T](
@@ -308,22 +308,22 @@ final case class HttpMethodMetadata[T](
 }
 
 /**
-  * Typeclass used during [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization to determine whether a real method is a valid HTTP
-  * method. Usually this means that the result must be a type wrapped into something that captures asynchronous
-  * computation, e.g. `Future`. Because REST framework core tries to be agnostic about this
-  * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for [[io.udash.rest.raw.HttpResponseType HttpResponseType]].
-  * They must be provided externally.
-  *
-  * For example, [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] introduces an instance of [[io.udash.rest.raw.HttpResponseType HttpResponseType]] for `Future[T]`,
-  * for arbitrary type `T`. For [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
-  * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected into materialization of
-  * [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
-  * See `MacroInstances` for more information on injection of implicits.
-  */
+ * Typeclass used during [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization to determine whether a real method is a valid HTTP
+ * method. Usually this means that the result must be a type wrapped into something that captures asynchronous
+ * computation, e.g. `Future`. Because REST framework core tries to be agnostic about this
+ * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for [[io.udash.rest.raw.HttpResponseType HttpResponseType]].
+ * They must be provided externally.
+ *
+ * For example, [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] introduces an instance of [[io.udash.rest.raw.HttpResponseType HttpResponseType]] for `Future[T]`,
+ * for arbitrary type `T`. For [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
+ * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected into materialization of
+ * [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
+ * See `MacroInstances` for more information on injection of implicits.
+ */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
 final case class HttpResponseType[T]()
 object HttpResponseType {
-  implicit def asyncEffectResponseType[F[_] : AsyncEffect, T]: HttpResponseType[F[T]] =
+  implicit def asyncEffectResponseType[F[_] : TaskLike, T]: HttpResponseType[F[T]] =
     HttpResponseType()
 }
 

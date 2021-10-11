@@ -5,6 +5,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
 import sttp.client3._
+import monix.eval.Task
 import sttp.model.Uri.QuerySegment.KeyValue
 import sttp.model.Uri.{PathSegmentEncoding, QuerySegmentEncoding}
 import sttp.model.{HeaderNames, Method, Uri, Header => SttpHeader}
@@ -40,10 +41,7 @@ object SttpRestClient {
   def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
     implicit backend: SttpBackend[Future, Any]
   ): RawRest.HandleRequest =
-    RawRest.safeHandle { request =>
-      val sttpReq = toSttpRequest(baseUri, request, options)
-      callback => sttpReq.send(backend).onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
-    }
+    asHandleRequest(baseUri, options)
 
   private def toSttpRequest(
     baseUri: String,
@@ -105,4 +103,8 @@ object SttpRestClient {
       }
     )
 
+  private def asHandleRequest(baseUri: String, options: RequestOptions)(
+    implicit backend: SttpBackend[Future, Any]
+  ): RawRest.HandleRequest = request =>
+    Task.deferFuture(toSttpRequest(baseUri, request, options).send()).map(fromSttpResponse)
 }

@@ -100,7 +100,7 @@ object Dependencies {
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp.client3" %%% "core" % sttpVersion,
-    "io.monix" %%% "monix" % monixVersion % Test,
+    "io.monix" %%% "monix" % monixVersion,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
     "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,

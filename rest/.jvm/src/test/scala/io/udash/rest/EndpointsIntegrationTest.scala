@@ -1,6 +1,7 @@
 package io.udash
 package rest
 
+import monix.execution.Scheduler
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
 import org.eclipse.jetty.server.Server
@@ -14,10 +15,10 @@ import sttp.client3.SttpBackend
 import sttp.client3.SttpClientException.ConnectException
 
 import scala.concurrent.duration.DurationLong
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
 class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit def scheduler: Scheduler = Scheduler.global
 
   val port = 44598
   val contextPrefix = "/rest_api"
@@ -34,7 +35,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
-    rawHandle.andThen(FutureRestImplicits.futureAsyncEffect.fromAsync)
+    rawHandle.andThen(FutureRestImplicits.futureFromTask.fromTask)
 
   def mkRequest(
     url: String,

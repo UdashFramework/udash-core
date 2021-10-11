@@ -16,6 +16,7 @@
       </option>
       <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />
       <option name="BLANK_LINES_AROUND_METHOD_IN_INNER_SCOPES" value="0" />
+      <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
     </ScalaCodeStyleSettings>
     <codeStyleSettings language="Scala">
       <option name="BLANK_LINES_AROUND_CLASS" value="0" />

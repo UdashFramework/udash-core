@@ -1,21 +1,22 @@
 package io.udash.rest.raw
 
-import com.avsystem.commons.Promise
 import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.rest.SomeServerApiImpl
 import io.udash.rest.openapi.Info
+import monix.execution.Scheduler
 import org.scalactic.source.Position
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 
 class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
+  implicit def scheduler: Scheduler = Scheduler.global
+
   private val apiImpl = new SomeServerApiImpl
   private val serverHandle = SomeServerApiImpl.asHandleRequest(apiImpl)
 
   def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
-    val promise = Promise[RestResponse]()
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    val future = serverHandle(request).runToFuture
+    assert(future.futureValue == response)
   }
 
   test("simple GET call") {
