@@ -1,7 +1,6 @@
 package io.udash
 package rest.raw
 
-import cats.effect.Async
 import com.avsystem.commons._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
@@ -55,13 +54,13 @@ object RestResponse extends RestResponseLowPrio {
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: Async[F],
+    fromAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
   ): ImplicitNotFound[AsReal[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: Async[F],
+    toAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
   ): ImplicitNotFound[AsRaw[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 

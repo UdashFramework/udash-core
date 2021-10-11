@@ -7,6 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
 import io.udash.utils.URLEncoder
+import monix.eval.Task
 import monix.execution.Scheduler
 
 import java.io.ByteArrayOutputStream
@@ -63,7 +64,7 @@ class RestServlet(
         asyncContext.complete()
       }
 
-    val cancelable = handleRequest(readRequest(request)).runAsync {
+    val cancelable = Task.defer(handleRequest(readRequest(request))).runAsync {
       case Right(restResponse) =>
         completeWith(writeResponse(response, restResponse))
       case Left(e: HttpErrorException) =>
