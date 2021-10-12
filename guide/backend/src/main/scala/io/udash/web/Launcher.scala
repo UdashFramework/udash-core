@@ -17,7 +17,7 @@ object Launcher extends LazyLogging {
 
 
   private[udash] def createApplicationServer(): ApplicationServer = {
-    implicit val scheduler: Scheduler = Scheduler.global
+    implicit val scheduler: Scheduler = Scheduler.computation()
     val serverConfig = ConfigFactory.load().getConfig("ui.server")
     new ApplicationServer(
       port = serverConfig.getInt("port"),
