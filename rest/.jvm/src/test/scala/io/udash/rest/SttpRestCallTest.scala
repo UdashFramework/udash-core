@@ -3,13 +3,13 @@ package rest
 
 import io.udash.rest.raw.HttpErrorException
 import io.udash.rest.raw.RawRest.HandleRequest
-import sttp.client.SttpBackend
+import sttp.client3.SttpBackend
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 trait SttpClientRestTest extends ServletBasedRestApiTest {
-  implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
+  implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
   def clientHandle: HandleRequest =
     SttpRestClient.asHandleRequest(s"$baseUrl/api")

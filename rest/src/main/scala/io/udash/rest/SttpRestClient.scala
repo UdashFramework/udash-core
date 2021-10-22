@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
-import sttp.client._
+import sttp.client3._
 import sttp.model.Uri.QuerySegment.KeyValue
 import sttp.model.Uri.{PathSegmentEncoding, QuerySegmentEncoding}
 import sttp.model.{HeaderNames, Method, Uri, Header => SttpHeader}
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 object SttpRestClient {
   final val CookieHeader = "Cookie"
 
-  def defaultBackend(): SttpBackend[Future, Nothing, Nothing] = DefaultSttpBackend()
+  def defaultBackend(): SttpBackend[Future, Any] = DefaultSttpBackend()
 
   final val DefaultRequestOptions = RequestOptions(
     followRedirects = true,
@@ -30,7 +30,7 @@ object SttpRestClient {
   @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
     baseUri: String,
     options: RequestOptions = DefaultRequestOptions
-  )(implicit backend: SttpBackend[Future, Nothing, Nothing]): RestApi =
+  )(implicit backend: SttpBackend[Future, Any]): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri, options))
 
   /**
@@ -38,7 +38,7 @@ object SttpRestClient {
    * a specified base URI using default HTTP client implementation (sttp).
    */
   def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
-    implicit backend: SttpBackend[Future, Nothing, Nothing]
+    implicit backend: SttpBackend[Future, Any]
   ): RawRest.HandleRequest =
     asHandleRequest(uri"$baseUri", options)
 
@@ -46,10 +46,10 @@ object SttpRestClient {
     baseUri: Uri,
     request: RestRequest,
     options: RequestOptions
-  ): Request[Array[Byte], Nothing] = {
+  ): Request[Array[Byte], Any] = {
     val uri = baseUri |>
-      (u => u.copy(pathSegments = u.pathSegments ++
-        request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard)))) |>
+      (u => u.copy(pathSegments = u.pathSegments.addSegments(
+        request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard))))) |>
       (u => u.copy(querySegments = u.querySegments ++
         request.parameters.query.entries.iterator.map {
           case (k, PlainValue(v)) => KeyValue(k, v, QuerySegmentEncoding.All, QuerySegmentEncoding.All)
@@ -104,11 +104,11 @@ object SttpRestClient {
     )
 
   private def asHandleRequest(baseUri: Uri, options: RequestOptions)(
-    implicit backend: SttpBackend[Future, Nothing, Nothing]
+    implicit backend: SttpBackend[Future, Any]
   ): RawRest.HandleRequest =
     RawRest.safeHandle(request => {
       val sttpReq = toSttpRequest(baseUri, request, options)
       callback =>
-        sttpReq.send().onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
+        sttpReq.send(backend).onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
     })
 }
