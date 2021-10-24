@@ -50,14 +50,13 @@ object SttpRestClient {
     request: RestRequest,
     options: RequestOptions
   ): Request[Array[Byte], Any] = {
-    val uri = uri"$baseUri" |>
-      (u => u.copy(pathSegments = u.pathSegments.addSegments(
-        request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard))))) |>
-      (u => u.copy(querySegments = u.querySegments ++
-        request.parameters.query.entries.iterator.map {
-          case (k, PlainValue(v)) => KeyValue(k, v, QuerySegmentEncoding.All, QuerySegmentEncoding.All)
-        }.toList
-      ))
+    val querySegments = request.parameters.query.entries.iterator.map {
+      case (k, PlainValue(v)) => KeyValue(k, v, QuerySegmentEncoding.All, QuerySegmentEncoding.All)
+    }
+
+    val uri = querySegments.foldLeft(
+      uri"$baseUri".addPathSegments(request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard)))
+    )(_.addQuerySegment(_))
 
     val contentHeaders = request.body match {
       case HttpBody.Empty =>
