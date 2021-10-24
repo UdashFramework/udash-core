@@ -40,14 +40,17 @@ object SttpRestClient {
   def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
     implicit backend: SttpBackend[Future, Any]
   ): RawRest.HandleRequest =
-    asHandleRequest(uri"$baseUri", options)
+    RawRest.safeHandle { request =>
+      val sttpReq = toSttpRequest(baseUri, request, options)
+      callback => sttpReq.send(backend).onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
+    }
 
   private def toSttpRequest(
-    baseUri: Uri,
+    baseUri: String,
     request: RestRequest,
     options: RequestOptions
   ): Request[Array[Byte], Any] = {
-    val uri = baseUri |>
+    val uri = uri"$baseUri" |>
       (u => u.copy(pathSegments = u.pathSegments.addSegments(
         request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard))))) |>
       (u => u.copy(querySegments = u.querySegments ++
@@ -103,12 +106,4 @@ object SttpRestClient {
       }
     )
 
-  private def asHandleRequest(baseUri: Uri, options: RequestOptions)(
-    implicit backend: SttpBackend[Future, Any]
-  ): RawRest.HandleRequest =
-    RawRest.safeHandle(request => {
-      val sttpReq = toSttpRequest(baseUri, request, options)
-      callback =>
-        sttpReq.send(backend).onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
-    })
 }
