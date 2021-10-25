@@ -10,8 +10,8 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import sttp.client.SttpBackend
-import sttp.client.SttpClientException.ConnectException
+import sttp.client3.SttpBackend
+import sttp.client3.SttpClientException.ConnectException
 
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -52,7 +52,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     HttpBody.json(JsonValue(body))
   )
 
-  implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
+  implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
   val rawHandler = futureHandle(SttpRestClient.asHandleRequest(baseUri))
   val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface](baseUri)
