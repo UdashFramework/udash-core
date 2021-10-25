@@ -116,7 +116,7 @@ object ServerMain {
 On the client side, obtain a client proxy for your API and make a call:
 
 ```scala
-import com.softwaremill.sttp.SttpBackend
+import sttp.client3.SttpBackend
 import io.udash.rest.SttpRestClient
 
 import scala.concurrent.duration._
@@ -126,7 +126,7 @@ import scala.util.{Failure, Success}
 object ClientMain {
   def main(args: Array[String]): Unit = {
     // allocate an STTP backend
-    implicit val sttpBackend: SttpBackend[Future, Nothing] = SttpRestClient.defaultBackend()
+    implicit val sttpBackend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
     
     // obtain a "proxy" instance of UserApi
     val client: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
