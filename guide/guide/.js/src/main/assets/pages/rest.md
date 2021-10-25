@@ -679,10 +679,7 @@ Result type of every REST API method is wrapped into `Try` (in case the method t
 and translated into `Async[RestResponse]`. This means that the macro engine looks for an implicit instance of 
 `AsRaw[Async[RestResponse], Try[R]]` and `AsReal[Async[RestResponse], Try[R]]` for every HTTP method with result type `R`.
 
-* `Async` is a type alias defined in `RawRest` object.
-  This is just a very raw, low-level representation of asynchronous computations which may be invoked many times. 
-  It serves as a common denominator for all possible asynchronous abstractions like `Future`, Monix `Task`, etc.
-
+* `Async` is currently equivalent to `monix.eval.Task` and represents a repeatable, cancelable, asynchronous computation.
 * `RestResponse` itself is a simple class that aggregates HTTP status code, response headers and body.
 
 `DefaultRestApiCompanion` and its friends introduce implicits which translate between `Async` and `Future`s.
@@ -908,7 +905,9 @@ representations of requests and responses and handling asynchronous computations
 `RawRest` object defines following type alias:
 
 ```scala
-type HandleRequest = RestRequest => Async[RestResponse]
+import monix.eval.Task
+
+type HandleRequest = RestRequest => Task[RestResponse]
 ```
 
 `RestRequest` is a simple, immutable representation of HTTP request. It contains HTTP method, path, URL
@@ -918,16 +917,8 @@ easily sent through network.
 `RestResponse` is, similarly, a simple representation of HTTP response. `RestResponse` is made of HTTP status
 code and HTTP body (`HttpBody`, which also contains media type).
 
-`Async` is a type alias defined in `RawRest` object and serves as a low level representation of asynchronous,
-repeatable computation.
-
-```scala
-type Callback[T] = Try[T] => Unit
-type Async[T] = Callback[T] => Unit
-```
-
-Therefore, `Async[T]` resolves to `(Try[T] => Unit) => Unit` which means that it represents a consumer of a callback 
-of possibly failed computation of value of type `T`. 
+Monix `Task` is currently used as an "IO monad" implementation, i.e. a suspended, repeatable and cancellable 
+asynchronous computation.
 
 In other words, `HandleRequest` is a function which translates a `RestRequest` into an unexecuted, asynchronous
 computation which yields a `RestResponse` when run.
