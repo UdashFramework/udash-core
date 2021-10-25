@@ -122,4 +122,7 @@ abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] { companion 
 
   implicit def canBuildFrom[V]: Factory[(String, V), M[V]] =
     reusableFactory.asInstanceOf[Factory[(String, V), M[V]]]
+
+  implicit def toFactory[V](companion: AbstractMappingCompanion[M]): Factory[(String, V), M[V]] =
+    companion.canBuildFrom[V]
 }

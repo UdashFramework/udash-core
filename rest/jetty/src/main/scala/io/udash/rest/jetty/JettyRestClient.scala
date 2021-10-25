@@ -1,9 +1,6 @@
 package io.udash
 package rest.jetty
 
-import java.net.HttpCookie
-import java.nio.charset.Charset
-
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
@@ -13,8 +10,10 @@ import org.eclipse.jetty.client.api.Result
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesContentProvider, StringContentProvider}
 import org.eclipse.jetty.http.{HttpHeader, MimeTypes}
 
-import scala.util.{Failure, Success}
+import java.net.HttpCookie
+import java.nio.charset.Charset
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object JettyRestClient {
   final val DefaultMaxResponseLength = 2 * 1024 * 1024
@@ -78,7 +77,7 @@ object JettyRestClient {
                 case _ =>
                   HttpBody.Empty
               }
-              val headers = httpResp.getHeaders.iterator.asScala.map(h => (h.getName, PlainValue(h.getValue))).toList
+              val headers = httpResp.getHeaders.asScala.iterator.map(h => (h.getName, PlainValue(h.getValue))).toList
               val response = RestResponse(httpResp.getStatus, IMapping(headers), body)
               callback(Success(response))
             } else {
