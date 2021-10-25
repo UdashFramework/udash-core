@@ -46,8 +46,8 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     method,
     RestParameters(
       PlainValue.decodePath(url),
-      headers.iterator.map { case (k, v) => (k, PlainValue(v)) }.to(IMapping),
-      queryArguments.iterator.map { case (k, v) => (k, PlainValue(v)) }.to(Mapping),
+      IMapping(headers.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
+      Mapping(queryArguments.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
     ),
     HttpBody.json(JsonValue(body))
   )

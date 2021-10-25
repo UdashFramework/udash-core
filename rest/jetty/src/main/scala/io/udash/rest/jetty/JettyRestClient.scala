@@ -77,8 +77,8 @@ object JettyRestClient {
                 case _ =>
                   HttpBody.Empty
               }
-              val headers = httpResp.getHeaders.iterator.asScala.map(h => (h.getName, PlainValue(h.getValue)))
-              val response = RestResponse(httpResp.getStatus, headers.to(IMapping), body)
+              val headers = httpResp.getHeaders.asScala.iterator.map(h => (h.getName, PlainValue(h.getValue))).toList
+              val response = RestResponse(httpResp.getStatus, IMapping(headers), body)
               callback(Success(response))
             } else {
               callback(Failure(result.getFailure))
