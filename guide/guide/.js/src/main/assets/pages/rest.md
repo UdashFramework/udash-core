@@ -676,13 +676,13 @@ serializable as `HttpBody`.
 ### Result serialization
 
 Result type of every REST API method is wrapped into `Try` (in case the method throws an exception)
-and translated into `Async[RestResponse]`. This means that the macro engine looks for an implicit instance of 
-`AsRaw[Async[RestResponse], Try[R]]` and `AsReal[Async[RestResponse], Try[R]]` for every HTTP method with result type `R`.
+and translated into `Task[RestResponse]`. This means that the macro engine looks for an implicit instance of 
+`AsRaw[Task[RestResponse], Try[R]]` and `AsReal[Task[RestResponse], Try[R]]` for every HTTP method with result type `R`.
 
-* `Async` is currently equivalent to `monix.eval.Task` and represents a repeatable, cancelable, asynchronous computation.
+* `Task` is `monix.eval.Task` and represents a repeatable, cancelable, asynchronous computation.
 * `RestResponse` itself is a simple class that aggregates HTTP status code, response headers and body.
 
-`DefaultRestApiCompanion` and its friends introduce implicits which translate between `Async` and `Future`s.
+`DefaultRestApiCompanion` and its friends introduce implicits which translate between `Task` and `Future`s.
 This effectively means that if your method returns `Future[R]` then it's enough if `R` is serializable as `RestResponse`.
 
 However, there are even more defaults provided: if `R` is serializable as `HttpBody` then it's automatically serializable
@@ -843,19 +843,15 @@ object MyRestApi extends CirceRestApiCompanion[MyRestApi]
 REST API, then along from custom serialization you must provide customized instances of
 [`RestSchema`](#restschema-typeclass) that will adequately describe your new serialization format.
 
-#### Supporting async effects other than `Future`
+#### Supporting async effects other than `Task` and `Future`
 
 When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return 
-its return wrapped into a `Future`. However, `Future` is low level and limited in many ways 
-(e.g. there is no way to control when the actual asynchronous computation starts). 
-It is possible to use other task-like containers, e.g. [Monix Task](https://monix.io/docs/2x/eval/task.html) 
-or [Cats IO](https://typelevel.org/cats-effect/).
+its return wrapped into a Monix `Task` or `Future`. It is possible to use other asynchronous IO effects.
 
 In order to do that, you must provide some additional implicits which will make the macro engine
-understand how to translate between `Async[T]` and `MyFavoriteIOMonad[T]` for arbitrary type `T`. This is controlled by
-`AsyncEffect` typeclass defined in `RawRest` object which represents a bidirectional polymorphic conversion between
-some effect type constructor and `Async`. This means that you must provide implicit instance
-of `AsyncEffect[MyFavoriteIOMonad]`.
+understand how to translate between `Task[T]` and `MyFavoriteIOMonad[T]` for arbitrary type `T`. This is controlled by
+`RawRest.AsTask` and `RawRest.FromTask` typeclasses. This means that you must provide implicit instances
+of `AsTask[MyFavoriteIOMonad]` (for server side) and `FromTask[MyFavoriteIOMonad]` (for client side).
 
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
