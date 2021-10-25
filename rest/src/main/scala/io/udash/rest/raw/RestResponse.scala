@@ -40,9 +40,9 @@ object RestResponse extends RestResponseLowPrio {
   }
 
   implicit def taskLikeFromResponseTask[F[_], T](
-    implicit fromTask: FromTask[F], asResponse: AsReal[RestResponse, T]
+    implicit fromTask: FromTask[F], fromResponse: AsReal[RestResponse, T]
   ): AsReal[Task[RestResponse], Try[F[T]]] =
-    rawTask => Success(fromTask.fromTask(rawTask.map(asResponse.asReal)))
+    rawTask => Success(fromTask.fromTask(rawTask.map(fromResponse.asReal)))
 
   implicit def taskLikeToResponseTask[F[_], T](
     implicit taskLike: TaskLike[F], asResponse: AsRaw[RestResponse, T]
