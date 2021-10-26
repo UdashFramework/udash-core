@@ -5,8 +5,7 @@ import io.udash.core.Url
 import io.udash.properties.MutableBufferRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
-import org.scalajs.dom.raw.{HTMLAnchorElement, HashChangeEvent}
-import org.scalajs.dom.{Element, Location}
+import org.scalajs.dom.{Element, HTMLAnchorElement, HashChangeEvent, Location}
 
 import scala.scalajs.js
 
@@ -60,8 +59,8 @@ final class WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 final class WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   import dom.window
-  import org.scalajs.dom.experimental.{URL => JSUrl}
-  import org.scalajs.dom.raw.{MouseEvent, Node, PopStateEvent}
+  import org.scalajs.dom.{URL => JSUrl}
+  import org.scalajs.dom.{MouseEvent, Node, PopStateEvent}
 
   private val callbacks: js.Array[Url => Unit] = js.Array()
 

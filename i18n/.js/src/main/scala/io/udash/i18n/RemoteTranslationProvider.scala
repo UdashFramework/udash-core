@@ -1,9 +1,8 @@
 package io.udash.i18n
 
 import java.{util => ju}
-
 import com.avsystem.commons._
-import org.scalajs.dom.ext.Storage
+import org.scalajs.dom.Storage
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
@@ -23,9 +22,9 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
                                 missingTranslationError: String = "Missing translation")
   extends FrontendTranslationProvider {
 
-  protected def storageKey(key: String)(implicit lang: Lang) = s"udash-i18n_${lang.lang}_$key"
-  protected val cacheHashKey = "udash-i18n-cache-hash"
-  protected val cacheTTLKey = "udash-i18n-cache-ttl"
+  protected def storageKey(key: String)(implicit lang: Lang): String = s"udash-i18n_${lang.lang}_$key"
+  protected val cacheHashKey: String = "udash-i18n-cache-hash"
+  protected val cacheTTLKey: String = "udash-i18n-cache-ttl"
 
   private var reloading: Future[Option[Bundle]] = _
 
@@ -41,11 +40,11 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
     cache match {
       case Some(storage) =>
         reloadCache(storage)
-          .mapNow(_ => storage(storageKey(key)))
+          .mapNow(_ => storage.getItem(storageKey(key)).opt)
           .flatMapNow {
-            case Some(translationString) =>
+            case Opt(translationString) =>
               Future.successful(translationString)
-            case None =>
+            case Opt.Empty =>
               logger.warn(s"Key $key not found in cache!")
               Future.failed(new IllegalArgumentException(s"Key $key not found in cache!"))
           }
@@ -56,32 +55,31 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
   /** Reloads cache if needed. Return true if cache was reloaded. */
   private def reloadCache(storage: Storage)(implicit lang: Lang): Future[Boolean] = {
     def isCacheValid(timestamp: String): Boolean =
-      Try(timestamp.toLong > now()).getOrElse(false)
+      Try(timestamp.toLong > js.Date.now()).getOrElse(false)
 
-    storage(storageKey(cacheTTLKey)) match {
-      case Some(value) if isCacheValid(value) =>
+    storage.getItem(storageKey(cacheTTLKey)).opt match {
+      case Opt(value) if isCacheValid(value) =>
         Future.successful(false)
       case _ if reloading != null =>
         reloading.mapNow(_ => true)
       case _ =>
-        reloading = translationsEndpoint.loadTranslations(BundleHash(storage(storageKey(cacheHashKey)).getOrElse("")))
+        reloading = translationsEndpoint.loadTranslations(BundleHash(storage.getItem(storageKey(cacheHashKey)).opt.getOrElse("")))
         reloading.mapNow {
           case Some(Bundle(hash, translations)) =>
             translations.foreach {
               case (key, value) =>
-                storage(storageKey(key)) = value
+                storage.setItem(storageKey(key), value)
             }
-            storage(storageKey(cacheHashKey)) = hash.hash
-            storage(storageKey(cacheTTLKey)) = (js.Date.now() + ttl.fromNow.timeLeft.toMillis).toString
+            storage.setItem(storageKey(cacheHashKey), hash.hash)
+            storage.setItem(storageKey(cacheTTLKey), (js.Date.now() + ttl.fromNow.timeLeft.toMillis).toString)
             reloading = null
             true
           case None =>
-            storage(storageKey(cacheTTLKey)) = (js.Date.now() + ttl.fromNow.timeLeft.toMillis).toString
+            storage.setItem(storageKey(cacheTTLKey), (js.Date.now() + ttl.fromNow.timeLeft.toMillis).toString)
             reloading = null
             true
         }
     }
   }
 
-  private def now() = new ju.Date().getTime
 }
