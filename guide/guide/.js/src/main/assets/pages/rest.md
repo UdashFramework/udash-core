@@ -843,6 +843,25 @@ object MyRestApi extends CirceRestApiCompanion[MyRestApi]
 REST API, then along from custom serialization you must provide customized instances of
 [`RestSchema`](#restschema-typeclass) that will adequately describe your new serialization format.
 
+#### Adjusting client-side `Scheduler` used for `Future`-based methods
+
+`DefaultRestImplicits` contains a method that specifies the `monix.execution.Scheduler` 
+(extended version of `ExecutionContext`, usually wraps a thread pool) that is used for serialization and deserialization
+between `RestRequest`/`RestResponse` and representations of requests and responses native to the HTTP client being used.
+
+This method returns `Scheduler.global` in its default implementation. If you have a more sensible, shared thread pool
+that could be used for that purpose (and you probably should have one) then it's recommended to override this method, e.g.
+
+```scala
+trait CustomizedRestImplicits extends DefaultRestImplicits {
+  override def clientScheduler: Scheduler = ??? // insert your shared scheduler here
+}
+object CustomizedRestImplicits extends CustomizedRestImplicits
+
+trait MyFutureBasedRestApi { ... }
+object MyFutureBasedRestApi extends RestApiCompanion[CustomizedRestImplicits, MyFutureBasedRestApi](CustomizedRestImplicits)
+```
+
 #### Supporting async effects other than `Task` and `Future`
 
 When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return 

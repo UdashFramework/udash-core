@@ -24,7 +24,13 @@ trait FloatingPointRestImplicits {
 object FloatingPointRestImplicits extends FloatingPointRestImplicits
 
 trait FutureRestImplicits {
-  implicit def scheduler: Scheduler = Scheduler.global
+  /**
+   * This `Scheduler` is used only on client-side, effectively only to translate between [[RestRequest]]/[[RestResponse]]
+   * and native representations of requests and responses for the HTTP client being used (e.g. Jetty).
+   * Despite that, it is recommended to override this method and provide a customized `Scheduler`
+   * (possibly shared with other parts of your application) in order to avoid creating too many thread pools.
+   */
+  implicit def clientScheduler: Scheduler = Scheduler.global
 
   implicit def futureFromTask: FromTask[Future] =
     new FromTask[Future] {
