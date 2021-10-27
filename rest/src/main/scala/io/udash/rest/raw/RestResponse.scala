@@ -4,9 +4,10 @@ package rest.raw
 import com.avsystem.commons._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
+import io.udash.rest.raw.RawRest.FromTask
+import monix.eval.{Task, TaskLike}
 
 import scala.annotation.implicitNotFound
-import scala.util.Failure
 
 final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: HttpBody) {
   def header(name: String, value: String): RestResponse =
@@ -31,50 +32,49 @@ object RestResponse extends RestResponseLowPrio {
   }
   implicit def lazyOps(resp: => RestResponse): LazyOps = new LazyOps(() => resp)
 
-  implicit class AsyncOps(private val asyncResp: RawRest.Async[RestResponse]) extends AnyVal {
-    def recoverHttpError: RawRest.Async[RestResponse] =
-      callback => asyncResp {
-        case Failure(e: HttpErrorException) => callback(Success(e.toResponse))
-        case tr => callback(tr)
+  implicit class TaskOps(private val asyncResp: Task[RestResponse]) extends AnyVal {
+    def recoverHttpError: Task[RestResponse] =
+      asyncResp.onErrorRecover {
+        case e: HttpErrorException => e.toResponse
       }
   }
 
-  implicit def effectFromAsyncResp[F[_], T](
-    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsReal[RestResponse, T]
-  ): AsReal[RawRest.Async[RestResponse], Try[F[T]]] =
-    async => Success(asyncEff.fromAsync(RawRest.mapAsync(async)(resp => asResponse.asReal(resp))))
+  implicit def taskLikeFromResponseTask[F[_], T](
+    implicit fromTask: FromTask[F], fromResponse: AsReal[RestResponse, T]
+  ): AsReal[Task[RestResponse], Try[F[T]]] =
+    rawTask => Success(fromTask.fromTask(rawTask.map(fromResponse.asReal)))
 
-  implicit def effectToAsyncResp[F[_], T](
-    implicit asyncEff: RawRest.AsyncEffect[F], asResponse: AsRaw[RestResponse, T]
-  ): AsRaw[RawRest.Async[RestResponse], Try[F[T]]] =
-    _.fold(RawRest.failingAsync, ft => RawRest.mapAsync(asyncEff.toAsync(ft))(asResponse.asRaw)).recoverHttpError
+  implicit def taskLikeToResponseTask[F[_], T](
+    implicit taskLike: TaskLike[F], asResponse: AsRaw[RestResponse, T]
+  ): AsRaw[Task[RestResponse], Try[F[T]]] =
+    _.fold(Task.raiseError, ft => Task.from(ft).map(asResponse.asRaw)).recoverHttpError
 
   // following two implicits provide nice error messages when serialization is lacking for HTTP method result
   // while the async wrapper is fine (e.g. Future)
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: RawRest.AsyncEffect[F],
+    fromAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
-  ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsReal[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: RawRest.AsyncEffect[F],
+    toAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
-  ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[F[T]]]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsRaw[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   // following two implicits provide nice error messages when result type of HTTP method is totally wrong
 
   @implicitNotFound("#{forResponseType}")
   implicit def asyncAsRealNotFound[T](
     implicit forResponseType: ImplicitNotFound[HttpResponseType[T]]
-  ): ImplicitNotFound[AsReal[RawRest.Async[RestResponse], Try[T]]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsReal[Task[RestResponse], Try[T]]] = ImplicitNotFound()
 
   @implicitNotFound("#{forResponseType}")
   implicit def asyncAsRawNotFound[T](
     implicit forResponseType: ImplicitNotFound[HttpResponseType[T]]
-  ): ImplicitNotFound[AsRaw[RawRest.Async[RestResponse], Try[T]]] = ImplicitNotFound()
+  ): ImplicitNotFound[AsRaw[Task[RestResponse], Try[T]]] = ImplicitNotFound()
 }
 trait RestResponseLowPrio { this: RestResponse.type =>
   implicit def bodyBasedFromResponse[T](implicit bodyAsReal: AsReal[HttpBody, T]): AsReal[RestResponse, T] =
