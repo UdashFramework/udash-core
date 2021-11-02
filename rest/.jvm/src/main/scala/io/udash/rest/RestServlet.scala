@@ -115,7 +115,7 @@ class RestServlet(
   private def readBody(request: HttpServletRequest): HttpBody = {
     val contentLength = request.getContentLengthLong.opt.filter(_ != -1)
     contentLength.filter(_ > maxPayloadSize).foreach { length =>
-      throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
+      throw HttpErrorException.plain(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
     }
 
     request.getContentType.opt.fold(HttpBody.empty) { contentType =>
@@ -144,7 +144,7 @@ class RestServlet(
             case len =>
               bodyOs.write(bbuf, 0, len)
               if (bodyOs.size > maxPayloadSize) {
-                throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes")
+                throw HttpErrorException.plain(413, s"Payload is larger than maximum $maxPayloadSize bytes")
               }
               readLoop()
           }
