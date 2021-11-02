@@ -49,16 +49,13 @@ object RestParameters {
   final val Empty = RestParameters()
 }
 
-class HttpErrorException(val code: Int, val payload: HttpBody = HttpBody.Empty, val cause: Throwable = null)
+case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cause: Throwable = null)
   extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause) with NoStackTrace {
   def toResponse: RestResponse = RestResponse(code, IMapping.empty, payload)
 }
 object HttpErrorException {
   def plain(code: Int, message: String, cause: Throwable = null): HttpErrorException =
-    new HttpErrorException(code, HttpBody.plain(message), cause)
-
-  def unapply(hex: HttpErrorException): Some[(Int, HttpBody, Throwable)] =
-    Some((hex.code, hex.payload, hex.cause))
+    HttpErrorException(code, HttpBody.plain(message), cause)
 }
 
 final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody) {
