@@ -264,6 +264,16 @@
         }
       }
     },
+    "/jsonFailingGet": {
+      "get": {
+        "operationId": "jsonFailingGet",
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/moreFailingGet": {
       "get": {
         "operationId": "moreFailingGet",

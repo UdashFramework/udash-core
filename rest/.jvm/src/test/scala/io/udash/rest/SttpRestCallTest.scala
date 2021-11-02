@@ -24,7 +24,7 @@ class SttpRestCallTest extends SttpClientRestTest with RestApiTestScenarios {
   test("too large binary request") {
     val future = proxy.binaryEcho(Array.fill[Byte](maxPayloadSize + 1)(5))
     val exception = future.failed.futureValue
-    assert(exception == HttpErrorException(413, "Payload is larger than maximum 1048576 bytes (1048577)"))
+    assert(exception == HttpErrorException.plain(413, "Payload is larger than maximum 1048576 bytes (1048577)"))
   }
 }
 
@@ -33,7 +33,7 @@ class ServletTimeoutTest extends SttpClientRestTest {
 
   test("rest method timeout") {
     val exception = proxy.neverGet.failed.futureValue
-    assert(exception == HttpErrorException(500, "server operation timed out after 500 milliseconds"))
+    assert(exception == HttpErrorException.plain(500, "server operation timed out after 500 milliseconds"))
   }
 
   test("subsequent requests with timeout") {
