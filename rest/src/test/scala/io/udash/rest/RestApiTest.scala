@@ -41,6 +41,10 @@ trait RestApiTestScenarios extends RestApiTest {
     testCall(_.failingGet)
   }
 
+  test("JSON failing GET") {
+    testCall(_.jsonFailingGet)
+  }
+
   test("more failing GET") {
     testCall(_.moreFailingGet)
   }
