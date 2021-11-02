@@ -16,7 +16,7 @@ final case class RestResponse(code: Int, headers: IMapping[PlainValue], body: Ht
   def isSuccess: Boolean =
     code >= 200 && code < 300
   def toHttpError: HttpErrorException =
-    new HttpErrorException(code, body)
+    HttpErrorException(code, body)
   def ensureNonError: RestResponse =
     if (isSuccess) this else throw toHttpError
 }
