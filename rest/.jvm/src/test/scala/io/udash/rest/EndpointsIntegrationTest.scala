@@ -163,7 +163,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
     override def auth(pass: String): TestServerRESTInternalInterface =
       if (pass == "TurboSecureAPI") new TestServerRESTInternalInterfaceImpl("auth")
-      else throw HttpErrorException(401, "Invalid password")
+      else throw HttpErrorException.plain(401, "Invalid password")
   }
 
   private class TestServerRESTInternalInterfaceImpl(data: String) extends TestServerRESTInternalInterface {

@@ -2,7 +2,6 @@ package io.udash
 package rest
 package raw
 
-import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.rpc._
@@ -10,16 +9,16 @@ import com.avsystem.commons.rpc._
 import scala.util.control.NoStackTrace
 
 /**
-  * Enum representing HTTP methods.
-  */
+ * Enum representing HTTP methods.
+ */
 final class HttpMethod(implicit enumCtx: EnumCtx) extends AbstractValueEnum
 object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
   final val GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH: Value = new HttpMethod
 }
 
 /**
-  * Aggregates serialized path, header and query parameters of an HTTP request.
-  */
+ * Aggregates serialized path, header and query parameters of an HTTP request.
+ */
 final case class RestParameters(
   @multi @tagged[Path] path: List[PlainValue] = Nil,
   @multi @tagged[Header] @allowOptional headers: IMapping[PlainValue] = IMapping.empty,
@@ -50,9 +49,16 @@ object RestParameters {
   final val Empty = RestParameters()
 }
 
-final case class HttpErrorException(code: Int, payload: OptArg[String] = OptArg.Empty, cause: Throwable = null)
-  extends RuntimeException(s"HTTP ERROR $code${payload.fold("")(p => s": $p")}", cause) with NoStackTrace {
-  def toResponse: RestResponse = RestResponse.plain(code, payload)
+class HttpErrorException(val code: Int, val payload: HttpBody = HttpBody.Empty, val cause: Throwable = null)
+  extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause) with NoStackTrace {
+  def toResponse: RestResponse = RestResponse(code, IMapping.empty, payload)
+}
+object HttpErrorException {
+  def plain(code: Int, message: String, cause: Throwable = null): HttpErrorException =
+    new HttpErrorException(code, HttpBody.plain(message), cause)
+
+  def unapply(hex: HttpErrorException): Some[(Int, HttpBody, Throwable)] =
+    Some((hex.code, hex.payload, hex.cause))
 }
 
 final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody) {

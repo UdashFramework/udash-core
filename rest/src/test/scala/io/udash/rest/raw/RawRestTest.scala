@@ -109,8 +109,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     def autopost(bodyarg: String): Future[String] = Future.successful(bodyarg.toUpperCase)
     def singleBodyAutopost(body: String): Future[String] = Future.successful(body.toUpperCase)
     def formpost(qarg: String, sarg: String, iarg: Int): Future[String] = Future.successful(s"$qarg-$sarg-$iarg")
-    def fail: Future[Unit] = Future.failed(HttpErrorException(400, "zuo"))
-    def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
+    def fail: Future[Unit] = Future.failed(HttpErrorException.plain(400, "zuo"))
+    def failMore: Future[Unit] = throw HttpErrorException.plain(400, "ZUO")
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)

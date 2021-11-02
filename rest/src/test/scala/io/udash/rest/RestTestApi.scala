@@ -149,8 +149,8 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
 
   val Impl: RestTestApi = new RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
-    def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
-    def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
+    def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
+    def moreFailingGet: Future[Unit] = throw HttpErrorException.plain(503, "nie")
     def neverGet: Future[Unit] = Future.never
     def wait(millis: Int): Future[String] = FutureUtils.delayedResult(millis.millis)(s"waited $millis ms")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
