@@ -2,7 +2,7 @@ package io.udash.routing
 
 import com.avsystem.commons._
 import io.udash.core.Url
-import io.udash.properties.MutableBufferRegistration
+import io.udash.properties.MutableSetRegistration
 import io.udash.utils.Registration
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLAnchorElement, HashChangeEvent}
@@ -34,15 +34,15 @@ final class WindowUrlFragmentChangeProvider extends UrlChangeProvider {
 
   import dom.window
 
-  private val callbacks: js.Array[Url => Unit] = js.Array()
+  private val callbacks: MLinkedHashSet[Url => Unit] = MLinkedHashSet.empty
 
   override def initialize(): Unit = {
     window.onhashchange = (_: HashChangeEvent) => callbacks.foreach(_.apply(currentFragment))
   }
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
-    callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback, Opt.Empty)
+    callbacks += callback
+    new MutableSetRegistration(callbacks, callback, Opt.Empty)
   }
 
   override def currentFragment: Url = Url(window.location.hash.stripPrefix("#"))
@@ -63,7 +63,7 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
   import org.scalajs.dom.experimental.{URL => JSUrl}
   import org.scalajs.dom.raw.{MouseEvent, Node, PopStateEvent}
 
-  private val callbacks: js.Array[Url => Unit] = js.Array()
+  private val callbacks: MLinkedHashSet[Url => Unit] = MLinkedHashSet.empty
 
   @inline
   private def isSameOrigin(loc: Location, url: JSUrl): Boolean =
@@ -117,8 +117,8 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
   }
 
   override def onFragmentChange(callback: Url => Unit): Registration = {
-    callbacks.push(callback)
-    new MutableBufferRegistration(callbacks, callback, Opt.Empty)
+    callbacks += callback
+    new MutableSetRegistration(callbacks, callback, Opt.Empty)
   }
 
   override def changeFragment(url: Url, replaceCurrent: Boolean): Unit = {
