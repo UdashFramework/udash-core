@@ -101,7 +101,9 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     val originalListeners = structureListeners.toSet
     CallbackSequencer().queue(
       s"$hashCode:fireElementsListeners:${patch.hashCode()}",
-      () => structureListeners.foreach { listener => if (originalListeners.contains(listener)) listener(patch) }
+      () => structureListeners.toList.foreach { listener =>
+        if (originalListeners.contains(listener) && structureListeners.contains(listener)) listener(patch)
+      }
     )
   }
 

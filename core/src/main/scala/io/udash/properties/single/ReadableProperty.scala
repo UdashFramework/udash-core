@@ -143,7 +143,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     val originalListeners = listeners.toSet
     CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
-      listeners.foreach { listener => if (originalListeners.contains(listener)) listener(value) }
+      listeners.toList.foreach { listener => if (originalListeners.contains(listener) && listeners.contains(listener)) listener(value) }
       oneTimeListeners.foreach(_.cancel())
       oneTimeListeners.clear()
     })
