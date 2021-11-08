@@ -98,8 +98,7 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     new ZippedWithIndexReadableSeqProperty[A](this)
 
   protected final def fireElementsListeners(patch: Patch[ElemType]): Unit = {
-    import scala.collection.compat._
-    val originalListeners = structureListeners.iterator.to(MLinkedHashSet)
+    val originalListeners = structureListeners.toList
     CallbackSequencer().queue(
       s"$hashCode:fireElementsListeners:${patch.hashCode()}",
       () => originalListeners.foreach { listener => if (structureListeners.contains(listener)) listener(patch) }

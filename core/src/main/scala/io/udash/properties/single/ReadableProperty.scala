@@ -140,8 +140,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   }
 
   protected[properties] override def valueChanged(): Unit = {
-    import scala.collection.compat._
-    val originalListeners = listeners.iterator.to(MLinkedHashSet)
+    val originalListeners = listeners.toList
     CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
       originalListeners.foreach { listener => if (listeners.contains(listener)) listener(value) }
