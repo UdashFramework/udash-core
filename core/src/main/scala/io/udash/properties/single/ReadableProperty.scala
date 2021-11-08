@@ -84,7 +84,7 @@ object MirrorProperty {
 }
 
 private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A] {
-  protected[this] final val listeners: MArrayBuffer[A => Any] = MArrayBuffer.empty
+  protected[this] final val listeners: MLinkedHashSet[A => Any] = MLinkedHashSet.empty
   protected[this] final val oneTimeListeners: MArrayBuffer[Registration] = MArrayBuffer.empty
 
   protected def wrapListenerRegistration(reg: Registration): Registration = reg
@@ -98,13 +98,13 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     listenersUpdate()
     if (initUpdate) valueListener(this.get)
     wrapListenerRegistration(
-      new MutableBufferRegistration(listeners, valueListener, Opt(listenersUpdate _))
+      new MutableSetRegistration(listeners, valueListener, Opt(listenersUpdate _))
     )
   }
 
   override def listenOnce(valueListener: A => Any): Registration = {
     val reg = wrapOneTimeListenerRegistration(
-      new MutableBufferRegistration(listeners, valueListener, Opt(listenersUpdate _))
+      new MutableSetRegistration(listeners, valueListener, Opt(listenersUpdate _))
     )
     listeners += valueListener
     oneTimeListeners += reg
@@ -113,7 +113,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   }
 
   override def listenersCount(): Int =
-    listeners.length
+    listeners.size
 
   override protected[properties] def listenersUpdate(): Unit = {
     if (parent != null) parent.listenersUpdate()
@@ -141,7 +141,7 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
 
   protected[properties] override def valueChanged(): Unit = {
     import scala.collection.compat._
-    val originalListeners = listeners.to(MLinkedHashSet)
+    val originalListeners = listeners.iterator.to(MLinkedHashSet)
     CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
       val value = get
       originalListeners.foreach { listener => if (listeners.contains(listener)) listener(value) }
