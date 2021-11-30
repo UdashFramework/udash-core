@@ -64,7 +64,9 @@ class RestServlet(
         asyncContext.complete()
       }
 
-    val cancelable = Task.defer(handleRequest(readRequest(request))).executeAsync.runAsync {
+    // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
+    val udashRequest = Try(readRequest(request))
+    val cancelable = Task.defer(handleRequest(udashRequest.get)).executeAsync.runAsync {
       case Right(restResponse) =>
         completeWith(writeResponse(response, restResponse))
       case Left(e: HttpErrorException) =>
