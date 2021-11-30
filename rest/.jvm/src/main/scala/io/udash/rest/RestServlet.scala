@@ -64,7 +64,7 @@ class RestServlet(
         asyncContext.complete()
       }
 
-    val cancelable = Task.defer(handleRequest(readRequest(request))).runAsync {
+    val cancelable = Task.defer(handleRequest(readRequest(request))).executeAsync.runAsync {
       case Right(restResponse) =>
         completeWith(writeResponse(response, restResponse))
       case Left(e: HttpErrorException) =>
