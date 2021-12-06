@@ -79,15 +79,10 @@ val commonSettings = Seq(
     "-Yrangepos",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
-    "-Ycache-macro-class-loader:last-modified"
+    "-Ycache-macro-class-loader:last-modified",
+    "-Xnon-strict-patmat-analysis",
+    "-Xlint:-strict-unsealed-patmat",
   ),
-  Compile / scalacOptions ++= {
-    //https://github.com/scala/bug/issues/12314#issuecomment-762331480
-    if (scalaBinaryVersion.value == "2.13") Seq(
-      "-Xnon-strict-patmat-analysis",
-      "-Xlint:-strict-unsealed-patmat"
-    ) else Seq.empty
-  },
   moduleName := "udash-" + moduleName.value,
   Compile / doc / sources := Seq.empty,
   Compile / ideOutputDirectory := Some(target.value.getParentFile / "out/production"),
