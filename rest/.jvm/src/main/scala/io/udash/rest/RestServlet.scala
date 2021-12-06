@@ -7,6 +7,8 @@ import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.RestServlet._
 import io.udash.rest.raw._
 import io.udash.utils.URLEncoder
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
@@ -32,6 +34,8 @@ object RestServlet {
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize
+  )(implicit
+    scheduler: Scheduler
   ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl), handleTimeout, maxPayloadSize)
 
   private final val BufferSize = 8192
@@ -41,6 +45,8 @@ class RestServlet(
   handleRequest: RawRest.HandleRequest,
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
   maxPayloadSize: Long = DefaultMaxPayloadSize
+)(implicit
+  scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
   import RestServlet._
@@ -58,23 +64,28 @@ class RestServlet(
         asyncContext.complete()
       }
 
-    asyncContext.setTimeout(handleTimeout.toMillis)
-    asyncContext.addListener(new AsyncListener {
-      def onComplete(event: AsyncEvent): Unit = ()
-      def onTimeout(event: AsyncEvent): Unit =
-        completeWith(writeFailure(response, Opt(s"server operation timed out after $handleTimeout")))
-      def onError(event: AsyncEvent): Unit = ()
-      def onStartAsync(event: AsyncEvent): Unit = ()
-    })
-    RawRest.safeAsync(handleRequest(readRequest(request))) {
-      case Success(restResponse) =>
+    // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
+    val udashRequest = Try(readRequest(request))
+    val cancelable = Task.defer(handleRequest(udashRequest.get)).executeAsync.runAsync {
+      case Right(restResponse) =>
         completeWith(writeResponse(response, restResponse))
-      case Failure(e: HttpErrorException) =>
+      case Left(e: HttpErrorException) =>
         completeWith(writeResponse(response, e.toResponse))
-      case Failure(e) =>
+      case Left(e) =>
         logger.error("Failed to handle REST request", e)
         completeWith(writeFailure(response, e.getMessage.opt))
     }
+
+    asyncContext.setTimeout(handleTimeout.toMillis)
+    asyncContext.addListener(new AsyncListener {
+      def onComplete(event: AsyncEvent): Unit = ()
+      def onTimeout(event: AsyncEvent): Unit = {
+        cancelable.cancel()
+        completeWith(writeFailure(response, Opt(s"server operation timed out after $handleTimeout")))
+      }
+      def onError(event: AsyncEvent): Unit = ()
+      def onStartAsync(event: AsyncEvent): Unit = ()
+    })
   }
 
   private def readParameters(request: HttpServletRequest): RestParameters = {
@@ -106,7 +117,7 @@ class RestServlet(
   private def readBody(request: HttpServletRequest): HttpBody = {
     val contentLength = request.getContentLengthLong.opt.filter(_ != -1)
     contentLength.filter(_ > maxPayloadSize).foreach { length =>
-      throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
+      throw HttpErrorException.plain(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
     }
 
     request.getContentType.opt.fold(HttpBody.empty) { contentType =>
@@ -135,7 +146,7 @@ class RestServlet(
             case len =>
               bodyOs.write(bbuf, 0, len)
               if (bodyOs.size > maxPayloadSize) {
-                throw HttpErrorException(413, s"Payload is larger than maximum $maxPayloadSize bytes")
+                throw HttpErrorException.plain(413, s"Payload is larger than maximum $maxPayloadSize bytes")
               }
               readLoop()
           }

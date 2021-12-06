@@ -38,9 +38,7 @@ trait Validator[-ArgumentType] {
 }
 
 object Validator {
-  object Default extends Validator[Any] {
-    override def apply(element: Any): Validation = Valid
-  }
+  final val Default: Validator[Any] = _ => Valid
 
   implicit final class FutureValidationOps[T](private val future: Future[Seq[ValidationResult]]) extends AnyVal {
     def foldValidationResult: Future[ValidationResult] = {

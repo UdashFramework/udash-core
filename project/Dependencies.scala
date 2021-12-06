@@ -5,8 +5,7 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.6" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.5.0"
+  val versionOfScala = "2.13.7" //update .github/workflows/ci.yml as well
 
   val jqueryWrapperVersion = "3.2.0"
 
@@ -15,10 +14,10 @@ object Dependencies {
   val scalaCssVersion = "1.0.0-RC2"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.3.0"
+  val avsCommonsVersion = "2.5.1"
 
   val atmosphereJSVersion = "3.0.4"
-  val atmosphereVersion = "2.7.2"
+  val atmosphereVersion = "2.7.3"
 
   val upickleVersion = "1.4.2" // Tests only
   val circeVersion = "0.14.1" // Tests only
@@ -32,7 +31,7 @@ object Dependencies {
   val jettyVersion = "9.4.44.v20210927"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
-  val logbackVersion = "1.2.6"
+  val logbackVersion = "1.2.7"
   val janinoVersion = "3.1.6"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
@@ -60,7 +59,6 @@ object Dependencies {
 
   val utilsCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
@@ -100,7 +98,7 @@ object Dependencies {
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp.client3" %%% "core" % sttpVersion,
-    "io.monix" %%% "monix" % monixVersion % Test,
+    "io.monix" %%% "monix" % monixVersion,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
     "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,

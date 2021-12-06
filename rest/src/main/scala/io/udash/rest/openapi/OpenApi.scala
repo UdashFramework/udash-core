@@ -82,7 +82,7 @@ object Server extends HasGenObjectCodec[Server]
   */
 final case class ServerVariable(
   default: String,
-  @td enum: List[String] = Nil,
+  @td `enum`: List[String] = Nil,
   @td description: OptArg[String] = OptArg.Empty
 )
 object ServerVariable extends HasGenObjectCodec[ServerVariable]
@@ -258,7 +258,7 @@ final case class Schema(
   @td not: OptArg[RefOr[Schema]] = OptArg.Empty,
   @td discriminator: OptArg[Discriminator] = OptArg.Empty,
 
-  @td enum: List[JsonValue] = Nil,
+  @td `enum`: List[JsonValue] = Nil,
   @td default: OptArg[JsonValue] = OptArg.Empty,
   @td example: OptArg[JsonValue] = OptArg.Empty
 )

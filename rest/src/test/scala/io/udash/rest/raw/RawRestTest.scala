@@ -6,6 +6,8 @@ import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
 import io.udash.rest.util.WithHeaders
+import monix.eval.Task
+import monix.execution.Scheduler
 import org.scalactic.source.Position
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
@@ -67,6 +69,8 @@ trait RootApi {
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
 class RawRestTest extends AnyFunSuite with ScalaFutures {
+  implicit def scheduler: Scheduler = Scheduler.global
+
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
     case tb@HttpBody.Textual(content, _, _) =>
@@ -105,8 +109,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     def autopost(bodyarg: String): Future[String] = Future.successful(bodyarg.toUpperCase)
     def singleBodyAutopost(body: String): Future[String] = Future.successful(body.toUpperCase)
     def formpost(qarg: String, sarg: String, iarg: Int): Future[String] = Future.successful(s"$qarg-$sarg-$iarg")
-    def fail: Future[Unit] = Future.failed(HttpErrorException(400, "zuo"))
-    def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
+    def fail: Future[Unit] = Future.failed(HttpErrorException.plain(400, "zuo"))
+    def failMore: Future[Unit] = throw HttpErrorException.plain(400, "ZUO")
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
@@ -117,16 +121,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
   var trafficLog: String = _
 
   val real: RootApi = new RootApiImpl(0, "")
-  val serverHandle: RawRest.HandleRequest = request => callback => {
-    RawRest.asHandleRequest(real).apply(request) { result =>
-      callback(result)
-      result match {
-        case Success(response) =>
-          trafficLog = s"${repr(request)}\n${repr(response)}\n"
-        case _ =>
+  val serverHandle: RawRest.HandleRequest = request =>
+    RawRest.asHandleRequest(real).apply(request).tapEval { response =>
+      Task {
+        trafficLog = s"${repr(request)}\n${repr(response)}\n"
       }
     }
-  }
 
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
@@ -141,9 +141,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
   }
 
   def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
-    val promise = Promise[RestResponse]()
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    val future = serverHandle(request).runToFuture
+    assert(future.futureValue == response)
   }
 
   test("simple GET") {

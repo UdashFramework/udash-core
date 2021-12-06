@@ -2,12 +2,11 @@ package io.udash
 package rest
 package raw
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 import com.avsystem.commons._
 import com.avsystem.commons.meta._
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc._
+import monix.eval.{Task, TaskLike}
 
 import scala.annotation.{implicitNotFound, tailrec}
 
@@ -30,7 +29,7 @@ final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall],
   def rpcChainRepr: String =
     prefixes.iterator.map(_.rpcName).mkString("", "->", s"->${finalCall.rpcName}")
 
-  def adjustResponse(response: RawRest.Async[RestResponse]): RawRest.Async[RestResponse] =
+  def adjustResponse(response: Task[RestResponse]): Task[RestResponse] =
     prefixes.foldRight(finalCall.metadata.adjustResponse(response))(_.metadata.adjustResponse(_))
 }
 
@@ -62,7 +61,7 @@ trait RawRest {
   def get(
     @methodName name: String,
     @composite parameters: RestParameters
-  ): Async[RestResponse]
+  ): Task[RestResponse]
 
   @multi @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
@@ -73,7 +72,7 @@ trait RawRest {
     @methodName name: String,
     @composite parameters: RestParameters,
     @multi @tagged[Body] body: Mapping[PlainValue]
-  ): Async[RestResponse]
+  ): Task[RestResponse]
 
   @multi @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
@@ -84,7 +83,7 @@ trait RawRest {
     @methodName name: String,
     @composite parameters: RestParameters,
     @multi @tagged[Body] body: Mapping[JsonValue]
-  ): Async[RestResponse]
+  ): Task[RestResponse]
 
   @multi @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
@@ -96,12 +95,12 @@ trait RawRest {
     @methodName name: String,
     @composite parameters: RestParameters,
     @encoded @tagged[Body] @unmatched(RawRest.MissingBodyParam) body: HttpBody
-  ): Async[RestResponse]
+  ): Task[RestResponse]
 
   def asHandleRequest(metadata: RestMetadata[_]): HandleRequest =
     RawRest.resolveAndHandle(metadata)(handleResolved)
 
-  def handleResolved(request: RestRequest, resolved: ResolvedCall): Async[RestResponse] = {
+  def handleResolved(request: RestRequest, resolved: ResolvedCall): Task[RestResponse] = {
     val RestRequest(method, parameters, body) = request
     val ResolvedCall(_, prefixes, finalCall) = resolved
     val HttpCall(finalPathParams, finalMetadata) = finalCall
@@ -111,12 +110,12 @@ trait RawRest {
     }
 
     @tailrec
-    def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Async[RestResponse] = prefixes match {
+    def resolveCall(rawRest: RawRest, prefixes: List[PrefixCall]): Task[RestResponse] = prefixes match {
       case PrefixCall(pathParams, pm) :: tail =>
         rawRest.prefix(pm.name, parameters.copy(path = pathParams)) match {
           case Success(nextRawRest) => resolveCall(nextRawRest, tail)
-          case Failure(e: HttpErrorException) => RawRest.successfulAsync(e.toResponse)
-          case Failure(cause) => RawRest.failingAsync(cause)
+          case Failure(e: HttpErrorException) => Task.now(e.toResponse)
+          case Failure(cause) => Task.raiseError(cause)
         }
       case Nil =>
         val finalParameters = parameters.copy(path = finalPathParams)
@@ -131,110 +130,28 @@ trait RawRest {
     }
     try resolved.adjustResponse(resolveCall(this, prefixes)) catch {
       case e: InvalidRpcCall =>
-        RawRest.successfulAsync(RestResponse.plain(400, e.getMessage))
+        Task.now(RestResponse.plain(400, e.getMessage))
     }
   }
 }
 
 object RawRest extends RawRpcCompanion[RawRest] {
-  /**
-    * A callback that gets notified when value of type `T` gets computed or when computation of that value fails.
-    * Callbacks should never throw exceptions. Preferably, they should be simple notifiers that delegate the real
-    * work somewhere else, e.g. schedule some handling code on a separate executor
-    * (e.g. [[scala.concurrent.ExecutionContext ExecutionContext]]).
-    */
-  type Callback[T] = Try[T] => Unit
+  type HandleRequest = RestRequest => Task[RestResponse]
 
   /**
-    * The most low-level, raw type representing an asynchronous, possibly side-effecting operation that yields a
-    * value of type `T` as a result.
-    * `Async` is a consumer of a callback. When a callback is passed to `Async`, it should start the operation
-    * and ultimately notify the callback about the result. Each time the callback is passed, the
-    * entire operation should be repeated, involving all possible side effects. Operation should never be started
-    * without the callback being passed (i.e. there should be no observable side effects before a callback is passed).
-    * Implementation of `Async` should also be prepared to accept a callback before the previous one was notified
-    * about the result (i.e. it should support concurrent execution).
-    */
-  type Async[T] = Callback[T] => Unit
+   * Similar to [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] but accepts already resolved path as a second argument.
+   */
+  type HandleResolvedRequest = (RestRequest, ResolvedCall) => Task[RestResponse]
 
-  /**
-    * Raw type of an operation that executes a [[RestRequest]]. The operation should be run every time the
-    * resulting `Async` value is passed a callback. It should not be run before that. Each run may involve side
-    * effects, network communication, etc. Runs may be concurrent.
-    * Request handlers should never throw exceptions but rather convert them into failing implementation of
-    * `Async`. One way to do this is by wrapping the handler with [[io.udash.rest.raw.RawRest.safeHandle safeHandle]].
-    */
-  type HandleRequest = RestRequest => Async[RestResponse]
+  type AsTask[F[_]] = TaskLike[F]
+  trait FromTask[F[_]] {
+    def fromTask[A](task: Task[A]): F[A]
+  }
 
-  /**
-    * Similar to [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] but accepts already resolved path as a second argument.
-    */
-  type HandleResolvedRequest = (RestRequest, ResolvedCall) => Async[RestResponse]
-
-  /**
-    * Ensures that all possible exceptions thrown by a request handler are not propagated but converted into
-    * an instance of `Async` that notifies its callbacks about the failure.
-    */
-  def safeHandle(handleRequest: HandleRequest): HandleRequest =
-    request => safeAsync(handleRequest(request))
-
-  private def guardedAsync[T](async: Async[T]): Async[T] = callback => {
-    val called = new AtomicBoolean
-    val guardedCallback: Callback[T] = result =>
-      if (!called.getAndSet(true)) {
-        callback(result) // may possibly throw but better let it fly rather than catch and ignore
-      }
-    try async(guardedCallback) catch {
-      case NonFatal(t) =>
-        // if callback was already called then we can't do much with the failure, rethrow it
-        if (!called.getAndSet(true)) callback(Failure(t)) else throw t
+  implicit val taskFromTask: FromTask[Task] =
+    new FromTask[Task] {
+      override def fromTask[A](task: Task[A]): Task[A] = task
     }
-  }
-
-  def safeAsync[T](async: => Async[T]): Async[T] =
-    try guardedAsync(async) catch {
-      case NonFatal(t) => failingAsync(t)
-    }
-
-  def readyAsync[T](result: Try[T]): Async[T] =
-    callback => callback(result)
-
-  def successfulAsync[T](value: T): Async[T] =
-    readyAsync(Success(value))
-
-  def failingAsync[T](cause: Throwable): Async[T] =
-    readyAsync(Failure(cause))
-
-  def transformAsync[A, B](async: Async[A])(f: Try[A] => Try[B]): Async[B] =
-    cb => async(contraTransformCallback(cb)(f))
-
-  def mapAsync[A, B](async: Async[A])(f: A => B): Async[B] =
-    transformAsync(async)(_.map(f))
-
-  def contraTransformCallback[A, B](callback: Callback[B])(f: Try[A] => Try[B]): Callback[A] =
-    ta => callback(try f(ta) catch {
-      case NonFatal(cause) => Failure(cause)
-    })
-
-  def contramapCallback[A, B](callback: Callback[B])(f: A => B): Callback[A] =
-    contraTransformCallback(callback)(_.map(f))
-
-  /**
-    * Typeclass which captures the fact that some effect type constructor represents asynchronous computation and
-    * can be converted to [[RawRest.Async]].
-    */
-  @implicitNotFound("${F} is not a valid asynchronous effect, AsyncEffect instance is missing")
-  trait AsyncEffect[F[_]] {
-    def toAsync[A](fa: F[A]): Async[A]
-    def fromAsync[A](async: Async[A]): F[A]
-  }
-  object AsyncEffect {
-    implicit val identity: AsyncEffect[Async] =
-      new AsyncEffect[Async] {
-        def toAsync[A](a: Async[A]): Async[A] = a
-        def fromAsync[A](a: Async[A]): Async[A] = a
-      }
-  }
 
   final val NotValidPrefixMethod =
     "it cannot be translated into a prefix method"
@@ -272,12 +189,12 @@ object RawRest extends RawRpcCompanion[RawRest] {
   def resolveAndHandle(metadata: RestMetadata[_])(handleResolved: HandleResolvedRequest): HandleRequest = {
     metadata.ensureValid()
 
-    RawRest.safeHandle { request =>
+    request => {
       val path = request.parameters.path
       metadata.resolvePath(path) match {
         case Nil =>
           val message = s"path ${PlainValue.encodePath(path)} not found"
-          RawRest.successfulAsync(RestResponse.plain(404, message))
+          Task.now(RestResponse.plain(404, message))
         case calls => request.method match {
           case HttpMethod.OPTIONS =>
             val meths = calls.iterator.map(_.method).flatMap {
@@ -286,17 +203,17 @@ object RawRest extends RawRpcCompanion[RawRest] {
             } ++ Iterator(HttpMethod.OPTIONS)
             val response = RestResponse(200,
               IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)
-            RawRest.successfulAsync(response)
+            Task.now(response)
           case wireMethod =>
             val head = wireMethod == HttpMethod.HEAD
             val req = if (head) request.copy(method = HttpMethod.GET) else request
             calls.find(_.method == req.method) match {
               case Some(call) =>
                 val resp = handleResolved(req, call)
-                if (head) RawRest.mapAsync(resp)(_.copy(body = HttpBody.empty)) else resp
+                if (head) resp.map(_.copy(body = HttpBody.empty)) else resp
               case None =>
                 val message = s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"
-                RawRest.successfulAsync(RestResponse.plain(405, message))
+                Task.now(RestResponse.plain(405, message))
             }
         }
       }
@@ -316,24 +233,24 @@ object RawRest extends RawRpcCompanion[RawRest] {
         Success(new DefaultRawRest(prefixMeta :: prefixMetas, prefixMeta.result.value, newHeaders, handleRequest))
       } getOrElse Failure(new UnknownRpc(name, "prefix"))
 
-    def get(name: String, parameters: RestParameters): Async[RestResponse] =
+    def get(name: String, parameters: RestParameters): Task[RestResponse] =
       doHandle("get", name, parameters, HttpBody.Empty)
 
-    def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Async[RestResponse] =
+    def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Task[RestResponse] =
       doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
-    def handleForm(name: String, parameters: RestParameters, body: Mapping[PlainValue]): Async[RestResponse] =
+    def handleForm(name: String, parameters: RestParameters, body: Mapping[PlainValue]): Task[RestResponse] =
       doHandle("handleForm", name, parameters, HttpBody.createFormBody(body))
 
-    def handleCustom(name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
+    def handleCustom(name: String, parameters: RestParameters, body: HttpBody): Task[RestResponse] =
       doHandle("handleSingle", name, parameters, body)
 
-    private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Async[RestResponse] =
+    private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Task[RestResponse] =
       metadata.httpMethodsByName.get(name).map { methodMeta =>
         val newHeaders = prefixParams.append(methodMeta, parameters)
         val baseRequest = RestRequest(methodMeta.method, newHeaders, body)
         val request = prefixMetas.foldLeft(methodMeta.adjustRequest(baseRequest))((req, meta) => meta.adjustRequest(req))
         handleRequest(request)
-      } getOrElse RawRest.failingAsync(new UnknownRpc(name, rawName))
+      } getOrElse Task.raiseError(new UnknownRpc(name, rawName))
   }
 }

@@ -3,11 +3,12 @@ package rest
 
 import com.avsystem.commons._
 import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.{GenCodec, flatten, whenAbsent}
+import com.avsystem.commons.serialization.json.JsonStringOutput
+import com.avsystem.commons.serialization.{GenCodec, HasPolyGenCodec, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
-import _root_.monix.execution.{Scheduler, FutureUtils}
+import monix.execution.{FutureUtils, Scheduler}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -70,9 +71,13 @@ object ThirdPartyImplicits {
 case class HasThirdParty(dur: ThirdParty)
 object HasThirdParty extends RestDataCompanionWithDeps[ThirdPartyImplicits.type, HasThirdParty]
 
+case class ErrorWrapper[T](error: T)
+object ErrorWrapper extends HasPolyGenCodec[ErrorWrapper]
+
 trait RestTestApi {
   @GET def trivialGet: Future[Unit]
   @GET def failingGet: Future[Unit]
+  @GET def jsonFailingGet: Future[Unit]
   @GET def moreFailingGet: Future[Unit]
   @GET def neverGet: Future[Unit]
   @GET def wait(millis: Int): Future[String]
@@ -145,12 +150,14 @@ trait RestTestApi {
   @CustomBody def thirdPartyBody(param: HasThirdParty): Future[HasThirdParty]
 }
 object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
+
   import Scheduler.Implicits.global
 
   val Impl: RestTestApi = new RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
-    def failingGet: Future[Unit] = Future.failed(HttpErrorException(503, "nie"))
-    def moreFailingGet: Future[Unit] = throw HttpErrorException(503, "nie")
+    def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
+    def jsonFailingGet: Future[Unit] = Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))
+    def moreFailingGet: Future[Unit] = throw HttpErrorException.plain(503, "nie")
     def neverGet: Future[Unit] = Future.never
     def wait(millis: Int): Future[String] = FutureUtils.delayedResult(millis.millis)(s"waited $millis ms")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))

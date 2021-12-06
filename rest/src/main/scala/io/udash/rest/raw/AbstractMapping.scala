@@ -5,7 +5,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.collection.CrossFactory
 import io.udash.rest.raw.AbstractMapping.ConcatSeq
 
-import scala.collection.compat._
+import scala.collection.Factory
 
 /**
  * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy

@@ -4,6 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
+import monix.eval.Task
 import sttp.client3._
 import sttp.model.Uri.QuerySegment.KeyValue
 import sttp.model.Uri.{PathSegmentEncoding, QuerySegmentEncoding}
@@ -40,10 +41,7 @@ object SttpRestClient {
   def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
     implicit backend: SttpBackend[Future, Any]
   ): RawRest.HandleRequest =
-    RawRest.safeHandle { request =>
-      val sttpReq = toSttpRequest(baseUri, request, options)
-      callback => sttpReq.send(backend).onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
-    }
+    request => Task.deferFuture(toSttpRequest(baseUri, request, options).send(backend)).map(fromSttpResponse)
 
   private def toSttpRequest(
     baseUri: String,
@@ -104,5 +102,4 @@ object SttpRestClient {
         }
       }
     )
-
 }
