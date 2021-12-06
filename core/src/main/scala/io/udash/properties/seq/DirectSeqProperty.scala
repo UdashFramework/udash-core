@@ -5,7 +5,7 @@ import io.udash.properties.PropertyCreator
 import io.udash.properties.single.{CastableProperty, ReadableProperty}
 import io.udash.utils.CrossCollections
 
-import scala.collection.compat._
+import scala.collection.Factory
 
 private[properties] final class DirectSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
   override protected val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])

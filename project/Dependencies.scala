@@ -6,7 +6,6 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.7" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.6.0"
 
   val jqueryWrapperVersion = "3.1.1"
 
@@ -60,7 +59,6 @@ object Dependencies {
 
   val utilsCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(

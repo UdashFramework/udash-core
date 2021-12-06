@@ -63,7 +63,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.12.15"),
+  crossScalaVersions := Seq(Dependencies.versionOfScala),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",

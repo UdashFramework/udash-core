@@ -156,8 +156,6 @@ private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator
   }
 
   override def replaceSeq(idx: Int, amount: Int, values: BSeq[B]): Unit = {
-    import scala.collection.compat._
-
     val current = get.to(MListBuffer)
     current.remove(idx, amount)
     current.insertAll(idx, values)
