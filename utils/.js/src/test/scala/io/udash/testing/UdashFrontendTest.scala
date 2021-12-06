@@ -2,8 +2,7 @@ package io.udash.testing
 
 import com.avsystem.commons._
 import org.scalajs.dom
-import org.scalajs.dom.Element
-import org.scalajs.dom.raw.DOMTokenList
+import org.scalajs.dom.{DOMTokenList, Element}
 import org.scalatest.enablers.Containing
 
 trait FrontendTestUtils {

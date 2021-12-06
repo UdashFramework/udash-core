@@ -6,8 +6,7 @@ import io.udash.routing.{RoutingEngine, StateChangeEvent}
 import io.udash.utils.CallbacksHandler
 import io.udash.view.ViewRenderer
 import org.scalajs.dom
-import org.scalajs.dom.raw.EventListenerOptions
-import org.scalajs.dom.{Element, Event}
+import org.scalajs.dom.{DocumentReadyState, Element, Event, EventListenerOptions}
 
 import scala.util.Try
 
@@ -61,7 +60,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
       run(rootElement)
       onApplicationStarted(rootElement)
     }
-    if (dom.document.readyState != "loading") onReady()
+    if (dom.document.readyState != DocumentReadyState.loading) onReady()
     else dom.document.addEventListener("DOMContentLoaded", { _: Event => onReady() }, new EventListenerOptions {
       once = true
       passive = true

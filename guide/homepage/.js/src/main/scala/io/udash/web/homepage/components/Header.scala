@@ -9,7 +9,7 @@ import io.udash.web.homepage.Context._
 import io.udash.web.homepage.IndexState
 import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
 object Header extends HeaderButtons with HeaderNav {
