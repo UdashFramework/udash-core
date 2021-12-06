@@ -6,7 +6,6 @@ import io.udash.bindings.modifiers._
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
-import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 

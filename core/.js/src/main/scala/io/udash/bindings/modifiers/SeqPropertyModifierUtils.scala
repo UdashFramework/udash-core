@@ -36,8 +36,10 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       // Clean up nested bindings
       patch.removed.foreach(clearPropertyAwareNestedInterceptor)
 
+      val childNodes: BSeq[Node] = root.childNodes
+
       //index of the first element produced by the binding
-      val firstIndex = nodeListArray(root.childNodes).indexOf(firstElement)
+      val firstIndex = childNodes.indexOf(firstElement)
 
       //number of nodes produced by properties before patch index
       val elementsBefore = producedElementsCount.jsSlice(0, patch.idx).sum
@@ -52,7 +54,7 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
         if (firstElementIsPlaceholder) {
           replace(root)(Seq(firstElement), newElementsFlatten)
           firstElementIsPlaceholder = false
-        } else insert(root)(root.childNodes(elementsBefore + firstIndex), newElementsFlatten)
+        } else insert(root)(childNodes(elementsBefore + firstIndex), newElementsFlatten)
       }
 
       if (patch.removed.nonEmpty) {

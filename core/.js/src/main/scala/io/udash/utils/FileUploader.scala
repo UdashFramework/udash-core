@@ -4,7 +4,6 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
 import org.scalajs.dom._
-import org.scalajs.dom.raw.{FormData, XMLHttpRequest}
 
 import scala.scalajs.js
 

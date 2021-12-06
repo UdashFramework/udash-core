@@ -2,8 +2,6 @@ package io.udash.utils
 
 import com.avsystem.commons.misc.AbstractCase
 import org.scalajs.dom._
-import org.scalajs.dom.experimental.FileReaderSync
-import org.scalajs.dom.raw.Blob
 
 import java.io.IOException
 import scala.concurrent.{Future, Promise}
@@ -30,7 +28,9 @@ object FileService {
     import js.typedarray._
 
     val jsBytesArrays = js.Array[js.Any](bytesArrays.map(_.toTypedArray) :_ *)
-    val blob = new Blob(jsBytesArrays, BlobPropertyBag(mimeType))
+    val blob = new Blob(jsBytesArrays, new BlobPropertyBag {
+      `type` = mimeType
+    })
     CloseableUrl(URL.createObjectURL(blob))
   }
 

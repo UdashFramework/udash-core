@@ -2,9 +2,8 @@ package io.udash.bindings.inputs
 
 import io.udash._
 import io.udash.properties.seq.SeqProperty
-import org.scalajs.dom.Event
+import org.scalajs.dom.{Event, HTMLOptionElement}
 import org.scalajs.dom.html.Select
-import org.scalajs.dom.raw.HTMLOptionElement
 import scalatags.JsDom.all._
 
 /**

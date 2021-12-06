@@ -5,7 +5,7 @@ import io.udash.properties.seq.DirectSeqProperty
 import io.udash.properties.single.{CastableProperty, DirectProperty, ReadableProperty}
 
 import scala.annotation.implicitNotFound
-import scala.collection.compat.Factory
+import scala.collection.Factory
 
 trait PropertyCreator[T] {
   def newProperty(parent: ReadableProperty[_])(implicit blank: Blank[T]): CastableProperty[T] =

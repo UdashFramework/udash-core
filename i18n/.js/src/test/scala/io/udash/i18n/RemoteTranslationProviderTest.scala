@@ -1,7 +1,8 @@
 package io.udash.i18n
 
 import io.udash.testing.AsyncUdashFrontendTest
-import org.scalajs.dom.ext.LocalStorage
+import org.scalajs.dom
+import org.scalajs.dom.Storage
 import org.scalatest.BeforeAndAfter
 
 import scala.concurrent.Future
@@ -9,6 +10,8 @@ import scala.concurrent.duration.DurationInt
 
 class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAndAfter {
   implicit val lang = Lang("en")
+
+  private def localStorage: Storage = dom.window.localStorage
 
   class RemoteTranslationRPCMock extends RemoteTranslationRPC {
     private var translations: Bundle = Bundle(BundleHash(""), Map.empty)
@@ -30,13 +33,13 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
   }
 
   before {
-    LocalStorage.clear()
+    localStorage.clear()
   }
 
   "RemoteTranslationProvider" should {
     "provide translations without argument" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(LocalStorage), 1 second, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 1 second, missingTranslationError = "ERROR")
 
       rpc.updateTranslations(BundleHash("hash1"), Map(
         "tr1" -> "Translation",
@@ -61,7 +64,7 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "provide translations with arguments" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(LocalStorage), 1 second, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 1 second, missingTranslationError = "ERROR")
 
       rpc.updateTranslations(BundleHash("hash2"), Map(
         "tr1" -> "Translation {0}",
@@ -91,7 +94,7 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "try to reload cache after TTL" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(LocalStorage), 0 seconds, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 0 seconds, missingTranslationError = "ERROR")
 
       rpc.updateTranslations(BundleHash("hash3"), Map(
         "tr1" -> "Translation {0}",
@@ -141,7 +144,7 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "not try to reload cache before TTL" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(LocalStorage), 10 seconds, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 10 seconds, missingTranslationError = "ERROR")
 
       rpc.updateTranslations(BundleHash("hash3"), Map(
         "tr1" -> "Translation {0}",
@@ -219,7 +222,7 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "handle languages" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(LocalStorage), 10 seconds, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 10 seconds, missingTranslationError = "ERROR")
 
       rpc.updateTranslations(BundleHash("hash2"), Map(
         "tr1" -> "Translation {0}",

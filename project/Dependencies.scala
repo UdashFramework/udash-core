@@ -6,16 +6,15 @@ import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.7" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.6.0"
 
-  val jqueryWrapperVersion = "3.1.1"
+  val jqueryWrapperVersion = "3.2.0"
 
-  val scalaJsDomVersion = "1.2.0"
-  val scalaTagsVersion = "0.9.4"
-  val scalaCssVersion = "0.7.0"
+  val scalaJsDomVersion = "2.0.0"
+  val scalaTagsVersion = "0.11.0"
+  val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.5.0"
+  val avsCommonsVersion = "2.5.1"
 
   val atmosphereJSVersion = "3.0.4"
   val atmosphereVersion = "2.7.3"
@@ -25,7 +24,7 @@ object Dependencies {
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.0" // Tests only
 
-  val sttpVersion = "3.3.15"
+  val sttpVersion = "3.3.18"
 
   val scalaLoggingVersion = "3.9.4"
 
@@ -42,8 +41,8 @@ object Dependencies {
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
 
-  val seleniumVersion = "4.1.0"
-  val scalaJsBenchmarkVersion = "0.9.0"
+  val seleniumVersion = "3.141.59"
+  val scalaJsBenchmarkVersion = "0.10.0-RC3"
 
   val compilerPlugins = Def.setting(Seq(
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
@@ -60,7 +59,6 @@ object Dependencies {
 
   val utilsCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(

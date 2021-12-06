@@ -15,7 +15,6 @@ import io.udash.logging.CrossLogging
 import io.udash.properties.seq
 import org.scalajs.dom._
 import org.scalajs.dom.html.{Form, Input => JSInput}
-import org.scalajs.dom.raw.Event
 import scalatags.JsDom.all._
 
 import scala.concurrent.duration.{Duration, DurationLong}

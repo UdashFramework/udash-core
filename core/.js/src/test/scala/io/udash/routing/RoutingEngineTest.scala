@@ -4,8 +4,6 @@ import io.udash._
 import io.udash.testing._
 import org.scalactic.source.Position
 
-import scala.collection.compat._
-
 class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
   "RoutingEngine" should {

@@ -1,7 +1,7 @@
 package io.udash.web.commons.views
 
 import org.scalajs.dom
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scalatags.generic.Namespace
