@@ -6,16 +6,16 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.utils.Registration
 
-private[properties] class ImmutableProperty[A](value: A) extends ReadableProperty[A] {
+private[properties] class ImmutableProperty[+A](value: A) extends ReadableProperty[A] {
 
   /** @return Current property value. */
   @inline override def get: A = value
 
   /**
-    * Registers listener which will be called on value change.
-    *
-    * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
-    */
+   * Registers listener which will be called on value change.
+   *
+   * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
+   */
   override def listen(valueListener: A => Any, initUpdate: Boolean): Registration = {
     if (initUpdate) valueListener(value)
     ImmutableProperty.NoOpRegistration
@@ -52,7 +52,7 @@ private[properties] final class ImmutableModelProperty[A](value: A)
 }
 
 private[properties] final class ImmutableSeqProperty[A, SeqTpe[T] <: BSeq[T]](value: SeqTpe[A])
-  extends ImmutableProperty[BSeq[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
+  extends ImmutableProperty[SeqTpe[A]](value) with ReadableSeqProperty[A, ImmutableProperty[A]] {
 
   override lazy val elemProperties: BSeq[ImmutableProperty[A]] = value.map(PropertyCreator[A].newImmutableProperty)
 
