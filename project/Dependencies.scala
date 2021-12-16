@@ -19,7 +19,7 @@ object Dependencies {
   val atmosphereJSVersion = "3.0.4"
   val atmosphereVersion = "2.7.3"
 
-  val upickleVersion = "1.4.2" // Tests only
+  val upickleVersion = "1.4.3" // Tests only
   val circeVersion = "0.14.1" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.0" // Tests only
@@ -31,7 +31,7 @@ object Dependencies {
   val jettyVersion = "9.4.44.v20210927"
   val typesafeConfigVersion = "1.4.1"
   val flexmarkVersion = "0.62.2"
-  val logbackVersion = "1.2.7"
+  val logbackVersion = "1.2.8"
   val janinoVersion = "3.1.6"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
@@ -41,8 +41,8 @@ object Dependencies {
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
 
-  val seleniumVersion = "4.1.0"
-  val scalaJsBenchmarkVersion = "0.10.0-RC3"
+  val seleniumVersion = "3.141.59"
+  val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
