@@ -42,7 +42,7 @@ object Dependencies {
   val momentJsVersion = "2.29.1"
 
   val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.10.0-RC3"
+  val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
