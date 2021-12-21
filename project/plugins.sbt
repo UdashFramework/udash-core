@@ -5,7 +5,7 @@ libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.8.0")
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.0")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.1")
 addSbtPlugin("org.jetbrains" % "sbt-ide-settings" % "1.1.0")
 addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.1.2")
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.7")
