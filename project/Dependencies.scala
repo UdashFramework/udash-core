@@ -42,6 +42,7 @@ object Dependencies {
   val momentJsVersion = "2.29.1"
 
   val seleniumVersion = "4.1.1"
+  val webDriverManagerVersion = "5.0.3"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
@@ -163,10 +164,12 @@ object Dependencies {
     "com.typesafe" % "config" % typesafeConfigVersion,
 
     "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion,
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
 
-  val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+  val seleniumDeps: Seq[ModuleID] = Seq(
+    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion,
+    "io.github.bonigarcia" % "webdrivermanager" % webDriverManagerVersion,
+  ).map(_ % Test)
 
   val guideJsDeps = Def.setting(Seq[JSModuleID](
     ProvidedJS / "prism.js",

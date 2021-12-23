@@ -1,5 +1,6 @@
 package io.udash.web
 
+import io.github.bonigarcia.wdm.WebDriverManager
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.{By, Dimension, WebElement}
@@ -47,6 +48,7 @@ private final class InternalServerConfig extends ServerConfig {
 abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
+  WebDriverManager.firefoxdriver().setup()
   protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
   driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200))
   driver.manage().window().setSize(new Dimension(1440, 800))
@@ -72,6 +74,6 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
   override protected def afterAll(): Unit = {
     super.afterAll()
     server.destroy()
-    driver.close()
+    driver.quit()
   }
 }
