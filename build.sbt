@@ -476,7 +476,7 @@ lazy val `guide-selenium` =
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
 
-      libraryDependencies ++= Dependencies.backendDeps.value,
+      libraryDependencies ++= Dependencies.seleniumDeps,
 
       Test / parallelExecution := false,
 
