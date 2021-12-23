@@ -76,6 +76,7 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
   override protected def afterAll(): Unit = {
     super.afterAll()
     server.destroy()
-    driverManager.quit(driver)
+    driver.quit()
+    driverManager.quit()
   }
 }
