@@ -48,7 +48,9 @@ private final class InternalServerConfig extends ServerConfig {
 abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
-  WebDriverManager.firefoxdriver().setup()
+  private val driverManager = WebDriverManager.firefoxdriver()
+  driverManager.config().setServerPort(0)
+  driverManager.setup()
   protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
   driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200))
   driver.manage().window().setSize(new Dimension(1440, 800))
@@ -75,5 +77,6 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
     super.afterAll()
     server.destroy()
     driver.quit()
+    driverManager.quit()
   }
 }
