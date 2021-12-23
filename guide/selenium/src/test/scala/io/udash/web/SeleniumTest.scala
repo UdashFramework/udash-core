@@ -1,15 +1,15 @@
 package io.udash.web
 
-import java.util.concurrent.TimeUnit
-
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
-import org.openqa.selenium.{Dimension, WebElement}
+import org.openqa.selenium.{By, Dimension, WebElement}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import java.time.Duration
 
 private trait ServerConfig {
   def init(): Unit
@@ -48,11 +48,11 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
   protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
-  driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
+  driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200))
   driver.manage().window().setSize(new Dimension(1440, 800))
 
   protected final def findElementById(id: String): WebElement = eventually {
-    driver.findElementById(id)
+    driver.findElement(By.id(id))
   }
 
   protected def url: String

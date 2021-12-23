@@ -23,7 +23,6 @@ object StyleConstants extends CssBase {
   /**
     * COLORS
     */
-  //TODO grab all colors here
   object Colors {
     val Red = c"#e30613"
     val RedLight = c"#ff2727"
