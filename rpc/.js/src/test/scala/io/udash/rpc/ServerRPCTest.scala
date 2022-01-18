@@ -1,10 +1,9 @@
 package io.udash.rpc
 
-import java.util.concurrent.TimeUnit
-
 import io.udash.rpc.internals.UsesServerRPC
 import io.udash.testing.AsyncUdashFrontendTest
 
+import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.{DurationLong, FiniteDuration}
 import scala.util.{Failure, Random}
@@ -40,28 +39,33 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
     "handle responses from server" in {
       val (_, serverRPC) = createServerRpc(defaultTimeout)
       val rpc = serverRPC.remoteRpc
+      val external = External(2137)
 
       val f1 = rpc.doStuff(true)
       val f2 = rpc.innerRpc("bla").recInner("arg").func(123)
       val f3 = rpc.doStuffInt(true)
       val f4 = rpc.doStuff(true)
       val f5 = rpc.doStuffUnit()
+      val f6 = rpc.doStuffExternal(external)
 
       serverRPC.handleResponse(RpcResponseSuccess(write("response1"), "1"))
       serverRPC.handleResponse(RpcResponseSuccess(write("response2"), "2"))
-      serverRPC.handleResponse(RpcResponseSuccess(write[Int](5), "3"))
-      serverRPC.handleResponse(RpcResponseSuccess(write[Unit](()), "5"))
+      serverRPC.handleResponse(RpcResponseSuccess(write(5), "3"))
+      serverRPC.handleResponse(RpcResponseSuccess(write(()), "5"))
+      serverRPC.handleResponse(RpcResponseSuccess(write(external)(ExternalTypeCodec.codec), "6"))
 
       f1.isCompleted should be(true)
       f2.isCompleted should be(true)
       f3.isCompleted should be(true)
       f4.isCompleted should be(false)
       f5.isCompleted should be(true)
+      f6.isCompleted should be(true)
 
       f1.value.get.get should be("response1")
       f2.value.get.get should be("response2")
       f3.value.get.get should be(5)
       f5.value.get.get should be(())
+      f6.value.get.get should be(external)
     }
 
     "handle fail responses from server" in {
