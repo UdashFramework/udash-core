@@ -1,7 +1,7 @@
 package io.udash.rpc
 
 import com.avsystem.commons.rpc.rpcName
-import com.avsystem.commons.serialization.HasGenCodec
+import com.avsystem.commons.serialization.{GenCodec, HasGenCodec}
 import io.udash.rpc.utils.Logged
 
 import scala.annotation.nowarn
@@ -47,6 +47,12 @@ trait InnerClientRPC {
 }
 object InnerClientRPC extends DefaultClientRpcCompanion[InnerClientRPC]
 
+case class External(x: Int)
+
+object ExternalTypeCodec {
+  implicit val codec: GenCodec[External] = GenCodec.transformed[External, Int](_.x, External.apply)
+}
+
 /** Main Server side RPC interface */
 trait TestRPC extends RPCMethods {
   def doStuff(yes: Boolean): Future[String]
@@ -58,6 +64,8 @@ trait TestRPC extends RPCMethods {
   def doStuffInt(yes: Boolean): Future[Int]
 
   def doStuffUnit(): Future[Unit]
+
+  def doStuffExternal(external: External): Future[External]
 
   @Logged
   def fireSomething(arg: Int): Unit
@@ -123,7 +131,7 @@ trait RPCMethodsImpl extends RPCMethods {
 }
 
 @nowarn
-object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
+object TestRPC extends DefaultServerRpcCompanionWithDeps[ExternalTypeCodec.type, TestRPC] {
   /** Returns implementation of server side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
     new TestRPC with RPCMethodsImpl {
@@ -139,8 +147,11 @@ object TestRPC extends DefaultServerRpcCompanion[TestRPC] {
       override def doStuffInt(yes: Boolean): Future[Int] =
         onCall("doStuffInt", List(List(yes)), 5)
 
-      def doStuffUnit(): Future[Unit] =
+      override def doStuffUnit(): Future[Unit] =
         onCall("doStuffUnit", List(Nil), ())
+
+      override def doStuffExternal(external: External): Future[External] =
+        onCall("doStuffExternal", List(Nil), external)
 
       override def fireSomething(arg: Int): Unit =
         onFire("fireSomething", List(List(arg)))
