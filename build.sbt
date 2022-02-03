@@ -38,15 +38,10 @@ val deploymentConfiguration = Seq(
     sys.env.getOrElse("SONATYPE_PASSWORD", "")
   ),
 
+  licenses := Seq(License.Apache2),
+
   pomExtra := {
     <url>https://github.com/UdashFramework/udash-core</url>
-      <licenses>
-        <license>
-          <name>Apache v.2 License</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
       <scm>
         <url>git@github.com:UdashFramework/udash-core.git</url>
         <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
