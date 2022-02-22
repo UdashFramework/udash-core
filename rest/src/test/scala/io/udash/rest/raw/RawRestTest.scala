@@ -4,7 +4,7 @@ package raw
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
-import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import com.avsystem.commons.serialization.{StringWrapperCompanion, transientDefault, whenAbsent}
 import io.udash.rest.util.WithHeaders
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -19,6 +19,13 @@ object UserId extends RestDataWrapperCompanion[String, UserId]
 
 case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
+
+case class NonBlankString(str: String) {
+  if (str.isBlank) {
+    throw HttpErrorException(400, HttpBody.plain("this stuff is blank"))
+  }
+}
+object NonBlankString extends RestDataWrapperCompanion[String, NonBlankString]
 
 class omit[T](value: => T) extends AnnotationAggregate {
   @transientDefault @whenAbsent(value)
@@ -63,7 +70,7 @@ trait RootApi {
   def subApi(id: Int, @Query query: String): UserApi
   def fail: Future[Unit]
   def failMore: Future[Unit]
-
+  @GET def requireNonBlank(param: NonBlankString): Future[Unit]
   @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
@@ -114,6 +121,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def requireNonBlank(param: NonBlankString): Future[Unit] = Future.unit
     def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]] =
       Future.successful(WithHeaders((), headers.toList))
   }
@@ -312,6 +320,15 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     val body = HttpBody.binary("""{"bodyarg":"value"}""".getBytes(HttpBody.Utf8Charset), HttpBody.JsonType)
     val request = RestRequest(HttpMethod.POST, RestParameters(List(PlainValue("autopost"))), body)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"VALUE\"")))
+    assertRawExchange(request, response)
+  }
+
+  test("invalid parameter with custom validation error") {
+    val request = RestRequest(HttpMethod.GET, RestParameters(
+      List(PlainValue("requireNonBlank")),
+      query = Mapping(ISeq("param" -> PlainValue("")))
+    ), HttpBody.Empty)
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain("this stuff is blank"))
     assertRawExchange(request, response)
   }
 }

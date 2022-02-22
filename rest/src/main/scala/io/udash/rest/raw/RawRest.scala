@@ -130,8 +130,14 @@ trait RawRest {
     }
     try resolved.adjustResponse(resolveCall(this, prefixes)) catch {
       case e: InvalidRpcCall =>
-        Task.now(RestResponse.plain(400, e.getMessage))
+        Task.now(extractHttpException(e).map(_.toResponse).getOrElse(RestResponse.plain(400, e.getMessage)))
     }
+  }
+
+  @tailrec private def extractHttpException(e: Throwable): Opt[HttpErrorException] = e match {
+    case null => Opt.Empty
+    case e: HttpErrorException => Opt(e)
+    case _ => extractHttpException(e.getCause)
   }
 }
 
