@@ -24,10 +24,11 @@ class DemoComponent(url: Property[IndexState]) extends Component {
       ul(DemoStyles.demoTabs)(
         DemoComponent.demoEntries.map(entry =>
           li(DemoStyles.demoTabsItem)(
-
-            a(DemoStyles.demoTabsLink, href := entry.targetState.url)(
-              entry.name
-            )
+            a(
+              DemoStyles.demoTabsLink,
+              href := entry.targetState.url,
+              (attr(Attributes.data(Attributes.Active)) := "true").attrIf(url.transform(_ == entry.targetState))
+            )(entry.name)
           )
         )
       ),
@@ -40,11 +41,6 @@ class DemoComponent(url: Property[IndexState]) extends Component {
   private def onUrlChange(update: IndexState): Unit = {
     val entryOption = DemoComponent.demoEntries.find(_.targetState == update)
     val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
-    val urlString = s""""${entry.targetState.url}""""
-    val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.className}[href=$urlString]")
-
-    jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.className}").attr(Attributes.data(Attributes.Active), "false")
-    tab.attr(Attributes.data(Attributes.Active), "true")
 
     jqFiddleContainer.html(entry.fiddle)
     Prism.highlightAllUnder(fiddleContainer)
