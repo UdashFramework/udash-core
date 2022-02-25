@@ -55,11 +55,10 @@ object DemoStyles extends CssBase {
   val demoFiddle: CssStyle = style(
     GlobalStyles.col,
     width(100.%%),
+    display.grid,
+    gridTemplateColumns := "70% 30%",
     height :=! s"calc(100% - 43px)",
-
-    MediaQueries.tabletLandscape(
-      height(400.px)
-    )
+    MediaQueries.tabletLandscape(height(100.%%)),
   )
 
   val demoTabs: CssStyle = style(

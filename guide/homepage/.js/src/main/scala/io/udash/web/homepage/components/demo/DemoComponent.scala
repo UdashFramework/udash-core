@@ -15,12 +15,10 @@ final class DemoComponent(implicit application: Application[RoutingState]) exten
 
   private def code(demo: CodeDemo): Element =
     div(DemoStyles.demoFiddle)(
-      style := "display: grid; grid-template-columns: 70% 30%",
-      height := 100.pct,
-      div(textAlign.left, backgroundColor := "#f5f2f0")(
+      div(textAlign.left, backgroundColor := "#f5f2f0", overflow.auto)(
         CodeBlock.lines(demo.source.linesIterator.drop(1).map(_.drop(2)).toSeq.dropRight(1).iterator)(HomepageStyles)
       ),
-      div(backgroundColor := "white")(demo.rendered),
+      div(backgroundColor := "white", paddingTop := 15.px)(demo.rendered),
     ).render
 
   override def getTemplate: Modifier =
