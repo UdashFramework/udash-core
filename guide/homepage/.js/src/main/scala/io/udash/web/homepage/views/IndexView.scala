@@ -12,7 +12,7 @@ import io.udash.web.homepage.styles.partials.HomepageStyles
 
 case object IndexViewFactory extends ViewFactory[IndexState] {
   override def create(): (View, Presenter[IndexState]) = {
-    val state = Property[IndexState](IndexState(None))
+    val state = Property[IndexState](HelloState) //todo remove
     (new IndexView(state), new IndexPresenter(state))
   }
 }

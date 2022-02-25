@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.components.{HeaderButtonsStyles, HeaderNavStyles, MobileMenuStyles}
 import io.udash.web.homepage.Context._
-import io.udash.web.homepage.IndexState
+import io.udash.web.homepage.{HelloState, IndexState}
 import io.udash.web.homepage.styles.partials.{HeaderStyles, HomepageStyles}
 import io.udash.wrappers.jquery.{JQueryEvent, _}
 import org.scalajs.dom.Element
@@ -39,7 +39,7 @@ object Header extends HeaderButtons with HeaderNav {
     div(GlobalStyles.body, GlobalStyles.clearfix, HomepageStyles.body)(
       div(HeaderStyles.headerLeft)(
         btnMobileMenu,
-        a(HeaderStyles.headerLogo, href := IndexState(None).url)(),
+        a(HeaderStyles.headerLogo, href := HelloState.url)(),
         navElement
       ),
       buttons

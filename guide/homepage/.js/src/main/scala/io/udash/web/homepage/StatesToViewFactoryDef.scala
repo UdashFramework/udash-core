@@ -6,7 +6,7 @@ import io.udash.web.homepage.views._
 class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
   def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] = state match {
     case RootState => RootViewFactory
-    case IndexState(_) => IndexViewFactory
+    case _: IndexState => IndexViewFactory
     case _ => ErrorViewFactory
   }
 }
