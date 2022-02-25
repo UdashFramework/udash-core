@@ -4,11 +4,9 @@ import io.udash._
 import io.udash.logging.CrossLogging
 import io.udash.routing.WindowUrlPathChangeProvider
 
-import scala.concurrent.ExecutionContext
 import scala.scalajs.js.annotation.JSExport
 
 object Context {
-  implicit val executionContext: ExecutionContext = scalajs.concurrent.JSExecutionContext.Implicits.queue
   private val routingRegistry = new RoutingRegistryDef
   private val viewFactoriesRegistry = new StatesToViewFactoryDef
 

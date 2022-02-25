@@ -6,15 +6,13 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.components.CodeBlock.Prism
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.views.{Component, Image}
-import io.udash.web.homepage.Context._
-import io.udash.web.homepage.IndexState
+import io.udash.web.homepage.components.demo.DemoComponent.CodeDemo
 import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
+import io.udash.web.homepage.{IndexState, RoutingState}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import io.udash.css.CssView._
-import io.udash.web.homepage.components.demo.DemoComponent.CodeDemo
 
-class DemoComponent(url: Property[IndexState]) extends Component {
+final class DemoComponent(implicit application: Application[RoutingState]) extends Component {
 
   private def code(demo: CodeDemo): Element =
     div(DemoStyles.demoFiddle)(
@@ -35,13 +33,13 @@ class DemoComponent(url: Property[IndexState]) extends Component {
             a(
               DemoStyles.demoTabsLink,
               href := state.url,
-              (attr(Attributes.data(Attributes.Active)) := "true").attrIf(url.transform(_ == state))
+              (attr(Attributes.data(Attributes.Active)) := "true").attrIf(application.currentStateProperty.transform(_ == state))
             )(state.name)
           )
         }.toSeq
       ),
-      produce(url) { state =>
-        code(state.codeDemo).setup(Prism.highlightAllUnder)
+      produce(application.currentStateProperty) { state =>
+        state.opt.collect { case state: IndexState => code(state.codeDemo).setup(Prism.highlightAllUnder) }.getOrElse[Element](div().render)
       }
     )
   ).render
@@ -50,11 +48,6 @@ class DemoComponent(url: Property[IndexState]) extends Component {
 }
 
 object DemoComponent {
-
-  //  def demoEntries: Map[IndexState, DemoEntry] = Map(
-  //    IndexState("hello") -> DemoEntry("Hello World", code(HelloDemo)),
-  //    IndexState("properties") -> DemoEntry("Properties", div().render),
-  //  )
 
   trait CodeDemo {
     def rendered: Modifier
