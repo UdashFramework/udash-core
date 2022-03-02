@@ -27,7 +27,8 @@ final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall],
   def method: HttpMethod = finalCall.metadata.method
 
   def rpcChainRepr: String =
-    prefixes.iterator.map(_.rpcName).mkString("", "->", s"->${finalCall.rpcName}")
+    if (prefixes.isEmpty) finalCall.rpcName
+    else prefixes.iterator.map(_.rpcName).mkString("", "->", s"->${finalCall.rpcName}")
 
   def adjustResponse(response: Task[RestResponse]): Task[RestResponse] =
     prefixes.foldRight(finalCall.metadata.adjustResponse(response))(_.metadata.adjustResponse(_))
