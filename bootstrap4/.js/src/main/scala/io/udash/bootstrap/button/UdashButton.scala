@@ -2,7 +2,7 @@ package io.udash.bootstrap
 package button
 
 import com.avsystem.commons.Opt
-import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.misc.{AbstractCase, AbstractNamedEnumCompanion, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, NamedEnum, SealedEnumCompanion}
 import io.udash._
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton.{ButtonClickEvent, ButtonTag, UdashButtonJQuery}
@@ -23,7 +23,6 @@ import scala.scalajs.js
  * @param outline         If true, selects the outline style for the button. More: <a href="http://getbootstrap.com/docs/4.1/components/buttons/#outline-buttons">Bootstrap Docs</a>.
  * @param block           If true, rendered button will be a full-width block.
  * @param tag             HTML tag used in button, one of tags defined in `ButtonTag`
- * @param href            Href attribute value, used only in case of `ButtonTag.Anchor`
  * @param customModifiers Sequence of custom modifiers.
  */
 final case class UdashButtonOptions(
@@ -32,7 +31,6 @@ final case class UdashButtonOptions(
   outline: Boolean = false,
   block: Boolean = false,
   tag: ButtonTag = ButtonTag.Button,
-  href: Opt[String] = Opt.Empty,
   customModifiers: Seq[Modifier] = Seq.empty
 ) extends AbstractCase
 
@@ -62,15 +60,13 @@ final class UdashButton private(
   override val render: dom.html.Element = {
     (options.tag match {
       case ButtonTag.Button =>
-        button(componentId, tpe := "button")(classes: _*)(
+        button(componentId, tpe := "button")(classes)(
           onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
         )
-      case ButtonTag.Anchor =>
-        a(componentId)(classes: _*)(
-          options.href.map(href := _)
-        )
+      case ButtonTag.Anchor(url) =>
+        a(componentId)(classes)(href := url)
       case ButtonTag.Div =>
-        div(componentId)(classes: _*)(
+        div(componentId)(classes)(
           onclick :+= ((me: MouseEvent) => if (!disabled.get) fire(ButtonClickEvent(this, me)))
         )
     }) (content(nestedInterceptor)).render
@@ -97,11 +93,13 @@ object UdashButton {
    * to redirect user on click
    * - Div    - encloses the button in <div></div> tags
    */
-  final class ButtonTag()(implicit enumCtx: EnumCtx) extends AbstractValueEnum
-  object ButtonTag extends AbstractValueEnumCompanion[ButtonTag] {
-    final val Button: Value = new ButtonTag()
-    final val Anchor: Value = new ButtonTag()
-    final val Div: Value = new ButtonTag()
+  sealed trait ButtonTag
+
+  object ButtonTag {
+    final case object Button extends ButtonTag
+    final case class Anchor(href: String) extends ButtonTag
+    final case object Div extends ButtonTag
+
   }
 
   /**

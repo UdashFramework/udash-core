@@ -19,7 +19,6 @@ object ButtonsDemo extends AutoDemo {
 
     import scala.util.Random
 
-    val smallBtn = Size.Small.opt
     val disabledButtons = Property(Set.empty[Int])
 
     def bottomMargin: CssStyle = {
@@ -33,7 +32,7 @@ object ButtonsDemo extends AutoDemo {
       UdashButton(
         options = UdashButtonOptions(
           color.opt,
-          smallBtn,
+          Size.Small.opt,
         ),
         disabled = disabledButtons.transform(_.contains(color.ordinal))
       )(_ => Seq[Modifier](

@@ -21,12 +21,13 @@ object NavigationDemo extends AutoDemo {
     import org.scalajs.dom.html.Anchor
     import scalatags.JsDom.all._
 
-    def linkFactory(l: MenuLink, dropdown: Boolean = true): Anchor =
-      a(
-        href := l.state.url,
-        Dropdown.item.styleIf(dropdown),
-        Navigation.link.styleIf(!dropdown)
-      )(span(l.name)).render
+    def linkButtonFactory(link: MenuLink, dropdown: Boolean = true) = UdashButton(
+      options = UdashButtonOptions(
+        tag = ButtonTag.Anchor(link.state.url),
+        color = BootstrapStyles.Color.Link.opt,
+        customModifiers = if (dropdown) Seq(Dropdown.item) else Seq(Navigation.link)
+      )
+    )(_ => link.name)
 
     val panels = SeqProperty(mainMenuEntries.slice(0, 4): Seq[MenuEntry])
 
@@ -38,25 +39,18 @@ object NavigationDemo extends AutoDemo {
         elemFactory = (panel, nested) => div(nested(produce(panel) {
           case MenuContainer(name, children) =>
             val dropdown = UdashDropdown(children.toSeqProperty)(
-              (item, _) => linkFactory(item.get),
+              (item, _) => linkButtonFactory(item.get).render,
               _ => span(name, " "),
               buttonFactory = UdashButton(
                 options = UdashButtonOptions(
-                  tag = ButtonTag.Anchor,
+                  tag = ButtonTag.Button,
                   color = BootstrapStyles.Color.Link.opt,
                   customModifiers = Seq(Navigation.link)
                 )
               )
             ).render
             dropdown
-          case link: MenuLink => UdashButton(
-            options = UdashButtonOptions(
-              tag = ButtonTag.Anchor,
-              color = BootstrapStyles.Color.Link.opt,
-              href = link.state.url.opt,
-              customModifiers = Seq(Navigation.link)
-            )
-          )(_ => link.name).render
+          case link: MenuLink => linkButtonFactory(link, dropdown = false).render
         })).render,
         isDropdown = _.transform {
           case _: MenuContainer => true

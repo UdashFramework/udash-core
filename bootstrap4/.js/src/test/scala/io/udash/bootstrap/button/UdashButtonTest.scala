@@ -75,7 +75,7 @@ class UdashButtonTest extends UdashCoreFrontendTest {
       activeProperty.listenersCount() should be(0)
     }
 
-    "apply style changes" in {
+    "apply style changes (without outline - mutually exclusive with color)" in {
       val buttonStyle = BootstrapStyles.Color.Secondary.opt
       val size = BootstrapStyles.Size.Large.opt
       val outline: Boolean = false
@@ -110,9 +110,55 @@ class UdashButtonTest extends UdashCoreFrontendTest {
       el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
       el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Secondary).className)
 
+
       btn.kill()
       active.listenersCount() should be(0)
       disabled.listenersCount() should be(0)
+    }
+
+    "apply outline" in {
+      val buttonStyle = BootstrapStyles.Color.Secondary.opt
+      val size = BootstrapStyles.Size.Large.opt
+      val outline: Boolean = true
+      val block: Boolean = true
+      val active: Property[Boolean] = Property(false)
+      val disabled: Property[Boolean] = Property(false)
+
+      val btn = UdashButton(
+        active = active,
+        disabled = disabled,
+        options = UdashButtonOptions(color = buttonStyle, size = size, outline = outline, block = block)
+      )("btn")
+      val el = btn.render
+      el.classList.length should be(4)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Secondary).className)
+
+      active.set(true)
+
+      el.classList.length should be(5)
+      el.classList should contain(BootstrapStyles.active.className)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Secondary).className)
+
+      disabled.set(true)
+
+      el.classList.length should be(6)
+      el.classList should contain(BootstrapStyles.active.className)
+      el.classList should contain(BootstrapStyles.disabled.className)
+      el.classList should contain(BootstrapStyles.Button.btn.className)
+      el.classList should contain(BootstrapStyles.Button.block.className)
+      el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
+      el.classList should contain(BootstrapStyles.Button.outline(BootstrapStyles.Color.Secondary).className)
+
+      btn.kill()
+      active.listenersCount() should be(0)
+      disabled.listenersCount() should be(0)
+
     }
   }
 }
