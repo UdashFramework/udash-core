@@ -26,6 +26,17 @@ object DemoStyles extends CssBase {
     )
   )
 
+  val demoCode: CssStyle = style(
+    textAlign.left,
+    backgroundColor(c"#f5f2f0"),
+    overflow.auto,
+  )
+
+  val demoRender: CssStyle = style(
+    backgroundColor.white,
+    paddingTop(15.px),
+  )
+
   val laptopImage: CssStyle = style(
     position.absolute,
     top(`0`),
