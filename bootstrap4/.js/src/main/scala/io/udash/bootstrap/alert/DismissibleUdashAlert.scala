@@ -3,7 +3,7 @@ package alert
 
 import io.udash._
 import io.udash.bindings.modifiers.Binding
-import io.udash.bootstrap.button.UdashButton
+import io.udash.bootstrap.button.{UdashButton, UdashButtonOptions}
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
@@ -18,7 +18,7 @@ final class DismissibleUdashAlert private[alert](
   def dismissed: ReadableProperty[Boolean] =
     _dismissed
 
-  private val button = UdashButton(buttonStyle = BootstrapStyles.Color.Link.toProperty) { _ => Seq[Modifier](
+  private val button = UdashButton(options = UdashButtonOptions(color = BootstrapStyles.Color.Link.opt)) { _ => Seq[Modifier](
     componentId.withSuffix("close"),
     `type` := "button", BootstrapStyles.close,
     BootstrapTags.dataDismiss := "alert", aria.label := "close",
