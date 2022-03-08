@@ -1,7 +1,6 @@
 package io.udash.web.homepage.components.demo
 
 import com.avsystem.commons.SharedExtensions._
-import com.avsystem.commons.misc.AutoNamedEnum
 import io.udash._
 import scalatags.JsDom.all._
 
@@ -22,6 +21,8 @@ object HelloDemo extends CodeDemo {
 
 object SelectDemo extends CodeDemo {
   val (rendered, source) = {
+    import com.avsystem.commons.misc.AutoNamedEnum
+
     sealed trait Fruit extends AutoNamedEnum
     case object Apple extends Fruit
     case object Banana extends Fruit
