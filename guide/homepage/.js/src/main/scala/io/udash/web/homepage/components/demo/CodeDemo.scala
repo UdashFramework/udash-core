@@ -1,7 +1,7 @@
 package io.udash.web.homepage.components.demo
 
 import com.avsystem.commons.SharedExtensions._
-import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
+import com.avsystem.commons.misc.AutoNamedEnum
 import io.udash._
 import scalatags.JsDom.all._
 
@@ -22,14 +22,16 @@ object HelloDemo extends CodeDemo {
 
 object SelectDemo extends CodeDemo {
   val (rendered, source) = {
-    final class Fruit(implicit ctx: EnumCtx) extends AbstractValueEnum
-    object Fruit extends AbstractValueEnumCompanion[Fruit] {
-      final val Apple, Banana, Orange: Value = new Fruit
-    }
-    val favoriteFruits = SeqProperty(Fruit.Banana)
+    sealed trait Fruit extends AutoNamedEnum
+    case object Apple extends Fruit
+    case object Banana extends Fruit
+    case object Orange extends Fruit
+
+    val fruits = Seq(Apple, Banana, Orange)
+    val favoriteFruits = SeqProperty[Fruit](Banana)
 
     div(
-      div(Select(favoriteFruits, Fruit.values.toSeqProperty)(_.name)),
+      div(Select(favoriteFruits, fruits.toSeqProperty)(_.name)),
       div(produce(favoriteFruits)(_.mkString(",").render)),
     )
   }.withSourceCode
