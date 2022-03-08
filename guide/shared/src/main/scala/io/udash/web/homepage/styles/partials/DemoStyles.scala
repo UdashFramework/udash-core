@@ -26,6 +26,17 @@ object DemoStyles extends CssBase {
     )
   )
 
+  val demoCode: CssStyle = style(
+    textAlign.left,
+    backgroundColor(c"#f5f2f0"),
+    overflow.auto,
+  )
+
+  val demoRender: CssStyle = style(
+    backgroundColor.white,
+    paddingTop(15.px),
+  )
+
   val laptopImage: CssStyle = style(
     position.absolute,
     top(`0`),
@@ -55,11 +66,10 @@ object DemoStyles extends CssBase {
   val demoFiddle: CssStyle = style(
     GlobalStyles.col,
     width(100.%%),
+    display.grid,
+    gridTemplateColumns := "70% 30%",
     height :=! s"calc(100% - 43px)",
-
-    MediaQueries.tabletLandscape(
-      height(400.px)
-    )
+    MediaQueries.tabletLandscape(height(100.%%)),
   )
 
   val demoTabs: CssStyle = style(
@@ -151,94 +161,5 @@ object DemoStyles extends CssBase {
         borderBottomStyle.solid
       )
     )
-  )
-
-  val demoIOWrapper: CssStyle = style(
-    position.relative,
-    maxWidth(480 px),
-    margin(`0`, auto),
-    top(50 %%),
-    borderRadius(6 px),
-    overflow.hidden,
-    transform := "translate3d(0, 0, 1px) translateY(-50%)",
-
-    MediaQueries.tabletLandscape(
-      top.auto,
-      transform := none
-    ),
-
-    MediaQueries.phone(
-      width(100 %%)
-    )
-  )
-
-  val demoBootstrap: CssStyle = style(
-    height(300 px)
-  )
-
-  val demoInlineField: CssStyle = style(
-    display.tableCell,
-    minHeight(34 px),
-    height(100 %%),
-    padding(`0`,.8125 rem),
-    border.none,
-    verticalAlign.middle,
-
-    MediaQueries.phone(
-      display.block,
-      width(100 %%),
-      height.auto,
-      padding(.4375 rem,.8125 rem),
-      textAlign.center
-    )
-  )
-
-  val demoInput: CssStyle = style(
-    padding(.4375 rem,.8125 rem),
-    border.none
-  )
-
-  val demoOutput: CssStyle = style(
-    padding(.625 rem,.8125 rem),
-    backgroundColor(StyleConstants.Colors.GreyExtra)
-  )
-
-  val demoOutpuLabel: CssStyle = style(
-    GlobalStyles.col,
-    width(100 / 3 %%),
-    paddingRight(15 px),
-    textAlign.right
-  )
-
-  val navItem: CssStyle = style(
-    color.black,
-    position.relative,
-    display.inlineBlock,
-    verticalAlign.middle,
-    paddingLeft(1.125 rem),
-    paddingRight(1.125 rem),
-
-    &.firstChild (
-      paddingLeft(0 px)
-    ),
-
-    &.lastChild (
-      paddingRight(0 px)
-    ),
-
-    &.before.not(_.firstChild)(
-      CommonStyleUtils.absoluteMiddle,
-      content.string("|"),
-      left(`0`),
-
-      &.hover(
-        textDecoration := none
-      )
-    )
-  )
-
-  val underlineLink: CssStyle = style(
-    GlobalStyles.underlineLink,
-    color.black
   )
 }

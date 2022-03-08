@@ -20,10 +20,6 @@ object GuideStyles extends CssBase with CodeBlockStyles {
     minHeight :=! s"calc(100vh - ${StyleConstants.Sizes.HeaderHeight}px - ${StyleConstants.Sizes.FooterHeight}px)"
   )
 
-  val floatLeft: CssStyle = style(
-    float.left
-  )
-
   val floatRight: CssStyle = style(
     float.right
   )
@@ -214,13 +210,6 @@ object GuideStyles extends CssBase with CodeBlockStyles {
 
   val useBootstrap: CssStyle = style(
     addClassName("bootstrap")
-  )
-
-  val blockOnMobile: CssStyle = style(
-    MediaQueries.phone(
-      display.block,
-      width(100 %%)
-    )
   )
 
   val sectionError: CssStyle = style(

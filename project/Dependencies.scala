@@ -181,6 +181,7 @@ object Dependencies {
 
   val homepageJsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
+    ProvidedJS / "prism.js",
   ))
 
 }
