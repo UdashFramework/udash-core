@@ -8,7 +8,7 @@ import io.udash.i18n._
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, GuideExceptions}
-import org.scalajs.dom.ext.LocalStorage
+import org.scalajs.dom
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -73,7 +73,7 @@ class ExceptionsDemoComponent extends Component {
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
 
-    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(LocalStorage), 6 hours)
+    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(dom.window.localStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
 
     private val exceptionButtonDisabled = Property(false)

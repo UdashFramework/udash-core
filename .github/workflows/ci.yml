@@ -5,7 +5,7 @@ env:
 
 on:
   push:
-    branches: '*'
+    branches: '**'
     tags: [ "v[0-9]+*" ]
   pull_request:
     # avoid duplicate checks (push & PR) further in the review process
@@ -18,10 +18,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ 2.12.14, 2.13.6 ]
+        scala: [ 2.13.8 ]
         command: [ udash-jvm/test, udash-js/test ]
         include:
-          - scala: 2.13.6
+          - scala: 2.13.8
             command: guide-selenium/test
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
       - name: Install jsdom
         run: npm install jsdom@15.2.1
       - name: Run tests
-        run: sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++${{ matrix.scala }} ${{ matrix.command }}
+        run: sbt ++${{ matrix.scala }} ${{ matrix.command }}
 
   publish:
     name: Publish to Sonatype

@@ -7,7 +7,7 @@ import io.udash.rest.SttpRestClient
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.guide.styles.partials.GuideStyles
-import io.udash.web.guide.{Context, _}
+import io.udash.web.guide._
 import scalatags.JsDom
 
 import scala.concurrent.Future
@@ -25,11 +25,11 @@ final class AdvancedBootstrappingSbtView extends View with CssView {
   private val g8IndexContent = Property.blank[String]
 
   locally {
-    import sttp.client._
-    implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
-    basicRequest.get(uri"${ExternalUrls.udashG8Build}").send().foreachNow(_.body.foreach(g8buildContent.set(_)))
-    basicRequest.get(uri"${ExternalUrls.udashG8Plugins}").send().foreachNow(_.body.foreach(g8PluginsContent.set(_)))
-    basicRequest.get(uri"${ExternalUrls.udashG8Index}").send().foreachNow(_.body.foreach(g8IndexContent.set(_)))
+    import sttp.client3._
+    val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
+    basicRequest.get(uri"${ExternalUrls.udashG8Build}").send(backend).foreachNow(_.body.foreach(g8buildContent.set(_)))
+    basicRequest.get(uri"${ExternalUrls.udashG8Plugins}").send(backend).foreachNow(_.body.foreach(g8PluginsContent.set(_)))
+    basicRequest.get(uri"${ExternalUrls.udashG8Index}").send(backend).foreachNow(_.body.foreach(g8IndexContent.set(_)))
   }
 
   override def getTemplate: Modifier =

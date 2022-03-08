@@ -3,8 +3,9 @@ package io.udash.rpc.utils
 import com.typesafe.scalalogging.Logger
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig}
-import javax.servlet.ServletConfig
 import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
+
+import javax.servlet.ServletConfig
 
 /** AtmosphereFramework with default configuration for Udash. */
 class DefaultAtmosphereFramework(
@@ -23,6 +24,7 @@ class DefaultAtmosphereFramework(
   addInitParameter(ApplicationConfig.BROADCASTER_SHARABLE_THREAD_POOLS, "true")
   addInitParameter(ApplicationConfig.BROADCASTER_LIFECYCLE_POLICY, "EMPTY_DESTROY")
   addInitParameter(ApplicationConfig.ANALYTICS, "false")
+  addInitParameter(ApplicationConfig.SCAN_CLASSPATH, "false")
 
   override def init(sc: ServletConfig): AtmosphereFramework = {
     super.init(sc)

@@ -5,7 +5,7 @@ import com.avsystem.commons._
 import com.avsystem.commons.collection.CrossFactory
 import io.udash.rest.raw.AbstractMapping.ConcatSeq
 
-import scala.collection.compat._
+import scala.collection.Factory
 
 /**
  * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
@@ -122,4 +122,7 @@ abstract class AbstractMappingCompanion[M[V] <: AbstractMapping[V]] { companion 
 
   implicit def canBuildFrom[V]: Factory[(String, V), M[V]] =
     reusableFactory.asInstanceOf[Factory[(String, V), M[V]]]
+
+  implicit def toFactory[V](companion: AbstractMappingCompanion[M]): Factory[(String, V), M[V]] =
+    companion.canBuildFrom[V]
 }

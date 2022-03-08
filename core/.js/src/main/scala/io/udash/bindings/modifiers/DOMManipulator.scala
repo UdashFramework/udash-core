@@ -1,6 +1,7 @@
 package io.udash.bindings.modifiers
 
-import org.scalajs.dom.Node
+import org.scalajs.dom.{DocumentFragment, Node}
+
 
 private[bindings] trait DOMManipulator {
 
@@ -23,6 +24,12 @@ private[bindings] trait DOMManipulator {
     * Otherwise you have to replace elements in DOM manually.
     */
   def customElementsInsert: InsertMethod = DefaultElementInsert
+
+  protected final def defragment(elements: Seq[Node]): Seq[Node] =
+    elements.flatMap {
+      case fragment: DocumentFragment => fragment.childNodes
+      case node => Seq(node)
+    }
 
   protected def replace(root: Node)(oldElements: Seq[Node], newElements: Seq[Node]): Unit =
     if (customElementsReplace(root, oldElements, newElements)) {

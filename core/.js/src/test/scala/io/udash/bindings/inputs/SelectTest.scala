@@ -125,6 +125,37 @@ class SelectTest extends UdashFrontendTest {
       r.value should be("4")
       r2.value should be("1")
     }
+
+    "handle optional case" in {
+      val options = Seq(Some("A"), None, Some("B"))
+      val p = Property[Option[Option[String]]](Some(None))
+
+      val select = Select.optional(p, options.toSeqProperty,StringFrag("empty"))(x => StringFrag(x.getOrElse(""))).render
+
+      select.childElementCount should be(4) // empty value should be included
+      select.value should be("1")
+
+      def trimHtml(s:String):String = s.split("\n").map(_.trim).mkString
+
+      val expectedHtml = """<select>
+                           |  <option value="">empty</option>
+                           |  <option value="0">A</option>
+                           |  <option value="1"></option>
+                           |  <option value="2">B</option>
+                           |</select>
+                           |""".stripMargin
+
+      trimHtml(select.outerHTML) should be(trimHtml(expectedHtml))
+
+      p.set(None)
+      select.value should be("")
+
+      for ((o, idx) <- options.zipWithIndex) {
+        p.set(Some(o))
+        select.value should be(idx.toString)
+      }
+    }
+
   }
 
   "Select with multiple on" should {

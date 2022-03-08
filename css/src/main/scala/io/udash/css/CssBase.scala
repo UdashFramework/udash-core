@@ -134,9 +134,6 @@ trait CssBase {
 
     implicit def fontFamilyExt(n: Attrs.fontFamily.type): CssBase.FontFamilyExt =
       new CssBase.FontFamilyExt(n)
-
-    @inline override implicit def colourLiteralMacro(sc: StringContext): Macros.ColourLiteral =
-      new Macros.ColourLiteral(sc)
   }
 
   private val elementsBuffer = mutable.ArrayBuffer.empty[CssStyle]

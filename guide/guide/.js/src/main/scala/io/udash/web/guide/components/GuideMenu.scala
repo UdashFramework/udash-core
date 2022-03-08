@@ -8,7 +8,7 @@ import io.udash.web.commons.views.{SVG, Size}
 import io.udash.web.guide.styles.partials.{GuideStyles, MenuStyles}
 import io.udash.web.guide.{Context, _}
 import io.udash.wrappers.jquery._
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.tags2._
 

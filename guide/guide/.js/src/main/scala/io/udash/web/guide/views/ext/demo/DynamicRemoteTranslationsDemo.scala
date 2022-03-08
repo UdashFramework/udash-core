@@ -13,8 +13,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
     import io.udash.i18n._
     import io.udash.web.guide.Context.serverRpc
     import io.udash.web.guide.demos.i18n.Translations
-    import org.scalajs.dom.Event
-    import org.scalajs.dom.ext.LocalStorage
+    import org.scalajs.dom
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
@@ -22,7 +21,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
     implicit val translationProvider: RemoteTranslationProvider =
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
-        Some(LocalStorage),
+        Some(dom.window.localStorage),
         6.hours
       )
 
@@ -32,11 +31,11 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
       button(
         Button.btn,
         Button.color(Color.Primary)
-      )(id := "enButton", onclick := ((_: Event) => lang.set(Lang("en"))))("EN"), " ",
+      )(id := "enButton", onclick := ((_: dom.Event) => lang.set(Lang("en"))))("EN"), " ",
       button(
         Button.btn,
         Button.color(Color.Primary)
-      )(id := "plButton", onclick := ((_: Event) => lang.set(Lang("pl"))))("PL"),
+      )(id := "plButton", onclick := ((_: dom.Event) => lang.set(Lang("pl"))))("PL"),
       div(Card.card, Card.body, Background.color(Color.Light), Spacing.margin(
         side = Side.Top,
         size = SpacingSize.Normal

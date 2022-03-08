@@ -8,7 +8,10 @@ import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal, InvalidRpcCall}
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.avsystem.commons.serialization.{GenCodec, GenKeyCodec}
 import io.udash.rest.openapi.{OpenApiMetadata, RestSchema}
+import io.udash.rest.raw.RawRest.FromTask
 import io.udash.rest.raw._
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.annotation.implicitNotFound
 
@@ -21,12 +24,17 @@ trait FloatingPointRestImplicits {
 object FloatingPointRestImplicits extends FloatingPointRestImplicits
 
 trait FutureRestImplicits {
-  implicit def futureAsyncEffect: RawRest.AsyncEffect[Future] =
-    new RawRest.AsyncEffect[Future] {
-      def toAsync[A](fa: Future[A]): RawRest.Async[A] =
-        fa.onCompleteNow
-      def fromAsync[A](async: RawRest.Async[A]): Future[A] =
-        Promise[A]().setup(p => async(p.complete)).future
+  /**
+   * This `Scheduler` is used only on client-side, effectively only to translate between [[RestRequest]]/[[RestResponse]]
+   * and native representations of requests and responses for the HTTP client being used (e.g. Jetty).
+   * Despite that, it is recommended to override this method and provide a customized `Scheduler`
+   * (possibly shared with other parts of your application) in order to avoid creating too many thread pools.
+   */
+  implicit def clientScheduler: Scheduler = Scheduler.global
+
+  implicit def futureFromTask: FromTask[Future] =
+    new FromTask[Future] {
+      override def fromTask[A](task: Task[A]): Future[A] = task.runToFuture
     }
 
   @implicitNotFound("${T} is not a valid result type of HTTP REST method - it must be a Future")
@@ -36,8 +44,8 @@ trait FutureRestImplicits {
 object FutureRestImplicits extends FutureRestImplicits
 
 /**
-  * Defines `GenCodec` and `GenKeyCodec` based serialization for REST API traits.
-  */
+ * Defines `GenCodec` and `GenKeyCodec` based serialization for REST API traits.
+ */
 trait GenCodecRestImplicits extends FloatingPointRestImplicits {
   // read failure handling is now baked into macro-generated RPC `AsRaw` implementations but this
   // method is left for backwards compatibility - for instances materialized with previous version of macro

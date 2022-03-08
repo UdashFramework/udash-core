@@ -515,7 +515,7 @@ object UdashDatePicker {
   // registered to be watched.
   private val datePickerMutationObserver = {
     new MutationObserver((records: js.Array[MutationRecord], _: MutationObserver) => {
-      def mutationHandler(nodesExtractor: MutationRecord => NodeList, callbacks: Map[Node, () => Unit]): Unit = {
+      def mutationHandler(nodesExtractor: MutationRecord => NodeList[Node], callbacks: Map[Node, () => Unit]): Unit = {
         records
           .flatMap(nodesExtractor(_) |> (recordNodes => for {i <- 0 until recordNodes.length} yield recordNodes(i)))
           .foreach(node =>
@@ -532,7 +532,7 @@ object UdashDatePicker {
 
   def registerMutationCallbacks(pickerNode: Node, setupCallback: () => Unit, detachCallback: () => Unit): Unit = {
     if (datePickerSetupCallbacks.isEmpty && datePickerDetachCallbacks.isEmpty)
-      datePickerMutationObserver.observe(document.body, MutationObserverInit(childList = true, subtree = true))
+      datePickerMutationObserver.observe(document.body, new MutationObserverInit { childList = true; subtree = true } )
     datePickerSetupCallbacks += (pickerNode -> setupCallback)
     datePickerDetachCallbacks += (pickerNode -> detachCallback)
   }

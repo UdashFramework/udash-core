@@ -4,8 +4,10 @@ package raw
 
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.AnnotationAggregate
-import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import com.avsystem.commons.serialization.{StringWrapperCompanion, transientDefault, whenAbsent}
 import io.udash.rest.util.WithHeaders
+import monix.eval.Task
+import monix.execution.Scheduler
 import org.scalactic.source.Position
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
@@ -17,6 +19,13 @@ object UserId extends RestDataWrapperCompanion[String, UserId]
 
 case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
+
+case class NonBlankString(str: String) {
+  if (str.isBlank) {
+    throw HttpErrorException(400, HttpBody.plain("this stuff is blank"))
+  }
+}
+object NonBlankString extends RestDataWrapperCompanion[String, NonBlankString]
 
 class omit[T](value: => T) extends AnnotationAggregate {
   @transientDefault @whenAbsent(value)
@@ -61,12 +70,14 @@ trait RootApi {
   def subApi(id: Int, @Query query: String): UserApi
   def fail: Future[Unit]
   def failMore: Future[Unit]
-
+  @GET def requireNonBlank(param: NonBlankString): Future[Unit]
   @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
 class RawRestTest extends AnyFunSuite with ScalaFutures {
+  implicit def scheduler: Scheduler = Scheduler.global
+
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
     case tb@HttpBody.Textual(content, _, _) =>
@@ -105,11 +116,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     def autopost(bodyarg: String): Future[String] = Future.successful(bodyarg.toUpperCase)
     def singleBodyAutopost(body: String): Future[String] = Future.successful(body.toUpperCase)
     def formpost(qarg: String, sarg: String, iarg: Int): Future[String] = Future.successful(s"$qarg-$sarg-$iarg")
-    def fail: Future[Unit] = Future.failed(HttpErrorException(400, "zuo"))
-    def failMore: Future[Unit] = throw HttpErrorException(400, "ZUO")
+    def fail: Future[Unit] = Future.failed(HttpErrorException.plain(400, "zuo"))
+    def failMore: Future[Unit] = throw HttpErrorException.plain(400, "ZUO")
     def eatHeader(stuff: String): Future[String] = Future.successful(stuff.toLowerCase)
     def adjusted: Future[Unit] = Future.unit
     def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]] = Future.successful(bytes)
+    def requireNonBlank(param: NonBlankString): Future[Unit] = Future.unit
     def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]] =
       Future.successful(WithHeaders((), headers.toList))
   }
@@ -117,16 +129,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
   var trafficLog: String = _
 
   val real: RootApi = new RootApiImpl(0, "")
-  val serverHandle: RawRest.HandleRequest = request => callback => {
-    RawRest.asHandleRequest(real).apply(request) { result =>
-      callback(result)
-      result match {
-        case Success(response) =>
-          trafficLog = s"${repr(request)}\n${repr(response)}\n"
-        case _ =>
+  val serverHandle: RawRest.HandleRequest = request =>
+    RawRest.asHandleRequest(real).apply(request).tapEval { response =>
+      Task {
+        trafficLog = s"${repr(request)}\n${repr(response)}\n"
       }
     }
-  }
 
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
@@ -141,9 +149,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
   }
 
   def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
-    val promise = Promise[RestResponse]()
-    serverHandle(request).apply(promise.complete)
-    assert(promise.future.futureValue == response)
+    val future = serverHandle(request).runToFuture
+    assert(future.futureValue == response)
   }
 
   test("simple GET") {
@@ -313,6 +320,15 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     val body = HttpBody.binary("""{"bodyarg":"value"}""".getBytes(HttpBody.Utf8Charset), HttpBody.JsonType)
     val request = RestRequest(HttpMethod.POST, RestParameters(List(PlainValue("autopost"))), body)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"VALUE\"")))
+    assertRawExchange(request, response)
+  }
+
+  test("invalid parameter with custom validation error") {
+    val request = RestRequest(HttpMethod.GET, RestParameters(
+      List(PlainValue("requireNonBlank")),
+      query = Mapping(ISeq("param" -> PlainValue("")))
+    ), HttpBody.Empty)
+    val response = RestResponse(400, IMapping.empty, HttpBody.plain("this stuff is blank"))
     assertRawExchange(request, response)
   }
 }

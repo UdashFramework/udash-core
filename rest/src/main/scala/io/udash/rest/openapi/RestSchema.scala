@@ -2,11 +2,10 @@ package io.udash
 package rest.openapi
 
 import java.util.UUID
-
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
-import io.udash.rest.raw.RawRest.AsyncEffect
 import io.udash.rest.raw._
+import monix.eval.TaskLike
 
 import scala.annotation.implicitNotFound
 
@@ -249,7 +248,7 @@ object RestResponses {
  */
 final case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
-  implicit def forAsyncEffect[F[_] : AsyncEffect, T: RestResponses]: RestResultType[F[T]] =
+  implicit def forAsyncEffect[F[_] : TaskLike, T: RestResponses]: RestResultType[F[T]] =
     RestResultType(RestResponses[T].responses(_, identity))
 
   @implicitNotFound("#{forResponseType}")
@@ -258,7 +257,7 @@ object RestResultType {
   ): ImplicitNotFound[RestResultType[T]] = ImplicitNotFound()
 
   @implicitNotFound("#{forRestResponses}")
-  implicit def notFoundForAsyncEffect[F[_] : AsyncEffect, T](
+  implicit def notFoundForAsyncEffect[F[_] : TaskLike, T](
     implicit forRestResponses: ImplicitNotFound[RestResponses[T]]
   ): ImplicitNotFound[RestResultType[F[T]]] = ImplicitNotFound()
 }

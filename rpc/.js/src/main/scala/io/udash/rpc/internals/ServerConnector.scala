@@ -9,7 +9,6 @@ import io.udash.wrappers.atmosphere.Transport.Transport
 import io.udash.wrappers.atmosphere._
 import org.scalajs.dom
 
-import scala.collection.mutable
 import scala.scalajs.js
 import scala.util.control.NonFatal
 
@@ -29,7 +28,7 @@ abstract class AtmosphereServerConnector(
   def handleResponse(response: RpcResponse): Any
   def handleRpcFire(fire: RpcFire): Any
 
-  private val waitingRequests = new mutable.ArrayBuffer[RpcRequest]()
+  private var waitingRequests = new js.Array[RpcRequest]()
   private var isReady: ConnectionStatus = ConnectionStatus.Closed
   private val websocketSupport: Boolean = scala.scalajs.js.Dynamic.global.WebSocket != null
 
@@ -65,6 +64,8 @@ abstract class AtmosphereServerConnector(
     Atmosphere.subscribe(atmRequest)
   }
 
+  def uuid: String = socket.getUUID().toString
+
   override def sendRpcRequest(request: RpcRequest): Unit = {
     val msg = JsonStringOutput.write[RpcRequest](request)
     if (isReady == ConnectionStatus.Open) socket.push(msg)
@@ -93,11 +94,9 @@ abstract class AtmosphereServerConnector(
   private def ready(isReady: ConnectionStatus): Unit = {
     this.isReady = isReady
     if (isReady == ConnectionStatus.Open) {
-      val queue = new mutable.ArrayBuffer[RpcRequest]()
-      queue ++= waitingRequests
-      waitingRequests.clear()
-
-      queue foreach { req => sendRpcRequest(req) }
+      val queue = waitingRequests
+      waitingRequests = js.Array()
+      queue.foreach(sendRpcRequest)
     }
 
     connectionStatusCallbacks.fire(isReady)

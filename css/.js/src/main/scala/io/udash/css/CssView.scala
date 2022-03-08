@@ -13,7 +13,7 @@ trait CssView extends CssText {
   import CssView._
 
   implicit def style2Mod(style: CssStyle): Modifier = new StyleModifier(style)
-  implicit def elementOps(element: Element): ElementOps = new ElementOps(element)
+  implicit def elementOps[T <: Element](element: T): ElementOps[T] = new ElementOps(element)
   implicit def styleOps(style: CssStyle): StyleOps = new StyleOps(style)
   implicit def styleFactoryOps[T](factory: T => CssStyle): StyleFactoryOps[T] = new StyleFactoryOps[T](factory)
 }
@@ -24,8 +24,8 @@ object CssView extends CssView {
       styles.foreach(_.addTo(t))
   }
 
-  final class ElementOps(private val element: Element) extends AnyVal {
-    def styles(styles: CssStyle*): Element = {
+  final class ElementOps[T <: Element](private val element: T) extends AnyVal {
+    def styles(styles: CssStyle*): T = {
       styles.foreach(_.addTo(element))
       element
     }
