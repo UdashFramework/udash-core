@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.4"
 
-  val jettyVersion = "9.4.46.v20220331"
+  val jettyVersion = "11.0.9"
   val typesafeConfigVersion = "1.4.2"
   val flexmarkVersion = "0.62.2"
   val logbackVersion = "1.2.11"
