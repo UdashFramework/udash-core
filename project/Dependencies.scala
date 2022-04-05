@@ -37,6 +37,7 @@ object Dependencies {
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.11"
+  val scalaJsSecureRandomVersion = "1.0.0"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.1"
@@ -50,7 +51,11 @@ object Dependencies {
   ).map(compilerPlugin))
 
   val commonTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
+    "org.scalatest" %%% "scalatest" % scalatestVersion,
+  ).map(_ % Test))
+
+  val commonJsTestDeps = Def.setting(Seq(
+    "org.scala-js" %%% "scalajs-fake-insecure-java-securerandom" % scalaJsSecureRandomVersion, //ScalaTest uses SecureRandom
   ).map(_ % Test))
 
   val macroDeps = Def.setting(Seq(
