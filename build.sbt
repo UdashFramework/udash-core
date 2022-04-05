@@ -95,6 +95,7 @@ val commonJsSettings = commonSettings ++ Seq(
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
+  libraryDependencies ++= Dependencies.commonJsTestDeps.value,
 )
 
 val testInBrowser = Seq(
