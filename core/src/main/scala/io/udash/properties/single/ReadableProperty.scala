@@ -39,6 +39,8 @@ trait ReadableProperty[+A] {
    */
   def transform[B](transformer: A => B): ReadableProperty[B]
 
+  def map[B](f: A => B): ReadableProperty[B] = transform(f)
+
   /**
    * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
    *

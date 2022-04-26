@@ -470,6 +470,21 @@ class PropertyTest extends UdashCoreTest {
       zipped.get shouldBe 7 -> 2
     }
 
+    "work with simple generators" in {
+      val p = Property(1)
+      val rp: ReadableProperty[Int] = p
+      val generated =
+        for {
+          v1 <- rp
+        } yield v1 + 1
+
+      generated.get shouldBe p.get + 1
+
+      p.set(42)
+
+      generated.get shouldBe 43
+    }
+
     "combine with other properties (model properties)" in {
       val p1 = Property(12)
       val p2 = Property(-2)
