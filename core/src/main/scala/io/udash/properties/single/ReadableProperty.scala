@@ -72,6 +72,16 @@ trait ReadableProperty[+A] {
    */
   def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
+
+  /**
+   * Combines two properties into a new one, containing a tuple of origin values.
+   * Created property will be updated after any change in the origin ones.
+   *
+   * @param property `Property[B]` to combine with `this`.
+   * @tparam B Type of elements in provided property.
+   * @return Property[(A, B)] updated with a new tuple on any change in `this` or `property`.
+   */
+  def zip[B](property: ReadableProperty[B]): ReadableProperty[(A, B)] = combine(property)(_ -> _)
 }
 
 final class MirrorProperty[A: PropertyCreator](origin: ReadableProperty[A]) {

@@ -423,6 +423,53 @@ class PropertyTest extends UdashCoreTest {
       mul.get should be(14)
     }
 
+    "zip with other properties" in {
+      val p1 = Property(1)
+      val p2 = Property(2)
+
+      val zipped = p1 zip p2
+
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      zipped.get shouldBe 1 -> 2
+
+      p1.set(12)
+
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+      zipped.get shouldBe 12 -> 2
+
+      var zippedCallbackValue = 0 -> 0
+      val registration = zipped.listen(zippedCallbackValue = _)
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+
+      p1.touch()
+      zippedCallbackValue shouldBe 12 -> 2
+
+      CallbackSequencer().sequence {
+        p2.set(-2)
+      }
+
+      zippedCallbackValue shouldBe 12 -> -2
+      zipped.get shouldBe 12 -> -2
+
+      p2.touch()
+
+      zipped.get shouldBe 12 -> -2
+
+      p1.listenersCount() shouldBe 1
+      p2.listenersCount() shouldBe 1
+      registration.cancel()
+      p1.listenersCount() shouldBe 0
+      p2.listenersCount() shouldBe 0
+
+      p1.set(7)
+      p2.set(2)
+
+      zipped.get shouldBe 7 -> 2
+    }
+
     "combine with other properties (model properties)" in {
       val p1 = Property(12)
       val p2 = Property(-2)
