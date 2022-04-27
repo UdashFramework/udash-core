@@ -75,6 +75,13 @@ trait ReadableProperty[+A] {
   def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
 
+  //todo not sustainable
+  def flatMap[B](f: A => ReadableProperty[B]): ReadableProperty[B] = {
+    val result = Property[B](f(get).get)
+    var registration = listen(a => f(a).listen(result.set(_), initUpdate = true))
+    result
+  }
+
   /**
    * Combines two properties into a new one, containing a tuple of origin values.
    * Created property will be updated after any change in the origin ones.

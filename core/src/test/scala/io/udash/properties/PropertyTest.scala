@@ -478,11 +478,36 @@ class PropertyTest extends UdashCoreTest {
           v1 <- rp
         } yield v1 + 1
 
+      p.listenersCount() shouldBe 0
       generated.get shouldBe p.get + 1
 
-      p.set(42)
+      p.set(41)
 
-      generated.get shouldBe 43
+      generated.get shouldBe p.get + 1
+    }
+
+    "work with for-comprehensions" in {
+      val p1 = Property(1)
+      val p2 = Property(2)
+      val rp1: ReadableProperty[Int] = p1
+      val rp2: ReadableProperty[Int] = p2
+      val generated =
+        for {
+          v1 <- rp1
+          v2 <- rp2
+        } yield v1 + v2
+
+      //      p1.listenersCount() shouldBe 0
+      //      p2.listenersCount() shouldBe 0
+      generated.get shouldBe p1.get + p2.get
+
+      p1.set(40)
+
+      generated.get shouldBe p1.get + p2.get
+
+      p2.set(29)
+
+      generated.get shouldBe p1.get + p2.get
     }
 
     "combine with other properties (model properties)" in {
