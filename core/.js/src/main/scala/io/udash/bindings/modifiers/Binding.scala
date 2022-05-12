@@ -1,6 +1,5 @@
 package io.udash.bindings.modifiers
 
-import com.avsystem.commons.SharedExtensions._
 import io.udash.utils.Registration
 import org.scalajs.dom.Element
 import scalatags.generic.Modifier
@@ -14,7 +13,10 @@ trait Binding extends Modifier[Element] {
 
   /** Every interceptor is expected to return the value received as argument. */
   final val nestedInterceptor: Binding.NestedInterceptor = new Binding.NestedInterceptor {
-    override def apply[T <: Binding](binding: T): T = binding.setup(nestedBindings.push(_))
+    override def apply(binding: Binding): binding.type = {
+      nestedBindings.push(binding)
+      binding
+    }
   }
 
   def addRegistration(registration: Registration): Unit = propertyListeners += registration
@@ -37,12 +39,12 @@ object Binding {
 
   /** Every interceptor is expected to return the value received as argument. */
   trait NestedInterceptor {
-    def apply[T <: Binding](binding: T): T
+    def apply(binding: Binding): binding.type
   }
 
   object NestedInterceptor {
     final val Identity: NestedInterceptor = new NestedInterceptor {
-      override def apply[T <: Binding](binding: T): T = binding
+      override def apply(binding: Binding): binding.type = binding
     }
   }
 
