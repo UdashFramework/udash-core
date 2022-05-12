@@ -844,7 +844,7 @@ final class FormElementsFactory(
 
 object FormElementsFactory {
   def apply(
-    nestedInterceptor: NestedInterceptor = identity,
+    nestedInterceptor: NestedInterceptor = NestedInterceptor.Identity,
     inputValidationTrigger: ValidationTrigger = ValidationTrigger.None,
     selectValidationTrigger: ValidationTrigger = ValidationTrigger.None,
     form: OptArg[UdashForm] = OptArg.Empty

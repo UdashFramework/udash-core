@@ -13,10 +13,9 @@ trait Binding extends Modifier[Element] {
   protected final val nestedBindings: js.Array[Binding] = js.Array()
 
   /** Every interceptor is expected to return the value received as argument. */
-  def nestedInterceptor[T <: Binding](binding: T): T =
-    binding.setup {
-      nestedBindings += _
-    }
+  final val nestedInterceptor: Binding.NestedInterceptor = new Binding.NestedInterceptor {
+    override def apply[T <: Binding](binding: T): T = binding.setup(nestedBindings.push(_))
+  }
 
   def addRegistration(registration: Registration): Unit = propertyListeners += registration
 
@@ -35,6 +34,16 @@ trait Binding extends Modifier[Element] {
 }
 
 object Binding {
+
   /** Every interceptor is expected to return the value received as argument. */
-  type NestedInterceptor = Binding => Binding
+  trait NestedInterceptor {
+    def apply[T <: Binding](binding: T): T
+  }
+
+  object NestedInterceptor {
+    final val Identity: NestedInterceptor = new NestedInterceptor {
+      override def apply[T <: Binding](binding: T): T = binding
+    }
+  }
+
 }
