@@ -18,10 +18,11 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
   private val producedElementsCount = js.Array[Int]()
   private val nestedBindingsByProperty = js.Map.empty[E, js.Array[Binding]]
 
-  def propertyAwareNestedInterceptor(p: E)(binding: Binding): Binding = {
-    super.nestedInterceptor(binding)
-    binding.setup { b =>
-      nestedBindingsByProperty.getOrElseUpdate(p, js.Array()).push(b)
+  def propertyAwareNestedInterceptor(p: E): Binding.NestedInterceptor = new Binding.NestedInterceptor {
+    override def apply(binding: Binding): binding.type = {
+      nestedInterceptor(binding)
+      nestedBindingsByProperty.getOrElseUpdate(p, js.Array()).push(binding)
+      binding
     }
   }
 

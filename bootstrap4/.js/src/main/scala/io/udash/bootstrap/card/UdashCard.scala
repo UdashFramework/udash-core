@@ -18,100 +18,83 @@ final class UdashCard private(
   override val componentId: ComponentId
 )(content: UdashCard#CardElementsFactory => Modifier) extends UdashBootstrapComponent {
   class CardElementsFactory {
-    /** Use this method to bond the external binging's lifecycle with the lifecycle of this form. */
-    def externalBinding[T <: Binding](binding: T): T = UdashCard.this.nestedInterceptor(binding)
 
     /** Creates header of a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#header-and-footer">Bootstrap Docs</a>. */
-    def header(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      div(BootstrapStyles.Card.header)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#header-and-footer">Bootstrap Docs</a>. */
+    def header(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.header)(content(nestedInterceptor))
 
     /** Creates footer of a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#header-and-footer">Bootstrap Docs</a>. */
-    def footer(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      div(BootstrapStyles.Card.footer)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#header-and-footer">Bootstrap Docs</a>. */
+    def footer(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.footer)(content(nestedInterceptor))
 
     /** Creates body of a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#body">Bootstrap Docs</a>. */
-    def body(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      div(BootstrapStyles.Card.body)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#body">Bootstrap Docs</a>. */
+    def body(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.body)(content(nestedInterceptor))
 
     /** Creates title of a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
-    def title(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      div(BootstrapStyles.Card.title)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
+    def title(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.title)(content(nestedInterceptor))
 
     /** Creates subtitle of a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
-    def subtitle(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      div(BootstrapStyles.Card.subtitle)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
+    def subtitle(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.subtitle)(content(nestedInterceptor))
 
     /** Creates text paragraph for a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
-    def text(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      p(BootstrapStyles.Card.text)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
+    def text(content: Binding.NestedInterceptor => Modifier): Modifier =
+      p(BootstrapStyles.Card.text)(content(nestedInterceptor))
 
     /** Creates link with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
-    def link(link: ReadableProperty[String])(content: Binding.NestedInterceptor => Modifier): Modifier = {
-      a(externalBinding(href.bind(link)), BootstrapStyles.Card.link)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#titles-text-and-links">Bootstrap Docs</a>. */
+    def link(link: ReadableProperty[String])(content: Binding.NestedInterceptor => Modifier): Modifier =
+      a(nestedInterceptor(href.bind(link)), BootstrapStyles.Card.link)(content(nestedInterceptor))
 
     /** Creates top image for a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
     def imgTop(imageSrc: ReadableProperty[String], alternativeText: ReadableProperty[String])(
       additionalModifiers: Binding.NestedInterceptor => Modifier
-    ): Modifier = {
+    ): Modifier =
       img(
-        externalBinding(src.bind(imageSrc)),
-        externalBinding(alt.bind(alternativeText)),
+        nestedInterceptor(src.bind(imageSrc)),
+        nestedInterceptor(alt.bind(alternativeText)),
         BootstrapStyles.Card.imageTop
-      )(additionalModifiers(externalBinding))
-    }
+      )(additionalModifiers(nestedInterceptor))
 
     /** Creates bottom image for a card with a provided content.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
     def imgBottom(imageSrc: ReadableProperty[String], alternativeText: ReadableProperty[String])(
       additionalModifiers: Binding.NestedInterceptor => Modifier
-    ): Modifier = {
+    ): Modifier =
       img(
-        externalBinding(src.bind(imageSrc)),
-        externalBinding(alt.bind(alternativeText)),
+        nestedInterceptor(src.bind(imageSrc)),
+        nestedInterceptor(alt.bind(alternativeText)),
         BootstrapStyles.Card.imageBottom
-      )(additionalModifiers(externalBinding))
-    }
+      )(additionalModifiers(nestedInterceptor))
 
     /** Wraps provided content into an element with `card-img-overlay` style.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
-    def imgOverlay(imageSrc: ReadableProperty[String], alternativeText: ReadableProperty[String])(
-      content: Binding.NestedInterceptor => Modifier
-    ): Modifier = {
-      div(BootstrapStyles.Card.imageOverlay)(content(externalBinding))
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#images-1">Bootstrap Docs</a>. */
+    def imgOverlay(content: Binding.NestedInterceptor => Modifier): Modifier =
+      div(BootstrapStyles.Card.imageOverlay)(content(nestedInterceptor))
 
     /** Puts the provided list group into the card with additional `list-group-flush` style.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#list-groups">Bootstrap Docs</a>. */
-    def listGroup(list: Binding.NestedInterceptor => UdashListGroup[_, _]): Modifier = {
-      list(externalBinding).render.styles(BootstrapStyles.ListGroup.flush)
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#list-groups">Bootstrap Docs</a>. */
+    def listGroup(list: Binding.NestedInterceptor => UdashListGroup[_, _]): Modifier =
+      list(nestedInterceptor).render.styles(BootstrapStyles.ListGroup.flush)
 
     /** Puts the provided navigation tabs into the card with additional `card-header-tabs` style.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
-    def navigationTabs(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier = {
-      navigation(externalBinding).render.styles(BootstrapStyles.Card.navTabs)
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
+    def navigationTabs(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier =
+      navigation(nestedInterceptor).render.styles(BootstrapStyles.Card.navTabs)
 
     /** Puts the provided navigation tabs into the card with additional `card-header-pills` style.
-      * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
-    def navigationPills(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier = {
-      navigation(externalBinding).render.styles(BootstrapStyles.Card.navPills)
-    }
+     * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#navigation">Bootstrap Docs</a>. */
+    def navigationPills(navigation: Binding.NestedInterceptor => UdashNav[_, _]): Modifier =
+      navigation(nestedInterceptor).render.styles(BootstrapStyles.Card.navPills)
   }
 
   override val render: Element = div(
@@ -148,20 +131,17 @@ object UdashCard {
   }
 
   /** Puts the provided cards into a group.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-groups">Bootstrap Docs</a>. */
-  def group(cards: Modifier*): Element = {
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-groups">Bootstrap Docs</a>. */
+  def group(cards: Modifier*): Element =
     div(BootstrapStyles.Card.group)(cards).render
-  }
 
   /** Puts the provided cards into a deck.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-decks">Bootstrap Docs</a>. */
-  def deck(cards: Modifier*): Element = {
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-decks">Bootstrap Docs</a>. */
+  def deck(cards: Modifier*): Element =
     div(BootstrapStyles.Card.deck)(cards).render
-  }
 
   /** Puts the provided cards into a columns layout.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-columns">Bootstrap Docs</a>. */
-  def columns(cards: Modifier*): Element = {
+   * More: <a href="http://getbootstrap.com/docs/4.1/components/card/#card-columns">Bootstrap Docs</a>. */
+  def columns(cards: Modifier*): Element =
     div(BootstrapStyles.Card.columns)(cards).render
-  }
 }
