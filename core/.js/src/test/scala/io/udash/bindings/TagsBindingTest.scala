@@ -1912,7 +1912,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val el = div(
         repeatWithIndex(p) { case (item, idx, nested) =>
-          span(nested(bind(idx)), nested(bind(item))).render
+          span(nested.multi(bind(idx), nested(bind(item)))).render
         }
       ).render
 
