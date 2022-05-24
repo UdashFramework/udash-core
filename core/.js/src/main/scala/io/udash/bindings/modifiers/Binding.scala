@@ -17,7 +17,7 @@ trait Binding extends Modifier[Element] {
       nestedBindings.push(binding)
       binding
     }
-    override def multi(bindings: Binding*): bindings.type = {
+    override def multi[T <: Binding](bindings: T*): Seq[T] = {
       nestedBindings.push(bindings: _*)
       bindings
     }
@@ -44,7 +44,7 @@ object Binding {
   /** Every interceptor is expected to return the value received as argument. */
   trait NestedInterceptor {
     def apply(binding: Binding): binding.type
-    def multi(bindings: Binding*): bindings.type = {
+    def multi[T <: Binding](bindings: T*): Seq[T] = {
       bindings.foreach(apply(_))
       bindings
     }
