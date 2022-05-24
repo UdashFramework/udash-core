@@ -86,11 +86,11 @@ jobs:
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
+        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
       - name: Release Sonatype bundle
         #https://github.com/xerial/sbt-sonatype#publishing-your-artifact
         if: ${{ !endsWith(steps.get_tag_name.outputs.VERSION, 'SNAPSHOT') }}
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease
+        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease
