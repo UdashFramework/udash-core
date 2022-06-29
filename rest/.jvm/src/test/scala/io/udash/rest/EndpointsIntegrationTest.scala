@@ -1,9 +1,9 @@
 package io.udash
 package rest
 
-import monix.execution.Scheduler
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
+import monix.execution.Scheduler
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
@@ -55,9 +55,9 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
   implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
-  val rawHandler = futureHandle(SttpRestClient.asHandleRequest(baseUri))
-  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface](baseUri)
-  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest(s"http://127.0.0.1:69$contextPrefix"))
+  val rawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](baseUri))
+  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface, Future](baseUri)
+  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](s"http://127.0.0.1:69$contextPrefix"))
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)

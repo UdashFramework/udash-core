@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
-import monix.eval.Task
+import monix.eval.{Task, TaskLike}
 import sttp.client3._
 import sttp.model.Uri.QuerySegment.KeyValue
 import sttp.model.Uri.{PathSegmentEncoding, QuerySegmentEncoding}
@@ -26,22 +26,40 @@ object SttpRestClient {
 
   /**
    * Creates a client instance of some REST API trait which translates method calls into HTTP requests
-   * to given URI using STTP.
+   * to given URI using an STTP backend.
    */
-  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
+  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata, F[_] : TaskLike](
     baseUri: String,
-    options: RequestOptions = DefaultRequestOptions
-  )(implicit backend: SttpBackend[Future, Any]): RestApi =
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[F, Any]): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri, options))
+
+  /**
+   * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+   * to given URI using an STTP Future-based backend.
+   */
+  @explicitGenerics def future[RestApi: RawRest.AsRealRpc : RestMetadata](
+    baseUri: String,
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[Future, Any]): RestApi = apply[RestApi, Future](baseUri, options)
+
+  /**
+   * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+   * to given URI using an STTP Task-based backend.
+   */
+  @explicitGenerics def task[RestApi: RawRest.AsRealRpc : RestMetadata](
+    baseUri: String,
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[Task, Any]): RestApi = apply[RestApi, Task](baseUri, options)
 
   /**
    * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
    * a specified base URI using default HTTP client implementation (sttp).
    */
-  def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
-    implicit backend: SttpBackend[Future, Any]
+  def asHandleRequest[F[_] : TaskLike](baseUri: String, options: RequestOptions = DefaultRequestOptions)(
+    implicit backend: SttpBackend[F, Any]
   ): RawRest.HandleRequest =
-    request => Task.deferFuture(toSttpRequest(baseUri, request, options).send(backend)).map(fromSttpResponse)
+    request => TaskLike[F].apply(toSttpRequest(baseUri, request, options).send(backend)).map(fromSttpResponse)
 
   private def toSttpRequest(
     baseUri: String,
