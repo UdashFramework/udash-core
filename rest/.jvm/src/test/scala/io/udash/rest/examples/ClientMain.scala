@@ -11,7 +11,7 @@ import scala.util.{Failure, Success}
 object ClientMain {
   def main(args: Array[String]): Unit = {
     implicit val sttpBackend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
-    val proxy: UserApi = SttpRestClient[UserApi]("http://localhost:9090")
+    val proxy: UserApi = SttpRestClient[UserApi, Future]("http://localhost:9090")
 
     // make a remote REST call
     val result: Future[User] = proxy.createUser("Fred")
