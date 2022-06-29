@@ -14,7 +14,7 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.7.1"
+  val avsCommonsVersion = "2.7.2"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.7"
@@ -112,6 +112,7 @@ object Dependencies {
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-monix" % sttpVersion,
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
