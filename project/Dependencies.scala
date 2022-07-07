@@ -17,7 +17,7 @@ object Dependencies {
   val avsCommonsVersion = "2.7.2"
 
   val atmosphereJSVersion = "3.1.3"
-  val atmosphereVersion = "2.7.7"
+  val atmosphereVersion = "3.0.2"
 
   val upickleVersion = "2.0.0" // Tests only
   val circeVersion = "0.14.2" // Tests only
