@@ -26,9 +26,8 @@ object FileService {
    */
   def createURL(bytesArrays: Seq[Array[Byte]], mimeType: String): CloseableUrl = {
     import js.typedarray._
-
-    val jsBytesArrays = js.Array[js.Any](bytesArrays.map(_.toTypedArray) :_ *)
-    val blob = new Blob(jsBytesArrays, new BlobPropertyBag {
+    import scalajs.js.JSConverters._
+    val blob = new Blob(bytesArrays.iterator.map(_.toTypedArray: BlobPart).toJSArray, new BlobPropertyBag {
       `type` = mimeType
     })
     CloseableUrl(URL.createObjectURL(blob))
