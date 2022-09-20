@@ -5,11 +5,11 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.8" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.9" //update .github/workflows/ci.yml as well
 
   val jqueryWrapperVersion = "3.2.0"
 
-  val scalaJsDomVersion = "2.2.0"
+  val scalaJsDomVersion = "2.3.0"
   val scalaTagsVersion = "0.11.1"
   val scalaCssVersion = "1.0.0"
 
@@ -20,11 +20,11 @@ object Dependencies {
   val atmosphereVersion = "2.7.7"
 
   val upickleVersion = "2.0.0" // Tests only
-  val circeVersion = "0.14.2" // Tests only
+  val circeVersion = "0.14.3" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // Tests only
 
-  val sttpVersion = "3.7.6"
+  val sttpVersion = "3.8.0"
 
   val scalaLoggingVersion = "3.9.5"
 
@@ -36,14 +36,14 @@ object Dependencies {
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.2.12"
+  val scalatestVersion = "3.2.13"
   val scalaJsSecureRandomVersion = "1.0.0"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.4"
 
   val seleniumVersion = "4.4.0"
-  val webDriverManagerVersion = "5.2.3"
+  val webDriverManagerVersion = "5.3.0"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
