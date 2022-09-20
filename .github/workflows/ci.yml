@@ -18,11 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ 2.13.8 ]
-        command: [ udash-jvm/test, udash-js/test ]
-        include:
-          - scala: 2.13.8
-            command: guide-selenium/test
+        scala: [ 2.13.9 ]
+        command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
       - uses: actions/checkout@v2
       - name: Cache sbt
