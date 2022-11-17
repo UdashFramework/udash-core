@@ -22,7 +22,8 @@ object PropertiesBonanzaModel extends HasModelPropertyCreator[PropertiesBonanzaM
   implicit val blank: Blank[PropertiesBonanzaModel] = Blank.Simple(PropertiesBonanzaModel("", "", 0))
 }
 
-final class PropertiesBonanzaViewFactory(implicit application: Application[RoutingState]) extends ViewFactory[PropertiesBonanzaState] {
+final case class PropertiesBonanzaViewFactory()(implicit application: Application[RoutingState])
+  extends ViewFactory[PropertiesBonanzaState] {
 
   override def create(): (View, Presenter[PropertiesBonanzaState]) = {
     val model = ModelProperty.blank[PropertiesBonanzaModel]
