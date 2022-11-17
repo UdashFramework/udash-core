@@ -1,6 +1,10 @@
 package io.udash.web.guide
 
+import com.avsystem.commons.serialization.GenCodec
+import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import io.udash._
+
+import scala.scalajs.js.URIUtils
 
 class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
   def matchUrl(url: Url): RoutingState = {
@@ -41,5 +45,22 @@ class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
     case "/ext/activity" => UserActivityExtState
     case "/faq" => FaqState
     case "/license" => LicenseState
+    case "/bonanza" => PropertiesBonanzaState.Default
+    case "/bonanza" / s => PropertiesBonanzaStateEncoder(s)
   }
+
+  private object UrlEncoder {
+    def apply(encoded: String): String = URIUtils.decodeURIComponent(encoded)
+    def unapply(decoded: String): Option[String] = Some(URIUtils.encodeURIComponent(decoded))
+  }
+
+  private abstract class GenericUrlEncoder[T: GenCodec] {
+    def apply(encoded: String): T = JsonStringInput.read[T](UrlEncoder(encoded))
+    def unapply(decoded: T): Option[String] = UrlEncoder.unapply(JsonStringOutput.write[T](decoded))
+  }
+
+
+  private object PropertiesBonanzaStateEncoder extends GenericUrlEncoder[PropertiesBonanzaState]
+
+
 }

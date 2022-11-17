@@ -28,6 +28,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   private val viewRenderer = new ViewRenderer(rootElement)
   private val routingEngine = new RoutingEngine[HierarchyRoot](routingRegistry, viewFactoryRegistry, viewRenderer)
 
+  def getUrlChangeProvider: UrlChangeProvider = urlChangeProvider
   private def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] =
     routingEngine.handleUrl(url, fullReload).recover { case t => handleRoutingFailure(t) }
 

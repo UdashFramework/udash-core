@@ -3,10 +3,10 @@ package io.udash.web.guide
 import io.udash._
 import io.udash.web.commons.views.MarkdownPageViewFactory
 import io.udash.web.guide.views._
-import io.udash.web.guide.views.bootstrapping.{BootstrappingFrontendViewFactory, _}
+import io.udash.web.guide.views.bootstrapping._
 import io.udash.web.guide.views.ext._
-import io.udash.web.guide.views.frontend.{FrontendFormsViewFactory, FrontendPropertiesViewFactory, FrontendRoutingViewFactory, FrontendTemplatesViewFactory, _}
-import io.udash.web.guide.views.rpc.{RpcIntroViewFactory, RpcServerClientViewFactory, _}
+import io.udash.web.guide.views.frontend._
+import io.udash.web.guide.views.rpc._
 
 class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
   def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
@@ -51,6 +51,8 @@ class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
 
       case FaqState => FaqViewFactory
       case LicenseState => MarkdownPageViewFactory[LicenseState.type]()(Context.serverRpc.pages)
+      case BonanzaParentState => new BonanzaParentViewFactory()(Context.applicationInstance)
+      case _: PropertiesBonanzaState => new PropertiesBonanzaViewFactory()(Context.applicationInstance)
       case ErrorState => ErrorViewFactory
     }
 }

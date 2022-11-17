@@ -1,5 +1,6 @@
 package io.udash.web.guide
 
+import com.avsystem.commons.serialization.HasGenCodec
 import io.udash._
 import io.udash.web.commons.views.MarkdownPageState
 import io.udash.web.guide.markdown.MarkdownPage
@@ -79,7 +80,7 @@ case object RpcServerClientState extends RoutingState(Some(RpcState))
 /** REST communication chapters */
 case object RestState extends MarkdownState(MarkdownPage.Rest)
 
-/** Extensions **/
+/** Extensions * */
 case object BootstrapExtState extends RoutingState(Some(ContentState))
 
 case object AuthorizationExtState extends RoutingState(Some(ContentState))
@@ -89,5 +90,12 @@ case object JQueryExtState extends RoutingState(Some(ContentState))
 case object I18NExtState extends RoutingState(Some(ContentState))
 
 case object UserActivityExtState extends RoutingState(Some(ContentState))
+
+case object BonanzaParentState extends ContainerRoutingState(Some(RootState))
+case class PropertiesBonanzaState(currentInputContent: String, lastDistinctInput: String, numberOfValueChanges: Int) extends RoutingState(Some(BonanzaParentState))
+
+object PropertiesBonanzaState extends HasGenCodec[PropertiesBonanzaState] {
+  val Default: PropertiesBonanzaState = PropertiesBonanzaState("", "", 0)
+}
 
 

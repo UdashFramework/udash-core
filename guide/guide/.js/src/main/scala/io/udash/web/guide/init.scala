@@ -71,6 +71,7 @@ object Context {
       MenuLink("User activity", UserActivityExtState)
     )),
     MenuLink("License", LicenseState),
+    MenuLink("Bonanza", PropertiesBonanzaState.Default)
   )
 }
 
