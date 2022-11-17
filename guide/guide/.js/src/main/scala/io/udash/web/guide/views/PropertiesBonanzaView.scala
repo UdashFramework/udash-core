@@ -1,5 +1,6 @@
 package io.udash.web.guide.views
 
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bindings.inputs.TextInput
 import io.udash.core.{Presenter, View, ViewFactory}
 import io.udash.css.CssView
@@ -14,8 +15,8 @@ import scalatags.JsDom.all.{br, _}
 final case class PropertiesBonanzaModel(
   inputContent: String,
   lastDistinctInputContent: String,
-  numberOfValueChanges: Int
-)
+  numberOfValueChanges: Int,
+) extends AbstractCase
 
 object PropertiesBonanzaModel extends HasModelPropertyCreator[PropertiesBonanzaModel] {
   implicit val blank: Blank[PropertiesBonanzaModel] = Blank.Simple(PropertiesBonanzaModel("", "", 0))
@@ -31,7 +32,7 @@ final class PropertiesBonanzaViewFactory(implicit application: Application[Routi
 class PropertiesBonanzaPresenter(model: ModelProperty[PropertiesBonanzaModel])(implicit application: Application[RoutingState]) extends Presenter[PropertiesBonanzaState] {
 
   override def handleState(state: PropertiesBonanzaState): Unit = {
-    model.set(new PropertiesBonanzaModel(
+    model.set(PropertiesBonanzaModel(
       inputContent = state.currentInputContent,
       lastDistinctInputContent = state.lastDistinctInput,
       numberOfValueChanges = state.numberOfValueChanges
@@ -39,18 +40,21 @@ class PropertiesBonanzaPresenter(model: ModelProperty[PropertiesBonanzaModel])(i
   }
 
   private val inputContentRegistration = model.subProp(_.inputContent).listen { value =>
-    val (lastDistinctInput, numberOfValueChanges) = if (value != model.subProp(_.lastDistinctInputContent).get)
-      (value, model.subProp(_.numberOfValueChanges).get + 1) else
-      (model.subProp(_.lastDistinctInputContent).get, model.subProp(_.numberOfValueChanges).get)
+    val (lastDistinctInput, numberOfValueChanges) =
+      if (value != model.subProp(_.lastDistinctInputContent).get)
+        (value, model.subProp(_.numberOfValueChanges).get + 1)
+      else
+        (model.subProp(_.lastDistinctInputContent).get, model.subProp(_.numberOfValueChanges).get)
     application.goTo(PropertiesBonanzaState(currentInputContent = value, lastDistinctInput = lastDistinctInput, numberOfValueChanges = numberOfValueChanges))
   }
+
   override def onClose(): Unit = {
     inputContentRegistration.cancel()
     super.onClose()
   }
 }
 
-class PropertiesBonanzaView(model: ModelProperty[PropertiesBonanzaModel]) extends View with CssView {
+final class PropertiesBonanzaView(model: ModelProperty[PropertiesBonanzaModel]) extends View with CssView {
 
   override def getTemplate: Modifier = div(GlobalStyles.body)(
     div(GuideStyles.main)(

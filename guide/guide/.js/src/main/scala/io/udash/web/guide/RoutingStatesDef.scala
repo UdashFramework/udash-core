@@ -80,7 +80,7 @@ case object RpcServerClientState extends RoutingState(Some(RpcState))
 /** REST communication chapters */
 case object RestState extends MarkdownState(MarkdownPage.Rest)
 
-/** Extensions * */
+/** Extensions */
 case object BootstrapExtState extends RoutingState(Some(ContentState))
 
 case object AuthorizationExtState extends RoutingState(Some(ContentState))
