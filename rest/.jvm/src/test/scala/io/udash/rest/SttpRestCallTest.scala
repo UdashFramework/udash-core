@@ -12,7 +12,7 @@ trait SttpClientRestTest extends ServletBasedRestApiTest {
   implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
   def clientHandle: HandleRequest =
-    SttpRestClient.asHandleRequest(s"$baseUrl/api")
+    SttpRestClient.asHandleRequest[Future](s"$baseUrl/api")
 
   override protected def afterAll(): Unit = {
     backend.close()
