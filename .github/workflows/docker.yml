@@ -29,7 +29,6 @@ jobs:
         id: get_tag_name
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
       - name: Build and push Docker image
-        #run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
         run: >
           sbt
           'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"'
