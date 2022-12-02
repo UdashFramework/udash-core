@@ -21,7 +21,7 @@ jobs:
         scala: [ 2.13.10 ]
         command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache sbt
         uses: actions/cache@v2
         with:
@@ -32,8 +32,7 @@ jobs:
             ~/.cache/coursier
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
           restore-keys: ${{ runner.os }}-sbt-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/setup-java@v1
         with:
           java-version: 11
       - name: Cache npm
@@ -42,8 +41,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
-      - name: Set up node
-        uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2-beta
       - name: Install jsdom
         run: npm install jsdom@15.2.1
       - name: Run tests
@@ -56,17 +54,7 @@ jobs:
     needs: [ test ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache sbt
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache
-            ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
-          restore-keys: ${{ runner.os }}-sbt-
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
