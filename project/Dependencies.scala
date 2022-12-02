@@ -14,7 +14,7 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.7.5"
+  val avsCommonsVersion = "2.7.7"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.7"
@@ -32,7 +32,7 @@ object Dependencies {
   val typesafeConfigVersion = "1.4.2"
   val flexmarkVersion = "0.64.0"
   val logbackVersion = "1.3.1"
-  val janinoVersion = "3.1.8"
+  val janinoVersion = "3.1.9"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
@@ -43,7 +43,7 @@ object Dependencies {
   val momentJsVersion = "2.29.4"
 
   val seleniumVersion = "4.5.0"
-  val webDriverManagerVersion = "5.3.0"
+  val webDriverManagerVersion = "5.3.1"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
