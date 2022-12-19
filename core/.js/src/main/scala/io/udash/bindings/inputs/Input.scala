@@ -10,9 +10,10 @@ import scala.concurrent.duration.{Duration, DurationInt}
 /** Abstraction for HTML input tags. */
 private[bindings] abstract class Input(inputType: String) {
   /**
-   * @param value          Property to bind.
-   * @param debounce       Property update timeout after input changes.
-   * @param inputModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
+   * @param value               Property to bind.
+   * @param debounce            Property update timeout after input changes.
+   * @param onPropertyUpdated   Callback that's being called when property is updated
+   * @param inputModifiers      Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
    * @return HTML input with bound Property, applied modifiers and nested options.
    */
   def apply(value: Property[String], debounce: Duration = 20 millis, onPropertyUpdated: String => Unit = _ => ())(inputModifiers: Modifier*): InputBinding[JSInput] =

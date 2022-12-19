@@ -12,6 +12,7 @@ object TextArea {
   /**
    * @param value             Property to bind.
    * @param debounce          Property update timeout after input changes.
+   * @param onPropertyUpdated   Callback that's being called when property is updated.
    * @param textareaModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
    * @return HTML textarea with bound Property, applied modifiers and nested options.
    */
