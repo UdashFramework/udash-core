@@ -2,6 +2,7 @@ package io.udash.bindings.inputs
 
 import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
+import org.scalajs.dom.{Event, InputEvent, InputEventInit}
 
 import scala.concurrent.duration.DurationLong
 
@@ -96,22 +97,32 @@ class InputTest extends AsyncUdashFrontendTest {
       inputEl.onchange(null)
       inputEl.oninput(null)
 
-      retrying { p.get should be("ABCD") } flatMap { _ =>
+      retrying {
+        p.get should be("ABCD")
+      } flatMap { _ =>
         inputEl.value = "ABC"
         inputEl.onchange(null)
-        retrying { p.get should be("ABC") }
+        retrying {
+          p.get should be("ABC")
+        }
       } flatMap { _ =>
         inputEl.value = "AB"
         inputEl.oninput(null)
-        retrying { p.get should be("AB") }
+        retrying {
+          p.get should be("AB")
+        }
       } flatMap { _ =>
         inputEl.value = "A"
         inputEl.onkeyup(null)
-        retrying { p.get should be("A") }
+        retrying {
+          p.get should be("A")
+        }
       } flatMap { _ =>
         inputEl.value = "123qweasd"
         inputEl.onchange(null)
-        retrying { p.get should be("123qweasd") }
+        retrying {
+          p.get should be("123qweasd")
+        }
       } flatMap { _ =>
         p.listenersCount() should be(1)
         input.kill()
@@ -160,6 +171,79 @@ class InputTest extends AsyncUdashFrontendTest {
       p.set("trewq")
       r.value should be("qaz")
       r2.value should be("asd")
+    }
+  }
+
+  "run callback on state changes" in {
+    val p = Property[String]("ABC")
+    val result = Property("")
+    val input = TextInput(p, 0 millis, result.set(_))()
+    val inputEl = input.render
+
+    inputEl.value = "ABCD"
+    inputEl.onchange(new Event("change"))
+    result.get should be("ABCD")
+
+    inputEl.value = "ABC"
+    inputEl.onchange(new Event("change"))
+
+    result.get should be("ABC")
+
+    inputEl.value = "AB"
+    inputEl.onchange(new Event("change"))
+    result.get should be("AB")
+
+    inputEl.value = "A"
+    inputEl.onchange(new Event("change"))
+    result.get should be("A")
+
+    inputEl.value = "123qweasd"
+    inputEl.onchange(new Event("change"))
+    result.get should be("123qweasd")
+
+    p.listenersCount() should be(1)
+    input.kill()
+    p.listenersCount() should be(0)
+  }
+
+  "run callback on state changes with debouncing" in {
+    val p = Property[String]("ABC")
+    val result = Property[String]("")
+    val input = TextInput(p, 20 millis, value => {
+      result.set(value)
+    })()
+    val inputEl = input.render
+
+
+    inputEl.onchange(new Event("change"))
+    inputEl.value = "ABCD"
+
+    retrying {
+      result.get should be("ABCD")
+    } flatMap { _ =>
+      inputEl.value = "ABC"
+      inputEl.onchange(new Event("change"))
+      retrying {
+        result.get should be("ABC")
+      }
+    } flatMap { _ =>
+      inputEl.value = "AB"
+      inputEl.onchange(new Event("change"))
+      retrying {
+        result.get should be("AB")
+      }
+    } flatMap { _ =>
+      inputEl.value = "A"
+      inputEl.onchange(new Event("change"))
+      retrying {
+        result.get should be("A")
+      }
+    } flatMap { _ =>
+      inputEl.value = "123qweasd"
+      inputEl.onchange(new Event("change"))
+      retrying {
+        result.get should be("123qweasd")
+      }
     }
   }
 }

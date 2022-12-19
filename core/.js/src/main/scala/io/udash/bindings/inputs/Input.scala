@@ -7,26 +7,26 @@ import scalatags.JsDom.all._
 
 import scala.concurrent.duration.{Duration, DurationInt}
 
-/** Abstraction for HTML input tags.*/
+/** Abstraction for HTML input tags. */
 private[bindings] abstract class Input(inputType: String) {
   /**
-    * @param value Property to bind.
-    * @param debounce Property update timeout after input changes.
-    * @param inputModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
-    * @return HTML input with bound Property, applied modifiers and nested options.
-    */
-  def apply(value: Property[String], debounce: Duration = 20 millis)(inputModifiers: Modifier*): InputBinding[JSInput] =
+   * @param value          Property to bind.
+   * @param debounce       Property update timeout after input changes.
+   * @param inputModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
+   * @return HTML input with bound Property, applied modifiers and nested options.
+   */
+  def apply(value: Property[String], debounce: Duration = 20 millis, onPropertyUpdated: String => Unit = _ => ())(inputModifiers: Modifier*): InputBinding[JSInput] =
     new InputBinding[JSInput] {
       private val element = input(
         inputModifiers, tpe := inputType,
-        nestedInterceptor(new InputModifier(value, Some(debounce)))
+        nestedInterceptor(new InputModifier(value, Some(debounce), onPropertyUpdated))
       ).render
 
       override def render: JSInput = element
     }
 
-  private class InputModifier(property: Property[String], debounce: Option[Duration])
-    extends TextInputsModifier(property, debounce)  {
+  private class InputModifier(property: Property[String], debounce: Option[Duration], onPropertyUpdated: String => Unit = _ => ())
+    extends TextInputsModifier(property, debounce, onPropertyUpdated) {
 
     override def elementValue(t: Element): String =
       t.asInstanceOf[JSInput].value

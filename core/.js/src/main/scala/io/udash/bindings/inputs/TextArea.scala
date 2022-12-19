@@ -7,25 +7,25 @@ import scalatags.JsDom.all._
 
 import scala.concurrent.duration.{Duration, DurationInt}
 
-/** Simple HTML text area with bound Property.*/
+/** Simple HTML text area with bound Property. */
 object TextArea {
   /**
-    * @param value Property to bind.
-    * @param debounce Property update timeout after input changes.
-    * @param textareaModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
-    * @return HTML textarea with bound Property, applied modifiers and nested options.
-    */
-  def apply(value: Property[String], debounce: Duration = 20 millis)(textareaModifiers: Modifier*): InputBinding[TextArea] =
+   * @param value             Property to bind.
+   * @param debounce          Property update timeout after input changes.
+   * @param textareaModifiers Additional Modifiers, don't use modifiers on value, onchange and onkeyup attributes.
+   * @return HTML textarea with bound Property, applied modifiers and nested options.
+   */
+  def apply(value: Property[String], debounce: Duration = 20 millis, onPropertyUpdated: String => Unit = _ => ())(textareaModifiers: Modifier*): InputBinding[TextArea] =
     new InputBinding[TextArea] {
       private val element = textarea(
-        textareaModifiers, nestedInterceptor(new TextAreaModifier(value, Some(debounce)))
+        textareaModifiers, nestedInterceptor(new TextAreaModifier(value, Some(debounce), onPropertyUpdated))
       ).render
 
       override def render: TextArea = element
     }
 
-  private class TextAreaModifier(property: Property[String], debounce: Option[Duration])
-    extends TextInputsModifier(property, debounce)  {
+  private class TextAreaModifier(property: Property[String], debounce: Option[Duration], onPropertyUpdated: String => Unit = _ => ())
+    extends TextInputsModifier(property, debounce, onPropertyUpdated) {
 
     override def elementValue(t: Element): String =
       t.asInstanceOf[TextArea].value
