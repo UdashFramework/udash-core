@@ -146,30 +146,30 @@ class TextAreaTest extends AsyncUdashFrontendTest {
 
     "run callback on state changes" in {
       val p = Property[String]("ABC")
-      val result = Property("")
-      val input = TextArea(p, 0 millis, result.set(_))()
+      var result = ""
+      val input = TextArea(p, 0 millis, result = _)()
       val inputEl = input.render
 
       inputEl.value = "ABCD"
       inputEl.onchange(new Event("change"))
-      result.get should be("ABCD")
+      result should be("ABCD")
 
       inputEl.value = "ABC"
       inputEl.onchange(new Event("change"))
 
-      result.get should be("ABC")
+      result should be("ABC")
 
       inputEl.value = "AB"
       inputEl.onchange(new Event("change"))
-      result.get should be("AB")
+      result should be("AB")
 
       inputEl.value = "A"
       inputEl.onchange(new Event("change"))
-      result.get should be("A")
+      result should be("A")
 
       inputEl.value = "123qweasd"
       inputEl.onchange(new Event("change"))
-      result.get should be("123qweasd")
+      result should be("123qweasd")
 
       p.listenersCount() should be(1)
       input.kill()
@@ -178,10 +178,8 @@ class TextAreaTest extends AsyncUdashFrontendTest {
 
     "run callback on state changes with debouncing" in {
       val p = Property[String]("ABC")
-      val result = Property[String]("")
-      val input = TextArea(p, 20 millis, value => {
-        result.set(value)
-      })()
+      var result = ""
+      val input = TextArea(p, 20 millis, result = _)()
       val inputEl = input.render
 
 
@@ -189,30 +187,30 @@ class TextAreaTest extends AsyncUdashFrontendTest {
       inputEl.value = "ABCD"
 
       retrying {
-        result.get should be("ABCD")
+        result should be("ABCD")
       } flatMap { _ =>
         inputEl.value = "ABC"
         inputEl.onchange(new Event("change"))
         retrying {
-          result.get should be("ABC")
+          result should be("ABC")
         }
       } flatMap { _ =>
         inputEl.value = "AB"
         inputEl.onchange(new Event("change"))
         retrying {
-          result.get should be("AB")
+          result should be("AB")
         }
       } flatMap { _ =>
         inputEl.value = "A"
         inputEl.onchange(new Event("change"))
         retrying {
-          result.get should be("A")
+          result should be("A")
         }
       } flatMap { _ =>
         inputEl.value = "123qweasd"
         inputEl.onchange(new Event("change"))
         retrying {
-          result.get should be("123qweasd")
+          result should be("123qweasd")
         }
       }
     }
