@@ -10,25 +10,26 @@ import scala.concurrent.duration.{Duration, DurationInt}
 /** Abstraction for HTML input tags. */
 private[bindings] abstract class Input(inputType: String) {
   /**
-   * @param value                       Property to bind.
-   * @param debounce                    Property update timeout after input changes.
-   * @param onInputElementEventReceived Callback that's executed when `Input` element receives one of following events:
-   *                                    `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
-   * @param inputModifiers              Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
-   *                                    as they are used internally to sync property value with element value.
+   * @param value               Property to bind.
+   * @param debounce            Property update timeout after input changes.
+   * @param onInputElementEvent Callback that's executed when `Input` element receives one of following events:
+   *                            `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
+   *                            Can be used to mimic unidirectional data flow for components based on this `Input`.
+   * @param inputModifiers      Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
+   *                            as they are used internally to sync property value with element value.
    * @return HTML input with bound Property, applied modifiers and nested options.
    */
   def apply(
     value: Property[String] = Property(""),
     debounce: Duration = 20 millis,
-    onInputElementEventReceived: String => Unit = _ => ()
+    onInputElementEvent: String => Unit = _ => (),
   )(
     inputModifiers: Modifier*
   ): InputBinding[JSInput] =
     new InputBinding[JSInput] {
       private val element = input(
         inputModifiers, tpe := inputType,
-        nestedInterceptor(new InputModifier(value, debounce, onInputElementEventReceived))
+        nestedInterceptor(new InputModifier(value, debounce, onInputElementEvent))
       ).render
 
       override def render: JSInput = element
@@ -37,8 +38,8 @@ private[bindings] abstract class Input(inputType: String) {
   private class InputModifier(
     property: Property[String],
     debounce: Duration,
-    onInputElementEventReceived: String => Unit = _ => ()
-  ) extends TextInputsModifier(property, debounce, onInputElementEventReceived) {
+    onInputElementEvent: String => Unit = _ => (),
+  ) extends TextInputsModifier(property, debounce, onInputElementEvent) {
 
     override def elementValue(t: Element): String =
       t.asInstanceOf[JSInput].value

@@ -8,7 +8,7 @@ import scala.concurrent.duration.Duration
 
 /** Template of binding for text inputs. */
 
-private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Duration, onInputElementEventReceived: String => Unit) extends Binding {
+private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Duration, onInputElementEvent: String => Unit) extends Binding {
   def elementValue(t: Element): String
   def setElementValue(t: Element, v: String): Unit
   def setElementKeyUp(t: Element, callback: KeyboardEvent => Unit): Unit
@@ -20,7 +20,7 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
     val value = elementValue(element)
     if (property.get != value) {
       property.set(value)
-      onInputElementEventReceived(value)
+      onInputElementEvent(value)
     }
   }
 

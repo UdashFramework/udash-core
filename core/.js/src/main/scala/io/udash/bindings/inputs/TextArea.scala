@@ -10,31 +10,32 @@ import scala.concurrent.duration.{Duration, DurationInt}
 /** Simple HTML text area with bound Property. */
 object TextArea {
   /**
-   * @param value                       Property to bind.
-   * @param debounce                    Property update timeout after input changes.
-   * @param onInputElementEventReceived Callback that's executed when `Input` element receives one of following events:
-   *                                    `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
-   * @param textareaModifiers           Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
-   *                                    as they are used internally to sync property value with element value.
+   * @param value               Property to bind.
+   * @param debounce            Property update timeout after input changes.
+   * @param onInputElementEvent Callback that's executed when `Input` element receives one of following events:
+   *                            `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
+   *                            Can be used to mimic unidirectional data flow for components based on this `TextArea`.
+   * @param textareaModifiers   Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
+   *                            as they are used internally to sync property value with element value.
    * @return HTML textarea with bound Property, applied modifiers and nested options.
    */
   def apply(
     value: Property[String] = Property(""),
     debounce: Duration = 20 millis,
-    onInputElementEventReceived: String => Unit = _ => ()
+    onInputElementEvent: String => Unit = _ => (),
   )(
     textareaModifiers: Modifier*
   ): InputBinding[TextArea] =
     new InputBinding[TextArea] {
       private val element = textarea(
-        textareaModifiers, nestedInterceptor(new TextAreaModifier(value, debounce, onInputElementEventReceived))
+        textareaModifiers, nestedInterceptor(new TextAreaModifier(value, debounce, onInputElementEvent))
       ).render
 
       override def render: TextArea = element
     }
 
-  private class TextAreaModifier(property: Property[String], debounce: Duration, onPropertyUpdated: String => Unit = _ => ())
-    extends TextInputsModifier(property, debounce, onPropertyUpdated) {
+  private class TextAreaModifier(property: Property[String], debounce: Duration, onInputElementEvent: String => Unit = _ => ())
+    extends TextInputsModifier(property, debounce, onInputElementEvent) {
 
     override def elementValue(t: Element): String =
       t.asInstanceOf[TextArea].value

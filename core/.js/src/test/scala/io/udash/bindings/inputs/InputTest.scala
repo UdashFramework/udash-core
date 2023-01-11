@@ -2,12 +2,43 @@ package io.udash.bindings.inputs
 
 import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
-import org.scalajs.dom.{Event, InputEvent, InputEventInit}
+import org.scalajs.dom.{ClipboardEvent, Event, KeyboardEvent, html}
 
 import scala.concurrent.duration.DurationLong
 
 class InputTest extends AsyncUdashFrontendTest {
+
+  private implicit class InputElementTestOps(input: html.Input) {
+    def changeValue(value: String): Unit = {
+      input.value = value
+      input.onchange(new Event("change"))
+
+    }
+  }
+
   "Input" should {
+    "update state on KeyUp, Change, Paste and Input events" in {
+      val p = Property[String]("")
+      val input = TextInput(p, 0 millis)()
+      val inputEl = input.render
+
+      inputEl.value = "ABCD"
+      inputEl.onchange(new Event("change"))
+      p.get should be("ABCD")
+
+      inputEl.value = "DCBA"
+      inputEl.onkeyup(new KeyboardEvent("keyup"))
+      p.get should be("DCBA")
+
+      inputEl.value = "ABCD"
+      inputEl.oninput(new Event("input"))
+      p.get should be("ABCD")
+
+      inputEl.value = "DCBA"
+      inputEl.onpaste(new ClipboardEvent("paste"))
+      p.get should be("DCBA")
+    }
+
     "synchronise state with property changes" in {
       val p = Property[String]("ABC")
       val input = TextInput(p, 0 millis)()
@@ -43,33 +74,19 @@ class InputTest extends AsyncUdashFrontendTest {
       val input = TextInput(p, 0 millis)()
       val inputEl = input.render
 
-      inputEl.value = "ABCD"
-      inputEl.onpaste(null)
-      inputEl.value = "12345"
-      inputEl.onpaste(null)
-      inputEl.value = "5432"
-      inputEl.onpaste(null)
-      inputEl.onkeyup(null)
-      inputEl.onchange(null)
-      inputEl.oninput(null)
-      inputEl.value = "ABCD"
-      inputEl.onpaste(null)
-      inputEl.onkeyup(null)
-      inputEl.onchange(null)
-      inputEl.oninput(null)
+      inputEl.changeValue("ABCD")
+      inputEl.changeValue("12345")
+      inputEl.changeValue("54321")
+      inputEl.changeValue("ABCD")
 
       p.get should be("ABCD")
-      inputEl.value = "ABC"
-      inputEl.onchange(null)
+      inputEl.changeValue("ABC")
       p.get should be("ABC")
-      inputEl.value = "AB"
-      inputEl.oninput(null)
+      inputEl.changeValue("AB")
       p.get should be("AB")
-      inputEl.value = "A"
-      inputEl.onkeyup(null)
+      inputEl.changeValue("A")
       p.get should be("A")
-      inputEl.value = "123qweasd"
-      inputEl.onchange(null)
+      inputEl.changeValue("123qweasd")
       p.get should be("123qweasd")
 
       p.listenersCount() should be(1)
@@ -82,44 +99,31 @@ class InputTest extends AsyncUdashFrontendTest {
       val input = TextInput(p, 0 millis)()
       val inputEl = input.render
 
-      inputEl.value = "ABCD"
-      inputEl.onpaste(null)
-      inputEl.value = "12345"
-      inputEl.onpaste(null)
-      inputEl.value = "5432"
-      inputEl.onpaste(null)
-      inputEl.onkeyup(null)
-      inputEl.onchange(null)
-      inputEl.oninput(null)
-      inputEl.value = "ABCD"
-      inputEl.onpaste(null)
-      inputEl.onkeyup(null)
-      inputEl.onchange(null)
-      inputEl.oninput(null)
+      inputEl.changeValue("ABCD")
+      inputEl.changeValue("12345")
+      inputEl.changeValue("54321")
+      inputEl.changeValue("ABCD")
+
 
       retrying {
         p.get should be("ABCD")
       } flatMap { _ =>
-        inputEl.value = "ABC"
-        inputEl.onchange(null)
+        inputEl.changeValue("ABC")
         retrying {
           p.get should be("ABC")
         }
       } flatMap { _ =>
-        inputEl.value = "AB"
-        inputEl.oninput(null)
+        inputEl.changeValue("AB")
         retrying {
           p.get should be("AB")
         }
       } flatMap { _ =>
-        inputEl.value = "A"
-        inputEl.onkeyup(null)
+        inputEl.changeValue("A")
         retrying {
           p.get should be("A")
         }
       } flatMap { _ =>
-        inputEl.value = "123qweasd"
-        inputEl.onchange(null)
+        inputEl.changeValue("123qweasd")
         retrying {
           p.get should be("123qweasd")
         }
@@ -145,13 +149,11 @@ class InputTest extends AsyncUdashFrontendTest {
       r.value should be("test")
       r2.value should be("test")
 
-      r.value = "qwe"
-      r.onchange(null)
+      r.changeValue("qwe")
       p.get should be("qwe")
       r2.value should be("qwe")
 
-      r2.value = "asd"
-      r2.onchange(null)
+      r2.changeValue("asd")
       p.get should be("asd")
       r.value should be("asd")
 
@@ -160,8 +162,7 @@ class InputTest extends AsyncUdashFrontendTest {
       input2.kill()
       p.listenersCount() should be(1)
 
-      r.value = "qaz"
-      r.onchange(null)
+      r.changeValue("qaz")
       p.get should be("qaz")
       r2.value should be("asd")
 
@@ -176,30 +177,24 @@ class InputTest extends AsyncUdashFrontendTest {
 
   "run callback on state changes" in {
     val p = Property[String]("ABC")
-    val result = Property("")
-    val input = TextInput(p, 0 millis, result.set(_))()
+    var result = ""
+    val input = TextInput(p, 0 millis, result = _)()
     val inputEl = input.render
 
-    inputEl.value = "ABCD"
-    inputEl.onchange(new Event("change"))
-    result.get should be("ABCD")
+    inputEl.changeValue("ABCD")
+    result should be("ABCD")
 
-    inputEl.value = "ABC"
-    inputEl.onchange(new Event("change"))
+    inputEl.changeValue("ABC")
+    result should be("ABC")
 
-    result.get should be("ABC")
+    inputEl.changeValue("AB")
+    result should be("AB")
 
-    inputEl.value = "AB"
-    inputEl.onchange(new Event("change"))
-    result.get should be("AB")
+    inputEl.changeValue("A")
+    result should be("A")
 
-    inputEl.value = "A"
-    inputEl.onchange(new Event("change"))
-    result.get should be("A")
-
-    inputEl.value = "123qweasd"
-    inputEl.onchange(new Event("change"))
-    result.get should be("123qweasd")
+    inputEl.changeValue("123qweasd")
+    result should be("123qweasd")
 
     p.listenersCount() should be(1)
     input.kill()
@@ -208,41 +203,33 @@ class InputTest extends AsyncUdashFrontendTest {
 
   "run callback on state changes with debouncing" in {
     val p = Property[String]("ABC")
-    val result = Property[String]("")
-    val input = TextInput(p, 20 millis, value => {
-      result.set(value)
-    })()
+    var result = ""
+    val input = TextInput(p, 20 millis, result = _)()
     val inputEl = input.render
 
-
-    inputEl.onchange(new Event("change"))
-    inputEl.value = "ABCD"
+    inputEl.changeValue("ABCD")
 
     retrying {
-      result.get should be("ABCD")
+      result should be("ABCD")
     } flatMap { _ =>
-      inputEl.value = "ABC"
-      inputEl.onchange(new Event("change"))
+      inputEl.changeValue("ABC")
       retrying {
-        result.get should be("ABC")
+        result should be("ABC")
       }
     } flatMap { _ =>
-      inputEl.value = "AB"
-      inputEl.onchange(new Event("change"))
+      inputEl.changeValue("AB")
       retrying {
-        result.get should be("AB")
+        result should be("AB")
       }
     } flatMap { _ =>
-      inputEl.value = "A"
-      inputEl.onchange(new Event("change"))
+      inputEl.changeValue("A")
       retrying {
-        result.get should be("A")
+        result should be("A")
       }
     } flatMap { _ =>
-      inputEl.value = "123qweasd"
-      inputEl.onchange(new Event("change"))
+      inputEl.changeValue("123qweasd")
       retrying {
-        result.get should be("123qweasd")
+        result should be("123qweasd")
       }
     }
   }
