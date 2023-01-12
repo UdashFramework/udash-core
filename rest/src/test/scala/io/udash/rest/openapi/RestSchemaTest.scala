@@ -139,4 +139,21 @@ class RestSchemaTest extends AnyFunSuite {
         |  "additionalProperties": false
         |}""".stripMargin)
   }
+
+  test("nullable enum") {
+    assert(schemaStr[Opt[KeyEnum]] ==
+      """{
+        |  "type": "string",
+        |  "nullable": true,
+        |  "enum": [
+        |    null,
+        |    "First",
+        |    "Second",
+        |    "Third",
+        |    "Fourth"
+        |  ]
+        |}""".stripMargin)
+
+    assert(schemaStr[Opt[Opt[KeyEnum]]] == schemaStr[Opt[KeyEnum]])
+  }
 }

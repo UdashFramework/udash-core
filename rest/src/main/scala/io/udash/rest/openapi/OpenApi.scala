@@ -298,8 +298,15 @@ object Schema extends HasGenObjectCodec[Schema] {
       additionalProperties = AdditionalProperties.Flag(false)
     )
 
-  def nullable(schema: RefOr[Schema]): Schema =
-    schema.rewrapRefToAllOf.copy(nullable = true)
+  def nullable(schema: RefOr[Schema]): Schema = schema match {
+    case RefOr.Value(schema) =>
+      val e = schema.`enum`
+      val newEnum = if (e.isEmpty || e.contains(JsonValue.Null)) e else JsonValue.Null :: e
+      schema.copy(nullable = true, `enum` = newEnum)
+
+    case ref =>
+      Schema(allOf = List(ref), nullable = true)
+  }
 
   implicit class RefOrOps(private val refOrSchema: RefOr[Schema]) extends AnyVal {
     /**
