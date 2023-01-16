@@ -4,6 +4,8 @@ import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
 import org.scalajs.dom.html.TextArea
 import org.scalajs.dom.{ClipboardEvent, Event, KeyboardEvent, html}
+import org.scalatest.exceptions.TestFailedException
+import scalatags.JsDom.all._
 
 import scala.concurrent.duration.DurationInt
 
@@ -18,6 +20,39 @@ class TextAreaTest extends AsyncUdashFrontendTest {
   }
 
   "TextArea" should {
+
+    "should ignore Attributes: `tpe`, `value`, `onkeyup`, `onchange`, `onpaste`, `oninput` from inputModifiers" in {
+      val p = Property[String]("")
+
+      val input = TextInput(p, 0 millis)(inputModifiers = Seq[Modifier](
+        tpe :+= null,
+        scalatags.JsDom.all.value :+= null,
+        onkeyup :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+        onchange :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+        onpaste :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+        oninput :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+        attr("sth") := "sth2"
+      ))
+
+      val inputEl = input.render
+      inputEl.value = "ABCD"
+      inputEl.onchange(new Event("change"))
+      p.get should be("ABCD")
+
+      inputEl.value = "DCBA"
+      inputEl.onkeyup(new KeyboardEvent("keyup"))
+      p.get should be("DCBA")
+
+      inputEl.value = "ABCD"
+      inputEl.oninput(new Event("input"))
+      p.get should be("ABCD")
+
+      inputEl.value = "DCBA"
+      inputEl.onpaste(new ClipboardEvent("paste"))
+      p.get should be("DCBA")
+
+      inputEl.getAttribute("sth") should be("sth2")
+    }
 
     "update state on KeyUp, Change, Paste and Input events" in {
       val p = Property[String]("ABC")
@@ -221,6 +256,22 @@ class TextAreaTest extends AsyncUdashFrontendTest {
           result should be("123qweasd")
         }
       }
+    }
+
+    "not run callback when value is the same with debouncing" in {
+      val p = Property[String]("ABC")
+      var called = false
+      val input = TextArea(p, 1 seconds, _ => called = true)()
+      val inputEl = input.render
+
+      called should be(false)
+
+      inputEl.changeValue("CBA")
+      inputEl.changeValue("ABC")
+
+      waiting({
+        called should be(false)
+      }, 2.seconds)
     }
   }
 }

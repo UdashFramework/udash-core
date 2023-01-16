@@ -14,9 +14,9 @@ object TextArea {
    * @param debounce            Property update timeout after input changes.
    * @param onInputElementEvent Callback that's executed when `Input` element receives one of following events:
    *                            `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
-   *                            Can be used to mimic unidirectional data flow for components based on this `TextArea`.
-   * @param textareaModifiers   Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
-   *                            as they are used internally to sync property value with element value.
+   *                            Can Can be used to build unidirectional data flow component on top of `TextArea` component.
+   * @param textareaModifiers   Additional modifiers. Attributes: `tpe`, `value`, `onkeyup`, `onchange`, `onpaste`, `oninput`
+   *                            are ignored as they are overwritten internally.
    * @return HTML textarea with bound Property, applied modifiers and nested options.
    */
   def apply(

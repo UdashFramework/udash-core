@@ -14,9 +14,9 @@ private[bindings] abstract class Input(inputType: String) {
    * @param debounce            Property update timeout after input changes.
    * @param onInputElementEvent Callback that's executed when `Input` element receives one of following events:
    *                            `Input`, `Change`, `KeyUp`, `Paste` and element value is different than property value.
-   *                            Can be used to mimic unidirectional data flow for components based on this `Input`.
-   * @param inputModifiers      Additional modifiers. Don't use modifiers on value, onchange and onkeyup attributes
-   *                            as they are used internally to sync property value with element value.
+   *                            Can be used to build unidirectional data flow component on top of `Input` component.
+   * @param inputModifiers      Additional modifiers. Attributes: `tpe`, `value`, `onkeyup`, `onchange`, `onpaste`, `oninput`
+   *                            are ignored as they are overwritten internally.
    * @return HTML input with bound Property, applied modifiers and nested options.
    */
   def apply(
