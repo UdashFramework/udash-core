@@ -280,8 +280,8 @@ class InputTest extends AsyncUdashFrontendTest {
     inputEl.changeValue("CBA")
     inputEl.changeValue("ABC")
 
-    waiting({
+    waiting {
       called should be(false)
-    }, 2.seconds)
+    }(2.seconds)
   }
 }

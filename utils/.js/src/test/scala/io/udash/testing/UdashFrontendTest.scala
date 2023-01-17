@@ -33,7 +33,7 @@ trait FrontendTestUtils {
 trait UdashFrontendTest extends UdashSharedTest with FrontendTestUtils
 
 trait AsyncUdashFrontendTest extends AsyncUdashSharedTest with FrontendTestUtils {
-  def waiting(code: => Any, duration: FiniteDuration)(implicit pos: Position): Future[Assertion] = {
+  def waiting(code: => Any)(duration: FiniteDuration)(implicit pos: Position): Future[Assertion] = {
     val p = Promise[Assertion]()
     dom.window.setTimeout(() => {
       try {
