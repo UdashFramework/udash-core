@@ -2,11 +2,15 @@ package io.udash.bindings.inputs
 
 import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
+import org.scalactic.source.Position
 import org.scalajs.dom.{ClipboardEvent, Event, KeyboardEvent, html}
+import org.scalatest.Assertion
 import org.scalatest.exceptions.TestFailedException
+import org.scalatest.time.{Millis, Span}
 import scalatags.JsDom.all._
 
 import scala.concurrent.duration.DurationLong
+import scala.util.{Failure, Success}
 
 class InputTest extends AsyncUdashFrontendTest {
 
@@ -271,17 +275,24 @@ class InputTest extends AsyncUdashFrontendTest {
 
   "not run callback when value is the same with debouncing" in {
     val p = Property[String]("ABC")
-    var called = false
-    val input = TextInput(p, 1 seconds, _ => called = true)()
+    var callbackValues = Seq.empty[String]
+    val input = TextInput(p, 1 seconds, newValue => callbackValues :+= newValue)()
     val inputEl = input.render
 
-    called should be(false)
+    callbackValues should be(empty)
 
     inputEl.changeValue("CBA")
     inputEl.changeValue("ABC")
 
-    waiting {
-      called should be(false)
-    }(2.seconds)
+    retrying(
+      callbackValues.shouldNot(be(empty))
+    )(PatienceConfig(scaled(Span(1000, Millis)), scaled(Span(500, Millis))), Position.here).transform {
+      case Failure(_: RetryingTimeout | _: TestFailedException) => Success(succeed)
+      case fail: Failure[Assertion] => fail
+      case Success(_) => Failure(fail(s"Callback shouldn't be executed with this debounce setup but it was executed ${callbackValues.length}" +
+        s" times with following values: ${callbackValues.mkString(",")}"
+      ))
+    }
+
   }
 }
