@@ -286,7 +286,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     retrying(
       callbackValues.shouldNot(be(empty))
-    )(PatienceConfig(scaled(Span(1000, Millis)), scaled(Span(500, Millis))), Position.here).transform {
+    )(PatienceConfig(scaled(Span(2000, Millis)), scaled(Span(500, Millis))), Position.here).transform {
       case Failure(_: RetryingTimeout | _: TestFailedException) => Success(succeed)
       case fail: Failure[Assertion] => fail
       case Success(_) => Failure(fail(s"Callback shouldn't be executed with this debounce setup but it was executed ${callbackValues.length}" +
