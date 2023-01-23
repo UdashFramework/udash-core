@@ -43,7 +43,7 @@ object Dependencies {
   val momentJsVersion = "2.29.4"
 
   val seleniumVersion = "4.7.2"
-  val webDriverManagerVersion = "5.3.1"
+  val webDriverManagerVersion = "5.3.2"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
