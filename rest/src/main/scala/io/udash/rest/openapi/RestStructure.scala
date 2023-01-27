@@ -67,23 +67,43 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @checked @infer restSchema: RestSchema[T],
     @composite info: GenCaseInfo[T]
   ) extends Case[T] {
+
     def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
       caseFieldName.fold(restSchema) { cfn =>
         val caseFieldSchema = RefOr(Schema.enumOf(List(info.rawName)))
-        val taggedName =
-          if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}"
-          else info.rawName
-        restSchema.map({
-          case RefOr.Value(caseSchema) => caseSchema.copy(
-            properties = caseSchema.properties + (cfn -> caseFieldSchema),
-            required = cfn :: caseSchema.required
-          )
-          case ref => Schema(allOf = List(RefOr(Schema(
-            `type` = DataType.Object,
-            properties = IListMap(cfn -> caseFieldSchema),
-            required = List(cfn)
-          )), ref))
-        }, taggedName)
+
+        def schemaWithDiscriminatorField: RestSchema[T] = {
+          val taggedName = if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}" else info.rawName
+          restSchema.map({
+            case RefOr.Value(caseSchema) => caseSchema.copy(
+              properties = caseSchema.properties + (cfn -> caseFieldSchema),
+              required = cfn :: caseSchema.required
+            )
+            case ref => Schema(allOf = List(RefOr(Schema(
+              `type` = DataType.Object,
+              properties = IListMap(cfn -> caseFieldSchema),
+              required = List(cfn)
+            )), ref))
+          }, taggedName)
+        }
+
+        restSchema.createSchema(ShallowInliningResolver) match {
+          case RefOr.Value(caseSchema) =>
+            caseSchema.properties.getOpt(cfn) match {
+              case Opt(existingDiscriminator) =>
+                if (existingDiscriminator != caseFieldSchema) {
+                  throw new IllegalArgumentException(
+                    s"Cannot materialize schema for ${info.sourceName}, discriminator field conflict"
+                  )
+                }
+                // When provided `restSchema` already contains right discriminator field just return it unchanged
+                restSchema
+              case Opt.Empty =>
+                schemaWithDiscriminatorField
+            }
+          case _ =>
+            schemaWithDiscriminatorField
+        }
       }
   }
 
