@@ -19,6 +19,12 @@ sealed trait RestStructure[T] extends TypedMetadata[T] {
     schemaAdjusters.foldRight(schema)(_ adjustSchema _)
 }
 object RestStructure extends AdtMetadataCompanion[RestStructure] {
+
+  private object ShallowInliningResolver extends SchemaResolver {
+    def resolve(schema: RestSchema[_]): RefOr[Schema] =
+      schema.name.fold(schema.createSchema(this))(RefOr.ref)
+  }
+
   @positioned(positioned.here) final case class Union[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtCaseMetadata @multi cases: List[Case[_]],
@@ -96,7 +102,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
                     s"Cannot materialize schema for ${info.sourceName}, discriminator field conflict"
                   )
                 }
-                // When provided `restSchema` already contains right discriminator field just return it unchanged
+                // When provided `restSchema` already contains the expected discriminator field just return it unchanged
                 restSchema
               case Opt.Empty =>
                 schemaWithDiscriminatorField

@@ -332,11 +332,6 @@ object InliningResolver {
     new InliningResolver().resolve(schema)
 }
 
-object ShallowInliningResolver extends SchemaResolver {
-  def resolve(schema: RestSchema[_]): RefOr[Schema] =
-    schema.name.fold(schema.createSchema(this))(RefOr.ref)
-}
-
 /**
  * An implementation of [[SchemaResolver]] which registers named [[RestSchema]]s and replaces them with a
  * [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#referenceObject Reference Object]].
