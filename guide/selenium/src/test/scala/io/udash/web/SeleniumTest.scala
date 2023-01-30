@@ -51,7 +51,7 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
   private val driverManager = WebDriverManager.firefoxdriver()
   driverManager.config().setServerPort(0)
   driverManager.setup()
-  protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
+  protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().addArguments("-headless"))
   driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200))
   driver.manage().window().setSize(new Dimension(1440, 800))
 
