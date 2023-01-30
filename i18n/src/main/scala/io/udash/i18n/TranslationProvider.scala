@@ -6,6 +6,7 @@ import scala.util.Try
 import scala.util.matching.Regex
 
 trait TranslationProvider {
+
   import TranslationProvider._
 
   /** Basing on provided translation key, arguments and language it should created `Future` containing translated text. */
@@ -14,26 +15,30 @@ trait TranslationProvider {
   protected def handleMixedPlaceholders(template: String): Unit
 
   protected def putArgs(template: String, argv: Any*): Translated = {
-    val args = argv.map(_.toString).map(Regex.quoteReplacement).lift
+    val result =
+      if (template == null) ""
+      else {
+        val args = argv.map(_.toString).map(Regex.quoteReplacement).lift
 
-    var prevN = -1
-    var indexed = false
-    var unindexed = false
-    val result = argRegex.replaceSomeIn(template, m => {
-      val n = Try {
-        val i = m.group(1).toInt
-        indexed = true
-        i
-      } getOrElse {
-        unindexed = true
-        prevN + 1
+        var prevN = -1
+        var indexed = false
+        var unindexed = false
+        argRegex.replaceSomeIn(template, m => {
+          val n = Try {
+            val i = m.group(1).toInt
+            indexed = true
+            i
+          }.getOrElse {
+            unindexed = true
+            prevN + 1
+          }
+
+          if (indexed && unindexed) handleMixedPlaceholders(template)
+
+          prevN = n
+          args(n)
+        })
       }
-
-      if (indexed && unindexed) handleMixedPlaceholders(template)
-
-      prevN = n
-      args(n)
-    })
     Translated(result)
   }
 }
