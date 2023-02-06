@@ -3,6 +3,7 @@ import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import sbtcrossproject.CrossProject
 
 name := "udash"
 
@@ -141,6 +142,16 @@ def jvmProject(proj: Project): Project =
     sourceDirsSettings(_ / ".jvm"),
   )
 
+
+def sharedProject(cross: CrossProject.Builder): CrossProject = {
+  cross
+    .crossType(CrossType.Pure)
+    .withoutSuffixFor(JVMPlatform)
+    .settings(commonSettings)
+    .jsSettings(commonJsSettings)
+    .platformsEnablePlugins(JSPlatform)(JSDependenciesPlugin)
+}
+
 def jsProject(proj: Project): Project =
   proj.in(proj.base / ".js")
     .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
@@ -248,13 +259,13 @@ lazy val udash = project.in(file("."))
   )
 
 //for simplifying Travis build matrix and project dependencies
-lazy val jvmLibraries = Seq[ProjectReference](macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+lazy val jvmLibraries = Seq[ProjectReference](macros, utils.jvm, core, rpc, rest, `rest-jetty`, i18n, auth, css)
 lazy val `udash-jvm` = project.in(file(".jvm"))
   .aggregate(jvmLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val jsLibraries = Seq[ProjectReference](
-  macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4
+  macros, utils.js, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4
 )
 lazy val `udash-js` = project.in(file(".js"))
   .aggregate(jsLibraries: _*)
@@ -266,52 +277,46 @@ lazy val macros = project
     libraryDependencies ++= Dependencies.macroDeps.value,
   )
 
-lazy val utils = jvmProject(project)
-  .dependsOn(macros)
-  .settings(
-    libraryDependencies ++= Dependencies.utilsJvmDeps.value,
-  )
-
-lazy val `utils-js` = jsProjectFor(project, utils)
-  .dependsOn(macros)
-  .settings(
-    libraryDependencies ++= Dependencies.utilsSjsDeps.value,
-  )
+lazy val utils = sharedProject(crossProject(JVMPlatform, JSPlatform))
+  .configure(_.dependsOn(macros))
+  .settings(libraryDependencies ++= Dependencies.utilsCrossDeps.value)
+  .jvmSettings(libraryDependencies ++= Dependencies.utilsJvmDeps.value)
+  .jsSettings(libraryDependencies ++= Dependencies.utilsSjsDeps.value)
 
 lazy val core = jvmProject(project)
-  .dependsOn(utils % CompileAndTest)
+  .dependsOn(utils.jvm % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.coreJvmDeps.value,
   )
 
 lazy val `core-js` = jsProjectFor(project, core)
-  .dependsOn(`utils-js` % CompileAndTest)
+  .dependsOn(utils.js % CompileAndTest)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.coreSjsDeps.value,
   )
 
 lazy val rpc = jvmProject(project)
-  .dependsOn(utils % CompileAndTest)
+  .dependsOn(utils.jvm % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcJvmDeps.value,
   )
 
 lazy val `rpc-js` = jsProjectFor(project, rpc)
-  .dependsOn(`utils-js` % CompileAndTest)
+  .dependsOn(utils.js % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.rpcSjsDeps.value,
     jsDependencies ++= Dependencies.rpcJsDeps.value,
   )
 
 lazy val rest = jvmProject(project)
-  .dependsOn(utils % CompileAndTest)
+  .dependsOn(utils.jvm % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restJvmDeps.value,
   )
 
 lazy val `rest-js` = jsProjectFor(project, rest)
-  .dependsOn(`utils-js` % CompileAndTest)
+  .dependsOn(utils.js % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restSjsDeps.value,
   )

@@ -59,7 +59,6 @@ object Dependencies {
   ).map(_ % Test))
 
   val macroDeps = Def.setting(Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.avsystem.commons" %% "commons-macros" % avsCommonsVersion,
   ))
 
@@ -67,11 +66,11 @@ object Dependencies {
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
   ))
 
-  val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
-    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
+  val utilsJvmDeps = Def.setting(Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
   ))
 
-  val utilsSjsDeps = Def.setting(utilsCrossDeps.value ++ Seq(
+  val utilsSjsDeps = Def.setting(Seq(
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
