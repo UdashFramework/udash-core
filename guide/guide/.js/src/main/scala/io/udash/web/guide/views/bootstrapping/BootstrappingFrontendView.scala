@@ -15,6 +15,7 @@ import scalatags.JsDom.Modifier
 case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
 class BootstrappingFrontendView extends View with CssView {
+
   import com.avsystem.commons.SharedExtensions.universalOps
 
   private val statesSource = {
@@ -259,26 +260,14 @@ class BootstrappingFrontendView extends View with CssView {
           |  )
           |}""".stripMargin
       )(GuideStyles),
-      p("ScalaJS needs the main function that will initialize the whole application. For example: "),
+      p("Scala.js needs the main function that will initialize the whole application. For example: "),
       CodeBlock(
-        """import io.udash.wrappers.jquery._
-          |import io.udash.logging.CrossLogging
-          |import org.scalajs.dom.Element
-          |
-          |import scala.scalajs.js.annotation.JSExport
+        """import scala.scalajs.js.annotation.JSExport
           |
           |object JSLauncher extends CrossLogging {
           |  @JSExport
           |  def main(args: Array[String]): Unit = {
-          |    jQ((jThis: Element) => {
-          |      // Select #application element from index.html as root of whole app
-          |      val appRoot = jQ("#application").get(0)
-          |      if (appRoot.isEmpty) {
-          |        logger.error("Application root element not found! Check your index.html file!")
-          |      } else {
-          |        Context.applicationInstance.run(appRoot.get)
-          |      }
-          |    })
+          |    Context.applicationInstance.run("#application")
           |  }
           |}""".stripMargin
       )(GuideStyles),

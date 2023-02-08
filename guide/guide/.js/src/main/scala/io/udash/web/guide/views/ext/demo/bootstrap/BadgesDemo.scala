@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -20,8 +21,10 @@ object BadgesDemo extends AutoDemo with CssView {
 
     div(
       UdashButton(
-        buttonStyle = Color.Primary.toProperty,
-        size = Some(Size.Large).toProperty
+        options = UdashButtonOptions(
+          color = Color.Primary.opt,
+          size = Size.Large.opt
+        )
       )(_ => Seq[Modifier](
         "Button ",
         UdashBadge()(nested => nested(bind(counter))

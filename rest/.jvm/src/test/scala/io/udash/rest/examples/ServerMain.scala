@@ -2,6 +2,7 @@ package io.udash
 package rest.examples
 
 import io.udash.rest.RestServlet
+import monix.execution.Scheduler
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 
@@ -16,6 +17,10 @@ class UserApiImpl extends UserApi {
 
 object ServerMain {
   def main(args: Array[String]): Unit = {
+    // Scheduler.global is usually not the best choice
+    // use whatever Scheduler is appropriate in your application, e.g. freshly created Scheduler.computation()
+    implicit val scheduler: Scheduler = Scheduler.global
+
     val server = new Server(9090)
     val handler = new ServletContextHandler
     handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/*")

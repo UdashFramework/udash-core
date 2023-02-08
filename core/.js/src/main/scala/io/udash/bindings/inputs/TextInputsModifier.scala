@@ -7,13 +7,22 @@ import org.scalajs.dom._
 import scala.concurrent.duration.Duration
 
 /** Template of binding for text inputs. */
-private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Option[Duration]) extends Binding {
+
+private[bindings] abstract class TextInputsModifier(property: Property[String], debounce: Duration, onInputElementEvent: String => Unit) extends Binding {
   def elementValue(t: Element): String
   def setElementValue(t: Element, v: String): Unit
   def setElementKeyUp(t: Element, callback: KeyboardEvent => Unit): Unit
   def setElementOnChange(t: Element, callback: Event => Unit): Unit
   def setElementOnInput(t: Element, callback: Event => Unit): Unit
   def setElementOnPaste(t: Element, callback: Event => Unit): Unit
+
+  private def updatePropertyValueForElement(element: Element): Unit = {
+    val value = elementValue(element)
+    if (property.get != value) {
+      property.set(value)
+      onInputElementEvent(value)
+    }
+  }
 
   override def applyTo(t: Element): Unit = {
     if (property.get != null) setElementValue(t, property.get)
@@ -23,18 +32,16 @@ private[bindings] abstract class TextInputsModifier(property: Property[String], 
     }
 
     var propertyUpdateHandler: Int = 0
-    val callback = if (debounce.nonEmpty && debounce.get.toMillis > 0) {
+    val callback = if (debounce.toMillis > 0) {
       _: Event => {
         if (propertyUpdateHandler != 0) window.clearTimeout(propertyUpdateHandler)
         propertyUpdateHandler = window.setTimeout(() => {
-          val value: String = elementValue(t)
-          if (property.get != value) property.set(value)
-        }, debounce.get.toMillis.toDouble)
+          updatePropertyValueForElement(t)
+        }, debounce.toMillis.toDouble)
       }
     } else {
       _: Event => {
-        val value: String = elementValue(t)
-        if (property.get != value) property.set(value)
+        updatePropertyValueForElement(t)
       }
     }
     setElementKeyUp(t, callback)

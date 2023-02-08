@@ -6,7 +6,7 @@ import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.styles.utils.StyleConstants
 import io.udash.web.homepage.Context._
-import io.udash.web.homepage.IndexState
+import io.udash.web.homepage.{HelloState, IndexState}
 import io.udash.web.homepage.styles.partials.HomepageStyles
 import io.udash.wrappers.jquery._
 import org.scalajs.dom.Element
@@ -26,7 +26,7 @@ class ErrorView extends View with CssView {
             "The link doesn't work. Or maybe it never did? You can still ",
             a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
           ), br(),
-          span("... or go "), a(GlobalStyles.red, href := IndexState(None).url)("home"), span(".")
+          span("... or go "), a(GlobalStyles.red, href := HelloState.url)("home"), span(".")
         )
       )
     )

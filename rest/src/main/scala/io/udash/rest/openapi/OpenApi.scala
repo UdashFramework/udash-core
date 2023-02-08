@@ -82,7 +82,7 @@ object Server extends HasGenObjectCodec[Server]
   */
 final case class ServerVariable(
   default: String,
-  @td enum: List[String] = Nil,
+  @td `enum`: List[String] = Nil,
   @td description: OptArg[String] = OptArg.Empty
 )
 object ServerVariable extends HasGenObjectCodec[ServerVariable]
@@ -258,7 +258,7 @@ final case class Schema(
   @td not: OptArg[RefOr[Schema]] = OptArg.Empty,
   @td discriminator: OptArg[Discriminator] = OptArg.Empty,
 
-  @td enum: List[JsonValue] = Nil,
+  @td `enum`: List[JsonValue] = Nil,
   @td default: OptArg[JsonValue] = OptArg.Empty,
   @td example: OptArg[JsonValue] = OptArg.Empty
 )
@@ -298,8 +298,15 @@ object Schema extends HasGenObjectCodec[Schema] {
       additionalProperties = AdditionalProperties.Flag(false)
     )
 
-  def nullable(schema: RefOr[Schema]): Schema =
-    schema.rewrapRefToAllOf.copy(nullable = true)
+  def nullable(schema: RefOr[Schema]): Schema = schema match {
+    case RefOr.Value(schema) =>
+      val e = schema.`enum`
+      val newEnum = if (e.isEmpty || e.contains(JsonValue.Null)) e else JsonValue.Null :: e
+      schema.copy(nullable = true, `enum` = newEnum)
+
+    case ref =>
+      Schema(allOf = List(ref), nullable = true)
+  }
 
   implicit class RefOrOps(private val refOrSchema: RefOr[Schema]) extends AnyVal {
     /**

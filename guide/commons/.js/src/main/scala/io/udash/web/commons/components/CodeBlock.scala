@@ -19,7 +19,7 @@ object CodeBlock {
 
   @js.native
   @JSGlobal("Prism")
-  private object Prism extends js.Object {
+  object Prism extends js.Object {
     //https://prismjs.com/extending.html#api
     def highlightAllUnder(element: Element): Unit = js.native
   }

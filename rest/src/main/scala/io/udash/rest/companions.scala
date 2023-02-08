@@ -4,8 +4,9 @@ package rest
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.meta.MacroInstances.materializeWith
 import io.udash.rest.openapi.OpenApiMetadata
-import io.udash.rest.raw.RawRest.AsyncEffect
+import io.udash.rest.raw.RawRest.FromTask
 import io.udash.rest.raw.{RawRest, RestMetadata}
+import monix.eval.TaskLike
 
 trait ClientInstances[Real] {
   def asReal: RawRest.AsRealRpc[Real]
@@ -70,12 +71,12 @@ abstract class RestServerOpenApiCompanion[Implicits, Real](protected val implici
 }
 
 /**
-  * Base class for REST trait companions. Reduces boilerplate needed in order to define appropriate instances
-  * of `AsRawReal` and `RestMetadata` for given trait. The `Implicits` type parameter lets you inject additional implicits
-  * into macro materialization of these instances, e.g. [[io.udash.rest.DefaultRestImplicits DefaultRestImplicits]].
-  * Usually, for even less boilerplate, this base class is extended by yet another abstract class which fixes
-  * the `Implicits` type, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
-  */
+ * Base class for REST trait companions. Reduces boilerplate needed in order to define appropriate instances
+ * of `AsRawReal` and `RestMetadata` for given trait. The `Implicits` type parameter lets you inject additional implicits
+ * into macro materialization of these instances, e.g. [[io.udash.rest.DefaultRestImplicits DefaultRestImplicits]].
+ * Usually, for even less boilerplate, this base class is extended by yet another abstract class which fixes
+ * the `Implicits` type, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
+ */
 abstract class RestApiCompanion[Implicits, Real](protected val implicits: Implicits)(
   implicit inst: MacroInstances[Implicits, FullInstances[Real]]
 ) {
@@ -105,20 +106,20 @@ abstract class RestOpenApiCompanion[Implicits, Real](protected val implicits: Im
 }
 
 trait PolyRestApiFullInstances[T[_[_]]] {
-  def asRawRest[F[_] : AsyncEffect]: RawRest.AsRawRpc[T[F]]
-  def fromRawRest[F[_] : AsyncEffect]: RawRest.AsRealRpc[T[F]]
-  def restMetadata[F[_] : AsyncEffect]: RestMetadata[T[F]]
-  def openapiMetadata[F[_] : AsyncEffect]: OpenApiMetadata[T[F]]
+  def asRawRest[F[_] : TaskLike]: RawRest.AsRawRpc[T[F]]
+  def fromRawRest[F[_] : FromTask]: RawRest.AsRealRpc[T[F]]
+  def restMetadata[F[_] : TaskLike]: RestMetadata[T[F]]
+  def openapiMetadata[F[_] : TaskLike]: OpenApiMetadata[T[F]]
 }
 
 abstract class DefaultPolyRestApiCompanion[T[_[_]]](implicit
   instances: MacroInstances[GenCodecRestImplicits, PolyRestApiFullInstances[T]]
 ) {
   private lazy val inst = instances(GenCodecRestImplicits, this)
-  implicit def asRawRest[F[_] : AsyncEffect]: RawRest.AsRawRpc[T[F]] = inst.asRawRest
-  implicit def fromRawRest[F[_] : AsyncEffect]: RawRest.AsRealRpc[T[F]] = inst.fromRawRest
-  implicit def restMetadata[F[_] : AsyncEffect]: RestMetadata[T[F]] = inst.restMetadata
-  implicit def openapiMetadata[F[_] : AsyncEffect]: OpenApiMetadata[T[F]] = inst.openapiMetadata
+  implicit def asRawRest[F[_] : TaskLike]: RawRest.AsRawRpc[T[F]] = inst.asRawRest
+  implicit def fromRawRest[F[_] : FromTask]: RawRest.AsRealRpc[T[F]] = inst.fromRawRest
+  implicit def restMetadata[F[_] : TaskLike]: RestMetadata[T[F]] = inst.restMetadata
+  implicit def openapiMetadata[F[_] : TaskLike]: OpenApiMetadata[T[F]] = inst.openapiMetadata
 }
 
 /**

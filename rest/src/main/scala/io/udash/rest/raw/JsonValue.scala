@@ -14,4 +14,6 @@ object JsonValue extends (String => JsonValue) {
     i => JsonValue(i.readCustom(RawJson).getOrElse(i.readSimple().readString())),
     (o, v) => if (!o.writeCustom(RawJson, v.value)) o.writeSimple().writeString(v.value)
   )
+
+  final val Null = JsonValue("null")
 }

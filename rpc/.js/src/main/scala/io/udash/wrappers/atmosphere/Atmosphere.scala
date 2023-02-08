@@ -2,6 +2,7 @@ package io.udash.wrappers.atmosphere
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSGlobal, JSName}
+import scala.scalajs.js.|
 
 object Transport {
   type Transport = String
@@ -120,6 +121,8 @@ trait AtmosphereRequest extends js.Object {
 
   def push(request: AtmosphereRequest): Unit = js.native
   def push(request: String): Unit = js.native
+
+  def getUUID(): String | Int = js.native
 }
 
 @js.native

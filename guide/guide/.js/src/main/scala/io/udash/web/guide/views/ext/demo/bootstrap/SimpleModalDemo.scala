@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -38,17 +39,13 @@ object SimpleModalDemo extends AutoDemo {
           UdashButton()(_ => Seq[Modifier](
             UdashModal.CloseButtonAttr, "Close"
           )).render,
-          UdashButton(
-            Color.Primary.toProperty
-          )("Something...").render
+          UdashButton()("Something...").render
         ).render
       }
     )
     modal.listen { case ev => events.append(ev) }
 
-    val openModalButton = UdashButton(
-      Color.Primary.toProperty
-    )("Show modal...")
+    val openModalButton = UdashButton()("Show modal...")
     openModalButton.listen {
       case UdashButton.ButtonClickEvent(_, _) =>
         modal.show()

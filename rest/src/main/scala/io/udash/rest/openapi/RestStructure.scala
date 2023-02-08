@@ -19,6 +19,12 @@ sealed trait RestStructure[T] extends TypedMetadata[T] {
     schemaAdjusters.foldRight(schema)(_ adjustSchema _)
 }
 object RestStructure extends AdtMetadataCompanion[RestStructure] {
+
+  private object ShallowInliningResolver extends SchemaResolver {
+    def resolve(schema: RestSchema[_]): RefOr[Schema] =
+      schema.name.fold(schema.createSchema(this))(RefOr.ref)
+  }
+
   @positioned(positioned.here) final case class Union[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtCaseMetadata @multi cases: List[Case[_]],
@@ -62,28 +68,56 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
 
   /**
    * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
+   *
+   * For flat sealed hierarchy, if the existing [[RestSchema]] already has expected discriminator field it will be
+   * returned unchanged (in order to preserve original schema name), otherwise new schema instance will be created with
+   * additional single-value enum field.
    */
   @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
     @composite info: GenCaseInfo[T]
   ) extends Case[T] {
+
     def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
       caseFieldName.fold(restSchema) { cfn =>
         val caseFieldSchema = RefOr(Schema.enumOf(List(info.rawName)))
-        val taggedName =
-          if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}"
-          else info.rawName
-        restSchema.map({
-          case RefOr.Value(caseSchema) => caseSchema.copy(
-            properties = caseSchema.properties + (cfn -> caseFieldSchema),
-            required = cfn :: caseSchema.required
-          )
-          case ref => Schema(allOf = List(RefOr(Schema(
-            `type` = DataType.Object,
-            properties = IListMap(cfn -> caseFieldSchema),
-            required = List(cfn)
-          )), ref))
-        }, taggedName)
+
+        // creates new schema with additional discriminator field
+        def schemaWithDiscriminatorField: RestSchema[T] = {
+          val taggedName = if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}" else info.rawName
+          restSchema.map({
+            case RefOr.Value(caseSchema) => caseSchema.copy(
+              properties = caseSchema.properties + (cfn -> caseFieldSchema),
+              required = cfn :: caseSchema.required
+            )
+            case ref => Schema(allOf = List(RefOr(Schema(
+              `type` = DataType.Object,
+              properties = IListMap(cfn -> caseFieldSchema),
+              required = List(cfn)
+            )), ref))
+          }, taggedName)
+        }
+
+        // `restSchema` needs to be resolved in-place to check for discriminator field
+        restSchema.createSchema(ShallowInliningResolver) match {
+          case RefOr.Value(caseSchema) =>
+            // Check if schema contains discriminator field
+            caseSchema.properties.getOpt(cfn) match {
+              case Opt(existingDiscriminator) =>
+                if (existingDiscriminator != caseFieldSchema) {
+                  // If existing field has different schema than expected, report an error
+                  throw new IllegalArgumentException(
+                    s"Cannot materialize schema for ${info.sourceName}, discriminator field conflict"
+                  )
+                }
+                // When provided `restSchema` already contains the expected discriminator field just return it unchanged
+                restSchema
+              case Opt.Empty =>
+                schemaWithDiscriminatorField
+            }
+          case _ =>
+            schemaWithDiscriminatorField
+        }
       }
   }
 

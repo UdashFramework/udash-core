@@ -5,53 +5,57 @@ import sbt.Keys.scalaVersion
 import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.6" //update .github/workflows/ci.yml as well
-  val collectionCompatVersion = "2.5.0"
+  val versionOfScala = "2.13.10" //update .github/workflows/ci.yml as well
 
-  val jqueryWrapperVersion = "3.0.4"
-  val jqueryVersion = "3.3.1"
+  val jqueryWrapperVersion = "3.2.0"
 
-  val scalaJsDomVersion = "1.1.0"
-  val scalaTagsVersion = "0.9.4"
-  val scalaCssVersion = "0.7.0"
+  val scalaJsDomVersion = "2.3.0"
+  val scalaTagsVersion = "0.12.0"
+  val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.2.6"
+  val avsCommonsVersion = "2.8.2"
 
-  val atmosphereJSVersion = "3.0.4"
-  val atmosphereVersion = "2.7.2"
+  val atmosphereJSVersion = "3.1.3"
+  val atmosphereVersion = "2.7.9"
 
-  val upickleVersion = "1.4.0" // Tests only
-  val circeVersion = "0.14.1" // Tests only
+  val upickleVersion = "2.0.0" // Tests only
+  val circeVersion = "0.14.3" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
-  val monixVersion = "3.4.0" // Tests only
+  val monixVersion = "3.4.1" // Tests only
 
-  val sttpVersion = "2.2.9"
+  val sttpVersion = "3.8.10"
 
-  val scalaLoggingVersion = "3.9.4"
+  val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "9.4.43.v20210629"
-  val typesafeConfigVersion = "1.4.1"
-  val flexmarkVersion = "0.62.2"
-  val logbackVersion = "1.2.5"
-  val janinoVersion = "3.1.4"
+  val jettyVersion = "9.4.50.v20221201"
+  val typesafeConfigVersion = "1.4.2"
+  val flexmarkVersion = "0.64.0"
+  val logbackVersion = "1.3.5"
+  val janinoVersion = "3.1.9"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.2.9"
+  val scalatestVersion = "3.2.15"
+  val scalaJsSecureRandomVersion = "1.0.0"
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
-  val momentJsVersion = "2.29.1"
+  val momentJsVersion = "2.29.4"
 
-  val seleniumVersion = "3.141.59"
-  val scalaJsBenchmarkVersion = "0.9.0"
+  val seleniumVersion = "4.8.0"
+  val webDriverManagerVersion = "5.3.2"
+  val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
     "com.avsystem.commons" %% "commons-analyzer" % avsCommonsVersion
   ).map(compilerPlugin))
 
   val commonTestDeps = Def.setting(Seq(
-    "org.scalatest" %%% "scalatest" % scalatestVersion
+    "org.scalatest" %%% "scalatest" % scalatestVersion,
+  ).map(_ % Test))
+
+  val commonJsTestDeps = Def.setting(Seq(
+    "org.scala-js" %%% "scalajs-fake-insecure-java-securerandom" % scalaJsSecureRandomVersion, //ScalaTest uses SecureRandom
   ).map(_ % Test))
 
   val macroDeps = Def.setting(Seq(
@@ -61,7 +65,6 @@ object Dependencies {
 
   val utilsCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "org.scala-lang.modules" %%% "scala-collection-compat" % collectionCompatVersion,
   ))
 
   val utilsJvmDeps = Def.setting(utilsCrossDeps.value ++ Seq(
@@ -100,15 +103,14 @@ object Dependencies {
 
   private val restCrossDeps = Def.setting(Seq(
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
-    "com.softwaremill.sttp.client" %%% "core" % sttpVersion,
-    "io.monix" %%% "monix" % monixVersion % Test,
+    "com.softwaremill.sttp.client3" %%% "monix" % sttpVersion,
+    "io.monix" %%% "monix" % monixVersion,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
     "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
-    "com.softwaremill.sttp.client" %% "async-http-client-backend-future" % sttpVersion,
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
@@ -135,15 +137,12 @@ object Dependencies {
     "io.udash" %%% "udash-jquery" % jqueryWrapperVersion,
   ))
 
-  private val jqueryResource = s"$jqueryVersion/jquery.js"
   private val momentResource = s"$momentJsVersion/moment.js"
   private val bootstrap4Resource = "js/bootstrap.bundle.js"
 
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "jquery" % jqueryVersion / jqueryResource
-      minified s"$jqueryVersion/jquery.min.js",
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
-      minified "js/bootstrap.bundle.min.js" dependsOn jqueryResource,
+      minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
     "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
@@ -169,10 +168,12 @@ object Dependencies {
     "com.typesafe" % "config" % typesafeConfigVersion,
 
     "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion,
-    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion % Test,
   ))
 
-  val seleniumJsDeps = Def.setting(Seq[JSModuleID]())
+  val seleniumDeps: Seq[ModuleID] = Seq(
+    "org.seleniumhq.selenium" % "selenium-java" % seleniumVersion,
+    "io.github.bonigarcia" % "webdrivermanager" % webDriverManagerVersion,
+  ).map(_ % Test)
 
   val guideJsDeps = Def.setting(Seq[JSModuleID](
     ProvidedJS / "prism.js",
@@ -184,6 +185,7 @@ object Dependencies {
 
   val homepageJsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
+    ProvidedJS / "prism.js",
   ))
 
 }

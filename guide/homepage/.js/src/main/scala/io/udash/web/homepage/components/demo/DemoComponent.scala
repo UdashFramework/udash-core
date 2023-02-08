@@ -1,78 +1,44 @@
 package io.udash.web.homepage.components.demo
 
+import com.avsystem.commons.SharedExtensions._
 import io.udash._
+import io.udash.web.commons.components.CodeBlock
+import io.udash.web.commons.components.CodeBlock.Prism
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.views.{Component, Image}
-import io.udash.web.homepage.Context._
-import io.udash.web.homepage.IndexState
-import io.udash.web.homepage.styles.partials.DemoStyles
-import io.udash.wrappers.jquery._
+import io.udash.web.homepage.styles.partials.{DemoStyles, HomepageStyles}
+import io.udash.web.homepage.{IndexState, RoutingState}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
-import scalatags.generic.Attr
 
-/**
-  * Created by malchik on 2016-04-04.
-  */
+final class DemoComponent(implicit application: Application[RoutingState]) extends Component {
 
-class DemoComponent(url: Property[IndexState]) extends Component {
-
-  private val fiddleContainer = div(DemoStyles.demoFiddle).render
-  private val jqFiddleContainer = jQ(fiddleContainer)
-
-  private val template = div(DemoStyles.demoComponent)(
-    Image("laptop.png", "", DemoStyles.laptopImage),
-    div(DemoStyles.demoBody)(
-      ul(DemoStyles.demoTabs)(
-        DemoComponent.demoEntries.map(entry =>
-          li(DemoStyles.demoTabsItem)(
-            a(DemoStyles.demoTabsLink, href := entry.targetState.url)(
-              entry.name
-            )
-          )
-        )
+  private def code(demo: CodeDemo): Element =
+    div(DemoStyles.demoFiddle)(
+      div(DemoStyles.demoCode)(
+        CodeBlock.lines(demo.source.linesIterator.drop(1).map(_.drop(2)).toSeq.dropRight(1).iterator)(HomepageStyles)
       ),
-      fiddleContainer
-    )
-  ).render
-
-  url.listen(onUrlChange, initUpdate = true)
-
-  private def onUrlChange(update: IndexState) = {
-    val entryOption = DemoComponent.demoEntries.find(_.targetState == update)
-    val entry = entryOption.getOrElse(DemoComponent.demoEntries.head)
-    val urlString = s""""${entry.targetState.url}""""
-    val tab = jQ(template).find(s".${DemoStyles.demoTabsLink.className}[href=$urlString]")
-
-    jQ(template).not(tab).find(s".${DemoStyles.demoTabsLink.className}").attr(Attributes.data(Attributes.Active), "false")
-    tab.attr(Attributes.data(Attributes.Active), "true")
-
-    jqFiddleContainer
-      .animate(Map[String, Any]("opacity" -> 0), 150, EasingFunction.swing,
-        (_: Element) => {
-          jqFiddleContainer
-            .html(entry.fiddle)
-            .animate(Map[String, Any]("opacity" -> 1), 200)
-        })
-  }
-
-  override def getTemplate: Modifier = template
-}
-
-object DemoComponent {
-  def fiddle(fiddleId: String): Element =
-    iframe(
-      Attr("frameborder") := "0",
-      style := "width: 100%; height: 100%; overflow: hidden;",
-      src := s"https://embed.scalafiddle.io/embed?sfid=$fiddleId&theme=dark"
+      div(DemoStyles.demoRender)(demo.rendered),
     ).render
 
-  def demoEntries: Seq[DemoEntry] = Seq(
-    DemoEntry("Hello World", IndexState(Option("hello")), fiddle("yJVjCFf/0")),
-    DemoEntry("Properties", IndexState(Option("properties")), fiddle("a10A6UA/0")),
-    DemoEntry("Validation", IndexState(Option("validation")), fiddle("ButwLWQ/0")),
-    DemoEntry("i18n", IndexState(Option("i18n")), fiddle("aczBObA/0")),
-  )
+  override def getTemplate: Modifier =
+    div(DemoStyles.demoComponent)(
+      Image("laptop.png", "", DemoStyles.laptopImage),
+      div(DemoStyles.demoBody)(
+        ul(DemoStyles.demoTabs)(
+          IndexState.values.iterator.map { state =>
+            li(DemoStyles.demoTabsItem)(
+              a(
+                DemoStyles.demoTabsLink,
+                href := state.url,
+                (attr(Attributes.data(Attributes.Active)) := "true").attrIf(application.currentStateProperty.transform(_ == state))
+              )(state.name)
+            )
+          }.toSeq
+        ),
+        produce(application.currentStateProperty) { state =>
+          state.opt.collect { case state: IndexState => code(state.codeDemo).setup(Prism.highlightAllUnder) }.getOrElse[Element](div().render)
+        }
+      )
+    ).render
 }
-
-

@@ -6,7 +6,6 @@ import io.udash.bindings.modifiers._
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
 import org.scalajs.dom._
-import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
@@ -43,7 +42,7 @@ trait Bindings {
   def queuedNode(component: => Seq[Node], timeout: Int = 0): Modifier[Element] = t => {
     val el = document.createElement("div")
     t.appendChild(el)
-    window.setTimeout(() => t.replaceChildren(el, component), timeout)
+    window.setTimeout(() => t.replaceChildren(Seq(el), component), timeout)
   }
 
   /**

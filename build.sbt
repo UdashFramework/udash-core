@@ -38,15 +38,10 @@ val deploymentConfiguration = Seq(
     sys.env.getOrElse("SONATYPE_PASSWORD", "")
   ),
 
+  licenses := Seq(License.Apache2),
+
   pomExtra := {
     <url>https://github.com/UdashFramework/udash-core</url>
-      <licenses>
-        <license>
-          <name>Apache v.2 License</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
       <scm>
         <url>git@github.com:UdashFramework/udash-core.git</url>
         <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
@@ -63,7 +58,7 @@ val deploymentConfiguration = Seq(
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala, "2.12.14"),
+  crossScalaVersions := Seq(Dependencies.versionOfScala),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -79,15 +74,10 @@ val commonSettings = Seq(
     "-Yrangepos",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
-    "-Ycache-macro-class-loader:last-modified"
+    "-Ycache-macro-class-loader:last-modified",
+    "-Xnon-strict-patmat-analysis",
+    "-Xlint:-strict-unsealed-patmat",
   ),
-  Compile / scalacOptions ++= {
-    //https://github.com/scala/bug/issues/12314#issuecomment-762331480
-    if (scalaBinaryVersion.value == "2.13") Seq(
-      "-Xnon-strict-patmat-analysis",
-      "-Xlint:-strict-unsealed-patmat"
-    ) else Seq.empty
-  },
   moduleName := "udash-" + moduleName.value,
   Compile / doc / sources := Seq.empty,
   Compile / ideOutputDirectory := Some(target.value.getParentFile / "out/production"),
@@ -105,6 +95,7 @@ val commonJsSettings = commonSettings ++ Seq(
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
     s"-P:scalajs:mapSourceURI:$localDir->$githubDir/v${version.value}/"
   },
+  libraryDependencies ++= Dependencies.commonJsTestDeps.value,
 )
 
 val testInBrowser = Seq(
@@ -371,6 +362,7 @@ lazy val benchmarks = jsProject(project)
     crossScalaVersions := Seq(Dependencies.versionOfScala),
     libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
     Compile / scalaJSUseMainModuleInitializer := true,
+    evictionErrorLevel := Level.Warn, //todo: remove after upickle 2.0.1+ is available
   )
 
 // Custom SBT tasks
@@ -471,7 +463,8 @@ lazy val `guide-packager` =
 
       dockerExposedPorts += 8080, //should match ui.server.port
       dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
-      dockerBaseImage := "openjdk:11",
+      dockerBaseImage := "eclipse-temurin:11-jdk-jammy",
+      dockerUpdateLatest := true,
     )
 
 lazy val `guide-selenium` =
@@ -481,7 +474,7 @@ lazy val `guide-selenium` =
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
 
-      libraryDependencies ++= Dependencies.backendDeps.value,
+      libraryDependencies ++= Dependencies.seleniumDeps,
 
       Test / parallelExecution := false,
 

@@ -1,8 +1,5 @@
 package io.udash.web.commons.styles.attributes
 
-/**
-  * Created by malchik on 2016-05-19.
-  */
 object Attributes {
   /**
     * States

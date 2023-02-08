@@ -8,7 +8,7 @@ import io.udash.i18n._
 import io.udash.web.commons.views.Component
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, GuideExceptions}
-import org.scalajs.dom.ext.LocalStorage
+import org.scalajs.dom
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
@@ -73,25 +73,22 @@ class ExceptionsDemoComponent extends Component {
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
 
-    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(LocalStorage), 6 hours)
+    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(dom.window.localStorage), 6 hours)
     implicit val lang: Lang = Lang("en")
 
     private val exceptionButtonDisabled = Property(false)
     private val exceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = exceptionButtonDisabled,
       componentId = ComponentId("exception-demo")
     )(_ => "Call registered exception!")
 
     private val translatableExceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = exceptionButtonDisabled,
       componentId = ComponentId("translatable-exception-demo")
     )(_ => "Call registered translatable exception!")
 
     private val unknownExceptionButtonDisabled = Property(false)
     private val unknownExceptionButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = unknownExceptionButtonDisabled,
       componentId = ComponentId("unknown-exception-demo")
     )(_ => "Call unknown exception!")

@@ -5,7 +5,7 @@ env:
 
 on:
   push:
-    branches: '*'
+    branches: '**'
     tags: [ "v[0-9]+*" ]
   pull_request:
     # avoid duplicate checks (push & PR) further in the review process
@@ -18,15 +18,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: [ 2.12.14, 2.13.6 ]
-        command: [ udash-jvm/test, udash-js/test ]
-        include:
-          - scala: 2.13.6
-            command: guide-selenium/test
+        scala: [ 2.13.10 ]
+        command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache sbt
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.sbt
@@ -35,22 +32,21 @@ jobs:
             ~/.cache/coursier
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
           restore-keys: ${{ runner.os }}-sbt-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/setup-java@v3
         with:
+          distribution: temurin
           java-version: 11
       - name: Cache npm
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
-      - name: Set up node
-        uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v3
       - name: Install jsdom
         run: npm install jsdom@15.2.1
       - name: Run tests
-        run: sbt "set concurrentRestrictions in Global += Tags.limit(ScalaJSTags.Link, 1)" ++${{ matrix.scala }} ${{ matrix.command }}
+        run: sbt ++${{ matrix.scala }} ${{ matrix.command }}
 
   publish:
     name: Publish to Sonatype
@@ -59,20 +55,11 @@ jobs:
     needs: [ test ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache sbt
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache
-            ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
-          restore-keys: ${{ runner.os }}-sbt-
+      - uses: actions/checkout@v3
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
+          distribution: temurin
           java-version: 11
       - name: Get version
         id: get_tag_name
@@ -86,11 +73,11 @@ jobs:
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
+        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
       - name: Release Sonatype bundle
         #https://github.com/xerial/sbt-sonatype#publishing-your-artifact
         if: ${{ !endsWith(steps.get_tag_name.outputs.VERSION, 'SNAPSHOT') }}
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set version in ThisBuild := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease
+        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease

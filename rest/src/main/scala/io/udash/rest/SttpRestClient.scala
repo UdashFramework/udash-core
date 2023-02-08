@@ -4,7 +4,8 @@ package rest
 import com.avsystem.commons._
 import com.avsystem.commons.annotation.explicitGenerics
 import io.udash.rest.raw._
-import sttp.client._
+import monix.eval.{Task, TaskLike}
+import sttp.client3._
 import sttp.model.Uri.QuerySegment.KeyValue
 import sttp.model.Uri.{PathSegmentEncoding, QuerySegmentEncoding}
 import sttp.model.{HeaderNames, Method, Uri, Header => SttpHeader}
@@ -14,7 +15,7 @@ import scala.concurrent.Future
 object SttpRestClient {
   final val CookieHeader = "Cookie"
 
-  def defaultBackend(): SttpBackend[Future, Nothing, Nothing] = DefaultSttpBackend()
+  def defaultBackend(): SttpBackend[Future, Any] = DefaultSttpBackend()
 
   final val DefaultRequestOptions = RequestOptions(
     followRedirects = true,
@@ -25,36 +26,53 @@ object SttpRestClient {
 
   /**
    * Creates a client instance of some REST API trait which translates method calls into HTTP requests
-   * to given URI using STTP.
+   * to given URI using an STTP backend.
    */
-  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
+  @explicitGenerics def apply[RestApi: RawRest.AsRealRpc : RestMetadata, F[_] : TaskLike](
     baseUri: String,
-    options: RequestOptions = DefaultRequestOptions
-  )(implicit backend: SttpBackend[Future, Nothing, Nothing]): RestApi =
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[F, Any]): RestApi =
     RawRest.fromHandleRequest[RestApi](asHandleRequest(baseUri, options))
+
+  /**
+   * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+   * to given URI using an STTP Future-based backend.
+   */
+  @explicitGenerics def future[RestApi: RawRest.AsRealRpc : RestMetadata](
+    baseUri: String,
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[Future, Any]): RestApi = apply[RestApi, Future](baseUri, options)
+
+  /**
+   * Creates a client instance of some REST API trait which translates method calls into HTTP requests
+   * to given URI using an STTP Task-based backend.
+   */
+  @explicitGenerics def task[RestApi: RawRest.AsRealRpc : RestMetadata](
+    baseUri: String,
+    options: RequestOptions = DefaultRequestOptions,
+  )(implicit backend: SttpBackend[Task, Any]): RestApi = apply[RestApi, Task](baseUri, options)
 
   /**
    * Creates a [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] function which sends REST requests to
    * a specified base URI using default HTTP client implementation (sttp).
    */
-  def asHandleRequest(baseUri: String, options: RequestOptions = DefaultRequestOptions)(
-    implicit backend: SttpBackend[Future, Nothing, Nothing]
+  def asHandleRequest[F[_] : TaskLike](baseUri: String, options: RequestOptions = DefaultRequestOptions)(
+    implicit backend: SttpBackend[F, Any]
   ): RawRest.HandleRequest =
-    asHandleRequest(uri"$baseUri", options)
+    request => TaskLike[F].apply(toSttpRequest(baseUri, request, options).send(backend)).map(fromSttpResponse)
 
   private def toSttpRequest(
-    baseUri: Uri,
+    baseUri: String,
     request: RestRequest,
     options: RequestOptions
-  ): Request[Array[Byte], Nothing] = {
-    val uri = baseUri |>
-      (u => u.copy(pathSegments = u.pathSegments ++
-        request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard)))) |>
-      (u => u.copy(querySegments = u.querySegments ++
-        request.parameters.query.entries.iterator.map {
-          case (k, PlainValue(v)) => KeyValue(k, v, QuerySegmentEncoding.All, QuerySegmentEncoding.All)
-        }.toList
-      ))
+  ): Request[Array[Byte], Any] = {
+    val querySegments = request.parameters.query.entries.iterator.map {
+      case (k, PlainValue(v)) => KeyValue(k, v, QuerySegmentEncoding.All, QuerySegmentEncoding.All)
+    }
+
+    val uri = querySegments.foldLeft(
+      uri"$baseUri".addPathSegments(request.parameters.path.map(pv => Uri.Segment(pv.value, PathSegmentEncoding.Standard)))
+    )(_.addQuerySegment(_))
 
     val contentHeaders = request.body match {
       case HttpBody.Empty =>
@@ -88,7 +106,7 @@ object SttpRestClient {
   private def fromSttpResponse(sttpResp: Response[Array[Byte]]): RestResponse =
     RestResponse(
       sttpResp.code.code,
-      IMapping(sttpResp.headers.iterator.map { case SttpHeader(n, v) => (n, PlainValue(v)) }.toList),
+      IMapping(sttpResp.headers.map { case SttpHeader(n, v) => (n, PlainValue(v)) }),
       sttpResp.contentType.fold(HttpBody.empty) { contentType =>
         val mediaType = HttpBody.mediaTypeOf(contentType)
         HttpBody.charsetOf(contentType) match {
@@ -102,13 +120,4 @@ object SttpRestClient {
         }
       }
     )
-
-  private def asHandleRequest(baseUri: Uri, options: RequestOptions)(
-    implicit backend: SttpBackend[Future, Nothing, Nothing]
-  ): RawRest.HandleRequest =
-    RawRest.safeHandle(request => {
-      val sttpReq = toSttpRequest(baseUri, request, options)
-      callback =>
-        sttpReq.send().onCompleteNow(respTry => callback(respTry.map(fromSttpResponse)))
-    })
 }

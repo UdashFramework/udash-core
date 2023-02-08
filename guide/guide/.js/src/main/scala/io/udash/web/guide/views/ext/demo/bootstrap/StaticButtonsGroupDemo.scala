@@ -16,7 +16,7 @@ object StaticButtonsGroupDemo extends AutoDemo with CssView {
 
     div(
       UdashButtonGroup(vertical = true.toProperty)(
-        UdashButton(Color.Primary.toProperty)("Button 1").render,
+        UdashButton()("Button 1").render,
         UdashButton()("Button 2").render,
         UdashButton()("Button 3").render
       )

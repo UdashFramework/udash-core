@@ -5,6 +5,7 @@ import io.udash.properties.seq.{Patch, ReadableSeqProperty, SeqProperty}
 import io.udash.properties.single.{Property, ReadableProperty}
 import io.udash.testing.UdashCoreTest
 import io.udash.utils.Registration
+import org.scalactic.source.Position
 
 import scala.util.Random
 
@@ -71,7 +72,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val pt = SeqProperty[T](TO1, TC1(5), TO2)
       val ptt = SeqProperty[TT](randTT(), randTT(), randTT())
 
-      def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt)) = {
+      def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt))(implicit position: Position) = {
         props.foreach(p => {
           p.get.size should be(expectedSize)
           p.get should be(p.elemProperties.map(_.get))
@@ -519,7 +520,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val r1 = f.listen(v => states += v)
       val r2 = f.listenStructure(p => patches += p)
 
-      p.listenersCount() should be(1)
+      p.listenersCount() should be(0)
       p.structureListenersCount() should be(1)
 
       p.append(4)
@@ -689,7 +690,7 @@ class SeqPropertyTest extends UdashCoreTest {
 
       f.get should be(Seq(2, 2, 4, 6))
 
-      p.listenersCount() should be(1)
+      p.listenersCount() should be(0)
       p.structureListenersCount() should be(1)
 
       r1.cancel()
@@ -749,12 +750,9 @@ class SeqPropertyTest extends UdashCoreTest {
 
       val r1 = evens.listenStructure(_ => ())
 
-      doubles.listenersCount() should be(1)
-      ints.listenersCount() should be(1)
-
-      doubles.listenersCount() should be(1)
+      doubles.listenersCount() should be(0)
       doubles.structureListenersCount() should be(1)
-      ints.listenersCount() should be(1)
+      ints.listenersCount() should be(0)
       ints.structureListenersCount() should be(1)
 
       doubles.get should be(Seq(1.5, 2.3, 3.7))
@@ -1393,9 +1391,12 @@ class SeqPropertyTest extends UdashCoreTest {
       pairs.size should be(4)
       pairs.get should be(Seq((3, 4), (7, 8), (9, 10), (13, 14)))
       patches.size should be(11)
+      patches(9).idx should be(0)
+      patches(9).added.size should be(5)
+      patches(9).removed.size should be(5)
       patches.last.idx should be(0)
       patches.last.added.size should be(4)
-      patches.last.removed.size should be(4)
+      patches.last.removed.size should be(5)
 
       odds.listenersCount() should be(0)
       evens.listenersCount() should be(0)

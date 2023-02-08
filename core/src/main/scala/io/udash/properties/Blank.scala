@@ -5,7 +5,7 @@ import com.avsystem.commons.misc.AbstractCase
 import io.udash.utils.CrossCollections
 
 import scala.annotation.implicitNotFound
-import scala.collection.compat.{Factory => CFactory, _}
+import scala.collection.{Factory => CFactory}
 
 @implicitNotFound(
   "Class ${A} does not have a blank value. Please, specify the value of this property or add `implicit val blank: Blank[${A}] = ???` in ${A}'s companion object."

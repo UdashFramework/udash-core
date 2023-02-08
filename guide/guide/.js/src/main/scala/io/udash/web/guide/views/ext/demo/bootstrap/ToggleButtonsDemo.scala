@@ -1,5 +1,6 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -17,8 +18,10 @@ object ToggleButtonsDemo extends AutoDemo {
       color.name -> {
         val active = Property(false)
         val btn = UdashButton.toggle(
-          active,
-          color.toProperty
+          active = active,
+          options = UdashButtonOptions(
+            color.opt
+          )
         )(_ => Seq[Modifier](
           color.name,
           Spacing.margin(size = SpacingSize.ExtraSmall)

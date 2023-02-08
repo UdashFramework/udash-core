@@ -12,7 +12,7 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
     import io.udash.i18n._
     import io.udash.web.guide.Context.serverRpc
     import io.udash.web.guide.demos.i18n.Translations
-    import org.scalajs.dom.ext.LocalStorage
+    import org.scalajs.dom
     import scalatags.JsDom.all._
 
     import scala.concurrent.duration.DurationInt
@@ -20,7 +20,7 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
     implicit val translationProvider: RemoteTranslationProvider =
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
-        Some(LocalStorage),
+        Some(dom.window.localStorage),
         6.hours
       )
 

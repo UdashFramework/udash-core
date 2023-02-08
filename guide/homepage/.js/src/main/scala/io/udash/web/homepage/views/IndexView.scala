@@ -10,27 +10,21 @@ import io.udash.web.homepage.components.Buttons
 import io.udash.web.homepage.components.demo.DemoComponent
 import io.udash.web.homepage.styles.partials.HomepageStyles
 
-case object IndexViewFactory extends ViewFactory[IndexState] {
+final case class IndexViewFactory()(implicit application: Application[RoutingState]) extends ViewFactory[IndexState] {
   override def create(): (View, Presenter[IndexState]) = {
-    val state = Property[IndexState](IndexState(None))
-    (new IndexView(state), new IndexPresenter(state))
+    (new IndexView, EmptyPresenter)
   }
 }
 
-class IndexPresenter(stateProperty: Property[IndexState]) extends Presenter[IndexState] {
-  override def handleState(state: IndexState): Unit = {
-    stateProperty.set(state)
-  }
-}
+final class IndexView(implicit application: Application[RoutingState]) extends View {
 
-class IndexView(state: Property[IndexState]) extends View {
   import scalatags.JsDom.all._
 
   private lazy val content = div(
     IndexView.sectionIntro,
     IndexView.sectionFeatures,
     IndexView.sectionMore,
-    IndexView.sectionDemo(state)
+    IndexView.sectionDemo,
   )
 
   override def getTemplate: Modifier = content
@@ -131,10 +125,10 @@ private object IndexView {
     )
   )
 
-  private def sectionDemo(state: Property[IndexState]) = section(HomepageStyles.sectionDemo)(
+  private def sectionDemo(implicit application: Application[RoutingState]) = section(HomepageStyles.sectionDemo)(
     div(GlobalStyles.body, HomepageStyles.body)(
       h1("Have a code preview"),
-      new DemoComponent(state).getTemplate,
+      new DemoComponent().getTemplate,
       p(HomepageStyles.demoDescription)("It's free, try it now!"),
       Buttons.blackBorderButton(ExternalUrls.guide, "Start your project")
     )

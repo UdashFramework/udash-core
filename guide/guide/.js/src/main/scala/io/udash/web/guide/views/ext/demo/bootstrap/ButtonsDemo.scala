@@ -1,6 +1,7 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
 
+import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
@@ -18,7 +19,6 @@ object ButtonsDemo extends AutoDemo {
 
     import scala.util.Random
 
-    val smallBtn = Some(Size.Small).toProperty[Option[Size]]
     val disabledButtons = Property(Set.empty[Int])
 
     def bottomMargin: CssStyle = {
@@ -30,8 +30,10 @@ object ButtonsDemo extends AutoDemo {
 
     val buttons = Color.values.map(color =>
       UdashButton(
-        color.toProperty,
-        smallBtn,
+        options = UdashButtonOptions(
+          color.opt,
+          Size.Small.opt,
+        ),
         disabled = disabledButtons.transform(_.contains(color.ordinal))
       )(_ => Seq[Modifier](
         color.name,
@@ -46,8 +48,10 @@ object ButtonsDemo extends AutoDemo {
     })
 
     val push = UdashButton(
-      size = Some(Size.Large).toProperty,
-      block = true.toProperty
+      options = UdashButtonOptions(
+        size = Size.Large.opt,
+        block = true
+      )
     )("Disable random buttons!")
     push.listen {
       case UdashButton.ButtonClickEvent(_, _) =>

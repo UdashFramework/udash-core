@@ -71,7 +71,7 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
 private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadableProperty[A]]
   extends AbstractReadableProperty[BSeq[A]] with ReadableSeqProperty[A, ElemType] {
 
-  protected[this] final val structureListeners: MBuffer[Patch[ElemType] => Any] = MArrayBuffer.empty
+  protected[this] final val structureListeners: MLinkedHashSet[Patch[ElemType] => Any] = MLinkedHashSet.empty
 
   override final def structureListenersCount(): Int = structureListeners.size
   protected def wrapStructureListenerRegistration(reg: Registration): Registration =
@@ -81,7 +81,7 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     structureListeners += structureListener
     listenersUpdate()
     wrapStructureListenerRegistration(
-      new MutableBufferRegistration(structureListeners, structureListener, Opt(listenersUpdate _))
+      new MutableSetRegistration(structureListeners, structureListener, Opt(listenersUpdate _))
     )
   }
 
@@ -98,10 +98,10 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     new ZippedWithIndexReadableSeqProperty[A](this)
 
   protected final def fireElementsListeners(patch: Patch[ElemType]): Unit = {
-    val originalListeners = structureListeners.toSet
+    val originalListeners = structureListeners.toList
     CallbackSequencer().queue(
       s"$hashCode:fireElementsListeners:${patch.hashCode()}",
-      () => structureListeners.foreach { listener => if (originalListeners.contains(listener)) listener(patch) }
+      () => originalListeners.foreach { listener => if (structureListeners.contains(listener)) listener(patch) }
     )
   }
 

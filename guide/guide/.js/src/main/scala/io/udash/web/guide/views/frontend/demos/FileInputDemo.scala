@@ -13,7 +13,7 @@ object FileInputDemo extends AutoDemo with CssView {
     import org.scalajs.dom.File
     import scalatags.JsDom.all._
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
     val acceptMultipleFiles = true.toProperty
     val selectedFiles = SeqProperty.blank[File]
@@ -21,10 +21,10 @@ object FileInputDemo extends AutoDemo with CssView {
     div(
       FileInput(selectedFiles, acceptMultipleFiles)("files"),
       h4("Selected files"),
-      ul(repeat(selectedFiles)(file => {
+      ul(repeat(selectedFiles){ file =>
         val content = Property(Array.empty[Byte])
 
-        FileService.asBytesArray(file.get) foreach { bytes =>
+        FileService.asBytesArray(file.get).foreach { bytes =>
           content.set(bytes)
         }
 
@@ -42,7 +42,7 @@ object FileInputDemo extends AutoDemo with CssView {
             Seq(download, span(" or "), revoke).render
           }
         )).render
-      }))
+      })
     )
   }.withSourceCode
 

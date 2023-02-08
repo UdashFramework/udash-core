@@ -1912,7 +1912,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       val el = div(
         repeatWithIndex(p) { case (item, idx, nested) =>
-          span(nested(bind(idx)), nested(bind(item))).render
+          span(nested.multi(bind(idx), nested(bind(item)))).render
         }
       ).render
 
@@ -2160,7 +2160,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       )
     }
 
-    //todo https://github.com/UdashFramework/udash-core/issues/282
+    //todo https://github.com/UdashFramework/udash-core/issues/290
     "avoid multiple updates in produceWithNested on transformed properties" ignore {
       val p = Property(2)
       val s = Property(3)

@@ -1,6 +1,7 @@
 package io.udash
 package rest
 
+import monix.execution.Scheduler
 import com.avsystem.commons._
 import io.udash.rest.raw.RawRest
 import io.udash.rest.raw.RawRest.HandleRequest
@@ -9,6 +10,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 
 abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
+  implicit def scheduler: Scheduler = Scheduler.global
+
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](RestTestApi.Impl)
 
@@ -36,6 +39,10 @@ trait RestApiTestScenarios extends RestApiTest {
 
   test("failing GET") {
     testCall(_.failingGet)
+  }
+
+  test("JSON failing GET") {
+    testCall(_.jsonFailingGet)
   }
 
   test("more failing GET") {

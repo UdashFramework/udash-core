@@ -1,15 +1,16 @@
 package io.udash.web
 
-import java.util.concurrent.TimeUnit
-
+import io.github.bonigarcia.wdm.WebDriverManager
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
-import org.openqa.selenium.{Dimension, WebElement}
+import org.openqa.selenium.{By, Dimension, WebElement}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import java.time.Duration
 
 private trait ServerConfig {
   def init(): Unit
@@ -47,12 +48,15 @@ private final class InternalServerConfig extends ServerConfig {
 abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
-  protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().setHeadless(true))
-  driver.manage().timeouts().implicitlyWait(200, TimeUnit.MILLISECONDS)
+  private val driverManager = WebDriverManager.firefoxdriver()
+  driverManager.config().setServerPort(0)
+  driverManager.setup()
+  protected final val driver: RemoteWebDriver = new FirefoxDriver(new FirefoxOptions().addArguments("-headless"))
+  driver.manage().timeouts().implicitlyWait(Duration.ofMillis(200))
   driver.manage().window().setSize(new Dimension(1440, 800))
 
   protected final def findElementById(id: String): WebElement = eventually {
-    driver.findElementById(id)
+    driver.findElement(By.id(id))
   }
 
   protected def url: String
@@ -72,6 +76,7 @@ abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfte
   override protected def afterAll(): Unit = {
     super.afterAll()
     server.destroy()
-    driver.close()
+    driver.quit()
+    driverManager.quit()
   }
 }

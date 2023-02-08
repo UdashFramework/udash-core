@@ -42,7 +42,6 @@ class PingPongCallDemoComponent extends Component {
 
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
-      buttonStyle = BootstrapStyles.Color.Primary.toProperty,
       disabled = pingDisabled,
       componentId = ComponentId("ping-pong-call-demo")
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))

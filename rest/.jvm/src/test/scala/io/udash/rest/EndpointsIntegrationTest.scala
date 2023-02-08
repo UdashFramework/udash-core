@@ -3,6 +3,7 @@ package rest
 
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
+import monix.execution.Scheduler
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
@@ -10,14 +11,14 @@ import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import sttp.client.SttpBackend
-import sttp.client.SttpClientException.ConnectException
+import sttp.client3.SttpBackend
+import sttp.client3.SttpClientException.ConnectException
 
 import scala.concurrent.duration.DurationLong
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
 class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit def scheduler: Scheduler = Scheduler.global
 
   val port = 44598
   val contextPrefix = "/rest_api"
@@ -34,7 +35,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
-    rawHandle.andThen(FutureRestImplicits.futureAsyncEffect.fromAsync)
+    rawHandle.andThen(FutureRestImplicits.futureFromTask.fromTask)
 
   def mkRequest(
     url: String,
@@ -47,16 +48,16 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
     RestParameters(
       PlainValue.decodePath(url),
       IMapping(headers.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
-      Mapping(queryArguments.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList)
+      Mapping(queryArguments.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
     ),
     HttpBody.json(JsonValue(body))
   )
 
-  implicit val backend: SttpBackend[Future, Nothing, Nothing] = SttpRestClient.defaultBackend()
+  implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
-  val rawHandler = futureHandle(SttpRestClient.asHandleRequest(baseUri))
-  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface](baseUri)
-  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest(s"http://127.0.0.1:69$contextPrefix"))
+  val rawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](baseUri))
+  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface, Future](baseUri)
+  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](s"http://127.0.0.1:69$contextPrefix"))
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)
@@ -162,7 +163,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
     override def auth(pass: String): TestServerRESTInternalInterface =
       if (pass == "TurboSecureAPI") new TestServerRESTInternalInterfaceImpl("auth")
-      else throw HttpErrorException(401, "Invalid password")
+      else throw HttpErrorException.plain(401, "Invalid password")
   }
 
   private class TestServerRESTInternalInterfaceImpl(data: String) extends TestServerRESTInternalInterface {
